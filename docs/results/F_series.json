@@ -1,0 +1,250 @@
+{
+ "film_plan": {
+  "concept": "A lighthouse keeper discovers the light has been guiding something other than ships",
+  "title": "\"The Keeper's Eye\"",
+  "logline": "A lighthouse keeper discovers the light has been guiding something other than ships, leading to a haunting revelation about the past and the present.",
+  "theme": "Obsession, isolation, and the weight of history.",
+  "characters": [
+   {
+    "name": "ELIA WYATT",
+    "role": "Lighthouse Keeper",
+    "appearance": "40s, rugged, with a scar running from temple to chin, always wearing a weathered coat",
+    "arc": "Arc: From isolated, skeptical guardian to a man who confronts his own guilt and the secrets of the lighthouse."
+   }
+  ],
+  "scenes": [
+   {
+    "act": "ACT 1",
+    "location": "Location: Coastline, dusk",
+    "action": "What happens: Elia is scanning the horizon when he notices a strange pattern in the waves. Maya arrives to investigate the lighthouse, drawn by rumors of its mysterious light.",
+    "dialogue": "Key line of dialogue: \"You're not the first to see it, Elia. You just don't know who you are.\""
+   },
+   {
+    "act": "ACT 1",
+    "location": "Location: Lighthouse, inside",
+    "action": "What happens: Elia and Maya examine the lighthouse's records, finding references to a \"shadow\" that has been guiding ships for decades. They discover a hidden journal that hints at a tragic past.",
+    "dialogue": "Key line of dialogue: \"This light wasn't just for ships. It was for someone else.\""
+   },
+   {
+    "act": "ACT 2",
+    "location": "Location: Lighthouse, night",
+    "action": "What happens: The light begins to flicker erratically, and Elia starts to see figures in the beam. Maya is convinced it's a hallucination, but Elia is beginning to believe it's real.",
+    "dialogue": "Key line of dialogue: \"It's not just guiding ships. It's guiding people.\""
+   },
+   {
+    "act": "ACT 2",
+    "location": "Location: Lighthouse, basement",
+    "action": "What happens: They find the old man's cryptic notes and a faded photo of a woman with the same scar as Elia. The connection becomes clear.",
+    "dialogue": "Key line of dialogue: \"You're not the first to be chosen. You're the next.\""
+   },
+   {
+    "act": "ACT 3",
+    "location": "Location: Coastline, dawn",
+    "action": "What happens: Elia confronts the old man, who reveals he was the keeper before him, and that the light has been guiding lost souls. Elia must decide whether to continue or let the light go out.",
+    "dialogue": "Key line of dialogue: \"You're not alone, Elia. You were never alone.\""
+   },
+   {
+    "act": "ACT 3",
+    "location": "Location: Lighthouse, top",
+    "action": "What happens: Elia turns off the light, letting it go out. He steps back into the dark, ready to face whatever comes next.",
+    "dialogue": "Key line of dialogue: \"Some lights are meant to be turned off.\""
+   }
+  ],
+  "shot_list": [
+   {
+    "scene": "1",
+    "size": "Wide",
+    "move": "Tracking move",
+    "description": "We see the lighthouse standing alone against the darkening sky, its beam slicing through the fog."
+   },
+   {
+    "scene": "2",
+    "size": "Medium",
+    "move": "Static",
+    "description": "Elia stands at the top of the tower, staring at the horizon, his face lit by the light, but his eyes are shadowed with doubt."
+   },
+   {
+    "scene": "3",
+    "size": "Close-up",
+    "move": "Zoom",
+    "description": "Elia's face, reflected in the beam, showing the scar running from temple to chin."
+   },
+   {
+    "scene": "4",
+    "size": "Wide",
+    "move": "Pan",
+    "description": "The lighthouse is surrounded by shadows, and the beam cuts through them, revealing a figure in the distance, the old man standing at the edge of the light."
+   }
+  ],
+  "id": "film_49cb463cdd"
+ },
+ "bible": {
+  "title": "Sunken Currents",
+  "genre": "Sci-Fi Thriller",
+  "logline": "A young engineer and a retired sea captain restore a solar-powered research boat and uncover why the coastal town's fish are disappearing.",
+  "world_rules": [
+   "All water in the area must be tested for bioluminescent contamination.",
+   "No electronic devices can be used without permission from the town council.",
+   "The boat's AI must be reactivated during a lunar eclipse to access its full capabilities."
+  ],
+  "characters": [
+   {
+    "name": "Eli",
+    "role": "Engineer",
+    "appearance": "Wears a safety harness, eyes covered with a protective veil",
+    "trait": "Analytical",
+    "goal": "Wants to prove the ocean is still healthy"
+   },
+   {
+    "name": "Hark",
+    "role": "Captain",
+    "appearance": "Wears a weathered coat, silver hair tied back",
+    "trait": "Stoic",
+    "goal": "Wants to reclaim his legacy"
+   },
+   {
+    "name": "Mira",
+    "role": "Biologist",
+    "appearance": "Wears a lab coat, fingerless gloves",
+    "trait": "Curious",
+    "goal": "Wants to understand the mystery of the vanishing fish"
+   }
+  ],
+  "locations": [
+   {
+    "name": "Seabrook Bay",
+    "look": "A sprawling estuary with fog-draped piers and rusting fishing nets LOCATION: Lunar Reef"
+   }
+  ],
+  "style": {
+   "grade": "cinematic",
+   "mood": "tense",
+   "music_seed": 270,
+   "voice": "en_US-joe-medium"
+  },
+  "season": [
+   {
+    "number": 1,
+    "title": "The Restored Boat",
+    "summary": "Eli and Hark work together to restore the solar-powered research boat, while Mira investigates the town's fish disappearance theory. They discover a strange bioluminescent pattern in the water.",
+    "cliffhanger": "The boat's AI is activated during the lunar eclipse, revealing a hidden underwater anomaly."
+   },
+   {
+    "number": 2,
+    "title": "The Lunar Eclipse",
+    "summary": "As the lunar eclipse begins, the boat's AI reveals a mysterious energy source beneath the sea. Mira's tests show the contamination is spreading rapidly.",
+    "cliffhanger": "The AI warns of a bioluminescent contaminant that could wipe out the entire ecosystem."
+   },
+   {
+    "number": 3,
+    "title": "The Deep Mystery",
+    "summary": "The team confronts the source of the contamination, discovering a secret underwater facility linked to the vanishing fish. The contamination is caused by a failed experiment from decades ago.",
+    "cliffhanger": "The facility's entrance is sealed with a force field, but the contamination is spreading faster than expected."
+   }
+  ],
+  "canon": [
+   {
+    "episode": 1,
+    "event": "The bioluminescent pattern matches the last known locations of missing fish."
+   },
+   {
+    "episode": 1,
+    "event": "The boat's AI reveals a hidden compartment containing evidence of past contamination."
+   },
+   {
+    "episode": 2,
+    "event": "The bioluminescent pattern is a signal from an unknown submersible deep in the ocean."
+   },
+   {
+    "episode": 2,
+    "event": "The energy source beneath the sea is linked to the vanishing fish and the contamination."
+   }
+  ]
+ },
+ "episode_1": {
+  "number": 1,
+  "title": "The Restored Boat",
+  "scenes": [
+   {
+    "location": "Seabrook Bay",
+    "narration": "Eli and Hark work side by side on the rusty research boat, repairing its solar panels and checking for structural damage. Mira watches from a distance, noting the strange glow in the water.",
+    "on_screen_text": ""
+   },
+   {
+    "location": "Lunar Reef",
+    "narration": "Mira collects samples from the water, trying to determine the source of the strange glow. Eli and Hark inspect the boat's hull, searching for signs of contamination.",
+    "on_screen_text": ""
+   },
+   {
+    "location": "Seabrook Bay",
+    "narration": "The town council approaches the duo, demanding they stop their investigation without permission. Hark refuses, insisting they need to find the truth.",
+    "on_screen_text": ""
+   },
+   {
+    "location": "Lunar Reef",
+    "narration": "As the lunar eclipse begins, Eli activates the boat's AI system, revealing a hidden compartment. Mira and Hark discover a series of bioluminescent patterns in the water, suggesting a deeper mystery.",
+    "on_screen_text": ""
+   }
+  ],
+  "cliffhanger": "The AI reveals a pattern that matches the missing fish's last known locations.",
+  "summary": "Eli and Hark restore the research boat while Mira investigates the vanishing fish. They discover a strange bioluminescent pattern in the water.",
+  "events": [
+   "The bioluminescent pattern matches the last known locations of missing fish.",
+   "The boat's AI reveals a hidden compartment containing evidence of past contamination."
+  ]
+ },
+ "episode_2": {
+  "number": 2,
+  "title": "The Lunar Eclipse",
+  "scenes": [
+   {
+    "location": "Lunar Reef",
+    "narration": "Eli, Hark, and Mira stand near the boat's hull as the lunar eclipse begins",
+    "on_screen_text": "AI activation sequence"
+   },
+   {
+    "location": "Lunar Reef",
+    "narration": "The AI's holographic interface flickers to life, revealing a deep blue energy source beneath the seabed",
+    "on_screen_text": "bioluminescent readings spike"
+   },
+   {
+    "location": "Lunar Reef",
+    "narration": "Mira's lab coat is soaked with saltwater as she runs tests on the water sample, her fingers trembling",
+    "on_screen_text": "contamination levels are rising"
+   },
+   {
+    "location": "Lunar Reef",
+    "narration": "Hark clenches his weathered coat as he watches the eclipse progress, his stoic expression hardening",
+    "on_screen_text": "the energy source is a new threat"
+   }
+  ],
+  "cliffhanger": "The AI reveals the bioluminescent pattern is a signal from an unknown submersible deep in the ocean.",
+  "summary": "During the lunar eclipse, the boat's AI reveals a mysterious energy source beneath the sea, and Mira's tests show the contamination is spreading rapidly.",
+  "events": [
+   "The bioluminescent pattern is a signal from an unknown submersible deep in the ocean.",
+   "The energy source beneath the sea is linked to the vanishing fish and the contamination."
+  ]
+ },
+ "continuity_ep2": [
+  "PASS recurring characters appear: ['Eli', 'Hark', 'Mira'] of ['Eli', 'Hark', 'Mira']",
+  "PASS no unestablished named characters: all recurring names are in the bible",
+  "FAIL locations from the bible: scenes set in ['Lunar Reef']; not in bible: ['Lunar Reef', 'Lunar Reef', 'Lunar Reef', 'Lunar Reef']",
+  "PASS picks up previous cliffhanger: opening echoes: ['reveals']",
+  "PASS continuity supervisor (LLM): VERDICT: OK"
+ ],
+ "continuity_attempts": 1,
+ "renders": {
+  "ep1": {
+   "status": "PASSED_AUTOMATED_CHECKS",
+   "duration": 49.866667,
+   "issues": []
+  },
+  "ep2": {
+   "status": "PASSED_AUTOMATED_CHECKS",
+   "duration": 41.778,
+   "issues": [
+    "[minor] locations from the bible: scenes set in ['Lunar Reef']; not in bible: ['Lunar Reef', 'Lunar Reef', 'Lunar Reef', 'Lunar Reef']"
+   ]
+  }
+ }
+}

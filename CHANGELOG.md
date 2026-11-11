@@ -6,7 +6,8 @@
   task registry (`nexus/registry/tasks.yaml`), `nexus checkpoint|resume|status|tasks`. Checkpoints refuse secrets, media,
   weights, databases and files > 2 MB, and never force-push.
 - **Durable job ledger** (`nexus/jobs.py`, `nexus/workflows.py`): jobs are database rows with stage checkpoints, heartbeats,
-  retries and crash recovery; separate worker process (`nexus worker`). Create-from-idea, render, localize and backup run on it.
+  retries and crash recovery; separate worker process (`nexus worker`). **Every** API job runs on it (create, render,
+  localize, analyze, remix, package, series, film, animate, backup); the in-memory queue is gone.
 - **Federated storage** (`nexus/storage/`): `StorageBackend` interface, local and rclone backends, provider registry with
   zero-spend eligibility and free-allowance caps (`nexus/registry/storage.yaml`).
 - **Verified backups** (`nexus/backup.py`): content-addressed, incremental, optionally AES-256-GCM encrypted snapshots;
@@ -24,7 +25,8 @@
   to the writer, prompt wording A/B-tested against the local model, empty LLM answers are retried instead of rendered.
 - Create-from-idea found no stock images for descriptive queries (every scene fell back to a gradient card): query ladder.
   `thumb.wikimedia.org` declared as a Wikimedia Commons host.
-- In-process jobs stayed "running" forever after an app restart; they are now marked `interrupted` with a recovery hint.
+- Jobs were lost (and shown as "running" forever) when the app restarted.
+- Subtitle cues straddled sentence boundaries; they now break at sentence/clause ends.
 - Font paths were Linux-only (Windows font candidates added). SQLite opened in WAL mode for API + worker processes.
 
 ## 0.1.0 — 2026-11-11 — Foundation (previous session)

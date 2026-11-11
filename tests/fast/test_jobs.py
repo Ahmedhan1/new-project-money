@@ -155,3 +155,21 @@ def test_series_episode_is_not_written_twice_when_production_crashes(home, monke
     assert jobs.run_job(jobs.claim("w")) == "done"
     j = jobs.get(jid)
     assert n == {"write": 1, "produce": 2} and j["result"]["episode"]["number"] == 1 and j["project_id"] == "prj_x"
+
+
+def test_backups_are_scheduled_automatically(home):
+    import json
+    import time as t
+    from nexus import project as prj
+    assert jobs.schedule_backup() is None                       # nothing to protect yet
+    prj.Project.create("p", "edit")
+    jid = jobs.schedule_backup()
+    assert jid and jobs.get(jid)["kind"] == "backup"            # never backed up -> queued
+    assert jobs.schedule_backup() is None                       # one pending backup is enough
+    from nexus import workflows  # noqa: F401
+    assert jobs.run_job(jobs.claim("w")) == "done" and (home / "last_backup.json").exists()
+    assert jobs.schedule_backup() is None                       # fresh backup -> nothing to do
+    assert jobs.schedule_backup(now=t.time() + 25 * 3600)       # a day later -> queued again
+    (home / "settings.json").write_text(json.dumps({"backup_every_hours": 0}))
+    db.execute("DELETE FROM jobs")
+    assert jobs.schedule_backup(now=t.time() + 99 * 3600) is None   # user switched it off

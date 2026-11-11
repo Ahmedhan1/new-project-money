@@ -4,7 +4,7 @@
  Browser UI (nexus/ui/index.html, single page)            NEXUS_*.bat / python -m nexus <cmd>
         │  REST                                                   │
  ┌──────▼──────────── API process (nexus/api.py, FastAPI, 127.0.0.1) ──────────────┐
- │ submits jobs ─────────────┐        quick in-process jobs (being migrated: JOB-2) │
+ │ submits jobs ─────────────┐        (no in-memory queue: every job is a ledger row) │
  └───────────────────────────┼──────────────────────────────────────────────────────┘
                              ▼
         SQLite (WAL)  NEXUS_HOME/nexus.db : projects · jobs (ledger) · assets+licences · cost ledger · metrics · docs

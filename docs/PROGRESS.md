@@ -8,6 +8,10 @@
   encrypted backups + restore + drill, one-command launcher, Windows launchers, Storage & Backup UI page, CI, 28 fast tests.
 - Ran Test D for real: first result "passed QA" with an 18 s, one-sentence-per-scene video and zero images → fixed the
   script gate/feedback loop, schema-constrained LLM output, stock query ladder.
+- Test F passed on its first run (film plan + 2 series episodes).
+- Moved every API job onto the durable ledger (in-memory queue removed); automatic daily backups.
+- CI green on Linux; Windows job surfaced two real file-locking issues in tests (fixed) and proved job recovery,
+  encrypted backup/restore and the launcher on Windows.
 - Wrote the 40-domain gap analysis and a 28-task registry.
 
 **2026-11-11 — session 1 (v0.1.0): foundation**

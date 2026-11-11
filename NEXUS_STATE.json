@@ -3,28 +3,28 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-11T22:15:04Z",
+ "updated": "2026-11-11T22:25:21Z",
  "git": {
   "branch": "claude/intelligent-faraday-y28cx1",
-  "commit": "5345a2e",
-  "subject": "Add analysis, editing, QA, localization, remix, creation, animation, series, compute federation, factory, API and UI",
-  "dirty_files": 57,
-  "upstream": null,
-  "unpushed_commits": null
+  "commit": "e491f3a",
+  "subject": "Run every API job on the durable ledger; remove the in-memory queue",
+  "dirty_files": 16,
+  "upstream": "origin/claude/intelligent-faraday-y28cx1",
+  "unpushed_commits": 0
  },
  "current_task": {
-  "id": "TST-D",
-  "title": "Acceptance test D (create-from-idea end to end) - never finished in the previous session",
+  "id": "QLT-1",
+  "title": "Creative quality pass: measured rubric + series writer on the script schema + research/visual relevance",
   "status": "in_progress",
-  "next": "Run it now that models are installed; fix what fails; inspect the frames for quality problems (feeds QLT-1)."
+  "next": "1) series.py - use llm.chat_json(schema=...) and the scene-depth gate (episode 2 had one-clause scenes). 2) Give series episodes stock visuals (they are title cards only). 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Score visual relevance from query terms vs image title."
  },
  "next_tasks": [
   {
-   "id": "TST-D",
+   "id": "QLT-1",
    "priority": 1,
-   "title": "Acceptance test D (create-from-idea end to end) - never finished in the previous session",
+   "title": "Creative quality pass: measured rubric + series writer on the script schema + research/visual relevance",
    "status": "in_progress",
-   "next": "Run it now that models are installed; fix what fails; inspect the frames for quality problems (feeds QLT-1)."
+   "next": "1) series.py - use llm.chat_json(schema=...) and the scene-depth gate (episode 2 had one-clause scenes). 2) Give series episodes stock visuals (they are title cards only). 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Score visual relevance from query terms vs image title."
   },
   {
    "id": "WIN-1",
@@ -43,32 +43,40 @@
   {
    "id": "UX-1",
    "priority": 2,
-   "title": "UI - backup/storage page, job stage progress, resume buttons, clear error states",
+   "title": "UI - storage/backup page, job stages + resume (done); onboarding, video preview player, friendlier errors (open)",
    "status": "in_progress",
-   "next": "Job stages + Resume button are in the jobs table; add a Storage & Backup page calling /api/backup endpoints."
+   "next": "Commit the Playwright smoke test; add an in-app video player on the project page; first-run checklist on the home page."
   },
   {
-   "id": "CI-1",
+   "id": "JOB-2",
    "priority": 2,
-   "title": "GitHub Actions CI - lint + fast tests on Linux and Windows, secret scan, no models",
-   "status": "implemented",
-   "next": "Confirm the first run is green on both OS runners; fix Windows-only failures."
+   "title": "Move remaining in-process API jobs onto the durable ledger (analyze, remix, series, film, animate, package)",
+   "status": "tested",
+   "next": "Verify analyze, remix and package handlers with real models (they are covered by heavy tests A, B, G only through the library, not through the job handlers)."
   }
  ],
  "tasks": {
   "total": 28,
   "by_status": {
-   "verified": 3,
-   "planned": 15,
-   "tested": 1,
+   "verified": 6,
+   "tested": 3,
    "blocked": 4,
-   "implemented": 2,
+   "implemented": 1,
    "deferred": 1,
+   "planned": 11,
    "in_progress": 2
   },
   "registry": "nexus/registry/tasks.yaml"
  },
- "tests": {},
+ "tests": {
+  "fast": {
+   "summary": "32 passed, 0 failed, 0 skipped",
+   "ok": true,
+   "date": "2026-11-11",
+   "platform": "Linux",
+   "python": "3.13.18"
+  }
+ },
  "jobs": {
   "counts": {},
   "active": []

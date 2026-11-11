@@ -226,6 +226,27 @@ def run_job(job: Job) -> str:
         stop.set()
 
 
+def schedule_backup(now: float | None = None) -> str | None:
+    """Queue a backup when the last one is older than settings.backup_every_hours (default 24; 0 disables).
+    Only when there is something to protect, and never while another backup job is pending."""
+    import json as _json
+    hours = float(config.settings().get("backup_every_hours", 24))
+    if hours <= 0 or not db.query("SELECT 1 FROM projects LIMIT 1"):
+        return None
+    now = now or time.time()
+    f = config.HOME / "last_backup.json"
+    try:
+        last = _json.loads(f.read_text(encoding="utf-8"))["ts"] if f.exists() else 0
+    except (ValueError, KeyError, OSError):
+        last = 0
+    if now - last < hours * 3600:
+        return None
+    recent = db.query("SELECT status, created FROM jobs WHERE kind='backup' ORDER BY created DESC LIMIT 1")
+    if recent and (recent[0]["status"] in ACTIVE or now - recent[0]["created"] < 3600):  # pending, or failed less than an hour ago
+        return None
+    return submit("backup", {"drill": False, "scheduled": True}, max_retries=0)["job"]
+
+
 def run_worker(stop: threading.Event | None = None, poll: float = 1.0, once: bool = False, role: str = "worker") -> None:
     from . import workflows  # noqa: F401  (registers the production handlers)
     wid = worker_id(role)
@@ -233,6 +254,7 @@ def run_worker(stop: threading.Event | None = None, poll: float = 1.0, once: boo
     while not (stop and stop.is_set()):
         if time.time() - last_recover > STALE_S:
             recover()
+            schedule_backup()
             last_recover = time.time()
         job = claim(wid)
         if job is None:

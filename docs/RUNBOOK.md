@@ -36,6 +36,6 @@ scripts/setup.sh                       # or: python -m venv .venv && .venv/bin/p
 | "port … is already used" | Close the other program or `set NEXUS_PORT=8770` |
 | Start fails after health wait | The last API log lines are printed; full logs in `.nexus/logs/api.log`, `worker.log` |
 | Job stuck / failed | UI → Jobs → **Resume**, or `python -m nexus jobs list` / `jobs show ID` / `jobs retry ID`; per-job log in `.nexus/logs/jobs/` |
-| Job shows `interrupted` | It was an in-process job (analysis/remix/series/animation) when the app stopped — run the action again (task JOB-2 moves these onto the durable ledger) |
+| Job shows `interrupted` | Left over from v0.1's in-memory queue — run the action again. Since v0.2 every job is durable and resumes by itself |
 | Backup `BLOCK` | Reason is printed: provider not eligible, not authorised, or passphrase missing |
 | Checkpoint blocked | It lists the offending files (secret, media, > 2 MB). Remove or `.gitignore` them; nothing was committed |

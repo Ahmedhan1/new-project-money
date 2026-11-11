@@ -3,7 +3,7 @@
 | # | Issue | Impact | Workaround / plan |
 |---|---|---|---|
 | K-1 | `.bat`/`.ps1` launchers never executed on real Windows | Setup may fail on: `llama-cpp-python` wheel (uses a prebuilt-CPU index, unverified), Blender/eSpeak not on PATH, `curl` model download | Task WIN-1; the Python layer under them is CI-tested on Windows |
-| K-2 | Analyze, remix, series, film, animate and package jobs are still in-process closures | If the app stops mid-job they are marked `interrupted` and must be re-run (not lost silently, but not resumed) | Task JOB-2 |
+| K-2 | Running jobs cannot be cancelled (only queued ones); remix and analyze are single-stage jobs | A long remix restarts from its beginning after a crash (render segments are still cached) | Split remix into plan/render stages; add cooperative cancel |
 | K-3 | Qwen3-4B answers `{}` to some prompts in free JSON mode | Script stage failed outright | Schema-constrained output + retry (D-9); a larger model is not an option on 4 cores |
 | K-4 | Research takes Wikipedia's top search hits as-is | Script can drift to a neighbouring topic (Test D: "Trained immunity") | Task QLT-1: rank pages by title/topic overlap |
 | K-5 | Stock search depends on Wikimedia Commons availability; Openverse returned HTTP 504 during testing | Scenes fall back to gradient title cards | Query ladder reduces misses; GEN-1 adds generated images |

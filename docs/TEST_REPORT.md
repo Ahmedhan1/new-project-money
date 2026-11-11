@@ -31,4 +31,33 @@ Session-1 results were **not re-executed** this session (their result files are 
 were touched this session: `create.py`, `assets.py`, `llm.py` (covered by D), `api.py` job submission (covered by fast
 tests), `config.py` fonts (A/C/E use them — re-run A, C, E once before the next release: task `TST-R`).
 
-RESULTS_D_F
+## Test D — create from idea (session 2): PASS after three real fixes
+`docs/results/D_create.json`, `D_storyboard.png`, `D_frame0-2.png`. Topic "How vaccines train the immune system", 4 scenes.
+
+| Run | Outcome | What it showed |
+|---|---|---|
+| 1 | FAIL (video 18 s; test needs > 25 s) — yet QA said `PASSED_AUTOMATED_CHECKS` | One sentence per scene (36 words total); **0 licensed images** (every scene a gradient card): descriptive queries like "doctor giving BCG vaccine to child" return nothing |
+| 2–3 | FAIL (0 scenes) | After a prompt change the 4B model answered `{}`; the pipeline rendered a 2.4 s title-only video |
+| 4 | **PASS**, 217 s | 47.2 s video, 104 words, 2 sentences per scene on the first attempt, **3 of 4 scenes with licensed Commons images** + credits card, all 5 QA stages pass |
+
+Fixes: grammar-constrained script schema (no empty/short output possible), scene-depth gate + reviewer feedback to the
+writer, stock query ladder, `thumb.wikimedia.org` host. Guarded by `tests/fast/test_quality_guards.py`.
+
+**Honest quality reading of run 4** (frames inspected): it is a competent narrated slideshow. Image relevance is
+approximate (a histology slide of intestinal cells stands in for "immune cells"); scene 2 still fell back to a title
+card; the script leans on the "Trained immunity" article rather than how vaccines work in general (K-4). Not premium.
+
+## Test F — film plan + series (session 2): PASS on first run, 368 s
+`docs/results/F_series.json`, `F_ep2_frame.png`. Film plan "The Keeper's Eye" (6 scenes, shot list). Series "Sunken
+Currents": bible with 3 characters, 3-episode season; episodes 1 and 2 written, continuity-reviewed and rendered
+(49.9 s and 41.8 s, both `PASSED_AUTOMATED_CHECKS`); all 3 characters recur; episode 2 opens with a recap and picks up
+the cliffhanger; same look/sound identity; continuation metadata present.
+
+**Honest quality reading:** the continuity checker correctly flagged that episode 2 is set in a location ("Lunar Reef")
+that is not in the bible (reported as a minor issue, not fixed). Episode visuals are title cards with narration — no
+characters are ever shown, so "character consistency" is textual only. Episode 2's scene lines are single short clauses
+(the series writer does not yet use the schema/depth gate that fixed Test D → task `QLT-1`).
+
+## Not covered by any test yet
+Real Windows `.bat` run · any real cloud storage remote · analyze/remix/package job handlers with real models ·
+quality regression baselines · UI beyond the Storage page smoke run.

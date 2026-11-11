@@ -23,13 +23,13 @@ Acceptance criteria and next actions for every gap are in `nexus/registry/tasks.
 | 14 | Translation | MADLAD-400 + independent LLM back-translation review, number/foreign-word checks (Test C) | Only en/ar/de wired; quality judged by automated proxies, no native review | partial | 3 | — |
 | 15 | Subtitles | Cue generation, timing fix, reading-speed/overlap QA, burn-in, RTL shaping | No styled/animated captions; SRT/VTT sidecar export not verified | partial | 3 | QLT-2 |
 | 16 | Video enhancement | none exposed (FFmpeg vidstab installed) | Stabilise, upscale, interpolate, denoise controls | missing | 3 | GEN-3 |
-| 17 | Film production | `series.film_plan`: scenes, characters, shot list (Test F — **not yet passed**) | A plan document, not a produced film | thin | 2 | TST-F |
-| 18 | Episodic series | Bible, season plan, continuity-checked episodes, shared style (Test F — **not yet passed**) | Episodes are narrated stills; character consistency is textual only | thin | 2 | TST-F, GEN-1 |
+| 17 | Film production | `series.film_plan`: scenes, characters, shot list (Test F passed) | A plan document, not a produced film | thin | 2 | GEN-1 |
+| 18 | Episodic series | Bible, season plan, continuity-checked episodes, shared style (Test F passed) | Episodes are narrated **title cards**; characters are never shown; location continuity failures are reported but not repaired | thin | 2 | QLT-1, GEN-1 |
 | 19 | Documentary | Chronological remix variant (Test B) | No archive research, interview structuring or citation overlays | thin | 3 | QLT-2 |
 | 20 | Content summaries | Highlights goal in editor (Test A/B) | No dedicated "summarise this long video" workflow with chaptering | thin | 3 | — |
 | 21 | AI research | Wikipedia retrieval with URLs; grounding + number-traceability checks | One source type; top hit can be off-topic (D: "Trained immunity" outranked "Vaccine"); no claim-level citations | thin | 2 | RES-1, QLT-1 |
 | 22 | Content calendars | `factory.schedule`, calendar docs in DB | Filled manually; no trend input | thin | 3 | RES-1 |
-| 23 | Multi-agent orchestration | Staged workflows with independent review steps; durable job ledger (tests/fast) | "Agents" are pipeline stages, not autonomous planners — adequate for now | partial | 4 | JOB-2 |
+| 23 | Multi-agent orchestration | Staged workflows with independent review steps; durable job ledger (tests/fast) | "Agents" are pipeline stages, not autonomous planners — adequate for now | partial | 4 | — |
 | 24 | Five videos/day capacity | Capacity planner from measured throughput, per-profile, masters ≠ language versions (Test G) | Measured on a cloud VM, not the user's PC; stage timings only now being recorded | partial | 2 | CAP-1 |
 | 25 | Multi-channel management | Channel records in DB, UI page "partial" | No per-channel branding/queues | thin | 4 | — |
 | 26 | Publishing preparation | Per-platform packages: cuts, titles, descriptions, thumbnails (Test G) | Metadata quality unreviewed | partial | 3 | — |

@@ -41,6 +41,7 @@ def settings() -> dict:
     data.setdefault("port", DEFAULT_PORT)
     data.setdefault("host", "127.0.0.1")
     data.setdefault("min_free_disk_gb", 2.0)
+    data.setdefault("backup_every_hours", 24)
     return data
 REGISTRY_DIR = Path(__file__).resolve().parent / "registry"
 

@@ -46,7 +46,7 @@ Mandatory for remote destinations; optional for local ones (`"encrypt": true`). 
 encrypted too. **There is no passphrase recovery.**
 
 ## Known limits
-- Backups are manual (button/launcher) until task STO-4 schedules them.
+- A backup is queued automatically every 24 h while the app runs (`"backup_every_hours"` in `settings.json`, 0 = off). Old snapshots are not pruned automatically yet (`nexus` has `backup.prune`; task STO-4).
 - Content hashes are visible to the storage provider as object names (they reveal nothing but equality of files).
 - No remote destination has been exercised against a real cloud account yet (task STO-3 — needs the user's authorisation);
   the rclone backend is tested against rclone's local-path remote.
