@@ -15,7 +15,7 @@ class RemoteUnavailable(RuntimeError):
     pass
 
 
-def _open(url: str, timeout: int = 30, retries: int = 3):
+def _open(url: str, timeout: int = 30, retries: int = 3, max_wait: float = 10.0):
     costguard.check_host(url)
     req = urllib.request.Request(url, headers={"User-Agent": config.USER_AGENT, "Accept": "*/*"})
     delay = 2.0
@@ -25,7 +25,10 @@ def _open(url: str, timeout: int = 30, retries: int = 3):
         except urllib.error.HTTPError as e:
             # 429 = the provider's rate limit. We back off; we never try to evade it.
             if e.code in (429, 503) and attempt < retries - 1:
-                time.sleep(float(e.headers.get("Retry-After") or delay))
+                wait = float(e.headers.get("Retry-After") or delay)
+                if wait > max_wait:  # the provider asks for a long pause: give up now and let the caller fall back
+                    raise RemoteUnavailable(f"{url.split('?')[0]} -> rate limited, retry after {wait:.0f}s") from e
+                time.sleep(wait)
                 delay *= 2
                 continue
             raise RemoteUnavailable(f"{url.split('?')[0]} -> HTTP {e.code}") from e

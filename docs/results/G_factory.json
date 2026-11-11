@@ -1,0 +1,460 @@
+{
+ "date": "2026-11-11",
+ "target": 5,
+ "scheduled": 5,
+ "jobs": [
+  {
+   "slot": 1,
+   "topic": "AI in radiology",
+   "profile": "narrated-explainer",
+   "worker": "local-0",
+   "start": "08:00",
+   "finish": "08:28",
+   "minutes": 28.4,
+   "versions": [
+    "en",
+    "ar",
+    "de"
+   ],
+   "platforms": [
+    "youtube",
+    "shorts",
+    "tiktok",
+    "instagram-reels"
+   ],
+   "status": "scheduled",
+   "quality_gates": [
+    "script review",
+    "asset licence review",
+    "technical QA",
+    "language QA",
+    "HUMAN APPROVAL"
+   ]
+  },
+  {
+   "slot": 2,
+   "topic": "mRNA vaccines",
+   "profile": "narrated-explainer",
+   "worker": "local-0",
+   "start": "08:28",
+   "finish": "08:56",
+   "minutes": 28.4,
+   "versions": [
+    "en",
+    "ar",
+    "de"
+   ],
+   "platforms": [
+    "youtube",
+    "shorts",
+    "tiktok",
+    "instagram-reels"
+   ],
+   "status": "scheduled",
+   "quality_gates": [
+    "script review",
+    "asset licence review",
+    "technical QA",
+    "language QA",
+    "HUMAN APPROVAL"
+   ]
+  },
+  {
+   "slot": 3,
+   "topic": "CRISPR explained",
+   "profile": "animated-explainer",
+   "worker": "local-0",
+   "start": "08:56",
+   "finish": "09:28",
+   "minutes": 32.0,
+   "versions": [
+    "en",
+    "ar",
+    "de"
+   ],
+   "platforms": [
+    "youtube",
+    "shorts",
+    "tiktok",
+    "instagram-reels"
+   ],
+   "status": "scheduled",
+   "quality_gates": [
+    "script review",
+    "asset licence review",
+    "technical QA",
+    "language QA",
+    "HUMAN APPROVAL"
+   ]
+  },
+  {
+   "slot": 4,
+   "topic": "Wearable ECGs",
+   "profile": "animated-explainer",
+   "worker": "local-0",
+   "start": "09:28",
+   "finish": "10:00",
+   "minutes": 32.0,
+   "versions": [
+    "en",
+    "ar",
+    "de"
+   ],
+   "platforms": [
+    "youtube",
+    "shorts",
+    "tiktok",
+    "instagram-reels"
+   ],
+   "status": "scheduled",
+   "quality_gates": [
+    "script review",
+    "asset licence review",
+    "technical QA",
+    "language QA",
+    "HUMAN APPROVAL"
+   ]
+  },
+  {
+   "slot": 5,
+   "topic": "AI drug discovery",
+   "profile": "edit-or-remix",
+   "worker": "local-0",
+   "start": "10:00",
+   "finish": "10:53",
+   "minutes": 52.2,
+   "versions": [
+    "en",
+    "ar",
+    "de"
+   ],
+   "platforms": [
+    "youtube",
+    "shorts",
+    "tiktok",
+    "instagram-reels"
+   ],
+   "status": "scheduled",
+   "quality_gates": [
+    "script review",
+    "asset licence review",
+    "technical QA",
+    "language QA",
+    "HUMAN APPROVAL"
+   ]
+  }
+ ],
+ "predicted_finish": "10:53",
+ "workers": [
+  {
+   "id": "local-0",
+   "provider": "local",
+   "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+   "cores": 4,
+   "threads": 4,
+   "ram_gb": 15.7,
+   "ram_free_gb": 15.1,
+   "gpu": null,
+   "disk_free_gb": 21.4,
+   "acceleration": "cpu (int8/quantised models, Cycles CPU)",
+   "recommended": {
+    "asr": "whisper-small int8",
+    "llm": "Qwen3-4B Q4",
+    "mt": "MADLAD-400 3B int8",
+    "video_generation": "not feasible locally - remote free GPU or stills/motion graphics",
+    "max_parallel_heavy_jobs": 1
+   },
+   "frameworks": [
+    "ffmpeg",
+    "ctranslate2",
+    "llama.cpp",
+    "onnxruntime",
+    "manim",
+    "blender"
+   ],
+   "max_job_hours": null,
+   "quota": "unlimited (your own machine)",
+   "network": "as configured",
+   "policy": "none",
+   "available": true,
+   "status": "ok",
+   "automated": true
+  },
+  {
+   "id": "kaggle-0",
+   "provider": "kaggle",
+   "gpu": {
+    "name": "T4 x2 or P100 (assigned by Kaggle)",
+    "vram_gb": 16
+   },
+   "ram_gb": 30,
+   "max_job_hours": 12,
+   "quota": "weekly GPU hours per account; one account per person; phone verification for GPU/internet",
+   "policy": "no multi-account quota evasion, no crypto-mining, no persistent serving; batch 'Save & Run' via API is an official feature",
+   "tested": false,
+   "frameworks": [
+    "pytorch",
+    "diffusers"
+   ],
+   "network": "internet toggle requires phone-verified account",
+   "available": false,
+   "status": "kaggle CLI not installed (pip install kaggle)",
+   "automated": true
+  },
+  {
+   "id": "colab-0",
+   "provider": "colab",
+   "gpu": {
+    "name": "T4 (when granted)",
+    "vram_gb": 16
+   },
+   "quota": "undisclosed dynamic limits; idle and max-lifetime timeouts",
+   "policy": "interactive use only: no headless/API automation, no idle-timeout circumvention, no remote-desktop/SSH, no serving. NEXUS therefore only GENERATES a notebook for the user to open and run by hand.",
+   "mode": "manual hand-off only",
+   "available": false,
+   "status": "manual hand-off only (automation would violate Colab's free-tier terms)",
+   "automated": false
+  }
+ ],
+ "capacity": {
+  "target_masters_per_day": 5,
+  "assumptions": {
+   "working_hours_per_day": 16.0,
+   "machine_factor": 1.25,
+   "extra_languages": 2,
+   "platform_exports_per_language": 4,
+   "free_gpu_hours_per_week": 0.0,
+   "one_heavy_job_at_a_time": true,
+   "metrics_not_yet_measured_on_this_machine": []
+  },
+  "throughput_metrics": {
+   "render_rtf": {
+    "value": 0.606,
+    "measured": true
+   },
+   "tts_rtf": {
+    "value": 0.068,
+    "measured": true
+   },
+   "asr_rtf": {
+    "value": 0.362,
+    "measured": true
+   },
+   "llm_tok_per_s": {
+    "value": 6.877,
+    "measured": true
+   },
+   "mt_sec_per_line": {
+    "value": 1.884,
+    "measured": true
+   },
+   "blender_sec_per_frame": {
+    "value": 3.17,
+    "measured": true
+   },
+   "manim_seconds": {
+    "value": 7.866,
+    "measured": true
+   }
+  },
+  "profiles": [
+   {
+    "profile": "narrated-explainer",
+    "label": "Narrated explainer (licensed stills, Ken Burns, captions, music)",
+    "minutes_per_master_all_versions": 28.4,
+    "max_per_day": 33,
+    "meets_target": true,
+    "bottleneck": "research+script (LLM)",
+    "gpu_hours_per_video": 0.0,
+    "quality_note": "good for education/news-style channels; visual variety limited to stills + graphics",
+    "detail": {
+     "profile": "narrated-explainer",
+     "label": "Narrated explainer (licensed stills, Ken Burns, captions, music)",
+     "duration": 75,
+     "stages": {
+      "research+script (LLM)": 256,
+      "asset search/download": 150,
+      "narration (TTS)": 4,
+      "render + mix": 59,
+      "automated QA (decode, loudness, detectors)": 36
+     },
+     "master_cpu_s": 506,
+     "per_language_cpu_s": 165,
+     "language_stages": {
+      "translation (MADLAD)": 23,
+      "back-translation check (LLM)": 39,
+      "dub (TTS)": 5,
+      "dub verification (ASR)": 27,
+      "render + mix": 35,
+      "automated QA": 36
+     },
+     "per_platform_cpu_s": 44,
+     "gpu_minutes": 0,
+     "quality_note": "good for education/news-style channels; visual variety limited to stills + graphics"
+    }
+   },
+   {
+    "profile": "animated-explainer",
+    "label": "Animated explainer (Manim diagrams + data graphics + narration)",
+    "minutes_per_master_all_versions": 32.0,
+    "max_per_day": 30,
+    "meets_target": true,
+    "bottleneck": "research+script (LLM)",
+    "gpu_hours_per_video": 0.0,
+    "quality_note": "strong for science/finance/tech topics",
+    "detail": {
+     "profile": "animated-explainer",
+     "label": "Animated explainer (Manim diagrams + data graphics + narration)",
+     "duration": 90,
+     "stages": {
+      "research+script (LLM)": 302,
+      "asset search/download": 60,
+      "narration (TTS)": 5,
+      "2D animation (Manim)": 52,
+      "motion graphics": 10,
+      "render + mix": 71,
+      "automated QA (decode, loudness, detectors)": 42
+     },
+     "master_cpu_s": 542,
+     "per_language_cpu_s": 184,
+     "language_stages": {
+      "translation (MADLAD)": 23,
+      "back-translation check (LLM)": 39,
+      "dub (TTS)": 6,
+      "dub verification (ASR)": 33,
+      "render + mix": 43,
+      "automated QA": 42
+     },
+     "per_platform_cpu_s": 52,
+     "gpu_minutes": 0,
+     "quality_note": "strong for science/finance/tech topics"
+    }
+   },
+   {
+    "profile": "edit-or-remix",
+    "label": "Edit / remix of 10 min of supplied footage",
+    "minutes_per_master_all_versions": 52.2,
+    "max_per_day": 18,
+    "meets_target": true,
+    "bottleneck": "source analysis (ASR + detection)",
+    "gpu_hours_per_video": 0.0,
+    "quality_note": "depends on the footage; highest realism per CPU-minute",
+    "detail": {
+     "profile": "edit-or-remix",
+     "label": "Edit / remix of 10 min of supplied footage",
+     "duration": 180,
+     "stages": {
+      "research+script (LLM)": 58,
+      "narration (TTS)": 10,
+      "source analysis (ASR + detection)": 367,
+      "render + mix": 142,
+      "automated QA (decode, loudness, detectors)": 73
+     },
+     "master_cpu_s": 651,
+     "per_language_cpu_s": 358,
+     "language_stages": {
+      "translation (MADLAD)": 45,
+      "back-translation check (LLM)": 79,
+      "dub (TTS)": 11,
+      "dub verification (ASR)": 65,
+      "render + mix": 85,
+      "automated QA": 73
+     },
+     "per_platform_cpu_s": 95,
+     "gpu_minutes": 0,
+     "quality_note": "depends on the footage; highest realism per CPU-minute"
+    }
+   },
+   {
+    "profile": "3d-showcase",
+    "label": "30 s of 3D animation (Cycles CPU, 720p) + narration",
+    "minutes_per_master_all_versions": 205.4,
+    "max_per_day": 4,
+    "meets_target": false,
+    "bottleneck": "3D rendering (Blender Cycles CPU)",
+    "gpu_hours_per_video": 0.0,
+    "quality_note": "720p frames cost ~4x the measured 360p test; noisy below ~64 samples",
+    "detail": {
+     "profile": "3d-showcase",
+     "label": "30 s of 3D animation (Cycles CPU, 720p) + narration",
+     "duration": 45,
+     "stages": {
+      "research+script (LLM)": 113,
+      "narration (TTS)": 3,
+      "3D rendering (Blender Cycles CPU)": 9130,
+      "render + mix": 35,
+      "automated QA (decode, loudness, detectors)": 26
+     },
+     "master_cpu_s": 9307,
+     "per_language_cpu_s": 97,
+     "language_stages": {
+      "translation (MADLAD)": 11,
+      "back-translation check (LLM)": 20,
+      "dub (TTS)": 3,
+      "dub verification (ASR)": 16,
+      "render + mix": 21,
+      "automated QA": 26
+     },
+     "per_platform_cpu_s": 30,
+     "gpu_minutes": 0,
+     "quality_note": "720p frames cost ~4x the measured 360p test; noisy below ~64 samples"
+    }
+   },
+   {
+    "profile": "generative-cinematic",
+    "label": "Fully AI-generated video scenes (open-weight T2V on a free GPU session)",
+    "minutes_per_master_all_versions": 25.0,
+    "max_per_day": 0,
+    "meets_target": false,
+    "bottleneck": "free GPU quota (1.2 GPU-h per video vs 0.0 GPU-h/day available)",
+    "gpu_hours_per_video": 1.2,
+    "quality_note": "UNMEASURED ESTIMATE: ~6 GPU-min per 5 s 480p clip on a T4 class GPU; no model deployed yet",
+    "detail": {
+     "profile": "generative-cinematic",
+     "label": "Fully AI-generated video scenes (open-weight T2V on a free GPU session)",
+     "duration": 60,
+     "stages": {
+      "research+script (LLM)": 256,
+      "narration (TTS)": 3,
+      "render + mix": 47,
+      "automated QA (decode, loudness, detectors)": 31
+     },
+     "master_cpu_s": 338,
+     "per_language_cpu_s": 208,
+     "language_stages": {
+      "translation (MADLAD)": 45,
+      "back-translation check (LLM)": 79,
+      "dub (TTS)": 4,
+      "dub verification (ASR)": 22,
+      "render + mix": 28,
+      "automated QA": 31
+     },
+     "per_platform_cpu_s": 37,
+     "gpu_minutes": 72,
+     "quality_note": "UNMEASURED ESTIMATE: ~6 GPU-min per 5 s 480p clip on a T4 class GPU; no model deployed yet"
+    }
+   }
+  ],
+  "files_per_master": 12,
+  "recommended_mix": {
+   "mix": {
+    "narrated-explainer": 2,
+    "animated-explainer": 2,
+    "edit-or-remix": 1
+   },
+   "machine_hours": 2.9,
+   "fits_in_day": true,
+   "total_files_per_day": 60
+  },
+  "human_review_hours_per_day": 1.5,
+  "verdict": [
+   "5/day is ACHIEVABLE on CPU alone for: narrated-explainer, animated-explainer, edit-or-remix.",
+   "NOT achievable at this volume: 3d-showcase (max 4/day; bottleneck: 3D rendering (Blender Cycles CPU)); generative-cinematic (max 0/day; bottleneck: free GPU quota (1.2 GPU-h per video vs 0.0 GPU-h/day available)).",
+   "Recommended daily mix {'narrated-explainer': 2, 'animated-explainer': 2, 'edit-or-remix': 1} needs ~2.9 machine-hours of the 16 available.",
+   "Human review is the real limit on quality: ~1.5 h/day to watch every language version before publishing. Automated QA catches technical faults, not weak storytelling or mistranslations.",
+   "'Premium cinematic' fully generated footage is not available at 5/day: UNMEASURED ESTIMATE: ~6 GPU-min per 5 s 480p clip on a T4 class GPU; no model deployed yet."
+  ]
+ },
+ "realistic": true,
+ "id": "2026-11-11"
+}

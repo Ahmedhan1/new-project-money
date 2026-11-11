@@ -1,0 +1,234 @@
+"""Create-from-zero: idea -> research -> script -> review -> storyboard -> visuals -> narration -> timeline."""
+from __future__ import annotations
+
+import json
+import re
+from pathlib import Path
+
+from PIL import Image, ImageDraw
+
+from . import assets, config, llm, net, project as prj, qa
+from .audio import music
+from .speech import tts
+from .timeline import ops, subs, text as ttext
+from .timeline.render import clip_duration, clip_starts
+
+STOP = set("the a an and or but of to in on for with is are was were be been it this that as at by from we you they have has had not "
+           "can will its their our your more most very also into than then about over when which who how what why".split())
+
+
+# ------------------------------------------------------------------ research
+def research(topic: str, lang: str = "en", max_pages: int = 2, notes: str | None = None) -> dict:
+    """Collect source text from Wikipedia (with URLs for the source list). Falls back to user notes when offline."""
+    sources, corpus = [], []
+    if notes:
+        sources.append({"title": "User-supplied notes", "url": None, "license": "user"})
+        corpus.append(notes)
+    try:
+        host = f"https://{lang}.wikipedia.org/w/api.php"
+        hits = net.get_json(host, {"action": "query", "list": "search", "srsearch": topic, "format": "json", "srlimit": max_pages}, max_wait=45)
+        titles = [h["title"] for h in hits.get("query", {}).get("search", [])]
+        if titles:
+            pages = net.get_json(host, {"action": "query", "prop": "extracts|info", "exintro": 1, "explaintext": 1, "inprop": "url",
+                                        "titles": "|".join(titles), "format": "json", "redirects": 1}, max_wait=45)
+            for pg in pages.get("query", {}).get("pages", {}).values():
+                ex = (pg.get("extract") or "").strip()
+                if len(ex) > 200:
+                    corpus.append(ex[:3500])
+                    sources.append({"title": pg["title"], "url": pg.get("fullurl"), "license": "CC BY-SA 4.0 (Wikipedia) - used for facts, not copied"})
+    except (net.RemoteUnavailable, Exception) as e:  # research source down: say so, continue with what we have
+        sources.append({"title": f"Wikipedia unavailable ({type(e).__name__})", "url": None, "license": None})
+    return {"topic": topic, "sources": sources, "text": "\n\n".join(corpus), "grounded": bool(corpus)}
+
+
+# ------------------------------------------------------------------ script
+def write_script(topic: str, res: dict, scenes: int = 5, audience: str = "a curious general audience", style: str = "clear, vivid explainer",
+                 series_context: str = "") -> dict:
+    facts = res["text"][:5000] or "(no research text available - write only widely known, uncontroversial facts)"
+    r = llm.chat_json(
+        f"Write the narration script for a short video.\nTopic: {topic}\nAudience: {audience}\nStyle: {style}\n{series_context}\n"
+        f"Use ONLY facts from these research notes. Do not invent numbers, dates or names.\n--- NOTES ---\n{facts}\n--- END NOTES ---\n\n"
+        f"Write exactly {scenes} scenes. Scene 1 must open with a hook (a surprising fact or question). The last scene must give a takeaway.\n"
+        'Return JSON: {"title": "max 7 words", "scenes": [{"narration": "2 short spoken sentences", '
+        '"on_screen_text": "max 5 words", "visual_query": "2-3 word photo search phrase, concrete nouns"}]}',
+        max_tokens=1300, temperature=0.6)
+    sc = [{"narration": re.sub(r"\s+", " ", str(s.get("narration", ""))).strip(), "on_screen_text": str(s.get("on_screen_text", ""))[:48],
+           "visual_query": str(s.get("visual_query", topic))[:60]} for s in r.get("scenes", []) if s.get("narration")]
+    return {"title": str(r.get("title", topic))[:70], "topic": topic, "scenes": sc}
+
+
+def _content(text: str) -> list[str]:
+    return [w for w in re.findall(r"[a-zA-Z]{4,}", text.lower()) if w not in STOP]
+
+
+def review_script(script: dict, res: dict, want_scenes: int) -> dict:
+    """Stage 1 pre-production review. Grounding is checked by string evidence, not by the model that wrote the script."""
+    checks = []
+    sc = script["scenes"]
+    checks.append(qa._c("structure", len(sc) == want_scenes, f"{len(sc)} scenes (wanted {want_scenes})", "major", fix="rewrite"))
+    words = sum(len(s["narration"].split()) for s in sc)
+    checks.append(qa._c("length", 8 * len(sc) <= words <= 60 * len(sc), f"{words} words, ~{words / 2.5:.0f}s of narration", "major", fix="rewrite"))
+    hook = sc[0]["narration"] if sc else ""
+    checks.append(qa._c("hook", "?" in hook or bool(re.search(r"\d|never|every|most|only|imagine|did you", hook, re.I)),
+                        f"opening: \"{hook[:70]}\"", "minor"))
+    src = res["text"].lower()
+    stems = {w[:6] for w in _content(src)}
+    if res["grounded"]:
+        weak, bad_nums = [], []
+        for i, s in enumerate(sc):
+            cw = _content(s["narration"])
+            cov = sum(w[:6] in stems for w in cw) / max(len(cw), 1)
+            if cov < 0.5:
+                weak.append((i + 1, f"{cov:.0%}"))
+            for n in re.findall(r"\d[\d,.]*", s["narration"]):
+                if n.rstrip(".,").replace(",", "") not in src.replace(",", ""):
+                    bad_nums.append((i + 1, n))
+        checks.append(qa._c("numbers traceable to sources", not bad_nums, "every figure appears in the research text" if not bad_nums
+                            else f"figures not found in sources (scene, value): {bad_nums}", "major", fix="rewrite-scene"))
+        checks.append(qa._c("claims grounded in sources", not weak, "narration vocabulary is covered by the research text" if not weak
+                            else f"scenes with low source coverage: {weak}", "major", fix="rewrite-scene"))
+    else:
+        checks.append(qa._c("fact-check", False, "no research text was available - facts are UNVERIFIED", "major"))
+    dup = len({s["narration"][:40] for s in sc}) < len(sc)
+    checks.append(qa._c("no repeated scenes", not dup, "all scenes distinct"))
+    checks.append(qa._c("scene feasibility", all(s["visual_query"] for s in sc), "every scene has a concrete visual to source"))
+    return {"stage": "1-pre-production", "checks": checks, "passed": all(c["ok"] or c["severity"] == "minor" for c in checks),
+            "sources": res["sources"]}
+
+
+def script_with_review(topic: str, res: dict, scenes: int = 5, rounds: int = 3, **kw) -> tuple[dict, dict]:
+    """Write -> review -> rewrite until the gates pass or we run out of rounds (then the issues stay in the report)."""
+    best = None
+    for _ in range(rounds):
+        script = write_script(topic, res, scenes, **kw)
+        review = review_script(script, res, scenes)
+        fails = sum(not c["ok"] and c["severity"] != "minor" for c in review["checks"])
+        if best is None or fails < best[2]:
+            best = (script, review, fails)
+        if fails == 0:
+            break
+    best[1]["attempts"] = _ + 1
+    return best[0], best[1]
+
+
+# ------------------------------------------------------------------ visuals
+def card(text_: str, sub: str, W: int, H: int, out: Path, hue: int = 0) -> Path:
+    """Generated fallback visual: gradient background + headline (used when no licensed image is found)."""
+    out.parent.mkdir(parents=True, exist_ok=True)
+    palettes = [((12, 24, 52), (30, 96, 150)), ((40, 14, 54), (150, 50, 110)), ((10, 44, 40), (30, 140, 110)), ((52, 30, 10), (170, 110, 40))]
+    a, b = palettes[hue % len(palettes)]
+    img = Image.new("RGB", (W, H))
+    d = ImageDraw.Draw(img)
+    for y in range(H):
+        t = y / H
+        d.line([(0, y), (W, y)], fill=tuple(int(a[k] + (b[k] - a[k]) * t) for k in range(3)))
+    for k in range(6):  # soft decorative circles
+        r = int(H * (0.18 + 0.07 * k))
+        cx, cy = int(W * (0.12 + 0.17 * k)), int(H * (0.2 + 0.12 * ((k * 3) % 5)))
+        d.ellipse([cx - r, cy - r, cx + r, cy + r], outline=tuple(min(255, c + 26) for c in b), width=3)
+    rgba = img.convert("RGBA")
+    ttext.draw_text_block(rgba, text_, "title")
+    if sub:
+        ttext.draw_text_block(rgba, sub, "subtitle")
+    rgba.convert("RGB").save(out, quality=92)
+    return out
+
+
+def storyboard_sheet(frames: list[tuple[Path, str]], out: Path, cols: int = 3) -> Path:
+    tw, th = 480, 270
+    rows = (len(frames) + cols - 1) // cols
+    sheet = Image.new("RGB", (cols * tw + (cols + 1) * 12, rows * (th + 58) + 12), (18, 20, 28))
+    d = ImageDraw.Draw(sheet)
+    f = ttext.font(17)
+    for i, (path, cap) in enumerate(frames):
+        x, y = 12 + (i % cols) * (tw + 12), 12 + (i // cols) * (th + 58)
+        with Image.open(path) as im:
+            im = im.convert("RGB")
+            s = max(tw / im.width, th / im.height)
+            im = im.resize((int(im.width * s) + 1, int(im.height * s) + 1))
+            sheet.paste(im.crop(((im.width - tw) // 2, (im.height - th) // 2, (im.width + tw) // 2, (im.height + th) // 2)), (x, y))
+        for li, line in enumerate(ttext.wrap(d, f"{i + 1}. {cap}", f, tw)[:2]):
+            d.text((x, y + th + 6 + li * 22), line, font=f, fill=(225, 228, 235))
+    sheet.save(out)
+    return out
+
+
+# ------------------------------------------------------------------ production
+def produce(project, script: dict, *, lang: str = "en", size=(1280, 720), style: dict | None = None, use_stock: bool = True,
+            extra_clips: dict[int, str] | None = None) -> dict:
+    """Script -> timeline. `style` (grade, mood, music_seed, voice) is stored on the project for later continuation.
+    `extra_clips` maps scene index -> path of a pre-rendered animation to use instead of a still."""
+    style = {"grade": "cinematic", "mood": "inspiring", "music_seed": 7, "voice": None, **(style or {})}
+    W, H = size
+    tl = prj.new_timeline(W, H, lang)
+    tl["grade"] = "none"
+    gen, used, frames = project.data.setdefault("generated", {}), set(), []
+    tl["clips"].append(ops.color_clip(2.4, text=[{"text": script["title"], "style": "title"}], fade_in=0.5))
+    narr = []
+    for i, s in enumerate(script["scenes"]):
+        wav = project.dir / "audio" / lang / f"scene{i:02d}.wav"
+        v = tts.synthesize(s["narration"], wav, lang, style["voice"])
+        dur = round(v["duration"] + 0.7, 3)
+        overlay = [{"text": s["on_screen_text"], "style": "lower_third", "start": 0.4, "end": min(dur - 0.3, 5.0)}] if s.get("on_screen_text") else []
+        if extra_clips and i in extra_clips:
+            from .media import ff
+            ad = ff.duration(extra_clips[i])
+            clip = ops.video_clip(extra_clips[i], 0, min(ad, dur), mute=True, fit="contain", speed=round(min(1.0, min(ad, dur) / dur), 3))
+            gen[extra_clips[i]] = {"license": "generated by NEXUS (original)", "source": "animation studio"}
+            frames.append((None, s["on_screen_text"] or s["narration"][:40]))
+        else:
+            row = assets.find_image(s["visual_query"], project.id, used) if use_stock else None
+            if row:
+                used.add(row["id"])
+                img, prov = row["path"], {"license": row["license"], "source": row["source"], "attribution": row["attribution"]}
+            else:
+                img = str(card(s["on_screen_text"] or script["title"], "", W, H, project.dir / "work" / f"card{i:02d}.jpg", i))
+                prov = {"license": "generated by NEXUS (original)", "source": "title-card generator"}
+                overlay = []
+            gen[img] = prov
+            clip = ops.image_clip(img, dur, kenburns="in" if i % 2 == 0 else "out", grade=style["grade"], provenance=prov, text=overlay)
+            frames.append((Path(img), s["on_screen_text"] or s["narration"][:40]))
+        clip.update(narration=s["narration"], transition="crossfade", transition_dur=0.5, scene=i)
+        if extra_clips and i in extra_clips:
+            clip["text"] = overlay
+        tl["clips"].append(clip)
+        narr.append(wav)
+    creds = assets.credits(project.id)
+    if creds:  # attribution is part of the video, not an afterthought
+        tl["clips"].append(ops.color_clip(3.0, text=[{"text": "Image credits: " + " • ".join(c.split(". Source")[0] for c in creds)[:420],
+                                                       "style": "subtitle"}], transition="crossfade", transition_dur=0.5, fade_out=0.6))
+    else:
+        tl["clips"][-1]["fade_out"] = 0.6
+    starts = clip_starts(tl)
+    cues = []
+    for (i, wav) in enumerate(narr):
+        from .media import ff
+        st = starts[i + 1] + 0.45
+        tl["audio"].append({"src": str(wav), "start": round(st, 3), "clip": tl["clips"][i + 1]["id"]})
+        cues += subs.cues_from_text(script["scenes"][i]["narration"], st, st + ff.duration(wav))
+    tl["subtitles"] = subs.fix_timing(cues)
+    total = starts[-1] + clip_duration(tl["clips"][-1])
+    tl["music"] = {"src": str(music.music_bed(total, style["mood"], style["music_seed"])), "volume": 0.3, "duck": True}
+    project.data["style"] = {**style, "size": list(size), "lang": lang}
+    project.data["script"] = script
+    project.data["credits"] = creds
+    still = [(p, c) for p, c in frames if p is not None]
+    if still:
+        project.data["storyboard"] = str(storyboard_sheet(still, project.dir / "reports" / "storyboard.png"))
+    (project.dir / "reports" / "script.json").write_text(json.dumps(script, indent=1, ensure_ascii=False))
+    project.save()
+    return tl
+
+
+def create_video(topic: str, *, scenes: int = 5, lang: str = "en", size=(1280, 720), notes: str | None = None, style: dict | None = None,
+                 name: str | None = None) -> dict:
+    """The whole from-zero workflow. Returns paths + the approval report."""
+    project = prj.Project.create(name or topic[:60], "create")
+    res = research(topic, notes=notes)
+    script, pre = script_with_review(topic, res, scenes)
+    tl = produce(project, script, lang=lang, size=size, style=style)
+    project.save_timeline(tl, "first assembly")
+    stats, report = qa.render_with_qa(project, tl, "master", extra_stages=[pre],
+                                      extra={"sources": res["sources"], "credits": project.data.get("credits", [])})
+    return {"project": project.id, "output": stats["output"], "script": script, "research": res["sources"], "render": stats,
+            "report": report, "storyboard": project.data.get("storyboard")}

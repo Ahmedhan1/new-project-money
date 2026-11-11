@@ -1,0 +1,145 @@
+{
+ "plan": {
+  "title": "Clean Power Synergy",
+  "opening": "When the sun sets and the wind rises, clean energy continues to flow.",
+  "sections": [
+   {
+    "heading": "Solar Challenges",
+    "keys": [
+     "0.0",
+     "0.4",
+     "0.5"
+    ]
+   },
+   {
+    "heading": "Wind Complement",
+    "keys": [
+     "1.0",
+     "1.1",
+     "1.2",
+     "1.3"
+    ]
+   },
+   {
+    "heading": "Grid Balance",
+    "keys": [
+     "2.0",
+     "2.1",
+     "2.2",
+     "0.1",
+     "0.3"
+    ]
+   }
+  ],
+  "planner": "local LLM (attempt 1)"
+ },
+ "comparison": [
+  {
+   "version": "A-story",
+   "size": "1280x720",
+   "duration": 55.2,
+   "shots": 16,
+   "grade": "cinematic",
+   "music": "inspiring",
+   "sources_used": 3,
+   "order": [
+    "solar_talk@0s",
+    "solar_talk@20s",
+    "solar_talk@24s",
+    "wind_talk@0s",
+    "wind_talk@3s",
+    "wind_talk@8s",
+    "wind_talk@13s",
+    "grid_talk@0s",
+    "grid_talk@7s",
+    "grid_talk@12s",
+    "solar_talk@4s",
+    "solar_talk@15s"
+   ]
+  },
+  {
+   "version": "B-highlights-vertical",
+   "size": "720x1280",
+   "duration": 24.6,
+   "shots": 7,
+   "grade": "vivid",
+   "music": "upbeat",
+   "sources_used": 2,
+   "order": [
+    "solar_talk@0s",
+    "solar_talk@4s",
+    "solar_talk@15s",
+    "solar_talk@20s",
+    "solar_talk@24s",
+    "wind_talk@3s"
+   ]
+  },
+  {
+   "version": "C-chronological-doc",
+   "size": "1280x720",
+   "duration": 55.1,
+   "shots": 16,
+   "grade": "documentary",
+   "music": "documentary",
+   "sources_used": 3,
+   "order": [
+    "solar_talk@0s",
+    "solar_talk@4s",
+    "solar_talk@15s",
+    "solar_talk@20s",
+    "solar_talk@24s",
+    "wind_talk@0s",
+    "wind_talk@3s",
+    "wind_talk@8s",
+    "wind_talk@13s",
+    "grid_talk@0s",
+    "grid_talk@7s",
+    "grid_talk@12s"
+   ]
+  }
+ ],
+ "renders": {
+  "A-story": {
+   "status": "PASSED_AUTOMATED_CHECKS",
+   "duration": 55.283,
+   "video": {
+    "codec": "h264",
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "pix_fmt": "yuv420p",
+    "duration": 55.233333
+   },
+   "known_issues": [],
+   "render_seconds": 50.53
+  },
+  "B-highlights-vertical": {
+   "status": "PASSED_AUTOMATED_CHECKS",
+   "duration": 24.666667,
+   "video": {
+    "codec": "h264",
+    "width": 720,
+    "height": 1280,
+    "fps": 30.0,
+    "pix_fmt": "yuv420p",
+    "duration": 24.666667
+   },
+   "known_issues": [],
+   "render_seconds": 16.96
+  },
+  "C-chronological-doc": {
+   "status": "PASSED_AUTOMATED_CHECKS",
+   "duration": 55.171,
+   "video": {
+    "codec": "h264",
+    "width": 1280,
+    "height": 720,
+    "fps": 30.0,
+    "pix_fmt": "yuv420p",
+    "duration": 55.133333
+   },
+   "known_issues": [],
+   "render_seconds": 32.16
+  }
+ }
+}

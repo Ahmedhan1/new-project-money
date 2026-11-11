@@ -1,0 +1,47 @@
+{
+ "events": [
+  {
+   "t": 1794431606.4680328,
+   "event": "assigned",
+   "worker": "sim-gpu-0"
+  },
+  {
+   "t": 1794431607.060942,
+   "event": "worker-lost",
+   "worker": "sim-gpu-0",
+   "detail": "remote GPU session terminated by provider",
+   "progress_saved": [
+    "scene-1",
+    "scene-2",
+    "scene-3"
+   ]
+  },
+  {
+   "t": 1794431607.0625303,
+   "event": "cpu-fallback",
+   "detail": "no GPU worker available; continuing on CPU (slower)"
+  },
+  {
+   "t": 1794431607.0625315,
+   "event": "assigned",
+   "worker": "local-0"
+  }
+ ],
+ "final_worker": "local-0",
+ "scenes_rendered_order": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5
+ ],
+ "output_duration": 9.021333,
+ "deferred_case": {
+  "status": "deferred",
+  "reasons": [
+   "local-0: no GPU on this worker"
+  ]
+ },
+ "limitation": "after failover the remaining scenes ran on CPU: correct but slower; a GPU-only model would instead be deferred"
+}

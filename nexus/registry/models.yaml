@@ -17,6 +17,14 @@ models:
     license: Apache-2.0
     commercial: true
 
+  mt-madlad400-3b:
+    repo: Nextcloud-AI/madlad400-3b-mt-ct2-int8
+    files: [config.json, model.bin, shared_vocabulary.json, spiece.model]
+    dir: madlad400-3b
+    size_mb: 2960
+    license: Apache-2.0 (google/madlad400-3b-mt, CTranslate2 int8 conversion by Nextcloud)
+    commercial: true
+
 # Piper voices (huggingface.co/rhasspy/piper-voices). `commercial` reflects the
 # TRAINING DATASET licence stated in each MODEL_CARD.
 voices:

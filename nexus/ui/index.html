@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEXUS Video AI</title>
+<style>
+:root{--bg:#0c0f17;--panel:#141926;--panel2:#1b2233;--line:#27304a;--text:#e6e9f2;--mute:#8b94ad;--acc:#3ec5ff;--ok:#5fd38a;--warn:#ffb648;--bad:#ff6b81}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;min-height:100vh}
+nav{width:232px;flex:none;background:var(--panel);border-right:1px solid var(--line);padding:14px 10px;overflow-y:auto;height:100vh;position:sticky;top:0}
+nav h1{font-size:17px;margin:4px 8px 2px;letter-spacing:.06em}
+nav .zero{margin:0 8px 12px;color:var(--ok);font-size:12px}
+nav h2{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin:14px 8px 4px}
+nav a{display:flex;justify-content:space-between;gap:6px;padding:6px 8px;border-radius:6px;color:var(--text);text-decoration:none;cursor:pointer}
+nav a:hover{background:var(--panel2)} nav a.on{background:var(--panel2);color:var(--acc)}
+nav a small{color:var(--mute);font-size:10px;align-self:center}
+main{flex:1;min-width:0;padding:22px 28px 60px;max-width:1280px}
+h2.page{font-size:22px;margin:0 0 4px} p.lead{color:var(--mute);margin:0 0 18px;max-width:75ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+.card.click{cursor:pointer} .card.click:hover{border-color:var(--acc)}
+.card h3{margin:0 0 4px;font-size:15px} .card p{margin:0;color:var(--mute);font-size:13px}
+.stat b{display:block;font-size:24px;font-variant-numeric:tabular-nums} .stat span{color:var(--mute);font-size:12px}
+table{border-collapse:collapse;width:100%;font-size:13px} th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--mute);font-weight:500;font-size:12px} .scroll{overflow-x:auto}
+input,select,textarea,button{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:7px 9px}
+textarea{width:100%;min-height:70px} input[type=text],input:not([type]){width:100%}
+button{cursor:pointer;background:#1f6feb;border-color:#1f6feb;color:#fff} button.sec{background:var(--panel2);border-color:var(--line);color:var(--text)}
+button:disabled{opacity:.5;cursor:default} button.sm{padding:3px 7px;font-size:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin:10px 0} .row>label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mute);flex:1;min-width:140px}
+.tag{display:inline-block;padding:1px 7px;border-radius:99px;font-size:11px;border:1px solid var(--line);color:var(--mute);white-space:nowrap}
+.tag.ok{color:var(--ok);border-color:var(--ok)} .tag.warn{color:var(--warn);border-color:var(--warn)} .tag.bad{color:var(--bad);border-color:var(--bad)}
+pre{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px;overflow:auto;max-height:340px;font-size:12px;white-space:pre-wrap}
+video{width:100%;max-height:420px;background:#000;border-radius:8px}
+.tl{display:flex;height:54px;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:8px 0}
+.tl div{border-right:1px solid var(--bg);padding:4px 6px;font-size:11px;overflow:hidden;white-space:nowrap;cursor:pointer;min-width:6px}
+.tl div.sel{outline:2px solid var(--acc);outline-offset:-2px}
+.tv{background:#28507a}.ti{background:#2f6a4f}.tc{background:#5a4a7a}
+.note{border-left:3px solid var(--warn);background:var(--panel);padding:8px 12px;margin:10px 0;color:var(--mute);border-radius:0 8px 8px 0}
+h3.sec{margin:22px 0 8px;font-size:15px}
+main a{color:var(--acc)}
+@media(max-width:820px){body{flex-direction:column}nav{width:100%;height:auto;position:static;display:flex;flex-wrap:wrap;gap:2px}nav h2{width:100%}main{padding:16px}}
+</style>
+</head>
+<body>
+<nav id="nav"></nav>
+<main id="main"></main>
+<script>
+const $=(s,e=document)=>e.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const api=async(p,body)=>{const r=await fetch(p,body===undefined?{}:{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+  const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.detail||r.statusText);return j};
+const tag=(t,c="")=>`<span class="tag ${c}">${esc(t)}</span>`;
+const statusTag=s=>tag(s,/PASSED|done|deployed|true|scheduled/i.test(s)?"ok":/BLOCK|fail|REJECT/i.test(s)?"bad":"warn");
+const table=(rows,cols)=>!rows||!rows.length?'<p class="lead">Nothing here yet.</p>':`<div class="scroll"><table><tr>${cols.map(c=>`<th>${esc(c[0])}</th>`).join("")}</tr>${rows.map(r=>`<tr>${cols.map(c=>`<td>${c[1](r)}</td>`).join("")}</tr>`).join("")}</table></div>`;
+let mode=localStorage.getItem("nexus-mode")||"beginner", current=null, sel=null, branch="main";
+// status: live = wired to the tested backend; partial = part of it works; planned = not built yet
+const MODULES=[["Create",[["home","What do you want to create?","live"],["creator","AI Video Creator","live"],["editor","Video Editor","live"],["remix","Video Remix Studio","live"],
+ ["animation","Animation & Motion Graphics","live"],["dubbing","Voiceover, Dubbing & Subtitles","live"],["series","Film & Series Studio","live"],["audio","Audio Production","partial"],
+ ["enhance","Video Enhancement","planned"],["vfx","VFX Studio","planned"],["documentary","Documentary Studio","partial"]]],
+ ["Produce",[["dashboard","Dashboard","live"],["factory","Content Factory","live"],["publishing","Publishing Studio","live"],["channels","Channels & Business","partial"],
+ ["research","Content Research & Trends","planned"],["analytics","Analytics","planned"]]],
+ ["System",[["projects","Project History","live"],["qa","Quality Assurance Center","live"],["assets","Asset Library","live"],["resources","Free Resources & Compute","live"],
+ ["tools","Deployed Tools & Models","live"],["discovery","GitHub Discovery","live"],["plugins","Plugin Manager","planned"],["settings","Settings","live"]]]];
+const PLANNED={enhance:"Upscaling, interpolation and stabilisation controls. FFmpeg's stabiliser is installed but not exposed here yet; Real-ESRGAN/RIFE need a GPU worker.",
+ vfx:"Masks, keying and compositing. Not built. Candidates: SAM 2 (GPU) and rembg (CPU).",research:"Trend and competitor research. Not built: needs platform analytics access that you authorise. Wikipedia-based topic research already runs inside the AI Video Creator.",
+ analytics:"Performance analytics from YouTube/TikTok/Instagram. Not built: requires your own OAuth authorisation for each platform's official API.",plugins:"Third-party plugin loading. Not built."};
+function nav(){ $("#nav").innerHTML=`<h1>NEXUS VIDEO AI</h1><div class="zero" id="spend">spend: $0.00</div>`+MODULES.map(([g,items])=>`<h2>${g}</h2>`+items.map(([id,name,st])=>`<a data-id="${id}" class="${id===current?"on":""}">${esc(name)}${st==="live"?"":`<small>${st}</small>`}</a>`).join("")).join("");
+  document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>go(a.dataset.id));
+  api("/api/spend").then(s=>$("#spend").textContent=`spend: $${s.actual_spend_usd.toFixed(2)} · ${s.decisions.block||0} paid ops blocked`).catch(()=>{}) }
+function go(id,arg){current=id;nav();const m=$("#main");m.innerHTML="<p class='lead'>Loading…</p>";(PAGES[id]||planned)(m,arg,id).catch(e=>m.innerHTML=`<div class="note">Error: ${esc(e.message)}</div>`)}
+async function planned(m,_,id){const n=MODULES.flatMap(g=>g[1]).find(x=>x[0]===id);m.innerHTML=`<h2 class="page">${esc(n[1])}</h2><div class="note"><b>Not built yet.</b> ${esc(PLANNED[id]||"")}</div>`}
+async function jobsBlock(){const j=await api("/api/jobs");return `<h3 class="sec">Jobs</h3>`+table(j.slice(0,12),[["Job",r=>esc(r.kind)],["Status",r=>statusTag(r.status)],["Project",r=>r.project_id||r.result?.project?`<a href="#" onclick="go('editor','${r.project_id||r.result.project}');return false">${esc(r.project_id||r.result.project)}</a>`:""],
+ ["Result",r=>r.error?`<span style="color:var(--bad)">${esc(r.error.split("\n")[0])}</span>`:r.result?.status?statusTag(r.result.status)+" "+esc((r.result.issues||[]).length+" issue(s)"):esc(r.result?JSON.stringify(r.result).slice(0,90):"")],
+ ["Time",r=>r.finished&&r.started?Math.round(r.finished-r.started)+" s":""]])}
+function poll(el){const t=setInterval(async()=>{if(!document.body.contains(el))return clearInterval(t);el.innerHTML=await jobsBlock()},4000);jobsBlock().then(h=>el.innerHTML=h)}
+const PAGES={
+async home(m){const C=[["creator","Create a video from an idea","Research, script, licensed visuals, narration, music, captions."],["series","Create a cinematic film plan","Logline, characters, scenes and a shot list."],
+ ["series","Create an episodic series","Series bible, season plan, continuity-checked episodes."],["creator","Create a documentary","Source-cited narration over licensed archive images."],
+ ["animation","Create an animated explainer","Manim diagrams, data graphics, 3D titles."],["editor","Edit an existing video","Upload, analyse, get an edit proposal, refine on the timeline."],
+ ["remix","Remix multiple videos","Combine sources into a new story in three versions."],["dubbing","Translate and dub a video","Arabic (MSA + Egyptian), German, English."],
+ ["projects","Continue an existing project","Reopen any project with its style and history."],["factory","Create five daily videos","Capacity plan and schedule from measured speed."],
+ ["channels","Build a content channel","Niche, pillars, calendar, revenue ledger."],["research","Research content opportunities","Planned."]];
+ m.innerHTML=`<h2 class="page">What do you want to create?</h2><p class="lead">Everything runs on this computer with free, open tools. No paid API can be called: the Cost Guard blocks it.</p><div class="grid">${C.map(c=>`<div class="card click" onclick="go('${c[0]}')"><h3>${c[1]}</h3><p>${c[2]}</p></div>`).join("")}</div><div id="jobs"></div>`;poll($("#jobs"))},
+async dashboard(m){const d=await api("/api/dashboard");const hw=d.hardware;const st=(v,l)=>`<div class="card stat"><b>${v}</b><span>${l}</span></div>`;
+ m.innerHTML=`<h2 class="page">Dashboard</h2><p class="lead">Measured on this machine. Money spent is always zero because anything that could cost money is refused before it runs.</p>
+ <div class="grid">${st("$"+d.spend.actual_spend_usd.toFixed(2),"actual money spent")}${st(d.spend.decisions.block||0,"paid / undeclared operations blocked")}${st(d.projects,"projects")}${st(d.qa.renders_reviewed,"renders reviewed by QA")}
+ ${st(Math.round(d.qa.first_pass_rate*100)+"%","passed automated QA")}${st(d.cpu_seconds_in_ffmpeg+" s","CPU time in FFmpeg")}${st("0 s","GPU time used")}${st(hw.ram_free_gb+" / "+hw.ram_gb+" GB","RAM free")}${st(hw.disk_free_gb+" GB","disk free")}</div>
+ <h3 class="sec">Hardware</h3><p>${esc(hw.cpu)} · ${hw.threads} threads · GPU: ${hw.gpu?esc(hw.gpu.name):"none"} · acceleration: ${esc(hw.acceleration)}</p>
+ <h3 class="sec">Measured throughput</h3>${table(Object.entries(d.throughput),[["Metric",r=>esc(r[0])],["Value",r=>r[1].value],["Source",r=>r[1].measured?tag("measured","ok"):tag("default, not measured","warn")]])}<div id="jobs"></div>`;poll($("#jobs"))},
+async creator(m){m.innerHTML=`<h2 class="page">AI Video Creator</h2><p class="lead">From a topic to a finished, reviewed video. Research comes from Wikipedia (cited), visuals from Wikimedia Commons with licence records, narration from Piper, script from a local LLM. Takes roughly 5–10 minutes.</p>
+ <div class="row"><label>Topic or idea<input id="topic" placeholder="How vaccines train the immune system"></label><label style="max-width:110px">Scenes<input id="scenes" type="number" value="5" min="3" max="10"></label>
+ <label style="max-width:150px">Format<select id="vert"><option value="">16:9 landscape</option><option value="1">9:16 vertical</option></select></label></div>
+ ${mode!=="beginner"?`<label style="color:var(--mute);font-size:12px">Your own research notes (optional; used as the fact source)<textarea id="notes"></textarea></label>`:""}
+ <div class="row"><button id="go">Create video</button></div><div class="note">The script is checked against the research text (numbers and claims must be traceable). You still need to watch the result before publishing.</div><div id="jobs"></div>`;
+ $("#go").onclick=async()=>{if(!$("#topic").value.trim())return;await api("/api/create",{topic:$("#topic").value,scenes:+$("#scenes").value,vertical:!!$("#vert").value,notes:$("#notes")?.value||null});poll($("#jobs"))};poll($("#jobs"))},
+async projects(m){const p=await api("/api/projects");m.innerHTML=`<h2 class="page">Project History</h2><p class="lead">Originals are never modified. Every edit is a saved version you can return to.</p>`+table(p,[["Project",r=>`<a href="#" onclick="go('editor','${r.id}');return false">${esc(r.name)}</a>`],["Type",r=>tag(r.kind)],["Created",r=>new Date(r.created*1000).toLocaleString()]])},
+async editor(m,pid){ if(!pid){m.innerHTML=`<h2 class="page">Video Editor</h2><p class="lead">Upload a video you own or are authorised to use. NEXUS analyses it and proposes an edit before changing anything.</p>
+  <div class="row"><input type="file" id="f" accept="video/*,audio/*"><button id="up">Upload and analyse</button></div><div id="jobs"></div><h3 class="sec">Or open a project</h3><div id="pl"></div>`;
+  $("#up").onclick=async()=>{const f=$("#f").files[0];if(!f)return;const fd=new FormData();fd.append("file",f);$("#up").disabled=true;const r=await(await fetch("/api/upload",{method:"POST",body:fd})).json();go("editor",r.project)};
+  poll($("#jobs"));const p=await api("/api/projects");$("#pl").innerHTML=table(p.slice(0,15),[["Project",r=>`<a href="#" onclick="go('editor','${r.id}');return false">${esc(r.name)}</a>`],["Type",r=>tag(r.kind)]]);return}
+ const p=await api(`/api/projects/${pid}?branch=${encodeURIComponent(branch)}`).catch(async()=>{branch="main";return api(`/api/projects/${pid}`)});const tl=p.timeline;const an=Object.values(p.analysis)[0];
+ const last=p.renders[p.renders.length-1];const rep=p.reports[p.reports.length-1];
+ let h=`<h2 class="page">${esc(p.name)}</h2><p class="lead">${tag(p.kind)} ${Object.keys(p.history).map(b=>`<a href="#" onclick="branch='${b}';go('editor','${pid}');return false">${tag(b,b===branch?"ok":"")}</a>`).join(" ")}</p>`;
+ if(an)h+=`<h3 class="sec">Source analysis</h3><p>${an.duration.toFixed(1)} s · ${an.scenes.length} shots · ${an.silences.length} pauses · ${an.repetitions.length} repeated takes · loudness ${an.loudness?an.loudness.lufs+" LUFS":"n/a"} ${an.issues.map(i=>tag(i,"warn")).join(" ")}</p><p class="lead">Not available yet: ${esc(an.not_available.join("; "))}</p>${mode!=="beginner"?`<pre>${esc(an.text||"")}</pre>`:""}`;
+ else if(p.media.length&&!tl)h+=`<div class="note">Analysis is still running…</div>`;
+ if(an&&!tl){h+=`<h3 class="sec">Editing proposal</h3><div class="row"><label>Goal<select id="goal"><option value="tighten">Tighten (remove pauses and retakes)</option><option value="highlights">Highlights cut</option></select></label>
+  <label>Target length (s, optional)<input id="td" type="number"></label><label>Look<select id="grade"><option>cinematic</option><option>documentary</option><option>warm</option><option>cool</option><option>vivid</option><option>bw</option><option>none</option></select></label>
+  <label>Opening title (optional)<input id="title"></label><button id="prop">Propose edit</button></div><div id="propout"></div>`}
+ if(tl){h+=`<h3 class="sec">Timeline · ${tl.duration}s · ${tl.width}×${tl.height} · look: ${esc(tl.grade)} · ${tl.subtitles.length} captions</h3><div class="tl">${tl.clips.map(c=>`<div class="${c.type==="video"?"tv":c.type==="image"?"ti":"tc"} ${sel===c.id?"sel":""}" style="flex:${c._duration}" data-c="${c.id}" title="${c.type} ${c._duration}s">${esc(c.type==="video"?c.in+"–"+c.out:(c.text?.[0]?.text||c.type))}</div>`).join("")}</div>
+  <div class="row"><button class="sec sm" data-op="undo">Undo</button><button class="sec sm" data-op="redo">Redo</button>
+  <select id="g2">${["cinematic","documentary","warm","cool","vivid","bw","none"].map(g=>`<option ${g===tl.grade?"selected":""}>${g}</option>`).join("")}</select><button class="sec sm" id="setg">Set look</button>
+  <select id="ar"><option value="1280x720">16:9</option><option value="720x1280">9:16</option><option value="1080x1080">1:1</option><option value="1080x1350">4:5</option></select><button class="sec sm" id="ref">Reframe</button>
+  <button class="sec sm" id="fork">Save as new version</button><button id="render">Render + QA</button></div><div id="clip"></div>
+  <h3 class="sec">Languages</h3><div class="row"><select id="lang"><option value="ar">Arabic (Modern Standard)</option><option value="ar-EG">Arabic (Egyptian)</option><option value="de">German</option></select><button class="sec" id="loc">Translate + dub + render</button></div>
+  <h3 class="sec">Publish package</h3><div class="row"><select id="plat"></select><label>Title<input id="ptitle" value="${esc(p.script?.title||p.name)}"></label><button class="sec" id="pack">Build upload package</button></div>`}
+ if(last)h+=`<h3 class="sec">Latest render</h3><video controls src="/api/projects/${pid}/file?path=${encodeURIComponent(last)}"></video><p class="lead">${p.renders.map(r=>`<a href="/api/projects/${pid}/file?path=${encodeURIComponent(r)}" target="_blank">${esc(r)}</a>`).join(" · ")}</p>`;
+ if(rep)h+=`<h3 class="sec">QA report: ${statusTag(rep.status)} ${esc(rep.output)}</h3><p class="lead">${esc(rep.human_approval)}</p>`+table(rep.stages.flatMap(s=>s.checks.map(c=>({s:s.stage,...c}))),[["Stage",r=>esc(r.s)],["Check",r=>esc(r.check)],["Result",r=>r.ok?tag("pass","ok"):tag(r.severity,r.severity==="minor"?"warn":"bad")],["Detail",r=>esc(r.detail)]]);
+ if(p.credits?.length)h+=`<h3 class="sec">Credits</h3><pre>${esc(p.credits.join("\n"))}</pre>`;
+ m.innerHTML=h+`<div id="jobs"></div>`;poll($("#jobs"));
+ const op=async(o,clip,args={})=>{await api(`/api/projects/${pid}/op`,{op:o,clip,args,branch});go("editor",pid)};
+ if($("#prop"))$("#prop").onclick=async()=>{const pr=await api(`/api/projects/${pid}/propose`,{goal:$("#goal").value,target_duration:+$("#td").value||null,grade:$("#grade").value,title:$("#title").value||null});
+  $("#propout").innerHTML=`<p><b>${pr.source_duration}s → ${pr.proposed_duration}s</b></p><ul>${pr.actions.map(a=>`<li>${esc(a)}</li>`).join("")}</ul>${table(pr.removed,[["Remove",r=>r.in+"–"+r.out+" s"],["Why",r=>esc(r.reason)]])}<div class="row"><button id="acc">Accept and build timeline</button></div>`;
+  $("#acc").onclick=async()=>{await api(`/api/projects/${pid}/accept`,{});go("editor",pid)}};
+ if(tl){document.querySelectorAll(".tl div").forEach(d=>d.onclick=()=>{sel=d.dataset.c;go("editor",pid)});document.querySelectorAll("[data-op]").forEach(b=>b.onclick=()=>op(b.dataset.op));
+  $("#setg").onclick=()=>op("set_global",null,{grade:$("#g2").value});$("#ref").onclick=()=>{const [w,hh]=$("#ar").value.split("x").map(Number);op("reframe",null,{width:w,height:hh,fit:w<hh?"blur":"cover"})};
+  $("#fork").onclick=()=>{const n=prompt("Name for the new version");if(n){op("fork",null,{name:n});branch=n}};
+  $("#render").onclick=async()=>{await api(`/api/projects/${pid}/render`,{branch});poll($("#jobs"))};$("#loc").onclick=async()=>{await api(`/api/projects/${pid}/localize`,{lang:$("#lang").value,branch});poll($("#jobs"))};
+  api("/api/platforms").then(pl=>$("#plat").innerHTML=Object.keys(pl).map(k=>`<option>${k}</option>`).join(""));
+  $("#pack").onclick=async()=>{await api(`/api/projects/${pid}/package`,{platform:$("#plat").value,title:$("#ptitle").value,branch});poll($("#jobs"))};
+  const c=tl.clips.find(x=>x.id===sel);if(c){$("#clip").innerHTML=`<div class="card"><h3>Selected scene · ${c.type} · ${c._duration}s</h3><div class="row">
+   ${c.type==="video"?`<label>In (s)<input id="cin" type="number" step="0.1" value="${c.in}"></label><label>Out (s)<input id="cout" type="number" step="0.1" value="${c.out}"></label><label>Speed<input id="csp" type="number" step="0.05" value="${c.speed||1}"></label>`:`<label>Duration (s)<input id="cdur" type="number" step="0.1" value="${c.duration}"></label>`}
+   <label>Look<select id="cg"><option value="">(project)</option>${["cinematic","documentary","warm","cool","vivid","bw","none"].map(g=>`<option ${g===c.grade?"selected":""}>${g}</option>`).join("")}</select></label>
+   <label>On-screen text<input id="ctx" value="${esc(c.text?.[0]?.text||"")}"></label></div><div class="row"><button class="sm" id="capply">Apply to this scene</button><button class="sec sm" id="cdel">Delete (ripple)</button>
+   <button class="sec sm" id="cleft">Move earlier</button><button class="sec sm" id="cright">Move later</button></div><p class="lead">Only this scene is re-rendered; the others come from the segment cache.</p></div>`;
+   const i=tl.clips.indexOf(c);$("#capply").onclick=async()=>{if(c.type==="video")await api(`/api/projects/${pid}/op`,{op:"trim",clip:c.id,args:{t_in:+$("#cin").value,t_out:+$("#cout").value},branch});else await api(`/api/projects/${pid}/op`,{op:"trim",clip:c.id,args:{t_out:+$("#cdur").value},branch});
+    const props={grade:$("#cg").value||null};if(c.type==="video")props.speed=+$("#csp").value;const t=$("#ctx").value;props.text=t?[{...(c.text?.[0]||{style:"lower_third",start:0.3}),text:t}]:[];op("set_props",c.id,props)};
+   $("#cdel").onclick=()=>op("ripple_delete",c.id);$("#cleft").onclick=()=>op("move",c.id,{new_index:Math.max(0,i-1)});$("#cright").onclick=()=>op("move",c.id,{new_index:Math.min(tl.clips.length-1,i+1)})}}},
+async remix(m){const p=await api("/api/projects");m.innerHTML=`<h2 class="page">Video Remix Studio</h2><p class="lead">Upload two or more videos into one project (Video Editor → upload, then upload more here), then describe the story you want. NEXUS builds three versions: a re-ordered story cut, a vertical highlights cut and a chronological documentary cut.</p>
+ <div class="row"><label>Project<select id="rp">${p.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join("")}</select></label><input type="file" id="rf" accept="video/*"><button class="sec" id="radd">Add video to project</button></div>
+ <div class="row"><label>Brief<input id="brief" placeholder="How solar, wind and smart grids work together"></label><button id="rgo">Build three versions</button></div><div id="jobs"></div>`;
+ $("#radd").onclick=async()=>{const f=$("#rf").files[0];if(!f)return;const fd=new FormData();fd.append("file",f);await fetch("/api/upload?project_id="+$("#rp").value,{method:"POST",body:fd});poll($("#jobs"))};
+ $("#rgo").onclick=async()=>{await api("/api/remix",{project_id:$("#rp").value,brief:$("#brief").value||"Combine these videos into one story"});poll($("#jobs"))};poll($("#jobs"))},
+async dubbing(m){const t=await api("/api/tools");m.innerHTML=`<h2 class="page">Voiceover, Dubbing & Subtitles</h2><p class="lead">Open a project in the Video Editor and use “Translate + dub + render”. Translation: MADLAD-400. Voices: Piper. Each dub is transcribed back by Whisper to check it is intelligible, and a different model reads the translation back to check meaning.</p>
+ <h3 class="sec">Voices</h3>${table(Object.entries(t.voices),[["Voice",r=>esc(r[0])],["Language",r=>esc(r[1].lang)],["Dataset licence",r=>esc(r[1].license)],["Commercial use",r=>r[1].commercial?tag("cleared","ok"):tag("not cleared","bad")]])}
+ <div class="note"><b>Limits.</b> The only Arabic voice has an unverified licence, so Arabic dubs are flagged and not approved for commercial publishing. Dubbing replaces the whole original soundtrack (no voice/music separation yet). No lip-sync. Every translated version needs a native speaker's review.</div>`},
+async audio(m){m.innerHTML=`<h2 class="page">Audio Production</h2><p class="lead">Working now, applied automatically in every render: speech denoise + voice EQ/compression, music ducking under speech, two-pass loudness normalisation to −14 LUFS, true-peak limiting, procedural music beds and transition sounds.</p>
+ <div class="note"><b>Not built yet:</b> voice/music separation, speaker detection, Foley library, generated music (only synthesised ambient pads), a manual multitrack mixer.</div>`},
+async documentary(m){m.innerHTML=`<h2 class="page">Documentary Studio</h2><p class="lead">Use the AI Video Creator: it researches from Wikipedia, cites its sources, checks that every number in the script appears in the research text, and uses licensed archive images with credits. Timeline animations are in Animation & Motion Graphics.</p><div class="note"><b>Not built yet:</b> interview editing presets, animated maps, multi-source fact-checking beyond Wikipedia.</div>`},
+async animation(m){m.innerHTML=`<h2 class="page">Animation & Motion Graphics</h2><p class="lead">Describe the content; NEXUS writes the scene and runs the engine.</p>
+ <div class="row"><label>Type<select id="ak"><option value="bar_chart">Animated bar chart (data graphic)</option><option value="explainer">2D process explainer (Manim)</option><option value="timeline">History timeline</option><option value="kinetic">Kinetic typography</option><option value="title3d">3D title (Blender, ~2.5 min)</option></select></label><label>Title<input id="at" value="Cost of electricity"></label></div>
+ <label style="color:var(--mute);font-size:12px">Data, one item per line as “label | value or detail” (kinetic: one line of text per line)<textarea id="ad">Solar | 44\nWind | 33\nGas | 76</textarea></label><div class="row"><button id="ago">Render animation</button></div><div id="jobs"></div>
+ <div class="note">3D runs on the CPU with Cycles: about 3 s per 640×360 frame here. Character rigging, simulation and hand-drawn animation are not automated.</div>`;
+ $("#ago").onclick=async()=>{const k=$("#ak").value;const lines=$("#ad").value.split("\n").map(l=>l.trim()).filter(Boolean);const data=k==="kinetic"?lines:lines.map(l=>l.split("|").map(x=>x.trim()));await api("/api/animate",{kind:k,title:$("#at").value,data});poll($("#jobs"))};poll($("#jobs"))},
+async series(m){const s=await api("/api/series");m.innerHTML=`<h2 class="page">Film & Series Studio</h2><p class="lead">A series bible keeps characters, world rules and canon. Each new episode is checked against it before it is added.</p>
+ <div class="row"><label>Series concept<input id="sc"></label><button id="sgo">Create series bible</button></div><div class="row"><label>Short film concept<input id="fc"></label><button class="sec" id="fgo">Plan short film</button></div>
+ ${s.map(b=>`<div class="card" style="margin:10px 0"><h3>${esc(b.title)} ${tag(b.genre)}</h3><p>${esc(b.logline)}</p><p style="margin-top:6px">${b.characters.map(c=>tag(c.name+" · "+c.role)).join(" ")}</p><p>${b.episodes.length} episode(s) written · ${b.canon.length} canonical events</p>
+ ${mode!=="beginner"?`<pre>${esc(b.episodes.map(e=>`E${e.number} ${e.title}: ${e.summary}\n  cliffhanger: ${e.cliffhanger}`).join("\n")||"no episodes yet")}</pre>`:""}<div class="row"><button class="sm" onclick="api('/api/series/${b.id}/next',{}).then(()=>go('series'))">Write + produce next episode</button></div></div>`).join("")}<div id="jobs"></div>
+ <div class="note">Episodes are narrated stories over generated title cards. Consistent drawn or filmed characters are not possible without an image/video model on a GPU.</div>`;
+ $("#sgo").onclick=async()=>{await api("/api/series",{concept:$("#sc").value});poll($("#jobs"))};$("#fgo").onclick=async()=>{await api("/api/film",{concept:$("#fc").value});poll($("#jobs"))};poll($("#jobs"))},
+async factory(m){m.innerHTML=`<h2 class="page">Content Factory</h2><p class="lead">Capacity is calculated from speeds measured on this machine, not assumed.</p>
+ <div class="row"><label>Master videos per day<input id="ct" type="number" value="5"></label><label>Extra languages per video<input id="cl" type="number" value="2"></label><label>Platform exports per language<input id="cp" type="number" value="4"></label>
+ <label>Machine hours per day<input id="ch" type="number" value="16"></label><label>Free GPU hours per week<input id="cg" type="number" value="0"></label><button id="cgo">Calculate</button></div><div id="cap"></div>`;
+ const run=async()=>{const c=await api(`/api/capacity?target=${$("#ct").value}&languages=${$("#cl").value}&platforms=${$("#cp").value}&hours=${$("#ch").value}&gpu_hours_week=${$("#cg").value}`);
+  const s=await api("/api/schedule",{target:+$("#ct").value});
+  $("#cap").innerHTML=`<h3 class="sec">Verdict</h3><ul>${c.verdict.map(v=>`<li>${esc(v)}</li>`).join("")}</ul>${table(c.profiles,[["Production type",r=>esc(r.label)],["Minutes per master (all versions)",r=>r.minutes_per_master_all_versions],["Max per day",r=>r.max_per_day],["Target",r=>r.meets_target?tag("met","ok"):tag("not met","bad")],["Bottleneck",r=>esc(r.bottleneck)]])}
+  <h3 class="sec">Today's schedule · finishes ${esc(s.predicted_finish)}</h3>${table(s.jobs,[["#",r=>r.slot],["Topic",r=>esc(r.topic)],["Type",r=>esc(r.profile)],["Start",r=>r.start],["Finish",r=>r.finish],["Worker",r=>esc(r.worker)],["Status",r=>statusTag(r.status)]])}
+  <p class="lead">Human review needed: about ${c.human_review_hours_per_day} h/day. Assumptions: ${esc(JSON.stringify(c.assumptions))}</p>`};$("#cgo").onclick=run;run()},
+async publishing(m){const p=await api("/api/platforms");m.innerHTML=`<h2 class="page">Publishing Studio</h2><p class="lead">Build a platform package from any project in the Video Editor: reframed video, thumbnail, captions, title, description with credits, hashtags.</p>
+ ${table(Object.entries(p),[["Platform",r=>esc(r[0])],["Frame",r=>r[1].size.join("×")],["Max length",r=>r[1].max_s?r[1].max_s+" s":"—"],["Automatic posting",r=>tag(r[1].auto_publish,"warn")]])}
+ <div class="note">Nothing is posted automatically. Each platform's publishing API needs your own developer app and authorisation, and several do not allow it on free access. You upload the package by hand.</div>`},
+async channels(m){const c=await api("/api/channels");m.innerHTML=`<h2 class="page">Channels & Business</h2><p class="lead">Define channels and keep actual and estimated revenue apart. No income is guaranteed.</p>
+ <div class="row"><label>Channel name<input id="cn"></label><label>Niche<input id="cni"></label><label>Languages (comma)<input id="cla" value="en,ar"></label><label>Platforms (comma)<input id="cpl" value="youtube,shorts"></label><button id="cadd">Add channel</button></div>
+ ${table(c,[["Channel",r=>esc(r.name)],["Niche",r=>esc(r.niche)],["Languages",r=>esc(r.languages.join(", "))],["Platforms",r=>esc(r.platforms.join(", "))],["Actual revenue",r=>r.business.actual_revenue],["Estimated",r=>r.business.estimated_revenue],["Spend",r=>"0"]])}
+ <div class="note"><b>Not built yet:</b> audience analytics, market-demand research, automatic monetisation eligibility checks.</div>`;
+ $("#cadd").onclick=async()=>{await api("/api/channels",{name:$("#cn").value,niche:$("#cni").value,languages:$("#cla").value.split(",").map(s=>s.trim()),platforms:$("#cpl").value.split(",").map(s=>s.trim())});go("channels")}},
+async qa(m){const p=await api("/api/projects");let rows=[];for(const x of p.slice(0,25)){const d=await api("/api/projects/"+x.id);d.reports.forEach(r=>rows.push({p:x,r}))}
+ m.innerHTML=`<h2 class="page">Quality Assurance Center</h2><p class="lead">Every render is reviewed by tools other than the one that produced it. “Passed automated checks” never means approved: a person still has to watch it.</p>`+
+ table(rows,[["Project",r=>`<a href="#" onclick="go('editor','${r.p.id}');return false">${esc(r.p.name)}</a>`],["Output",r=>esc(r.r.output)],["Status",r=>statusTag(r.r.status)],["Corrections applied",r=>(r.r.corrections||[]).length],["Known issues",r=>esc((r.r.known_issues||[]).join(" · ")).slice(0,260)],["Human approval",r=>tag("pending","warn")]])},
+async assets(m){const a=await api("/api/assets");m.innerHTML=`<h2 class="page">Asset Library</h2><p class="lead">Only assets whose licence allows commercial use and modification are downloaded. The licence is read per file.</p>`+
+ table(a,[["Title",r=>`<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.title)}</a>`],["Creator",r=>esc(r.creator)],["Licence",r=>tag(r.license,"ok")],["Restrictions",r=>esc(r.restrictions)],["Source",r=>esc(r.source)],["Used",r=>r.uses+"×"]])},
+async resources(m){const c=await api("/api/compute");const s=await api("/api/spend");m.innerHTML=`<h2 class="page">Free Resources & Compute</h2><p class="lead">Local first. Remote free GPUs are optional and used only through their official interfaces, with one account. If nothing eligible is free, the job waits.</p>
+ ${table(c.workers,[["Worker",r=>esc(r.id)],["Provider",r=>esc(r.provider)],["GPU",r=>esc(r.gpu?.name||"none")],["Available",r=>r.available?tag("yes","ok"):tag("no","warn")],["Status",r=>esc(r.status)],["Quota / policy",r=>esc(r.quota||"")+" "+esc(r.policy||"")]])}
+ <h3 class="sec">Task routing</h3>${table(Object.entries(c.routes),[["Task",r=>esc(r[0])],["Needs GPU",r=>r[1].needs_gpu?"yes":"no"],["Preferred workers",r=>esc(r[1].preferred.join(" → "))]])}
+ <h3 class="sec">Cost Guard</h3><p>Money spent: <b>$${s.actual_spend_usd.toFixed(2)}</b> · allowed operations: ${s.decisions.allow||0} · blocked: ${s.decisions.block||0}</p>${table(s.recent_blocks,[["Blocked",r=>esc(r.component)],["Operation",r=>esc(r.operation)],["Reason",r=>esc(r.reason)]])}`},
+async tools(m){const t=await api("/api/tools");m.innerHTML=`<h2 class="page">Deployed Tools & Models</h2><p class="lead">What is really installed on this machine, with versions and licences.</p>`+
+ table(t.components,[["Component",r=>`<a href="${esc(r.source_url)}" target="_blank" rel="noopener">${esc(r.name)}</a>`],["Status",r=>statusTag(r.status)],["Health",r=>r.healthy===true?tag("ok","ok"):r.healthy===false?tag("broken","bad"):tag("untested","warn")],["Version",r=>esc(r.version)],["Licence",r=>esc(r.license)+(r.weights_license?`<br><small style="color:var(--mute)">weights: ${esc(r.weights_license)}</small>`:"")],["Cost",r=>"$"+r.cost_usd]])+
+ `<h3 class="sec">Downloaded models</h3>`+table(Object.entries(t.models),[["Model",r=>esc(r[0])],["Repository",r=>esc(r[1].repo)],["Revision",r=>esc((r[1].revision||"").slice(0,10))],["Licence",r=>esc(r[1].license)],["Downloaded",r=>esc(r[1].downloaded)]])},
+async discovery(m){const c=await api("/api/catalog");const cls=[...new Set(c.map(r=>r.class))];m.innerHTML=`<h2 class="page">GitHub Discovery</h2><p class="lead">${c.length} projects and services evaluated. Licence classes are kept apart. “Deployed” means installed and tested here.</p>
+ <div class="row"><label>Decision<select id="fd"><option value="">all</option><option>DEPLOYED</option><option>NEXT</option><option>CANDIDATE</option><option>REJECTED</option></select></label><label>Licence class<select id="fc"><option value="">all</option>${cls.map(x=>`<option>${x}</option>`).join("")}</select></label><button class="sec" id="evo">Run evolution check</button></div><div id="cat"></div><div id="jobs"></div>`;
+ const draw=()=>{const d=$("#fd").value,k=$("#fc").value;$("#cat").innerHTML=table(c.filter(r=>(!d||r.decision===d)&&(!k||r.class===k)),[["Area",r=>esc(r.category)],["Project",r=>r.repo.includes("/")&&!r.repo.startsWith("http")&&!r.repo.includes(" ")?`<a href="https://github.com/${esc(r.repo)}" target="_blank" rel="noopener">${esc(r.name)}</a>`:esc(r.name)],
+  ["Licence",r=>esc(r.license)+(r.weights_license?`<br><small style="color:var(--mute)">${esc(r.weights_license)}</small>`:"")],["Class",r=>tag(r.class,r.class==="FOSS"?"ok":r.class==="EXCLUDED-PAID"?"bad":"warn")],["Last push",r=>esc(r.pushed)+(r.archived==="true"?" "+tag("archived","bad"):"")],["Decision",r=>statusTag(r.decision)],["Why",r=>esc(r.reason)]])};
+ $("#fd").onchange=draw;$("#fc").onchange=draw;draw();$("#evo").onclick=async()=>{await api("/api/evolution/check",{});poll($("#jobs"))}},
+async settings(m){m.innerHTML=`<h2 class="page">Settings</h2><div class="row"><label>User mode<select id="mode"><option value="beginner">Beginner: guided, automatic</option><option value="creator">Creator: creative settings</option><option value="professional">Professional: full detail</option></select></label></div>
+ <p class="lead">Beginner hides transcripts, research notes and technical detail. Stored in this browser only.</p>`;$("#mode").value=mode;$("#mode").onchange=e=>{mode=e.target.value;localStorage.setItem("nexus-mode",mode)}}
+};
+go("home");
+</script>
+</body>
+</html>

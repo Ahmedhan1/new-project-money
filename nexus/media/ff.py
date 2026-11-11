@@ -75,7 +75,7 @@ def detect_silence(path: str | Path, noise_db: float = -35, min_dur: float = 0.6
 
 
 def detect_black(path: str | Path, min_dur: float = 0.5) -> list[tuple[float, float]]:
-    err = run(["-i", path, "-an", "-vf", f"blackdetect=d={min_dur}:pix_th=0.10", "-f", "null", "-"], op="detect-black")
+    err = run(["-i", path, "-an", "-vf", f"blackdetect=d={min_dur}:pic_th=0.99:pix_th=0.035", "-f", "null", "-"], op="detect-black")
     return [(float(a), float(b)) for a, b in re.findall(r"black_start:([\d.]+) black_end:([\d.]+)", err)]
 
 

@@ -92,6 +92,20 @@ components:
     network_hosts: [huggingface.co]
     version_py: llama_cpp
     status: deployed
+  - id: madlad-mt
+    name: MADLAD-400 3B MT (CTranslate2 int8)
+    kind: model
+    capability: [translate, localize]
+    source_url: https://github.com/OpenNMT/CTranslate2
+    license: MIT (CTranslate2 runtime)
+    weights_license: "Apache-2.0 (google/madlad400-3b-mt; int8 conversion Nextcloud-AI/madlad400-3b-mt-ct2-int8)"
+    commercial_use: "yes"
+    usage_restrictions: "can add or repeat a clause - output is trimmed to the source sentence count and still needs native review"
+    hardware: "CPU, ~3.5 GB RAM, ~1.5 s per sentence on 4 cores"
+    install: "pip install ctranslate2 sentencepiece; weights from huggingface.co"
+    network_hosts: [huggingface.co]
+    version_py: ctranslate2
+    status: deployed
   - id: manim
     name: Manim Community
     kind: software
@@ -185,11 +199,26 @@ components:
     hardware: none
     network_hosts: [commons.wikimedia.org, upload.wikimedia.org]
     status: deployed
+  - id: github-api
+    name: GitHub REST API (public repository metadata)
+    kind: service
+    capability: [evolution-check]
+    source_url: https://docs.github.com/en/rest
+    license: "service"
+    free_tier: "unauthenticated: 60 requests/hour, public data only"
+    quotas: "60 req/h per IP without a token; the evolution check stops at the limit"
+    commercial_use: "n/a (metadata only)"
+    usage_restrictions: "respect rate limits"
+    data_retention: "requests are logged by GitHub"
+    availability: remote
+    hardware: none
+    network_hosts: [api.github.com]
+    status: deployed
   - id: kaggle-notebooks
     name: Kaggle Notebooks (batch GPU via official API)
     kind: compute
     capability: [gpu-batch]
-    source_url: https://github.com/Kaggle/kaggle-api
+    source_url: https://github.com/Kaggle/kaggle-cli
     license: Apache-2.0 (client)
     free_tier: "free GPU weekly quota (historically ~30 h/week, shown in the account), 12 h max per session"
     account_required: true

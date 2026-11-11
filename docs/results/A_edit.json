@@ -1,0 +1,93 @@
+{
+ "source": {
+  "duration": 28.421,
+  "lufs": -26.93,
+  "issues": [
+   "quiet audio (-26.93 LUFS)",
+   "6 frozen section(s)"
+  ],
+  "scenes": 5,
+  "transcript": "Solar panels turn sunlight directly into electricity. In the last 10 years the price of solar power fell by almost 90%. That makes it the cheapest source of new electricity in most countries. That makes it the cheapest source of new electricity in most countries. The main challenge is storage, because the sun does not shine at night. Batteries are solving that problem faster than anyone expected."
+ },
+ "proposal": {
+  "actions": [
+   "tighten: keep 5 speech ranges, remove pauses and repeated takes",
+   "audio: denoise + voice EQ/compression, normalise -26.93 -> -14 LUFS",
+   "colour: 'cinematic' grade; captions from transcript; fade in/out"
+  ],
+  "removed": [
+   {
+    "in": 3.26,
+    "out": 4.17,
+    "reason": "silence 0.9s"
+   },
+   {
+    "in": 7.72,
+    "out": 11.26,
+    "reason": "silence 3.5s"
+   },
+   {
+    "in": 10.56,
+    "out": 14.4,
+    "reason": "repeated take: \"That makes it the cheapest source of new electricity in most\""
+   },
+   {
+    "in": 14.53,
+    "out": 15.46,
+    "reason": "silence 0.9s"
+   },
+   {
+    "in": 18.74,
+    "out": 19.66,
+    "reason": "silence 0.9s"
+   },
+   {
+    "in": 23.23,
+    "out": 24.18,
+    "reason": "silence 1.0s"
+   }
+  ],
+  "proposed_duration": 18.19
+ },
+ "output": {
+  "duration": 20.2,
+  "lufs": -14.35,
+  "true_peak": -1.86,
+  "video": {
+   "codec": "h264",
+   "width": 1280,
+   "height": 720,
+   "fps": 30.0,
+   "pix_fmt": "yuv420p",
+   "duration": 20.2
+  },
+  "render_seconds": 14.12
+ },
+ "qa_status": "PASSED_AUTOMATED_CHECKS",
+ "known_issues": [],
+ "corrections": [],
+ "checks": [
+  "PASS provenance 00_solar_talk.mp4: user-supplied / user upload",
+  "PASS duplicate stills: none",
+  "PASS cut length: no flash cuts",
+  "PASS pacing: 6 shots, mean 3.4s, longest 4.1s",
+  "PASS subtitle sync: 10 cues inside programme",
+  "PASS file integrity (full decode): decodes cleanly",
+  "PASS video track present: ok",
+  "PASS audio track present: ok",
+  "PASS codec: h264/yuv420p",
+  "PASS resolution: 1280x720 (expected 1280x720)",
+  "PASS aspect ratio: 1.778",
+  "PASS frame rate: 30.0 fps",
+  "PASS black frames: none beyond intentional fades",
+  "PASS frozen frames: none",
+  "PASS duration matches timeline: 20.20s vs timeline 20.19s",
+  "PASS A/V stream length: video 20.20s, audio 20.19s",
+  "PASS audio channels: 2 ch @ 48000 Hz",
+  "PASS loudness: -14.35 LUFS (target -14.0 +/-1.5)",
+  "PASS clipping / true peak: true peak -1.86 dBTP (limit -1.0)",
+  "PASS dead air: none",
+  "PASS subtitle timing: 10 cues, 0 out of range, 0 overlapping",
+  "PASS subtitle reading speed: 1 cues above 25 chars/s"
+ ]
+}

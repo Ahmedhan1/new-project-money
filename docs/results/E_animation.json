@@ -1,0 +1,19 @@
+{
+ "timings": {
+  "infographic_s": 1.2,
+  "kinetic_s": 1.1,
+  "timeline_s": 1.3,
+  "manim_s": 7.9,
+  "blender": {
+   "path": "/home/user/new-project-money/.nexus/test-home/projects/prj_28a72a32e5/work/title3d.mp4",
+   "frames": 48,
+   "elapsed": 152.2,
+   "sec_per_frame": 3.17
+  }
+ },
+ "reel": {
+  "duration": 31.85,
+  "status": "PASSED_AUTOMATED_CHECKS",
+  "render_seconds": 16.29
+ }
+}

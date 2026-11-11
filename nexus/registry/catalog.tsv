@@ -1,0 +1,114 @@
+category	name	repo	license	pushed	archived	stars	class	weights_license	decision	reason
+editing	FFmpeg	FFmpeg/FFmpeg	LGPL-2.1+/GPL-2+	2026-11-11	false	67051	FOSS		DEPLOYED	Core encode/filter/analysis engine; every render and technical QA check runs through it
+editing	PySceneDetect	Breakthrough/PySceneDetect	BSD-3-Clause	2026-11-10	false	5436	FOSS		DEPLOYED	Shot detection; chosen over FFmpeg scdet for adaptive detectors and a Python API
+editing	OpenTimelineIO	AcademySoftwareFoundation/OpenTimelineIO	Apache-2.0	2026-11-10	false	2070	FOSS		NEXT	Export NEXUS timelines to Kdenlive/Resolve for manual finishing
+editing	MLT Framework	mltframework/mlt	LGPL-2.1	2026-11-11	false	1874	FOSS		CANDIDATE	Alternative render engine (melt); FFmpeg filtergraphs cover current needs
+editing	Kdenlive	KDE/kdenlive	GPL-3.0	2026-11-11	false	6090	FOSS		NEXT	Recommended manual finishing editor (reads OTIO/MLT); not embedded
+editing	Shotcut	mltframework/shotcut	GPL-3.0	2026-11-11	false	15654	FOSS		CANDIDATE	Alternative manual editor
+editing	OpenShot	OpenShot/openshot-qt	GPL-3.0	2026-11-10	false	6767	FOSS		CANDIDATE	Simpler editor; libopenshot less capable than MLT
+editing	LosslessCut	mifi/lossless-cut	GPL-2.0	2026-11-09	false	45938	FOSS		CANDIDATE	GUI for stream-copy cuts; FFmpeg already does this headlessly
+editing	Olive	olive-editor/olive	GPL-3.0	2024-12-05	false	9153	FOSS		REJECTED	No commits for ~2 years; unstable alpha
+editing	MoviePy	Zulko/moviepy	MIT	2026-08-26	false	15137	FOSS		REJECTED	Slower than direct filtergraphs; adds nothing over our renderer
+editing	PyAV	PyAV-Org/PyAV	BSD-3-Clause	2026-11-08	false	3333	FOSS		REJECTED	Installed as a dependency but bypassed: its API change broke faster-whisper decoding, we decode with the ffmpeg binary
+editing	yt-dlp	yt-dlp/yt-dlp	Unlicense	2026-11-04	false	206943	FOSS		REJECTED	Downloading from platforms generally violates their ToS; NEXUS asks the user to upload files they own
+video-gen	Wan 2.1	Wan-Video/Wan2.1	Apache-2.0	2026-03-05	false	17417	FOSS	Apache-2.0 (1.3B T2V runs in ~8 GB VRAM)	NEXT	First video model to benchmark on a free Kaggle GPU session; cannot run on the CPU-only machine
+video-gen	Wan 2.2	Wan-Video/Wan2.2	Apache-2.0	2026-09-21	false	18552	FOSS	Apache-2.0 (5B TI2V needs ~24 GB without offload)	CANDIDATE	Higher quality but heavier than free 16 GB GPUs comfortably allow
+video-gen	LTX-Video	Lightricks/LTX-Video	Apache-2.0	2026-11-02	false	11365	FREE-COMMERCIAL-RESTRICTED	LTX open-weights licence: free below a revenue threshold - verify current text	CANDIDATE	Fastest open video model; licence terms must be re-read before commercial use
+video-gen	CogVideoX	zai-org/CogVideo	Apache-2.0	2025-11-04	false	13197	FOSS	2B: Apache-2.0; 5B: CogVideoX licence (restricted)	CANDIDATE	Only the 2B weights are freely commercial
+video-gen	HunyuanVideo	Tencent-Hunyuan/HunyuanVideo	Tencent Hunyuan Community	2026-10-08	false	12759	FREE-COMMERCIAL-RESTRICTED	Tencent community licence: excludes EU/UK/South Korea and has usage limits	REJECTED	Territorial restriction makes it unsafe for a German/European channel
+video-gen	FramePack	lllyasviel/FramePack	Apache-2.0	2025-10-16	false	17351	FREE-COMMERCIAL-RESTRICTED	uses HunyuanVideo weights (Tencent licence)	REJECTED	Inherits the Hunyuan weight licence
+video-gen	Mochi 1	genmoai/mochi	Apache-2.0	2026-10-22	false	3767	FOSS	Apache-2.0	CANDIDATE	Needs far more VRAM than free tiers offer
+video-gen	Stable Video Diffusion	Stability-AI/generative-models	MIT	2025-12-16	false	27344	FREE-COMMERCIAL-RESTRICTED	Stability AI Community Licence (revenue cap, registration)	REJECTED	Weight licence has commercial conditions
+image-gen	ComfyUI	Comfy-Org/ComfyUI	GPL-3.0	2026-11-11	false	146357	FOSS		NEXT	Node workflow runner for image/video models on the GPU worker
+image-gen	Diffusers	huggingface/diffusers	Apache-2.0	2026-11-11	false	34909	FOSS		NEXT	Scriptable pipelines for the Kaggle batch adapter
+image-gen	stable-diffusion.cpp	leejet/stable-diffusion.cpp	MIT	2026-11-10	false	7984	FOSS		CANDIDATE	CPU image generation without PyTorch; to benchmark for local stills
+image-gen	FLUX	black-forest-labs/flux	Apache-2.0	2025-07-31	false	26058	FREE-COMMERCIAL-RESTRICTED	schnell: Apache-2.0; dev: non-commercial	CANDIDATE	Only FLUX.1-schnell weights are usable commercially
+speech	faster-whisper	SYSTRAN/faster-whisper	MIT	2026-11-10	false	26670	FOSS	MIT (Whisper weights)	DEPLOYED	ASR + dub verification; 0.36x realtime on 4 CPU cores with small/int8
+speech	Whisper	openai/whisper	MIT	2026-08-31	false	112502	FOSS	MIT	REJECTED	Reference implementation needs PyTorch and is ~4x slower on CPU than faster-whisper
+speech	whisper.cpp	ggml-org/whisper.cpp	MIT	2026-11-10	false	55101	FOSS	MIT	CANDIDATE	Fallback ASR with no Python dependency
+speech	WhisperX	m-bain/whisperX	BSD-2-Clause	2026-10-22	false	25215	FOSS	pyannote diarisation models are gated (free, needs HF account)	NEXT	Forced alignment + speaker diarisation (speaker detection is not deployed yet)
+speech	sherpa-onnx	k2-fsa/sherpa-onnx	Apache-2.0	2026-11-11	false	15885	FOSS	per model	NEXT	Diarisation and VAD without PyTorch; models on GitHub releases
+speech	Silero VAD	snakers4/silero-vad	MIT	2026-10-22	false	10639	FOSS	MIT	DEPLOYED	Bundled inside faster-whisper (vad_filter)
+speech	Subtitle Edit	SubtitleEdit/subtitleedit	MIT	2026-11-11	false	14959	FOSS		CANDIDATE	Desktop subtitle editor for manual correction
+tts	Piper (piper1-gpl)	OHF-Voice/piper1-gpl	GPL-3.0	2026-11-11	false	6251	FOSS	per voice: joe CC0, ljspeech PD, thorsten CC0; kareem (Arabic) UNVERIFIED	DEPLOYED	Fast CPU neural TTS; 0.07x realtime
+tts	Piper (original)	rhasspy/piper	MIT	2025-08-26	true	11323	FOSS		REJECTED	Archived; development moved to OHF-Voice/piper1-gpl
+tts	eSpeak NG	espeak-ng/espeak-ng	GPL-3.0	2026-11-08	false	7024	FOSS		DEPLOYED	Clear-licence fallback voice (robotic); phonemiser for Piper
+tts	Chatterbox	resemble-ai/chatterbox	MIT	2026-11-04	false	27762	FOSS	MIT; multilingual model lists Arabic	NEXT	Top candidate to replace the unverified-licence Arabic voice; needs PyTorch and a CPU-speed benchmark
+tts	Qwen3-TTS	QwenLM/Qwen3-TTS	Apache-2.0	2026-03-17	false	14369	FOSS	Apache-2.0	CANDIDATE	High quality but no Arabic in its listed languages; GPU-oriented
+tts	Kokoro	hexgrad/kokoro	Apache-2.0	2025-08-06	false	10056	FOSS	Apache-2.0	CANDIDATE	Excellent English, no Arabic or German
+tts	F5-TTS	SWivid/F5-TTS	MIT	2026-11-03	false	15562	RESEARCH-ONLY	CC-BY-NC weights	REJECTED	Non-commercial weights
+tts	Coqui TTS / XTTS	coqui-ai/TTS	MPL-2.0	2024-08-16	false	46215	RESEARCH-ONLY	XTTS: Coqui Public Model Licence (non-commercial)	REJECTED	Company closed, repo unmaintained, weights non-commercial
+translation	MADLAD-400 on CTranslate2	OpenNMT/CTranslate2	MIT	2026-11-10	false	4750	FOSS	Apache-2.0 (google/madlad400-3b-mt)	DEPLOYED	Primary translator after a side-by-side test: correct MSA/German and real Egyptian Arabic (arz)
+translation	OPUS-MT	Helsinki-NLP/Opus-MT	MIT	2026-02-23	false	875	FOSS	CC-BY-4.0 / Apache-2.0 per pair	CANDIDATE	Smaller and faster but no Egyptian Arabic
+translation	Argos Translate	argosopentech/argos-translate	MIT	2026-08-08	false	6644	FOSS	MIT/CC0	CANDIDATE	Easy packaging; quality below MADLAD
+translation	SeamlessM4T	facebookresearch/seamless_communication	CC-BY-NC-4.0	2026-09-08	false	11905	RESEARCH-ONLY	CC-BY-NC	REJECTED	Non-commercial
+llm	llama.cpp	ggml-org/llama.cpp	MIT	2026-11-11	false	134134	FOSS	Qwen3-4B GGUF: Apache-2.0	DEPLOYED	Local scripting/planning/review LLM; 6.9 tok/s on 4 cores
+llm	llama-cpp-python	abetlen/llama-cpp-python	MIT	2026-11-08	false	10673	FOSS		DEPLOYED	Python binding used by nexus.llm
+llm	Ollama	ollama/ollama	MIT	2026-11-11	false	186675	FOSS		CANDIDATE	Easier model management on the user's desktop; same engine
+animation	Manim Community	ManimCommunity/manim	MIT	2026-11-11	false	42421	FOSS		DEPLOYED	2D explainer/diagram animation, driven from a spec
+animation	manim (3b1b)	3b1b/manim	MIT	2026-09-09	false	96390	FOSS		REJECTED	Author's personal fork; Community edition is the documented, packaged one
+animation	Blender	blender/blender	GPL-3.0-or-later	2026-11-11	false	21883	FOSS		DEPLOYED	Headless 3D (Cycles CPU); 3.2 s/frame at 640x360/20 samples here
+animation	Motion Canvas	motion-canvas/motion-canvas	MIT	2026-07-02	false	19773	FOSS		CANDIDATE	TypeScript motion graphics; would add a Node toolchain
+animation	Remotion	remotion-dev/remotion	Remotion Licence	2026-11-11	false	72491	SOURCE-AVAILABLE	free for individuals/small teams, paid company licence	REJECTED	Not open source; licence fee beyond a team-size threshold
+animation	three.js	mrdoob/three.js	MIT	2026-11-11	false	118175	FOSS		CANDIDATE	WebGL scenes for the future desktop UI preview
+animation	lottie-web	airbnb/lottie-web	MIT	2025-09-01	false	32398	FOSS		CANDIDATE	Play Lottie animations; asset licences vary per file
+animation	OpenToonz	opentoonz/opentoonz	BSD-3-Clause (modified)	2026-11-10	false	8174	FOSS		CANDIDATE	Hand-drawn 2D; GUI tool, hard to automate
+animation	Krita	KDE/krita	GPL-3.0	2026-11-11	false	10727	FOSS		CANDIDATE	Painting/frame animation; GUI tool
+animation	Synfig	synfig/synfig	GPL-3.0	2026-11-08	false	2404	FOSS		CANDIDATE	Vector tweening with a CLI renderer
+animation	Pencil2D	pencil2d/pencil	GPL-2.0	2026-11-10	false	1879	FOSS		CANDIDATE	Simple hand-drawn animation
+animation	Inkscape	inkscape/inkscape (GitLab is official)	GPL-2.0+	n/a	false	0	FOSS		CANDIDATE	SVG authoring/CLI export; GitHub mirror is stale, official repo is on GitLab
+audio	python-audio-separator	nomadkaraoke/python-audio-separator	MIT	2026-10-29	false	1487	FOSS	per model (MDX/Demucs weights MIT)	NEXT	Voice/music separation so dubbing can keep the original music and effects
+audio	Demucs	facebookresearch/demucs	MIT	2024-04-24	true	10407	FOSS	MIT	REJECTED	Archived upstream; use via maintained audio-separator instead
+audio	Spleeter	deezer/spleeter	MIT	2026-10-28	false	28525	FOSS	MIT	CANDIDATE	Older separation quality
+audio	DeepFilterNet	Rikorose/DeepFilterNet	MIT/Apache-2.0	2026-11-06	false	4999	FOSS	MIT/Apache-2.0	NEXT	Better speech denoising than the FFmpeg afftdn filter used now
+audio	RNNoise	xiph/rnnoise	BSD-3-Clause	2025-02-22	false	5961	FOSS	BSD	CANDIDATE	FFmpeg arnndn filter can load its models
+audio	Pedalboard	spotify/pedalboard	GPL-3.0	2026-11-09	false	6475	FOSS		CANDIDATE	Studio effects chain
+audio	pyloudnorm	csteinmetz1/pyloudnorm	MIT	2026-01-04	false	792	FOSS		REJECTED	FFmpeg loudnorm/ebur128 already measure and normalise
+audio	ACE-Step	ace-step/ACE-Step	Apache-2.0	2026-02-15	false	5051	FOSS	Apache-2.0	NEXT	Open-weight music generation to benchmark on the GPU worker (replaces procedural pads)
+audio	AudioCraft / MusicGen	facebookresearch/audiocraft	MIT	2026-03-03	false	23848	RESEARCH-ONLY	MusicGen weights CC-BY-NC	REJECTED	Non-commercial weights
+audio	Stable Audio Open	Stability-AI/stable-audio-tools	MIT	2026-11-01	false	3906	FREE-COMMERCIAL-RESTRICTED	Stability AI Community Licence	REJECTED	Weight licence has commercial conditions
+audio	Audacity	audacity/audacity	GPL-3.0	2026-11-11	false	19028	FOSS		CANDIDATE	Manual audio repair on the desktop
+enhance	OpenCV	opencv/opencv	Apache-2.0	2026-11-11	false	91532	FOSS		DEPLOYED	Sharpness/exposure sampling; Haar face cascades are absent in OpenCV 5 (face reframing currently off)
+enhance	vid.stab	n/a (libvidstab, compiled into the FFmpeg build)	GPL-2.0+	n/a	false	0	FOSS		DEPLOYED	Stabilisation filters are compiled into the installed FFmpeg (not yet exposed in the UI)
+enhance	Real-ESRGAN	xinntao/Real-ESRGAN	BSD-3-Clause	2024-08-06	false	37459	FOSS	BSD-3	CANDIDATE	Upscaling; stale since 2024 and needs a GPU for video
+enhance	Real-ESRGAN ncnn	xinntao/Real-ESRGAN-ncnn-vulkan	MIT	2024-05-10	false	2294	FOSS	BSD-3	CANDIDATE	Vulkan build for integrated GPUs
+enhance	Practical-RIFE	hzwer/Practical-RIFE	MIT	2026-08-27	false	1044	FOSS	MIT	CANDIDATE	Frame interpolation on the GPU worker
+enhance	RIFE ncnn	nihui/rife-ncnn-vulkan	MIT	2024-01-02	false	1130	FOSS	MIT	CANDIDATE	Vulkan interpolation
+enhance	SAM 2	facebookresearch/sam2	Apache-2.0	2026-05-30	false	20138	FOSS	Apache-2.0	CANDIDATE	Video object masks for VFX; GPU
+enhance	rembg	danielgatis/rembg	MIT	2026-11-06	false	25426	FOSS	per model	NEXT	CPU background removal for cut-outs and thumbnails
+enhance	Ultralytics YOLO	ultralytics/ultralytics	AGPL-3.0	2026-11-11	false	63301	SOURCE-AVAILABLE	AGPL or paid enterprise licence	REJECTED	AGPL obligations / paid licence for closed use
+enhance	GFPGAN	TencentARC/GFPGAN	Apache-2.0	2024-07-26	false	37709	FOSS	mixed	REJECTED	Unmaintained
+enhance	CodeFormer	sczhou/CodeFormer	S-Lab Licence	2025-11-18	false	18228	RESEARCH-ONLY	non-commercial	REJECTED	Non-commercial
+enhance	Wav2Lip	Rudrabha/Wav2Lip	none (research)	2025-06-22	false	13273	RESEARCH-ONLY	non-commercial	REJECTED	Non-commercial; lip-sync therefore NOT available yet
+orchestration	SQLite	sqlite/sqlite	Public domain	2026-11-11	false	10980	FOSS		DEPLOYED	Project/job/asset/ledger store; no server to run
+orchestration	FastAPI	fastapi/fastapi	MIT	2026-11-11	false	104624	FOSS		DEPLOYED	Local backend API + UI host
+orchestration	Tauri	tauri-apps/tauri	Apache-2.0/MIT	2026-11-10	false	112789	FOSS		NEXT	Desktop shell for the web UI (smaller than Electron)
+orchestration	Electron	electron/electron	MIT	2026-11-11	false	123860	FOSS		CANDIDATE	Heavier desktop shell alternative
+orchestration	LangGraph	langchain-ai/langgraph	MIT	2026-11-11	false	44812	FOSS		REJECTED	Agent graph framework; our pipelines are deterministic steps with checkpoints, no need
+orchestration	Prefect	PrefectHQ/prefect	Apache-2.0	2026-11-10	false	24152	FOSS		CANDIDATE	Workflow scheduler if the built-in queue is outgrown
+orchestration	Celery	celery/celery	BSD-3-Clause	2026-11-11	false	29175	FOSS		CANDIDATE	Distributed queue; needs a broker
+orchestration	Valkey	valkey-io/valkey	BSD-3-Clause	2026-11-11	false	27689	FOSS		CANDIDATE	Open-source Redis fork if a broker is needed
+orchestration	Redis	redis/redis	RSALv2/SSPLv1/AGPLv3	2026-11-11	false	77445	SOURCE-AVAILABLE		REJECTED	Licence changed; Valkey is the BSD alternative
+orchestration	PostgreSQL	postgres/postgres	PostgreSQL Licence	2026-11-11	false	22792	FOSS		CANDIDATE	Only if multi-user; SQLite is enough for one machine
+orchestration	n8n	n8n-io/n8n	Sustainable Use Licence	2026-11-11	false	210200	SOURCE-AVAILABLE	fair-code, restrictions on commercial hosting	REJECTED	Not open source
+orchestration	Docker Engine (Moby)	moby/moby	Apache-2.0	2026-11-11	false	72264	FOSS		CANDIDATE	Optional sandbox for evaluating new repositories
+media	Wikimedia Commons	https://commons.wikimedia.org	per file	n/a	false	0	HOSTED-FREE-TIER	PD/CC0/BY/BY-SA accepted; licence read per file	DEPLOYED	Primary image source with authoritative per-file licence metadata
+media	Openverse	WordPress/openverse	MIT (API)	2026-11-11	false	604	HOSTED-FREE-TIER	per asset	DEPLOYED	Secondary CC search (anonymous, rate limited; returned 504s during testing)
+media	Wikipedia API	https://www.mediawiki.org/wiki/API	CC BY-SA 4.0 text	n/a	false	0	HOSTED-FREE-TIER		DEPLOYED	Research source with citations
+media	Pexels	https://www.pexels.com/api/	Pexels Licence	n/a	false	0	HOSTED-FREE-TIER	free commercial use; no standalone redistribution; API key (free account)	NEXT	Stock video/photos; needs the user's free API key
+media	Pixabay	https://pixabay.com/api/docs/	Pixabay Content Licence	n/a	false	0	HOSTED-FREE-TIER	free commercial use with restrictions; API key (free account)	NEXT	Stock video/music; needs the user's free API key
+media	Freesound	https://freesound.org/docs/api/	per sound (CC0/BY/BY-NC)	n/a	false	0	HOSTED-FREE-TIER	filter to CC0/BY; API key (free account)	NEXT	Sound effects library; BY-NC must be filtered out
+compute	Local machine	n/a	n/a	n/a	false	0	FOSS		DEPLOYED	Always-available worker; everything in this build runs here
+compute	Kaggle Notebooks	Kaggle/kaggle-cli	Apache-2.0 (client)	2026-11-04	false	7657	HOSTED-FREE-TIER	free weekly GPU quota, no card	NEXT	Batch GPU adapter written, NOT tested (needs the user's account token)
+compute	Google Colab free	https://research.google.com/colaboratory/faq.html	service	n/a	false	0	HOSTED-FREE-TIER	interactive only; automation prohibited	NEXT	Manual notebook hand-off only
+compute	GitHub Actions	https://docs.github.com/actions	service	n/a	false	0	HOSTED-FREE-TIER	free minutes for public repos	CANDIDATE	CI for the test suite only - never a render farm
+compute	Hugging Face Spaces (ZeroGPU)	https://huggingface.co/docs/hub/spaces-zerogpu	service	n/a	false	0	HOSTED-FREE-TIER	small daily GPU quota per account; meant for demos	REJECTED	Quota and terms do not fit batch production
+compute	Lightning AI Studios free	https://lightning.ai	service	n/a	false	0	HOSTED-FREE-TIER	monthly free credits; terms change	CANDIDATE	Re-check whether a card is required before any use
+models	Hugging Face Hub	https://huggingface.co	per model	n/a	false	0	HOSTED-FREE-TIER	public downloads need no account	DEPLOYED	Source of all model weights (revision recorded per download)
+models	ModelScope	https://modelscope.cn	per model	n/a	false	0	HOSTED-FREE-TIER		CANDIDATE	Mirror for Wan/Qwen weights if HF is unreachable
+paid	Runway / Pika / Kling / Luma / Sora / Veo	n/a	proprietary	n/a	false	0	EXCLUDED-PAID		REJECTED	Paid video generation - blocked by the Cost Guard
+paid	ElevenLabs / Play.ht / Azure-Google-AWS TTS	n/a	proprietary	n/a	false	0	EXCLUDED-PAID		REJECTED	Paid TTS - blocked by the Cost Guard
+paid	OpenAI / Anthropic / Gemini APIs	n/a	proprietary	n/a	false	0	EXCLUDED-PAID		REJECTED	Metered LLM APIs - blocked by the Cost Guard
+paid	RunPod / Vast.ai / Lambda / Modal / Replicate / fal	n/a	proprietary	n/a	false	0	EXCLUDED-PAID		REJECTED	Paid GPU compute - blocked by the Cost Guard
+paid	Shutterstock / Getty / Artlist / Epidemic Sound	n/a	proprietary	n/a	false	0	EXCLUDED-PAID		REJECTED	Paid stock libraries
+paid	DeepL API / Google Translate API	n/a	proprietary	n/a	false	0	EXCLUDED-PAID		REJECTED	Free tiers require a card / billing account

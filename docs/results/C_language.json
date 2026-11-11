@@ -1,0 +1,212 @@
+{
+ "en": {
+  "status": "PASSED_AUTOMATED_CHECKS",
+  "duration": 20.2,
+  "voice": null,
+  "lines": [
+   {
+    "source": "Solar panels turn sunlight directly into electricity.",
+    "target": "Solar panels turn sunlight directly into electricity."
+   },
+   {
+    "source": "In the last 10 years the price of solar power fell by almost 90%.",
+    "target": "In the last 10 years the price of solar power fell by almost 90%."
+   },
+   {
+    "source": "That makes it the cheapest source of new electricity in most countries.",
+    "target": "That makes it the cheapest source of new electricity in most countries."
+   },
+   {
+    "source": "The main challenge is storage, because the sun does not shine at night.",
+    "target": "The main challenge is storage, because the sun does not shine at night."
+   },
+   {
+    "source": "Batteries are solving that problem faster than anyone expected.",
+    "target": "Batteries are solving that problem faster than anyone expected."
+   }
+  ],
+  "language_checks": [
+   "PASS script [en]: 100% Latin letters",
+   "PASS clean text [en]: no model artefacts",
+   "PASS no code-switching [en]: every word is in the target script",
+   "PASS line alignment [en]: 5/5 lines",
+   "PASS numbers preserved [en]: all digits carried over",
+   "PASS no added/dropped content [en]: line lengths consistent with the source",
+   "PASS native-speaker review [en]: source language"
+  ],
+  "known_issues": [],
+  "dub_pass_rate": null
+ },
+ "ar": {
+  "status": "NEEDS_FIXES",
+  "duration": 34.8,
+  "voice": {
+   "voice": "ar_JO-kareem-medium",
+   "license": "UNVERIFIED - model card says 'See URL'; dataset repo AliMokhammad/arabicttstrain has no licence file",
+   "commercial": false,
+   "engine": "piper"
+  },
+  "lines": [
+   {
+    "source": "Solar panels turn sunlight directly into electricity.",
+    "target": "تقوم الألواح الشمسية بتحويل ضوء الشمس مباشرة إلى كهرباء."
+   },
+   {
+    "source": "In the last 10 years the price of solar power fell by almost 90%.",
+    "target": "وفي السنوات العشر الماضية، انخفض سعر الطاقة الشمسية بما يقرب من 90 في المائة."
+   },
+   {
+    "source": "That makes it the cheapest source of new electricity in most countries.",
+    "target": "وهذا يجعلها أرخص مصدر للطاقة الكهربائية الجديدة في معظم البلدان."
+   },
+   {
+    "source": "The main challenge is storage, because the sun does not shine at night.",
+    "target": "ويتمثل التحدي الرئيسي في التخزين، لأن الشمس لا تشرق ليلا."
+   },
+   {
+    "source": "Batteries are solving that problem faster than anyone expected.",
+    "target": "إن البطاريات تحل هذه المشكلة بسرعة أكبر مما كان يتوقعه أي شخص."
+   }
+  ],
+  "language_checks": [
+   "PASS script [ar]: 100% Arabic letters",
+   "PASS clean text [ar]: no model artefacts",
+   "PASS no code-switching [ar]: every word is in the target script",
+   "PASS line alignment [ar]: 5/5 lines",
+   "FAIL numbers preserved [ar]: numbers missing/changed in lines [(2, ['10'])] (may be spelled out - verify)",
+   "PASS no added/dropped content [ar]: line lengths consistent with the source",
+   "PASS back-translation meaning [ar]: mean overlap 72%; weak lines [] (read back by a different model)",
+   "FAIL native-speaker review [ar]: REQUIRED before publishing - machine translation can still miss nuance and tone",
+   "FAIL dub timing [ar] scene 1: picture slowed to 0.562x to fit the translation - consider a shorter line",
+   "PASS dub intelligibility [ar]: Whisper heard 89% of the script words back",
+   "FAIL dub timing [ar] scene 2: picture slowed to 0.544x to fit the translation - consider a shorter line",
+   "PASS dub intelligibility [ar]: Whisper heard 86% of the script words back",
+   "FAIL dub timing [ar] scene 3: picture slowed to 0.509x to fit the translation - consider a shorter line",
+   "PASS dub intelligibility [ar]: Whisper heard 90% of the script words back",
+   "PASS dub intelligibility [ar]: Whisper heard 100% of the script words back",
+   "FAIL dub timing [ar] scene 5: picture slowed to 0.51x to fit the translation - consider a shorter line",
+   "PASS dub intelligibility [ar]: Whisper heard 100% of the script words back",
+   "FAIL voice licence [ar]: ar_JO-kareem-medium: UNVERIFIED - model card says 'See URL'; dataset repo AliMokhammad/arabicttstrain has no licence file"
+  ],
+  "known_issues": [
+   "[major] voice licence [ar]: ar_JO-kareem-medium: UNVERIFIED - model card says 'See URL'; dataset repo AliMokhammad/arabicttstrain has no licence file",
+   "[minor] numbers preserved [ar]: numbers missing/changed in lines [(2, ['10'])] (may be spelled out - verify)",
+   "[minor] native-speaker review [ar]: REQUIRED before publishing - machine translation can still miss nuance and tone",
+   "[minor] dub timing [ar] scene 1: picture slowed to 0.562x to fit the translation - consider a shorter line",
+   "[minor] dub timing [ar] scene 2: picture slowed to 0.544x to fit the translation - consider a shorter line",
+   "[minor] dub timing [ar] scene 3: picture slowed to 0.509x to fit the translation - consider a shorter line",
+   "[minor] dub timing [ar] scene 5: picture slowed to 0.51x to fit the translation - consider a shorter line"
+  ],
+  "dub_pass_rate": 1.0
+ },
+ "ar-EG": {
+  "status": "NEEDS_FIXES",
+  "duration": 30.966667,
+  "voice": {
+   "voice": "ar_JO-kareem-medium",
+   "license": "UNVERIFIED - model card says 'See URL'; dataset repo AliMokhammad/arabicttstrain has no licence file",
+   "commercial": false,
+   "engine": "piper"
+  },
+  "lines": [
+   {
+    "source": "Solar panels turn sunlight directly into electricity.",
+    "target": "الألواح الشمسية بتحول ضوء الشمس مباشرة إلى كهرباء."
+   },
+   {
+    "source": "In the last 10 years the price of solar power fell by almost 90%.",
+    "target": "في السنوات العشر الأخيرة، انخفض سعر الطاقة الشمسية بحوالي 90٪."
+   },
+   {
+    "source": "That makes it the cheapest source of new electricity in most countries.",
+    "target": "وده بيخليها أرخص مصدر للكهرباء الجديدة في معظم البلدان."
+   },
+   {
+    "source": "The main challenge is storage, because the sun does not shine at night.",
+    "target": "التحدي الأساسي هو التخزين، لأن الشمس مش تشرق الليل."
+   },
+   {
+    "source": "Batteries are solving that problem faster than anyone expected.",
+    "target": "بتحل البطاريات المشكلة دي بسرعة أكتر من اللي توقعه أي واحد."
+   }
+  ],
+  "language_checks": [
+   "PASS script [ar-EG]: 100% Arabic letters",
+   "PASS clean text [ar-EG]: no model artefacts",
+   "PASS no code-switching [ar-EG]: every word is in the target script",
+   "PASS line alignment [ar-EG]: 5/5 lines",
+   "FAIL numbers preserved [ar-EG]: numbers missing/changed in lines [(2, ['10'])] (may be spelled out - verify)",
+   "PASS no added/dropped content [ar-EG]: line lengths consistent with the source",
+   "PASS Egyptian dialect markers: 17% of words are typical Masri forms",
+   "PASS back-translation meaning [ar-EG]: mean overlap 67%; weak lines [] (read back by a different model)",
+   "FAIL native-speaker review [ar-EG]: REQUIRED before publishing - machine translation can still miss nuance and tone",
+   "PASS dub intelligibility [ar-EG]: Whisper heard 100% of the script words back",
+   "PASS dub intelligibility [ar-EG]: Whisper heard 76% of the script words back",
+   "FAIL dub timing [ar-EG] scene 3: picture slowed to 0.556x to fit the translation - consider a shorter line",
+   "PASS dub intelligibility [ar-EG]: Whisper heard 100% of the script words back",
+   "PASS dub intelligibility [ar-EG]: Whisper heard 89% of the script words back",
+   "FAIL dub timing [ar-EG] scene 5: picture slowed to 0.581x to fit the translation - consider a shorter line",
+   "PASS dub intelligibility [ar-EG]: Whisper heard 82% of the script words back",
+   "FAIL voice licence [ar-EG]: ar_JO-kareem-medium: UNVERIFIED - model card says 'See URL'; dataset repo AliMokhammad/arabicttstrain has no licence file"
+  ],
+  "known_issues": [
+   "[major] voice licence [ar-EG]: ar_JO-kareem-medium: UNVERIFIED - model card says 'See URL'; dataset repo AliMokhammad/arabicttstrain has no licence file",
+   "[minor] numbers preserved [ar-EG]: numbers missing/changed in lines [(2, ['10'])] (may be spelled out - verify)",
+   "[minor] native-speaker review [ar-EG]: REQUIRED before publishing - machine translation can still miss nuance and tone",
+   "[minor] dub timing [ar-EG] scene 3: picture slowed to 0.556x to fit the translation - consider a shorter line",
+   "[minor] dub timing [ar-EG] scene 5: picture slowed to 0.581x to fit the translation - consider a shorter line"
+  ],
+  "dub_pass_rate": 1.0
+ },
+ "de": {
+  "status": "PASSED_AUTOMATED_CHECKS",
+  "duration": 24.966667,
+  "voice": {
+   "voice": "de_DE-thorsten-medium",
+   "license": "CC0 (Thorsten-Voice)",
+   "commercial": true,
+   "engine": "piper"
+  },
+  "lines": [
+   {
+    "source": "Solar panels turn sunlight directly into electricity.",
+    "target": "Sonnenkollektoren wandeln das Sonnenlicht direkt in Strom um."
+   },
+   {
+    "source": "In the last 10 years the price of solar power fell by almost 90%.",
+    "target": "In den letzten 10 Jahren sind die Preise für Solarstrom um fast 90% gesunken, und das ist ein großer Erfolg."
+   },
+   {
+    "source": "That makes it the cheapest source of new electricity in most countries.",
+    "target": "Das macht sie in den meisten Ländern zur günstigsten neuen Stromquelle und damit zur günstigsten Energiequelle."
+   },
+   {
+    "source": "The main challenge is storage, because the sun does not shine at night.",
+    "target": "Die größte Herausforderung ist die Lagerung, denn nachts scheint die Sonne nicht."
+   },
+   {
+    "source": "Batteries are solving that problem faster than anyone expected.",
+    "target": "Batterien lösen dieses Problem schneller, als irgendjemand erwartet hat."
+   }
+  ],
+  "language_checks": [
+   "PASS script [de]: 100% Latin letters",
+   "PASS clean text [de]: no model artefacts",
+   "PASS no code-switching [de]: every word is in the target script",
+   "PASS line alignment [de]: 5/5 lines",
+   "PASS numbers preserved [de]: all digits carried over",
+   "PASS no added/dropped content [de]: line lengths consistent with the source",
+   "PASS back-translation meaning [de]: mean overlap 71%; weak lines [] (read back by a different model)",
+   "FAIL native-speaker review [de]: REQUIRED before publishing - machine translation can still miss nuance and tone",
+   "PASS dub intelligibility [de]: Whisper heard 100% of the script words back",
+   "PASS dub intelligibility [de]: Whisper heard 95% of the script words back",
+   "PASS dub intelligibility [de]: Whisper heard 90% of the script words back",
+   "PASS dub intelligibility [de]: Whisper heard 92% of the script words back",
+   "PASS dub intelligibility [de]: Whisper heard 100% of the script words back"
+  ],
+  "known_issues": [
+   "[minor] native-speaker review [de]: REQUIRED before publishing - machine translation can still miss nuance and tone"
+  ],
+  "dub_pass_rate": 1.0
+ }
+}

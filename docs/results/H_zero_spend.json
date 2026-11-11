@@ -1,0 +1,129 @@
+{
+ "components": {
+  "ffmpeg": {
+   "cost_usd": 0,
+   "card_required": false,
+   "account_required": false,
+   "license": "LGPL-2.1+ / GPL-2+ (distro build is GPL)",
+   "violations": []
+  },
+  "faster-whisper": {
+   "cost_usd": 0,
+   "card_required": false,
+   "account_required": false,
+   "license": "MIT",
+   "violations": []
+  },
+  "pyscenedetect": {
+   "cost_usd": 0,
+   "card_required": false,
+   "account_required": false,
+   "license": "BSD-3-Clause",
+   "violations": []
+  },
+  "piper": {
+   "cost_usd": 0,
+   "card_required": false,
+   "account_required": false,
+   "license": "GPL-3.0",
+   "violations": []
+  },
+  "espeak-ng": {
+   "cost_usd": 0,
+   "card_required": false,
+   "account_required": false,
+   "license": "GPL-3.0",
+   "violations": []
+  },
+  "local-llm": {
+   "cost_usd": 0,
+   "card_required": false,
+   "account_required": false,
+   "license": "MIT",
+   "violations": []
+  },
+  "madlad-mt": {
+   "cost_usd": 0,
+   "card_required": false,
+   "account_required": false,
+   "license": "MIT (CTranslate2 runtime)",
+   "violations": []
+  },
+  "manim": {
+   "cost_usd": 0,
+   "card_required": false,
+   "account_required": false,
+   "license": "MIT",
+   "violations": []
+  },
+  "blender": {
+   "cost_usd": 0,
+   "card_required": false,
+   "account_required": false,
+   "license": "GPL-3.0-or-later",
+   "violations": []
+  },
+  "pillow-motion": {
+   "cost_usd": 0,
+   "card_required": false,
+   "account_required": false,
+   "license": "MIT-CMU (HPND)",
+   "violations": []
+  },
+  "procedural-music": {
+   "cost_usd": 0,
+   "card_required": false,
+   "account_required": false,
+   "license": "BSD-3-Clause",
+   "violations": []
+  },
+  "wikipedia": {
+   "cost_usd": 0,
+   "card_required": false,
+   "account_required": false,
+   "license": "text CC BY-SA 4.0 (facts are not copyrightable; we cite, we do not copy text)",
+   "violations": []
+  },
+  "openverse": {
+   "cost_usd": 0,
+   "card_required": false,
+   "account_required": false,
+   "license": "API MIT; each asset has its own CC licence - recorded per asset",
+   "violations": []
+  },
+  "wikimedia-commons": {
+   "cost_usd": 0,
+   "card_required": false,
+   "account_required": false,
+   "license": "per file (extmetadata) - recorded per asset",
+   "violations": []
+  },
+  "kaggle-notebooks": {
+   "cost_usd": 0,
+   "card_required": false,
+   "account_required": true,
+   "license": "Apache-2.0 (client)",
+   "violations": []
+  },
+  "colab-free": {
+   "cost_usd": 0,
+   "card_required": false,
+   "account_required": true,
+   "license": "service",
+   "violations": []
+  }
+ },
+ "paid_sdk_imports": [],
+ "paid_hosts_in_code": [],
+ "blocked_demo": {
+  "requested": "elevenlabs",
+  "used_instead": "piper"
+ },
+ "ledger": {
+  "actual_spend_usd": 0.0,
+  "decisions": {
+   "allow": 1010,
+   "block": 4
+  }
+ }
+}
