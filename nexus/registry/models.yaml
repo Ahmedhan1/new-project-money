@@ -1,0 +1,53 @@
+# On-demand model downloads. Nothing here is fetched until it is needed (or
+# `python -m nexus models fetch` is run). Licences were read from the upstream
+# model cards on 2026-11-11.
+models:
+  whisper-small:
+    repo: Systran/faster-whisper-small
+    files: [config.json, model.bin, tokenizer.json, vocabulary.txt]
+    dir: whisper-small
+    size_mb: 490
+    license: MIT
+    commercial: true
+  llm-qwen3-4b:
+    repo: Qwen/Qwen3-4B-GGUF
+    files: [Qwen3-4B-Q4_K_M.gguf]
+    dir: llm
+    size_mb: 2500
+    license: Apache-2.0
+    commercial: true
+
+# Piper voices (huggingface.co/rhasspy/piper-voices). `commercial` reflects the
+# TRAINING DATASET licence stated in each MODEL_CARD.
+voices:
+  en_US-joe-medium:
+    lang: en
+    path: en/en_US/joe/medium
+    gender: male
+    license: CC0
+    commercial: true
+  en_US-ljspeech-medium:
+    lang: en
+    path: en/en_US/ljspeech/medium
+    gender: female
+    license: public domain (LJ Speech)
+    commercial: true
+  de_DE-thorsten-medium:
+    lang: de
+    path: de/de_DE/thorsten/medium
+    gender: male
+    license: CC0 (Thorsten-Voice)
+    commercial: true
+  ar_JO-kareem-medium:
+    lang: ar
+    path: ar/ar_JO/kareem/medium
+    gender: male
+    license: "UNVERIFIED - model card says 'See URL'; dataset repo AliMokhammad/arabicttstrain has no licence file"
+    commercial: false   # treated as not cleared until a licence is confirmed
+    note: "Only Arabic Piper voice. Jordanian/MSA-leaning, not Egyptian. Use for drafts; clear-licence fallback is espeak-ng (robotic). Candidate replacement: Chatterbox Multilingual (MIT) - needs benchmarking."
+
+# Voices evaluated and rejected
+rejected_voices:
+  en_US-ryan-medium: "CC BY-NC-SA 4.0 dataset - non-commercial"
+  en_US-hfc_male-medium: "CC BY-NC-SA 4.0 dataset - non-commercial"
+  en_US-lessac-medium: "Blizzard 2013 licence - research only"

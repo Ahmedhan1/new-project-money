@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+pydantic
+faster-whisper
+scenedetect[opencv-headless]
+pillow
+numpy
+piper-tts
+huggingface_hub
+arabic-reshaper
+python-bidi
+pyyaml
+pytest
+httpx
+psutil
+manim
+llama-cpp-python

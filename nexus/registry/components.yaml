@@ -1,0 +1,221 @@
+# NEXUS component manifest. Every integration MUST be declared here before the
+# Cost Guard lets it run. `monetary_cost_usd` must be 0 and
+# `payment_method_required` must be false or the component is blocked.
+# status: deployed (installed + tested here) | adapter (code exists, needs the
+# user's own free account, NOT tested here) | planned
+defaults:
+  monetary_cost_usd: 0
+  payment_method_required: false
+  account_required: false
+  free_tier: "n/a - runs locally"
+  quotas: none
+  data_retention: "local only; nothing leaves the machine"
+  availability: local
+  network_hosts: []
+
+components:
+  - id: ffmpeg
+    name: FFmpeg
+    kind: software
+    capability: [encode, cut, filter, audio-master, technical-qa]
+    source_url: https://github.com/FFmpeg/FFmpeg
+    license: "LGPL-2.1+ / GPL-2+ (distro build is GPL)"
+    commercial_use: "yes (we invoke the binary; outputs are unencumbered)"
+    usage_restrictions: "H.264/AAC patents may apply to distribution of encoders in some regions; not to rendered files for personal publishing"
+    hardware: "CPU"
+    install: "apt-get install ffmpeg"
+    version_cmd: ["ffmpeg", "-version"]
+    status: deployed
+  - id: faster-whisper
+    name: faster-whisper + Systran/faster-whisper-small
+    kind: model
+    capability: [transcribe, language-detect, dub-verification]
+    source_url: https://github.com/SYSTRAN/faster-whisper
+    license: MIT
+    weights_license: "MIT (OpenAI Whisper weights, CTranslate2 conversion)"
+    commercial_use: "yes"
+    usage_restrictions: none
+    hardware: "CPU int8, ~1 GB RAM for small"
+    install: "pip install faster-whisper; weights from huggingface.co/Systran/faster-whisper-small"
+    network_hosts: [huggingface.co]
+    version_py: faster_whisper
+    status: deployed
+  - id: pyscenedetect
+    name: PySceneDetect
+    kind: software
+    capability: [shot-detection]
+    source_url: https://github.com/Breakthrough/PySceneDetect
+    license: BSD-3-Clause
+    commercial_use: "yes"
+    usage_restrictions: none
+    hardware: "CPU"
+    install: "pip install scenedetect[opencv-headless]"
+    version_py: scenedetect
+    status: deployed
+  - id: piper
+    name: Piper TTS (OHF-Voice/piper1-gpl) + voices
+    kind: model
+    capability: [narration, dubbing]
+    source_url: https://github.com/OHF-Voice/piper1-gpl
+    license: GPL-3.0
+    weights_license: "per voice - see nexus/speech/voices.yaml (only voices whose dataset licence allows commercial use are enabled)"
+    commercial_use: "per voice"
+    usage_restrictions: "GPL applies to the engine, not to generated audio"
+    hardware: "CPU, faster than realtime"
+    install: "pip install piper-tts; voices from huggingface.co/rhasspy/piper-voices"
+    network_hosts: [huggingface.co]
+    version_py: piper
+    status: deployed
+  - id: espeak-ng
+    name: eSpeak NG
+    kind: software
+    capability: [narration-fallback, phonemization]
+    source_url: https://github.com/espeak-ng/espeak-ng
+    license: GPL-3.0
+    commercial_use: "yes (generated audio)"
+    usage_restrictions: "robotic quality - fallback only"
+    hardware: "CPU"
+    install: "apt-get install espeak-ng"
+    version_cmd: ["espeak-ng", "--version"]
+    status: deployed
+  - id: local-llm
+    name: llama.cpp (llama-cpp-python) + Qwen3-4B GGUF Q4_K_M
+    kind: model
+    capability: [script, translate, localize, review, series-writing]
+    source_url: https://github.com/ggml-org/llama.cpp
+    license: MIT
+    weights_license: "Apache-2.0 (Qwen/Qwen3-4B-GGUF)"
+    commercial_use: "yes"
+    usage_restrictions: "small model: output needs fact review; Egyptian Arabic quality needs a native reviewer"
+    hardware: "CPU, ~4 GB RAM"
+    install: "pip install llama-cpp-python; weights from huggingface.co/Qwen/Qwen3-4B-GGUF"
+    network_hosts: [huggingface.co]
+    version_py: llama_cpp
+    status: deployed
+  - id: manim
+    name: Manim Community
+    kind: software
+    capability: [2d-explainer, scientific-animation]
+    source_url: https://github.com/ManimCommunity/manim
+    license: MIT
+    commercial_use: "yes"
+    usage_restrictions: none
+    hardware: "CPU (Cairo renderer)"
+    install: "apt-get install libcairo2-dev libpango1.0-dev; pip install manim"
+    version_py: manim
+    status: deployed
+  - id: blender
+    name: Blender (headless)
+    kind: software
+    capability: [3d-animation, product-visualisation]
+    source_url: https://projects.blender.org/blender/blender
+    license: GPL-3.0-or-later
+    commercial_use: "yes (renders are yours)"
+    usage_restrictions: "no GPU here: Cycles CPU only, keep samples/resolution low"
+    hardware: "CPU; 8 GB+ RAM"
+    install: "apt-get install blender  (or official tarball from download.blender.org)"
+    version_cmd: ["blender", "--version"]
+    status: deployed
+  - id: pillow-motion
+    name: NEXUS motion graphics (Pillow + FFmpeg)
+    kind: software
+    capability: [infographic, lower-third, kinetic-typography, title-card]
+    source_url: https://github.com/python-pillow/Pillow
+    license: MIT-CMU (HPND)
+    commercial_use: "yes"
+    usage_restrictions: none
+    hardware: "CPU"
+    install: "pip install pillow arabic-reshaper python-bidi"
+    version_py: PIL
+    status: deployed
+  - id: procedural-music
+    name: NEXUS procedural music bed (NumPy synthesis)
+    kind: software
+    capability: [music-bed]
+    source_url: https://github.com/numpy/numpy
+    license: BSD-3-Clause
+    commercial_use: "yes - audio is synthesised locally, no third-party recording involved"
+    usage_restrictions: "simple ambient pads only; not a substitute for composed music"
+    hardware: "CPU"
+    install: "pip install numpy"
+    version_py: numpy
+    status: deployed
+  - id: wikipedia
+    name: Wikipedia REST/Action API
+    kind: service
+    capability: [research]
+    source_url: https://www.mediawiki.org/wiki/API:Main_page
+    license: "text CC BY-SA 4.0 (facts are not copyrightable; we cite, we do not copy text)"
+    free_tier: "free, no key"
+    quotas: "be polite: serial requests, descriptive User-Agent; 429 means back off"
+    commercial_use: "yes with attribution if text is reused"
+    usage_restrictions: "no bulk scraping"
+    data_retention: "query terms are sent to Wikimedia"
+    availability: "remote; research falls back to user-supplied notes when unreachable"
+    hardware: none
+    network_hosts: [en.wikipedia.org, ar.wikipedia.org, de.wikipedia.org]
+    status: deployed
+  - id: openverse
+    name: Openverse API (CC-licensed images/audio index)
+    kind: media-source
+    capability: [image-search, audio-search]
+    source_url: https://github.com/WordPress/openverse
+    license: "API MIT; each asset has its own CC licence - recorded per asset"
+    free_tier: "anonymous access, no key, no card"
+    quotas: "anonymous: rate limited (documented ~1 req/s burst, daily cap); 429 => queue and retry later"
+    commercial_use: "per asset - NEXUS only requests licence_type=commercial,modification"
+    usage_restrictions: "attribution required for BY/BY-SA; SA requires share-alike of adapted images"
+    data_retention: "search terms are sent to Openverse"
+    availability: "remote; falls back to generated title cards"
+    hardware: none
+    network_hosts: [api.openverse.org]
+    status: deployed
+  - id: wikimedia-commons
+    name: Wikimedia Commons (asset downloads + licence metadata)
+    kind: media-source
+    capability: [image-download]
+    source_url: https://commons.wikimedia.org/wiki/Commons:Reusing_content_outside_Wikimedia
+    license: "per file (extmetadata) - recorded per asset"
+    free_tier: "free, no key"
+    quotas: "polite use; 429 => back off"
+    commercial_use: "per asset; only PD/CC0/BY/BY-SA accepted"
+    usage_restrictions: "attribution; personality/trademark rights are not covered by the licence"
+    data_retention: "requests are sent to Wikimedia"
+    availability: remote
+    hardware: none
+    network_hosts: [commons.wikimedia.org, upload.wikimedia.org]
+    status: deployed
+  - id: kaggle-notebooks
+    name: Kaggle Notebooks (batch GPU via official API)
+    kind: compute
+    capability: [gpu-batch]
+    source_url: https://github.com/Kaggle/kaggle-api
+    license: Apache-2.0 (client)
+    free_tier: "free GPU weekly quota (historically ~30 h/week, shown in the account), 12 h max per session"
+    account_required: true
+    payment_method_required: false
+    quotas: "weekly GPU hours per account; one account per person; phone verification for GPU/internet"
+    commercial_use: "check Kaggle ToS for your use; model licences still apply"
+    usage_restrictions: "no multi-account quota evasion, no crypto-mining, no persistent serving; batch 'Save & Run' via API is an official feature"
+    data_retention: "notebooks/data are stored in your Kaggle account (private by default)"
+    availability: "remote, best effort"
+    hardware: "typically T4 x2 / P100 16 GB VRAM, ~30 GB RAM"
+    network_hosts: [www.kaggle.com]
+    status: adapter
+  - id: colab-free
+    name: Google Colab free tier (manual hand-off only)
+    kind: compute
+    capability: [gpu-interactive]
+    source_url: https://research.google.com/colaboratory/faq.html
+    license: "service"
+    free_tier: "free interactive GPU when available; no guarantee, dynamic limits"
+    account_required: true
+    payment_method_required: false
+    quotas: "undisclosed dynamic limits; idle and max-lifetime timeouts"
+    commercial_use: "see Google ToS"
+    usage_restrictions: "interactive use only: no headless/API automation, no idle-timeout circumvention, no remote-desktop/SSH, no serving. NEXUS therefore only GENERATES a notebook for the user to open and run by hand."
+    data_retention: "notebook + outputs in the user's Google account"
+    availability: "remote, not guaranteed"
+    hardware: "T4 16 GB when granted"
+    network_hosts: []
+    status: adapter

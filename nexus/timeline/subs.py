@@ -1,0 +1,108 @@
+"""Subtitle cues: build from transcripts, write SRT / VTT / ASS."""
+from __future__ import annotations
+
+from pathlib import Path
+
+
+def _ts(t: float, sep: str = ",") -> str:
+    t = max(0.0, t)
+    h, rem = divmod(int(t), 3600)
+    m, s = divmod(rem, 60)
+    return f"{h:02d}:{m:02d}:{s:02d}{sep}{int(round((t - int(t)) * 1000)) % 1000:03d}"
+
+
+def cues_from_transcript(segments: list[dict], max_chars: int = 42, max_dur: float = 5.0) -> list[dict]:
+    """Split whisper segments into readable cues using word timestamps."""
+    cues: list[dict] = []
+    for seg in segments:
+        words = seg.get("words") or []
+        if not words:
+            cues.append({"start": seg["start"], "end": seg["end"], "text": seg["text"]})
+            continue
+        cur: list[dict] = []
+        for w in words:
+            trial = " ".join(x["word"] for x in cur + [w])
+            if cur and (len(trial) > max_chars or w["end"] - cur[0]["start"] > max_dur):
+                cues.append({"start": cur[0]["start"], "end": cur[-1]["end"], "text": " ".join(x["word"] for x in cur)})
+                cur = []
+            cur.append(w)
+        if cur:
+            cues.append({"start": cur[0]["start"], "end": cur[-1]["end"], "text": " ".join(x["word"] for x in cur)})
+    return fix_timing(cues)
+
+
+def cues_from_text(text: str, start: float, end: float, max_chars: int = 42) -> list[dict]:
+    """Spread a known narration text over [start,end] proportionally to length."""
+    words = text.split()
+    chunks, cur = [], ""
+    for w in words:
+        if cur and len(cur) + 1 + len(w) > max_chars:
+            chunks.append(cur)
+            cur = w
+        else:
+            cur = f"{cur} {w}".strip()
+    if cur:
+        chunks.append(cur)
+    total = sum(len(c) for c in chunks) or 1
+    t, cues = start, []
+    for c in chunks:
+        d = (end - start) * len(c) / total
+        cues.append({"start": round(t, 3), "end": round(t + d, 3), "text": c})
+        t += d
+    return cues
+
+
+def fix_timing(cues: list[dict], min_dur: float = 0.7, gap: float = 0.04) -> list[dict]:
+    cues = sorted((dict(c) for c in cues if c["text"].strip()), key=lambda c: c["start"])
+    for i, c in enumerate(cues):
+        nxt = cues[i + 1]["start"] if i + 1 < len(cues) else None
+        if c["end"] - c["start"] < min_dur:
+            c["end"] = c["start"] + min_dur
+        if nxt is not None and c["end"] > nxt - gap:
+            c["end"] = max(c["start"] + 0.2, nxt - gap)
+    return cues
+
+
+def shift(cues: list[dict], offset: float) -> list[dict]:
+    return [{**c, "start": c["start"] + offset, "end": c["end"] + offset} for c in cues]
+
+
+def write_srt(cues: list[dict], path: Path) -> Path:
+    path.write_text("\n".join(f"{i}\n{_ts(c['start'])} --> {_ts(c['end'])}\n{c['text']}\n" for i, c in enumerate(cues, 1)),
+                    encoding="utf-8")
+    return path
+
+
+def write_vtt(cues: list[dict], path: Path) -> Path:
+    path.write_text("WEBVTT\n\n" + "\n".join(f"{_ts(c['start'], '.')} --> {_ts(c['end'], '.')}\n{c['text']}\n" for c in cues),
+                    encoding="utf-8")
+    return path
+
+
+def write_ass(cues: list[dict], path: Path, W: int, H: int, lang: str = "en", style: dict | None = None) -> Path:
+    st = {"size": 0.048, "margin_v": 0.07, "outline": 3, "primary": "&H00FFFFFF", "back": "&H96000000", **(style or {})}
+    font = "Noto Naskh Arabic" if lang.startswith("ar") else "DejaVu Sans"
+    size = int(H * st["size"]) if W >= H else int(W * st["size"] * 1.25)
+    mv = int(H * st["margin_v"]) if W >= H else int(H * 0.16)  # keep clear of vertical-platform UI
+    head = f"""[Script Info]
+ScriptType: v4.00+
+PlayResX: {W}
+PlayResY: {H}
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,{font},{size},{st['primary']},&H000000FF,&H00101010,{st['back']},1,0,0,0,100,100,0,0,1,{st['outline']},1,2,{int(W*0.06)},{int(W*0.06)},{mv},1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+"""
+
+    def t(x: float) -> str:
+        x = max(0.0, x)
+        return f"{int(x // 3600)}:{int(x % 3600 // 60):02d}:{x % 60:05.2f}"
+
+    lines = [f"Dialogue: 0,{t(c['start'])},{t(c['end'])},Default,,0,0,0,,{c['text'].replace(chr(10), ' ')}" for c in cues]
+    path.write_text(head + "\n".join(lines) + "\n", encoding="utf-8")
+    return path
