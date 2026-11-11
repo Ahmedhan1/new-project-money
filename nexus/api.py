@@ -8,15 +8,13 @@ import queue
 import shutil
 import threading
 import time
-import traceback
 from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
 
-from . import assets, compute, config, costguard, db, edit, factory, jobs, project as prj, publish, remix, series, tools
-from .media import analyze
+from . import assets, compute, config, costguard, db, edit, factory, jobs, project as prj, publish, tools
 from .timeline import ops
 from .timeline.render import clip_duration, clip_starts, total_duration
 
@@ -26,37 +24,12 @@ _q: "queue.Queue[tuple[str, callable]]" = queue.Queue()
 _analyses: dict[str, dict] = {}
 
 
-_API_WORKER = jobs.worker_id("api")
-
-
-def _worker() -> None:
-    while True:
-        job_id, fn = _q.get()
-        db.execute("UPDATE jobs SET status='running', started=? WHERE id=?", (time.time(), job_id))
-        try:
-            with jobs.heavy_lock():
-                result = fn()
-            db.execute("UPDATE jobs SET status='done', progress=1, finished=?, result=? WHERE id=?",
-                       (time.time(), json.dumps(result, default=str, ensure_ascii=False), job_id))
-        except Exception as e:  # the job fails, the server keeps running
-            db.execute("UPDATE jobs SET status='failed', finished=?, error=? WHERE id=?",
-                       (time.time(), f"{type(e).__name__}: {e}\n{traceback.format_exc()[-1500:]}", job_id))
-
-
-threading.Thread(target=_worker, daemon=True).start()
-# Startup recovery: durable jobs whose worker died are re-queued from their last checkpoint; in-process jobs
-# that died with a previous app run are marked 'interrupted' (never left 'running' forever).
-jobs.recover(api_worker=_API_WORKER)
+# Every job goes through the durable ledger (nexus/jobs.py): nothing is queued in this process's memory, so an
+# app restart or crash never loses work. Startup recovery re-queues jobs whose worker died; anything left over
+# from the old in-process queue of v0.1 is marked 'interrupted'.
+jobs.recover(api_worker="")
 if os.environ.get("NEXUS_EMBEDDED_WORKER", "1") != "0":  # `nexus start` runs the worker as its own process instead
     threading.Thread(target=jobs.run_worker, kwargs={"role": "embedded"}, daemon=True).start()
-
-
-def submit(kind: str, fn, project_id: str = "") -> dict:
-    job_id = db.new_id("job")
-    db.execute("INSERT INTO jobs(id,project_id,kind,status,worker,progress,created) VALUES(?,?,?,?,?,?,?)",
-               (job_id, project_id, kind, "queued", _API_WORKER, 0.0, time.time()))
-    _q.put((job_id, fn))
-    return {"job": job_id, "status": "queued"}
 
 
 def _project(pid: str) -> prj.Project:
@@ -106,7 +79,7 @@ def api_catalog():
 
 @app.post("/api/evolution/check")
 def api_evolution():
-    return submit("evolution-check", lambda: tools.evolution_check())
+    return jobs.submit("evolution-check", max_retries=0)
 
 
 @app.get("/api/compute")
@@ -232,13 +205,7 @@ async def api_upload(file: UploadFile = File(...), project_id: str | None = None
     m = p.import_media(tmp)
     tmp.unlink()
 
-    def run():
-        an = analyze.analyze(m["path"])
-        _analyses[m["path"]] = an
-        (p.dir / "reports" / f"analysis_{m['id']}.json").write_text(json.dumps(an, ensure_ascii=False))
-        return {"issues": an["issues"], "scenes": len(an["scenes"]), "duration": an["probe"]["duration"]}
-
-    return {"project": p.id, "media": m, **submit("analyze", run, p.id)}
+    return {"project": p.id, "media": m, **jobs.submit("analyze", {"project": p.id, "media": m["id"]}, p.id)}
 
 
 class ProposeReq(BaseModel):
@@ -350,8 +317,12 @@ class PackageReq(BaseModel):
 @app.post("/api/projects/{pid}/package")
 def api_package(pid: str, r: PackageReq):
     p = _project(pid)
-    tl = p.timeline(r.branch)
-    return submit(f"package-{r.platform}", lambda: publish.package(p, tl, r.platform, r.title, r.description, r.lang), pid)
+    try:
+        p.timeline(r.branch)
+    except KeyError:
+        raise HTTPException(409, f"project has no timeline on branch '{r.branch}' yet")
+    return jobs.submit("package", {"project": pid, "branch": r.branch, "platform": r.platform, "title": r.title,
+                                   "description": r.description, "lang": r.lang}, pid)
 
 
 # ---------------------------------------------------------------- create / remix / series
@@ -378,14 +349,9 @@ class RemixReq(BaseModel):
 def api_remix(r: RemixReq):
     p = _project(r.project_id)
 
-    def run():
-        lib = _analysis(p)
-        if len(lib) < 2:
-            raise ValueError("upload at least two analysed videos into this project first")
-        versions = remix.make_versions(p, lib, r.brief)
-        return {"plan": p.data["remix"]["plan"], "comparison": remix.compare(versions)}
-
-    return submit("remix", run, p.id)
+    if len(_analysis(p)) < 2:
+        raise HTTPException(409, "upload at least two analysed videos into this project first")
+    return jobs.submit("remix", {"project": p.id, "brief": r.brief}, p.id)
 
 
 class SeriesReq(BaseModel):
@@ -400,17 +366,14 @@ def api_series_list():
 
 @app.post("/api/series")
 def api_series(r: SeriesReq):
-    return submit("series-bible", lambda: series.create_series(r.concept, r.episodes))
+    return jobs.submit("series-bible", {"concept": r.concept, "episodes": r.episodes})
 
 
 @app.post("/api/series/{sid}/next")
 def api_series_next(sid: str):
-    def run():
-        b, ep, review = series.next_episode(sid)
-        out = series.produce_episode(b, ep, review)
-        return {"episode": ep, "project": out["project"], "status": out["report"]["status"], "issues": out["report"]["known_issues"]}
-
-    return submit("series-episode", run)
+    if db.get_doc("series", sid) is None:
+        raise HTTPException(404, "series not found")
+    return jobs.submit("series-episode", {"series": sid})
 
 
 class FilmReq(BaseModel):
@@ -419,7 +382,7 @@ class FilmReq(BaseModel):
 
 @app.post("/api/film")
 def api_film(r: FilmReq):
-    return submit("film-plan", lambda: series.film_plan(r.concept))
+    return jobs.submit("film-plan", {"concept": r.concept})
 
 
 class AnimReq(BaseModel):
@@ -431,26 +394,11 @@ class AnimReq(BaseModel):
 
 @app.post("/api/animate")
 def api_animate(r: AnimReq):
-    from .animation import engines, mograph
+    if r.kind not in ("bar_chart", "kinetic", "timeline", "explainer", "title3d"):
+        raise HTTPException(422, f"unknown animation kind {r.kind}")
     p = _project(r.project_id) if r.project_id else prj.Project.create(f"Animation - {r.title or r.kind}", "animation")
-    out = p.dir / "renders" / f"{r.kind}_{int(time.time()) % 100000}.mp4"
-
-    def run():
-        if r.kind == "bar_chart":
-            mograph.bar_chart(out, r.title, [(str(a), float(b)) for a, b in r.data])
-        elif r.kind == "kinetic":
-            mograph.kinetic_text(out, [str(x) for x in r.data])
-        elif r.kind == "timeline":
-            mograph.timeline_animation(out, r.title, [(str(a), str(b)) for a, b in r.data])
-        elif r.kind == "explainer":
-            engines.manim_explainer(out, r.title, [{"label": str(a), "detail": str(b)} for a, b in r.data])
-        elif r.kind == "title3d":
-            engines.blender_title(out, r.title or "NEXUS")
-        else:
-            raise ValueError(f"unknown animation kind {r.kind}")
-        return {"project": p.id, "output": str(out.relative_to(p.dir))}
-
-    return submit(f"animate-{r.kind}", run, p.id)
+    return jobs.submit("animate", {"project": p.id, "kind": r.kind, "title": r.title, "data": r.data,
+                                   "output": f"renders/{r.kind}_{int(time.time()) % 100000}.mp4"}, p.id)
 
 
 # ---------------------------------------------------------------- business

@@ -110,8 +110,8 @@ def test_backup_verify_restore_and_reopen_project(home, tmp_path):
 
     # originals untouched, and the restored copy opens as a working NEXUS_HOME with no reference to the old one
     assert open(m["path"], "rb").read().startswith(b"original camera footage")
+    db.reset_for_tests()                                                      # close the old database (Windows locks open files)
     home.rename(tmp_path / "old-machine-is-gone")                             # nothing may still point at the old location
-    db.reset_for_tests()
     config.set_home(target)
     q = prj.Project(p.id)
     tl = q.timeline()

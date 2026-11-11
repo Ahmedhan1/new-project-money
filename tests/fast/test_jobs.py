@@ -131,3 +131,27 @@ def test_create_pipeline_runs_as_resumable_stages(home, monkeypatch):
     j = jobs.get(jid)
     assert j["project_id"].startswith("prj_") and j["result"]["status"] == "PASSED_AUTOMATED_CHECKS"
     assert [k for k in j["stages"]] == ["project", "research", "script", "assemble", "render-qa"]
+
+
+def test_series_episode_is_not_written_twice_when_production_crashes(home, monkeypatch):
+    """Writing an episode appends it to the series canon; a crash during production must not append it again."""
+    from nexus import series, workflows  # noqa: F401
+    n = {"write": 0, "produce": 0}
+
+    def next_episode(sid):
+        n["write"] += 1
+        return {"id": sid, "episodes": [{"number": n["write"]}]}, {"number": n["write"], "scenes": []}, {"checks": [], "attempts": 1}
+
+    def produce_episode(b, ep, review):
+        n["produce"] += 1
+        if n["produce"] == 1:
+            raise RuntimeError("render crashed")
+        return {"project": "prj_x", "report": {"status": "PASSED_AUTOMATED_CHECKS", "known_issues": []}}
+
+    monkeypatch.setattr(series, "next_episode", next_episode)
+    monkeypatch.setattr(series, "produce_episode", produce_episode)
+    jid = jobs.submit("series-episode", {"series": "series_1"})["job"]
+    assert jobs.run_job(jobs.claim("w")) == "queued"
+    assert jobs.run_job(jobs.claim("w")) == "done"
+    j = jobs.get(jid)
+    assert n == {"write": 1, "produce": 2} and j["result"]["episode"]["number"] == 1 and j["project_id"] == "prj_x"
