@@ -30,4 +30,4 @@ def test_d_create_from_idea(results):
     import shutil
     shutil.copy(r["storyboard"], results / "D_storyboard.png")
     for i, ts in enumerate((1.0, 8.0, 20.0)):
-        ff.run(["-ss", ts, "-i", r["output"], "-frames:v", "1", results / f"D_frame{i}.png"])
+        ff.run(["-ss", ts, "-i", r["output"], "-frames:v", "1", "-vf", "scale=640:-2", results / f"D_frame{i}.png"])  # evidence frames stay small in Git

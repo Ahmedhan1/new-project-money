@@ -12,39 +12,61 @@
   }
  ],
  "script": {
-  "title": "How vaccines train the immune system",
+  "title": "How Vaccines Train the Immune System",
   "topic": "How vaccines train the immune system",
-  "scenes": []
+  "scenes": [
+   {
+    "narration": "Did you know vaccination can train your immune system to fight more than just the disease it's designed for? This is called trained immunity, a new concept in immunology.",
+    "on_screen_text": "Vaccines train immune system",
+    "visual_query": "Human immune system cells"
+   },
+   {
+    "narration": "Trained immunity works by changing how our innate immune cells remember threats. These changes are often epigenetic, affecting gene expression without altering DNA.",
+    "on_screen_text": "Innate immune memory",
+    "visual_query": "Innate immune cell changes"
+   },
+   {
+    "narration": "This trained immunity can protect against unrelated infections, like the BCG vaccine reducing child mortality from other diseases. Studies show vaccinated mothers' children have lower disease risks, suggesting a transgenerational effect.",
+    "on_screen_text": "BCG vaccine benefits",
+    "visual_query": "Mother and child health"
+   },
+   {
+    "narration": "Vaccines are crucial for public health, preventing diseases like smallpox and polio. Getting vaccinated protects you and others through herd immunity.",
+    "on_screen_text": "Vaccine importance",
+    "visual_query": "Public health vaccination"
+   }
+  ]
  },
- "script_attempts": 3,
+ "script_attempts": 1,
  "pre_production": [
-  "FAIL structure: 0 scenes (wanted 4)",
-  "PASS length: 0 words, ~0s of narration",
-  "PASS scene depth: every scene has at least 2 sentences / 16 words",
-  "FAIL hook: opening: \"\"",
+  "PASS structure: 4 scenes (wanted 4)",
+  "PASS length: 104 words, ~42s of narration",
+  "PASS scene depth: every scene has at least 2 sentences / 14 words",
+  "PASS hook: opening: \"Did you know vaccination can train your immune system to fight more th\"",
   "PASS numbers traceable to sources: every figure appears in the research text",
   "PASS claims grounded in sources: narration vocabulary is covered by the research text",
   "PASS no repeated scenes: all scenes distinct",
   "PASS scene feasibility: every scene has a concrete visual to source"
  ],
- "licensed_images_used": 0,
- "credits": [],
- "status": "NEEDS_FIXES",
- "known_issues": [
-  "[major] structure: 0 scenes (wanted 4)",
-  "[minor] hook: opening: \"\""
+ "licensed_images_used": 3,
+ "credits": [
+  "\"Human Paneth cells\" - public domain (PDM). Source: https://commons.wikimedia.org/wiki/File:Human_Paneth_cells.JPG",
+  "\"Caf babies\" by hdptcar (Flickr User), licensed CC BY 2.0. Source: https://commons.wikimedia.org/w/index.php?curid=9791305",
+  "\"Vaccinations at the District Public Health Office, Immunization Clinic, Pokhara, Nepal. (10680998474)\" by Department of Foreign Affairs and Trade, licensed CC BY 2.0. Source: https://commons.wikimedia.org/wiki/File:Vaccinations_at_the_District_Public_Health_Office,_Immunization_Clinic,_Pokhara,_Nepal._(10680998474).jpg"
  ],
+ "status": "PASSED_AUTOMATED_CHECKS",
+ "known_issues": [],
  "output": {
-  "duration": 2.421,
+  "duration": 47.167,
   "video": {
    "codec": "h264",
    "width": 1280,
    "height": 720,
    "fps": 30.0,
    "pix_fmt": "yuv420p",
-   "duration": 2.4
+   "duration": 47.166667
   },
-  "render_seconds": 0.97
+  "render_seconds": 43.55
  },
  "technical": [
   "PASS file integrity (full decode): decodes cleanly",
@@ -56,11 +78,13 @@
   "PASS frame rate: 30.0 fps",
   "PASS black frames: none beyond intentional fades",
   "PASS frozen frames: none",
-  "PASS duration matches timeline: 2.42s vs timeline 2.40s",
-  "PASS A/V stream length: video 2.40s, audio 2.42s",
+  "PASS duration matches timeline: 47.17s vs timeline 47.16s",
+  "PASS A/V stream length: video 47.17s, audio 47.17s",
   "PASS audio channels: 2 ch @ 48000 Hz",
-  "PASS loudness: -14.02 LUFS (target -14.0 +/-1.5)",
-  "PASS clipping / true peak: true peak -2.51 dBTP (limit -1.0)",
-  "PASS dead air: none"
+  "PASS loudness: -15.01 LUFS (target -14.0 +/-1.5)",
+  "PASS clipping / true peak: true peak -1.8 dBTP (limit -1.0)",
+  "PASS dead air: none",
+  "PASS subtitle timing: 20 cues, 0 out of range, 0 overlapping",
+  "PASS subtitle reading speed: 0 cues above 25 chars/s"
  ]
 }

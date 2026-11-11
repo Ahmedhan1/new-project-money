@@ -3,7 +3,7 @@ name: CI
 # Heavy end-to-end tests (tests/test_*.py, A-I) run locally: `pytest tests/test_d_create.py` etc.
 on:
   push:
-    branches: [main, develop, "claude/**"]
+    branches: [main]
   pull_request:
 concurrency:
   group: ci-${{ github.ref }}
@@ -29,6 +29,9 @@ jobs:
       - name: FFmpeg + rclone (Linux only; the launcher/rclone tests skip themselves where a tool is missing)
         if: runner.os == 'Linux'
         run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg rclone
+      - name: FFmpeg (Windows) - so the one-command launcher is exercised on the user's real platform
+        if: runner.os == 'Windows'
+        run: choco install ffmpeg -y --no-progress
       - name: Lint
         run: python -m ruff check .
       - name: Project memory is valid (state file, task registry, handoff size)

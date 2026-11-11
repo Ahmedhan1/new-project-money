@@ -56,3 +56,16 @@ def test_thin_scripts_are_rejected_and_feedback_reaches_the_writer(monkeypatch):
     script, review = create.script_with_review("t", res, 2)
     assert script is rich and review["attempts"] == 2
     assert seen[0] == "" and "scene depth" in seen[1] and "no repeated scenes" in seen[1]   # reviewer findings were passed back
+
+
+def test_subtitle_cues_break_at_sentence_and_clause_boundaries():
+    from nexus.timeline import subs
+    text = ("Did you know vaccination can train your immune system to fight more than just the disease it's designed for? "
+            "This is called trained immunity, a new concept in immunology.")
+    cues = subs.cues_from_text(text, 0.0, 12.0)
+    texts = [c["text"] for c in cues]
+    assert " ".join(texts) == text and all(len(t) <= 42 for t in texts)
+    assert not any("? " in t or ". " in t for t in texts)                     # no cue straddles two sentences
+    assert any(t.endswith("designed for?") for t in texts) and texts[-1].endswith("immunology.")
+    assert cues[0]["start"] == 0.0 and abs(cues[-1]["end"] - 12.0) < 0.01 and all(a["end"] <= b["start"] + 1e-6 for a, b in zip(cues, cues[1:]))
+    assert [c["text"] for c in subs.cues_from_text("Short line.", 0, 2)] == ["Short line."]

@@ -38,9 +38,13 @@ def cues_from_text(text: str, start: float, end: float, max_chars: int = 42) -> 
     for w in words:
         if cur and len(cur) + 1 + len(w) > max_chars:
             chunks.append(cur)
-            cur = w
-        else:
-            cur = f"{cur} {w}".strip()
+            cur = ""
+        cur = f"{cur} {w}".strip()
+        # Break where a viewer expects it: a sentence never shares a cue with the start of the next one,
+        # and a long cue ends at a clause boundary rather than mid-phrase.
+        if (cur[-1] in ".!?\u061f\u06d4\u2026" and len(cur) >= max_chars * 0.35) or (cur[-1] in ",;:\u060c" and len(cur) >= max_chars * 0.7):
+            chunks.append(cur)
+            cur = ""
     if cur:
         chunks.append(cur)
     total = sum(len(c) for c in chunks) or 1
