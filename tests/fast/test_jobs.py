@@ -1,0 +1,133 @@
+"""Acceptance test C - interrupted production: a worker dies mid-job, the job is recovered and finished,
+and stages that had completed are not executed again."""
+import os
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+from nexus import db, jobs
+
+HERE = Path(__file__).parent
+WORKER = "import crash_handlers; from nexus import jobs; jobs.run_worker(once=True)"
+
+
+def _env(home):
+    return {**os.environ, "NEXUS_HOME": str(home), "PYTHONPATH": os.pathsep.join([str(HERE), str(HERE.parent.parent)])}
+
+
+def test_failed_stage_retries_from_checkpoint(home):
+    calls = {"a": 0, "b": 0}
+
+    @jobs.handler("flaky")
+    def flaky(job):
+        def a():
+            calls["a"] += 1
+            return 1
+
+        def b():
+            calls["b"] += 1
+            if calls["b"] == 1:
+                raise RuntimeError("transient")
+            return 2
+
+        return job.stage("a", a) + job.stage("b", b)
+
+    jid = jobs.submit("flaky")["job"]
+    assert jobs.run_job(jobs.claim("w1")) == "queued"          # failed once -> re-queued, not lost
+    assert jobs.get(jid)["retries"] == 1 and "transient" in jobs.get(jid)["error"]
+    assert jobs.run_job(jobs.claim("w2")) == "done"
+    j = jobs.get(jid)
+    assert j["result"] == 3 and calls == {"a": 1, "b": 2}        # stage a answered from its checkpoint
+    assert j["stages"]["a"]["runs"] == 1 and j["stages"]["b"]["runs"] == 2
+    assert db.metric_avg("stage_seconds.flaky.a") is not None    # stage timings feed the capacity planner
+
+
+def test_retry_limit_then_manual_retry(home):
+    @jobs.handler("always-bad")
+    def bad(job):
+        raise ValueError("nope")
+
+    jid = jobs.submit("always-bad", max_retries=1)["job"]
+    assert jobs.run_job(jobs.claim("w")) == "queued"
+    assert jobs.run_job(jobs.claim("w")) == "failed"
+    assert jobs.claim("w") is None
+    assert jobs.get(jid)["recovery"] and jobs.retry(jid) and jobs.get(jid)["status"] == "queued"
+
+
+def test_unknown_kind_fails_cleanly_and_cancel(home):
+    jid = jobs.submit("no-such-kind")["job"]
+    assert jobs.run_job(jobs.claim("w")) == "failed" and "no handler" in jobs.get(jid)["error"]
+    j2 = jobs.submit("no-such-kind")["job"]
+    assert jobs.cancel(j2) and jobs.claim("w") is None
+
+
+def test_worker_killed_mid_job_resumes_without_repeating_stages(home):
+    jid = jobs.submit("crash-test", {"n": 1})["job"]
+    p = subprocess.Popen([sys.executable, "-c", WORKER], env=_env(home))
+    try:
+        t0 = time.time()
+        while not (home / "b_started").exists():
+            assert time.time() - t0 < 60 and p.poll() is None, "worker never reached stage b"
+            time.sleep(0.1)
+    finally:
+        p.kill()            # hard kill: no cleanup code runs, like a crash or power loss
+        p.wait()
+    j = jobs.get(jid)
+    assert j["status"] == "running" and j["stage"] == "b" and j["stages"]["a"]["status"] == "done"
+    assert jobs.recover(stale_after=3600) == {"requeued": [], "failed": [], "interrupted": []}   # fresh heartbeat: left alone
+    rec = jobs.recover(stale_after=0)
+    assert rec["requeued"] == [jid]
+    assert "lost at stage 'b'" in jobs.get(jid)["recovery"]
+    subprocess.run([sys.executable, "-c", WORKER], env=_env(home), check=True, timeout=120)       # a brand-new worker process
+    j = jobs.get(jid)
+    assert j["status"] == "done" and j["result"] == {"answer": 42}
+    ran = {n: len((home / f"ran_{n}").read_text()) for n in "abc"}
+    assert ran == {"a": 1, "b": 2, "c": 1}, ran                 # a was NOT repeated; only the interrupted stage re-ran
+    assert "restored from checkpoint" in Path(j["log"]).read_text()
+
+
+def test_in_process_jobs_of_a_dead_app_are_flagged_not_left_running(home):
+    import time as t
+    db.execute("INSERT INTO jobs(id,project_id,kind,status,worker,progress,created) VALUES('job_old','','remix','running','api-host-1',0,?)", (t.time(),))
+    db.execute("INSERT INTO jobs(id,project_id,kind,status,worker,progress,created) VALUES('job_mine','','remix','queued','api-host-2',0,?)", (t.time(),))
+    rec = jobs.recover(api_worker="api-host-2")
+    assert rec["interrupted"] == ["job_old"]
+    assert jobs.get("job_old")["status"] == "interrupted" and jobs.get("job_old")["recovery"]
+    assert jobs.get("job_mine")["status"] == "queued"
+
+
+def test_create_pipeline_runs_as_resumable_stages(home, monkeypatch):
+    """The real create-from-idea workflow, with the model-backed functions stubbed: crash in render, resume."""
+    from nexus import create, qa, workflows  # noqa: F401
+    n = {"research": 0, "script": 0, "produce": 0, "render": 0}
+
+    def research(topic, notes=None, **_):
+        n["research"] += 1
+        return {"topic": topic, "sources": [{"title": "t", "url": "https://example.org"}], "text": "facts", "grounded": True}
+
+    def script_with_review(topic, res, scenes, **_):
+        n["script"] += 1
+        return {"title": "T", "topic": topic, "scenes": [{"narration": "n", "on_screen_text": "o", "visual_query": "q"}]}, {"stage": "1-pre-production", "checks": [], "passed": True}
+
+    def produce(project, script, **_):
+        n["produce"] += 1
+        return {"clips": [], "width": 1280, "height": 720}
+
+    def render_with_qa(project, tl, name, **_):
+        n["render"] += 1
+        if n["render"] == 1:
+            raise RuntimeError("encoder crashed")
+        return {"output": str(project.dir / "renders" / "master.mp4"), "elapsed": 1.0}, {"status": "PASSED_AUTOMATED_CHECKS", "known_issues": []}
+
+    monkeypatch.setattr(create, "research", research)
+    monkeypatch.setattr(create, "script_with_review", script_with_review)
+    monkeypatch.setattr(create, "produce", produce)
+    monkeypatch.setattr(qa, "render_with_qa", render_with_qa)
+    jid = jobs.submit("create-from-idea", {"topic": "Solar power", "scenes": 1})["job"]
+    assert jobs.run_job(jobs.claim("w")) == "queued"
+    assert jobs.run_job(jobs.claim("w")) == "done"
+    assert n == {"research": 1, "script": 1, "produce": 1, "render": 2}
+    j = jobs.get(jid)
+    assert j["project_id"].startswith("prj_") and j["result"]["status"] == "PASSED_AUTOMATED_CHECKS"
+    assert [k for k in j["stages"]] == ["project", "research", "script", "assemble", "render-qa"]

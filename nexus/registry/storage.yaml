@@ -1,0 +1,77 @@
+# Storage provider profiles for the NEXUS Federated Storage System.
+# A provider is ELIGIBLE only if it needs no payment method and cannot bill (billing_risk: none).
+# Figures were checked on 2026-11-11 (see docs/STORAGE.md for sources); `verify` lists what must be
+# re-confirmed in the provider's own console before the user enables it. NEXUS never enables a remote by itself.
+checked: "2026-11-11"
+providers:
+  local:
+    name: Local folder / external drive / NAS share
+    kind: local
+    free_gb: null            # limited only by the disk
+    payment_method_required: false
+    billing_risk: none
+    private: true
+    allowed_content: [state, metadata, production, assets, originals, exports]
+    notes: Default. A second physical disk or NAS path is the recommended first backup copy.
+  backblaze-b2:
+    name: Backblaze B2 (S3-compatible)
+    kind: rclone
+    rclone_type: b2
+    free_gb: 10
+    payment_method_required: false
+    billing_risk: none        # without a card on file the account cannot be charged; uploads stop at the cap
+    private: true
+    allowed_content: [state, metadata, production, assets, originals]
+    notes: First 10 GB free; free egress up to 3x stored data per month. Keep the account card-free.
+    verify: ["sign-up still works without a card", "data caps are set to $0 in the B2 console"]
+  google-drive:
+    name: Google Drive (personal account)
+    kind: rclone
+    rclone_type: drive
+    free_gb: 15
+    payment_method_required: false
+    billing_risk: none
+    private: true
+    allowed_content: [state, metadata, production, assets, originals]
+    notes: 15 GB shared with Gmail/Photos. Hard quota - uploads fail when full, nothing is billed.
+  onedrive:
+    name: Microsoft OneDrive (personal account)
+    kind: rclone
+    rclone_type: onedrive
+    free_gb: 5
+    payment_method_required: false
+    billing_risk: none
+    private: true
+    allowed_content: [state, metadata, production, assets]
+    notes: 5 GB hard quota.
+  huggingface-private:
+    name: Hugging Face Hub private repository
+    kind: manual
+    free_gb: 100
+    payment_method_required: false
+    billing_risk: none
+    private: true
+    allowed_content: []       # models/datasets only - the Hub is not a general backup service
+    notes: >
+      Use only for model weights / datasets NEXUS itself produces (licence permitting). Not for user videos or
+      project backups: outside the Hub's intended use. No rclone backend; would need a dedicated adapter.
+  cloudflare-r2:
+    name: Cloudflare R2 (S3-compatible)
+    kind: rclone
+    rclone_type: s3
+    free_gb: 10
+    payment_method_required: true   # R2 must be activated on an account with billing details
+    billing_risk: overage           # usage above the free allowance is billed automatically; no hard spend cap
+    private: true
+    allowed_content: []
+    notes: BLOCKED by the zero-spend rule - needs a payment method and bills overage. Technically the best fit (free egress).
+  github-lfs:
+    name: Git LFS on GitHub
+    kind: manual
+    free_gb: 1
+    payment_method_required: false
+    billing_risk: none
+    private: true
+    allowed_content: []
+    notes: Small allowance, shared with bandwidth. Reserved for a few tiny sample assets, not backups.
+    verify: ["current LFS storage/bandwidth allowance on the account's billing page"]

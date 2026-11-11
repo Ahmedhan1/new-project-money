@@ -1,0 +1,114 @@
+{
+ "schema_version": 1,
+ "project": "NEXUS VIDEO AI",
+ "version": "0.2.0",
+ "phase": "hardening",
+ "updated": "2026-11-11T22:15:04Z",
+ "git": {
+  "branch": "claude/intelligent-faraday-y28cx1",
+  "commit": "5345a2e",
+  "subject": "Add analysis, editing, QA, localization, remix, creation, animation, series, compute federation, factory, API and UI",
+  "dirty_files": 57,
+  "upstream": null,
+  "unpushed_commits": null
+ },
+ "current_task": {
+  "id": "TST-D",
+  "title": "Acceptance test D (create-from-idea end to end) - never finished in the previous session",
+  "status": "in_progress",
+  "next": "Run it now that models are installed; fix what fails; inspect the frames for quality problems (feeds QLT-1)."
+ },
+ "next_tasks": [
+  {
+   "id": "TST-D",
+   "priority": 1,
+   "title": "Acceptance test D (create-from-idea end to end) - never finished in the previous session",
+   "status": "in_progress",
+   "next": "Run it now that models are installed; fix what fails; inspect the frames for quality problems (feeds QLT-1)."
+  },
+  {
+   "id": "WIN-1",
+   "priority": 1,
+   "title": "One-click Windows launchers (SETUP/START/STOP/STATUS/DOCTOR/BACKUP/RESTORE/CHECKPOINT/RESUME/UPDATE)",
+   "status": "implemented",
+   "next": "Run NEXUS_SETUP.bat and NEXUS_START.bat on the user's Windows machine; fix whatever fails (likely llama-cpp-python wheel, espeak-ng, Blender path)."
+  },
+  {
+   "id": "STO-1",
+   "priority": 1,
+   "title": "Federated storage adapter (local + rclone backends) with zero-spend eligibility and free-allowance caps",
+   "status": "tested",
+   "next": "Verify against one real remote (Backblaze B2 or Google Drive) once the user authorises an account - see STO-3."
+  },
+  {
+   "id": "UX-1",
+   "priority": 2,
+   "title": "UI - backup/storage page, job stage progress, resume buttons, clear error states",
+   "status": "in_progress",
+   "next": "Job stages + Resume button are in the jobs table; add a Storage & Backup page calling /api/backup endpoints."
+  },
+  {
+   "id": "CI-1",
+   "priority": 2,
+   "title": "GitHub Actions CI - lint + fast tests on Linux and Windows, secret scan, no models",
+   "status": "implemented",
+   "next": "Confirm the first run is green on both OS runners; fix Windows-only failures."
+  }
+ ],
+ "tasks": {
+  "total": 28,
+  "by_status": {
+   "verified": 3,
+   "planned": 15,
+   "tested": 1,
+   "blocked": 4,
+   "implemented": 2,
+   "deferred": 1,
+   "in_progress": 2
+  },
+  "registry": "nexus/registry/tasks.yaml"
+ },
+ "tests": {},
+ "jobs": {
+  "counts": {},
+  "active": []
+ },
+ "blockers": [
+  {
+   "id": "STO-3",
+   "title": "First real off-machine backup destination",
+   "why": "Needs the user to create/authorise a free account (Backblaze B2 without a card, or Google Drive) and run `rclone config`. Never done by an agent."
+  },
+  {
+   "id": "GEN-2",
+   "title": "AI video generation (text/image-to-video clips)",
+   "why": "No GPU on the build machine and no authorised free GPU account. compute.SimulatedRemoteGPU is a simulation, not a provider."
+  },
+  {
+   "id": "PUB-1",
+   "title": "Platform upload via official APIs (YouTube first)",
+   "why": "Needs the user's own OAuth client + explicit authorisation for each platform. Today NEXUS produces upload packages only."
+  },
+  {
+   "id": "ANA-1",
+   "title": "Analytics + monetisation intelligence from real platform data",
+   "why": "Same OAuth authorisation as PUB-1. The revenue ledger exists but holds only manual entries."
+  }
+ ],
+ "backup": {
+  "last": null,
+  "restore_drill": null
+ },
+ "environment": {
+  "models_installed": [
+   "llm-qwen3-4b",
+   "mt-madlad400-3b",
+   "voice:ar_JO-kareem-medium",
+   "voice:de_DE-thorsten-medium",
+   "voice:en_US-joe-medium",
+   "voice:en_US-ljspeech-medium",
+   "whisper-small"
+  ],
+  "data_home": "NEXUS_HOME (default: ./.nexus, never committed)"
+ }
+}

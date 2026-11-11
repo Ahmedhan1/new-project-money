@@ -1,7 +1,6 @@
 """Motion graphics rendered frame-by-frame with Pillow and piped into FFmpeg (no intermediate image files)."""
 from __future__ import annotations
 
-import math
 import subprocess
 from pathlib import Path
 

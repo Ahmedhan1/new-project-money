@@ -1,0 +1,66 @@
+{
+ "research_sources": [
+  {
+   "title": "Trained immunity",
+   "url": "https://en.wikipedia.org/wiki/Trained_immunity",
+   "license": "CC BY-SA 4.0 (Wikipedia) - used for facts, not copied"
+  },
+  {
+   "title": "Vaccine",
+   "url": "https://en.wikipedia.org/wiki/Vaccine",
+   "license": "CC BY-SA 4.0 (Wikipedia) - used for facts, not copied"
+  }
+ ],
+ "script": {
+  "title": "How vaccines train the immune system",
+  "topic": "How vaccines train the immune system",
+  "scenes": []
+ },
+ "script_attempts": 3,
+ "pre_production": [
+  "FAIL structure: 0 scenes (wanted 4)",
+  "PASS length: 0 words, ~0s of narration",
+  "PASS scene depth: every scene has at least 2 sentences / 16 words",
+  "FAIL hook: opening: \"\"",
+  "PASS numbers traceable to sources: every figure appears in the research text",
+  "PASS claims grounded in sources: narration vocabulary is covered by the research text",
+  "PASS no repeated scenes: all scenes distinct",
+  "PASS scene feasibility: every scene has a concrete visual to source"
+ ],
+ "licensed_images_used": 0,
+ "credits": [],
+ "status": "NEEDS_FIXES",
+ "known_issues": [
+  "[major] structure: 0 scenes (wanted 4)",
+  "[minor] hook: opening: \"\""
+ ],
+ "output": {
+  "duration": 2.421,
+  "video": {
+   "codec": "h264",
+   "width": 1280,
+   "height": 720,
+   "fps": 30.0,
+   "pix_fmt": "yuv420p",
+   "duration": 2.4
+  },
+  "render_seconds": 0.97
+ },
+ "technical": [
+  "PASS file integrity (full decode): decodes cleanly",
+  "PASS video track present: ok",
+  "PASS audio track present: ok",
+  "PASS codec: h264/yuv420p",
+  "PASS resolution: 1280x720 (expected 1280x720)",
+  "PASS aspect ratio: 1.778",
+  "PASS frame rate: 30.0 fps",
+  "PASS black frames: none beyond intentional fades",
+  "PASS frozen frames: none",
+  "PASS duration matches timeline: 2.42s vs timeline 2.40s",
+  "PASS A/V stream length: video 2.40s, audio 2.42s",
+  "PASS audio channels: 2 ch @ 48000 Hz",
+  "PASS loudness: -14.02 LUFS (target -14.0 +/-1.5)",
+  "PASS clipping / true peak: true peak -2.51 dBTP (limit -1.0)",
+  "PASS dead air: none"
+ ]
+}

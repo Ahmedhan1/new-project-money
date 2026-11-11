@@ -7,7 +7,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
-from . import assets, config, llm, net, project as prj, qa
+from . import assets, llm, net, project as prj, qa
 from .audio import music
 from .speech import tts
 from .timeline import ops, subs, text as ttext
@@ -42,16 +42,38 @@ def research(topic: str, lang: str = "en", max_pages: int = 2, notes: str | None
 
 
 # ------------------------------------------------------------------ script
+def _script_schema(scenes: int) -> dict:
+    """Grammar for the script: the local model cannot return an empty object, the wrong number of scenes,
+    or a one-sentence scene - those were the failure modes seen in acceptance test D."""
+    return {"type": "object", "required": ["title", "scenes"], "properties": {
+        "title": {"type": "string"},
+        "scenes": {"type": "array", "minItems": scenes, "maxItems": scenes, "items": {
+            "type": "object", "required": ["narration", "on_screen_text", "visual_query"], "properties": {
+                "narration": {"type": "array", "minItems": 2, "maxItems": 3, "items": {"type": "string"}},
+                "on_screen_text": {"type": "string"}, "visual_query": {"type": "string"}}}}}}
+
+
 def write_script(topic: str, res: dict, scenes: int = 5, audience: str = "a curious general audience", style: str = "clear, vivid explainer",
-                 series_context: str = "") -> dict:
+                 series_context: str = "", feedback: str = "") -> dict:
     facts = res["text"][:5000] or "(no research text available - write only widely known, uncontroversial facts)"
     r = llm.chat_json(
         f"Write the narration script for a short video.\nTopic: {topic}\nAudience: {audience}\nStyle: {style}\n{series_context}\n"
         f"Use ONLY facts from these research notes. Do not invent numbers, dates or names.\n--- NOTES ---\n{facts}\n--- END NOTES ---\n\n"
-        f"Write exactly {scenes} scenes. Scene 1 must open with a hook (a surprising fact or question). The last scene must give a takeaway.\n"
-        'Return JSON: {"title": "max 7 words", "scenes": [{"narration": "2 short spoken sentences", '
+        # Wording here was A/B-tested against Qwen3-4B: arrows ("->") and "e.g." inside the JSON example made it
+        # answer with an empty object. Keep it plain; `require` retries if the model still returns nothing.
+        f"Write exactly {scenes} scenes that build one story: a hook, then how it works, then why it matters, then a takeaway. "
+        "Scene 1 must open with a hook (a surprising fact or question). The last scene must give a takeaway. "
+        "Each scene explains ONE new idea and must not repeat an earlier scene.\n"
+        "Every narration is 2 or 3 full spoken sentences, 22 to 40 words in total, concrete and specific. "
+        "Visuals must show the real subject of the scene, never a metaphor.\n"
+        + (f"Your previous draft was rejected. Fix exactly these problems:\n{feedback}\n" if feedback else "") +
+        'Return JSON: {"title": "max 7 words", "scenes": [{"narration": ["first spoken sentence", "second spoken sentence"], '
         '"on_screen_text": "max 5 words", "visual_query": "2-3 word photo search phrase, concrete nouns"}]}',
-        max_tokens=1300, temperature=0.6)
+        require="scenes", schema=_script_schema(scenes),
+        max_tokens=1700, temperature=0.6)
+    for s in r.get("scenes", []):  # narration arrives as a list of sentences (the schema forces 2-3 of them)
+        if isinstance(s.get("narration"), list):
+            s["narration"] = " ".join(x.strip() if x.strip()[-1:] in ".!?" else x.strip() + "." for x in map(str, s["narration"]) if x.strip())
     sc = [{"narration": re.sub(r"\s+", " ", str(s.get("narration", ""))).strip(), "on_screen_text": str(s.get("on_screen_text", ""))[:48],
            "visual_query": str(s.get("visual_query", topic))[:60]} for s in r.get("scenes", []) if s.get("narration")]
     return {"title": str(r.get("title", topic))[:70], "topic": topic, "scenes": sc}
@@ -68,6 +90,10 @@ def review_script(script: dict, res: dict, want_scenes: int) -> dict:
     checks.append(qa._c("structure", len(sc) == want_scenes, f"{len(sc)} scenes (wanted {want_scenes})", "major", fix="rewrite"))
     words = sum(len(s["narration"].split()) for s in sc)
     checks.append(qa._c("length", 8 * len(sc) <= words <= 60 * len(sc), f"{words} words, ~{words / 2.5:.0f}s of narration", "major", fix="rewrite"))
+    thin = [(i + 1, len(s["narration"].split())) for i, s in enumerate(sc)
+            if len(s["narration"].split()) < 14 or len(re.findall(r"[.!?](?:\s|$)", s["narration"])) < 2]
+    checks.append(qa._c("scene depth", not thin, "every scene has at least 2 sentences / 14 words" if not thin
+                        else f"scenes too thin to carry a shot (scene, words): {thin} - each needs 2-3 sentences, 22-40 words", "major", fix="rewrite"))
     hook = sc[0]["narration"] if sc else ""
     checks.append(qa._c("hook", "?" in hook or bool(re.search(r"\d|never|every|most|only|imagine|did you", hook, re.I)),
                         f"opening: \"{hook[:70]}\"", "minor"))
@@ -98,15 +124,18 @@ def review_script(script: dict, res: dict, want_scenes: int) -> dict:
 
 def script_with_review(topic: str, res: dict, scenes: int = 5, rounds: int = 3, **kw) -> tuple[dict, dict]:
     """Write -> review -> rewrite until the gates pass or we run out of rounds (then the issues stay in the report)."""
-    best = None
+    best, feedback = None, ""
     for _ in range(rounds):
-        script = write_script(topic, res, scenes, **kw)
+        script = write_script(topic, res, scenes, feedback=feedback, **kw)
         review = review_script(script, res, scenes)
-        fails = sum(not c["ok"] and c["severity"] != "minor" for c in review["checks"])
+        failed = [c for c in review["checks"] if not c["ok"] and c["severity"] != "minor"]
+        fails = len(failed)
         if best is None or fails < best[2]:
             best = (script, review, fails)
         if fails == 0:
             break
+        # the reviewer's findings go back to the writer - a blind retry tends to repeat the same mistake
+        feedback = "\n".join(f"- {c['check']}: {c['detail']}" for c in failed)
     best[1]["attempts"] = _ + 1
     return best[0], best[1]
 
@@ -177,10 +206,11 @@ def produce(project, script: dict, *, lang: str = "en", size=(1280, 720), style:
             gen[extra_clips[i]] = {"license": "generated by NEXUS (original)", "source": "animation studio"}
             frames.append((None, s["on_screen_text"] or s["narration"][:40]))
         else:
-            row = assets.find_image(s["visual_query"], project.id, used) if use_stock else None
+            row = assets.find_image(s["visual_query"], project.id, used, fallbacks=(s.get("on_screen_text", ""), script.get("topic", ""))) if use_stock else None
             if row:
                 used.add(row["id"])
-                img, prov = row["path"], {"license": row["license"], "source": row["source"], "attribution": row["attribution"]}
+                img, prov = row["path"], {"license": row["license"], "source": row["source"], "attribution": row["attribution"],
+                                          "query": s["visual_query"], "matched_query": row.get("matched_query")}
             else:
                 img = str(card(s["on_screen_text"] or script["title"], "", W, H, project.dir / "work" / f"card{i:02d}.jpg", i))
                 prov = {"license": "generated by NEXUS (original)", "source": "title-card generator"}
@@ -220,15 +250,50 @@ def produce(project, script: dict, *, lang: str = "en", size=(1280, 720), style:
     return tl
 
 
+def _timed_stage(name: str, fn):
+    """Default stage runner (no job ledger): just measure, so `nexus profile` has real numbers."""
+    import time
+    from . import db
+    t0 = time.time()
+    out = fn()
+    db.metric(f"stage_seconds.create-from-idea.{name}", round(time.time() - t0, 3))
+    return json.loads(json.dumps(out, ensure_ascii=False, default=str))
+
+
 def create_video(topic: str, *, scenes: int = 5, lang: str = "en", size=(1280, 720), notes: str | None = None, style: dict | None = None,
-                 name: str | None = None) -> dict:
-    """The whole from-zero workflow. Returns paths + the approval report."""
-    project = prj.Project.create(name or topic[:60], "create")
-    res = research(topic, notes=notes)
-    script, pre = script_with_review(topic, res, scenes)
-    tl = produce(project, script, lang=lang, size=size, style=style)
-    project.save_timeline(tl, "first assembly")
-    stats, report = qa.render_with_qa(project, tl, "master", extra_stages=[pre],
-                                      extra={"sources": res["sources"], "credits": project.data.get("credits", [])})
-    return {"project": project.id, "output": stats["output"], "script": script, "research": res["sources"], "render": stats,
-            "report": report, "storyboard": project.data.get("storyboard")}
+                 name: str | None = None, stage=None, on_project=None) -> dict:
+    """The whole from-zero workflow. Returns paths + the approval report.
+
+    Runs as named stages. When called from a durable job, `stage` is `Job.stage`: each finished stage is
+    checkpointed, so a crashed/restarted worker resumes at the first unfinished stage instead of redoing
+    research, script-writing or narration."""
+    stage = stage or _timed_stage
+    pid = stage("project", lambda: prj.Project.create(name or topic[:60], "create").id)
+    if on_project:
+        on_project(pid)
+    res = stage("research", lambda: research(topic, notes=notes))
+
+    def _script():
+        script, pre = script_with_review(topic, res, scenes)
+        return {"script": script, "pre": pre}
+
+    sp = stage("script", _script)
+    script, pre = sp["script"], sp["pre"]
+
+    def _assemble():
+        project = prj.Project(pid)
+        tl = produce(project, script, lang=lang, size=tuple(size), style=style)
+        return {"timeline": project.save_timeline(tl, "first assembly")}
+
+    vid = stage("assemble", _assemble)["timeline"]
+
+    def _render():
+        project = prj.Project(pid)
+        stats, report = qa.render_with_qa(project, project.timeline(vid=vid), "master", extra_stages=[pre],
+                                          extra={"sources": res["sources"], "credits": project.data.get("credits", [])})
+        return {"stats": stats, "report": report}
+
+    rr = stage("render-qa", _render)
+    project = prj.Project(pid)
+    return {"project": pid, "output": rr["stats"]["output"], "script": script, "research": res["sources"], "render": rr["stats"],
+            "report": rr["report"], "storyboard": project.data.get("storyboard")}

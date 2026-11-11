@@ -4,7 +4,6 @@ from __future__ import annotations
 import re
 
 from . import create, db, llm, project as prj, qa
-from .timeline import ops
 
 SYSTEM = "You are a showrunner and screenwriter. You follow the requested output format exactly, with no extra commentary."
 

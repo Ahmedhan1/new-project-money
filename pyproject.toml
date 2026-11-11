@@ -1,0 +1,17 @@
+[tool.ruff]
+line-length = 170
+target-version = "py310"
+extend-exclude = [".nexus", ".venv"]
+
+[tool.ruff.lint]
+# Real defects only (syntax errors, undefined names, unused imports/variables, bug-prone patterns).
+select = ["E9", "F", "B006", "B008", "B017", "B018", "B023", "PLE"]
+ignore = ["E741"]
+
+[tool.ruff.lint.per-file-ignores]
+"nexus/api.py" = ["B008"]            # FastAPI's File(...) default is the documented pattern
+"nexus/animation/engines.py" = ["F403", "F405"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["heavy: needs downloaded models and minutes of CPU (tests/test_*.py A-I); not run in CI"]

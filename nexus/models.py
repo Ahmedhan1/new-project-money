@@ -57,6 +57,7 @@ def ensure_model(name: str) -> Path:
     d = config.MODELS / m["dir"]
     missing = [f for f in m["files"] if not (d / f).exists() or (d / f).stat().st_size == 0]
     if missing:
+        config.ensure_dirs()  # fresh clone: NEXUS_HOME does not exist yet
         free_mb = shutil.disk_usage(config.HOME).free / 1e6
         if free_mb < m["size_mb"] * 1.5 + 2000:
             raise RuntimeError(f"not enough disk for {name}: need ~{m['size_mb']} MB, {free_mb:.0f} MB free")
@@ -69,6 +70,7 @@ def ensure_model(name: str) -> Path:
 
 def ensure_voice(name: str) -> Path:
     v = catalog()["voices"][name]
+    config.ensure_dirs()
     d = config.MODELS / "piper"
     onnx = d / f"{name}.onnx"
     for suffix in (".onnx", ".onnx.json"):

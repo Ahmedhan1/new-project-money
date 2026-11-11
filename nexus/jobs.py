@@ -1,0 +1,249 @@
+"""Durable job ledger: production jobs survive app restarts, worker crashes and agent sessions ending.
+
+A job is a row in SQLite, not a closure in memory. A handler is a named function that runs its work
+as a sequence of *stages*; each finished stage stores its (JSON) output in the row, so when a worker
+dies the next worker re-runs the handler and every completed stage is answered from its checkpoint
+instead of being recomputed.
+
+    @jobs.handler("create-from-idea")
+    def run(job):
+        res = job.stage("research", lambda: research(job.params["topic"]))
+        ...
+
+Workers are plain processes (`python -m nexus worker`). They claim jobs atomically, heartbeat while
+working, and `recover()` re-queues anything whose worker stopped heartbeating.
+"""
+from __future__ import annotations
+
+import json
+import os
+import socket
+import threading
+import time
+import traceback
+from contextlib import contextmanager
+from typing import Any, Callable
+
+from . import config, db
+
+HANDLERS: dict[str, Callable[["Job"], Any]] = {}
+HEARTBEAT_S = 5.0
+STALE_S = 30.0
+ACTIVE = ("queued", "running")
+
+
+def handler(kind: str):
+    def deco(fn):
+        HANDLERS[kind] = fn
+        return fn
+    return deco
+
+
+def worker_id(role: str = "worker") -> str:
+    return f"{role}-{socket.gethostname()}-{os.getpid()}"
+
+
+@contextmanager
+def heavy_lock():
+    """One heavy job at a time on this machine, across processes (API thread and worker process)."""
+    config.ensure_dirs()
+    f = open(config.RUN / "heavy.lock", "a+")
+    try:
+        if os.name == "nt":
+            import msvcrt
+            while True:
+                try:
+                    f.seek(0)
+                    msvcrt.locking(f.fileno(), msvcrt.LK_NBLCK, 1)
+                    break
+                except OSError:
+                    time.sleep(0.5)
+        else:
+            import fcntl
+            fcntl.flock(f, fcntl.LOCK_EX)
+        yield
+    finally:
+        try:
+            if os.name == "nt":
+                import msvcrt
+                f.seek(0)
+                msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(f, fcntl.LOCK_UN)
+        finally:
+            f.close()
+
+
+class Job:
+    def __init__(self, row: dict):
+        self.id: str = row["id"]
+        self.kind: str = row["kind"]
+        self.project_id: str = row.get("project_id") or ""
+        self.params: dict = json.loads(row["params"]) if row.get("params") else {}
+        self._stages: dict[str, dict] = json.loads(row["stages"]) if row.get("stages") else {}
+        self.log_path = config.LOGS / "jobs" / f"{self.id}.log"
+
+    def log(self, msg: str) -> None:
+        self.log_path.parent.mkdir(parents=True, exist_ok=True)
+        with self.log_path.open("a", encoding="utf-8") as f:
+            f.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} {msg}\n")
+
+    def progress(self, p: float) -> None:
+        db.execute("UPDATE jobs SET progress=? WHERE id=?", (max(0.0, min(1.0, p)), self.id))
+
+    def set_project(self, pid: str) -> None:
+        self.project_id = pid
+        db.execute("UPDATE jobs SET project_id=? WHERE id=?", (pid, self.id))
+
+    def _save(self, stage: str) -> None:
+        db.execute("UPDATE jobs SET stage=?, stages=?, checkpoint=?, heartbeat=? WHERE id=?",
+                   (stage, json.dumps(self._stages, ensure_ascii=False, default=str),
+                    json.dumps({"last_done": [k for k, v in self._stages.items() if v["status"] == "done"][-1:], "ts": time.time()}),
+                    time.time(), self.id))
+
+    def stage(self, name: str, fn: Callable[[], Any]) -> Any:
+        """Run `fn` once. Its return value must be JSON-serialisable; a finished stage is never re-run."""
+        st = self._stages.get(name)
+        if st and st["status"] == "done":
+            self.log(f"stage {name}: restored from checkpoint (not re-run)")
+            return st["output"]
+        runs = (st or {}).get("runs", 0) + 1
+        self._stages[name] = {"status": "running", "started": time.time(), "runs": runs}
+        self._save(name)
+        self.log(f"stage {name}: start (run {runs})")
+        t0 = time.time()
+        out = fn()
+        out = json.loads(json.dumps(out, ensure_ascii=False, default=str))  # what a resumed run will see
+        el = round(time.time() - t0, 3)
+        self._stages[name] = {"status": "done", "started": t0, "finished": time.time(), "seconds": el, "runs": runs, "output": out}
+        self._save(name)
+        db.metric(f"stage_seconds.{self.kind}.{name}", el, job=self.id)
+        self.log(f"stage {name}: done in {el}s")
+        return out
+
+
+def submit(kind: str, params: dict | None = None, project_id: str = "", workflow: str | None = None, max_retries: int = 2) -> dict:
+    job_id = db.new_id("job")
+    db.execute("INSERT INTO jobs(id,project_id,kind,status,worker,progress,created,params,workflow,stages,retries,max_retries,durable,log)"
+               " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,1,?)",
+               (job_id, project_id, kind, "queued", None, 0.0, time.time(), json.dumps(params or {}, ensure_ascii=False),
+                workflow or kind, "{}", 0, max_retries, str(config.LOGS / "jobs" / f"{job_id}.log")))
+    return {"job": job_id, "status": "queued"}
+
+
+def get(job_id: str) -> dict | None:
+    rows = db.query("SELECT * FROM jobs WHERE id=?", (job_id,))
+    if not rows:
+        return None
+    r = rows[0]
+    for k in ("params", "stages", "result", "checkpoint"):
+        r[k] = json.loads(r[k]) if r.get(k) else None
+    return r
+
+
+def cancel(job_id: str) -> bool:
+    return db.execute("UPDATE jobs SET status='cancelled', finished=? WHERE id=? AND status='queued'", (time.time(), job_id)).rowcount == 1
+
+
+def retry(job_id: str) -> bool:
+    """Re-queue a failed/interrupted durable job; finished stages are kept."""
+    return db.execute("UPDATE jobs SET status='queued', error=NULL, finished=NULL, retries=0, recovery='re-queued by user' "
+                      "WHERE id=? AND durable=1 AND status IN ('failed','interrupted','cancelled')", (job_id,)).rowcount == 1
+
+
+def claim(wid: str) -> Job | None:
+    now = time.time()
+    with db._lock:  # RETURNING rows must be read before the commit
+        c = db.conn()
+        rows = c.execute("UPDATE jobs SET status='running', worker=?, started=COALESCE(started,?), heartbeat=? WHERE id=("
+                         "SELECT id FROM jobs WHERE status='queued' AND durable=1 ORDER BY created LIMIT 1) AND status='queued' RETURNING id",
+                         (wid, now, now)).fetchall()
+        c.commit()
+    if not rows:
+        return None
+    return Job(db.query("SELECT * FROM jobs WHERE id=?", (rows[0][0],))[0])
+
+
+def recover(stale_after: float = STALE_S, api_worker: str | None = None) -> dict:
+    """Re-queue durable jobs whose worker stopped heartbeating; flag lost in-process jobs. Safe to call any time."""
+    now = time.time()
+    out = {"requeued": [], "failed": [], "interrupted": []}
+    for r in db.query("SELECT id,stage,retries,max_retries,heartbeat,worker FROM jobs WHERE status='running' AND durable=1"):
+        if r["heartbeat"] and now - r["heartbeat"] < stale_after:
+            continue
+        n = (r["retries"] or 0) + 1
+        note = f"worker {r['worker']} lost at stage '{r['stage'] or 'start'}'"
+        if n > (r["max_retries"] or 0):
+            db.execute("UPDATE jobs SET status='failed', finished=?, retries=?, error=?, recovery=? WHERE id=? AND status='running'",
+                       (now, n, note + "; retry limit reached", "inspect the job log, then `nexus jobs retry <id>`", r["id"]))
+            out["failed"].append(r["id"])
+        else:
+            db.execute("UPDATE jobs SET status='queued', retries=?, recovery=? WHERE id=? AND status='running'",
+                       (n, note + "; resumed from last checkpoint", r["id"]))
+            out["requeued"].append(r["id"])
+    # In-process (closure) jobs cannot outlive the API process that created them: say so instead of showing 'running' forever.
+    if api_worker is not None:
+        for r in db.query("SELECT id FROM jobs WHERE status IN ('queued','running') AND COALESCE(durable,0)=0 AND COALESCE(worker,'')<>?", (api_worker,)):
+            db.execute("UPDATE jobs SET status='interrupted', finished=?, error=?, recovery=? WHERE id=?",
+                       (now, "the app stopped while this in-process job was pending", "run the action again from the app", r["id"]))
+            out["interrupted"].append(r["id"])
+    return out
+
+
+def run_job(job: Job) -> str:
+    """Execute one claimed job. Returns its final status."""
+    stop = threading.Event()
+
+    def beat():
+        while not stop.wait(HEARTBEAT_S):
+            db.execute("UPDATE jobs SET heartbeat=? WHERE id=? AND status='running'", (time.time(), job.id))
+
+    threading.Thread(target=beat, daemon=True).start()
+    try:
+        fn = HANDLERS.get(job.kind)
+        if fn is None:
+            raise LookupError(f"no handler registered for job kind '{job.kind}'")
+        with heavy_lock():
+            result = fn(job)
+        db.execute("UPDATE jobs SET status='done', progress=1, finished=?, result=? WHERE id=?",
+                   (time.time(), json.dumps(result, default=str, ensure_ascii=False), job.id))
+        job.log("job done")
+        return "done"
+    except Exception as e:
+        err = f"{type(e).__name__}: {e}\n{traceback.format_exc()[-1500:]}"
+        job.log(f"job error: {err}")
+        row = db.query("SELECT retries,max_retries FROM jobs WHERE id=?", (job.id,))[0]
+        n = (row["retries"] or 0) + 1
+        if isinstance(e, LookupError) or n > (row["max_retries"] or 0):
+            db.execute("UPDATE jobs SET status='failed', finished=?, retries=?, error=?, recovery=? WHERE id=?",
+                       (time.time(), n, err, "fix the cause, then `nexus jobs retry <id>` (finished stages are kept)", job.id))
+            return "failed"
+        db.execute("UPDATE jobs SET status='queued', retries=?, error=?, recovery=? WHERE id=?",
+                   (n, err, f"attempt {n} failed; retrying from last checkpoint", job.id))
+        return "queued"
+    finally:
+        stop.set()
+
+
+def run_worker(stop: threading.Event | None = None, poll: float = 1.0, once: bool = False, role: str = "worker") -> None:
+    from . import workflows  # noqa: F401  (registers the production handlers)
+    wid = worker_id(role)
+    last_recover = 0.0
+    while not (stop and stop.is_set()):
+        if time.time() - last_recover > STALE_S:
+            recover()
+            last_recover = time.time()
+        job = claim(wid)
+        if job is None:
+            if once:
+                return
+            time.sleep(poll)
+            continue
+        run_job(job)
+
+
+def summary() -> dict:
+    rows = db.query("SELECT status, COUNT(*) n FROM jobs GROUP BY status")
+    active = db.query("SELECT id,kind,status,stage,worker,retries,recovery FROM jobs WHERE status IN ('queued','running','interrupted') ORDER BY created")
+    return {"counts": {r["status"]: r["n"] for r in rows}, "active": active}

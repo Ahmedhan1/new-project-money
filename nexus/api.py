@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import queue
 import shutil
 import threading
@@ -14,7 +15,7 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
 
-from . import assets, compute, config, costguard, create, db, edit, factory, localize, project as prj, publish, qa, remix, series, tools
+from . import assets, compute, config, costguard, db, edit, factory, jobs, project as prj, publish, remix, series, tools
 from .media import analyze
 from .timeline import ops
 from .timeline.render import clip_duration, clip_starts, total_duration
@@ -25,12 +26,16 @@ _q: "queue.Queue[tuple[str, callable]]" = queue.Queue()
 _analyses: dict[str, dict] = {}
 
 
+_API_WORKER = jobs.worker_id("api")
+
+
 def _worker() -> None:
     while True:
         job_id, fn = _q.get()
         db.execute("UPDATE jobs SET status='running', started=? WHERE id=?", (time.time(), job_id))
         try:
-            result = fn()
+            with jobs.heavy_lock():
+                result = fn()
             db.execute("UPDATE jobs SET status='done', progress=1, finished=?, result=? WHERE id=?",
                        (time.time(), json.dumps(result, default=str, ensure_ascii=False), job_id))
         except Exception as e:  # the job fails, the server keeps running
@@ -39,12 +44,17 @@ def _worker() -> None:
 
 
 threading.Thread(target=_worker, daemon=True).start()
+# Startup recovery: durable jobs whose worker died are re-queued from their last checkpoint; in-process jobs
+# that died with a previous app run are marked 'interrupted' (never left 'running' forever).
+jobs.recover(api_worker=_API_WORKER)
+if os.environ.get("NEXUS_EMBEDDED_WORKER", "1") != "0":  # `nexus start` runs the worker as its own process instead
+    threading.Thread(target=jobs.run_worker, kwargs={"role": "embedded"}, daemon=True).start()
 
 
 def submit(kind: str, fn, project_id: str = "") -> dict:
     job_id = db.new_id("job")
     db.execute("INSERT INTO jobs(id,project_id,kind,status,worker,progress,created) VALUES(?,?,?,?,?,?,?)",
-               (job_id, project_id, kind, "queued", "local-0", 0.0, time.time()))
+               (job_id, project_id, kind, "queued", _API_WORKER, 0.0, time.time()))
     _q.put((job_id, fn))
     return {"job": job_id, "status": "queued"}
 
@@ -121,12 +131,53 @@ def api_schedule(r: ScheduleReq):
     return factory.schedule(r.target, r.languages, r.platforms, r.topics)
 
 
+@app.get("/api/health")
+def api_health():
+    return {"ok": True, "version": config.VERSION, "db_schema": db.schema_version(), "jobs": jobs.summary()["counts"]}
+
+
 @app.get("/api/jobs")
 def api_jobs():
-    rows = db.query("SELECT id,project_id,kind,status,worker,progress,created,started,finished,error,result FROM jobs ORDER BY created DESC LIMIT 60")
+    rows = db.query("SELECT id,project_id,kind,status,worker,progress,created,started,finished,error,result,stage,stages,retries,recovery,durable "
+                    "FROM jobs ORDER BY created DESC LIMIT 60")
     for r in rows:
         r["result"] = json.loads(r["result"]) if r["result"] else None
+        st = json.loads(r.pop("stages") or "{}")
+        r["stages"] = [{"name": k, "status": v["status"], "seconds": v.get("seconds"), "runs": v.get("runs", 1)} for k, v in st.items()]
     return rows
+
+
+@app.post("/api/jobs/{job_id}/retry")
+def api_job_retry(job_id: str):
+    if not jobs.retry(job_id):
+        raise HTTPException(409, "only failed, interrupted or cancelled durable jobs can be retried")
+    return {"job": job_id, "status": "queued"}
+
+
+@app.post("/api/jobs/{job_id}/cancel")
+def api_job_cancel(job_id: str):
+    if not jobs.cancel(job_id):
+        raise HTTPException(409, "only queued jobs can be cancelled")
+    return {"job": job_id, "status": "cancelled"}
+
+
+@app.get("/api/storage")
+def api_storage():
+    from . import state, storage
+    rt = state._runtime()
+    return {"destinations": storage.report(), "backup": rt["backup"],
+            "providers": [{"id": k, "name": v["name"], "free_gb": v["free_gb"], "eligible": storage.eligibility(k)[0], "why": storage.eligibility(k)[1]}
+                          for k, v in storage.providers().items()]}
+
+
+class BackupReq(BaseModel):
+    drill: bool = True
+    to: str | None = None
+
+
+@app.post("/api/backup")
+def api_backup(r: BackupReq):
+    return jobs.submit("backup", {"drill": r.drill, "to": r.to}, max_retries=0)
 
 
 @app.get("/api/assets")
@@ -263,14 +314,12 @@ class RenderReq(BaseModel):
 @app.post("/api/projects/{pid}/render")
 def api_render(pid: str, r: RenderReq):
     p = _project(pid)
-    tl = p.timeline(r.branch)
+    try:
+        p.timeline(r.branch)
+    except KeyError:
+        raise HTTPException(409, f"project has no timeline on branch '{r.branch}' yet")
 
-    def run():
-        stats, report = qa.render_with_qa(p, tl, r.name or f"{r.branch}_{int(time.time()) % 100000}", _analysis(p) or None)
-        return {"output": str(Path(stats["output"]).relative_to(p.dir)), "status": report["status"], "issues": report["known_issues"],
-                "segments_from_cache": stats["segments_from_cache"], "segments": stats["segments"], "seconds": stats["elapsed"]}
-
-    return submit("render", run, pid)
+    return jobs.submit("render", {"project": pid, "branch": r.branch, "name": r.name or f"{r.branch}_{int(time.time()) % 100000}"}, pid)
 
 
 class LocalizeReq(BaseModel):
@@ -282,15 +331,12 @@ class LocalizeReq(BaseModel):
 @app.post("/api/projects/{pid}/localize")
 def api_localize(pid: str, r: LocalizeReq):
     p = _project(pid)
-    tl = p.timeline(r.branch)
+    try:
+        p.timeline(r.branch)
+    except KeyError:
+        raise HTTPException(409, f"project has no timeline on branch '{r.branch}' yet")
 
-    def run():
-        ltl, review = localize.localize(p, tl, r.lang, _analysis(p) or None, context=p.name, dub=r.dub)
-        p.save_timeline(ltl, f"{r.lang} version", branch=r.lang)
-        stats, report = qa.render_with_qa(p, ltl, f"{r.branch}_{r.lang}", extra_stages=[review], extra={"language": r.lang})
-        return {"output": str(Path(stats["output"]).relative_to(p.dir)), "status": report["status"], "issues": report["known_issues"], "lines": review["lines"]}
-
-    return submit(f"localize-{r.lang}", run, pid)
+    return jobs.submit("localize", {"project": pid, "lang": r.lang, "branch": r.branch, "dub": r.dub}, pid)
 
 
 class PackageReq(BaseModel):
@@ -319,11 +365,8 @@ class CreateReq(BaseModel):
 
 @app.post("/api/create")
 def api_create(r: CreateReq):
-    def run():
-        out = create.create_video(r.topic, scenes=r.scenes, lang=r.lang, notes=r.notes, size=(720, 1280) if r.vertical else (1280, 720))
-        return {"project": out["project"], "status": out["report"]["status"], "issues": out["report"]["known_issues"], "title": out["script"]["title"]}
-
-    return submit("create-from-idea", run)
+    return jobs.submit("create-from-idea", {"topic": r.topic, "scenes": r.scenes, "lang": r.lang, "notes": r.notes,
+                                            "size": [720, 1280] if r.vertical else [1280, 720]})
 
 
 class RemixReq(BaseModel):

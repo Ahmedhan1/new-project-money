@@ -1,0 +1,15 @@
+# Light dependency set for CI and for working on the recovery/storage/job layers: no models, no ML runtimes.
+fastapi
+uvicorn
+pydantic
+python-multipart
+pyyaml
+pillow
+numpy
+psutil
+httpx
+cryptography
+arabic-reshaper
+python-bidi
+pytest
+ruff

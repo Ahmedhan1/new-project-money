@@ -22,7 +22,7 @@ def test_a_edit_uploaded_video(fx, results):
     prop = edit.propose(an, "tighten")
     assert prop["status"] == "awaiting approval" and prop["proposed_duration"] < prop["source_duration"] - 4
     tl = edit.build_timeline(media["path"], an, prop, title="Why Solar Won")
-    v1 = p.save_timeline(tl, "accepted proposal")
+    p.save_timeline(tl, "accepted proposal")
     # the timeline is editable: per-scene override + undo/redo
     tl2 = ops.set_props(tl, tl["clips"][1]["id"], text=[{"text": "Solar basics", "style": "lower_third", "start": 0.3, "end": 3.0}])
     p.save_timeline(tl2, "lower third on first scene")

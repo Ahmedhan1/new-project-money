@@ -16,3 +16,4 @@ psutil
 manim
 llama-cpp-python
 python-multipart
+cryptography

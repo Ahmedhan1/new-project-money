@@ -1,0 +1,227 @@
+# NEXUS development task registry - the single source of truth for "what next".
+# Statuses: planned | in_progress | implemented | tested | verified | blocked | deferred | rejected
+#   implemented = code exists          tested = automated test passes
+#   verified    = works in the integrated product, with evidence   (never mark verified without `evidence`)
+# Priority: 1 = do first. `python -m nexus tasks` prints the next ready tasks; docs/GAP_ANALYSIS.md maps
+# the 40 product domains to these ids.
+tasks:
+  # ------------------------------------------------------------------ recovery / memory / storage
+  - id: MEM-1
+    priority: 1
+    title: "Project memory files + checkpoint engine (state, handoff, task registry, secret/large-file guard)"
+    status: verified
+    acceptance: "A fresh session can resume from NEXUS_HANDOFF.md + NEXUS_STATE.json alone; checkpoint refuses secrets/media; never force-pushes."
+    test: "pytest tests/fast/test_state.py"
+    evidence: "tests/fast/test_state.py passes; this repository's own checkpoints are made with `nexus checkpoint`"
+    next: "Keep NEXUS_HANDOFF.md under 1,500 words as the project grows."
+  - id: JOB-1
+    priority: 1
+    title: "Durable job ledger with stage checkpoints, heartbeats, retry and crash recovery"
+    status: verified
+    acceptance: "Killing the worker mid-job loses nothing; after restart the job finishes and completed stages are not re-run."
+    test: "pytest tests/fast/test_jobs.py (kills a real worker process with SIGKILL mid-stage)"
+    evidence: "tests/fast/test_jobs.py::test_worker_killed_mid_job_resumes_without_repeating_stages"
+    next: "Move the remaining in-process API jobs (JOB-2) onto the ledger."
+  - id: JOB-2
+    priority: 2
+    title: "Move remaining in-process API jobs onto the durable ledger (analyze, remix, series, film, animate, package)"
+    status: planned
+    deps: [JOB-1]
+    acceptance: "No API endpoint submits a closure; every job kind has a named handler with stages and survives a restart."
+    test: "Extend tests/fast/test_jobs.py with one resume test per handler using stubbed heavy functions."
+    next: "Start with series (longest job - two LLM passes + render per episode), then remix, then analyze."
+  - id: STO-1
+    priority: 1
+    title: "Federated storage adapter (local + rclone backends) with zero-spend eligibility and free-allowance caps"
+    status: tested
+    acceptance: "Backends are interchangeable; a provider that needs a card or can bill is refused; uploads never exceed the free cap."
+    test: "pytest tests/fast/test_storage_backup.py"
+    evidence: "Local backend and rclone backend (against a local-path remote) pass the same contract test."
+    next: "Verify against one real remote (Backblaze B2 or Google Drive) once the user authorises an account - see STO-3."
+  - id: STO-2
+    priority: 1
+    title: "Verified, encrypted, deduplicated snapshot backups + restore into a new directory + restore drill"
+    status: verified
+    acceptance: "Backup is reported OK only after size+SHA-256 re-read; restore to another directory reopens projects with all references valid; one destination failing does not affect the others."
+    test: "pytest tests/fast/test_storage_backup.py"
+    evidence: "Acceptance tests D (storage recovery) and E (provider failure) in docs/TEST_REPORT.md"
+    next: "Schedule automatic daily backups from the worker (STO-4)."
+  - id: STO-3
+    priority: 2
+    title: "First real off-machine backup destination"
+    status: blocked
+    deps: [STO-1, STO-2]
+    blocked_by: "Needs the user to create/authorise a free account (Backblaze B2 without a card, or Google Drive) and run `rclone config`. Never done by an agent."
+    acceptance: "`nexus backup --drill` passes against the remote; usage stays under the free cap."
+    test: "nexus backup --to <remote> --drill"
+    next: "Ask the user which provider they authorise; follow docs/STORAGE.md \"Add a remote destination\"."
+  - id: STO-4
+    priority: 3
+    title: "Scheduled automatic backups + snapshot pruning policy"
+    status: planned
+    deps: [STO-2]
+    acceptance: "A backup runs daily without user action while the app is running; old snapshots are pruned by policy; failures show in the UI."
+    test: "Unit test with a fake clock."
+    next: "Add a `backup` durable job kind and a scheduler tick in the worker loop; expose keep-count in settings.json."
+  - id: WIN-1
+    priority: 1
+    title: "One-click Windows launchers (SETUP/START/STOP/STATUS/DOCTOR/BACKUP/RESTORE/CHECKPOINT/RESUME/UPDATE)"
+    status: implemented
+    acceptance: "On a clean Windows 10/11 machine, double-clicking NEXUS_SETUP then NEXUS_START opens the app; a previous project opens after a reboot."
+    test: "Manual on Windows (acceptance test F). The Python launcher under the .bat files is tested on Linux and in CI on windows-latest."
+    evidence: "tests/fast/test_launcher.py (start -> health -> stop with the real API); .bat/.ps1 wrappers NOT yet run on real Windows."
+    next: "Run NEXUS_SETUP.bat and NEXUS_START.bat on the user's Windows machine; fix whatever fails (likely llama-cpp-python wheel, espeak-ng, Blender path)."
+  - id: WIN-2
+    priority: 3
+    title: "Packaged Windows app (evaluate Tauri shell vs PyInstaller vs portable Python)"
+    status: deferred
+    deps: [WIN-1]
+    acceptance: "A single installer/portable folder that needs no pre-installed Python."
+    test: "Install on a clean VM."
+    next: "Only after WIN-1 is verified. Recommended path - portable embedded Python + the existing .bat launchers (see docs/DECISIONS.md D-6)."
+  - id: CI-1
+    priority: 2
+    title: "GitHub Actions CI - lint + fast tests on Linux and Windows, secret scan, no models"
+    status: implemented
+    acceptance: "Every push runs in < 5 min, uses no model downloads, and fails on lint/test/secret problems."
+    test: "The workflow run on the pull request."
+    next: "Confirm the first run is green on both OS runners; fix Windows-only failures."
+  # ------------------------------------------------------------------ verification debt from the previous session
+  - id: TST-D
+    priority: 1
+    title: "Acceptance test D (create-from-idea end to end) - never finished in the previous session"
+    status: in_progress
+    acceptance: "tests/test_d_create.py passes and docs/results/D_create.json + frames are committed."
+    test: "pytest tests/test_d_create.py"
+    next: "Run it now that models are installed; fix what fails; inspect the frames for quality problems (feeds QLT-1)."
+  - id: TST-F
+    priority: 1
+    title: "Acceptance test F (film plan + 2 continuity-aware series episodes) - never finished in the previous session"
+    status: planned
+    deps: [TST-D]
+    acceptance: "tests/test_f_series.py passes and docs/results/F_series.json is committed."
+    test: "pytest tests/test_f_series.py"
+    next: "Run after D (same LLM; one heavy job at a time on 4 cores)."
+  - id: TST-R
+    priority: 2
+    title: "Quality regression baselines for tests A-I (compare new renders to stored metrics)"
+    status: planned
+    deps: [TST-D, TST-F]
+    acceptance: "A `nexus regress` command re-renders the fixtures and fails if duration/LUFS/QA status drift from docs/results baselines."
+    test: "Run twice; second run must pass unchanged."
+    next: "Build from the JSON already in docs/results (durations, LUFS, QA checks are stored there)."
+  # ------------------------------------------------------------------ output quality (the product's real weakness)
+  - id: QLT-1
+    priority: 1
+    title: "Creative quality pass on create-from-idea (hook strength, scene variety, visual relevance, narration pacing)"
+    status: planned
+    deps: [TST-D]
+    acceptance: "A reviewer rubric (hook, story arc, visual relevance per scene, no repeated visuals, audio balance) is scored in the QA report and gates approval."
+    test: "Render 3 topics; rubric scores recorded in docs/results; a human watches them."
+    next: "Inspect D_frame*.png + D_create.json; the hook check is a regex and visuals are single stock stills with Ken Burns - both are weak. Add an LLM/CLIP-free relevance check (query terms vs image title/tags) and 2 visuals per long scene."
+  - id: QLT-2
+    priority: 2
+    title: "Production presets (cinematic, documentary, educational, scientific, commercial, product-ad, storytelling, social, explainer, film/series)"
+    status: planned
+    acceptance: "A preset sets script style, pacing, grade, music mood, caption style and aspect; selectable in UI and API; each renders a distinct result."
+    test: "Render one topic with 3 presets; compare timelines."
+    next: "create.produce already takes a `style` dict (grade/mood/music_seed/voice) - extend it into a preset table in registry/presets.yaml."
+  - id: QLT-3
+    priority: 2
+    title: "Targeted scene regeneration (replace one scene's visual/narration without re-rendering the rest)"
+    status: planned
+    acceptance: "API/UI action \"regenerate scene N\"; only that segment is re-encoded (segment cache proves it); original version kept for comparison."
+    test: "segments_from_cache == total-1 after regenerating one scene."
+    next: "Timeline versions + per-segment render cache already exist; add an op that swaps a clip's source and re-synthesises its narration."
+  - id: QLT-4
+    priority: 2
+    title: "Repair history + before/after comparison report in QA"
+    status: planned
+    acceptance: "Every auto-correction stores original render, corrected render and a diff of QA results."
+    test: "Force a loudness failure; report shows both versions."
+    next: "qa.render_with_qa already records `corrections`; keep the pre-fix render file instead of overwriting it."
+  - id: QLT-5
+    priority: 3
+    title: "Better narration voices (evaluate Kokoro-82M / other Apache-licensed TTS vs Piper) and music (real composition vs synth pads)"
+    status: planned
+    acceptance: "Blind A/B on 5 sentences per language; replace only if the candidate wins and its licence allows commercial use."
+    test: "Benchmark script with recorded results."
+    next: "Benchmark Kokoro on CPU first (it is in the research catalog); Arabic voice quality is the weakest of the three languages."
+  # ------------------------------------------------------------------ generation capabilities that do not exist yet
+  - id: GEN-1
+    priority: 2
+    title: "Local image generation for scene visuals (currently - licensed stock photos or gradient title cards only)"
+    status: planned
+    acceptance: "A scene with no good stock match gets a generated image with provenance; works on CPU within a stated time budget or is routed to a free GPU worker."
+    test: "Generate 4 images offline; record seconds/image."
+    next: "Benchmark a small distilled diffusion model on 4 CPU cores (expect minutes per image); if too slow, route via compute.KaggleWorker."
+  - id: GEN-2
+    priority: 3
+    title: "AI video generation (text/image-to-video clips)"
+    status: blocked
+    blocked_by: "No GPU on the build machine and no authorised free GPU account. compute.SimulatedRemoteGPU is a simulation, not a provider."
+    acceptance: "A 3-5 s generated clip is produced on an authorised free GPU worker and inserted into a timeline with provenance."
+    test: "End-to-end on a real Kaggle session."
+    next: "Needs the user's Kaggle account (free, phone-verified) - then implement the real job hand-off in compute.KaggleWorker."
+  - id: GEN-3
+    priority: 3
+    title: "VFX basics (background removal/keying, masks, compositing) and enhancement (stabilise, upscale, interpolate)"
+    status: planned
+    acceptance: "Stabilisation + chroma key + background removal exposed as timeline ops with QA."
+    test: "Fixture clips with known shake / green screen."
+    next: "Expose FFmpeg vidstab (already installed) first; rembg on CPU second; Real-ESRGAN/RIFE need a GPU worker."
+  # ------------------------------------------------------------------ business layer
+  - id: PUB-1
+    priority: 3
+    title: "Platform upload via official APIs (YouTube first)"
+    status: blocked
+    blocked_by: "Needs the user's own OAuth client + explicit authorisation for each platform. Today NEXUS produces upload packages only."
+    acceptance: "An approved package is uploaded as private/unlisted to the user's channel through the official API."
+    test: "Upload one unlisted video."
+    next: "Ask the user to create a Google Cloud OAuth client (free); implement resumable upload in publish.py behind costguard."
+  - id: ANA-1
+    priority: 3
+    title: "Analytics + monetisation intelligence from real platform data"
+    status: blocked
+    deps: [PUB-1]
+    blocked_by: "Same OAuth authorisation as PUB-1. The revenue ledger exists but holds only manual entries."
+    acceptance: "Views/retention/revenue per video pulled from the platform API and fed into topic selection."
+    test: "Compare with the platform's own dashboard."
+    next: "After PUB-1."
+  - id: RES-1
+    priority: 3
+    title: "Topic/opportunity research beyond Wikipedia (trends, competitor gaps) and content calendar automation"
+    status: planned
+    acceptance: "A daily list of ranked topics with sources; calendar fills from it; all sources are free and permitted."
+    test: "Offline fixture of a trends feed."
+    next: "Start with free official feeds (Wikipedia pageviews API, Google Trends RSS); never scrape against ToS."
+  - id: CAP-1
+    priority: 2
+    title: "Measured five-per-day capacity report on the user's real machine"
+    status: planned
+    deps: [TST-D]
+    acceptance: "`nexus capacity` uses only measured stage timings from this machine (no defaults) and states honestly which profiles reach 5 masters/day."
+    test: "nexus profile shows >= 3 samples per stage."
+    next: "Stage timings are now recorded automatically (metrics stage_seconds.*); produce 3 videos, then feed them into factory.measured()."
+  - id: SEC-1
+    priority: 2
+    title: "Local API authentication + dependency vulnerability check in CI"
+    status: planned
+    acceptance: "API refuses requests without the local session token when bound beyond 127.0.0.1; `pip-audit` runs in CI."
+    test: "Request without token -> 401."
+    next: "The API binds to 127.0.0.1 only (safe default). Add a token before any LAN/remote access feature."
+  - id: UX-1
+    priority: 2
+    title: "UI - backup/storage page, job stage progress, resume buttons, clear error states"
+    status: in_progress
+    deps: [JOB-1, STO-2]
+    acceptance: "A user can see job stages, resume a failed job, run a backup and see its verification, all without the terminal."
+    test: "Playwright smoke test against the running app."
+    next: "Job stages + Resume button are in the jobs table; add a Storage & Backup page calling /api/backup endpoints."
+  - id: EVO-1
+    priority: 4
+    title: "Controlled self-improvement loop (benchmark -> compare -> propose -> human approves)"
+    status: planned
+    acceptance: "tools.evolution_check findings create proposals with benchmark evidence; nothing is replaced without approval."
+    test: "Fixture catalog with an archived repo."
+    next: "evolution_check (read-only GitHub re-verification) exists; add benchmark harness per capability."

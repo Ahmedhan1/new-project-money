@@ -28,14 +28,55 @@ CREATE TABLE IF NOT EXISTS docs(kind TEXT, id TEXT, created REAL, data TEXT, PRI
 """
 
 
+# Schema migrations. Append only; each entry runs once and bumps PRAGMA user_version.
+MIGRATIONS: list[list[str]] = [
+    [  # 1: durable job ledger (stage checkpoints, retries, heartbeat, recovery notes)
+        "ALTER TABLE jobs ADD COLUMN workflow TEXT",
+        "ALTER TABLE jobs ADD COLUMN stage TEXT",
+        "ALTER TABLE jobs ADD COLUMN stages TEXT",
+        "ALTER TABLE jobs ADD COLUMN retries INTEGER DEFAULT 0",
+        "ALTER TABLE jobs ADD COLUMN max_retries INTEGER DEFAULT 2",
+        "ALTER TABLE jobs ADD COLUMN heartbeat REAL",
+        "ALTER TABLE jobs ADD COLUMN durable INTEGER DEFAULT 0",
+        "ALTER TABLE jobs ADD COLUMN log TEXT",
+        "ALTER TABLE jobs ADD COLUMN recovery TEXT",
+        "CREATE INDEX IF NOT EXISTS jobs_status ON jobs(status, created)",
+    ],
+]
+
+
+def _migrate(c: sqlite3.Connection) -> None:
+    have = c.execute("PRAGMA user_version").fetchone()[0]
+    for n, steps in enumerate(MIGRATIONS, start=1):
+        if n <= have:
+            continue
+        for sql in steps:
+            try:
+                c.execute(sql)
+            except sqlite3.OperationalError as e:  # another process migrated at the same moment
+                if "duplicate column" not in str(e):
+                    raise
+        c.execute(f"PRAGMA user_version={n}")
+        c.commit()
+
+
+def schema_version() -> int:
+    with _lock:
+        return conn().execute("PRAGMA user_version").fetchone()[0]
+
+
 def conn() -> sqlite3.Connection:
     global _conn
     with _lock:
         if _conn is None:
             config.ensure_dirs()
-            _conn = sqlite3.connect(config.DB_PATH, check_same_thread=False)
+            _conn = sqlite3.connect(config.DB_PATH, check_same_thread=False, timeout=30)
             _conn.row_factory = sqlite3.Row
+            # WAL + busy timeout: the API and the worker are separate processes sharing this file.
+            _conn.execute("PRAGMA journal_mode=WAL")
+            _conn.execute("PRAGMA busy_timeout=30000")
             _conn.executescript(SCHEMA)
+            _migrate(_conn)
         return _conn
 
 

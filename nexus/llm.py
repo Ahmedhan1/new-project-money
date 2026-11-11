@@ -31,11 +31,12 @@ def unload() -> None:
 
 
 def chat(prompt: str, system: str = "You are a precise assistant.", max_tokens: int = 900, temperature: float = 0.5,
-         json_mode: bool = False) -> str:
+         json_mode: bool = False, schema: dict | None = None) -> str:
     costguard.authorize("local-llm", "generate")
     with _lock:
         t0 = time.time()
-        kw = {"response_format": {"type": "json_object"}} if json_mode else {}
+        # With a schema the sampler is grammar-constrained: required keys and array lengths cannot be skipped.
+        kw = {"response_format": {"type": "json_object", **({"schema": schema} if schema else {})}} if json_mode or schema else {}
         # /no_think disables Qwen3's reasoning block: 3-5x faster on CPU
         r = load().create_chat_completion(
             messages=[{"role": "system", "content": system}, {"role": "user", "content": prompt + " /no_think"}],
@@ -48,17 +49,22 @@ def chat(prompt: str, system: str = "You are a precise assistant.", max_tokens: 
 
 
 def chat_json(prompt: str, system: str = "You output only valid JSON.", max_tokens: int = 1400, temperature: float = 0.5,
-              retries: int = 2):
+              retries: int = 2, require: str | None = None, schema: dict | None = None):
+    """`require`: a key that must be present and non-empty. Small local models sometimes answer `{}` in JSON mode;
+    that is treated like invalid JSON and retried (slightly warmer) instead of being passed on as an empty result."""
     last = ""
-    for _ in range(retries + 1):
-        last = chat(prompt, system, max_tokens, temperature, json_mode=True)
+    for i in range(retries + 1):
+        last = chat(prompt, system, max_tokens, min(1.0, temperature + 0.15 * i), json_mode=True, schema=schema)
+        data = None
         try:
-            return json.loads(last)
+            data = json.loads(last)
         except json.JSONDecodeError:
             m = re.search(r"\{.*\}|\[.*\]", last, re.S)
             if m:
                 try:
-                    return json.loads(m.group(0))
+                    data = json.loads(m.group(0))
                 except json.JSONDecodeError:
                     pass
-    raise ValueError(f"LLM did not return valid JSON: {last[:200]}")
+        if data is not None and (require is None or (isinstance(data, dict) and data.get(require))):
+            return data
+    raise ValueError(f"LLM did not return {'a usable ' + require + ' field' if require else 'valid JSON'}: {last[:200]}")

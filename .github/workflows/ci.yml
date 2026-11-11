@@ -1,0 +1,39 @@
+name: CI
+# Lightweight on purpose: lint + fast tests only (no model downloads, no rendering of real videos, no GPU).
+# Heavy end-to-end tests (tests/test_*.py, A-I) run locally: `pytest tests/test_d_create.py` etc.
+on:
+  push:
+    branches: [main, develop, "claude/**"]
+  pull_request:
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  lint-and-fast-tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-ci.txt
+      - run: python -m pip install -q -r requirements-ci.txt
+      - name: FFmpeg + rclone (Linux only; the launcher/rclone tests skip themselves where a tool is missing)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg rclone
+      - name: Lint
+        run: python -m ruff check .
+      - name: Project memory is valid (state file, task registry, handoff size)
+        run: python -m pytest tests/fast/test_state.py -q
+      - name: Fast tests (job recovery, storage, backup/restore, launcher)
+        run: python -m pytest tests/fast -q
+      - name: No secrets / media / weights in the tree
+        run: python -c "import subprocess,sys; from nexus import state; p=state.scan_paths(subprocess.check_output(['git','ls-files'],text=True).split()); print('\n'.join(p) or 'clean'); sys.exit(1 if p else 0)"

@@ -4,7 +4,6 @@ from __future__ import annotations
 import hashlib
 import re
 import time
-from pathlib import Path
 
 from . import config, costguard, db, net
 
@@ -103,24 +102,58 @@ def record_use(asset_id: str, project_id: str) -> None:
     db.execute("INSERT INTO asset_usage VALUES(?,?,?)", (asset_id, project_id, time.time()))
 
 
-def find_image(query: str, project_id: str | None = None, exclude: set[str] | None = None) -> dict | None:
-    """Best usable image for a query (downloads it). None when nothing suitable/reachable is found."""
-    cands = []
-    for search in (search_commons, search_images):  # Commons first (authoritative licence data), Openverse second
-        try:
-            cands = search(query)
-        except (net.RemoteUnavailable, costguard.CostGuardError, ValueError):
-            cands = []
-        if cands:
+_QSTOP = set("a an the of in on at to for with and or by from into over under during being is are was were this that these those "
+             "how what why when where which who showing shows giving given undergoing using person people image photo picture chart diagram".split())
+
+
+def query_ladder(query: str, fallbacks: tuple[str, ...] = ()) -> list[str]:
+    """Stock search engines match short noun phrases, not sentences. Turn one descriptive query into a
+    few progressively simpler ones: full phrase -> its key words -> pairs -> the caller's fallbacks (topic)."""
+    out: list[str] = []
+
+    def add(q: str) -> None:
+        q = re.sub(r"\s+", " ", q).strip()
+        if q and q.lower() not in [o.lower() for o in out]:
+            out.append(q)
+
+    for q in (query, *fallbacks):
+        words = re.findall(r"[^\W\d_][\w-]*", q or "")
+        key = [w for w in words if w.lower() not in _QSTOP and len(w) > 2]
+        if len(words) <= 3:
+            add(q or "")
+        add(" ".join(key[:3]))
+        add(" ".join(key[-2:]))
+        if key:
+            add(max(key, key=len))  # the most specific single word
+    return out[:6]
+
+
+def find_image(query: str, project_id: str | None = None, exclude: set[str] | None = None, fallbacks: tuple[str, ...] = ()) -> dict | None:
+    """Best usable image for a query (downloads it). None when nothing suitable/reachable is found.
+    The row carries `matched_query` so reviews can see how far the search had to be simplified."""
+    down: set[str] = set()
+    for q in query_ladder(query, fallbacks):
+        cands = []
+        for search in (search_commons, search_images):  # Commons first (authoritative licence data), Openverse second
+            if search.__name__ in down:
+                continue
+            try:
+                cands = search(q)
+            except (net.RemoteUnavailable, costguard.CostGuardError, ValueError):
+                down.add(search.__name__)  # provider is down/rate-limited: do not hammer it with the other queries
+                cands = []
+            if cands:
+                break
+        for c in cands:
+            if exclude and c["id"] in exclude:
+                continue
+            row = acquire(c)
+            if row and _usable_image(row["path"]):
+                if project_id:
+                    record_use(row["id"], project_id)
+                return {**row, "matched_query": q}
+        if len(down) == 2:
             break
-    for c in cands:
-        if exclude and c["id"] in exclude:
-            continue
-        row = acquire(c)
-        if row and _usable_image(row["path"]):
-            if project_id:
-                record_use(row["id"], project_id)
-            return row
     return None
 
 

@@ -197,7 +197,7 @@ components:
     data_retention: "requests are sent to Wikimedia"
     availability: remote
     hardware: none
-    network_hosts: [commons.wikimedia.org, upload.wikimedia.org]
+    network_hosts: [commons.wikimedia.org, upload.wikimedia.org, thumb.wikimedia.org]
     status: deployed
   - id: github-api
     name: GitHub REST API (public repository metadata)
