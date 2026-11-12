@@ -19,7 +19,16 @@
     "target": "Prozess, das ist eine lange Zeit?"
    },
    "lines": 12,
-   "mode": "subtitles (original voice kept)"
+   "mode": "subtitles (original voice kept)",
+   "rerun_after_mt_fix": {
+    "job": "job_074b200fc8",
+    "status": "PASSED_AUTOMATED_CHECKS",
+    "remaining_minor": [
+     "native-speaker review required",
+     "back-translation not run (no local LLM)",
+     "5 cues above 17 chars/s"
+    ]
+   }
   },
   "fr": {
    "render": "renders/main_fr.mp4",
@@ -138,7 +147,7 @@
    "hi": "unverified/no"
   }
  },
- "fixed_after": "German QA found a truncation at '24.', a repetition loop and an added sentence: fixed in speech/mt.py (commit 9911a8d); re-run pending",
+ "fixed_after": "German QA found a truncation at '24.', a repetition loop and an added sentence; fixed in speech/mt.py (9911a8d); re-run passed automated checks",
  "not_proven": [
   "translation accuracy beyond automated checks (no native reviewers)",
   "back-translation (no local LLM in this container)"

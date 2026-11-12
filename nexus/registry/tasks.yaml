@@ -284,7 +284,7 @@ tasks:
   - id: LANG-1
     priority: 1
     title: "12+ languages (en, de, fr, ar-EG, ar-Gulf, zh, ru, hi first): translation tags, licensed voices, fonts, per-language QA"
-    status: tested
+    status: verified
     acceptance: "Each listed language either passes translation + dub checks in a real run or is reported as not available with the reason."
     test: "pytest tests/fast/test_languages.py; heavy: pytest tests/test_c_language.py"
     evidence: "14 packs; tests/fast/test_languages.py (16 tests); real MADLAD-400 translation of the interview into de/fr/ar-EG/ar-Gulf/zh/ru/hi; QA caught 3 real German MT errors, fixed in speech/mt.py"
@@ -353,12 +353,12 @@ tasks:
   - id: DEMO-1
     priority: 1
     title: "Real demonstrations 1-5 (long-form edit, shorts factory, multilingual, generation, interrupted-job recovery) with stored evidence"
-    status: in_progress
+    status: verified
     deps: [INT-4]
     acceptance: "Each demo has an output file, a quality report and a statement of what it does not prove."
     test: "docs/results/demo_*.json"
-    evidence: "Demos 1, 2, 4, 5 done with evidence in docs/results/demos/ (source: public-domain NASA interview); Demo 3 running"
-    next: "Demo 3 evidence file; re-run German with the MT fix; Windows run of all demos (WIN-1)."
+    evidence: "Demos 1-5 done on a public-domain NASA interview; docs/results/demos/ (demo1..demo5 json + contact sheets); German re-run after the MT fix passed automated checks"
+    next: "Windows run of all demos (WIN-1); a second, multi-camera licensed source with B-roll (BRL-1)."
   # ------------------------------------------------------------------ follow-ups found by the session 4 demos
   - id: FX-2
     priority: 2

@@ -3,12 +3,12 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-12T09:33:42Z",
+ "updated": "2026-11-12T09:36:13Z",
  "git": {
   "branch": "claude/hopeful-allen-luubcy",
-  "commit": "9911a8d",
-  "subject": "MT post-processing: no sentence split after numbers, ellipsis ends a sentence, collapse short decoder loops; demo evidence 1, 2, 4, 5",
-  "dirty_files": 6,
+  "commit": "32c9ac6",
+  "subject": "Session 4: eight workstreams integrated (director, renderer/VFX, shorts v2, languages, media engine, platforms, quality score, generation); Demos 1-5 on a real public-domain interview with evidence in docs/results/demos",
+  "dirty_files": 2,
   "upstream": "origin/claude/hopeful-allen-luubcy",
   "unpushed_commits": 0
  },
@@ -19,13 +19,6 @@
   "next": "1) Series visuals - derive the image query from the bible's location LOOK text (generic nouns), not its fictional name, and allow reuse of an image for a repeated location. 2) Repair off-bible locations instead of only reporting them. 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Scored rubric in the QA report."
  },
  "next_tasks": [
-  {
-   "id": "DEMO-1",
-   "priority": 1,
-   "title": "Real demonstrations 1-5 (long-form edit, shorts factory, multilingual, generation, interrupted-job recovery) with stored evidence",
-   "status": "in_progress",
-   "next": "Demo 3 evidence file; re-run German with the MT fix; Windows run of all demos (WIN-1)."
-  },
   {
    "id": "QLT-1",
    "priority": 1,
@@ -53,18 +46,25 @@
    "title": "Effects, transition library, animated word captions, procedural SFX in the renderer",
    "status": "tested",
    "next": "Wire the remaining builders (chroma key, masks, split screen, freeze frames, credits roll, audio-reactive overlay) and real J/L-cut audio overlaps - task FX-2."
+  },
+  {
+   "id": "GRW-1",
+   "priority": 1,
+   "title": "Growth: shorts extractor, retention rubric + auto retention pass, hook/title variants, reference-video style profile",
+   "status": "tested",
+   "next": "Extended by GRW-2."
   }
  ],
  "tasks": {
   "total": 48,
   "by_status": {
-   "verified": 11,
-   "tested": 11,
+   "verified": 13,
+   "tested": 10,
    "blocked": 4,
    "implemented": 1,
    "deferred": 1,
    "planned": 17,
-   "in_progress": 3
+   "in_progress": 2
   },
   "registry": "nexus/registry/tasks.yaml"
  },
@@ -79,7 +79,7 @@
  },
  "jobs": {
   "counts": {
-   "done": 13
+   "done": 14
   },
   "active": []
  },
