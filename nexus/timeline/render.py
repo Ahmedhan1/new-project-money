@@ -143,6 +143,8 @@ def segment_key(c: dict, tl: dict, draft: bool = False) -> str:
     on purpose: a new pixel- or sound-changing key can never be served a stale segment."""
     payload = {k: v for k, v in c.items() if k not in ("id", "label", "notes", "transition", "transition_dur")}
     payload["_g"] = [tl["width"], tl["height"], tl.get("fps", config.FPS), tl.get("grade", "none"), tl.get("lang", "en")]
+    if tl.get("slowmo") and c.get("type") == "video" and not c.get("interpolate"):
+        payload["_slowmo"] = tl["slowmo"]
     if tl.get("audio_fx", "none") != "none":
         payload["_afx"] = tl["audio_fx"]  # was missing before: changing the global audio chain must re-render
         if "clean_speech" in (tl.get("audio_fx"), c.get("audio_fx")):
@@ -218,8 +220,13 @@ def render_segment(c: dict, tl: dict, cache: Path, draft: bool = False, threads:
                 notes.append("stabilize requested but no stabilisation filter in this FFmpeg build")
         pre += fxp.orient_filters(c, notes)
         timing = ramp if ramp else f"setpts=(PTS-STARTPTS)/{speed}"
-        interp = fxp.interp_filter(c, fps, notes) if (speed < 1.0 or ramp) else None
-        v_pre = ",".join([*pre, timing, f"fps={fps}", *([interp] if interp else [])])
+        if speed < 1.0 or ramp:
+            cs = c if c.get("interpolate") else {**c, "interpolate": fxp.SLOWMO_PROFILES.get(tl.get("slowmo") or "none")}
+            interp = fxp.interp_filter(cs, fps, notes)
+        else:
+            interp = None
+        # an interpolator synthesises the output rate itself: an fps filter before it would only duplicate frames
+        v_pre = ",".join([*pre, timing, *([interp, "tpad=stop_mode=clone:stop_duration=0.25"] if interp else [f"fps={fps}"])])
         kfit = c.get("keyframes") and any(k in c["keyframes"] for k in ("x", "y", "scale")) and c.get("fit", "cover") == "cover"
         fit = _fit_kf(W, H, c, focus) if kfit else _fit(W, H, c.get("fit", "cover"), focus)
         v = f"{v_pre},{fit}"
@@ -253,6 +260,7 @@ def render_segment(c: dict, tl: dict, cache: Path, draft: bool = False, threads:
             lutf = [fxlut.filter_for(lut_val)]
         except (ValueError, KeyError) as e:
             notes.append(f"LUT skipped: {e}")
+    geo = [*fxp.perspective_filters(c, W, H, notes), *fxp.rotation_filters(c, W, H, kf_expr), *geo]
     chain = ",".join([*geo, *correct, *([grade] if grade else []), *lutf, *look, "format=yuv420p", "setsar=1"])
     fi, fo = float(c.get("fade_in", 0)), float(c.get("fade_out", 0))
     if fi:
@@ -502,6 +510,110 @@ def _jl_cuts(tl: dict, workdir: Path) -> dict:
     return tl
 
 
+def pipeline(tl: dict) -> str:
+    """"pieces" (default: cached pieces + stream-copy join, timeline/pieces.py) or "legacy" (xfade concat + full
+    re-encode in the final mix). tl["render_pipeline"] or NEXUS_RENDER_PIPELINE choose; benchmarks compare both."""
+    v = tl.get("render_pipeline") or os.environ.get("NEXUS_RENDER_PIPELINE") or "pieces"
+    return "legacy" if v == "legacy" else "pieces"
+
+
+def _loudnorm_chain(inputs: list, fc: list[str], pre: str, target: float) -> str:
+    """Two-pass loudness normalisation: measure the mix, return the linear loudnorm filter for the second pass."""
+    err = ff.run([*inputs, "-filter_complex", ";".join(fc + [f"[{pre}]loudnorm=I={target}:TP=-1.5:LRA=11:print_format=json[m]"]),
+                  "-map", "[m]", "-vn", "-f", "null", "-"], op="mix-measure")
+    m = re.search(r"\{[^{}]*\"input_i\"[^{}]*\}", err, re.S)
+    meas = json.loads(m.group(0)) if m else None
+    if meas and meas["input_i"] not in ("-inf", "inf") and float(meas["input_i"]) > -60:
+        return (f"loudnorm=I={target}:TP=-1.5:LRA=11:measured_I={meas['input_i']}:measured_TP={meas['input_tp']}:"
+                f"measured_LRA={meas['input_lra']}:measured_thresh={meas['input_thresh']}:offset={meas['target_offset']}:linear=true")
+    return "anull"  # silent programme: nothing to normalise
+
+
+def _finish_pieces(tl: dict, out: Path, workdir: Path, segs: list[Path], layers: list[dict], all_results: list,
+                   seg_notes: list, draft: bool, w: int, threads: int | None, cp, t0: float, on_progress) -> dict:
+    """Stages 2-3 of the piece pipeline (see timeline/pieces.py)."""
+    from . import pieces as pz
+    fps = tl.get("fps", config.FPS)
+    W, H, _ = _size(tl, draft)
+    plan, frames = pz.plan(tl)
+    n, d, _names = pz.layout(tl)
+    dur = frames / fps
+    pcache = config.CACHE / ("pieces_draft" if draft else "pieces")
+    vcodec = _vcodec(draft, None)
+    enc_sig = " ".join(str(a) for a in vcodec)
+    cp.stage("pieces", pieces_total=len(plan))
+    timings = {"segments": round(time.time() - t0, 2)}
+    t1 = time.time()
+    narr = tl.get("audio", [])
+    music = tl.get("music") or {}
+    has_music = bool(music.get("src"))
+    akey = pz.audio_key(tl, segs, n, d, fps, _src_sig)
+    final_audio = pcache / f"audio_{akey}.m4a"
+
+    def audio_job() -> bool:
+        if final_audio.exists() and final_audio.stat().st_size > 0:
+            return True
+        pcache.mkdir(parents=True, exist_ok=True)
+        wav = workdir / f"programme_{out.stem}.wav"
+        pz.programme_audio(segs, n, d, fps, wav)
+        inputs: list = ["-i", wav]
+        for a in narr:
+            inputs += ["-i", a["src"]]
+        if has_music:
+            inputs += ["-stream_loop", "-1", "-i", music["src"]]
+        fc, pre = _mix_graph(tl, len(narr), has_music, dur)
+        ln = _loudnorm_chain(inputs, fc, pre, float(tl.get("target_lufs", -14.0)))
+        fc.append(f"[{pre}]{ln},aresample={config.AUDIO_RATE},alimiter=limit=0.79:level=disabled[aout]")
+        tmp = final_audio.with_suffix(f".{threading.get_ident()}.tmp.m4a")
+        ff.run([*inputs, "-filter_complex", ";".join(fc), "-map", "[aout]", "-vn", *config.ACODEC, "-t", f"{dur:.6f}", tmp],
+               op="final-audio")
+        os.replace(tmp, final_audio)
+        wav.unlink(missing_ok=True)
+        return False
+
+    done = [0]
+    lock = threading.Lock()
+
+    def one(pc):
+        r = pz.build(pc, segs, tl, pcache, W, H, dur, layers, vcodec, enc_sig, threads)
+        cp.done("pieces", r[0].stem, r[1])
+        with lock:
+            done[0] += 1
+            if on_progress:
+                on_progress(0.7 + 0.25 * done[0] / max(1, len(plan)))
+        return r
+
+    with ThreadPoolExecutor(max_workers=max(1, w)) as ex:
+        afut = ex.submit(audio_job)
+        presults = list(ex.map(one, plan))
+        audio_cached = afut.result()
+    cp.stage("final", audio_done=True)
+    timings["pieces_and_audio"] = round(time.time() - t1, 2)
+    t2 = time.time()
+    lst = workdir / f"pieces_{out.stem}.txt"
+    lst.write_text("".join(ff.concat_list_line(p) + "\n" for p, _ in presults), encoding="utf-8")
+    part = out.with_name(out.stem + ".partial" + (out.suffix or ".mp4"))
+    ff.run(["-f", "concat", "-safe", "0", "-i", lst, "-i", final_audio, "-map", "0:v", "-map", "1:a", "-c", "copy",
+            "-t", f"{dur:.6f}", "-movflags", "+faststart", part], op="final-mux")
+    os.replace(part, out)  # atomic: an interrupted render never leaves a truncated programme at `out`
+    timings["final"] = round(time.time() - t2, 2)
+    sidecars = {}
+    if tl.get("subtitles"):
+        sidecars["srt"] = str(subs.write_srt(tl["subtitles"], out.with_suffix(".srt")))
+        sidecars["vtt"] = str(subs.write_vtt(tl["subtitles"], out.with_suffix(".vtt")))
+    elapsed = time.time() - t0
+    cached = sum(1 for _, was in all_results if was)
+    pcached = sum(1 for _, was in presults if was)
+    cp.data["reused"]["audio"] = bool(audio_cached)
+    db.metric("render_rtf", elapsed / max(dur, 0.1), cached=cached, clips=len(segs), draft=draft, workers=w)
+    if on_progress:
+        on_progress(1.0)
+    return {"output": str(out), "duration": dur, "elapsed": round(elapsed, 2), "segments": len(all_results),
+            "segments_from_cache": cached, "sidecars": sidecars, "draft": draft, "workers": w, "notes": sorted(set(seg_notes)),
+            "pieces": len(plan), "pieces_from_cache": pcached, "audio_from_cache": bool(audio_cached), "timings": timings,
+            "pipeline": "pieces", "resumed": cp.data["resumed"], "checkpoint": cp.finish()}
+
+
 def _workers(n_clips: int, workers: int | None) -> tuple[int, int | None]:
     cpu = os.cpu_count() or 2
     w = workers if workers is not None else max(1, min(4, cpu // 2))
@@ -560,6 +672,8 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
         nf = s.with_suffix(".notes.json")
         if nf.exists():
             seg_notes += json.loads(nf.read_text(encoding="utf-8"))
+    if pipeline(tl) == "pieces":
+        return _finish_pieces(tl, out, workdir, segs, layers, all_results, seg_notes, draft, w, threads, cp, t0, on_progress)
     prog = workdir / f"programme_{out.stem}.mp4"
     cp.stage("programme")
     _concat(segs, tl, prog, draft)
