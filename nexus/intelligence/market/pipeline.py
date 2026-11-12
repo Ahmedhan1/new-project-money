@@ -103,7 +103,8 @@ def to_production_brief(opportunity: dict, brief: dict, niche: dict | None = Non
         return "".join(f"[{src_ids[i]}]" for i in c["supported_by"] if i in src_ids)
     ver = [c for c in brief["claims"] if c["status"] == "verified"]
     single = [c for c in brief["claims"] if c["status"] == "single_source"]
-    lines = [f"Verified research for: {opportunity['topic']} (each fact confirmed by >= 2 sources)"]
+    lines = [f"Research for: {opportunity['topic']}. Facts below were found in >= 2 sources by an automatic check of their numbers "
+             "and words (not a semantic fact-check): a human verifies before publishing."]
     lines += [f"- {c['text']} {cite(c)}" for c in ver]
     if single:
         lines += ["", "Single-source facts (use only with attribution, e.g. 'according to ...'):"]
