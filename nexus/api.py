@@ -352,15 +352,36 @@ def api_presets():
 
 # ---------------------------------------------------------------- growth: shorts, retention, hooks
 class ShortsReq(BaseModel):
-    n: int = 3
-    min_s: float = 18
+    n: int | str = 3                       # a number, or "all" (every moment whose context check passes)
+    min_s: float = 18                      # legacy fields (used when no v2 field is set)
     max_s: float = 58
+    pick: list[int] | None = None          # choose specific ranks from a previous selection
+    time_range: list[float] | None = None  # [start, end] seconds in the source
+    topic: str | None = None
+    speaker: str | None = None             # only with speaker labels in the analysis
+    durations: list[float] | None = None   # e.g. [30, 45, 60]
+    variants: int = 1                      # hook variants per short (natural / cold open / text hooks)
+    platforms: list[str] | None = None
+    intensity: str | None = None           # light | medium | heavy
+    captions: str | None = None            # classic | boxed | pop | karaoke
+    music: bool | None = None
+    aspect: str | None = None              # 9:16 | 1:1 | 4:5 | 16:9
+    brand: dict | None = None
+    render: bool = False
+    render_limit: int = 12
 
 
 @app.post("/api/projects/{pid}/shorts")
 def api_shorts(pid: str, r: ShortsReq):
     _project(pid)
-    return jobs.submit("shorts", {"project": pid, "n": r.n, "min_s": r.min_s, "max_s": r.max_s}, project_id=pid)
+    v2 = any(x not in (None, False, 1) for x in (r.pick, r.time_range, r.topic, r.speaker, r.durations, r.platforms, r.intensity,
+                                                 r.captions, r.music, r.aspect, r.brand, r.render)) or r.variants != 1 or r.n == "all"
+    if r.n != "all" and (not isinstance(r.n, int) or r.n < 1):
+        raise HTTPException(400, "n must be a positive number or 'all'")
+    params = {"project": pid, "n": r.n, "min_s": r.min_s, "max_s": r.max_s}
+    if v2:
+        params.update({"v2": True, **r.model_dump(exclude={"min_s", "max_s"})})
+    return jobs.submit("shorts", params, project_id=pid)
 
 
 @app.get("/api/projects/{pid}/retention")

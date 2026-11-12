@@ -236,17 +236,54 @@ def shorts_(job: jobs.Job) -> dict:
     from . import project as prj, shorts
     p = prj.Project(job.params["project"])
 
-    def run():
+    a = job.params
+    if not a.get("v2"):  # legacy request shape (n/min_s/max_s): unchanged behaviour
+        def run():
+            lib = _analysis(p)
+            if not lib:
+                raise ValueError("this project has no analysed video yet")
+            path = a.get("media") or next(iter(lib))
+            media = next(m for m in p.data["media"] if m["path"] == path)
+            rows = shorts.make_shorts(p, media, lib[path], n=a.get("n", 3), min_s=a.get("min_s", 18), max_s=a.get("max_s", 58), sfx=True)
+            return {"project": p.id, "shorts": rows}
+
+        return job.stage("find-and-build", run)
+
+    def plan():
         lib = _analysis(p)
         if not lib:
             raise ValueError("this project has no analysed video yet")
-        path = job.params.get("media") or next(iter(lib))
-        media = next(m for m in p.data["media"] if m["path"] == path)
-        rows = shorts.make_shorts(p, media, lib[path], n=job.params.get("n", 3), min_s=job.params.get("min_s", 18),
-                                  max_s=job.params.get("max_s", 58), sfx=True)
-        return {"project": p.id, "shorts": rows}
+        path = a.get("media") or next(iter(lib))
+        ctl = {k: a[k] for k in ("pick", "time_range", "topic", "speaker", "durations", "intensity", "captions", "music", "aspect",
+                                 "brand", "min_score") if a.get(k) not in (None, [], "")}
+        if ctl.get("time_range"):
+            ctl["time_range"] = tuple(ctl["time_range"])
+        items = shorts.factory(path, lib[path], n=a.get("n", 3), platforms=tuple(a.get("platforms") or ("youtube_shorts",)),
+                               variants=int(a.get("variants", 1)), **ctl)
+        rows = shorts.save_batch(p, items)
+        notes = list(getattr(items, "notes", []))
+        for r, it in zip(rows, items):
+            r["why"] = it["why"]
+            r["context_check"] = {k: it["context_check"].get(k) for k in ("status", "why")}
+        return {"project": p.id, "shorts": rows, "notes": notes, "moments": len({(r["start"], r["end"]) for r in rows})}
 
-    return job.stage("find-and-build", run)
+    r = job.stage("select-and-build", plan)
+    if not a.get("render"):
+        return r
+    limit = int(a.get("render_limit", 12))
+
+    def render_all():
+        from . import qa
+        done = []
+        for row in r["shorts"][:limit]:
+            tl = p.timeline(row["branch"])
+            stats, rep = qa.render_with_qa(p, tl, row["branch"], max_rounds=1)
+            out = str(Path(stats["output"]).relative_to(p.dir))
+            done.append({"branch": row["branch"], "output": out, "seconds": stats["elapsed"],
+                         "quality": _quality(p, tl, out, row["platform"])})
+        return {"rendered": done, "not_rendered": [x["branch"] for x in r["shorts"][limit:]]}
+
+    return {**r, **job.stage("render-and-score", render_all)}
 
 
 @jobs.handler("deliver")

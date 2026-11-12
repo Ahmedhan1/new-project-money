@@ -118,3 +118,29 @@ def test_destination_selector_shares_renders_and_writes_packages(client, tmp_pat
     assert len(yt["title"]) <= 100 and yt["check"]["checks"]                                # title within YouTube's limit
     assert (p.dir / res["packages"]["tiktok"]["folder"] / "MANUAL_UPLOAD.md").read_text().startswith("# Upload to")
     assert (p.dir / res["packages"]["tiktok"]["cover"]).exists()
+
+
+def test_shorts_factory_job_selects_by_topic_and_saves_variants(client, tmp_path):
+    from nexus import project as prj
+    src = tmp_path / "talk.mp4"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "testsrc2=s=320x180:r=30:d=40", "-f", "lavfi",
+                    "-i", "sine=f=220:d=40:r=48000", "-c:v", "libx264", "-preset", "ultrafast", "-c:a", "aac", "-shortest", str(src)],
+                   check=True)
+    p = prj.Project.create("shorts test", "edit")
+    m = p.import_media(src)
+    (p.dir / "reports" / f"analysis_{m['id']}.json").write_text(json.dumps(_analysis(m["path"], 40.0)))
+    assert client.post(f"/api/projects/{p.id}/shorts", json={"n": 0}).status_code == 400
+    job = _run(client, client.post(f"/api/projects/{p.id}/shorts", json={
+        "n": 2, "durations": [10, 15], "variants": 2, "platforms": ["youtube_shorts", "tiktok"], "topic": "battery panels roof"}))
+    assert job["status"] == "done", job.get("error")
+    rows = job["result"]["shorts"]
+    assert rows and {r["platform"] for r in rows} == {"youtube_shorts", "tiktok"}
+    per = {}
+    for r in rows:
+        per.setdefault((r["start"], r["platform"]), set()).add(r["variant"])
+    assert all(len(v) == 2 for v in per.values()) and all(r["branch"].startswith("short-") for r in rows)
+    assert all(r["why"] and r["context_check"]["status"] in ("ok", "extended") for r in rows)
+    hist = client.get(f"/api/projects/{p.id}").json()["history"]
+    assert all(r["branch"] in hist for r in rows)
+    legacy = _run(client, client.post(f"/api/projects/{p.id}/shorts", json={"n": 1, "min_s": 8, "max_s": 20}))
+    assert legacy["status"] == "done", legacy.get("error")
