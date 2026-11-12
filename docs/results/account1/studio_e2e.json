@@ -1,0 +1,208 @@
+{
+ "base": "http://127.0.0.1:<free port>",
+ "sections": {
+  "dash": {
+   "title": "Dashboard",
+   "errors": [],
+   "notes": [],
+   "buttons": 6,
+   "ms": 65
+  },
+  "accounts": {
+   "title": "Connected accounts",
+   "errors": [],
+   "notes": [
+    "Storage service (Google Drive A/B/C, transfers, ingest) is not installed in this build: /api/v1/storage is not mounted. Showing what the shared database knows.",
+    "Compute service (remote workers: Kaggle, Colab handoff, user GPU) is not installed in this build: /api/v1/compute is not mounted."
+   ],
+   "buttons": 1,
+   "ms": 635
+  },
+  "notifications": {
+   "title": "Notifications",
+   "errors": [],
+   "notes": [],
+   "buttons": 3,
+   "ms": 68
+  },
+  "scheduler": {
+   "title": "Scheduler",
+   "errors": [],
+   "notes": [],
+   "buttons": 8,
+   "ms": 69
+  },
+  "jobs": {
+   "title": "Job queue",
+   "errors": [],
+   "notes": [
+    "Compute service (remote workers: Kaggle, Colab handoff, user GPU) is not installed in this build: /api/v1/compute is not mounted. The list below is read from th"
+   ],
+   "buttons": 0,
+   "ms": 63
+  },
+  "library": {
+   "title": "Media library",
+   "errors": [],
+   "notes": [],
+   "buttons": 0,
+   "ms": 66
+  },
+  "review": {
+   "title": "Review & approval",
+   "errors": [],
+   "notes": [],
+   "buttons": 1,
+   "ms": 42
+  },
+  "compute": {
+   "title": "Compute providers",
+   "errors": [],
+   "notes": [
+    "Compute service (remote workers: Kaggle, Colab handoff, user GPU) is not installed in this build: /api/v1/compute is not mounted."
+   ],
+   "buttons": 0,
+   "ms": 74
+  },
+  "storage": {
+   "title": "Drive & storage",
+   "errors": [],
+   "notes": [
+    "Storage service (Google Drive A/B/C, transfers, ingest) is not installed in this build: /api/v1/storage is not mounted."
+   ],
+   "buttons": 0,
+   "ms": 66
+  },
+  "health": {
+   "title": "Provider health",
+   "errors": [],
+   "notes": [],
+   "buttons": 0,
+   "ms": 66
+  },
+  "resources": {
+   "title": "Resource monitor",
+   "errors": [],
+   "notes": [],
+   "buttons": 0,
+   "ms": 257
+  },
+  "logs": {
+   "title": "Logs",
+   "errors": [],
+   "notes": [],
+   "buttons": 1,
+   "ms": 62
+  },
+  "checkpoints": {
+   "title": "Checkpoints",
+   "errors": [],
+   "notes": [],
+   "buttons": 0,
+   "ms": 65
+  },
+  "security": {
+   "title": "Security",
+   "errors": [],
+   "notes": [
+    "Storage service (Google Drive A/B/C, transfers, ingest) is not installed in this build: /api/v1/storage is not mounted.",
+    "Secret values are never returned by any API; the vault is encrypted at rest.",
+    "Disconnect a storage account from Connected accounts; that revokes and deletes its stored token."
+   ],
+   "buttons": 1,
+   "ms": 69
+  },
+  "config": {
+   "title": "System configuration",
+   "errors": [],
+   "notes": [],
+   "buttons": 1,
+   "ms": 67
+  }
+ },
+ "page_errors": [],
+ "console_errors": [
+  "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+  "Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "Failed to load resource: the server responded with a status of 404 (Not Found)",
+  "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+ ],
+ "failed_requests": [],
+ "http_errors": [],
+ "steps": [
+  "login screen shown (token mode)",
+  "wrong token rejected",
+  "logged in",
+  "opened every section",
+  "scheduler settings saved (demo plan probe / ffmpeg_transcode, 2 masters x 2 shorts)",
+  "scheduler started: running \u00b7 masters 0/2 \u00b7 shorts 0/4",
+  "scheduler paused",
+  "scheduler resumed",
+  "notifications marked read",
+  "library thumbnail rendered; stream endpoint answers Range 206",
+  "mobile light layout",
+  "signed out; data API answers 401"
+ ],
+ "screenshots": [
+  {
+   "file": "studio_scheduler.png",
+   "bytes": 152571
+  },
+  {
+   "file": "studio_library.png",
+   "bytes": 97596
+  },
+  {
+   "file": "studio_dashboard.png",
+   "bytes": 153098
+  },
+  {
+   "file": "studio_mobile_light.png",
+   "bytes": 76353
+  }
+ ],
+ "cookie": {
+  "httpOnly": true,
+  "sameSite": "Strict",
+  "secure": true
+ },
+ "token_visible_to_js": false,
+ "after_start": "running \u00b7 masters 0/2 \u00b7 shorts 0/4",
+ "after_start_note": "compute service not installed in this build",
+ "library": {
+  "imgs": [
+   320,
+   320
+  ],
+  "videos": 0,
+  "full_links": [
+   "Open full resolution",
+   "Open full resolution"
+  ]
+ },
+ "stream_range": {
+  "status": 206,
+  "range": "bytes 0-99/436031",
+  "len": 100
+ },
+ "mobile": {
+  "scrollW": 390,
+  "innerW": 390,
+  "bg": "rgb(245, 247, 251)"
+ },
+ "after_logout_status": 401,
+ "seconds": 4.0,
+ "server_tracebacks": 0,
+ "fixtures": "remote_jobs rows with provider 'fixture', two checkpoints, one failed-job event, one info notification, and a local ffmpeg-made thumbnail + 2 s master; everything else is live server state",
+ "date": "2026-11-12"
+}
