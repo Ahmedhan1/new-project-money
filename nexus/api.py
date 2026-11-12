@@ -668,6 +668,102 @@ def api_deliver(pid: str, r: DeliverReq):
     return {**job, "renders_planned": len(plan), "groups": plan}
 
 
+# ---------------------------------------------------------------- review (REV-1): speakers, translated lines, cutaways
+class SpeakerEditReq(BaseModel):
+    media: str
+    op: str                      # rename | name | merge | reassign
+    speaker: str
+    value: str | None = None
+
+
+@app.get("/api/projects/{pid}/review/speakers")
+def api_review_speakers(pid: str):
+    from . import review
+    return review.speakers(_project(pid))
+
+
+@app.post("/api/projects/{pid}/review/speakers")
+def api_review_speaker_edit(pid: str, r: SpeakerEditReq):
+    from . import review
+    p = _project(pid)
+    try:
+        out = review.edit_speaker(p, r.media, r.op, r.speaker, r.value)
+    except (KeyError, ValueError, IndexError) as e:
+        raise HTTPException(400, str(e))
+    _analyses.clear()  # analysis files changed on disk
+    return out
+
+
+class NamesReq(BaseModel):
+    branch: str = "main"
+
+
+@app.post("/api/projects/{pid}/review/names")
+def api_review_names(pid: str, r: NamesReq):
+    """Lower thirds from the names a reviewer set (roles are never shown on screen)."""
+    from . import review
+    p = _project(pid)
+    tl, added = review.apply_names(p.timeline(r.branch), _analysis(p))
+    if added:
+        p.save_timeline(tl, f"lower thirds: {', '.join(added)}", r.branch)
+    return {"added": added}
+
+
+@app.get("/api/projects/{pid}/review/lines")
+def api_review_lines(pid: str, branch: str):
+    from . import review
+    try:
+        return review.lines(_project(pid).timeline(branch))
+    except KeyError:
+        raise HTTPException(404, f"no branch '{branch}'")
+
+
+class LineReq(BaseModel):
+    branch: str
+    index: int
+    text: str | None = None
+    approved: bool | None = None
+    render_name: str | None = None   # e.g. "main_de": rewrite that render's SRT/VTT with the reviewed text
+
+
+@app.post("/api/projects/{pid}/review/lines")
+def api_review_line_edit(pid: str, r: LineReq):
+    from . import review
+    p = _project(pid)
+    try:
+        tl = review.edit_line(p.timeline(r.branch), r.index, r.text, r.approved)
+    except (KeyError, IndexError) as e:
+        raise HTTPException(400, str(e))
+    p.save_timeline(tl, f"review line {r.index}", r.branch)
+    side = review.write_sidecars(p, tl, r.render_name) if r.render_name else []
+    st = review.lines(tl)
+    return {"approved": st["approved"], "total": st["total"], "native_review_done": st["native_review_done"], "sidecars": side}
+
+
+@app.get("/api/projects/{pid}/review/cutaways")
+def api_review_cutaways(pid: str, branch: str = "main"):
+    from . import review
+    return review.cutaways(_project(pid).timeline(branch))
+
+
+class CutawayReq(BaseModel):
+    branch: str = "main"
+    clip: str
+    why: str = ""
+
+
+@app.post("/api/projects/{pid}/review/cutaways/reject")
+def api_review_cutaway_reject(pid: str, r: CutawayReq):
+    from . import review
+    p = _project(pid)
+    try:
+        tl = review.reject_cutaway(p.timeline(r.branch), r.clip, r.why)
+    except KeyError as e:
+        raise HTTPException(400, str(e))
+    p.save_timeline(tl, f"cutaway rejected on {r.clip}", r.branch)
+    return {"rejected": r.clip, "remaining": len(review.cutaways(tl))}
+
+
 @app.post("/api/projects/{pid}/subtitle-package")
 def api_subtitle_package(pid: str, branch: str = "main"):
     """All localised subtitle files of a branch + a readiness manifest (subtitle vs dub readiness, native review)."""

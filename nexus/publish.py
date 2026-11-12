@@ -204,6 +204,15 @@ def deliver(project, tl: dict, destinations: list[str], title: str, description:
 
 
 # ------------------------------------------------------------------ multilingual subtitle package
+def _reviewed(project, lang: str) -> bool:
+    """All caption lines of the localised branch approved by a reviewer (nexus.review)."""
+    from . import review
+    try:
+        return review.lines(project.timeline(lang))["native_review_done"]
+    except KeyError:
+        return False
+
+
 def subtitle_package(project, branch: str = "main", langs: list[str] | None = None, source_lang: str = "en") -> dict:
     """Bundle the subtitle sidecars of every localised render (<branch>_<lang>.srt/.vtt) with a manifest that separates
     SUBTITLE readiness (automated language QA) from DUB readiness (a voice whose commercial licence is verified) and
@@ -236,13 +245,14 @@ def subtitle_package(project, branch: str = "main", langs: list[str] | None = No
                      # pack flag (dialect profiles) additionally marks languages where even the MT model is weak
                      "native_review_required": lang != source_lang or bool(p.get("needs_native_review")),
                      "weak_mt_profile": bool(p.get("needs_native_review")),
-                     "native_review_done": False,
+                     "native_review_done": _reviewed(project, lang),
                      "dub_ready_voice": next((v["id"] for v in voices if v.get("commercial_use") == "yes"), None),
                      "dub_note": None if any(v.get("commercial_use") == "yes" for v in voices) else
                      "no voice with a verified commercial licence - subtitles only"})
     manifest = {"project": project.id, "branch": branch, "source_lang": source_lang, "built": time.strftime("%Y-%m-%dT%H:%M:%S"),
-                "languages": rows, "commercially_ready": [], "note": "No translation has had native review yet: none is "
-                "labelled commercially ready. subtitle_ready = automated checks passed, not a quality guarantee."}
+                "languages": rows, "commercially_ready": [r["lang"] for r in rows if r["subtitle_ready"] and r["native_review_done"]],
+                "note": "commercially_ready = automated checks passed AND every line approved by a reviewer (nexus.review). "
+                "subtitle_ready alone means automated checks passed, not a quality guarantee."}
     (out / "manifest.json").write_text(json.dumps(manifest, indent=1, ensure_ascii=False), encoding="utf-8")
     z = out.with_suffix(".zip")
     with zipfile.ZipFile(z, "w", zipfile.ZIP_DEFLATED) as zf:
