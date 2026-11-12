@@ -169,10 +169,19 @@ def eligibility(entry: dict, privacy: str, need_tokens: int = 0) -> tuple[bool, 
     return True, "ok"
 
 
+MIN_MEASURED_ITEMS = 5  # a benchmark score replaces the estimate only when it rests on at least this many items
+
+
+def _measured(entry: dict, cap: str) -> tuple[float | None, int]:
+    """Latest measured score and its sample size (the newest benchmark run supersedes older ones)."""
+    rows = db.query("SELECT value v, CAST(COALESCE(json_extract(meta, '$.n'), 0) AS INTEGER) n FROM metrics WHERE name=? AND meta LIKE ? "
+                    "ORDER BY ts DESC, id DESC LIMIT 1", (f"ai_quality.{cap}", f'%"model": "{entry["model"]}"%'))
+    return (rows[0]["v"], rows[0]["n"]) if rows else (None, 0)
+
+
 def _measured_quality(entry: dict, cap: str) -> float | None:
-    rows = db.query("SELECT AVG(value) v, COUNT(*) n FROM metrics WHERE name=? AND meta LIKE ?",
-                    (f"ai_quality.{cap}", f'%"model": "{entry["model"]}"%'))
-    return rows[0]["v"] if rows and rows[0]["n"] else None
+    v, n = _measured(entry, cap)
+    return v if v is not None and n >= MIN_MEASURED_ITEMS else None
 
 
 def candidates(task: str, privacy: str = "internal", entries: list[dict] | None = None,
@@ -184,8 +193,13 @@ def candidates(task: str, privacy: str = "internal", entries: list[dict] | None 
     for e in entries if entries is not None else _entries():
         good, reason = eligibility(e, privacy, need_tokens)
         q = (e.get("quality") or {}).get(t["cap"], 0)
-        mq = _measured_quality(e, t["cap"])
-        q, qsrc = (round(mq, 2), "measured") if mq is not None else (q, (e.get("quality") or {}).get("source", "estimate"))
+        mv, mn = _measured(e, t["cap"])
+        if mv is not None and mn >= MIN_MEASURED_ITEMS:
+            q, qsrc = round(mv, 2), f"measured n={mn}"
+        else:
+            qsrc = (e.get("quality") or {}).get("source", "estimate")
+            if mv is not None:
+                qsrc += f" (bench {round(mv, 2)} on n={mn} < {MIN_MEASURED_ITEMS} items: not used)"
         if good and q < t["min_q"]:
             good, reason = False, f"{e['provider']}/{e['model']}: quality {q} ({qsrc}) < {t['min_q']} needed for {task}"
         (ok.append({**e, "_q": q, "_q_source": qsrc}) if good else why.append(reason))

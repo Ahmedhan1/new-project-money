@@ -30,7 +30,7 @@ from ... import config, db
 SYS = "You are a precise assistant. Follow the format exactly."
 LANGS = {"de": "German", "fr": "French", "ar": "Modern Standard Arabic", "zh": "Simplified Chinese", "ru": "Russian", "hi": "Hindi"}
 TRANSLATE_SRC = "The museum opens at nine in the morning. Children under twelve enter for free."
-EGY = ["دلوقتي", "عايز", "عايزة", "إزاي", "ازاي", "كده", "بتاع", "أوي", "اوي", "ده", "دي", "إيه", "ايه", "مش", "هنروح", "بكرة"]
+EGY = ["دلوقتي", "عايز", "عايزة", "إزاي", "ازاي", "كده", "بتاع", "أوي", "اوي", "ده", "دي", "إيه", "ايه", "مش", "هنروح", "بكرة", "مفيش", "عشان", "إحنا", "احنا"]
 GULF = ["الحين", "وايد", "شلون", "أبي", "ابي", "ابغى", "أبغى", "زين", "هاذي", "شنو", "عاد", "يالله", "حق", "بروح", "باكر"]
 
 EXTRACT_TEXT = ("On 14 March 2026 Lina Haddad and Marco Rossi signed the lease for the studio in Lyon. "
@@ -44,7 +44,10 @@ SUMMARY_TEXT = ("Honeybees communicate the location of flowers through a waggle 
 SUMMARY_KEYS = [("dance", "waggle"), ("direction", "angle"), ("distance",), ("sun",), ("frisch", "nobel")]
 REASON_QS = [("A train leaves at 14:40 and the trip takes 95 minutes. At what time does it arrive? Answer as HH:MM.", "16:15"),
              ("Mia has 3 times as many stamps as Leo. Together they have 48. How many stamps does Mia have?", "36"),
-             ("If all bloops are razzies and no razzies are lazzies, can a bloop be a lazzie? Answer yes or no.", "no")]
+             ("If all bloops are razzies and no razzies are lazzies, can a bloop be a lazzie? Answer yes or no.", "no"),
+             ("A shirt costs 40 euros. It is discounted by 25 %, then the discounted price rises by 10 %. What is the final price in euros?", "33"),
+             ("Today is Wednesday. What day of the week will it be in 10 days? Answer with the day name.", "saturday"),
+             ("A box holds 12 eggs. How many boxes are needed for 100 eggs?", "9")]
 
 
 # JSON schemas passed with the structured items exactly as a router caller would (grammar-constrained where supported)
@@ -225,7 +228,7 @@ def aggregate(rows: list[dict]) -> dict:
         caps[r["cap"]].append(r["score"] if not r.get("error") else 0.0)
     lat = [r["latency_s"] for r in rows if not r.get("error")]
     tps = [r["tokens_per_s"] for r in rows if r.get("tokens_per_s")]
-    return {"capabilities": {c: round(sum(v) / len(v), 3) for c, v in caps.items()},
+    return {"capabilities": {c: round(sum(v) / len(v), 3) for c, v in caps.items()}, "n": {c: len(v) for c, v in caps.items()},
             "overall": round(sum(r["score"] if not r.get("error") else 0 for r in rows) / max(len(rows), 1), 3),
             "failures": sum(1 for r in rows if r.get("error")), "items": len(rows),
             "mean_latency_s": round(sum(lat) / len(lat), 2) if lat else None,
@@ -234,7 +237,8 @@ def aggregate(rows: list[dict]) -> dict:
 
 def store_quality(provider: str, model: str, agg: dict, run_id: str) -> None:
     for cap, v in agg["capabilities"].items():
-        db.metric(f"ai_quality.{cap}", round(v * 10, 2), model=model, provider=provider, source="bench", run=run_id)
+        db.metric(f"ai_quality.{cap}", round(v * 10, 2), model=model, provider=provider, source="bench", run=run_id,
+                  n=(agg.get("n") or {}).get(cap, 1))
 
 
 # ----------------------------------------------------------------- running
@@ -278,14 +282,23 @@ def backtranslate(rows_by_model: dict[str, list[dict]]) -> str | None:
     try:
         with jobs.heavy_lock():
             try:
-                outs = mt.translate([r["output"].replace("\n", " ") for _, r in todo], "en")
+                # sentence by sentence: MADLAD tends to drop a second sentence when given two at once
+                sents = [split_sentences(r["output"]) for _, r in todo]
+                flat = mt.translate([x for ss in sents for x in ss], "en")
             finally:
                 mt.unload()
     except Exception as e:  # recorded; translation is then scored on script share only (sim = None)
         return f"back-translation unavailable: {type(e).__name__}: {str(e)[:160]}"
-    for (_, r), b in zip(todo, outs):
-        r["back_translation"] = b
+    i = 0
+    for (_, r), ss in zip(todo, sents):
+        r["back_translation"] = " ".join(flat[i:i + len(ss)])
+        i += len(ss)
     return None
+
+
+def split_sentences(text: str) -> list[str]:
+    parts = [p.strip() for p in re.split(r"(?<=[.!?\u3002\uff01\uff1f\u0964\u061f])\s*", (text or "").replace("\n", " "))]
+    return [p for p in parts if p] or [text.strip()]
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -300,13 +313,22 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--no-backtranslate", action="store_true")
     ap.add_argument("--no-store", action="store_true", help="do not write ai_quality.* metrics")
     ap.add_argument("--out", default="docs/results/account3/models_bench.json")
+    ap.add_argument("--rescore", help="re-score the outputs stored in this evidence JSON (no generation; new back-translation)")
     a = ap.parse_args(argv)
     items = taskset()
     run_id = time.strftime("bench-%Y%m%dT%H%M%S")
     rows_by_model: dict[str, list[dict]] = {}
     entries: dict[str, dict] = {}
     notes = []
-    for pid in a.providers.split(","):
+    if a.rescore:
+        old = json.loads(Path(a.rescore).read_text(encoding="utf-8"))
+        notes.append(f"re-scored outputs of {old['run']} (generated {old['date']}); generation metrics are from that run")
+        for model, v in old["models"].items():
+            keep = ("id", "cap", "output", "latency_s", "output_tokens", "tokens_estimated", "tokens_per_s", "error")
+            rows_by_model[model] = [{k: r.get(k) for k in keep} for r in v["items"]]
+            entries[model] = {"provider": v["provider"], "hosting": v["hosting"], "licence": v.get("licence"), "weights": v.get("weights")}
+        notes += [n for n in old.get("notes", []) if n.startswith("owner-openai-compatible: GET")]
+    for pid in ([] if a.rescore else a.providers.split(",")):
         if pid == "local-llamacpp":
             e = next(m for m in reg.models() if m["provider"] == pid)
             print(f"[{pid}] waiting for the heavy lock")

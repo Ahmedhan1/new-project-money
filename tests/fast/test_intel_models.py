@@ -104,10 +104,21 @@ def test_owner_server_model_gets_catalogue_profile_and_no_think_suffix(settings,
 def test_measured_bench_quality_overrides_estimates(settings, server):
     settings({"ai_providers": {"owner-openai-compatible": {"base_url": server, "models": ["qwen3-0.6b-q8"]}}})
     assert router.route_explain("general", "internal")["chosen"]["model"] == "qwen3-0.6b-q8"
-    bench.store_quality("owner-openai-compatible", "qwen3-0.6b-q8", {"capabilities": {"reasoning": 0.2}}, "t")
+    bench.store_quality("owner-openai-compatible", "qwen3-0.6b-q8", {"capabilities": {"reasoning": 0.0}, "n": {"reasoning": 3}}, "t0")
+    small = router.route_explain("general", "internal")["chosen"]                              # 3 items: too few to override
+    assert small["model"] == "qwen3-0.6b-q8" and "not used" in small["quality_source"]
+    bench.store_quality("owner-openai-compatible", "qwen3-0.6b-q8", {"capabilities": {"reasoning": 0.2}, "n": {"reasoning": 6}}, "t")
     ex = router.route_explain("general", "internal")
     assert ex["chosen"] is None or ex["chosen"]["model"] != "qwen3-0.6b-q8"
-    assert any("(measured)" in w for w in ex["excluded"])
+    assert any("(measured n=6)" in w for w in ex["excluded"])
+    bench.store_quality("owner-openai-compatible", "qwen3-0.6b-q8", {"capabilities": {"reasoning": 0.5}, "n": {"reasoning": 6}}, "t2")   # newer run wins
+    assert router.route_explain("general", "internal")["chosen"]["quality"] == 5.0
+
+
+def test_sentence_split_for_back_translation():
+    assert bench.split_sentences("博物馆九点开门。儿童免费。") == ["博物馆九点开门。", "儿童免费。"]
+    assert bench.split_sentences("एक है। दो है।") == ["एक है।", "दो है।"]
+    assert bench.split_sentences("One. Two?\nThree") == ["One.", "Two?", "Three"]
 
 
 def test_schema_grammar_only_for_servers_that_declare_it(settings, server):
@@ -184,7 +195,7 @@ def test_bench_translation_and_dialect_scoring():
 def test_bench_taskset_is_fixed_and_fully_scorable():
     items = bench.taskset()
     ids = [i["id"] for i in items]
-    assert len(ids) == len(set(ids)) == 15
+    assert len(ids) == len(set(ids)) == 18
     assert {i["cap"] for i in items} == {"json", "reasoning", "summarization", "translation", "arabic", "writing"}
     for it in items:
         assert 0.0 <= bench.score_item(it, "", "")["score"] <= 1.0
