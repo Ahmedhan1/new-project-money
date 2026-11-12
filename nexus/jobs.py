@@ -180,7 +180,10 @@ def _local_worker_dead(wid: str | None) -> bool:
         return False
     try:
         import psutil
-        return not psutil.pid_exists(int(pid))
+        try:  # a killed process can linger briefly as an unreaped zombie: that is still a dead worker
+            return psutil.Process(int(pid)).status() == psutil.STATUS_ZOMBIE
+        except psutil.NoSuchProcess:
+            return True
     except Exception:  # noqa: BLE001 - without psutil fall back to the heartbeat rule
         return False
 

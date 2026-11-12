@@ -97,6 +97,19 @@ def test_fresh_heartbeat_of_a_live_worker_is_left_alone(home):
     assert jobs.recover(stale_after=0)["requeued"] == [jid]
 
 
+def test_a_killed_but_unreaped_worker_counts_as_dead(home):
+    p = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])
+    wid = f"worker-{jobs.socket.gethostname()}-{p.pid}"
+    assert jobs._local_worker_dead(wid) is False
+    p.kill()
+    time.sleep(0.3)                  # killed, not yet waited for: a zombie, which psutil.pid_exists reports as alive
+    try:
+        assert jobs._local_worker_dead(wid) is True
+    finally:
+        p.wait()
+    assert jobs._local_worker_dead(wid) is True
+
+
 def test_watchdog_recovers_while_the_worker_is_busy(home, monkeypatch):
     import threading
     monkeypatch.setattr(jobs, "STALE_S", 0.2)
