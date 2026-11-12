@@ -6,6 +6,7 @@ Every network call passes the cost guard first."""
 from __future__ import annotations
 
 import json
+import re
 import urllib.error
 import urllib.request
 
@@ -40,7 +41,9 @@ def openai_chat(entry: dict, prompt: str, system: str, schema: dict | None, max_
         costguard.check_host(url, free_tier_provider=entry["provider"])
     elif not url.startswith(("http://127.0.0.1", "http://localhost", "http://[::1]")):
         costguard.check_host(url)  # an owner worker on another machine must be a declared host
-    body = {"model": entry["model"], "messages": [{"role": "system", "content": system}, {"role": "user", "content": prompt}],
+    # prompt_suffix: per-model switch from the catalogue, e.g. Qwen3's " /no_think" (reasoning off: 3-5x faster on CPU)
+    user = prompt + (entry.get("prompt_suffix") or "")
+    body = {"model": entry["model"], "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
             "max_tokens": max_tokens, "temperature": temperature}
     if schema is not None:
         body["response_format"] = {"type": "json_object"}
@@ -63,7 +66,12 @@ def openai_chat(entry: dict, prompt: str, system: str, schema: dict | None, max_
         text = data["choices"][0]["message"]["content"] or ""
     except (KeyError, IndexError, TypeError) as e:
         raise ProviderError(f"{entry['provider']}: malformed response") from e
-    return text, data.get("usage") or {}
+    return strip_reasoning(text), data.get("usage") or {}
+
+
+def strip_reasoning(text: str) -> str:
+    """Remove <think>...</think> blocks (Qwen3/DeepSeek reasoning traces) - callers want the answer only."""
+    return re.sub(r"<think>.*?(</think>|$)", "", text or "", flags=re.S).strip()
 
 
 def list_models(base_url: str, key: str | None = None, timeout: float = 15) -> list[str]:

@@ -14,4 +14,5 @@ Contract for callers (stable; agent B owns the implementation behind it):
 """
 from __future__ import annotations
 
-from .router import TASKS, NoProviderAvailable, Result, complete, status  # noqa: F401
+from .router import (TASKS, NoProviderAvailable, Result, account1_capabilities, candidates, complete, health,  # noqa: F401
+                     route_explain, status)
