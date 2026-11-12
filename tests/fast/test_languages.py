@@ -243,3 +243,5 @@ def test_voiceover_lines_never_overlap_even_when_one_spills_over_its_cut(home, m
     out, review = localize.localize(p, tl, "de", dub=True, mode="voiceover")
     spans = sorted((a["start"], a["start"] + 3.3) for a in out["audio"])
     assert all(b[0] >= a[1] + 0.05 for a, b in zip(spans, spans[1:])), spans
+    from nexus.timeline.render import total_duration
+    assert spans[-1][1] <= total_duration(out) + 1e-6 and out["clips"][-1]["freeze"]["duration"] > 0   # last line not cut off

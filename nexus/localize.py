@@ -369,6 +369,15 @@ def localize(project, tl: dict, lang: str, analyses: dict | None = None, context
             out["audio"].append({"src": str(wav), "start": round(at, 3),
                                  "clip": out["clips"][u["clip"]]["id"], "role": "narration", "synthetic": True, "lang": lang})
             cues += _cues(line, at if mode == "voiceover" else st, (at if mode == "voiceover" else st) + ff.duration(wav), lang)
+        if mode == "voiceover" and prev_end > 0:
+            from .timeline.render import total_duration as _total
+            over = prev_end + 0.3 - _total(out)
+            last = out["clips"][-1] if out["clips"] else None
+            if over > 0 and last is not None and last.get("type") == "video":
+                # the last line runs past the picture: hold the final frame until it has been said (never cut a voice off)
+                last["freeze"] = {"at": round(max(0.0, clip_duration(last) - 0.05), 3), "duration": round(over, 3)}
+                review["checks"].append(qa._c(f"voice-over end [{lang}]", True,
+                                              f"final frame held {over:.1f}s so the last line finishes", "minor"))
         out["subtitles"] = subs.fix_timing(cues)
         review["voice"] = {k2: voice_info[k2] for k2 in ("voice", "license", "commercial", "engine")} if voice_info else None
         review["dub_mode"] = mode
