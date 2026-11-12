@@ -40,7 +40,7 @@ Session 4 (2026-11-12) integrated eight workstreams and ran the product on a rea
 - **Recovery (Demo 5)**: app SIGKILLed mid-render of a localisation job -> restart -> resumed; the translation stage did not re-run.
 - Renderer: effects, xfade, caption styles, animated titles, PiP, overlays, colour correction, stabilisation, parallel
   segments, draft mode, role-aware ducking (`docs/TIMELINE.md`). Media engine: proven encoder detection, size-targeted
-  H.264/H.265/AV1 export, verify, proxies. Durable jobs, backups (verified in this session), CI (Linux + Windows).
+  H.264/H.265/AV1 export, verify, proxies. Durable jobs, backups (verified in this session), CI (Linux + Windows; Windows was red from ca44e88 to 834f36a on a UTF-8 bug, fixed).
 
 ## What does NOT work / is unproven (be honest with the user)
 - **No generated video**: no GPU here. Needs >= 8 GB VRAM or the owner's GPU machine / authorised Kaggle (`GEN-2`).
