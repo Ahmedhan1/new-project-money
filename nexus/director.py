@@ -493,7 +493,7 @@ def plan(analysis_by_src: dict, brief: dict | None = None) -> dict:
     """Explainable edit plan. Pure: uses only the analysis dicts (word timings, scenes, measured shots if present)."""
     brief = dict(brief or {})
     ins = parse_instructions(brief.get("instructions"), bool(brief.get("use_llm")))
-    prof = get_profile(brief.get("profile"), ins["overrides"])
+    prof = get_profile(brief.get("profile"), _merge(brief.get("profile_overrides") or {}, ins["overrides"]))
     pace = ins["pace"]
     prof["shot_len"] = [round(prof["shot_len"][0] * pace, 3), round(prof["shot_len"][1] * pace, 3)]
     prof["pause_tolerance"] = round(ins["pause_tolerance"] if ins["pause_tolerance"] is not None else prof["pause_tolerance"] * pace, 3)
