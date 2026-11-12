@@ -1,0 +1,126 @@
+{
+ "date": "2026-11-12",
+ "niches": 15,
+ "categories": [
+  {
+   "niche": "science",
+   "status": "ok",
+   "exists": {
+    "Category:Astronomy": true,
+    "Category:Biology": true,
+    "Category:Physics": true,
+    "Category:Science": true
+   }
+  },
+  {
+   "niche": "technology",
+   "status": "ok",
+   "exists": {
+    "Category:Artificial intelligence": true,
+    "Category:Computing": true,
+    "Category:Technology": true
+   }
+  },
+  {
+   "niche": "education",
+   "status": "ok",
+   "exists": {
+    "Category:Education": true,
+    "Category:Learning": true
+   }
+  },
+  {
+   "niche": "history",
+   "status": "ok",
+   "exists": {
+    "Category:Ancient history": true,
+    "Category:History": true,
+    "Category:Middle Ages": true
+   }
+  },
+  {
+   "niche": "documentary",
+   "status": "ok",
+   "exists": {
+    "Category:Documentary films": true,
+    "Category:Nature": true
+   }
+  },
+  {
+   "niche": "business",
+   "status": "error",
+   "reason": "RemoteUnavailable: https://en.wikipedia.org/w/api.php -> HTTP 429"
+  },
+  {
+   "niche": "lifestyle",
+   "status": "ok",
+   "exists": {
+    "Category:Health": true,
+    "Category:Lifestyle": true
+   }
+  },
+  {
+   "niche": "travel",
+   "status": "ok",
+   "exists": {
+    "Category:Tourism": true,
+    "Category:Tourist attractions": true
+   }
+  },
+  {
+   "niche": "sports",
+   "status": "ok",
+   "exists": {
+    "Category:Sports": true
+   }
+  },
+  {
+   "niche": "entertainment",
+   "status": "ok",
+   "exists": {
+    "Category:Entertainment": true
+   }
+  },
+  {
+   "niche": "human_stories",
+   "status": "ok",
+   "exists": {
+    "Category:Biographies": true,
+    "Category:People": true
+   }
+  },
+  {
+   "niche": "productivity",
+   "status": "ok",
+   "exists": {
+    "Category:Productivity": true,
+    "Category:Time management": true
+   }
+  },
+  {
+   "niche": "consumer_awareness",
+   "status": "ok",
+   "exists": {
+    "Category:Consumer behaviour": true,
+    "Category:Consumer protection": true
+   }
+  },
+  {
+   "niche": "product_reviews",
+   "status": "ok",
+   "exists": {
+    "Category:Consumer electronics": true,
+    "Category:Home appliances": true
+   }
+  },
+  {
+   "niche": "arabic_content",
+   "status": "ok",
+   "exists": {
+    "تصنيف:تاريخ": true,
+    "تصنيف:تقنية": true,
+    "تصنيف:علوم": true
+   }
+  }
+ ]
+}
