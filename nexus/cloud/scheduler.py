@@ -117,8 +117,16 @@ def _jobid(res: Any, fallback: str) -> str:
     return getattr(res, "job_id", None) or fallback
 
 
+def _compute_router_missing() -> bool:
+    import sys
+    api = sys.modules.get("nexus.api")
+    return bool(api and "routes_compute" in getattr(api, "CLOUD_MISSING", {}))
+
+
 def default_submit(m: ProductionJobManifest) -> str:
     mod = _compute_module()
+    if mod is None and _compute_router_missing():
+        raise ComputeUnavailable("compute service not installed in this build")
     if mod is not None and hasattr(mod, "submit"):
         return _jobid(mod.submit(m), m.job_id)
     return _jobid(_http("POST", "/api/v1/compute/jobs", m.model_dump(mode="json")), m.job_id)
@@ -141,6 +149,8 @@ def default_quota() -> list[dict]:
     mod = _compute_module()
     if mod is not None and hasattr(mod, "quota_status"):
         res = mod.quota_status()
+    elif _compute_router_missing():
+        return []
     else:
         try:
             res = _http("GET", "/api/v1/compute/quota", timeout=8)
@@ -596,7 +606,7 @@ class Scheduler:
             eta["remaining_s"] = 0.0
         else:
             eta["note"] = "no history yet for " + ", ".join(t for t, v in eta["tasks"].items() if v["median_s"] is None)
-        recent = sorted(st["slots"].items(), key=lambda kv: (kv[1]["day"], kv[0]), reverse=True)[:60]
+        recent = sorted(sorted(st["slots"].items()), key=lambda kv: kv[1]["day"], reverse=True)[:60]  # newest day, then by key
         return {"status": st["status"], "pause_reason": st["pause_reason"], "started_at": st["started_at"],
                 "last_tick": st["last_tick"], "last_error": st["last_error"], "blocked": st["blocked"],
                 "items_done": st["items_done"], "day": day, "today": counts, "by_status": by,
