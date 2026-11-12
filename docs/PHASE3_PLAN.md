@@ -47,3 +47,18 @@ render.render(tl, out, workdir, on_progress=None, draft=False, workers=None) -> 
 - Fast tests build their own media with FFmpeg `lavfi` sources; they must not need models or network.
 - Touch only the files you own. If you need a change elsewhere, describe it in your report instead of making it.
 - Report honestly: what was measured (numbers), what is untested, known limits. No claim without a test or a measurement.
+
+## Phase 3b (owner request, 2026-11-12, second message)
+| Id | Package | Files owned |
+|---|---|---|
+| LANG-1 | 12+ languages (priority: English, German, French, Egyptian Arabic, Gulf Arabic, Chinese, Russian, Hindi), per-language voices with verified licences, fonts/shaping, per-language QA | `nexus/registry/languages.yaml`, `nexus/registry/models.yaml`, `nexus/models.py`, `nexus/localize.py`, `nexus/speech/mt.py`, `nexus/speech/asr.py`, `nexus/config.py` (fonts only), `nexus/timeline/text.py`, `nexus/timeline/subs.py`, `tests/fast/test_languages.py`, `tests/test_c_language.py` |
+| PLAT-1 | Platform knowledge base (specs + publicly documented ranking signals with sources and dates) and per-platform tuning of a timeline | `nexus/registry/platforms.yaml`, `nexus/platforms.py`, `nexus/publish.py`, `tests/fast/test_platforms.py` |
+| DIR-1 | Director: long footage -> condensed cinematic master + platform cuts + shorts, filler/pause removal, scene compression to a target length | `nexus/director.py`, `nexus/edit.py`, `tests/fast/test_director.py` |
+
+Interfaces other packages provide (import lazily, tolerate ImportError):
+`shorts.find_moments(analysis, min_s=18, max_s=58, top=5)`, `shorts.build_short(src_path, analysis, moment, size=(1080,1920), style=None)`,
+`shorts.make_shorts(project, media, analysis, n=3)`, `growth.retention_report(tl, analysis_by_src=None, platform="shorts")`,
+`growth.apply_retention_pass(tl, report)`, `presets.get(name)`, `presets.apply(tl, style)`, `config.font_for(lang)` (font file),
+`config.font_name_for(lang)` (fontconfig family name for ASS; added by LANG-1).
+Platform ranking systems are not public. Only signals the platforms themselves have documented may be encoded, each with its
+source and the date it was read; everything else is labelled an editorial rule of thumb.

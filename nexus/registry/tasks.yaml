@@ -276,4 +276,26 @@ tasks:
     acceptance: "Every phase-3 capability is reachable from the UI through a durable job and covered by a fast test."
     test: "pytest tests/fast"
     next: "Start when the work packages report."
+  - id: LANG-1
+    priority: 1
+    title: "12+ languages (en, de, fr, ar-EG, ar-Gulf, zh, ru, hi first): translation tags, licensed voices, fonts, per-language QA"
+    status: in_progress
+    acceptance: "Each listed language either passes translation + dub checks in a real run or is reported as not available with the reason."
+    test: "pytest tests/fast/test_languages.py; heavy: pytest tests/test_c_language.py"
+    next: "Implementation delegated."
+  - id: PLAT-1
+    priority: 1
+    title: "Platform knowledge base (specs + documented ranking signals with sources) and per-platform timeline tuning"
+    status: in_progress
+    acceptance: "tune(tl, platform) changes duration/aspect/captions/hook/loudness per platform; every encoded signal cites its source and date."
+    test: "pytest tests/fast/test_platforms.py"
+    next: "Implementation delegated."
+  - id: DIR-1
+    priority: 1
+    title: "Director: long footage -> condensed cinematic master + per-platform cuts + shorts in one job"
+    status: in_progress
+    deps: [GRW-1, FX-1]
+    acceptance: "One call produces a master timeline at a target length plus platform deliverables, each with QA and retention reports."
+    test: "pytest tests/fast/test_director.py"
+    next: "Implementation delegated."
 
