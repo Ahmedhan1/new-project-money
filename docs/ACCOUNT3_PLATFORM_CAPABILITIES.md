@@ -89,6 +89,26 @@ the limits (YouTube description in UTF-8 bytes, TikTok caption in UTF-16 units, 
 Studio, TikTok Studio, Instagram and Meta Business Suite (column maps per platform; unknown columns kept raw, missing
 values left absent - nothing is filled in). Upsert key = (platform, video_id, date, source).
 
+## 6. Status and evidence (honest)
+
+| Piece | Status | Evidence |
+|---|---|---|
+| Capability matrix (7 destinations) | implemented, tested | `nexus/intelligence/publishing/capabilities.yaml`, `docs/results/account3/publishing_capability_matrix.json` |
+| Engine: approval gate, idempotency, queue, schedule, backoff, history, durable job kind | implemented, tested (fast) | `tests/fast/test_intel_publishing.py` (22 tests) |
+| YouTube adapter + OAuth helper | implemented, tested against recorded responses; **not verified live** (no owner credentials) | resumable + resume-after-503 tests; demo stops at `credentials_missing` |
+| TikTok / Instagram / Facebook adapters | request flow written, **gated, never run live** | demo stops at `requires_approved_app` |
+| Snapchat | manual package only | demo stops at `manual_only` |
+| Packaging | tested; one real router call (local Qwen3-4B, privacy internal) in the demo, deterministic elsewhere | `publishing_demo.json` -> `youtube_shorts.text_source` |
+| Analytics import | YouTube API parsing tested on documented response shapes; CSV maps **not verified against real exports** (`map_verified: false`) | `tests/fast/fixtures_publishing/` (synthetic, labelled) |
+
+Demo (`NEXUS_HOME=... python scripts/account3/publishing_demo.py`, ~4-5 min, mostly the one local LLM call under
+`jobs.heavy_lock()`): no render existed under `.nexus/projects`, so 6 s ffmpeg test clips (16:9, 9:16, 4:5) were used;
+7 private/draft manifests + packages (cover.jpg, caption.txt, metadata.json, MANUAL_UPLOAD.md under
+`NEXUS_HOME/a3_data/publishing_demo/packages/`); every adapter stopped before any network call with an owner-action
+message; a second run deduplicated the identical YouTube Shorts manifest. **No real upload happened.**
+
+Credentials without the vault: `NEXUS_PUB_YOUTUBE_<LABEL>_CLIENT_ID`, `..._CLIENT_SECRET`, `..._REFRESH_TOKEN`.
+
 ## Integration requests (for the lead)
 1. **components.yaml**: declare a zero-cost component `youtube-data-api` with `network_hosts: [www.googleapis.com,
    youtubeanalytics.googleapis.com, oauth2.googleapis.com, accounts.google.com]` (and later `open.tiktokapis.com`,
