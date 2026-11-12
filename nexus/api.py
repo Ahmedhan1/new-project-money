@@ -49,6 +49,9 @@ _analyses: dict[str, dict] = {}
 jobs.recover(api_worker="")
 if os.environ.get("NEXUS_EMBEDDED_WORKER", "1") != "0":  # `nexus start` runs the worker as its own process instead
     threading.Thread(target=jobs.run_worker, kwargs={"role": "embedded"}, daemon=True).start()
+    # remote compute (Account 1): poll/dispatch Kaggle and pull-worker jobs while any are active
+    from .cloud.compute import poller as _remote_poller
+    _remote_poller.start()
 
 
 # Account 1 cloud platform routers (/api/v1). Each owner module exposes `router`; a module that is not present in
