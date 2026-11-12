@@ -659,3 +659,12 @@ def api_deliver(pid: str, r: DeliverReq):
     job = jobs.submit("deliver", {"project": pid, "platforms": names, "branch": r.branch, "title": r.title or p.name,
                                   "description": r.description, "lang": r.lang}, pid)
     return {**job, "renders_planned": len(plan), "groups": plan}
+
+
+@app.post("/api/projects/{pid}/subtitle-package")
+def api_subtitle_package(pid: str, branch: str = "main"):
+    """All localised subtitle files of a branch + a readiness manifest (subtitle vs dub readiness, native review)."""
+    r = publish.subtitle_package(_project(pid), branch)
+    if not r["languages"]:
+        raise HTTPException(409, "no localised renders on this branch yet: run Languages first")
+    return {k: r[k] for k in ("folder", "zip", "languages", "subtitle_ready")} | {"manifest": r["manifest"]}

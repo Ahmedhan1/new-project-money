@@ -144,3 +144,20 @@ def test_shorts_factory_job_selects_by_topic_and_saves_variants(client, tmp_path
     assert all(r["branch"] in hist for r in rows)
     legacy = _run(client, client.post(f"/api/projects/{p.id}/shorts", json={"n": 1, "min_s": 8, "max_s": 20}))
     assert legacy["status"] == "done", legacy.get("error")
+
+
+def test_subtitle_package_separates_subtitle_and_dub_readiness(home):
+    from nexus import project as prj
+    from nexus import publish
+    p = prj.Project.create("subs pkg", "edit")
+    r = p.dir / "renders"
+    r.mkdir(parents=True, exist_ok=True)
+    for lang in ("de", "hi"):
+        (r / f"main_{lang}.srt").write_text("1\n00:00:00,000 --> 00:00:01,000\nx\n", encoding="utf-8")
+        (p.dir / "reports" / f"main_{lang}.qa.json").write_text(json.dumps({"status": "PASSED_AUTOMATED_CHECKS"}), encoding="utf-8")
+    out = publish.subtitle_package(p)
+    rows = {x["lang"]: x for x in out["manifest"]["languages"]}
+    assert set(rows) == {"de", "hi"} and out["manifest"]["commercially_ready"] == []
+    assert rows["de"]["dub_ready_voice"] and rows["hi"]["dub_ready_voice"] is None and "subtitles only" in rows["hi"]["dub_note"]
+    assert all(x["native_review_required"] and x["files"]["srt"]["sha256"] for x in rows.values())
+    assert (p.dir / out["zip"]).exists()

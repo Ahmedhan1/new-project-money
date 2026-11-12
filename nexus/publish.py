@@ -187,3 +187,52 @@ def deliver(project, tl: dict, destinations: list[str], title: str, description:
     out["renders"] = len(groups)
     out["destinations"] = len(destinations)
     return out
+
+
+# ------------------------------------------------------------------ multilingual subtitle package
+def subtitle_package(project, branch: str = "main", langs: list[str] | None = None, source_lang: str = "en") -> dict:
+    """Bundle the subtitle sidecars of every localised render (<branch>_<lang>.srt/.vtt) with a manifest that separates
+    SUBTITLE readiness (automated language QA) from DUB readiness (a voice whose commercial licence is verified) and
+    states the native-review requirement. Writes publish/subtitles/<branch>/ + a zip. Uploads nothing."""
+    import hashlib
+    import zipfile
+    from .speech import packs
+    rdir, out = project.dir / "renders", project.dir / "publish" / "subtitles" / branch
+    out.mkdir(parents=True, exist_ok=True)
+    found = sorted({p.stem[len(branch) + 1:] for p in rdir.glob(f"{branch}_*.srt")})
+    langs = [x for x in (langs or found) if x in found]
+    rows = []
+    for lang in langs:
+        qa_file = project.dir / "reports" / f"{branch}_{lang}.qa.json"
+        qa_rep = json.loads(qa_file.read_text(encoding="utf-8")) if qa_file.exists() else {}
+        p = packs.get(lang) or {}
+        voices = (p.get("tts") or {}).get("voices") or []
+        files = {}
+        for ext in ("srt", "vtt"):
+            src = rdir / f"{branch}_{lang}.{ext}"
+            if src.exists():
+                dst = out / f"{lang}.{ext}"
+                dst.write_bytes(src.read_bytes())
+                files[ext] = {"file": dst.name, "sha256": hashlib.sha256(dst.read_bytes()).hexdigest()}
+        issues = qa_rep.get("known_issues") or []
+        rows.append({"lang": lang, "name": p.get("name", lang), "direction": p.get("direction"), "files": files,
+                     "subtitle_ready": qa_rep.get("status") == "PASSED_AUTOMATED_CHECKS",
+                     "qa_status": qa_rep.get("status", "no QA report"), "qa_issues": issues,
+                     # every machine translation needs a native reviewer before it is called commercially ready; the
+                     # pack flag (dialect profiles) additionally marks languages where even the MT model is weak
+                     "native_review_required": lang != source_lang or bool(p.get("needs_native_review")),
+                     "weak_mt_profile": bool(p.get("needs_native_review")),
+                     "native_review_done": False,
+                     "dub_ready_voice": next((v["id"] for v in voices if v.get("commercial_use") == "yes"), None),
+                     "dub_note": None if any(v.get("commercial_use") == "yes" for v in voices) else
+                     "no voice with a verified commercial licence - subtitles only"})
+    manifest = {"project": project.id, "branch": branch, "source_lang": source_lang, "built": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                "languages": rows, "commercially_ready": [], "note": "No translation has had native review yet: none is "
+                "labelled commercially ready. subtitle_ready = automated checks passed, not a quality guarantee."}
+    (out / "manifest.json").write_text(json.dumps(manifest, indent=1, ensure_ascii=False), encoding="utf-8")
+    z = out.with_suffix(".zip")
+    with zipfile.ZipFile(z, "w", zipfile.ZIP_DEFLATED) as zf:
+        for f in sorted(out.iterdir()):
+            zf.write(f, f.name)
+    return {"folder": str(out.relative_to(project.dir)), "zip": str(z.relative_to(project.dir)), "languages": len(rows),
+            "subtitle_ready": [r["lang"] for r in rows if r["subtitle_ready"]], "manifest": manifest}
