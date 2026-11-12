@@ -1,0 +1,1324 @@
+{
+ "youtube": {
+  "platform": "youtube",
+  "display": "YouTube (long-form video)",
+  "media": {
+   "aspect_recommended": {
+    "value": "16:9",
+    "kind": "documented",
+    "source": "https://support.google.com/youtube/answer/6375112",
+    "read_on": "2026-11-12",
+    "note": "do not add padding or black bars to the video; the player pads non-16:9 itself"
+   },
+   "resolution_recommended": {
+    "value": {
+     "width": 1920,
+     "height": 1080
+    },
+    "kind": "documented",
+    "source": "https://support.google.com/youtube/answer/6375112",
+    "read_on": "2026-11-12",
+    "note": "1080p is one of the listed 16:9 resolutions (240p to 4320p); NEXUS renders 1080p"
+   },
+   "resolution_max": {
+    "value": {
+     "width": 7680,
+     "height": 4320
+    },
+    "kind": "documented",
+    "source": "https://support.google.com/youtube/answer/6375112",
+    "read_on": "2026-11-12"
+   },
+   "fps": {
+    "value": {
+     "list": [
+      24,
+      25,
+      30,
+      48,
+      50,
+      60
+     ]
+    },
+    "kind": "documented",
+    "source": "https://support.google.com/youtube/answer/1722171",
+    "read_on": "2026-11-12",
+    "note": "upload at the frame rate it was recorded; deinterlace interlaced material"
+   },
+   "duration_max_s": {
+    "value": 43200,
+    "kind": "documented",
+    "source": "https://support.google.com/youtube/answer/71673",
+    "read_on": "2026-11-12",
+    "note": "256 GB or 12 hours, whichever is less"
+   },
+   "max_file_bytes": {
+    "value": 256000000000,
+    "kind": "documented",
+    "source": "https://support.google.com/youtube/answer/71673",
+    "read_on": "2026-11-12"
+   },
+   "title_max_chars": {
+    "value": 100,
+    "kind": "documented",
+    "source": "https://developers.google.com/youtube/v3/docs/videos",
+    "read_on": "2026-11-12",
+    "note": "may not contain < or >"
+   },
+   "description_max_bytes": {
+    "value": 5000,
+    "kind": "documented",
+    "source": "https://developers.google.com/youtube/v3/docs/videos",
+    "read_on": "2026-11-12",
+    "note": "5000 BYTES of UTF-8, not characters; may not contain < or >"
+   },
+   "tags_max_chars": {
+    "value": 500,
+    "kind": "documented",
+    "source": "https://developers.google.com/youtube/v3/docs/videos",
+    "read_on": "2026-11-12",
+    "note": "whole tag list; commas count; tags with spaces count their quotes"
+   },
+   "hashtags_max": {
+    "value": 60,
+    "kind": "documented",
+    "source": "https://support.google.com/youtube/answer/6390658",
+    "read_on": "2026-11-12",
+    "note": "with more than 60 hashtags ALL are ignored; up to 3 are shown near the title"
+   },
+   "thumbnail": {
+    "value": {
+     "width": 3840,
+     "height": 2160,
+     "min_width": 640,
+     "aspect": "16:9",
+     "formats": [
+      "jpg",
+      "png"
+     ],
+     "max_bytes": 2000000,
+     "max_bytes_desktop": 50000000,
+     "needs_verified_account": true
+    },
+    "kind": "documented",
+    "source": "https://support.google.com/youtube/answer/72431",
+    "read_on": "2026-11-12",
+    "note": "2 MB limit applies on mobile, 50 MB on desktop; NEXUS writes a 1920x1080 JPEG under 2 MB"
+   },
+   "caption_files": {
+    "value": [
+     "srt",
+     "vtt",
+     "sbv",
+     "ttml",
+     "dfxp",
+     "sami",
+     "rt",
+     "mpsub",
+     "lrc",
+     "cap"
+    ],
+    "kind": "documented",
+    "source": "https://support.google.com/youtube/answer/2734698",
+    "read_on": "2026-11-12",
+    "note": "SRT and SBV must be plain UTF-8; WebVTT supports positioning"
+   },
+   "safe_zone": {
+    "value": null,
+    "kind": "unverified",
+    "note": "no official overlay zones for long-form; player controls auto-hide"
+   },
+   "music_policy": {
+    "value": "Use music you own or have licensed. Tracks from the YouTube Audio Library do not receive Content ID claims.",
+    "kind": "documented",
+    "source": "https://support.google.com/youtube/answer/15424877",
+    "read_on": "2026-11-12"
+   }
+  },
+  "api": {
+   "upload": {
+    "endpoint": {
+     "value": "POST https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status",
+     "kind": "documented",
+     "source": "https://developers.google.com/youtube/v3/guides/using_resumable_upload_protocol",
+     "verified": "2026-11-12"
+    },
+    "protocol": {
+     "value": "initiate (X-Upload-Content-Length/-Type) -> 200 + Location session URI -> PUT bytes -> 201; on interruption PUT 'Content-Range: bytes */TOTAL' -> 308 + Range; retry 500/502/503/504 with exponential backoff (honour Retry-After); 404 = session expired, restart",
+     "kind": "documented",
+     "source": "https://developers.google.com/youtube/v3/guides/using_resumable_upload_protocol",
+     "verified": "2026-11-12"
+    },
+    "scopes": {
+     "value": [
+      "https://www.googleapis.com/auth/youtube.upload"
+     ],
+     "kind": "documented",
+     "source": "https://developers.google.com/youtube/v3/docs/videos/insert",
+     "verified": "2026-11-12",
+     "note": "any of youtube.upload, youtube, youtubepartner, youtube.force-ssl authorises videos.insert; NEXUS asks for the narrowest"
+    },
+    "max_file_bytes": {
+     "value": 256000000000,
+     "kind": "documented",
+     "source": "https://developers.google.com/youtube/v3/docs/videos/insert",
+     "verified": "2026-11-12"
+    },
+    "mime": {
+     "value": [
+      "video/*",
+      "application/octet-stream"
+     ],
+     "kind": "documented",
+     "source": "https://developers.google.com/youtube/v3/docs/videos/insert",
+     "verified": "2026-11-12"
+    },
+    "unverified_app_visibility": {
+     "value": "not restricted",
+     "kind": "documented",
+     "source": "https://developers.google.com/youtube/v3/docs/videos/insert",
+     "verified": "2026-11-12",
+     "note": "the page reads 'Videos uploaded from unverified API projects are not restricted to private viewing mode.' NEXUS still uploads privacyStatus=private unless the owner approved public"
+    },
+    "app_review": {
+     "value": "none required for the owner's own Google Cloud project; more quota via the quota extension form",
+     "kind": "documented",
+     "source": "https://developers.google.com/youtube/v3/determine_quota_cost",
+     "verified": "2026-11-12"
+    },
+    "thumbnail": {
+     "value": "thumbnails.set (custom thumbnails need a verified channel, platforms.yaml yt_thumbnails)",
+     "kind": "documented",
+     "source": "https://developers.google.com/youtube/v3/determine_quota_cost",
+     "verified": "2026-11-12"
+    }
+   },
+   "quota": {
+    "value": {
+     "daily_units": 10000,
+     "videos_insert": "1 unit per call in a separate 'Video Uploads' bucket limited to 100 calls/day",
+     "thumbnails_set": 50,
+     "videos_list": 1
+    },
+    "kind": "documented",
+    "source": "https://developers.google.com/youtube/v3/determine_quota_cost",
+    "verified": "2026-11-12",
+    "note": "the older figure '1600 units per videos.insert' is NOT what the current pages state; both the quota-cost page and videos.insert page say 100 uploads/day at 1 unit each in their own bucket"
+   },
+   "oauth": {
+    "value": {
+     "flow": "installed app, loopback redirect http://127.0.0.1:<port>, PKCE S256",
+     "auth_endpoint": "https://accounts.google.com/o/oauth2/v2/auth",
+     "token_endpoint": "https://oauth2.googleapis.com/token",
+     "oob": "no longer supported"
+    },
+    "kind": "documented",
+    "source": "https://developers.google.com/identity/protocols/oauth2/native-app",
+    "verified": "2026-11-12"
+   },
+   "analytics": {
+    "value": {
+     "endpoint": "GET https://youtubeanalytics.googleapis.com/v2/reports",
+     "required": [
+      "ids",
+      "startDate",
+      "endDate",
+      "metrics"
+     ],
+     "scopes": [
+      "https://www.googleapis.com/auth/yt-analytics.readonly",
+      "https://www.googleapis.com/auth/youtube.readonly"
+     ],
+     "metrics": [
+      "views",
+      "estimatedMinutesWatched",
+      "averageViewDuration",
+      "averageViewPercentage",
+      "audienceWatchRatio",
+      "relativeRetentionPerformance",
+      "subscribersGained",
+      "subscribersLost",
+      "likes",
+      "comments",
+      "shares"
+     ],
+     "retention": "dimensions=elapsedVideoTimeRatio, one video per request",
+     "impressions_ctr": "not on the metrics page read - import from the YouTube Studio export"
+    },
+    "kind": "documented",
+    "source": "https://developers.google.com/youtube/analytics/metrics",
+    "verified": "2026-11-12",
+    "note": "reports.query page (yt_reports) says requests now require youtube.readonly; averageViewDuration excludes looping clips since 2021-12-13"
+   }
+  },
+  "adapter": "youtube",
+  "adapter_status": "implemented_untested_live",
+  "default_visibility": "private",
+  "media_reviewed_on": "2026-11-12",
+  "api_verified_on": "2026-11-12"
+ },
+ "youtube_shorts": {
+  "platform": "youtube_shorts",
+  "display": "YouTube Shorts",
+  "media": {
+   "aspect_recommended": {
+    "value": "9:16",
+    "kind": "observed",
+    "source": "https://adkit.so/tools/safe-zones/youtube",
+    "read_on": "2026-11-12",
+    "note": "the help pages say 'vertical'; 9:16 is the universal reading and matches the documented 9:16 Shorts thumbnail"
+   },
+   "resolution_recommended": {
+    "value": {
+     "width": 1080,
+     "height": 1920
+    },
+    "kind": "observed",
+    "source": "https://adkit.so/tools/safe-zones/youtube",
+    "read_on": "2026-11-12"
+   },
+   "resolution_max": {
+    "value": {
+     "width": 1080,
+     "height": 1920
+    },
+    "kind": "documented",
+    "source": "https://support.google.com/youtube/answer/10059070",
+    "read_on": "2026-11-12",
+    "note": "uploaded Shorts can have a maximum resolution of 1080p"
+   },
+   "fps": {
+    "value": {
+     "list": [
+      24,
+      25,
+      30,
+      48,
+      50,
+      60
+     ]
+    },
+    "kind": "documented",
+    "source": "https://support.google.com/youtube/answer/1722171",
+    "read_on": "2026-11-12",
+    "note": "general YouTube encoding guidance"
+   },
+   "duration_max_s": {
+    "value": 180,
+    "kind": "documented",
+    "source": "https://support.google.com/youtube/answer/15424877",
+    "read_on": "2026-11-12",
+    "note": "up to three minutes; longer square/vertical uploads are long-form videos"
+   },
+   "max_file_bytes": {
+    "value": 256000000000,
+    "kind": "documented",
+    "source": "https://support.google.com/youtube/answer/71673",
+    "read_on": "2026-11-12"
+   },
+   "title_max_chars": {
+    "value": 100,
+    "kind": "documented",
+    "source": "https://developers.google.com/youtube/v3/docs/videos",
+    "read_on": "2026-11-12"
+   },
+   "description_max_bytes": {
+    "value": 5000,
+    "kind": "documented",
+    "source": "https://developers.google.com/youtube/v3/docs/videos",
+    "read_on": "2026-11-12"
+   },
+   "hashtags_max": {
+    "value": 60,
+    "kind": "documented",
+    "source": "https://support.google.com/youtube/answer/6390658",
+    "read_on": "2026-11-12"
+   },
+   "thumbnail": {
+    "value": {
+     "width": 2160,
+     "height": 3840,
+     "min_height": 640,
+     "aspect": "9:16",
+     "formats": [
+      "jpg",
+      "png"
+     ],
+     "max_bytes": 2000000,
+     "needs_verified_account": true,
+     "desktop_only": true
+    },
+    "kind": "documented",
+    "source": "https://support.google.com/youtube/answer/72431",
+    "read_on": "2026-11-12",
+    "note": "custom Shorts thumbnails: verified account, YouTube Studio on a computer"
+   },
+   "caption_files": {
+    "value": [
+     "srt",
+     "vtt",
+     "sbv",
+     "ttml"
+    ],
+    "kind": "documented",
+    "source": "https://support.google.com/youtube/answer/2734698",
+    "read_on": "2026-11-12",
+    "note": "the subtitle page is generic to YouTube videos; NEXUS also burns captions in for sound-off viewing"
+   },
+   "safe_zone": {
+    "value": {
+     "top": 0.15,
+     "bottom": 0.35,
+     "left": 0.044,
+     "right": 0.178
+    },
+    "kind": "observed",
+    "source": "https://adkit.so/tools/safe-zones/youtube",
+    "read_on": "2026-11-12",
+    "note": "figures attributed to Google Ads guidance for vertical video ads; no official organic Shorts safe zone was found"
+   },
+   "music_policy": {
+    "value": "A Short longer than 1 minute with ANY active copyright claim is blocked globally (not playable, recommended or monetised) until the claim is resolved. Most Shorts Audio Library songs can be used for up to 90 s (some 60 or 30 s).",
+    "kind": "documented",
+    "source": "https://support.google.com/youtube/answer/15424877",
+    "read_on": "2026-11-12"
+   }
+  },
+  "api": {
+   "upload": {
+    "endpoint": {
+     "value": "POST https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status",
+     "kind": "documented",
+     "source": "https://developers.google.com/youtube/v3/guides/using_resumable_upload_protocol",
+     "verified": "2026-11-12"
+    },
+    "protocol": {
+     "value": "initiate (X-Upload-Content-Length/-Type) -> 200 + Location session URI -> PUT bytes -> 201; on interruption PUT 'Content-Range: bytes */TOTAL' -> 308 + Range; retry 500/502/503/504 with exponential backoff (honour Retry-After); 404 = session expired, restart",
+     "kind": "documented",
+     "source": "https://developers.google.com/youtube/v3/guides/using_resumable_upload_protocol",
+     "verified": "2026-11-12"
+    },
+    "scopes": {
+     "value": [
+      "https://www.googleapis.com/auth/youtube.upload"
+     ],
+     "kind": "documented",
+     "source": "https://developers.google.com/youtube/v3/docs/videos/insert",
+     "verified": "2026-11-12",
+     "note": "any of youtube.upload, youtube, youtubepartner, youtube.force-ssl authorises videos.insert; NEXUS asks for the narrowest"
+    },
+    "max_file_bytes": {
+     "value": 256000000000,
+     "kind": "documented",
+     "source": "https://developers.google.com/youtube/v3/docs/videos/insert",
+     "verified": "2026-11-12"
+    },
+    "mime": {
+     "value": [
+      "video/*",
+      "application/octet-stream"
+     ],
+     "kind": "documented",
+     "source": "https://developers.google.com/youtube/v3/docs/videos/insert",
+     "verified": "2026-11-12"
+    },
+    "unverified_app_visibility": {
+     "value": "not restricted",
+     "kind": "documented",
+     "source": "https://developers.google.com/youtube/v3/docs/videos/insert",
+     "verified": "2026-11-12",
+     "note": "the page reads 'Videos uploaded from unverified API projects are not restricted to private viewing mode.' NEXUS still uploads privacyStatus=private unless the owner approved public"
+    },
+    "app_review": {
+     "value": "none required for the owner's own Google Cloud project; more quota via the quota extension form",
+     "kind": "documented",
+     "source": "https://developers.google.com/youtube/v3/determine_quota_cost",
+     "verified": "2026-11-12"
+    },
+    "thumbnail": {
+     "value": "thumbnails.set (custom thumbnails need a verified channel, platforms.yaml yt_thumbnails)",
+     "kind": "documented",
+     "source": "https://developers.google.com/youtube/v3/determine_quota_cost",
+     "verified": "2026-11-12"
+    }
+   },
+   "quota": {
+    "value": {
+     "daily_units": 10000,
+     "videos_insert": "1 unit per call in a separate 'Video Uploads' bucket limited to 100 calls/day",
+     "thumbnails_set": 50,
+     "videos_list": 1
+    },
+    "kind": "documented",
+    "source": "https://developers.google.com/youtube/v3/determine_quota_cost",
+    "verified": "2026-11-12",
+    "note": "the older figure '1600 units per videos.insert' is NOT what the current pages state; both the quota-cost page and videos.insert page say 100 uploads/day at 1 unit each in their own bucket"
+   },
+   "oauth": {
+    "value": {
+     "flow": "installed app, loopback redirect http://127.0.0.1:<port>, PKCE S256",
+     "auth_endpoint": "https://accounts.google.com/o/oauth2/v2/auth",
+     "token_endpoint": "https://oauth2.googleapis.com/token",
+     "oob": "no longer supported"
+    },
+    "kind": "documented",
+    "source": "https://developers.google.com/identity/protocols/oauth2/native-app",
+    "verified": "2026-11-12"
+   },
+   "analytics": {
+    "value": {
+     "endpoint": "GET https://youtubeanalytics.googleapis.com/v2/reports",
+     "required": [
+      "ids",
+      "startDate",
+      "endDate",
+      "metrics"
+     ],
+     "scopes": [
+      "https://www.googleapis.com/auth/yt-analytics.readonly",
+      "https://www.googleapis.com/auth/youtube.readonly"
+     ],
+     "metrics": [
+      "views",
+      "estimatedMinutesWatched",
+      "averageViewDuration",
+      "averageViewPercentage",
+      "audienceWatchRatio",
+      "relativeRetentionPerformance",
+      "subscribersGained",
+      "subscribersLost",
+      "likes",
+      "comments",
+      "shares"
+     ],
+     "retention": "dimensions=elapsedVideoTimeRatio, one video per request",
+     "impressions_ctr": "not on the metrics page read - import from the YouTube Studio export"
+    },
+    "kind": "documented",
+    "source": "https://developers.google.com/youtube/analytics/metrics",
+    "verified": "2026-11-12",
+    "note": "reports.query page (yt_reports) says requests now require youtube.readonly; averageViewDuration excludes looping clips since 2021-12-13"
+   }
+  },
+  "adapter": "youtube",
+  "adapter_status": "implemented_untested_live",
+  "default_visibility": "private",
+  "media_reviewed_on": "2026-11-12",
+  "api_verified_on": "2026-11-12"
+ },
+ "tiktok": {
+  "platform": "tiktok",
+  "display": "TikTok",
+  "media": {
+   "aspect_recommended": {
+    "value": "9:16",
+    "kind": "documented",
+    "source": "https://ads.tiktok.com/help/article/video-ads-specifications?lang=en",
+    "read_on": "2026-11-12",
+    "note": "stated on TikTok's In-Feed ads spec page (9:16 recommended); used for organic posts as the best official guidance"
+   },
+   "resolution_recommended": {
+    "value": {
+     "width": 1080,
+     "height": 1920
+    },
+    "kind": "observed",
+    "source": "https://reap.video/blog/short-form-video-safe-zones",
+    "read_on": "2026-11-12",
+    "note": "ads page states 540x960 or larger for 9:16; 1080x1920 is the common creator target"
+   },
+   "resolution_max": {
+    "value": {
+     "long_side": 4096
+    },
+    "kind": "documented",
+    "source": "https://developers.tiktok.com/doc/content-posting-api-media-transfer-guide",
+    "read_on": "2026-11-12"
+   },
+   "fps": {
+    "value": {
+     "min": 23,
+     "max": 60
+    },
+    "kind": "documented",
+    "source": "https://developers.tiktok.com/doc/content-posting-api-media-transfer-guide",
+    "read_on": "2026-11-12"
+   },
+   "duration_max_s": {
+    "value": 600,
+    "kind": "documented",
+    "source": "https://developers.tiktok.com/doc/content-posting-api-media-transfer-guide",
+    "read_on": "2026-11-12",
+    "note": "longest video a developer can send via the upload endpoint is 10 minutes. In-app limits are account-dependent (60-minute uploads tested for some users, observed: see tt_length_obs); a creator's own limit is returned as max_video_post_duration_sec by the creator-info query"
+   },
+   "max_file_bytes": {
+    "value": 4000000000,
+    "kind": "documented",
+    "source": "https://developers.tiktok.com/doc/content-posting-api-media-transfer-guide",
+    "read_on": "2026-11-12"
+   },
+   "title_max_chars": {
+    "value": null,
+    "kind": "unverified",
+    "note": "TikTok has no separate title: the post caption (post_info.title) is the text field"
+   },
+   "caption_max_utf16": {
+    "value": 2200,
+    "kind": "documented",
+    "source": "https://developers.tiktok.com/doc/content-posting-api-reference-direct-post",
+    "read_on": "2026-11-12",
+    "note": "max 2200 UTF-16 runes; hashtags and mentions are matched in the caption"
+   },
+   "hashtags_max": {
+    "value": null,
+    "kind": "unverified",
+    "note": "no hashtag count limit stated"
+   },
+   "thumbnail": {
+    "value": null,
+    "kind": "unverified",
+    "note": "cover is chosen from a frame in the app; no cover-image spec read this session. NEXUS writes cover.jpg as a frame suggestion"
+   },
+   "caption_files": {
+    "value": null,
+    "kind": "unverified",
+    "note": "no caption-file upload documented on the pages read; NEXUS burns captions into the picture"
+   },
+   "safe_zone": {
+    "value": {
+     "top": 0.15,
+     "bottom": 0.3,
+     "left": 0.1,
+     "right": 0.15
+    },
+    "kind": "observed",
+    "source": "https://reap.video/blog/short-form-video-safe-zones",
+    "read_on": "2026-11-12",
+    "note": "TikTok's ads page says the safe zone depends on dimensions and caption length and offers template files only (no numbers)"
+   },
+   "music_policy": {
+    "value": "Businesses cannot use the general music library for commercial use; business accounts must use the Commercial Music Library for organic posts, ads and branded content.",
+    "kind": "documented",
+    "source": "https://ads.tiktok.com/help/article/commercial-music-library?lang=en",
+    "read_on": "2026-11-12"
+   }
+  },
+  "api": {
+   "upload": {
+    "endpoint": {
+     "value": "POST https://open.tiktokapis.com/v2/post/publish/video/init/ (then PUT chunks to upload_url, poll /v2/post/publish/status/fetch/)",
+     "kind": "documented",
+     "source": "https://developers.tiktok.com/doc/content-posting-api-get-started",
+     "verified": "2026-11-12",
+     "note": "init URL quoted from the get-started page; the status endpoint is in the direct-post reference (tt_direct, read by platforms.yaml)"
+    },
+    "scopes": {
+     "value": [
+      "video.publish"
+     ],
+     "kind": "documented",
+     "source": "https://developers.tiktok.com/doc/content-posting-api-get-started",
+     "verified": "2026-11-12"
+    },
+    "unverified_app_visibility": {
+     "value": "private only (SELF_ONLY) until audited",
+     "kind": "documented",
+     "source": "https://developers.tiktok.com/doc/content-posting-api-get-started",
+     "verified": "2026-11-12",
+     "note": "'All content posted by unaudited clients will be restricted to private viewing mode.'"
+    },
+    "app_review": {
+     "value": "Content Posting API product + video.publish scope approval; audit to lift the private-only restriction (https://developers.tiktok.com/application/content-posting-api)",
+     "kind": "documented",
+     "source": "https://developers.tiktok.com/doc/content-posting-api-get-started",
+     "verified": "2026-11-12"
+    }
+   },
+   "quota": {
+    "value": null,
+    "kind": "unverified",
+    "note": "no daily posting cap stated on the get-started page"
+   },
+   "analytics": {
+    "value": {
+     "api": "Display API video object",
+     "fields": [
+      "view_count",
+      "like_count",
+      "comment_count",
+      "share_count"
+     ]
+    },
+    "kind": "documented",
+    "source": "https://developers.tiktok.com/doc/tiktok-api-v2-video-object",
+    "verified": "2026-11-12",
+    "note": "no watch time/retention -> TikTok Studio CSV export"
+   }
+  },
+  "adapter": "tiktok",
+  "adapter_status": "requires_approved_app",
+  "default_visibility": "private",
+  "media_reviewed_on": "2026-11-12",
+  "api_verified_on": "2026-11-12"
+ },
+ "instagram_reels": {
+  "platform": "instagram_reels",
+  "display": "Instagram Reels",
+  "media": {
+   "aspect_recommended": {
+    "value": "9:16",
+    "kind": "documented",
+    "source": "https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media",
+    "read_on": "2026-11-12"
+   },
+   "resolution_recommended": {
+    "value": {
+     "width": 1080,
+     "height": 1920
+    },
+    "kind": "observed",
+    "source": "https://www.socialpilot.co/instagram-marketing/instagram-video-size",
+    "read_on": "2026-11-12"
+   },
+   "resolution_max": {
+    "value": {
+     "width": 1920
+    },
+    "kind": "documented",
+    "source": "https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media",
+    "read_on": "2026-11-12",
+    "note": "maximum 1920 horizontal pixels (columns)"
+   },
+   "fps": {
+    "value": {
+     "min": 23,
+     "max": 60
+    },
+    "kind": "documented",
+    "source": "https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media",
+    "read_on": "2026-11-12"
+   },
+   "duration_max_s": {
+    "value": 900,
+    "kind": "documented",
+    "source": "https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media",
+    "read_on": "2026-11-12",
+    "note": "API: 15 minutes. The app records and edits reels up to 20 minutes (ig_reels_about)"
+   },
+   "max_file_bytes": {
+    "value": 300000000,
+    "kind": "documented",
+    "source": "https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media",
+    "read_on": "2026-11-12",
+    "note": "300 MB for API publishing"
+   },
+   "title_max_chars": {
+    "value": null,
+    "kind": "unverified",
+    "note": "no title field; the first caption line acts as the title"
+   },
+   "caption_max_chars": {
+    "value": 2200,
+    "kind": "documented",
+    "source": "https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media",
+    "read_on": "2026-11-12"
+   },
+   "hashtags_max": {
+    "value": 30,
+    "kind": "documented",
+    "source": "https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media",
+    "read_on": "2026-11-12",
+    "note": "also max 20 @mentions"
+   },
+   "thumbnail": {
+    "value": {
+     "aspect": "9:16",
+     "formats": [
+      "jpg"
+     ],
+     "max_bytes": 8000000,
+     "color_space": "sRGB",
+     "feed_crop": "centre 1:1 when shared to the feed grid"
+    },
+    "kind": "documented",
+    "source": "https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media",
+    "read_on": "2026-11-12",
+    "note": "non-9:16 covers are cropped to the middle 9:16"
+   },
+   "caption_files": {
+    "value": null,
+    "kind": "unverified",
+    "note": "no caption-file upload documented; NEXUS burns captions in"
+   },
+   "safe_zone": {
+    "value": {
+     "top": 0.14,
+     "bottom": 0.35,
+     "left": 0.06,
+     "right": 0.06
+    },
+    "kind": "observed",
+    "source": "https://houseofmarketers.com/guide-to-safe-zones-tiktok-facebook-instagram-stories-reels/",
+    "read_on": "2026-11-12",
+    "note": "Meta's own pages read give no organic numbers; these are widely repeated Reels ad margins"
+   },
+   "music_policy": {
+    "value": "Business/professional accounts may only have part of the music library; Meta Sound Collection tracks are royalty-free for use on Meta products only.",
+    "kind": "observed",
+    "source": "https://www.facebook.com/sound/collection/terms",
+    "read_on": "2026-11-12",
+    "note": "the music-library help page did not render for verification"
+   }
+  },
+  "api": {
+   "upload": {
+    "endpoint": {
+     "value": "POST /{ig-user-id}/media (media_type=REELS, video_url or upload_type=resumable) -> rupload.facebook.com/ig-api-upload/<ver>/<container> -> GET /<container>?fields=status_code -> POST /{ig-user-id}/media_publish",
+     "kind": "documented",
+     "source": "https://developers.facebook.com/docs/instagram-platform/content-publishing",
+     "verified": "2026-11-12"
+    },
+    "scopes": {
+     "value": {
+      "instagram_login": [
+       "instagram_business_basic",
+       "instagram_business_content_publish"
+      ],
+      "facebook_login": [
+       "instagram_basic",
+       "instagram_content_publish",
+       "pages_read_engagement"
+      ]
+     },
+     "kind": "documented",
+     "source": "https://developers.facebook.com/docs/instagram-platform/content-publishing",
+     "verified": "2026-11-12"
+    },
+    "account": {
+     "value": "Instagram professional account; linked Page must not require Page Publishing Authorization",
+     "kind": "documented",
+     "source": "https://developers.facebook.com/docs/instagram-platform/content-publishing",
+     "verified": "2026-11-12"
+    },
+    "app_review": {
+     "value": "Advanced or Standard Access level; review process not described on the page read",
+     "kind": "documented",
+     "source": "https://developers.facebook.com/docs/instagram-platform/content-publishing",
+     "verified": "2026-11-12"
+    },
+    "unverified_app_visibility": {
+     "value": "no private/draft mode: media_publish publishes",
+     "kind": "documented",
+     "source": "https://developers.facebook.com/docs/instagram-platform/content-publishing",
+     "verified": "2026-11-12",
+     "note": "hence the adapter never calls media_publish without approval == approved_by_owner"
+    },
+    "status_codes": {
+     "value": [
+      "IN_PROGRESS",
+      "FINISHED",
+      "PUBLISHED",
+      "ERROR",
+      "EXPIRED"
+     ],
+     "kind": "documented",
+     "source": "https://developers.facebook.com/docs/instagram-platform/content-publishing",
+     "verified": "2026-11-12"
+    }
+   },
+   "quota": {
+    "value": "100 API-published posts per account per 24 h (carousel section says 50); check GET /{ig-user-id}/content_publishing_limit",
+    "kind": "documented",
+    "source": "https://developers.facebook.com/docs/instagram-platform/content-publishing",
+    "verified": "2026-11-12"
+   },
+   "analytics": {
+    "value": {
+     "api": "Instagram media insights",
+     "metrics": [
+      "views",
+      "reach",
+      "ig_reels_avg_watch_time",
+      "reels_skip_rate",
+      "likes",
+      "comments",
+      "shares",
+      "saved",
+      "total_interactions"
+     ]
+    },
+    "kind": "documented",
+    "source": "https://developers.facebook.com/docs/instagram-platform/reference/instagram-media/insights",
+    "verified": "2026-11-12",
+    "note": "professional (business/creator) account required"
+   }
+  },
+  "adapter": "meta_instagram",
+  "adapter_status": "requires_approved_app",
+  "default_visibility": "draft",
+  "media_reviewed_on": "2026-11-12",
+  "api_verified_on": "2026-11-12"
+ },
+ "instagram_feed": {
+  "platform": "instagram_feed",
+  "display": "Instagram feed (4:5 video)",
+  "media": {
+   "aspect_recommended": {
+    "value": "4:5",
+    "kind": "observed",
+    "source": "https://www.socialpilot.co/instagram-marketing/instagram-video-size",
+    "read_on": "2026-11-12",
+    "note": "4:5 is the documented narrowest feed image ratio; for video it is the common feed choice"
+   },
+   "resolution_recommended": {
+    "value": {
+     "width": 1080,
+     "height": 1350
+    },
+    "kind": "observed",
+    "source": "https://www.socialpilot.co/instagram-marketing/instagram-video-size",
+    "read_on": "2026-11-12"
+   },
+   "resolution_max": {
+    "value": {
+     "width": 1920
+    },
+    "kind": "documented",
+    "source": "https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media",
+    "read_on": "2026-11-12"
+   },
+   "fps": {
+    "value": {
+     "min": 23,
+     "max": 60
+    },
+    "kind": "documented",
+    "source": "https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media",
+    "read_on": "2026-11-12"
+   },
+   "duration_max_s": {
+    "value": 900,
+    "kind": "documented",
+    "source": "https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media",
+    "read_on": "2026-11-12"
+   },
+   "max_file_bytes": {
+    "value": 300000000,
+    "kind": "documented",
+    "source": "https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media",
+    "read_on": "2026-11-12"
+   },
+   "title_max_chars": {
+    "value": null,
+    "kind": "unverified",
+    "note": "no title field"
+   },
+   "caption_max_chars": {
+    "value": 2200,
+    "kind": "documented",
+    "source": "https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media",
+    "read_on": "2026-11-12"
+   },
+   "hashtags_max": {
+    "value": 30,
+    "kind": "documented",
+    "source": "https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media",
+    "read_on": "2026-11-12"
+   },
+   "thumbnail": {
+    "value": {
+     "formats": [
+      "jpg"
+     ],
+     "max_bytes": 8000000,
+     "color_space": "sRGB",
+     "feed_crop": "centre 1:1 in the grid"
+    },
+    "kind": "documented",
+    "source": "https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media",
+    "read_on": "2026-11-12"
+   },
+   "caption_files": {
+    "value": null,
+    "kind": "unverified",
+    "note": "no caption-file upload documented; captions are burned in"
+   },
+   "safe_zone": {
+    "value": {
+     "top": 0.1,
+     "bottom": 0.1,
+     "left": 0.0,
+     "right": 0.0
+    },
+    "kind": "experimental",
+    "source": "editorial: keep text inside the centre 1:1 square that the grid shows (documented crop, ig_media)",
+    "read_on": "2026-11-12",
+    "note": "derived from the documented 1:1 grid crop of a 4:5 frame; not a UI overlay measurement"
+   }
+  },
+  "api": {
+   "upload": {
+    "endpoint": {
+     "value": "POST /{ig-user-id}/media (media_type=REELS, video_url or upload_type=resumable) -> rupload.facebook.com/ig-api-upload/<ver>/<container> -> GET /<container>?fields=status_code -> POST /{ig-user-id}/media_publish",
+     "kind": "documented",
+     "source": "https://developers.facebook.com/docs/instagram-platform/content-publishing",
+     "verified": "2026-11-12"
+    },
+    "scopes": {
+     "value": {
+      "instagram_login": [
+       "instagram_business_basic",
+       "instagram_business_content_publish"
+      ],
+      "facebook_login": [
+       "instagram_basic",
+       "instagram_content_publish",
+       "pages_read_engagement"
+      ]
+     },
+     "kind": "documented",
+     "source": "https://developers.facebook.com/docs/instagram-platform/content-publishing",
+     "verified": "2026-11-12"
+    },
+    "account": {
+     "value": "Instagram professional account; linked Page must not require Page Publishing Authorization",
+     "kind": "documented",
+     "source": "https://developers.facebook.com/docs/instagram-platform/content-publishing",
+     "verified": "2026-11-12"
+    },
+    "app_review": {
+     "value": "Advanced or Standard Access level; review process not described on the page read",
+     "kind": "documented",
+     "source": "https://developers.facebook.com/docs/instagram-platform/content-publishing",
+     "verified": "2026-11-12"
+    },
+    "unverified_app_visibility": {
+     "value": "no private/draft mode: media_publish publishes",
+     "kind": "documented",
+     "source": "https://developers.facebook.com/docs/instagram-platform/content-publishing",
+     "verified": "2026-11-12",
+     "note": "hence the adapter never calls media_publish without approval == approved_by_owner"
+    },
+    "status_codes": {
+     "value": [
+      "IN_PROGRESS",
+      "FINISHED",
+      "PUBLISHED",
+      "ERROR",
+      "EXPIRED"
+     ],
+     "kind": "documented",
+     "source": "https://developers.facebook.com/docs/instagram-platform/content-publishing",
+     "verified": "2026-11-12"
+    }
+   },
+   "quota": {
+    "value": "100 API-published posts per account per 24 h (carousel section says 50); check GET /{ig-user-id}/content_publishing_limit",
+    "kind": "documented",
+    "source": "https://developers.facebook.com/docs/instagram-platform/content-publishing",
+    "verified": "2026-11-12"
+   },
+   "analytics": {
+    "value": {
+     "api": "Instagram media insights",
+     "metrics": [
+      "views",
+      "reach",
+      "ig_reels_avg_watch_time",
+      "reels_skip_rate",
+      "likes",
+      "comments",
+      "shares",
+      "saved",
+      "total_interactions"
+     ]
+    },
+    "kind": "documented",
+    "source": "https://developers.facebook.com/docs/instagram-platform/reference/instagram-media/insights",
+    "verified": "2026-11-12",
+    "note": "professional (business/creator) account required"
+   }
+  },
+  "adapter": "meta_instagram",
+  "adapter_status": "requires_approved_app",
+  "default_visibility": "draft",
+  "media_reviewed_on": "2026-11-12",
+  "api_verified_on": "2026-11-12"
+ },
+ "facebook": {
+  "platform": "facebook",
+  "display": "Facebook (feed video)",
+  "media": {
+   "aspect_recommended": {
+    "value": "16:9",
+    "kind": "experimental",
+    "source": "editorial: keep the long-form master's frame so YouTube and Facebook share one render",
+    "read_on": "2026-11-12",
+    "note": "use the facebook/reels sub-profile for vertical"
+   },
+   "resolution_recommended": {
+    "value": {
+     "width": 1920,
+     "height": 1080
+    },
+    "kind": "experimental",
+    "source": "editorial: same as the YouTube render",
+    "read_on": "2026-11-12"
+   },
+   "resolution_max": {
+    "value": null,
+    "kind": "unverified",
+    "note": "not stated on pages read"
+   },
+   "fps": {
+    "value": {
+     "min": 24,
+     "max": 60
+    },
+    "kind": "observed",
+    "source": "https://developers.facebook.com/docs/video-api/guides/reels-publishing",
+    "read_on": "2026-11-12",
+    "note": "documented for Reels (fb_reels_api); feed videos are now reels"
+   },
+   "duration_max_s": {
+    "value": 14400,
+    "kind": "observed",
+    "source": "https://www.facebook.com/business/help/163131210928551",
+    "read_on": "2026-11-12",
+    "note": "240 minutes for Page uploads as quoted in search excerpts of this Meta page, which did not render for verification"
+   },
+   "max_file_bytes": {
+    "value": 10000000000,
+    "kind": "observed",
+    "source": "https://www.facebook.com/business/help/163131210928551",
+    "read_on": "2026-11-12",
+    "note": "10 GB as quoted in search excerpts; not verified"
+   },
+   "title_max_chars": {
+    "value": 255,
+    "kind": "experimental",
+    "source": "editorial: previous publish.PLATFORMS value",
+    "read_on": "2026-11-12",
+    "note": "the Video API accepts title and description but the page read states no length limits"
+   },
+   "description_max_chars": {
+    "value": 5000,
+    "kind": "experimental",
+    "source": "editorial: previous publish.PLATFORMS value",
+    "read_on": "2026-11-12",
+    "note": "no limit stated on the page read"
+   },
+   "hashtags_max": {
+    "value": null,
+    "kind": "unverified",
+    "note": "not stated"
+   },
+   "thumbnail": {
+    "value": null,
+    "kind": "unverified",
+    "note": "no thumbnail spec read; NEXUS writes a 16:9 JPEG"
+   },
+   "caption_files": {
+    "value": null,
+    "kind": "unverified",
+    "note": "SRT upload via Meta Business Suite is widely described but was not confirmed on an official page this session; the package includes captions.srt"
+   },
+   "safe_zone": {
+    "value": null,
+    "kind": "unverified",
+    "note": "no overlay zones documented for feed video"
+   },
+   "music_policy": {
+    "value": "Meta Sound Collection tracks are royalty-free on Meta products only; other commercial music needs your own licence.",
+    "kind": "observed",
+    "source": "https://www.facebook.com/sound/collection/terms",
+    "read_on": "2026-11-12"
+   }
+  },
+  "api": {
+   "upload": {
+    "endpoint": {
+     "value": "POST /{page-id}/videos (Video API); reels: POST /{page-id}/video_reels (upload_phase start/finish)",
+     "kind": "documented",
+     "source": "https://developers.facebook.com/docs/video-api/guides/publishing",
+     "verified": "2026-11-12"
+    },
+    "scopes": {
+     "value": [
+      "pages_show_list",
+      "pages_read_engagement",
+      "pages_manage_posts"
+     ],
+     "kind": "documented",
+     "source": "https://developers.facebook.com/docs/video-api/guides/publishing",
+     "verified": "2026-11-12",
+     "note": "Page access token; user with CREATE_CONTENT on the Page"
+    },
+    "app_review": {
+     "value": "Meta app review for the Page permissions",
+     "kind": "documented",
+     "source": "https://developers.facebook.com/docs/video-api/guides/publishing",
+     "verified": "2026-11-12"
+    },
+    "unverified_app_visibility": {
+     "value": "Pages only; API reels publish publicly",
+     "kind": "documented",
+     "source": "https://developers.facebook.com/docs/video-api/guides/reels-publishing",
+     "verified": "2026-11-12"
+    }
+   },
+   "quota": {
+    "value": "30 API-published reels per Page per 24 h",
+    "kind": "documented",
+    "source": "https://developers.facebook.com/docs/video-api/guides/reels-publishing",
+    "verified": "2026-11-12"
+   },
+   "analytics": {
+    "value": {
+     "endpoint": "GET /{video-id}/video_insights",
+     "metrics": [
+      "total_video_views",
+      "total_video_avg_time_watched",
+      "total_video_view_total_time",
+      "total_video_retention_graph"
+     ],
+     "permissions": [
+      "read_insights",
+      "pages_manage_engagement"
+     ],
+     "limits": "Page videos only; last 2 years"
+    },
+    "kind": "documented",
+    "source": "https://developers.facebook.com/docs/graph-api/reference/video/video_insights/",
+    "verified": "2026-11-12"
+   }
+  },
+  "adapter": "meta_facebook",
+  "adapter_status": "requires_approved_app",
+  "default_visibility": "draft",
+  "media_reviewed_on": "2026-11-12",
+  "api_verified_on": "2026-11-12"
+ },
+ "snapchat_spotlight": {
+  "platform": "snapchat_spotlight",
+  "display": "Snapchat Spotlight",
+  "media": {
+   "aspect_recommended": {
+    "value": "9:16",
+    "kind": "documented",
+    "source": "https://help.snapchat.com/hc/en-us/articles/7012310003348-How-to-Post-a-Snap-to-My-Story-from-the-Web",
+    "read_on": "2026-11-12",
+    "note": "stated in the web-posting article under the Spotlight help section: Snapchat content is 9:16 and is cropped automatically"
+   },
+   "resolution_recommended": {
+    "value": {
+     "width": 1080,
+     "height": 1920
+    },
+    "kind": "observed",
+    "source": "https://www.kapwing.com/resources/snapchat-spotlight-what-you-should-know/",
+    "read_on": "2026-11-12"
+   },
+   "resolution_max": {
+    "value": null,
+    "kind": "unverified",
+    "note": "not stated"
+   },
+   "fps": {
+    "value": null,
+    "kind": "unverified",
+    "note": "not stated; NEXUS uses 30 fps"
+   },
+   "duration_max_s": {
+    "value": 60,
+    "kind": "observed",
+    "source": "https://www.kapwing.com/resources/snapchat-spotlight-what-you-should-know/",
+    "read_on": "2026-11-12",
+    "note": "60 s is the long-standing reported limit (the web My Story article also says 5-60 s). Social Media Today reports up to 3 min (5 min uploads); unconfirmed, so the conservative 60 s is used"
+   },
+   "max_file_bytes": {
+    "value": null,
+    "kind": "unverified",
+    "note": "not stated"
+   },
+   "title_max_chars": {
+    "value": null,
+    "kind": "unverified",
+    "note": "no title field"
+   },
+   "description_max_chars": {
+    "value": 160,
+    "kind": "experimental",
+    "source": "editorial: previous publish.PLATFORMS value",
+    "read_on": "2026-11-12",
+    "note": "no limit stated on the pages read"
+   },
+   "hashtags_max": {
+    "value": 3,
+    "kind": "experimental",
+    "source": "editorial: a few #Topics",
+    "read_on": "2026-11-12",
+    "note": "Snap documents adding #Topics but no count limit"
+   },
+   "thumbnail": {
+    "value": null,
+    "kind": "unverified",
+    "note": "no cover spec"
+   },
+   "caption_files": {
+    "value": null,
+    "kind": "unverified",
+    "note": "no caption-file upload; Snap recommends captions for sound-off viewers (sc_creators), so they are burned in"
+   },
+   "safe_zone": {
+    "value": {
+     "top": 0.15,
+     "bottom": 0.3,
+     "left": 0.1,
+     "right": 0.15
+    },
+    "kind": "experimental",
+    "source": "editorial: generic vertical-video margins (short_safe_obs) applied to Snapchat",
+    "read_on": "2026-11-12",
+    "note": "no Snapchat-specific numbers found"
+   }
+  },
+  "api": {
+   "upload": {
+    "endpoint": {
+     "value": null,
+     "kind": "unverified",
+     "note": "no public organic Spotlight upload endpoint found. Public Profile API is 'currently allowlist only' (scope snapchat-profile-api, OAuth app via Ads Manager) and its get-started page documents reading, not posting"
+    },
+    "manual": {
+     "value": "profile.snapchat.com web upload, 'Spotlight Snaps'",
+     "kind": "documented",
+     "source": "https://help.snapchat.com/hc/en-us/articles/7012293789972-How-do-I-submit-a-Snap-to-Spotlight-from-the-web",
+     "verified": "2026-11-12"
+    },
+    "app_review": {
+     "value": "Public Profile API: allowlist via Snap point of contact",
+     "kind": "documented",
+     "source": "https://developers.snap.com/api/marketing-api/Public-Profile-API/GetStarted",
+     "verified": "2026-11-12"
+    }
+   },
+   "quota": {
+    "value": null,
+    "kind": "unverified",
+    "note": "n/a (manual)"
+   },
+   "analytics": {
+    "value": "Marketing (Ads) API reports ad performance only; organic stats via Public Profile API for allowlisted profiles; otherwise in-app Insights / manual entry",
+    "kind": "documented",
+    "source": "https://developers.snap.com/api/marketing-api/Ads-API/introduction",
+    "verified": "2026-11-12"
+   }
+  },
+  "adapter": "snapchat_manual",
+  "adapter_status": "manual_export_only",
+  "default_visibility": "draft",
+  "media_reviewed_on": "2026-11-12",
+  "api_verified_on": "2026-11-12"
+ }
+}
