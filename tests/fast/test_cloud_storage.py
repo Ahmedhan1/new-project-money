@@ -2,7 +2,6 @@
 fake (real HTTP), strict connection isolation, refresh, crash-safe resumable upload, checksums, dedupe, move, cleanup."""
 import hashlib
 import json
-import os
 import time
 from urllib.parse import parse_qs, urlparse
 
@@ -64,6 +63,7 @@ def test_local_provider_ops(home, tmp_path):
     src = blob(tmp_path, "a.bin", 3 * CHUNK + 17)
     f = p.upload(src, "NEXUS/Masters/p1/a.bin", chunk_size=CHUNK)
     assert f.sha256 == hashlib.sha256(src.read_bytes()).hexdigest() and f.app_created
+    assert f.ref == "storage/local/NEXUS/Masters/p1/a.bin" and (home / f.ref).is_file()
     assert [x.name for x in p.list("NEXUS/Masters/p1")] == ["a.bin"]
     assert p.checksum(f.ref)["sha256"] == f.sha256
     p.upload(blob(tmp_path, "b.bin", 100, seed=2), "NEXUS/Masters/p1/a.bin")  # overwrite keeps a version
@@ -81,7 +81,7 @@ def test_local_provider_ops(home, tmp_path):
     (tmp_path / "dl.bin.part").write_bytes(b"\x00" * 10)  # wrong partial data -> verification catches it
     with pytest.raises(StorageError):
         p.download(moved.ref, dest)
-    assert p.download(moved.ref, dest, resume=False).read_bytes()[:5] == (p.root / moved.ref).read_bytes()[:5]
+    assert p.download(moved.ref, dest, resume=False).read_bytes()[:5] == p.local_path(moved.ref).read_bytes()[:5]
 
 
 def test_local_resumable_crash_and_resume(home, tmp_path):
@@ -402,4 +402,104 @@ def test_get_provider_and_no_real_google_without_allowlist(home):
     if "oauth2.googleapis.com" not in json.dumps(__import__("nexus.costguard", fromlist=["x"]).manifest()):
         with pytest.raises(CostGuardError):
             oauth.guard("https://oauth2.googleapis.com/token")
-    assert os.environ.get("NEXUS_LIVE_DRIVE") != "1" or True
+    oauth.guard("http://127.0.0.1:9/token")  # loopback (the fake) never needs a declaration
+
+
+# ---------------------------------------------------------------- routes
+@pytest.fixture()
+def api(fake):
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+
+    from nexus.cloud import routes_storage
+    app = FastAPI()
+    app.include_router(routes_storage.router)
+    with TestClient(app) as c:
+        yield c
+
+
+def _png() -> bytes:
+    import io
+
+    from PIL import Image
+    b = io.BytesIO()
+    Image.new("RGB", (8, 8)).save(b, "PNG")
+    return b.getvalue()
+
+
+def test_routes_end_to_end(api, fake):
+    seen = []
+    conns = api.get("/api/v1/storage/connections").json()
+    assert [c["id"] for c in conns] == ["local", "drive_a", "drive_b", "drive_c"]
+    for k in ("id", "label", "provider", "status", "identity", "scopes", "quota", "last_success", "last_upload",
+              "last_error", "reauth_needed"):
+        assert k in conns[1]
+    s = api.post("/api/v1/storage/connections/drive_a/device/start").json()
+    assert s["verification_url"] == s["verification_uri"] and s["user_code"] and s["interval"]
+    assert api.post("/api/v1/storage/connections/drive_a/device/poll").json()["status"] == "pending"
+    fake.approve(s["user_code"], "alice@example.com")
+    d = json.loads(vault.get("gdevice_drive_a"))
+    d["next_poll"] = 0
+    vault.put("gdevice_drive_a", json.dumps(d))
+    r = api.post("/api/v1/storage/connections/drive_a/device/poll").json()
+    seen.append(json.dumps(r))
+    assert r["status"] == "connected"
+    assert api.post("/api/v1/storage/connections/drive_z/device/start").status_code in (400, 404)
+    q = api.get("/api/v1/storage/connections/drive_a/quota").json()
+    assert q["limit"] == 15e9 and q["source"] == "provider_api"
+    c = [x for x in api.get("/api/v1/storage/connections").json() if x["id"] == "drive_a"][0]
+    assert c["quota"]["limit"] == 15e9 and c["identity"] == "alice@example.com" and not c["reauth_needed"]
+
+    def up(cid):
+        return api.post("/api/v1/storage/uploads", files={"file": ("clip.bin", b"x" * 5000, "video/mp4")},
+                        data={"connection_id": cid, "folder": "NEXUS/Masters/prj_9"})
+    assert up("drive_a").status_code == 403  # not authorised by the owner yet
+    assert api.put("/api/v1/storage/rules", json={"authorized_remote": ["drive_a"]}).json()["authorized_remote"] == ["drive_a"]
+    assert len(api.post("/api/v1/storage/connections/drive_a/folders").json()["folders"]) == 10
+    res = up("drive_a").json()
+    loc = res["artifact"]["locations"][0]
+    assert loc["provider"] == "gdrive" and loc["connection_id"] == "drive_a" and loc["path"] == "NEXUS/Masters/prj_9/clip.bin"
+    files = api.get("/api/v1/storage/connections/drive_a/files", params={"path": "NEXUS/Masters/prj_9"}).json()
+    f = [x for x in files if x["name"] == "clip.bin"][0]
+    assert f["size"] == 5000 and f["mime"] == "video/mp4" and f["web_view"].startswith("https://drive.google.com/file/d/")
+    loc_res = up("local").json()["artifact"]
+    assert loc_res["artifact_id"] == res["artifact"]["artifact_id"]  # same bytes -> same artifact, new location
+    assert any(lo["ref"].startswith("storage/local/NEXUS/Masters/prj_9/") for lo in loc_res["locations"])
+    tr = api.get("/api/v1/storage/transfers").json()
+    assert tr and all("session_uri" not in t for t in tr)
+    assert api.get("/api/v1/storage/connections/drive_a/health").json()["status"] == "ok"
+    ing = api.post("/api/v1/storage/ingest", json={"source": {"kind": "http_url", "ref": "https://youtu.be/x",
+                                                              "rights": "owned"}}).json()
+    assert ing["status"] == "rejected" and api.get(f"/api/v1/storage/ingest/{ing['ingestion_id']}").json()["status"] == "rejected"
+    j = api.post("/api/v1/storage/ingest/upload", files={"file": ("p.png", _png(), "image/png")},
+                 data={"rights": "owned"}).json()
+    assert j["status"] == "stored" and j["artifact"]["mime"] == "image/png"
+    assert len(api.get("/api/v1/storage/artifacts").json()) == 2
+    plan = api.post("/api/v1/storage/cleanup", json={"dry_run": True}).json()
+    assert plan["dry_run"] and "plan_id" in plan
+    w = api.get("/api/v1/storage/connections/drive_b/oauth/start")
+    assert w.status_code == 400  # http://testserver is neither HTTPS nor localhost
+    cb = api.get("/api/v1/storage/oauth/callback", params={"state": "forged", "code": "x"})
+    assert cb.status_code == 400
+    out = api.post("/api/v1/storage/connections/drive_a/disconnect").json()
+    assert out["revoked"]
+    everything = json.dumps(seen) + json.dumps(conns) + json.dumps(tr) + json.dumps(files) + json.dumps(out)
+    assert "fake_at_" not in everything and "fake_rt_" not in everything and "test-secret" not in everything
+
+
+def test_routes_web_flow_callback(api, fake, monkeypatch):
+    monkeypatch.setenv("NEXUS_PUBLIC_URL", "https://nexus.example.org")
+    w = api.get("/api/v1/storage/connections/drive_b/oauth/start").json()
+    q = {k: v[0] for k, v in parse_qs(urlparse(w["auth_url"]).query).items()}
+    assert q["redirect_uri"] == "https://nexus.example.org/api/v1/storage/oauth/callback"
+    code = fake.issue_code("bob@example.com", CLIENT["client_id"], q["redirect_uri"], q["code_challenge"], q["scope"])
+    cb = api.get("/api/v1/storage/oauth/callback", params={"state": q["state"], "code": code})
+    assert cb.status_code == 200 and "bob@example.com" in cb.text
+    assert api.get("/api/v1/storage/oauth/callback", params={"state": q["state"], "code": code}).status_code == 400
+
+
+def test_routes_require_owner(api, monkeypatch):
+    monkeypatch.setenv("NEXUS_API_TOKEN", "owner-token-EXAMPLE-123")
+    assert api.get("/api/v1/storage/connections").status_code == 401
+    ok = api.get("/api/v1/storage/connections", headers={"Authorization": "Bearer owner-token-EXAMPLE-123"})
+    assert ok.status_code == 200

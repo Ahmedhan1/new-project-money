@@ -40,10 +40,26 @@ class LocalProvider(StorageProvider):
         self._sys = self.root / ".nexus"
         for d in ("uploads", "meta", "versions"):
             (self._sys / d).mkdir(parents=True, exist_ok=True)
+        # Refs are relative to NEXUS_HOME (e.g. "storage/local/NEXUS/Masters/x.mp4") so other modules can open them
+        # with config.HOME / ref; a ref without the prefix is accepted too.
+        try:
+            self.prefix = self.root.resolve().relative_to(config.HOME.resolve()).as_posix()
+        except ValueError:
+            self.prefix = ""
+
+    def _rel(self, ref: str) -> str:
+        rel = safe_rel(ref)
+        if self.prefix and (rel == self.prefix or rel.startswith(self.prefix + "/")):
+            rel = rel[len(self.prefix):].lstrip("/")
+        return rel
+
+    def ref_of(self, rel: str) -> str:
+        rel = safe_rel(rel)
+        return f"{self.prefix}/{rel}" if self.prefix else rel
 
     # ------------------------------------------------------------ helpers
     def _abs(self, ref: str) -> Path:
-        rel = safe_rel(ref)
+        rel = self._rel(ref)
         if rel.split("/", 1)[0] == ".nexus":
             raise ValueError("reserved path")
         p = (self.root / rel).resolve()
@@ -52,7 +68,7 @@ class LocalProvider(StorageProvider):
         return p
 
     def _meta_path(self, ref: str) -> Path:
-        return self._sys / "meta" / (safe_rel(ref) + ".json")
+        return self._sys / "meta" / (self._rel(ref) + ".json")
 
     def _meta(self, ref: str) -> dict:
         mp = self._meta_path(ref)
@@ -68,7 +84,7 @@ class LocalProvider(StorageProvider):
         m = self._meta(ref)
         st = p.stat()
         sha = m.get("sha256") if m.get("mtime") == st.st_mtime and m.get("size") == st.st_size else None
-        return RemoteFile(ref=safe_rel(ref), name=p.name, path=safe_rel(ref), size=None if p.is_dir() else st.st_size,
+        return RemoteFile(ref=self.ref_of(self._rel(ref)), name=p.name, path=self._rel(ref), size=None if p.is_dir() else st.st_size,
                           mime=m.get("mime", ""), sha256=sha, modified=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(st.st_mtime)),
                           is_folder=p.is_dir(), app_created=bool(m.get("props", {}).get("nexus") == "1"),
                           props=m.get("props", {}))
@@ -89,12 +105,14 @@ class LocalProvider(StorageProvider):
 
     def quota(self) -> QuotaStatus:
         du = shutil.disk_usage(self.root)
-        return QuotaStatus(provider="local", connection_id=self.connection_id, resource="storage_bytes", limit=du.total,
-                           used=du.total - du.free, remaining=du.free, source="measured", exhausted=du.free < 64 * 2 ** 20)
+        q = QuotaStatus(provider="local", connection_id=self.connection_id, resource="storage_bytes", limit=du.total,
+                        used=du.total - du.free, remaining=du.free, source="measured", exhausted=du.free < 64 * 2 ** 20)
+        connections.merge_data(self.connection_id, quota={"used": q.used, "limit": q.limit, "at": q.measured_at, "source": q.source})
+        return q
 
     # ------------------------------------------------------------ namespace
     def list(self, path: str = "") -> list[RemoteFile]:
-        base = self._abs(path) if safe_rel(path) else self.root
+        base = self._abs(path) if self._rel(path) else self.root
         if not base.is_dir():
             return []
         out = []
@@ -107,7 +125,7 @@ class LocalProvider(StorageProvider):
     def mkdirs(self, path: str) -> str:
         p = self._abs(path)
         p.mkdir(parents=True, exist_ok=True)
-        return safe_rel(path)
+        return self.ref_of(self._rel(path))
 
     def stat(self, ref: str) -> RemoteFile | None:
         try:
@@ -157,7 +175,7 @@ class LocalProvider(StorageProvider):
         return self._file(dest_path)
 
     def versions(self, ref: str) -> list[dict]:
-        rel = safe_rel(ref)
+        rel = self._rel(ref)
         vdir = self._sys / "versions" / Path(rel).parent
         out = [{"id": "current", "size": self._abs(ref).stat().st_size, "current": True}] if self._abs(ref).exists() else []
         if vdir.is_dir():
@@ -184,7 +202,7 @@ class LocalProvider(StorageProvider):
     def start_upload(self, dest_path: str, size: int, mime: str, props: dict) -> str:
         self._abs(dest_path)  # validates
         sid = uuid.uuid4().hex
-        (self._sys / "uploads" / f"{sid}.json").write_text(json.dumps({"dest": safe_rel(dest_path), "size": size,
+        (self._sys / "uploads" / f"{sid}.json").write_text(json.dumps({"dest": self._rel(dest_path), "size": size,
                                                                         "mime": mime, "props": props}), encoding="utf-8")
         (self._sys / "uploads" / f"{sid}.part").write_bytes(b"")
         return f"local:{sid}"

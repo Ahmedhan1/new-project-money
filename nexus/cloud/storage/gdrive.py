@@ -138,8 +138,10 @@ class GoogleDriveProvider(StorageProvider):
         row = connections.get(self.connection_id)
         if email and row["identity"] and email.lower() != row["identity"].lower():
             raise StorageError(f"{self.connection_id}: token belongs to {email}, connection was authorised as {row['identity']}")
-        return QuotaStatus(provider="gdrive", connection_id=self.connection_id, resource="storage_bytes", limit=limit,
-                           used=used, remaining=rem, source="provider_api", exhausted=rem is not None and rem < 1)
+        q = QuotaStatus(provider="gdrive", connection_id=self.connection_id, resource="storage_bytes", limit=limit,
+                        used=used, remaining=rem, source="provider_api", exhausted=rem is not None and rem < 1)
+        connections.merge_data(self.connection_id, quota={"used": used, "limit": limit, "at": q.measured_at, "source": q.source})
+        return q
 
     # ------------------------------------------------------------ folders
     def _folders(self) -> dict:

@@ -93,7 +93,11 @@ def identity_in_use(identity: str, except_cid: str) -> str | None:
 
 def public(r: dict) -> dict:
     """Owner view: identity e-mail included (routes are owner-only), no secrets, no internal folder ids."""
+    q = r["data"].get("quota") or {}
+    lu = db.query("SELECT MAX(updated) t FROM transfers WHERE connection_id=? AND direction='upload' AND status='done'", (r["id"],))
     return {"id": r["id"], "provider": r["provider"], "label": r["label"], "status": r["status"],
-            "identity": r["identity"], "scopes": r["scopes"], "last_success": r["last_success"],
-            "last_error": r["last_error"], "updated": r["updated"],
+            "identity": r["identity"], "scopes": r["scopes"],
+            "quota": {"used": q.get("used"), "limit": q.get("limit"), "measured_at": q.get("at"), "source": q.get("source")},
+            "last_success": r["last_success"], "last_upload": lu[0]["t"] if lu else None, "last_error": r["last_error"],
+            "reauth_needed": r["status"] == "reauth_required", "updated": r["updated"],
             "authorized_by_owner_at": r["data"].get("authorized_by_owner_at")}
