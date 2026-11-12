@@ -25,7 +25,9 @@ def pytest_sessionfinish(session, exitstatus):
     import time
     from pathlib import Path
     tr = session.config.pluginmanager.get_plugin("terminalreporter")
-    if tr is None or session.config.args != ["tests/fast"]:
+    opt = session.config.option
+    # only a complete run is a result: never record a filtered (-k/-m) or partially deselected run
+    if tr is None or session.config.args != ["tests/fast"] or getattr(opt, "keyword", "") or getattr(opt, "markexpr", "") or tr.stats.get("deselected"):
         return
     n = {k: len([r for r in tr.stats.get(k, []) if getattr(r, "when", "call") == "call" or k != "passed"]) for k in ("passed", "failed", "error", "skipped")}
     out = Path(__file__).resolve().parents[2] / "docs" / "results" / "fast_tests.json"
