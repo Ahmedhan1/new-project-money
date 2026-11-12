@@ -38,6 +38,7 @@ CONCLUDERS = ("that's why", "that is why", "which means", "the point", "in short
 NUMBER_RE = re.compile(r"\d|\b(one|two|three|four|five|six|seven|eight|nine|ten|twenty|hundred|thousand|million|billion|"
                        r"percent|half|double|triple)\b", re.I)
 TERMINAL = (".", "!", "?", "…")
+VERSION = 2  # of the understanding layer; 2 = word-level speaker turn repair (K-17)
 
 
 # ---------------------------------------------------------------- text helpers
@@ -92,10 +93,25 @@ def has_audio(an: dict) -> bool:
     return bool(probe.get("audio")) if probe else True
 
 
-def sentences(an: dict, max_pause: float = 1.5) -> list[dict]:
+TURN_REPAIR_GAP = 0.45  # a speaker-label change with less pause than this inside an unfinished sentence is not a turn
+
+
+def _continues(prev_w: dict, w: dict, max_gap: float) -> bool:
+    """True when `w` reads as the continuation of the sentence `prev_w` is in: no terminal punctuation or comma-free
+    break before it, a short gap, and a lower-case start (Whisper capitalises a new sentence or a new speaker's turn)."""
+    pw = prev_w["word"].rstrip("\"')]")
+    word = w["word"].lstrip("\"'([")
+    return (not pw.endswith(TERMINAL) and w["start"] - prev_w["end"] <= max_gap and bool(word)
+            and word[0].islower() and not word.lower().startswith(("yes", "no", "yeah", "okay", "right")))
+
+
+def sentences(an: dict, max_pause: float = 1.5, repair_turns: bool = True) -> list[dict]:
     """Sentence units with word timings, rebuilt ACROSS transcript segments: ASR segments (e.g. Whisper's) often break
     in the middle of a sentence, and an editor must cut at sentence boundaries, not at segment boundaries.
-    A sentence ends at terminal punctuation, at a pause longer than `max_pause` seconds, or at a speaker change.
+    A sentence ends at terminal punctuation, at a pause longer than `max_pause` seconds, or at a speaker change -
+    except a label change inside a running sentence (no end mark, < TURN_REPAIR_GAP s pause, lower-case continuation),
+    which diarisation of Whisper segments produces when a segment boundary falls mid-sentence (K-17): the sentence then
+    gets the speaker who says most of it, and `speaker_repair` records the original labels.
     Words without timings are spread over their segment proportionally to their length (marked `timed: false`)."""
     out: list[dict] = []
     stream: list[tuple[dict, int, dict, bool]] = []
@@ -120,16 +136,30 @@ def sentences(an: dict, max_pause: float = 1.5) -> list[dict]:
             return
         ws = [x[0] for x in cur]
         text = " ".join(w["word"] for w in ws).strip()
-        out.append({"start": ws[0]["start"], "end": ws[-1]["end"], "text": text, "words": ws,
-                    "terminal": text.rstrip("\"')]").endswith(TERMINAL), "seg": cur[0][1], "segs": sorted({x[1] for x in cur}),
-                    "speaker": cur[0][2].get("speaker"), "timed": all(x[3] for x in cur)})
+        talk: dict = {}
+        for w, _, sg, _ in cur:  # word-level speaker labels (K-17): the sentence belongs to whoever says most of it
+            talk[sg.get("speaker")] = talk.get(sg.get("speaker"), 0.0) + (w["end"] - w["start"])
+        spk = max(talk, key=lambda k: talk[k]) if talk else None
+        sent = {"start": ws[0]["start"], "end": ws[-1]["end"], "text": text, "words": ws,
+                "terminal": text.rstrip("\"')]").endswith(TERMINAL), "seg": cur[0][1], "segs": sorted({x[1] for x in cur}),
+                "speaker": spk, "timed": all(x[3] for x in cur)}
+        if len(talk) > 1:
+            sent["speaker_repair"] = {"labels": {str(k): round(v, 2) for k, v in talk.items()},
+                                      "why": "speaker label changed mid-sentence (no sentence end, no pause, lower-case "
+                                             "continuation): treated as one turn of the majority speaker"}
+            for w in ws:
+                w["speaker"] = spk
+        out.append(sent)
         cur.clear()
 
     for item in stream:
         w, si, seg, _ = item
         if cur:
             prev_w, _, prev_seg, _ = cur[-1]
-            if w["start"] - prev_w["end"] > max_pause or seg.get("speaker") != prev_seg.get("speaker"):
+            change = seg.get("speaker") != prev_seg.get("speaker")
+            if change and repair_turns and _continues(prev_w, w, max_gap=TURN_REPAIR_GAP):
+                change = False  # a diarisation flip inside a running sentence is not a turn (K-17)
+            if w["start"] - prev_w["end"] > max_pause or change:
                 flush()
         cur.append(item)
         if w["word"].rstrip("\"')]").endswith(TERMINAL):
@@ -222,6 +252,7 @@ SELF_INTRO_RE = re.compile(r"\b(i'?m|i am|this is \w+( \w+)?) (with|from|here (w
 PHATIC_RE = re.compile(
     r"\b(how are you( doing)?|how's it going|thank(s| you)( so much)?( for (having|joining|coming|watching))?|"
     r"for your time|good luck|good (morning|afternoon|evening)|nice to (meet|see|talk)|(great|good|happy|glad) to (be|have|see) (here|you|with)|"
+    r"(great|good|happy|glad) to (talk|speak|chat) (to|with)|"
     r"hello|hi there|welcome( back)?|can you hear me|are you (there|ready)|you're welcome|my pleasure|bye|see you)\b", re.I)
 
 
@@ -645,7 +676,7 @@ def understand(an: dict, path: str | Path | None = None, use_llm: bool = False, 
     if not spk["available"]:
         notes.append(spk["note"])
     notes.append("no vision model: shots carry measured picture statistics only, not subjects, objects or faces")
-    return {"sentences": sents, "fillers": fill, "stutters": stutters(sents), "retakes": retakes(sents),
+    return {"version": VERSION, "sentences": sents, "fillers": fill, "stutters": stutters(sents), "retakes": retakes(sents),
             "dead_air": dead_air(an, sents), "topics": topics, "narrative": narrative, "speakers": spk,
             "moments": moments(sents), "shots": shot_list, "motion": motion, "duplicate_shots": dups,
             "keyframes": [{"shot": s["id"], "t": s["keyframe_t"], "phash": s.get("phash")} for s in shot_list], "notes": notes}
@@ -661,11 +692,21 @@ def enrich(an: dict, path: str | Path | None = None, use_llm: bool = False) -> d
 
 
 def ensure(an: dict) -> dict:
-    """The understanding of an analysis: from its stored keys when present and consistent, else computed (no file I/O)."""
-    if an.get("understanding") and an.get("topics") is not None and an.get("shots") is not None:
-        u = dict(an["understanding"])
-        for k in ("shots", "topics", "speakers", "moments", "motion"):
-            u[k] = an[k]
+    """The understanding of an analysis: from its stored keys when present, current and consistent, else computed (no
+    file I/O). A stored layer from an older VERSION gets its transcript part recomputed; measured shots are kept."""
+    stored = an.get("understanding")
+    if stored and an.get("topics") is not None and an.get("shots") is not None:
+        if stored.get("version") == VERSION:
+            u = dict(stored)
+            for k in ("shots", "topics", "speakers", "moments", "motion"):
+                u[k] = an[k]
+            return u
+        u = understand(an, None, measure=False)
+        u["shots"], u["motion"] = an["shots"], an.get("motion") or u["motion"]
+        u["duplicate_shots"] = stored.get("duplicate_shots", u["duplicate_shots"])
+        u["keyframes"] = stored.get("keyframes", u["keyframes"])
+        u["notes"] = [n for n in u["notes"] if not n.startswith("shot quality")] + [
+            f"transcript layer recomputed (stored understanding v{stored.get('version', 1)} < v{VERSION})"]
         return u
     return understand(an, None, measure=False)
 

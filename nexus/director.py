@@ -403,6 +403,29 @@ def _pieces(t: dict, S: dict, prof: dict, fill_keys: set, decisions: list) -> li
     return pieces
 
 
+LEAD_TRIM = {"yes", "yeah", "no", "well", "so", "okay", "ok", "and", "but", "um", "uh", "oh", "right", "alright", "now",
+             "anyway", "also", "because", "exactly", "absolutely", "sure"}
+
+
+def _clean_open(piece: dict, decisions: list) -> None:
+    """The programme must not open on a dangling word ("Yes, ...", "And so ...", "Well, ..."): leading answer words,
+    conjunctions and fillers are cut between words when at least four words remain."""
+    ws = piece["words"]
+    k = 0
+    while k < len(ws) - 4 and re.sub(r"[^\w']", "", ws[k]["word"].lower()) in LEAD_TRIM:
+        k += 1
+    if not k:
+        return
+    cut = ws[:k]
+    piece["words"] = ws[k:]
+    piece["lo"] = cut[-1]["end"] + GUARD
+    piece["first"] = ws[k]["start"]
+    piece["in"] = max(piece["lo"], piece["first"] - PAD_IN)
+    _dec(decisions, piece["src"], cut[0]["start"], cut[-1]["end"], "drop", "opening",
+         f"opening starts on a complete thought: leading \"{' '.join(w['word'] for w in cut)}\" cut between words", 1.0,
+         confidence=0.8)
+
+
 def _clusters(thoughts: list[dict], srcs: dict) -> dict:
     """Topic clusters across sources (shared vocabulary), in first-appearance order. Returns topic key -> (rank, label)."""
     from collections import Counter
@@ -704,6 +727,8 @@ def plan(analysis_by_src: dict, brief: dict | None = None) -> dict:
             _dec(decisions, t["src"], s["start"], s["end"], "keep", "sentence", "kept: " + ", ".join(why), s.get("score", 0),
                  text=s["text"], thought=t["id"], speaker=s.get("speaker"),
                  confidence=1.0 if any(p.startswith("manual") for p in t["protected"]) else CONFIDENCE["sentence"])
+    if selected and pieces.get(selected[0]["id"]):
+        _clean_open(pieces[selected[0]["id"]][0], decisions)
     items, est = _layout(selected, pieces, prof, cards, srcs)
     items = _shot_pass(items, srcs, prof, decisions, est, rejected=ov["reject_cutaways"])
     for it in items:
