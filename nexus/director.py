@@ -967,7 +967,9 @@ def build(plan: dict, size: tuple[int, int] = (1920, 1080), music: bool = True) 
                 words.append({"start": round(a, 3), "end": round(b, 3), "word": w["word"]})
     words.sort(key=lambda w: w["start"])
     if words:
-        cues = subs.cues_from_transcript([{"start": 0, "end": 0, "text": "", "words": words}])
+        cuts = [st for st, c in zip(starts[1:], tl["clips"][1:]) if c.get("transition") != "crossfade"]
+        cuts += [st + clip_duration(c) for c, st in zip(tl["clips"], starts) if c["type"] != "video"]  # end of a card
+        cues = subs.cues_from_transcript([{"start": 0, "end": 0, "text": "", "words": words}], breaks=cuts)
         for q in cues:
             q["end"] = min(q["end"], total)
             q["words"] = [w for w in words if q["start"] - 1e-3 <= w["start"] and w["end"] <= q["end"] + 0.3]
