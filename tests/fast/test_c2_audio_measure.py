@@ -112,5 +112,5 @@ def test_speaker_spread_measures_a_quiet_second_voice():
     r = M.speaker_levels(m, SR, turns=turns)
     assert r["method"] == "diarisation turns"
     assert 7 <= r["spread_db"] <= 9
-    auto = M.speaker_levels(m, SR, segments=segs)    # unlabelled: voice clustering finds the two voices
+    auto = M.speaker_levels(m, SR, segments=segs, neural=False)    # unlabelled: MFCC voice clustering finds both
     assert "2 cluster" in auto["method"] and 7 <= auto["spread_db"] <= 9
