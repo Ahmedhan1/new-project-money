@@ -1,0 +1,22 @@
+{
+ "date": "2026-11-12 18:08:59 UTC",
+ "platform": "Linux-6.18.44-fc-v378-x86_64-with-glibc2.39",
+ "python": "3.13.18",
+ "server": "local fake Google Drive (protocol evidence, not real Drive)",
+ "file": "evidence_master.mp4",
+ "size": 22768213,
+ "sha256": "7842750fe60b655228e1f045f9dc530680d1b074cc519973fc859018fa957fcd",
+ "chunk_bytes": 1048576,
+ "killed_with": "SIGKILL",
+ "db_acknowledged_at_kill": 11534336,
+ "db_status_after_kill": "running",
+ "server_offset_on_status_query": 12582912,
+ "resumed_from_byte": 12582912,
+ "resume_seconds": 0.56,
+ "injected_mid_chunk_connection_cut_on_resume": true,
+ "final_status": "done",
+ "drive_sha256Checksum": "7842750fe60b655228e1f045f9dc530680d1b074cc519973fc859018fa957fcd",
+ "sha256_match": true,
+ "roundtrip_download_sha256_match": true,
+ "bytes_not_resent": 12582912
+}

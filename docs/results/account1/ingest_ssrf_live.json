@@ -1,0 +1,314 @@
+{
+ "date": "2026-11-12 18:08:36 UTC",
+ "platform": "Linux-6.18.44-fc-v378-x86_64-with-glibc2.39",
+ "python": "3.13.18",
+ "cases": 34,
+ "rejected": 34,
+ "results": [
+  {
+   "url": "http://localhost/a.mp4",
+   "resolved": [
+    "127.0.0.1"
+   ],
+   "verdict": "rejected",
+   "reason": "host 'localhost' names an internal service"
+  },
+  {
+   "url": "http://127.0.0.1/a.mp4",
+   "resolved": [
+    "127.0.0.1"
+   ],
+   "verdict": "rejected",
+   "reason": "127.0.0.1 resolves to 127.0.0.1 (loopback)"
+  },
+  {
+   "url": "http://2130706433/a.mp4",
+   "resolved": [
+    "127.0.0.1"
+   ],
+   "verdict": "rejected",
+   "reason": "non-canonical numeric host '2130706433' refused"
+  },
+  {
+   "url": "http://0x7f000001/a.mp4",
+   "resolved": [
+    "127.0.0.1"
+   ],
+   "verdict": "rejected",
+   "reason": "non-canonical numeric host '0x7f000001' refused"
+  },
+  {
+   "url": "http://0177.0.0.1/a.mp4",
+   "resolved": [
+    "127.0.0.1"
+   ],
+   "verdict": "rejected",
+   "reason": "non-canonical numeric host '0177.0.0.1' refused"
+  },
+  {
+   "url": "http://127.1/a.mp4",
+   "resolved": [
+    "127.0.0.1"
+   ],
+   "verdict": "rejected",
+   "reason": "non-canonical numeric host '127.1' refused"
+  },
+  {
+   "url": "http://[::1]/a.mp4",
+   "resolved": [
+    "::1"
+   ],
+   "verdict": "rejected",
+   "reason": "::1 resolves to ::1 (loopback)"
+  },
+  {
+   "url": "http://[::ffff:127.0.0.1]/a.mp4",
+   "resolved": [
+    "::ffff:127.0.0.1"
+   ],
+   "verdict": "rejected",
+   "reason": "::ffff:127.0.0.1 resolves to ::ffff:127.0.0.1 (embeds 127.0.0.1: loopback)"
+  },
+  {
+   "url": "http://[::ffff:a9fe:a9fe]/latest",
+   "resolved": [
+    "::ffff:169.254.169.254"
+   ],
+   "verdict": "rejected",
+   "reason": "::ffff:a9fe:a9fe resolves to ::ffff:169.254.169.254 (embeds 169.254.169.254: cloud metadata address)"
+  },
+  {
+   "url": "http://169.254.169.254/latest/meta-data/",
+   "resolved": [
+    "169.254.169.254"
+   ],
+   "verdict": "rejected",
+   "reason": "169.254.169.254 resolves to 169.254.169.254 (cloud metadata address)"
+  },
+  {
+   "url": "http://metadata.google.internal/",
+   "resolved": [
+    "unresolvable: gaierror"
+   ],
+   "verdict": "rejected",
+   "reason": "host 'metadata.google.internal' names an internal service"
+  },
+  {
+   "url": "http://100.100.100.200/latest/meta-data/",
+   "resolved": [
+    "100.100.100.200"
+   ],
+   "verdict": "rejected",
+   "reason": "100.100.100.200 resolves to 100.100.100.200 (cloud metadata address)"
+  },
+  {
+   "url": "http://[fd00:ec2::254]/latest/meta-data/",
+   "resolved": [
+    "fd00:ec2::254"
+   ],
+   "verdict": "rejected",
+   "reason": "fd00:ec2::254 resolves to fd00:ec2::254 (cloud metadata address)"
+  },
+  {
+   "url": "http://127.0.0.1.nip.io/a.mp4",
+   "resolved": [
+    "unresolvable: gaierror"
+   ],
+   "verdict": "rejected",
+   "reason": "cannot resolve 127.0.0.1.nip.io: [Errno -2] Name or service not known"
+  },
+  {
+   "url": "http://169.254.169.254.nip.io/latest",
+   "resolved": [
+    "unresolvable: gaierror"
+   ],
+   "verdict": "rejected",
+   "reason": "cannot resolve 169.254.169.254.nip.io: [Errno -2] Name or service not known"
+  },
+  {
+   "url": "http://10.0.0.1.sslip.io/a.mp4",
+   "resolved": [
+    "10.0.0.1"
+   ],
+   "verdict": "rejected",
+   "reason": "10.0.0.1.sslip.io resolves to 10.0.0.1 (private network)"
+  },
+  {
+   "url": "http://192-168-1-1.sslip.io/a.mp4",
+   "resolved": [
+    "192.168.1.1"
+   ],
+   "verdict": "rejected",
+   "reason": "192-168-1-1.sslip.io resolves to 192.168.1.1 (private network)"
+  },
+  {
+   "url": "http://localtest.me/a.mp4",
+   "resolved": [
+    "unresolvable: gaierror"
+   ],
+   "verdict": "rejected",
+   "reason": "cannot resolve localtest.me: [Errno -2] Name or service not known"
+  },
+  {
+   "url": "http://lvh.me/a.mp4",
+   "resolved": [
+    "unresolvable: gaierror"
+   ],
+   "verdict": "rejected",
+   "reason": "cannot resolve lvh.me: [Errno -2] Name or service not known"
+  },
+  {
+   "url": "http://vcap.me/a.mp4",
+   "resolved": [
+    "103.224.182.214"
+   ],
+   "verdict": "rejected",
+   "reason": "host not allowed by the zero-spend egress list: BLOCKED network call to undeclared host vcap.me"
+  },
+  {
+   "url": "http://images-assets.nasa.gov:8080/a.mp4",
+   "resolved": [
+    "18.160.143.119",
+    "18.160.143.45",
+    "18.160.143.57",
+    "18.160.143.66"
+   ],
+   "verdict": "rejected",
+   "reason": "port 8080 is not allowed (only 80/443 unless allowlisted)"
+  },
+  {
+   "url": "http://user:pass@images-assets.nasa.gov/a.mp4",
+   "resolved": [
+    "18.160.143.119",
+    "18.160.143.45",
+    "18.160.143.57",
+    "18.160.143.66"
+   ],
+   "verdict": "rejected",
+   "reason": "URLs with embedded credentials are refused"
+  },
+  {
+   "url": "file:///etc/passwd",
+   "resolved": [],
+   "verdict": "rejected",
+   "reason": "only http and https URLs are accepted (got 'file')"
+  },
+  {
+   "url": "ftp://ftp.example.org/a.mp4",
+   "resolved": [
+    "unresolvable: gaierror"
+   ],
+   "verdict": "rejected",
+   "reason": "only http and https URLs are accepted (got 'ftp')"
+  },
+  {
+   "url": "gopher://127.0.0.1:70/",
+   "resolved": [
+    "127.0.0.1"
+   ],
+   "verdict": "rejected",
+   "reason": "only http and https URLs are accepted (got 'gopher')"
+  },
+  {
+   "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+   "resolved": [
+    "142.251.150.4",
+    "142.251.151.4",
+    "142.251.152.4",
+    "142.251.153.4",
+    "142.251.154.4",
+    "142.251.155.4",
+    "142.251.156.4",
+    "142.251.157.4"
+   ],
+   "verdict": "rejected",
+   "reason": "youtube.com: platform page URLs are not imported: NEXUS does not scrape platforms or bypass their download controls. Upload the file you own, or use the creator's own export / download feature and upload that file"
+  },
+  {
+   "url": "https://youtu.be/dQw4w9WgXcQ",
+   "resolved": [
+    "173.194.42.136",
+    "173.194.42.190",
+    "173.194.42.91",
+    "173.194.42.93"
+   ],
+   "verdict": "rejected",
+   "reason": "youtu.be: platform page URLs are not imported: NEXUS does not scrape platforms or bypass their download controls. Upload the file you own, or use the creator's own export / download feature and upload that file"
+  },
+  {
+   "url": "https://www.tiktok.com/@nasa/video/1",
+   "resolved": [
+    "23.195.81.19",
+    "23.195.81.24",
+    "23.195.81.32",
+    "23.195.81.33",
+    "23.195.81.35",
+    "23.195.81.50",
+    "23.195.81.51",
+    "23.195.81.56",
+    "23.195.81.8"
+   ],
+   "verdict": "rejected",
+   "reason": "tiktok.com: platform page URLs are not imported: NEXUS does not scrape platforms or bypass their download controls. Upload the file you own, or use the creator's own export / download feature and upload that file"
+  },
+  {
+   "url": "https://www.instagram.com/reel/abc/",
+   "resolved": [
+    "157.240.254.174"
+   ],
+   "verdict": "rejected",
+   "reason": "instagram.com: platform page URLs are not imported: NEXUS does not scrape platforms or bypass their download controls. Upload the file you own, or use the creator's own export / download feature and upload that file"
+  },
+  {
+   "url": "https://www.facebook.com/watch/?v=1",
+   "resolved": [
+    "57.144.204.1"
+   ],
+   "verdict": "rejected",
+   "reason": "facebook.com: platform page URLs are not imported: NEXUS does not scrape platforms or bypass their download controls. Upload the file you own, or use the creator's own export / download feature and upload that file"
+  },
+  {
+   "url": "https://x.com/NASA/status/1",
+   "resolved": [
+    "172.66.0.227"
+   ],
+   "verdict": "rejected",
+   "reason": "x.com: platform page URLs are not imported: NEXUS does not scrape platforms or bypass their download controls. Upload the file you own, or use the creator's own export / download feature and upload that file"
+  },
+  {
+   "url": "https://twitter.com/NASA/status/1",
+   "resolved": [
+    "162.159.140.229"
+   ],
+   "verdict": "rejected",
+   "reason": "twitter.com: platform page URLs are not imported: NEXUS does not scrape platforms or bypass their download controls. Upload the file you own, or use the creator's own export / download feature and upload that file"
+  },
+  {
+   "url": "https://vimeo.com/76979871",
+   "resolved": [
+    "162.159.128.61",
+    "162.159.138.60"
+   ],
+   "verdict": "rejected",
+   "reason": "vimeo.com: platform page URLs are not imported: NEXUS does not scrape platforms or bypass their download controls. Upload the file you own, or use the creator's own export / download feature and upload that file"
+  },
+  {
+   "url": "https://example.com/video.mp4",
+   "resolved": [
+    "104.20.23.154",
+    "172.66.147.243"
+   ],
+   "verdict": "rejected",
+   "reason": "host not allowed by the zero-spend egress list: BLOCKED network call to undeclared host example.com"
+  }
+ ],
+ "control_accepted": {
+  "url": "http://images-assets.nasa.gov/video/jsc2022m000270_Orion_First_Imagery_Timelapse_and_Original_221117/jsc2022m000270_Orion_First_Imagery_Timelapse_and_Original_221117~mobile.mp4",
+  "resolved": [
+   "18.160.143.119",
+   "18.160.143.45",
+   "18.160.143.57",
+   "18.160.143.66"
+  ]
+ }
+}
