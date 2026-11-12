@@ -436,3 +436,49 @@ tasks:
     acceptance: "A two-video-track composite and a moving face blur render and pass pixel tests."
     test: "pytest tests/fast/test_fx.py"
     next: "LUT management and face-following crops are done (a06d3e4); masks are static rectangles today."
+  # ------------------------------------------------------------------ Account 2: cinematic engine (docs/ACCOUNT2_*.md)
+  - id: A2-0
+    priority: 1
+    title: "Account 2 integration contract (schemas + validator) and licensed benchmark media set"
+    status: tested
+    acceptance: "Contract documents validate; 9 licensed benchmark sources fetched with provenance."
+    test: "pytest tests/fast/test_contracts.py; scripts/benchmarks/fetch_media.py"
+    evidence: "nexus/contracts, docs/ACCOUNT2_CONTRACTS.md; .nexus/benchmarks/* (NASA + Prelinger public domain, provenance.json each)"
+    next: "Account 1 to confirm RenderExecutionRequest/Result against its worker interface."
+  - id: A2-A
+    priority: 1
+    title: "Agent A: multi-track timeline, opacity keyframes, tracked masks, resumable render, EDL/OTIO, renderer benchmark + perf port"
+    status: in_progress
+    acceptance: "Pixel/frame tests for every capability; docs/results/a2_render_bench.json before/after on real media."
+    test: "pytest tests/fast -k a2_"
+    next: "Delegated (branch work/account-2-agent-a-renderer)."
+  - id: A2-B
+    priority: 1
+    title: "Agent B: visual embeddings, semantic B-roll, 14 creative profiles, reference-style profiles, director coherence, shorts titles"
+    status: in_progress
+    acceptance: "B-roll precision measured on a labelled set; director plans on 6 media types; 5-10 distinct shorts with complete openings/endings."
+    test: "pytest tests/fast -k b2_"
+    next: "Delegated (branch work/account-2-agent-b-director)."
+  - id: A2-C
+    priority: 1
+    title: "Agent C: audio benchmark, noise-reduction comparison, dialogue chain v2, sound-design engine, audio QA (sync)"
+    status: in_progress
+    acceptance: "Before/after measurements on 5 real sources; sync offset measured; human listening still required."
+    test: "pytest tests/fast -k c2_"
+    next: "Delegated (branch work/account-2-agent-c-audio)."
+  - id: A2-D
+    priority: 1
+    title: "Agent D: tool/model catalogue, generation architecture + remote adapter, CPU image-gen benchmark, enhancement + VFX processors"
+    status: in_progress
+    acceptance: "Every generation capability classified (works here / GPU-ready unverified / not feasible) with measured numbers."
+    test: "pytest tests/fast -k d2_"
+    next: "Delegated (branch work/account-2-agent-d-generation)."
+  - id: A2-INT
+    priority: 1
+    title: "Account 2 integration: merge agent branches, editor workspace controls, demos 1-5, clean-clone tests, execution report, handoff to Account 3"
+    status: in_progress
+    deps: [A2-A, A2-B, A2-C, A2-D]
+    acceptance: "All Account 2 docs exist; demos rendered and inspected; clean clone fast suite green; PR open for review (not merged)."
+    test: "pytest tests/fast; clean-clone run"
+    next: "Wait for agent reports; integrate in order A, C, B, D."
+
