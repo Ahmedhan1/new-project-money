@@ -159,7 +159,7 @@ def build_brief(topic: str, results: list[dict], language: str = "en", signals: 
     """`results` are adapter SourceResults. `ai(task, prompt, schema) -> dict` or None for deterministic only."""
     sources = collect_sources(results)
     ignore = frozenset(words(topic).union(*[words(s["title"] or "") for s in sources if s.get("kind") == "facts"]))
-    notes, claims, rejected = [], extract_claims(sources), []
+    notes, claims, rejected, ai_errors = [], extract_claims(sources), [], []
     if ai is not None and sources:
         listing = "\n\n".join(f"[{s['id']}] ({s['source']}, {s['lang']}) {s['text'][:1200]}" for s in sources[:6])
         try:
@@ -177,6 +177,7 @@ def build_brief(topic: str, results: list[dict], language: str = "en", signals: 
             notes.append("claims: AI (data_extraction) + deterministic, all re-checked against source text")
         except Exception as e:  # NoProviderAvailable or provider failure -> deterministic fallback, said explicitly
             notes.append(f"claims: deterministic fallback ({type(e).__name__}: {str(e)[:160]})")
+            ai_errors.append({"task": "data_extraction", "error": type(e).__name__, "reasons": getattr(e, "reasons", [str(e)[:300]])})
     else:
         notes.append("claims: deterministic only" + ("" if sources else " (no text sources)"))
     seen, checked = set(), []
@@ -202,6 +203,7 @@ def build_brief(topic: str, results: list[dict], language: str = "en", signals: 
             notes.append("angles: deterministic + AI (deep_research)")
         except Exception as e:
             notes.append(f"angles: deterministic only ({type(e).__name__})")
+            ai_errors.append({"task": "deep_research", "error": type(e).__name__, "reasons": getattr(e, "reasons", [str(e)[:300]])})
     ver = sum(c["status"] == "verified" for c in checked)
     conf = round(min(1.0, 0.2 + 0.6 * (ver / max(len(checked), 1)) + 0.05 * min(len(sources), 4)), 2) if checked else 0.0
     doc = contracts.make("ResearchBrief", id=contracts.new_id("brief"), topic=topic, language=language,
@@ -209,4 +211,5 @@ def build_brief(topic: str, results: list[dict], language: str = "en", signals: 
                          conflicts=conflicts, open_questions=questions, angles=angles, confidence=conf)
     doc["method"] = notes
     doc["rejected_claims"] = rejected
+    doc["ai_errors"] = ai_errors
     return doc
