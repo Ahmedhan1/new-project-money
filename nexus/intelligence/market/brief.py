@@ -140,7 +140,8 @@ def _router_ai(task: str, prompt: str, schema: dict):
     from ..model_router import complete
     with jobs.heavy_lock():
         try:
-            return complete(task, prompt, schema=schema, privacy="public", max_tokens=900, temperature=0.2).data
+            return complete(task, prompt, schema=schema, privacy="public",
+                            max_tokens=700 if task == "data_extraction" else 450, temperature=0.2).data
         finally:
             llm.unload()
 
@@ -150,7 +151,7 @@ def build_brief(topic: str, results: list[dict], language: str = "en", signals: 
     sources = collect_sources(results)
     notes, claims, rejected = [], extract_claims(sources), []
     if ai is not None and sources:
-        listing = "\n\n".join(f"[{s['id']}] ({s['source']}, {s['lang']}) {s['text'][:1500]}" for s in sources[:8])
+        listing = "\n\n".join(f"[{s['id']}] ({s['source']}, {s['lang']}) {s['text'][:1200]}" for s in sources[:6])
         try:
             data = ai("data_extraction", f"Topic: {topic}\nExtract up to 10 factual claims about the topic that are stated in the "
                       f"sources below. Copy numbers exactly. Cite the source ids that state each claim.\n\n{listing}\n\n"
