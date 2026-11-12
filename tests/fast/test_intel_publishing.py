@@ -199,8 +199,11 @@ def test_youtube_resumes_saved_session_after_5xx(home, clip, monkeypatch):
 def test_transport_blocks_undeclared_host(home):
     from nexus.intelligence.publishing.adapters.base import Transport
     with pytest.raises(AdapterBlocked) as e:
-        Transport().request("GET", "https://youtubeanalytics.googleapis.com/v2/reports")
+        Transport().request("GET", "https://open.tiktokapis.com/v2/post/publish/video/init/")   # TikTok host is not declared
     assert e.value.code == "host_not_declared"
+    from nexus import costguard
+    costguard.manifest.cache_clear()
+    assert costguard.check_host("https://youtubeanalytics.googleapis.com/v2/reports") == "youtube-data-api"  # declared by the lead
 
 
 def test_oauth_url_uses_loopback_pkce():
