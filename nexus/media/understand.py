@@ -225,6 +225,13 @@ PHATIC_RE = re.compile(
     r"hello|hi there|welcome( back)?|can you hear me|are you (there|ready)|you're welcome|my pleasure|bye|see you)\b", re.I)
 
 
+def dialogue_like(sents: list[dict]) -> bool:
+    """True when a transcript reads like an interview/conversation: second-person questions are a meaningful share of its
+    sentences (>= 6 % and at least 3). A monologue's occasional rhetorical question does not qualify."""
+    q = sum(1 for s in sents if str(s.get("text", "")).rstrip().endswith("?") and SECOND_PERSON & set(tokens(s.get("text", ""))))
+    return q >= 3 and q / max(1, len(sents)) >= 0.06
+
+
 def substance(text: str) -> tuple[float, list[str]]:
     """Cap for an opening line that says nothing: pleasantries, greetings and lines with fewer than four content
     words cannot be a hook however question-like they are. Returns (cap 0..1, reasons)."""
@@ -303,6 +310,7 @@ def score_sentences(sents: list[dict], fill: list[dict] | None = None) -> None:
         raw.append(sum(math.log1p(tf[w]) * math.log1p(len(docs) / df[w]) for w in set(d)) / max(1, len(set(d))) if d else 0.0)
     top = max(raw or [1.0]) or 1.0
     labelled = any(s.get("speaker") for s in sents)
+    dialogue = (not labelled) and dialogue_like(sents)
     for s, r in zip(sents, raw):
         n = max(1, len(s["words"]))
         hook, why = hook_score(s["text"])
@@ -310,8 +318,8 @@ def score_sentences(sents: list[dict], fill: list[dict] | None = None) -> None:
         # Without speaker labels: a line addressed to someone else (second person, no first person) is most likely the
         # interviewer's/host's prompt, and a concrete first-person line is most likely the guest's own account.
         question = s["text"].rstrip().endswith("?")
-        s["prompt_like"] = (not labelled) and (
-            (bool(SECOND_PERSON & toks) and (question or not (FIRST_PERSON & toks))) or bool(SELF_INTRO_RE.search(s["text"])))
+        s["prompt_like"] = (not labelled) and (bool(SELF_INTRO_RE.search(s["text"])) or (
+            dialogue and bool(SECOND_PERSON & toks) and (question or not (FIRST_PERSON & toks))))
         if s["prompt_like"]:
             hook = min(hook, 0.3)
             why = why + ["addressed to someone else - likely an interviewer/host prompt (heuristic, no speaker labels; capped)"]

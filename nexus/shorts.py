@@ -74,47 +74,22 @@ def content_words(text: str) -> list[str]:
 
 # ---------------------------------------------------------------- sentences
 def sentences(analysis: dict) -> list[dict]:
-    """Sentence units from transcript words: split on terminal punctuation. A segment end also closes a sentence unless the
-    fragment is unterminated and the next segment follows within 0.6 s starting in lower case (Whisper split mid-sentence)."""
-    segs = ((analysis.get("transcript") or {}).get("segments")) or analysis.get("segments") or []
-    out: list[dict] = []
-    cur: list[dict] = []
-
-    def flush(seg_i: int) -> None:
-        nonlocal cur
-        if cur:
-            text = " ".join(w["word"] for w in cur).strip()
-            labels = [w["speaker"] for w in cur if w.get("speaker")]
-            out.append({"start": cur[0]["start"], "end": cur[-1]["end"], "text": text, "words": cur,
-                        "terminal": text.rstrip("\"')]").endswith(TERMINAL), "seg": seg_i,
-                        "speaker": max(set(labels), key=labels.count) if labels else None})
-        cur = []
-
-    for si, s in enumerate(segs):
-        words = [w for w in (s.get("words") or []) if w.get("word", "").strip()]
-        if not words:  # no word timings: spread the text over the segment proportionally to word length
-            toks = s.get("text", "").split()
-            total = sum(len(t) for t in toks) or 1
-            t, words = s["start"], []
-            for tok in toks:
-                d = (s["end"] - s["start"]) * len(tok) / total
-                words.append({"start": round(t, 3), "end": round(t + d, 3), "word": tok})
-                t += d
-        for w in words:
-            sp = w.get("speaker") or s.get("speaker")
-            cur.append({"start": float(w["start"]), "end": float(w["end"]), "word": w["word"].strip(), **({"speaker": sp} if sp else {})})
-            if w["word"].strip().rstrip("\"')]").endswith(TERMINAL):
-                flush(si)
-        nxt = segs[si + 1] if si + 1 < len(segs) else None
-        joins = (cur and nxt and nxt["start"] - s["end"] < 0.6 and (nxt.get("text", "").strip()[:1] or "A").islower())
-        if not joins:
-            flush(si)
-    flush(len(segs) - 1)
+    """Sentence units with word timings, rebuilt across ASR segments (media/understand.py, shared with the director):
+    a sentence ends at terminal punctuation, a pause > 1.5 s or a speaker change, never at a mere segment boundary."""
+    from .media import understand
+    out = []
+    for s in understand.sentences(analysis):
+        labels = [w.get("speaker") for w in s["words"] if w.get("speaker")]
+        out.append({"start": s["start"], "end": s["end"], "text": s["text"], "words": s["words"], "terminal": s["terminal"],
+                    "seg": s["seg"], "segs": s.get("segs", [s["seg"]]),
+                    "speaker": s.get("speaker") or (max(set(labels), key=labels.count) if labels else None)})
     return out
 
 
 # ---------------------------------------------------------------- scoring components
-def hook_score(text: str) -> tuple[float, list[str]]:
+def hook_score(text: str, dialogue: bool | None = None) -> tuple[float, list[str]]:
+    """Strength of a line as an opening (0..1). `dialogue` (from understand.dialogue_like on the whole transcript): only in
+    an interview/conversation is a second-person question treated as the interviewer's prompt."""
     toks = _tokens(text)
     reasons, s = [], 0.3
     if not toks:
@@ -146,7 +121,15 @@ def hook_score(text: str) -> tuple[float, list[str]]:
     elif toks[0] in PRONOUN_OPENERS:
         s -= 0.1
         reasons.append("opens on a pronoun (penalty)")
-    return round(min(1.0, max(0.0, s)), 3), reasons
+    from .media import understand  # shared caps: no information / interviewer prompt
+    cap, why = understand.substance(text)
+    first = bool(understand.FIRST_PERSON & set(toks))
+    if understand.SELF_INTRO_RE.search(text) or (dialogue and SECOND_PERSON & set(toks) and (text.strip().endswith("?") or not first)):
+        cap, why = min(cap, 0.3), why + ["addressed to someone else - likely an interviewer/host prompt (capped)"]
+    elif first and len(understand.content(text)) >= 6 and not text.strip().endswith("?"):
+        s += 0.15
+        reasons.append("first-hand account")
+    return round(min(1.0, cap, max(0.0, s)), 3), reasons + why
 
 
 def pace_score(wpm: float) -> float:
@@ -196,28 +179,40 @@ def clip_plan(sents: list[dict], start: float, end: float, gap: float = JUMP_CUT
     return [(round(a, 3), round(b, 3)) for a, b in blocks]
 
 
-def suggest_title(text: str, max_words: int = 6) -> str:
-    """Deterministic hook title (<= max_words) taken from the text itself."""
-    first = re.split(r"(?<=[.!?])\s+", text.strip())[0] if text.strip() else ""
-    words = re.findall(r"[\w'%$€£-]+", first)
-    while words and words[0].lower() in FILLER_OPENERS | BACKREF_OPENERS:
-        words = words[1:]
-    if not words:
+HOOK_CARD_WORDS = 6
+_FILL_RE = re.compile(r"\b(um+|uh+|erm|ah|hmm|you know|i mean|kind of|sort of|like)\b,?\s*", re.I)
+
+
+def suggest_title(text: str, max_words: int = 9) -> str:
+    """Deterministic title taken from the clip's own words: its most title-like sentence (self-contained, substantive,
+    not an interviewer's pleasantry), fillers removed, cut at a clause boundary to <= max_words. Never invents a claim."""
+    from .media import understand
+    sents = [x.strip() for x in re.split(r"(?<=[.!?])\s+", (text or "").strip()) if x.strip()]
+    best, best_s = "", -1.0
+    for k, sent in enumerate(sents[:6]):
+        clean = re.sub(r"\s+", " ", _FILL_RE.sub("", sent)).strip(" ,")
+        toks = _tokens(clean)
+        if len(toks) < 3:
+            continue
+        sc = hook_score(clean)[0] + 0.15 * min(1.0, len(understand.content(clean)) / 5) - 0.04 * k
+        if toks[0] in BACKREF_OPENERS | FILLER_OPENERS:
+            sc -= 0.4
+        if sc > best_s:
+            best, best_s = clean, sc
+    if not best:
         return ""
-    q = first.rstrip().endswith("?")
+    q = best.endswith("?")
+    words = best.rstrip(".!?").split()
     if len(words) > max_words:
-        best, best_s = 0, -1.0
-        for i in range(0, len(words) - max_words + 1):
-            win = words[i:i + max_words]
-            sc = sum(w.lower() not in STOP and len(w) > 2 for w in win) + 0.6 * bool(NUMBER_RE.search(" ".join(win))) \
-                - 0.5 * (win[0].lower() in STOP) - 0.02 * i
-            if sc > best_s:
-                best, best_s = i, sc
-        words = words[best:best + max_words]
-        q = False
-    while len(words) > 1 and words[-1].lower() in STOP:
+        cut = max_words
+        for i in range(max_words, 3, -1):  # prefer a clause boundary: a comma or a conjunction
+            if words[i - 1].endswith(",") or (i < len(words) and words[i].lower() in ("and", "but", "because", "so", "which", "that")):
+                cut = i
+                break
+        words, q = words[:cut], False
+    while len(words) > 2 and (words[-1].lower().strip(",") in STOP or words[-1].endswith(",")):
         words = words[:-1]
-    title = " ".join(words)
+    title = " ".join(words).strip(" ,")
     return title[:1].upper() + title[1:] + ("?" if q else "")
 
 
@@ -243,7 +238,11 @@ def usable_sentences(analysis: dict) -> list[dict]:
     """Sentences minus the EARLIER take of every repeated line (same rule as edit.py: keep the later take). Each keeps the
     end of the sentence before it and the start of the one after it in the original recording (`prev_end`, `next_start`,
     `gap_before`), so a dropped retake is cut out by a jump cut instead of counting as a long pause."""
+    from .media import understand
     allx = sentences(analysis)
+    dialogue = not any(s.get("speaker") for s in allx) and understand.dialogue_like(allx)
+    for s in allx:
+        s["dialogue"] = dialogue
     dropped = {r["earlier"] for r in analysis.get("repetitions") or []}
     out = []
     for k, s in enumerate(allx):
@@ -276,7 +275,7 @@ def _score_window(sents: list[dict], i: int, j: int, start: float, end: float) -
     win = sents[i:j + 1]
     text = " ".join(s["text"] for s in win)
     raw = end - start
-    hook, reasons = hook_score(win[0]["text"])
+    hook, reasons = hook_score(win[0]["text"], win[0].get("dialogue"))
     n_words = sum(len(s["words"]) for s in win)
     speech = sum(s["end"] - s["start"] for s in win) or raw
     density = min(1.0, len(set(content_words(text))) / max(speech, 0.1) / DENSITY_REF)
@@ -458,6 +457,8 @@ def build_short(src_path: str, analysis: dict, moment: dict, size: tuple[int, in
                              for t in [4.0 * n for n in range(1, int(d // 4.0) + 1)] if t < d - 1.0]
         tl["clips"].append(c)
     title = title if title is not None else (moment.get("title") or suggest_title(moment.get("text", "")))
+    if title and len(title.split()) > HOOK_CARD_WORDS:  # the card is on screen ~2.5 s: keep it readable
+        title = suggest_title(title, max_words=HOOK_CARD_WORDS)
     if title and tl["clips"]:
         d0 = clip_duration(tl["clips"][0])
         tl["clips"][0]["text"] = [{"text": title, "style": "callout", "start": 0.0, "end": round(min(HOOK_TITLE_SECONDS, d0), 3)}]
@@ -1101,13 +1102,13 @@ def statistics_mean(xs: list[float]) -> float:
 def _cold_open_line(sents: list[dict], i: int, j: int) -> int | None:
     """The strongest line inside (i, j] that can stand alone: no dangling start and nothing right after it that qualifies or
     reverses it. None when no line beats the natural opening clearly."""
-    base = hook_score(sents[i]["text"])[0]
+    base = hook_score(sents[i]["text"], sents[i].get("dialogue"))[0]
     best, best_s = None, base + 0.1
     for k in range(i + 1, j + 1):
         s = sents[k]
         if s["end"] - s["start"] > COLD_OPEN_MAX or not s["terminal"]:
             continue
-        hs = hook_score(s["text"])[0]
+        hs = hook_score(s["text"], s.get("dialogue"))[0]
         if hs <= best_s:
             continue
         alone = [x for x in _context_issues(sents, k, k) if x["at"] == "start" or x["severity"] == "critical"]
@@ -1119,14 +1120,20 @@ def _cold_open_line(sents: list[dict], i: int, j: int) -> int | None:
 
 
 def _hook_titles(text: str, natural: str, use_llm: bool = False) -> list[str]:
-    from . import growth  # lazy: growth imports this module
+    """Alternative on-screen hooks, each taken from a different sentence of the clip itself (so every hook is something the
+    speaker really says). Template titles ('X: why it matters') are not used: built from a two-word topic they read badly."""
     out = [natural] if natural else []
-    for h in growth.hook_variants(text, n=6, use_llm=use_llm):
-        t = h["title"]
-        if all(set(_tokens(t)) != set(_tokens(o)) for o in out):
+    sents = [x.strip() for x in re.split(r"(?<=[.!?])\s+", (text or "").strip()) if x.strip()]
+    for k in range(len(sents)):
+        if k and hook_score(sents[k])[0] < 0.45:  # weak or interviewer lines do not become hooks
+            continue
+        t = suggest_title(" ".join(sents[k:k + 1]))
+        if t and len(t.split()) >= 4 and all(set(_tokens(t)) != set(_tokens(o)) and not set(_tokens(t)) <= set(_tokens(o)) for o in out):
             out.append(t)
-    while len(out) < 4:
-        out.append(f"{natural or 'Watch this'} ({len(out) + 1})")
+    if use_llm:
+        llm = _llm_title(text)
+        if llm and all(set(_tokens(llm)) != set(_tokens(o)) for o in out):
+            out.insert(1, llm)
     return out
 
 
@@ -1150,12 +1157,15 @@ def plan_variants(analysis: dict, moment: dict, n: int = 3, use_llm: bool = Fals
             why_no_cold = "no line in the moment is clearly stronger than its opening and safe to show first"
     plan = [{"name": "natural", "title": titles[0], "cold_open": None, "why": "starts where the speaker starts; title card from the moment"}]
     if k is not None:
-        plan.append({"name": "cold_open", "title": titles[1], "cold_open": k,
+        plan.append({"name": "cold_open", "title": titles[1] if len(titles) > 1 else titles[0], "cold_open": k,
                      "why": f"teases the strongest line (\"{sents[k]['text'][:60]}\") first, then cuts back to the start; context check passed"})
-    plan.append({"name": "text_hook", "title": titles[2 if k is not None else 1], "cold_open": None,
-                 "why": "natural start with a large on-screen text hook from growth.hook_variants"})
-    plan.append({"name": "text_hook_b", "title": titles[3 if k is not None else 2], "cold_open": None,
-                 "why": "second text-hook wording for an A/B test"})
+    rest = titles[2:] if k is not None else titles[1:]
+    for name, why in (("text_hook", "natural start with a large on-screen text hook taken from another line of the clip"),
+                      ("text_hook_b", "second text-hook wording for an A/B test")):
+        if rest:
+            plan.append({"name": name, "title": rest.pop(0), "cold_open": None, "why": why})
+    if k is not None and len(titles) < 2:
+        plan[1]["title"] = titles[0]
     for p in plan:
         p["caption_style"] = VARIANT_CAPTIONS[p["name"]]
         p["text_style"] = VARIANT_TEXT_STYLE[p["name"]]
@@ -1348,27 +1358,26 @@ def platform_profile(name: str, mod=None) -> dict:
     if mod is None:
         return prof
     try:
-        p = mod.get(name) or {}
-    except Exception as e:  # unknown name in WS F's registry
+        pp = mod.get(name)
+    except Exception as e:  # unknown name in the platform registry
         prof["source"] += f"; nexus.platforms.get failed: {e}"
         return prof
-    v = p.get("video") if isinstance(p.get("video"), dict) else {}
-    asp = p.get("aspect") or v.get("aspect")
-    if isinstance(asp, (list, tuple)):
-        asp = asp[0] if asp else None
+    v = pp.get("v") or {}
+    asp = v.get("aspect_recommended")
     if asp in ASPECTS:
         prof["aspect"] = asp
-    dur = p.get("duration") if isinstance(p.get("duration"), dict) else {}
-    prof["max_duration"] = p.get("max_duration") or dur.get("max") or prof["max_duration"]
-    ideal = p.get("ideal_duration") or dur.get("ideal")
-    if isinstance(ideal, (list, tuple)) and len(ideal) == 2:
-        prof["ideal_duration"] = tuple(ideal)
-    txt = p.get("text") if isinstance(p.get("text"), dict) else p
-    for k in ("title_max", "description_max", "caption_max", "hashtags_max"):
-        if txt.get(k) is not None:
-            prof["limits"][k] = txt[k]
+    if v.get("duration_max_s"):
+        prof["max_duration"] = float(v["duration_max_s"])
+        lo, hi = prof["ideal_duration"]
+        prof["ideal_duration"] = (lo, min(hi, float(v["duration_max_s"])))
+    for k, f in (("title_max", "title_max_chars"), ("description_max", "description_max_chars"),
+                 ("caption_max", "caption_max_chars"), ("hashtags_max", "hashtags_max")):
+        if v.get(f) is not None:
+            prof["limits"][k] = v[f]
+    if v.get("caption_max_utf16") and not v.get("caption_max_chars"):
+        prof["limits"]["caption_max"] = v["caption_max_utf16"]
+    prof["kind"] = {k: (pp["fields"].get(f) or {}).get("kind") for k, f in (("aspect", "aspect_recommended"), ("max_duration", "duration_max_s"))}
     prof["source"] = "nexus.platforms"
-    prof["kind"] = p.get("kind")
     return prof
 
 
