@@ -16,7 +16,8 @@ from pathlib import Path
 
 from ...timeline import fonts
 
-OCR_LANG = {"en": "eng", "de": "deu", "fr": "eng", "ar": "ara", "ar-EG": "ara", "ar-Gulf": "ara", "zh": "chi_sim", "ru": "rus", "hi": "hin"}
+OCR_LANG = {"en": "eng", "de": "deu", "fr": "eng", "ar": "ara", "ar-EG": "ara", "ar-Gulf": "ara", "zh": "chi_sim", "ru": "rus", "hi": "hin",
+            "es": "eng", "pt": "eng", "it": "eng", "tr": "eng", "ja": "jpn", "ko": "kor"}  # Latin-script langs read with eng
 
 
 def check_text(text: str, lang: str = "en") -> dict:
@@ -35,7 +36,8 @@ def ocr_available(lang: str = "en") -> bool:
     if not shutil.which("tesseract"):
         return False
     have = subprocess.run(["tesseract", "--list-langs"], capture_output=True, text=True).stdout.split()
-    return all(code in have for code in OCR_LANG.get(lang, "eng").split("+"))
+    code = OCR_LANG.get(lang)
+    return bool(code) and all(c in have for c in code.split("+"))  # unknown language: no read-back, never English OCR
 
 
 def render_check(text: str, lang: str = "en", width: int = 1600, size_rel: float = 0.05) -> dict:

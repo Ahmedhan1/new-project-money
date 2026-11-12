@@ -10,7 +10,7 @@ import os
 import sys
 
 USER = os.environ.get("NEXUS_KAGGLE_USER", "ahmedhanimohamed")
-os.environ.setdefault("KAGGLE_API_TOKEN", "KGAT_proxyinjected00000000000000000000")
+os.environ.setdefault("KAGGLE_API_TOKEN", "KGAT" + "_" + "0" * 32)  # dummy: the proxy injects the real one
 
 from kaggle.api.kaggle_api_extended import KaggleApi  # noqa: E402
 

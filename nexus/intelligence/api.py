@@ -381,7 +381,71 @@ class LangCheckReq(BaseModel):
 def language_check(r: LangCheckReq):
     qa = _mod("language.translation_qa")
     back, how = (qa.back_translate(r.target, r.lang, r.privacy) if r.back_translate else (None, "not requested"))
-    return {**qa.check_lines(r.source, r.target, r.lang, r.glossary, back, r.protected), "back_translation": how}
+    memory = _mod("language.terminology").glossary(r.lang, " ".join(r.source))  # reviewer-approved terms always apply
+    gl = {**memory, **(r.glossary or {})}
+    return {**qa.check_lines(r.source, r.target, r.lang, gl or None, back, r.protected), "back_translation": how,
+            "terminology_applied": sorted(memory)}
+
+
+@router.get("/language/readiness")
+def language_readiness(lang: str | None = None, ocr: bool = True):
+    rd = _mod("language.readiness")
+    return rd.assess(lang, ocr) if lang else {"weights": rd.WEIGHTS, "languages": rd.report(ocr)}
+
+
+class ReviewSubmitReq(BaseModel):
+    lang: str
+    lines: list[dict]
+    project: str = ""
+    variety_note: str = ""
+
+
+class ReviewRecordReq(BaseModel):
+    verdict: str
+    reviewer: str
+    correction: str = ""
+    notes: str = ""
+    terms: dict[str, str] | None = None
+
+
+@router.post("/language/review")
+def language_review_submit(r: ReviewSubmitReq):
+    return {"ids": _mod("language.review").submit(r.lang, r.lines, r.project, r.variety_note)}
+
+
+@router.get("/language/review")
+def language_review_queue(lang: str | None = None, status: str | None = "pending"):
+    rv = _mod("language.review")
+    return {"items": rv.queue(lang, status), "stats": rv.stats()}
+
+
+@router.post("/language/review/{item_id}")
+def language_review_record(item_id: str, r: ReviewRecordReq):
+    try:
+        return _mod("language.review").record(item_id, r.verdict, r.reviewer, correction=r.correction, notes=r.notes, terms=r.terms)
+    except (ValueError, KeyError) as e:
+        raise HTTPException(400, str(e))
+
+
+class TermReq(BaseModel):
+    term: str
+    lang: str
+    target: str
+    origin: str = "owner"
+    by: str = ""
+
+
+@router.get("/language/terms")
+def language_terms(lang: str):
+    return {"lang": lang, "glossary": _mod("language.terminology").glossary(lang)}
+
+
+@router.post("/language/terms")
+def language_terms_add(r: TermReq):
+    try:
+        return _mod("language.terminology").add(r.term, r.lang, r.target, origin=r.origin, by=r.by)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
 
 
 class DialectReq(BaseModel):

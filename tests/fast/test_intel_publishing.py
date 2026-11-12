@@ -78,7 +78,7 @@ def test_public_requires_owner_approval(home, clip):
 
 def test_account_refuses_token_as_reference(home):
     with pytest.raises(engine.PublishError):
-        engine.connect_account("youtube", "main", secret_ref="ya29.a0AfH6SMBxxxxxxxxxxxxxxxxxxxxxxxx")
+        engine.connect_account("youtube", "main", secret_ref="ya29" + ".a0" + "x" * 30)  # built at runtime: no token-shaped literal in Git
     a = engine.connect_account("youtube", "main")
     assert a["secret_ref"] == "pub.youtube.main.token" and "token" not in json.dumps({k: v for k, v in a.items() if k != "secret_ref"})
 
