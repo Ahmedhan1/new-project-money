@@ -23,6 +23,23 @@ publishing packages, content factory) with a browser UI on `http://127.0.0.1:876
 - **Blocked:** `STO-3` Needs the user to create/authorise a free account (Backblaze B2 without a card, or Google Drive) and run `rclone config`. Never done by an agent.; `GEN-2` No GPU on the build machine and no authorised free GPU account. compute.SimulatedRemoteGPU is a simulation, not a provider.; `PUB-1` Needs the user's own OAuth client + explicit authorisation for each platform. Today NEXUS produces upload packages only.; `ANA-1` Same OAuth authorisation as PUB-1. The revenue ledger exists but holds only manual entries.
 <!-- /AUTO:STATE -->
 
+## Phase 3 in flight (written 2026-11-12, session 3 - read this before touching phase-3 files)
+Plan + shared timeline contract + file ownership: `docs/PHASE3_PLAN.md`. Tasks: FX-1, PERF-1, GRW-1, RPR-1, AUD-1, LANG-1, PLAT-1, DIR-1, INT-3.
+- **Reviewed and integrated:** production presets (`nexus/presets.py`, `registry/presets.yaml`, `preset` on `/api/create`),
+  topic-ranked research (K-4), GRW-1 (`nexus/shorts.py`, `nexus/growth.py`; job `shorts`; `/api/projects/{id}/shorts`,
+  `/retention`, `/retention/apply`, `/api/hooks`; editor UI controls). 63 fast tests passed at that point.
+- **Written by sub-agents, NOT yet reviewed/integrated (may be half-finished - check each module's fast test first):**
+  `nexus/fx/*` + `timeline/render.py` changes (FX-1/PERF-1), `nexus/repurpose.py`, `nexus/audio/master.py`,
+  `nexus/qa_continuity.py`, `speech/tts.py` mastering+cache (RPR-1/AUD-1), language registry work (LANG-1),
+  `nexus/platforms.py`, `nexus/director.py`, `registry/platforms.yaml` (PLAT-1/DIR-1).
+- **Integration still to do (INT-3):** call `repurpose.rights_review` and `qa_continuity.continuity_review` from
+  `qa.render_with_qa`; job handlers + endpoints + UI for repurpose, director, platform tuning, languages list;
+  re-run heavy tests A-F after the renderer changes; update `docs/TEST_REPORT.md`, `CHANGELOG.md`, version 0.3.0.
+- **Branches:** work on `claude/optimistic-franklin-376ndo` (PR #2). `main` holds only reviewed work (last: `ec5af11`).
+  The owner asked for reviewed work to be fast-forwarded to `main`; never push unreviewed WIP there.
+- **Owner's standing boundaries:** no detection-evasion/re-upload tricks, no platform downloaders (see the plan's boundary
+  section); no promise of views; no generative video without a GPU the owner authorises (GEN-2).
+
 ## What actually works (evidence in `docs/TEST_REPORT.md`)
 - **Editing, remix, localization (en/ar/de), animation (Manim/Blender/motion graphics), factory/capacity, zero-spend guard,
   compute failover (simulated GPU)** — heavy tests A, B, C, E, G, H, I passed in the previous session; result files in `docs/results/`.
@@ -82,4 +99,4 @@ python -m pytest tests/test_d_create.py                          # heavy tests A
   `pip install -r requirements-ci.txt`. Rebuild the full environment (`scripts/setup.sh`, ~10 min + 7 GB) only for heavy tests.
 - The 4B local LLM is fragile: use `llm.chat_json(..., schema=...)` for structured output (D-9); A/B any prompt change.
 - Heavy tests write to `NEXUS_HOME=.nexus/test-home`; `python -m nexus profile` reads stage timings from whichever home is active.
-- Prior work came from branch `claude/optimistic-franklin-376ndo` (2 commits); it is fully contained in this branch.
+- Branch `claude/intelligent-faraday-y28cx1` (session 2) is fully contained in `claude/optimistic-franklin-376ndo` and in `main`.
