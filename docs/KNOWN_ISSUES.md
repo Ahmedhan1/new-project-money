@@ -24,3 +24,4 @@
 | K-20 | Speakers have no names until a person sets them | No lower thirds on edits (roles are never put on screen) | `diarize.set_name`; UI for it is still missing |
 | K-21 | Caption reading speed: 90th percentile 22.5 chars/s on the 4-min edit (bar 20) | Fast bursts inside continuous speech; overall rate is 16.5 chars/s, fillers only 1.4 % | Verbatim captions kept; opt-in condensed mode is CAP-2 |
 | K-22 | Real text/image-to-video never run: no GPU in the build container, no owner GPU account | Generation claims stay "animated stills" | `scripts/gpu_video_bench.py` on the owner's GPU/notebook (GEN-2) |
+| K-23 | Shorts titles are the clip's own opening words cut to 9 words: often fragments ("Even yesterday out flying") | Weak hooks on otherwise good shorts | A complete-sentence bonus was tried and reverted (2 of 8 got worse); titles need the optional local LLM or a person (add title editing to the Review page, REV-1 next) |

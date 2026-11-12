@@ -23,35 +23,31 @@ publishing packages, content factory) with a browser UI on `http://127.0.0.1:876
 - **Blocked:** `STO-3` Needs the user to create/authorise a free account (Backblaze B2 without a card, or Google Drive) and run `rclone config`. Never done by an agent.; `GEN-2` No GPU on the build machine and no authorised free GPU account. compute.SimulatedRemoteGPU is a simulation, not a provider.; `PUB-1` Needs the user's own OAuth client + explicit authorisation for each platform. Today NEXUS produces upload packages only.; `ANA-1` Same OAuth authorisation as PUB-1. The revenue ledger exists but holds only manual entries.
 <!-- /AUTO:STATE -->
 
-## What actually works (evidence: `docs/results/demos/`, `docs/TEST_REPORT.md`, 150+ fast tests)
-Session 4 (2026-11-12) integrated eight workstreams and ran the product on a real 19.4-min public-domain NASA interview:
-- **Edit my video (Demo 1)**: upload -> analysis (Whisper, cross-segment sentences, topics, fillers, retakes, interviewer
-  prompts) -> **director** (`nexus/director.py`, 12 creative profiles in `registry/direction.yaml`, every kept/dropped span
-  with a reason, CMX3600 EDL) -> editable timeline -> render -> **weighted quality score** (`nexus/quality.py`). Through UI,
-  API and durable jobs. 87 s edit: quality 87.5 -> 92.0 after fixes the score itself found.
-- **Shorts factory (Demo 2)**: `shorts.select/factory` (count/all, time range, topic, speaker, durations, hook variants,
-  context check, per-platform tuning) -> 6 rendered 9:16 shorts scored 84-94.
-- **Platforms**: `registry/platforms.yaml` (7 destinations, each value documented/observed/experimental/unverified with source)
-  + `platforms.tune/check/deliverables` + `deliver` job (shared renders, per-platform packages, MANUAL_UPLOAD.md). No upload.
-- **Languages (Demo 3)**: 14 language packs (`registry/languages.yaml`), Egyptian and Gulf Arabic as separate rule-based dialect
-  profiles (need native review), CJK/RTL/Devanagari captions, licence-gated voices, real MADLAD-400 translation of the edit.
-- **Generation (Demo 4)**: `nexus/generate` reports capabilities from a real probe; SD 1.5 + LCM stills generated on CPU
-  (31 s/image unloaded); animated + narrated; labelled "animated stills", the claim guard refuses "AI-generated video".
-- **Recovery (Demo 5)**: app SIGKILLed mid-render of a localisation job -> restart -> resumed; the translation stage did not re-run.
-- Renderer: effects, xfade, caption styles, animated titles, PiP, overlays, colour correction, stabilisation, parallel
-  segments, draft mode, role-aware ducking (`docs/TIMELINE.md`). Media engine: proven encoder detection, size-targeted
-  H.264/H.265/AV1 export, verify, proxies. Durable jobs, backups (verified in this session), CI (Linux + Windows; Windows was red from ca44e88 to 834f36a on a UTF-8 bug, fixed).
+## What actually works (evidence: `docs/results/demos/acceptance_*.json`, `docs/FEATURE_MATRIX.md`, `docs/FINAL_REPORT.md`)
+Sessions 4-6 (2026-11-12), all on a real 19.4-min public-domain NASA interview (project `prj_2b1a5a2f07`, outside Git):
+- **4-min cinematic edit (demo 1)**: director + licensed NASA/Openverse B-roll (motion-picked, 720p windows) + RNNoise
+  clean-up + RMS leveller; 244.667 s, A/V equal, automated QA passed, quality 92.5 "pass". Inspected frame by frame.
+- **Shorts (demo 2)**: 8 distinct 22-43 s vertical shorts from the master, face-tracked crops, never opening on the
+  interviewer; quality 87-98. Titles are verbatim opening words and often weak: a human (or the optional local LLM) titles.
+- **Platforms (demo 3)**: one job -> 16:9 (YouTube+Facebook), 4:5 (Instagram feed), 9:16 (TikTok), face-tracked,
+  safe zones checked on frames, export-verified, caption.txt + manual upload steps. Nothing is uploaded.
+- **Subtitles (demo 4)**: 7 languages; ar-EG/de/fr/hi pass automated checks; package lists `commercially_ready` only after
+  every line is approved in the Review page.
+- **Dub (demo 5)**: German AI voice-over (Piper de_DE-thorsten, CC0, commercial use) labelled as synthetic; see
+  `acceptance_dub.json` for the automated findings and what a native reviewer must check.
+- **Crash recovery (demo 7)**: 5 production jobs hard-killed and resumed to completion. **Windows (demo 8)**: launchers +
+  API e2e green on a clean windows-latest VM (not yet on the owner's PC).
+- **Review page (REV-1)**: speaker names/roles/merge, per-line translation approval, cutaway rejection; all undoable.
+- Renderer: keyframes, J/L cuts, chroma, masks, split, freeze, credits, LUTs (.cube), face-following crops, speaker gain.
 
 ## What does NOT work / is unproven (be honest with the user)
-- **No generated video**: no GPU here. Needs >= 8 GB VRAM or the owner's GPU machine / authorised Kaggle (`GEN-2`).
-- **Windows launchers never run on real Windows** (`WIN-1`). Nothing has been measured on the owner's laptop.
-- Single-camera sources look repetitive: no B-roll library yet (`BRL-1`); room noise in pauses (`AUD-2`).
-- No speaker diarisation: interviewer/guest split is a labelled heuristic (`DIA-1`).
-- Gulf Arabic output is mostly MSA with Gulf function words; Egyptian is better (MADLAD `arz`). Both need native review.
-  No Arabic or Hindi voice has a verified commercial licence: those languages get subtitles, not dubbing (`LANG-2`).
-- Renderer builders not wired yet: chroma key, masks, split screen, freeze, credits, J/L-cut audio (`FX-2`).
+- **No generated video**: no GPU here; CPU AnimateDiff = noise. `scripts/gpu_video_bench.py` is ready for the owner's GPU.
+- **Not run on the owner's Windows PC** (only a clean CI VM). No native-speaker review of any translation yet.
+- Caption reading speed in fast speech (p90 22-28 chars/s) needs paraphrase, not filtering (K-21, CAP-2).
+- B-roll relevance is lexical (K-18); single-camera source still repeats imagery; 720p source is soft in 9:16 (K-13).
+- MT (MADLAD-400) still drops/adds clauses; QA flags them (K-14). Gulf Arabic reads as MSA (K-15). No licensed Arabic/Hindi voice.
 - Upload/analytics: blocked on the owner's OAuth (`PUB-1`, `ANA-1`). Off-machine backup: blocked on an account (`STO-3`).
-- Defects: `docs/KNOWN_ISSUES.md`. Plan and contracts: `docs/MASTER_ROADMAP.md`. Session log: `docs/AGENT_WORK_LOG.md`.
+- Defects: `docs/KNOWN_ISSUES.md`. Plan: `docs/MASTER_ROADMAP.md` (section 9 = next stage). Log: `docs/AGENT_WORK_LOG.md`.
 
 ## Where things are
 | Thing | Path |
@@ -81,6 +77,8 @@ python -m pytest tests/test_d_create.py                          # heavy tests A
 
 ## Things only the user can do (ask, do not attempt)
 1. Run `NEXUS_SETUP.bat` + `NEXUS_START.bat` on their Windows PC and report what fails (`WIN-1`).
+1b. Approve or reject merging PR #3 into `main` (agents never merge). Name the guest speaker in the Review page.
+1c. On a GPU machine (or their own free Kaggle notebook): `python scripts/gpu_video_bench.py` (`GEN-2`).
 2. Authorise one free backup destination (Backblaze B2 without a card, Google Drive, or a second disk) (`STO-3`).
 3. Free Kaggle account for GPU jobs (`GEN-2`); platform OAuth apps for upload/analytics (`PUB-1`, `ANA-1`).
 4. Decide on a LICENSE (none committed; `docs/DECISIONS.md` D-10).
