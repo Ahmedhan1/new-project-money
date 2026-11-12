@@ -92,10 +92,13 @@ def has_audio(an: dict) -> bool:
     return bool(probe.get("audio")) if probe else True
 
 
-def sentences(an: dict) -> list[dict]:
-    """Sentence units with word timings. A sentence never spans two transcript segments, so speaker labels stay exact.
-    Words without timings are spread over the segment proportionally to their length (marked `timed: false`)."""
+def sentences(an: dict, max_pause: float = 1.5) -> list[dict]:
+    """Sentence units with word timings, rebuilt ACROSS transcript segments: ASR segments (e.g. Whisper's) often break
+    in the middle of a sentence, and an editor must cut at sentence boundaries, not at segment boundaries.
+    A sentence ends at terminal punctuation, at a pause longer than `max_pause` seconds, or at a speaker change.
+    Words without timings are spread over their segment proportionally to their length (marked `timed: false`)."""
     out: list[dict] = []
+    stream: list[tuple[dict, int, dict, bool]] = []
     for si, s in enumerate(segments_of(an)):
         words = [w for w in (s.get("words") or []) if str(w.get("word", "")).strip()]
         timed = bool(words)
@@ -107,21 +110,31 @@ def sentences(an: dict) -> list[dict]:
                 d = (float(s["end"]) - float(s["start"])) * len(tok) / total
                 words.append({"start": round(t, 3), "end": round(t + d, 3), "word": tok})
                 t += d
-        cur: list[dict] = []
-
-        def flush() -> None:
-            if cur:
-                text = " ".join(w["word"] for w in cur).strip()
-                out.append({"start": cur[0]["start"], "end": cur[-1]["end"], "text": text, "words": list(cur),
-                            "terminal": text.rstrip("\"')]").endswith(TERMINAL), "seg": si, "speaker": s.get("speaker"),
-                            "timed": timed})
-                cur.clear()
-
         for w in words:
-            cur.append({"start": float(w["start"]), "end": float(w["end"]), "word": str(w["word"]).strip()})
-            if cur[-1]["word"].rstrip("\"')]").endswith(TERMINAL):
+            stream.append(({"start": float(w["start"]), "end": float(w["end"]), "word": str(w["word"]).strip()}, si, s, timed))
+
+    cur: list[tuple[dict, int, dict, bool]] = []
+
+    def flush() -> None:
+        if not cur:
+            return
+        ws = [x[0] for x in cur]
+        text = " ".join(w["word"] for w in ws).strip()
+        out.append({"start": ws[0]["start"], "end": ws[-1]["end"], "text": text, "words": ws,
+                    "terminal": text.rstrip("\"')]").endswith(TERMINAL), "seg": cur[0][1], "segs": sorted({x[1] for x in cur}),
+                    "speaker": cur[0][2].get("speaker"), "timed": all(x[3] for x in cur)})
+        cur.clear()
+
+    for item in stream:
+        w, si, seg, _ = item
+        if cur:
+            prev_w, _, prev_seg, _ = cur[-1]
+            if w["start"] - prev_w["end"] > max_pause or seg.get("speaker") != prev_seg.get("speaker"):
                 flush()
-        flush()
+        cur.append(item)
+        if w["word"].rstrip("\"')]").endswith(TERMINAL):
+            flush()
+    flush()
     for k, s in enumerate(out):
         s["i"] = k
     return out
@@ -204,12 +217,33 @@ def dead_air(an: dict, sents: list[dict] | None = None, min_gap: float = 0.7) ->
     return [{"start": round(a, 3), "end": round(b, 3), "duration": round(b - a, 3), "kind": k} for a, b, k in spans]
 
 
+FIRST_PERSON = {"i", "i'm", "i've", "i'd", "i'll", "me", "my", "mine", "we", "we're", "we've", "we'd", "we'll", "us", "our", "ours"}
+SELF_INTRO_RE = re.compile(r"\b(i'?m|i am|this is \w+( \w+)?) (with|from|here (with|for)) [A-Z]", re.I)
+PHATIC_RE = re.compile(
+    r"\b(how are you( doing)?|how's it going|thank(s| you)( so much)?( for (having|joining|coming|watching))?|"
+    r"for your time|good luck|good (morning|afternoon|evening)|nice to (meet|see|talk)|(great|good|happy|glad) to (be|have|see) (here|you|with)|"
+    r"hello|hi there|welcome( back)?|can you hear me|are you (there|ready)|you're welcome|my pleasure|bye|see you)\b", re.I)
+
+
+def substance(text: str) -> tuple[float, list[str]]:
+    """Cap for an opening line that says nothing: pleasantries, greetings and lines with fewer than four content
+    words cannot be a hook however question-like they are. Returns (cap 0..1, reasons)."""
+    words = content(text)
+    if PHATIC_RE.search(text) and len(words) < 10:
+        return 0.15, ["pleasantry/greeting - no information (capped)"]
+    if len(words) < 4:
+        return 0.35, [f"only {len(words)} content word(s) (capped)"]
+    return 1.0, []
+
+
 def hook_score(text: str) -> tuple[float, list[str]]:
     """Strength of a sentence as an opening line (0..1). Uses nexus.shorts.hook_score when present (same rubric
-    the shorts factory uses), otherwise an equivalent local rubric."""
+    the shorts factory uses), otherwise an equivalent local rubric; both are capped by `substance`."""
+    cap, capwhy = substance(text)
     try:
         from .. import shorts
-        return shorts.hook_score(text)
+        s0, why0 = shorts.hook_score(text)
+        return round(min(s0, cap), 3), why0 + capwhy
     except Exception:  # noqa: BLE001 - optional package
         pass
     toks = tokens(text)
@@ -231,13 +265,18 @@ def hook_score(text: str) -> tuple[float, list[str]]:
     elif toks[0] in PRONOUN:
         s -= 0.1
         why.append("opens on a pronoun (penalty)")
-    return round(min(1.0, max(0.0, s)), 3), why
+    return round(min(cap, max(0.0, s)), 3), why + capwhy
 
 
 def self_contained(s: dict) -> bool:
     """A sentence that can stand alone (e.g. lifted to a cold open) without misrepresenting its context."""
     toks = tokens(s["text"])
-    if len(toks) < 5 or not s.get("terminal"):
+    if len(toks) < 5 or not s.get("terminal") or substance(s["text"])[0] < 1.0:
+        return False
+    first = s["text"].lstrip("\"'([ ")[:1]
+    if first.isalpha() and first.islower():
+        return False  # starts mid-sentence: the transcript split a sentence across segments
+    if s.get("prompt_like"):
         return False
     if toks[0] in BACKREF or toks[0] in PRONOUN or toks[0] in FILLERS_HARD:
         return False
@@ -263,9 +302,22 @@ def score_sentences(sents: list[dict], fill: list[dict] | None = None) -> None:
     for d in docs:
         raw.append(sum(math.log1p(tf[w]) * math.log1p(len(docs) / df[w]) for w in set(d)) / max(1, len(set(d))) if d else 0.0)
     top = max(raw or [1.0]) or 1.0
+    labelled = any(s.get("speaker") for s in sents)
     for s, r in zip(sents, raw):
         n = max(1, len(s["words"]))
         hook, why = hook_score(s["text"])
+        toks = set(tokens(s["text"]))
+        # Without speaker labels: a line addressed to someone else (second person, no first person) is most likely the
+        # interviewer's/host's prompt, and a concrete first-person line is most likely the guest's own account.
+        question = s["text"].rstrip().endswith("?")
+        s["prompt_like"] = (not labelled) and (
+            (bool(SECOND_PERSON & toks) and (question or not (FIRST_PERSON & toks))) or bool(SELF_INTRO_RE.search(s["text"])))
+        if s["prompt_like"]:
+            hook = min(hook, 0.3)
+            why = why + ["addressed to someone else - likely an interviewer/host prompt (heuristic, no speaker labels; capped)"]
+        elif FIRST_PERSON & toks and len(content(s["text"])) >= 6 and not s["text"].rstrip().endswith("?"):
+            hook = min(1.0, hook + 0.15)
+            why = why + ["first-hand account"]
         spec = min(1.0, 0.5 * bool(NUMBER_RE.search(s["text"])) +
                    0.25 * len(re.findall(r"(?<!^)(?<![.!?] )\b[A-Z][a-z]{2,}", s["text"])))
         dur = max(0.1, s["end"] - s["start"])
@@ -290,6 +342,7 @@ def segment_topics(sents: list[dict], window: int = 3, min_sents: int = 3, use_l
     sentence gap; a gap whose depth (drop below the neighbouring peaks) is clearly above average starts a new topic.
     A pause > 1.5 s adds a little depth (speakers pause between subjects)."""
     n = len(sents)
+    min_sents = max(min_sents, n // 30)  # long sources: no topic shorter than ~1/30 of the talk
     bags = [Counter(content(s["text"])) for s in sents]
     bounds: list[int] = []
     gaps: list[dict] = []
@@ -317,7 +370,7 @@ def segment_topics(sents: list[dict], window: int = 3, min_sents: int = 3, use_l
             depths.append((lp - sim) + (rp - sim) + (0.1 if pause > 1.5 else 0.0))
         mean = sum(depths) / len(depths)
         sd = math.sqrt(sum((d - mean) ** 2 for d in depths) / len(depths))
-        cut = max(0.3, mean + 0.5 * sd)
+        cut = max(0.1, mean + 0.75 * sd)  # relative: short spoken sentences share few words even within a topic
         for k in sorted(range(len(depths)), key=lambda k: -depths[k]):
             g = k + 1
             if depths[k] < cut:

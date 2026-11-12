@@ -528,6 +528,9 @@ def plan(analysis_by_src: dict, brief: dict | None = None) -> dict:
             t["priority"] += 4
         if "setup" in t["roles"]:
             t["priority"] += 3
+        if all(s.get("prompt_like") for s in t["sents"]):
+            t["priority"] -= 30  # likely the interviewer's question/remark (no speaker labels): the answers carry the edit
+            t.setdefault("flags", []).append("prompt_like")
         if t is hook:
             t["priority"] += 15
             t["protected"].append("hook")
@@ -535,7 +538,10 @@ def plan(analysis_by_src: dict, brief: dict | None = None) -> dict:
             t["priority"] += 100
             t["protected"].append("instruction: keep " + " ".join(sorted(keep_terms & stems)))
         t["drop_reason"] = None
-        if drop_terms & stems and not t["protected"]:
+        t["substantive"] = any(und.substance(s["text"])[0] >= 1.0 and not s.get("prompt_like") for s in t["sents"])
+        if not t["substantive"] and not t["protected"]:
+            t["drop_reason"] = ("pleasantry", "greeting/thanks/sign-off or an interviewer prompt with no information of its own")
+        elif drop_terms & stems and not t["protected"]:
             t["drop_reason"] = ("instruction", "instructions asked to remove material about " + " ".join(sorted(drop_terms & stems)))
         elif "tangent" in t["roles"] and prof.get("drop_tangents") and not t["protected"]:
             coh = next((x["cohesion"] for x in srcs[t["src"]]["u"].get("topics") or [] if x["id"] == t["topic"]), 0.0)
@@ -544,7 +550,8 @@ def plan(analysis_by_src: dict, brief: dict | None = None) -> dict:
     ending = prof.get("ending", "resolution")
     last_cluster = max(t["cluster"] for t in thoughts) if thoughts else 0
     if ending == "resolution":
-        cands = [t for t in thoughts if t["cluster"] == last_cluster and not t["drop_reason"]]
+        cands = [t for t in thoughts if t["cluster"] == last_cluster and not t["drop_reason"]] or \
+            [t for t in thoughts if not t["drop_reason"]]  # never end on a sign-off: fall back to the last substantive thought
         conc = [t for t in cands if any((s.get("components") or {}).get("concluding") for s in t["sents"])]
         end_t = max(conc, key=lambda t: t["start"]) if conc else (max(cands, key=lambda t: (t["src"] == thoughts[-1]["src"], t["start"])) if cands else None)
         if end_t:
@@ -696,7 +703,8 @@ def _shot_pass(items: list[dict], srcs: dict, prof: dict, decisions: list, total
             p["in"], p["out"] = a, b
             p["words"] = [w for w in it["words"] if a <= w["start"] and w["end"] <= b]
             if k:
-                p["cut"], p.pop("xfade_dur", None) = "continuous", None
+                p["cut"] = "continuous"
+                p.pop("xfade_dur", None)
                 p["lo"], p["first"] = a, a
             if k < len(subs) - 1:
                 p["hi"], p["last"] = b, b
