@@ -348,7 +348,100 @@ def masks(c: dict) -> list[dict]:
                     "effect": m.get("effect") if m.get("effect") in MASK_EFFECTS else "black",
                     "region": "inside" if m.get("region") == "inside" else "outside",
                     "amount": min(1.0, max(0.0, _f(m, "amount", 0.6)))})
+        kf = {k: v for k, v in (m.get("keyframes") or {}).items() if k in MASK_KF and isinstance(v, list) and v}
+        if kf:  # a moving / tracked mask: x, y, w, h follow keyframes over clip-local time
+            out[-1]["keyframes"] = kf
     return out
+
+
+MASK_KF = ("x", "y", "w", "h")
+
+
+def kf_value(points, t: float, default: float = 0.0) -> float:
+    """The value of keyframes [[t, v, "linear"|"ease"], ...] at time t (same curve as render.kf_expr)."""
+    pts = sorted((float(p[0]), float(p[1]), (p[2] if len(p) > 2 else "linear")) for p in points or [] if len(p) >= 2)
+    if not pts:
+        return default
+    if t <= pts[0][0]:
+        return pts[0][1]
+    for (t0, v0, mode), (t1, v1, _) in zip(pts, pts[1:]):
+        if t < t1:
+            u = (t - t0) / max(t1 - t0, 1e-4)
+            if mode == "ease":
+                u = u * u * (3 - 2 * u)
+            return v0 + (v1 - v0) * u
+    return pts[-1][1]
+
+
+def mask_at(m: dict, t: float) -> dict:
+    """The mask's geometry at clip time t."""
+    kf = m.get("keyframes") or {}
+    g = {k: kf_value(kf[k], t, m[k]) if k in kf else m[k] for k in MASK_KF}
+    g["x"], g["y"] = min(1.0, max(-1.0, g["x"])), min(1.0, max(-1.0, g["y"]))
+    g["w"], g["h"] = min(2.0, max(0.005, g["w"])), min(2.0, max(0.005, g["h"]))
+    return g
+
+
+def mask_video(m: dict, W: int, H: int, dur: float, fps: int) -> tuple[Path, int, int]:
+    """Raw grey matte video (one frame per output frame) of a moving mask, drawn at quarter size (the renderer scales
+    it up; the feather hides the steps). Cached by its parameters. Returns (path, width, height)."""
+    from PIL import Image, ImageDraw, ImageFilter
+    mw, mh = max(32, even(W / 4)), max(32, even(H / 4))
+    n = max(1, round(dur * fps))
+    key = hashlib.sha1(f"mmask|{sorted((k, str(v)) for k, v in m.items())}|{mw}x{mh}|{n}|{fps}|v1".encode()).hexdigest()[:16]
+    out = config.CACHE / "overlays" / f"mmask_{key}_{mw}x{mh}.gray"
+    if out.exists() and out.stat().st_size == mw * mh * n:
+        return out, mw, mh
+    out.parent.mkdir(parents=True, exist_ok=True)
+    inside_keep = m["region"] == "outside"
+    fill, bg = (255, 0) if inside_keep else (0, 255)
+    rad = m["feather"] * min(mw, mh)
+    tmp = out.with_suffix(".tmp")
+    with tmp.open("wb") as f:
+        for i in range(n):
+            g = mask_at(m, i / fps)
+            img = Image.new("L", (mw, mh), bg)
+            box = [g["x"] * mw, g["y"] * mh, (g["x"] + g["w"]) * mw, (g["y"] + g["h"]) * mh]
+            (ImageDraw.Draw(img).ellipse if m["shape"] == "ellipse" else ImageDraw.Draw(img).rectangle)(box, fill=fill)
+            if rad > 0:
+                img = img.filter(ImageFilter.GaussianBlur(rad))
+            f.write(img.tobytes())
+    tmp.replace(out)
+    return out, mw, mh
+
+
+def mask_from_track(samples: list[dict], c: dict, W: int, H: int, src_w: int, src_h: int, pad: float = 1.5,
+                    effect: str = "blur", region: str = "inside", shape: str = "ellipse", amount: float = 0.8,
+                    step: float = 0.2) -> dict | None:
+    """A moving mask that follows a face/object track (nexus.media.faces samples: t in source seconds, x/y centre and
+    w/h size as fractions of the source frame) through the clip's cover crop at its static `focus`. `pad` enlarges
+    the box (1.5 = 50 % margin round the face). Typical use: blur or pixelate a bystander's face (effect inside), or
+    dim everything but the speaker (region outside). Returns None when the track has no sample inside the clip."""
+    t0, t1 = float(c.get("in", 0)), float(c.get("out", 0))
+    sp = float(c.get("speed", 1.0)) or 1.0
+    pts = [p for p in samples or [] if t0 - 0.5 <= float(p["t"]) <= t1 + 0.5 and "x" in p and "y" in p]
+    if not pts:
+        return None
+    sc = max(W / src_w, H / src_h)
+    fx, fy = (c.get("focus") or (0.5, 0.5))[:2]
+    ox, oy = (src_w * sc - W) * float(fx), (src_h * sc - H) * float(fy)
+    kf: dict[str, list] = {"x": [], "y": [], "w": [], "h": []}
+    last = -1e9
+    for p in pts:
+        if float(p["t"]) - last < step and p is not pts[-1]:
+            continue
+        last = float(p["t"])
+        tt = round(max(0.0, (float(p["t"]) - t0) / sp), 3)
+        bw = float(p.get("w", 0.15)) * src_w * sc / W * pad
+        bh = float(p.get("h", 0.2)) * src_h * sc / H * pad
+        cx = (float(p["x"]) * src_w * sc - ox) / W
+        cy = (float(p["y"]) * src_h * sc - oy) / H
+        kf["x"].append([tt, round(cx - bw / 2, 4)])
+        kf["y"].append([tt, round(cy - bh / 2, 4)])
+        kf["w"].append([tt, round(bw, 4)])
+        kf["h"].append([tt, round(bh, 4)])
+    first = {k: v[0][1] for k, v in kf.items()}
+    return {"shape": shape, **first, "feather": 0.04, "effect": effect, "region": region, "amount": amount, "keyframes": kf}
 
 
 def mask_png(m: dict, W: int, H: int) -> Path:
@@ -372,13 +465,18 @@ def mask_png(m: dict, W: int, H: int) -> Path:
 
 
 def mask_graph(c: dict, lines: list[str], src: str, W: int, H: int, dur: float, n_in: int, scale: float,
-               tag: str) -> tuple[list, str]:
+               tag: str, fps: int | None = None) -> tuple[list, str]:
     """Apply every mask of the clip in order. Returns (extra input args, output label)."""
     args: list = []
     cur = src
     for k, m in enumerate(masks(c)):
-        png = mask_png(m, W, H)
-        args += ["-loop", "1", "-t", f"{dur:.3f}", "-i", str(png)]
+        if m.get("keyframes"):
+            fps = int(fps or config.FPS)
+            raw, mw, mh = mask_video(m, W, H, dur, fps)
+            args += ["-f", "rawvideo", "-pix_fmt", "gray", "-s", f"{mw}x{mh}", "-framerate", fps, "-i", str(raw)]
+        else:
+            png = mask_png(m, W, H)
+            args += ["-loop", "1", "-t", f"{dur:.3f}", "-i", str(png)]
         if m["effect"] == "blur":
             fx = f"gblur=sigma={max(1.0, 30 * m['amount'] * scale):.2f}"
         elif m["effect"] == "dim":
@@ -390,7 +488,7 @@ def mask_graph(c: dict, lines: list[str], src: str, W: int, H: int, dur: float, 
             fx = "drawbox=x=0:y=0:w=iw:h=ih:color=black:t=fill"
         lines.append(f"{cur}split[{tag}a{k}][{tag}b{k}]")
         lines.append(f"[{tag}b{k}]{fx},format=yuv420p[{tag}e{k}]")
-        lines.append(f"[{n_in}:v]format=gray,scale={W}:{H}[{tag}m{k}]")
+        lines.append(f"[{n_in}:v]format=gray,scale={W}:{H}:flags=bilinear,setpts=PTS-STARTPTS[{tag}m{k}]")
         lines.append(f"[{tag}a{k}]format=yuva420p[{tag}c{k}]")
         lines.append(f"[{tag}c{k}][{tag}m{k}]alphamerge[{tag}k{k}]")
         lines.append(f"[{tag}e{k}][{tag}k{k}]overlay=0:0:format=auto,format=yuv420p[{tag}o{k}]")
