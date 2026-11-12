@@ -148,16 +148,16 @@ def write_ass(cues: list[dict], path: Path, W: int, H: int, lang: str = "en", op
     if style == "boxed":
         pad = max(2, int(size * 0.28))
         sl = (f"Style: Default,{font},{size},{white},{white},&H5A000000,&H5A000000,1,0,0,0,100,100,0,0,3,{pad},0,"
-              f"{L['align']},{L['side']},{L['side']},{L['mv']},1")
+              f"{L['align']},{L['side']},{L['side']},{L['mv']},-1")
     elif style == "pop":
         sl = (f"Style: Default,{font},{size},{white},{white},{black},&H80000000,1,0,0,0,100,100,0,0,1,{max(2, int(size * 0.08))},"
-              f"{max(1, int(size * 0.04))},{L['align']},{L['side']},{L['side']},{L['mv']},1")
+              f"{max(1, int(size * 0.04))},{L['align']},{L['side']},{L['side']},{L['mv']},-1")
     elif style == "karaoke":
         sl = (f"Style: Default,{font},{size},{hi},{white},{black},&H96000000,1,0,0,0,100,100,0,0,1,3,1,"
-              f"{L['align']},{L['side']},{L['side']},{L['mv']},1")
+              f"{L['align']},{L['side']},{L['side']},{L['mv']},-1")
     else:  # classic: same values as timeline.subs.write_ass, plus position / scale options
         sl = (f"Style: Default,{font},{size},{white},&H000000FF,{black},&H96000000,1,0,0,0,100,100,0,0,1,3,1,"
-              f"{L['align']},{L['side']},{L['side']},{L['mv']},1")
+              f"{L['align']},{L['side']},{L['side']},{L['mv']},-1")
     lines: list[str] = []
     for c in sorted(cues, key=lambda c: c["start"]):
         if c["end"] <= c["start"] or not str(c.get("text", "")).strip():

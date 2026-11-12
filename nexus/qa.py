@@ -209,11 +209,35 @@ def render_with_qa(project, tl: dict, name: str, analyses: dict | None = None, m
     out = project.dir / "renders" / f"{name}.mp4"
     corrections = []
     stats: dict = {}
+    extra_stages = list(extra_stages or [])
+    if tl.get("repurpose") and not any(s.get("stage") == "1-rights" for s in extra_stages):
+        # Reworked third-party/own footage: nothing is rendered until every source has a rights declaration
+        # (and, for the commentary basis, the transformation thresholds are met).
+        from . import repurpose
+        rights = repurpose.rights_review(project, tl, analyses)
+        if not rights["passed"]:
+            failed = "; ".join(f"{c['check']}: {c['detail']}" for c in rights["checks"] if not c["ok"])
+            raise repurpose.RepurposeRefused(f"export refused by the rights gate - {failed}")
+        extra_stages.append(rights)
+
+    def _known() -> dict:
+        k = {}
+        for m in project.data.get("media", []):
+            r = m.get("rights", "user-supplied")
+            k[m["path"]] = ({"license": f"{r.get('basis')} (declared)", "source": r.get("holder") or "user upload"} if isinstance(r, dict)
+                            else {"license": r, "source": "user upload"})
+        k.update(project.data.get("generated", {}))
+        return k
+
     for rnd in range(max_rounds):
         stats = render.render(tl, out, project.dir / "work")
-        known = {m["path"]: {"license": m.get("rights", "user-supplied"), "source": "user upload"} for m in project.data.get("media", [])}
-        known.update(project.data.get("generated", {}))
-        stages = [asset_review(tl, known), editing_review(tl), technical_review(out, expectation(tl))]
+        stages = [asset_review(tl, _known()), editing_review(tl), technical_review(out, expectation(tl))]
+        try:  # scene-to-scene continuity measured on the rendered file (level, brightness, colour jumps at cuts)
+            from . import qa_continuity
+            stages.append(qa_continuity.continuity_review(out, tl, analyses))
+        except Exception as e:  # a failing reviewer must never hide the render; it is reported instead
+            stages.append({"stage": "3-scene-continuity", "passed": True,
+                           "checks": [_c("continuity review ran", False, f"reviewer error: {type(e).__name__}: {e}", "minor")]})
         fixes = {c["fix"] for s in stages for c in s["checks"] if not c["ok"] and c.get("fix") and c["severity"] != "minor"}
         if not fixes or rnd == max_rounds - 1:
             break
@@ -237,9 +261,28 @@ def render_with_qa(project, tl: dict, name: str, analyses: dict | None = None, m
                 if end > clip_end and tl["clips"][idx]["type"] != "video":
                     tl["clips"][idx]["duration"] = round(tl["clips"][idx]["duration"] + end - clip_end + 0.3, 3)
             applied.append("extended scenes to fit narration")
+        if "level-match-cut" in fixes:
+            starts = clip_starts(tl)
+            n = 0
+            for c in (c for st in stages for c in st["checks"] if not c["ok"] and c.get("fix") == "level-match-cut" and c.get("t") is not None):
+                idx = min(range(len(starts)), key=lambda i: abs(starts[i] - c["t"]))
+                jump = c.get("jump_db")
+                if jump is None or tl["clips"][idx]["type"] != "video":
+                    continue
+                gain = 10 ** (-max(-12.0, min(12.0, jump)) / 20)  # cancel the measured jump on the later clip
+                tl["clips"][idx]["volume"] = round(float(tl["clips"][idx].get("volume", 1.0)) * gain, 3)
+                n += 1
+            if n:
+                applied.append(f"matched audio level across {n} cut(s)")
+        if "remove-flash-frame" in fixes:
+            fps = tl.get("fps", 30)
+            keep = [c for c in tl["clips"] if clip_duration(c) >= 3 / fps]
+            if 0 < len(keep) < len(tl["clips"]):
+                tl["clips"] = keep
+                applied.append("removed flash-frame clips")
         corrections.append({"round": rnd + 1, "problems": before, "applied": applied})
         if not applied:
             break
-    stages = (extra_stages or []) + stages
+    stages = extra_stages + stages
     report = approve(project.dir, name, stages, {"corrections": corrections, "render": stats, **(extra or {})})
     return stats, report

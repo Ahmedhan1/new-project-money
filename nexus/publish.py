@@ -12,23 +12,21 @@ from pathlib import Path
 
 from PIL import Image
 
-from . import db, qa
+from . import db, platforms, qa
 from .media import ff
-from .timeline import ops, render, text as ttext
-from .timeline.render import total_duration
+from .timeline import render, text as ttext
 
-PLATFORMS = {
-    "youtube": {"size": (1920, 1080), "max_s": None, "title_max": 100, "desc_max": 5000, "tags": 12, "fit": "contain"},
-    "shorts": {"size": (1080, 1920), "max_s": 180, "title_max": 100, "desc_max": 5000, "tags": 5, "fit": "blur"},
-    "tiktok": {"size": (1080, 1920), "max_s": 600, "title_max": 150, "desc_max": 2200, "tags": 5, "fit": "blur"},
-    "instagram-reels": {"size": (1080, 1920), "max_s": 180, "title_max": 125, "desc_max": 2200, "tags": 8, "fit": "blur"},
-    "instagram-feed": {"size": (1080, 1350), "max_s": 3600, "title_max": 125, "desc_max": 2200, "tags": 8, "fit": "blur"},
-    "facebook": {"size": (1920, 1080), "max_s": None, "title_max": 255, "desc_max": 5000, "tags": 5, "fit": "contain"},
-    "facebook-reels": {"size": (1080, 1920), "max_s": 90, "title_max": 255, "desc_max": 2200, "tags": 5, "fit": "blur"},
-    "snapchat-spotlight": {"size": (1080, 1920), "max_s": 60, "title_max": 100, "desc_max": 160, "tags": 3, "fit": "blur"},
-    "linkedin": {"size": (1920, 1080), "max_s": 900, "title_max": 150, "desc_max": 3000, "tags": 3, "fit": "contain"},
-    "square": {"size": (1080, 1080), "max_s": None, "title_max": 100, "desc_max": 2200, "tags": 5, "fit": "blur"},
-}
+def _legacy_view() -> dict:
+    """{platform: {size, max_s, title_max, desc_max, tags, fit, label, kind}} derived from registry/platforms.yaml."""
+    out = {}
+    for pid in [*platforms.names(), "square"]:
+        sp = platforms.spec(pid)
+        out[pid] = {"size": sp["size"], "max_s": sp.get("max_s"), "title_max": sp["title_max"], "desc_max": sp["desc_max"],
+                    "tags": sp["hashtags"], "fit": sp["fit"], "label": sp.get("label", pid), "kind": sp.get("kind")}
+    return out
+
+
+PLATFORMS = _legacy_view()
 AUTO_PUBLISH = {p: "not implemented - manual upload package only" for p in PLATFORMS}
 
 
@@ -56,32 +54,29 @@ def thumbnail(video: str, title: str, out: Path, size=(1280, 720), at: float | N
 
 
 def package(project, tl: dict, platform: str, title: str, description: str = "", lang: str = "en", analyses: dict | None = None) -> dict:
-    """Render a platform-specific version and write everything needed for a manual upload."""
-    spec = PLATFORMS[platform]
-    W, H = spec["size"]
-    ptl = ops.reframe(tl, W, H, spec["fit"])
-    for c in ptl["clips"]:
-        if c["type"] == "image":
-            c["fit"] = "cover"
-    notes = []
-    if spec["max_s"] and total_duration(ptl) > spec["max_s"]:
-        notes.append(f"programme is {total_duration(ptl):.0f}s but {platform} allows {spec['max_s']}s - make a shorter cut before uploading")
+    """Tune the timeline to the platform (platforms.tune), check it against the spec, render it and write everything needed for
+    a manual upload. Nothing is posted: auto-publishing needs the user's own OAuth apps and is not implemented."""
+    sp = platforms.spec(platform)
+    W, H = sp["size"]
+    ptl, notes = platforms.tune(tl, platform, analyses)
+    check = platforms.checklist(ptl, platform)
     d = project.dir / "publish" / platform / lang
     d.mkdir(parents=True, exist_ok=True)
     out = d / "video.mp4"
     stats = render.render(ptl, out, project.dir / "work")
     tech = qa.technical_review(out, qa.expectation(ptl))
-    credits = project.data.get("credits", [])
-    desc = (description or (project.data.get("script") or {}).get("topic", "")).strip()
-    if credits:
-        desc += "\n\nImage credits:\n" + "\n".join(f"- {c}" for c in credits)
-    tags = _hashtags(title, project.data.get("script"), spec["tags"])
-    meta = {"platform": platform, "language": lang, "title": title[:spec["title_max"]], "description": desc[:spec["desc_max"]], "hashtags": tags,
-            "video": str(out), "resolution": f"{W}x{H}", "duration": stats["duration"], "captions": stats["sidecars"],
-            "thumbnail": str(thumbnail(str(out), title, d / "thumbnail.jpg", (1280, 720) if W > H else (W, H), lang=lang)),
-            "technical_qa": "passed" if tech["passed"] else [c["detail"] for c in tech["checks"] if not c["ok"]], "notes": notes,
-            "auto_publish": AUTO_PUBLISH[platform], "upload": "manual - open the platform's upload page and use the files in this folder",
-            "human_approval": "PENDING"}
+    size_mb = out.stat().st_size / 1e6
+    if sp.get("file_max_mb") and size_mb > sp["file_max_mb"]:
+        notes.append({"change": f"FLAG: file is {size_mb:.0f} MB, above the {sp['file_max_mb']} MB limit", "signal": "spec", "confidence": "spec"})
+    md = platforms.metadata(project, ptl, platform, lang, title=title, description=description or None)
+    meta = {"platform": platform, "language": lang, "title": md["title"], "description": md["description"], "hashtags": md["hashtags"],
+            "video": str(out), "resolution": f"{W}x{H}", "duration": stats["duration"], "size_mb": round(size_mb, 2), "captions": stats["sidecars"],
+            "thumbnail": str(thumbnail(str(out), md["title"], d / "thumbnail.jpg", (1280, 720) if W > H else (W, H), lang=lang)),
+            "technical_qa": "passed" if tech["passed"] else [c["detail"] for c in tech["checks"] if not c["ok"]],
+            "platform_checklist": check, "notes": [n["change"] for n in notes], "platform_notes": notes,
+            "signals_note": "Ranking systems are not public; notes cite what the platform itself documented or say 'editorial'.",
+            "auto_publish": AUTO_PUBLISH.get(platform, "not implemented - manual upload package only"),
+            "upload": "manual - open the platform's upload page and use the files in this folder", "human_approval": "PENDING"}
     (d / "metadata.json").write_text(json.dumps(meta, indent=1, ensure_ascii=False))
     return meta
 

@@ -399,6 +399,54 @@ def api_hooks(r: HooksReq):
     return growth.hook_variants(r.text, r.n)
 
 
+# ---------------------------------------------------------------- repurpose: rights, recap/commentary/compilation
+class RightsReq(BaseModel):
+    media_id: str
+    basis: str
+    evidence: str = ""
+    holder: str = ""
+
+
+@app.post("/api/projects/{pid}/rights")
+def api_rights(pid: str, r: RightsReq):
+    from . import repurpose
+    try:
+        return repurpose.declare_rights(_project(pid), r.media_id, r.basis, r.evidence, r.holder)
+    except (ValueError, repurpose.RepurposeRefused) as e:
+        raise HTTPException(400, str(e))
+
+
+class RepurposeReq(BaseModel):
+    layout: str = "recap"
+    target_s: float = 90
+    comments: list[dict] = []
+    items: list[dict] = []
+    title: str | None = None
+    lang: str = "en"
+    request: str = ""
+
+
+@app.post("/api/projects/{pid}/repurpose")
+def api_repurpose(pid: str, r: RepurposeReq):
+    from . import repurpose
+    _project(pid)
+    try:
+        repurpose.check_request(r.request)  # detection-evasion / downloader requests are refused up front, with the reason
+    except repurpose.RepurposeRefused as e:
+        raise HTTPException(400, str(e))
+    return jobs.submit("repurpose", {"project": pid, **r.model_dump()}, project_id=pid)
+
+
+@app.get("/api/projects/{pid}/transformation")
+def api_transformation(pid: str, branch: str = "main"):
+    from . import repurpose
+    p = _project(pid)
+    tl = p.timeline(branch)
+    rep = repurpose.transformation_report(tl, _analysis(p) or None)
+    rights = repurpose.rights_review(p, tl, _analysis(p) or None)
+    return {"report": rep, "rights_ok": rights["passed"], "rights": rights["checks"], "credits": repurpose.credits_block(p, tl)}
+
+
 class RemixReq(BaseModel):
     project_id: str
     brief: str

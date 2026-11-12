@@ -628,7 +628,15 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
         else:
             # loud transients (SFX hits, plosives) would push loudnorm into its dynamic mode, which undershoots the
             # target: apply the measured gain and catch the peaks with a look-ahead limiter instead
-            ln = f"volume={gain:.2f}dB,alimiter=limit=0.71:attack=3:release=60:level=disabled"
+            lim = "alimiter=limit=0.71:attack=3:release=60:level=disabled"
+            for _ in range(2):  # limiting lowers integrated loudness: re-measure and correct the gain
+                e2 = ff.run([*ins, "-filter_complex", ";".join(fc + [f"[{pre}]volume={gain:.2f}dB,{lim},ebur128=framelog=quiet[m]"]),
+                             "-map", "[m]", "-vn", "-f", "null", "-"], op="mix-measure")
+                got = re.findall(r"I:\s+(-?[\d.]+) LUFS", e2)
+                if not got or abs(float(got[-1]) - target) < 0.3:
+                    break
+                gain += target - float(got[-1])
+            ln = f"volume={gain:.2f}dB,{lim}"
     else:
         ln = "anull"  # silent programme: nothing to normalise
     fc = fc + [f"[{pre}]{ln},aresample={config.AUDIO_RATE},alimiter=limit=0.79:level=disabled[aout]"]

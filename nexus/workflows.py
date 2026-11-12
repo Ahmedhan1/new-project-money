@@ -200,3 +200,36 @@ def shorts_(job: jobs.Job) -> dict:
         return {"project": p.id, "shorts": rows}
 
     return job.stage("find-and-build", run)
+
+
+@jobs.handler("repurpose")
+def repurpose_(job: jobs.Job) -> dict:
+    """Recap / commentary / compilation built from declared sources, saved on its own branch. Rendering goes through
+    the normal render job, where the rights gate refuses anything undeclared."""
+    from . import project as prj, repurpose
+    p = prj.Project(job.params["project"])
+    layout = job.params.get("layout", "recap")
+
+    def run():
+        repurpose.check_request(job.params.get("request", ""))
+        lib = _analysis(p)
+        if not lib:
+            raise ValueError("this project has no analysed video yet")
+        path = job.params.get("media") or next(iter(lib))
+        lang = job.params.get("lang", "en")
+        if layout == "recap":
+            tl = repurpose.recap_timeline(p, path, lib[path], target_s=job.params.get("target_s", 90), lang=lang)
+        elif layout == "commentary":
+            tl = repurpose.commentary_timeline(p, path, lib[path], job.params.get("comments", []), lang=lang)
+        elif layout == "compilation":
+            tl = repurpose.compilation_timeline(p, job.params["items"], job.params.get("title", p.name), lang=lang, analyses=lib)
+        else:
+            raise ValueError(f"unknown layout {layout}")
+        branch = job.params.get("branch") or layout
+        p.save_timeline(tl, f"repurpose: {layout}", branch)
+        rep = repurpose.transformation_report(tl, lib)
+        rights = repurpose.rights_review(p, tl, lib)
+        return {"project": p.id, "branch": branch, "transformation": rep.get("text"), "rights_ok": rights["passed"],
+                "rights_issues": [f"{c['check']}: {c['detail']}" for c in rights["checks"] if not c["ok"]]}
+
+    return job.stage("build", run)

@@ -1,0 +1,551 @@
+# Platform knowledge base (PLAT-1). Loaded by nexus/platforms.py; publish.PLATFORMS is derived from it.
+#
+# READ THIS FIRST
+# - Recommendation / ranking systems are NOT public, are personalised per viewer and change without notice. Nothing in this
+#   file is "the algorithm". `signals` only encode what a platform ITSELF has said publicly, each with its source and the date
+#   it was read. Anything that is not such a statement is labelled `confidence: editorial-rule-of-thumb`.
+# - confidence levels: official-statement (the platform says so in its own help/blog/newsroom), official-guideline (a
+#   platform rule or creator guideline), editorial-rule-of-thumb (common practice or model knowledge, not a platform claim).
+# - `verified_via`: how the source was checked. The build sandbox (2026-11-12) could not open platform hosts directly, so the
+#   official pages below were located and their wording checked through web-search excerpts of the official page; the page
+#   itself was not fetched. Entries whose official page could not be located say `source: unverified (from model knowledge, <year>)`.
+# - Specs (limits, sizes) change often. `spec_confidence` says how sure we are; check the platform's upload page before relying
+#   on a hard limit. Durations are seconds; safe zones are fractions of the frame kept free of platform UI
+#   (top/bottom/left/right); loudness is an integrated LUFS target for our master, not a platform requirement unless sourced.
+# - NEXUS never uploads, scrapes or downloads; it prepares manual upload packages. Nothing here is meant to evade detection:
+#   the originality signals are why NEXUS asks for rights and real transformation (see docs/PHASE3_PLAN.md boundary).
+
+read_on_default: "2026-11-12"
+
+platforms:
+  youtube:
+    label: YouTube (long-form)
+    kind: long
+    aspect: ["16:9"]
+    size: [1920, 1080]
+    fit: contain
+    min_s: 1
+    max_s: 43200            # 12 h for verified accounts; 15 min for unverified accounts
+    ideal_s: [240, 1200]    # editorial
+    file_max_mb: 262144
+    title_max: 100
+    desc_max: 5000
+    hashtags: 3             # YouTube shows up to 3 hashtags above the title
+    hashtag_max: 15
+    safe_zone: {top: 0.0, bottom: 0.10, left: 0.0, right: 0.0}
+    loudness_lufs: -14
+    captions: {style: classic, position: bottom}
+    captions_required: false
+    title_card: keep        # keep / short / remove
+    title_card_max_s: 2.5
+    progress_bar: false
+    hook_s: 5.0             # first speech should start within this many seconds (editorial)
+    end: end-card           # leave the closing seconds for YouTube end-screen elements (added in YouTube Studio)
+    end_card_s: [5, 20]
+    chapters: true
+    spec_confidence: editorial-rule-of-thumb
+    spec_sources: ["unverified (from model knowledge, 2025): YouTube Help upload limits, title 100 chars, description 5000 bytes, end screens 5-20 s, chapters need >=3 chapters of >=10 s starting at 0:00"]
+    signals:
+      - id: yt-satisfaction
+        claim: "The recommendation system uses signals such as clicks, watch time, survey responses, sharing, likes and dislikes, aiming at viewer satisfaction rather than raw watch time."
+        source: {title: "On YouTube's recommendation system (YouTube Official Blog)", url: "https://blog.youtube/inside-youtube/on-youtubes-recommendation-system/"}
+        read_on: "2026-11-12"
+        verified_via: search-result excerpt of the official page
+        confidence: official-statement
+        implication: "Master is condensed (fillers, pauses, retakes and low-importance sentences removed) so time watched is time valued; chapters and honest titles, no clickbait the video does not deliver."
+      - id: yt-valued-watchtime
+        claim: "Only watch time on videos viewers rate highly in surveys (4-5 stars) counts as 'valued watchtime'; a model predicts survey responses for everyone."
+        source: {title: "On YouTube's recommendation system (YouTube Official Blog)", url: "https://blog.youtube/inside-youtube/on-youtubes-recommendation-system/"}
+        read_on: "2026-11-12"
+        verified_via: search-result excerpt of the official page
+        confidence: official-statement
+        implication: "Director keeps the substance (importance + redundancy scoring) instead of padding length; QA reports pacing, never predicts views."
+      - id: yt-how-recommendations-work
+        claim: "YouTube publishes an overview of how recommendations work (personalised, based on watch history and engagement signals)."
+        source: {title: "How YouTube Works: Recommendations", url: "https://www.youtube.com/howyoutubeworks/product-features/recommendations"}
+        read_on: "2026-11-12"
+        verified_via: search-result listing of the official page
+        confidence: official-statement
+        implication: "One clear topic per video and accurate metadata (title/description/chapters) so the video can be matched to the right viewers."
+      - id: yt-recsys-help
+        claim: "YouTube Help documents its recommendation system and the notion of valued watch time."
+        source: {title: "YouTube's Recommendation System (YouTube Help)", url: "https://support.google.com/youtube/answer/16533387"}
+        read_on: "2026-11-12"
+        verified_via: search-result excerpt of the official page
+        confidence: official-statement
+        implication: "Same as yt-satisfaction; NEXUS never optimises length for its own sake."
+      - id: yt-ctr-thumbnail
+        claim: "Click-through on title and thumbnail matters, but only together with satisfaction after the click."
+        source: "unverified (from model knowledge, 2024)"
+        read_on: "2026-11-12"
+        confidence: editorial-rule-of-thumb
+        implication: "Package writes a readable thumbnail with the title; title variants come from the content, not invented claims."
+
+  shorts:
+    label: YouTube Shorts
+    kind: short
+    aspect: ["9:16", "1:1"]
+    size: [1080, 1920]
+    fit: blur
+    min_s: 1
+    max_s: 180
+    ideal_s: [20, 60]
+    file_max_mb: 262144
+    title_max: 100
+    desc_max: 5000
+    hashtags: 3
+    hashtag_max: 15
+    safe_zone: {top: 0.10, bottom: 0.22, left: 0.04, right: 0.15}
+    loudness_lufs: -14
+    captions: {style: pop, position: middle, words_per_cue: 3, uppercase: true, highlight: "#FFD400"}
+    captions_required: true
+    title_card: remove
+    title_card_max_s: 0
+    progress_bar: false     # Shorts loop; the player has its own progress line
+    hook_s: 1.5
+    end: loop
+    spec_confidence: official-guideline
+    spec_sources:
+      - "Shorts up to 3 minutes for square or taller videos from 2024-10-15: announced on the YouTube Official Blog 2024-10-03 (official post not reachable; confirmed via coverage, e.g. https://petapixel.com/2024/10/04/youtube-shorts-expands-video-length-to-three-minutes/)"
+    signals:
+      - id: shorts-viewed-vs-swiped
+        claim: "YouTube Studio reports 'Viewed vs. swiped away' for Shorts in the feed: the share of viewers who chose to watch rather than swipe."
+        source: "unverified (from model knowledge, 2024; official YouTube Help page not located from this sandbox)"
+        read_on: "2026-11-12"
+        confidence: editorial-rule-of-thumb
+        implication: "First second must carry a visual + a caption: no title card, no fade from black, speech within 1.5 s."
+      - id: shorts-view-counting-2025
+        claim: "Since March 2025 a Shorts view is counted when it starts to play or replays; 'engaged views' keep the older, stricter count."
+        source: "unverified (from model knowledge, 2025; reported by YouTube in Studio/Help, page not located from this sandbox)"
+        read_on: "2026-11-12"
+        confidence: editorial-rule-of-thumb
+        implication: "NEXUS reports durations and structure, never view predictions; engaged viewing is served by the hook rules."
+      - id: shorts-satisfaction
+        claim: "The same satisfaction-oriented signals (likes, shares, surveys, watching vs skipping) apply to Shorts recommendations."
+        source: {title: "On YouTube's recommendation system (YouTube Official Blog)", url: "https://blog.youtube/inside-youtube/on-youtubes-recommendation-system/"}
+        read_on: "2026-11-12"
+        verified_via: search-result excerpt of the official page
+        confidence: official-statement
+        implication: "Shorts are built from complete thoughts (whole sentences) with a concluding line, not cut mid-sentence."
+      - id: shorts-loop
+        claim: "Short vertical videos that end cleanly into their own start are rewatched more often."
+        source: "unverified (editorial practice, 2024)"
+        read_on: "2026-11-12"
+        confidence: editorial-rule-of-thumb
+        implication: "No fade-out to black at the end of short-form cuts so the loop is seamless."
+
+  tiktok:
+    label: TikTok
+    kind: short
+    aspect: ["9:16"]
+    size: [1080, 1920]
+    fit: blur
+    min_s: 3
+    max_s: 600              # in-app upload; longer uploads exist for some accounts
+    ideal_s: [15, 60]
+    file_max_mb: 4096
+    title_max: 150          # first line shown; we put the title first in the caption
+    desc_max: 4000
+    hashtags: 4
+    hashtag_max: 10
+    safe_zone: {top: 0.12, bottom: 0.24, left: 0.05, right: 0.15}
+    loudness_lufs: -14
+    captions: {style: pop, position: middle, words_per_cue: 3, uppercase: true, highlight: "#FFD400"}
+    captions_required: true
+    title_card: remove
+    title_card_max_s: 0
+    progress_bar: true
+    hook_s: 1.0
+    end: loop
+    spec_confidence: editorial-rule-of-thumb
+    spec_sources: ["unverified (from model knowledge, 2025): 10-minute in-app uploads, 4000-character captions, 9:16 1080x1920"]
+    signals:
+      - id: tt-factors
+        claim: "For You recommendations rank videos on a combination of factors: user interactions (likes, shares, follows, comments, content created), video information (captions, sounds, hashtags) and device/account settings."
+        source: {title: "How TikTok recommends videos #ForYou (TikTok Newsroom)", url: "https://newsroom.tiktok.com/en-us/how-tiktok-recommends-videos-for-you/"}
+        read_on: "2026-11-12"
+        verified_via: search-result excerpt of the official page
+        confidence: official-statement
+        implication: "Metadata carries an accurate first-line title and a few topical hashtags; captions are burned in and also exported as text."
+      - id: tt-completion
+        claim: "A strong indicator of interest, such as whether a user finishes watching a longer video from beginning to end, weighs more than weak indicators."
+        source: {title: "How TikTok recommends videos #ForYou (TikTok Newsroom)", url: "https://newsroom.tiktok.com/en-us/how-tiktok-recommends-videos-for-you/"}
+        read_on: "2026-11-12"
+        verified_via: "model knowledge of the same 2020 post; this sentence was not in the search excerpt"
+        confidence: official-statement
+        implication: "Short cuts are trimmed to their strongest complete moment (15-60 s), pauses removed, loopable ending."
+      - id: tt-duplicates
+        claim: "Duplicated content, content already seen and spam are not recommended; newly uploaded videos under review may be ineligible for For You."
+        source: {title: "How TikTok recommends videos #ForYou (TikTok Newsroom)", url: "https://newsroom.tiktok.com/en-us/how-tiktok-recommends-videos-for-you/"}
+        read_on: "2026-11-12"
+        verified_via: search-result excerpt of the official page
+        confidence: official-statement
+        implication: "Every platform cut is a distinct edit from footage the user owns; NEXUS adds no tricks to disguise reposts."
+      - id: tt-diversity
+        claim: "The For You feed generally avoids showing two videos in a row from the same creator or with the same sound."
+        source: {title: "How TikTok recommends videos #ForYou (TikTok Newsroom)", url: "https://newsroom.tiktok.com/en-us/how-tiktok-recommends-videos-for-you/"}
+        read_on: "2026-11-12"
+        verified_via: search-result excerpt of the official page
+        confidence: official-statement
+        implication: "Several different moments per long video rather than one clip reposted; procedural music beds differ per seed."
+      - id: tt-hook
+        claim: "The first second decides whether a viewer stays."
+        source: "unverified (editorial practice, 2024)"
+        read_on: "2026-11-12"
+        confidence: editorial-rule-of-thumb
+        implication: "Hook rule: first visual and caption at 0 s, no title card, first speech within 1 s."
+
+  instagram-reels:
+    label: Instagram Reels
+    kind: short
+    aspect: ["9:16"]
+    size: [1080, 1920]
+    fit: blur
+    min_s: 3
+    max_s: 180
+    ideal_s: [15, 60]
+    file_max_mb: 4096
+    title_max: 125          # caption shown before "more"
+    desc_max: 2200
+    hashtags: 4
+    hashtag_max: 30
+    safe_zone: {top: 0.14, bottom: 0.25, left: 0.05, right: 0.15}
+    loudness_lufs: -14
+    captions: {style: pop, position: middle, words_per_cue: 3, uppercase: true, highlight: "#FFD400"}
+    captions_required: true
+    title_card: remove
+    title_card_max_s: 0
+    progress_bar: true
+    hook_s: 1.0
+    end: loop
+    spec_confidence: editorial-rule-of-thumb
+    spec_sources: ["unverified (from model knowledge, 2025): Reels up to 3 min, 2200-character caption, 30 hashtags max"]
+    signals:
+      - id: ig-originality
+        claim: "Re-uploading someone else's work without meaningful creative input (e.g. only adding a border, watermark, subtitles or a credit) is unoriginal; accounts that mostly post unoriginal content can lose recommendation eligibility, regained after 30 days of mostly original posts."
+        source: {title: "Rewarding original creators on Instagram (Instagram Creators blog)", url: "https://creators.instagram.com/blog/rewarding-original-creators-on-instagram"}
+        read_on: "2026-11-12"
+        verified_via: search-result excerpt of the official page
+        confidence: official-guideline
+        implication: "Director only works on the user's own/licensed footage; repurpose transformation report is linked; no foreign watermarks are added (NEXUS watermark overlay is off for platform cuts)."
+      - id: ig-top-signals
+        claim: "Instagram's head (Adam Mosseri) has named watch time, likes per reach and sends per reach as the most important signals for Reels."
+        source: "unverified (from model knowledge, 2025; stated in Mosseri's own videos, official page not located from this sandbox)"
+        read_on: "2026-11-12"
+        confidence: editorial-rule-of-thumb
+        implication: "Short, complete moments with a payoff line (worth sending); captions for sound-off viewing."
+      - id: ig-watermark-lowres
+        claim: "Reels that are low-resolution or carry another app's watermark are less likely to be recommended."
+        source: "unverified (from model knowledge, 2022-2024; Instagram ranking explainers / Reels recommendation guidelines, page not located from this sandbox)"
+        read_on: "2026-11-12"
+        confidence: editorial-rule-of-thumb
+        implication: "Render at 1080x1920 from the original; checklist flags sub-1080 output and any watermark overlay."
+      - id: ig-ranking-explainers
+        claim: "Feed, Stories, Explore and Reels each use their own ranking with different signals; Reels favours entertaining content from accounts the viewer may not follow."
+        source: "unverified (from model knowledge, 2023: 'Instagram Ranking Explained', Instagram blog)"
+        read_on: "2026-11-12"
+        confidence: editorial-rule-of-thumb
+        implication: "Separate deliverables per surface (Reels vs feed 4:5) instead of one file for everything."
+
+  instagram-feed:
+    label: Instagram feed video
+    kind: feed
+    aspect: ["4:5", "1:1"]
+    size: [1080, 1350]
+    fit: blur
+    min_s: 3
+    max_s: 3600
+    ideal_s: [15, 90]
+    file_max_mb: 4096
+    title_max: 125
+    desc_max: 2200
+    hashtags: 4
+    hashtag_max: 30
+    safe_zone: {top: 0.05, bottom: 0.10, left: 0.0, right: 0.0}
+    loudness_lufs: -14
+    captions: {style: boxed, position: bottom}
+    captions_required: true
+    title_card: short
+    title_card_max_s: 1.0
+    progress_bar: false
+    hook_s: 1.5
+    end: cta
+    spec_confidence: editorial-rule-of-thumb
+    spec_sources: ["unverified (from model knowledge, 2025): new feed videos are shared as Reels; 4:5 1080x1350 is the tallest feed crop"]
+    signals:
+      - id: igf-originality
+        claim: "Instagram's originality guidelines apply to photos, carousels and reels alike."
+        source: {title: "Rewarding original creators on Instagram (Instagram Creators blog)", url: "https://creators.instagram.com/blog/rewarding-original-creators-on-instagram"}
+        read_on: "2026-11-12"
+        verified_via: search-result excerpt of the official page
+        confidence: official-guideline
+        implication: "Same as ig-originality."
+      - id: igf-ranking
+        claim: "Feed ranking predicts how likely a viewer is to spend time on, like, comment on, reshare or tap the profile of a post."
+        source: "unverified (from model knowledge, 2023: 'Instagram Ranking Explained', Instagram blog)"
+        read_on: "2026-11-12"
+        confidence: editorial-rule-of-thumb
+        implication: "4:5 frame (largest feed footprint), captions on, short title card."
+      - id: igf-sound-off
+        claim: "Many feed videos start muted."
+        source: "unverified (editorial practice)"
+        read_on: "2026-11-12"
+        confidence: editorial-rule-of-thumb
+        implication: "Burned-in captions are required on feed cuts."
+
+  facebook:
+    label: Facebook (feed video)
+    kind: long
+    aspect: ["16:9", "1:1", "4:5"]
+    size: [1920, 1080]
+    fit: contain
+    min_s: 1
+    max_s: 14400
+    ideal_s: [60, 600]
+    file_max_mb: 10240
+    title_max: 255
+    desc_max: 5000
+    hashtags: 2
+    hashtag_max: 10
+    safe_zone: {top: 0.0, bottom: 0.10, left: 0.0, right: 0.0}
+    loudness_lufs: -14
+    captions: {style: boxed, position: bottom}
+    captions_required: true
+    title_card: short
+    title_card_max_s: 1.5
+    progress_bar: false
+    hook_s: 3.0
+    end: cta
+    spec_confidence: editorial-rule-of-thumb
+    spec_sources: ["unverified (from model knowledge, 2024): 240-minute / 10 GB upload limit"]
+    signals:
+      - id: fb-originality
+        claim: "Facebook prioritises original content in Feed and Reels; reposts or minimally edited copies of others' content are unoriginal, can be demoted and repeat offenders can lose monetisation and recommendation."
+        source: "unverified (from model knowledge, 2025; Meta announcement July 2025 and Facebook content guidelines, official page not located from this sandbox)"
+        read_on: "2026-11-12"
+        confidence: editorial-rule-of-thumb
+        implication: "Only own/licensed footage; commentary/analysis added via the repurpose studio when footage is not the user's."
+      - id: fb-meaningful-edits
+        claim: "Meta suggests adding meaningful edits, voice-over or commentary when using material from elsewhere; adding a watermark or a reaction face alone is not enough."
+        source: "unverified (from model knowledge, 2025)"
+        read_on: "2026-11-12"
+        confidence: editorial-rule-of-thumb
+        implication: "Director cuts are real edits (selection, structure, captions, sound design); the transformation report says how much is new."
+      - id: fb-sound-off
+        claim: "Feed videos often autoplay without sound."
+        source: "unverified (editorial practice)"
+        read_on: "2026-11-12"
+        confidence: editorial-rule-of-thumb
+        implication: "Captions burned in."
+
+  facebook-reels:
+    label: Facebook Reels
+    kind: short
+    aspect: ["9:16"]
+    size: [1080, 1920]
+    fit: blur
+    min_s: 3
+    max_s: 90               # historical Reels limit; Facebook has been merging video into Reels - check before relying on it
+    ideal_s: [15, 60]
+    file_max_mb: 4096
+    title_max: 125
+    desc_max: 2200
+    hashtags: 3
+    hashtag_max: 10
+    safe_zone: {top: 0.14, bottom: 0.25, left: 0.05, right: 0.15}
+    loudness_lufs: -14
+    captions: {style: pop, position: middle, words_per_cue: 3, uppercase: true, highlight: "#FFD400"}
+    captions_required: true
+    title_card: remove
+    title_card_max_s: 0
+    progress_bar: true
+    hook_s: 1.0
+    end: loop
+    spec_confidence: editorial-rule-of-thumb
+    spec_sources: ["unverified (from model knowledge, 2024): 90-second Reels"]
+    signals:
+      - id: fbr-originality
+        claim: "Original Reels are prioritised; Meta reported that demoting unoriginal content doubled views and watch time of original Reels in H2 2025."
+        source: "unverified (Meta statements as reported in press, 2025-2026; official page not located from this sandbox)"
+        read_on: "2026-11-12"
+        confidence: editorial-rule-of-thumb
+        implication: "Same as fb-originality."
+      - id: fbr-unoriginal-forms
+        claim: "Reaction videos with only facial expressions, stitched compilations and narration of on-screen content without additions are treated as unoriginal."
+        source: "unverified (Facebook content guidelines as reported in press, 2026)"
+        read_on: "2026-11-12"
+        confidence: editorial-rule-of-thumb
+        implication: "No compilation-only output: director deliverables are built from the user's own talk with structure and captions."
+      - id: fbr-hook
+        claim: "Vertical short video is judged in the first seconds."
+        source: "unverified (editorial practice)"
+        read_on: "2026-11-12"
+        confidence: editorial-rule-of-thumb
+        implication: "Hook rule as for TikTok."
+
+  snapchat-spotlight:
+    label: Snapchat Spotlight
+    kind: short
+    aspect: ["9:16"]
+    size: [1080, 1920]
+    fit: cover               # Snap asks for full-frame vertical video without letterboxing
+    min_s: 5
+    max_s: 60
+    ideal_s: [10, 45]
+    file_max_mb: 1024
+    title_max: 100
+    desc_max: 160
+    hashtags: 3              # Spotlight uses #topics
+    hashtag_max: 3
+    safe_zone: {top: 0.10, bottom: 0.20, left: 0.05, right: 0.12}
+    loudness_lufs: -14
+    captions: {style: pop, position: middle, words_per_cue: 3, uppercase: true, highlight: "#FFD400"}
+    captions_required: true
+    title_card: remove
+    title_card_max_s: 0
+    progress_bar: false
+    hook_s: 1.0
+    end: loop
+    spec_confidence: official-guideline
+    spec_sources: ["Spotlight 101 (Snap creators): vertical video with sound, up to 60 s, full frame - https://creators.snap.com/learn-shine-in-the-spotlight-spotlight-101"]
+    signals:
+      - id: snap-format
+        claim: "Spotlight Snaps should be vertical videos with sound, up to 60 seconds, filling the full frame."
+        source: {title: "Spotlight 101 (Snap for Creators)", url: "https://creators.snap.com/learn-shine-in-the-spotlight-spotlight-101"}
+        read_on: "2026-11-12"
+        verified_via: search-result excerpt of the official page
+        confidence: official-guideline
+        implication: "Spotlight cut is 9:16 cover-crop (no blur bars), <=60 s, with sound; checklist fails anything longer."
+      - id: snap-review
+        claim: "Submissions are reviewed by moderators against the Spotlight and Community Guidelines before they appear on Spotlight."
+        source: {title: "How to Submit to Spotlight (Snap for Creators)", url: "https://creators.snap.com/learn-shine-in-the-spotlight-how-to-submit-to-spotlight"}
+        read_on: "2026-11-12"
+        verified_via: search-result excerpt of the official page
+        confidence: official-guideline
+        implication: "Human approval stays PENDING in the package; nothing is posted automatically."
+      - id: snap-no-watermark
+        claim: "Spotlight content should not carry watermarks from other apps."
+        source: "unverified (third-party tutorials; official guideline page not located from this sandbox)"
+        read_on: "2026-11-12"
+        confidence: editorial-rule-of-thumb
+        implication: "No watermark overlay on the Spotlight cut."
+
+  linkedin:
+    label: LinkedIn
+    kind: long
+    aspect: ["16:9", "1:1", "4:5"]
+    size: [1920, 1080]
+    fit: contain
+    min_s: 3
+    max_s: 900               # 15 min from desktop, 10 min from mobile
+    ideal_s: [30, 180]
+    file_max_mb: 5120
+    title_max: 150
+    desc_max: 3000
+    hashtags: 3
+    hashtag_max: 5
+    safe_zone: {top: 0.0, bottom: 0.10, left: 0.0, right: 0.0}
+    loudness_lufs: -14
+    captions: {style: boxed, position: bottom}
+    captions_required: true
+    title_card: short
+    title_card_max_s: 1.5
+    progress_bar: false
+    hook_s: 3.0
+    end: cta
+    spec_confidence: editorial-rule-of-thumb
+    spec_sources: ["unverified (third-party spec guides 2024-2026; LinkedIn Help page not located from this sandbox)"]
+    signals:
+      - id: li-muted-autoplay
+        claim: "Feed videos autoplay muted."
+        source: "unverified (from model knowledge, 2024; LinkedIn Help)"
+        read_on: "2026-11-12"
+        confidence: editorial-rule-of-thumb
+        implication: "Burned-in captions plus the .srt sidecar (LinkedIn accepts .srt caption files)."
+      - id: li-short-native
+        claim: "Shorter native videos (well under the upload limit) are recommended for engagement."
+        source: "unverified (from model knowledge, 2024; LinkedIn marketing guidance)"
+        read_on: "2026-11-12"
+        confidence: editorial-rule-of-thumb
+        implication: "LinkedIn deliverable uses the condensed master; checklist warns above 3 minutes."
+      - id: li-professional-value
+        claim: "LinkedIn's feed favours content that offers professional knowledge and conversation relevant to the viewer's network."
+        source: "unverified (from model knowledge, 2024; LinkedIn Engineering/feed statements)"
+        read_on: "2026-11-12"
+        confidence: editorial-rule-of-thumb
+        implication: "Metadata description leads with the key point of the talk; few, specific hashtags."
+
+  x:
+    label: X (Twitter)
+    kind: long
+    aspect: ["16:9", "1:1"]
+    size: [1920, 1080]
+    fit: contain
+    min_s: 0.5
+    max_s: 140               # non-Premium accounts
+    ideal_s: [15, 90]
+    file_max_mb: 512
+    title_max: 280           # post text
+    desc_max: 280
+    hashtags: 2
+    hashtag_max: 2
+    safe_zone: {top: 0.0, bottom: 0.10, left: 0.0, right: 0.0}
+    loudness_lufs: -14
+    captions: {style: boxed, position: bottom}
+    captions_required: true
+    title_card: short
+    title_card_max_s: 1.0
+    progress_bar: false
+    hook_s: 2.0
+    end: cta
+    spec_confidence: official-guideline
+    spec_sources: ["About longer videos for X Premium subscribers (X Help Center): non-Premium uploads up to 140 s - https://help.x.com/en/using-x/premium-longer-videos"]
+    signals:
+      - id: x-length
+        claim: "Accounts without Premium can upload videos up to 140 seconds; Premium allows much longer uploads."
+        source: {title: "About longer videos for X Premium subscribers (X Help Center)", url: "https://help.x.com/en/using-x/premium-longer-videos"}
+        read_on: "2026-11-12"
+        verified_via: search-result excerpt of the official page
+        confidence: official-guideline
+        implication: "X deliverable is a condensed cut <=140 s unless the user says the account has Premium."
+      - id: x-open-source-ranking
+        claim: "X published parts of its recommendation code (2023); engagement such as replies, reposts and likes feeds ranking."
+        source: "unverified (from model knowledge, 2023: X engineering blog 'Twitter's Recommendation Algorithm')"
+        read_on: "2026-11-12"
+        confidence: editorial-rule-of-thumb
+        implication: "Post text states the point in one sentence; no engagement bait."
+      - id: x-sound-off
+        claim: "Videos autoplay muted in the timeline."
+        source: "unverified (editorial practice)"
+        read_on: "2026-11-12"
+        confidence: editorial-rule-of-thumb
+        implication: "Burned-in captions."
+
+# Generic output formats that are not a platform (no signals). Kept for publish.PLATFORMS backwards compatibility.
+formats:
+  square:
+    label: Square (generic)
+    kind: feed
+    aspect: ["1:1"]
+    size: [1080, 1080]
+    fit: blur
+    min_s: 1
+    max_s: null
+    ideal_s: [15, 120]
+    file_max_mb: 4096
+    title_max: 100
+    desc_max: 2200
+    hashtags: 5
+    hashtag_max: 10
+    safe_zone: {top: 0.0, bottom: 0.08, left: 0.0, right: 0.0}
+    loudness_lufs: -14
+    captions: {style: boxed, position: bottom}
+    captions_required: true
+    title_card: short
+    title_card_max_s: 1.5
+    progress_bar: false
+    hook_s: 2.0
+    end: cta
+    spec_confidence: editorial-rule-of-thumb
+    spec_sources: []
+    signals: []
