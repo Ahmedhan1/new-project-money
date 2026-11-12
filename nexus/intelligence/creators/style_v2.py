@@ -86,7 +86,6 @@ def _frames(path: str | Path, every_s: float = 2.0, width: int = 320, limit: int
 def _ocr_words(frame) -> int:
     """Readable words in a frame (Tesseract confidence >= 60, length >= 3)."""
     from PIL import Image
-    import numpy as np
     with tempfile.TemporaryDirectory() as td:
         f = Path(td) / "f.png"
         img = Image.fromarray((frame * 255).astype("uint8"))

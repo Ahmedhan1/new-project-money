@@ -7,7 +7,7 @@ cd "$(dirname "$0")/.."
 SUDO=""; [ "$(id -u)" -ne 0 ] && SUDO="sudo"
 echo "== system packages (FFmpeg, Blender, eSpeak NG, fonts, Cairo/Pango for Manim, build tools for llama.cpp)"
 $SUDO apt-get update -qq
-DEBIAN_FRONTEND=noninteractive $SUDO apt-get install -y -qq ffmpeg blender espeak-ng fonts-noto-core fonts-dejavu-core \
+DEBIAN_FRONTEND=noninteractive $SUDO apt-get install -y -qq ffmpeg blender espeak-ng fonts-noto-core fonts-noto-cjk fonts-dejavu-core tesseract-ocr tesseract-ocr-ara tesseract-ocr-chi-sim tesseract-ocr-hin tesseract-ocr-rus tesseract-ocr-deu \
   libcairo2-dev libpango1.0-dev pkg-config cmake build-essential python3-venv curl
 echo "== python environment"
 python3 -m venv .venv
