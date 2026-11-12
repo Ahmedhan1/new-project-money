@@ -1,0 +1,6064 @@
+{
+ "schema": "nexus.Account3LanguageDemo/1",
+ "source": [
+  "The Aswan High Dam on the Nile in Egypt was built between 1960 and 1970.",
+  "It is 111 metres high and about 3,830 metres long.",
+  "Behind it lies Lake Nasser, which can hold about 132 cubic kilometres of water.",
+  "Its 12 turbines can generate up to 2,100 megawatts of electricity.",
+  "Engineers from the Soviet Union helped to design and build the dam.",
+  "The rising water threatened the temples of Abu Simbel, built for Ramesses II.",
+  "Between 1964 and 1968, an international UNESCO campaign moved the temples to higher ground.",
+  "Today the dam protects farms from floods, but it also traps the silt that once fertilised the Nile valley."
+ ],
+ "source_note": "Facts are standard encyclopaedic figures (built 1960-1970, 111 m high, ~3,830 m long, Lake Nasser ~132 km3, 12 x 175 MW turbines, Soviet assistance, UNESCO relocation of Abu Simbel 1964-1968); written by the agent, not re-verified against a primary source for this demo - the demo tests translation fidelity, not the facts.",
+ "glossary": {
+  "de": {
+   "Aswan": "Assuan",
+   "Nile": "Nil",
+   "Lake Nasser": "Nassersee",
+   "Soviet Union": "Sowjetunion",
+   "Abu Simbel": "Abu Simbel",
+   "Ramesses II": "Ramses II",
+   "UNESCO": "UNESCO",
+   "Egypt": "Ägypten"
+  },
+  "fr": {
+   "Aswan": "Assouan",
+   "Nile": "Nil",
+   "Lake Nasser": "lac Nasser",
+   "Soviet Union": "Union soviétique",
+   "Abu Simbel": "Abou Simbel",
+   "Ramesses II": "Ramsès II",
+   "UNESCO": "UNESCO",
+   "Egypt": "Égypte"
+  },
+  "es": {
+   "Aswan": "Asuán",
+   "Nile": "Nilo",
+   "Lake Nasser": "lago Nasser",
+   "Soviet Union": "Unión Soviética",
+   "Abu Simbel": "Abu Simbel",
+   "Ramesses II": "Ramsés II",
+   "UNESCO": "UNESCO",
+   "Egypt": "Egipto"
+  },
+  "ru": {
+   "Aswan": "Асуан",
+   "Nile": "Нил",
+   "Lake Nasser": "Насер",
+   "Soviet Union": "Советск",
+   "Abu Simbel": "Абу-Симбел",
+   "Ramesses II": "Рамсес",
+   "UNESCO": "ЮНЕСКО",
+   "Egypt": "Египт"
+  },
+  "zh": {
+   "Aswan": "阿斯旺",
+   "Nile": "尼罗河",
+   "Lake Nasser": "纳赛尔湖",
+   "Soviet Union": "苏联",
+   "Abu Simbel": "阿布辛贝",
+   "Ramesses II": "拉美西斯二世",
+   "UNESCO": "联合国教科文组织",
+   "Egypt": "埃及"
+  },
+  "hi": {
+   "Aswan": "असवान",
+   "Nile": "नील",
+   "Lake Nasser": "नासिर",
+   "Soviet Union": "सोवियत",
+   "Abu Simbel": "अबू सिम्बल",
+   "Ramesses II": "रामसेस",
+   "UNESCO": "यूनेस्को",
+   "Egypt": "मिस्र"
+  },
+  "ar-EG": {
+   "Aswan": "أسوان",
+   "Nile": "النيل",
+   "Lake Nasser": "بحيرة ناصر",
+   "Soviet Union": "السوفي",
+   "Abu Simbel": "أبو سمبل",
+   "Ramesses II": "رمسيس",
+   "UNESCO": "اليونسكو",
+   "Egypt": "مصر"
+  },
+  "ar-Gulf": {
+   "Aswan": "أسوان",
+   "Nile": "النيل",
+   "Lake Nasser": "بحيرة ناصر",
+   "Soviet Union": "السوفي",
+   "Abu Simbel": "أبو سمبل",
+   "Ramesses II": "رمسيس",
+   "UNESCO": "اليونسكو",
+   "Egypt": "مصر"
+  }
+ },
+ "timings": [
+  {
+   "start": 0.5,
+   "end": 6.67
+  },
+  {
+   "start": 6.97,
+   "end": 11.22
+  },
+  {
+   "start": 11.52,
+   "end": 17.3
+  },
+  {
+   "start": 17.6,
+   "end": 22.23
+  },
+  {
+   "start": 22.53,
+   "end": 27.55
+  },
+  {
+   "start": 27.85,
+   "end": 33.25
+  },
+  {
+   "start": 33.55,
+   "end": 39.33
+  },
+  {
+   "start": 39.63,
+   "end": 47.34
+  }
+ ],
+ "machine": "4 CPU / 15 GB shared; MADLAD-400 3B int8 (CTranslate2), Qwen3-4B Q4_K_M via model router",
+ "languages": {
+  "de": {
+   "lang": "de",
+   "started": "2026-11-12T17:24:18",
+   "mt_seconds": 163.5,
+   "mt_output": [
+    "Der Aswan-Hochbehinderung auf dem Nile in Ägypten wurde zwischen 1960 und 1970 gebaut.",
+    "Er ist 111 Meter hoch, ca.",
+    "Hinter ihm liegt der Nassersee, der etwa 132 Kubikkilometer Wasser aufnehmen kann.",
+    "Seine 12 Turbinen können bis zu 2.100 Megawatt Strom erzeugen.",
+    "Ingenieure aus der Sowjetunion halfen bei der Planung und dem Bau des Staudamms mit.",
+    "Das steigende Wasser bedrohte die für Ramses II.",
+    "Zwischen 1964 und 1968 wurden die Tempel im Rahmen einer internationalen UNESCO-Kampagne in höhere Lagen verlegt.",
+    "Heute schützt der Damm Landwirtschaftsbetriebe vor Überschwemmungen, fängt aber auch den Schlamm ein, der einst das Niltal düngte."
+   ],
+   "final": [
+    "Der Aswan-Hochbehinderung auf dem Nile in Ägypten wurde zwischen 1960 und 1970 gebaut.",
+    "Er ist 111 Meter hoch, ca.",
+    "Hinter ihm liegt der Nassersee, der etwa 132 Kubikkilometer Wasser aufnehmen kann.",
+    "Seine 12 Turbinen können bis zu 2.100 Megawatt Strom erzeugen.",
+    "Ingenieure aus der Sowjetunion halfen bei der Planung und dem Bau des Staudamms mit.",
+    "Das steigende Wasser bedrohte die für Ramses II.",
+    "Zwischen 1964 und 1968 wurden die Tempel im Rahmen einer internationalen UNESCO-Kampagne in höhere Lagen verlegt.",
+    "Heute schützt der Damm Landwirtschaftsbetriebe vor Überschwemmungen, fängt aber auch den Schlamm ein, der einst das Niltal düngte."
+   ],
+   "back_translation": {
+    "lines": [
+     "The Aswan High Dam on the Nile in Egypt was built between 1960 and 1970.",
+     "It is 111 meters high, ca.",
+     "Behind it lies the Nasser Lake, which can hold about 132 cubic kilometers of water.",
+     "Its 12 turbines can generate up to 2,100 megawatts of electricity.",
+     "Engineers from the Soviet Union helped with the planning and construction of the dam.",
+     "The rising water threatened the for Ramses II.",
+     "Between 1964 and 1968, the temples were moved in the framework of an international UNESCO campaign to higher levels.",
+     "Today the dam protects agricultural enterprises from floods, but also captures the silt, which once fertilized the Nile Valley."
+    ],
+    "note": "local-llamacpp/qwen3-4b-q4km",
+    "seconds": 34.3
+   },
+   "qa": {
+    "lang": "de",
+    "lines": [
+     {
+      "source": "The Aswan High Dam on the Nile in Egypt was built between 1960 and 1970.",
+      "target": "Der Aswan-Hochbehinderung auf dem Nile in Ägypten wurde zwischen 1960 und 1970 gebaut.",
+      "lang": "de",
+      "back": "The Aswan High Dam on the Nile in Egypt was built between 1960 and 1970.",
+      "coverage": 1.0,
+      "findings": [
+       {
+        "check": "glossary_term_missing",
+        "severity": "major",
+        "detail": "glossary: 'Aswan' must be rendered as 'Assuan'",
+        "term": "Aswan"
+       },
+       {
+        "check": "name_missing",
+        "severity": "major",
+        "detail": "name 'Aswan High Dam' does not appear in the target",
+        "term": "Aswan High Dam"
+       }
+      ],
+      "confidence": 0.4,
+      "status": "needs_fix"
+     },
+     {
+      "source": "It is 111 metres high and about 3,830 metres long.",
+      "target": "Er ist 111 Meter hoch, ca.",
+      "lang": "de",
+      "back": "It is 111 meters high, ca.",
+      "coverage": 0.667,
+      "findings": [
+       {
+        "check": "too_short",
+        "severity": "major",
+        "detail": "target is 0.52x the source length (expected >= 0.6) - content probably missing"
+       },
+       {
+        "check": "number_missing",
+        "severity": "major",
+        "detail": "numbers missing or changed: ['3830'] (spelled-out numbers are not recognised - verify)",
+        "items": [
+         "3830"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "67% source content words come back; not found: ['long']",
+        "items": [
+         "long"
+        ]
+       }
+      ],
+      "confidence": 0.4,
+      "status": "needs_fix"
+     },
+     {
+      "source": "Behind it lies Lake Nasser, which can hold about 132 cubic kilometres of water.",
+      "target": "Hinter ihm liegt der Nassersee, der etwa 132 Kubikkilometer Wasser aufnehmen kann.",
+      "lang": "de",
+      "back": "Behind it lies the Nasser Lake, which can hold about 132 cubic kilometers of water.",
+      "coverage": 1.0,
+      "findings": [],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Its 12 turbines can generate up to 2,100 megawatts of electricity.",
+      "target": "Seine 12 Turbinen können bis zu 2.100 Megawatt Strom erzeugen.",
+      "lang": "de",
+      "back": "Its 12 turbines can generate up to 2,100 megawatts of electricity.",
+      "coverage": 1.0,
+      "findings": [],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Engineers from the Soviet Union helped to design and build the dam.",
+      "target": "Ingenieure aus der Sowjetunion halfen bei der Planung und dem Bau des Staudamms mit.",
+      "lang": "de",
+      "back": "Engineers from the Soviet Union helped with the planning and construction of the dam.",
+      "coverage": 0.857,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['planning']",
+        "items": [
+         "planning"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "86% source content words come back; not found: ['design']",
+        "items": [
+         "design"
+        ]
+       }
+      ],
+      "confidence": 0.914,
+      "status": "machine_ok"
+     },
+     {
+      "source": "The rising water threatened the temples of Abu Simbel, built for Ramesses II.",
+      "target": "Das steigende Wasser bedrohte die für Ramses II.",
+      "lang": "de",
+      "back": "The rising water threatened the for Ramses II.",
+      "coverage": 0.375,
+      "findings": [
+       {
+        "check": "glossary_term_missing",
+        "severity": "major",
+        "detail": "glossary: 'Abu Simbel' must be rendered as 'Abu Simbel'",
+        "term": "Abu Simbel"
+       },
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['ramses']",
+        "items": [
+         "ramses"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "major",
+        "detail": "only 38% of the source content words come back: missing ['temples', 'abu', 'simbel', 'build', 'ramesses']",
+        "items": [
+         "temples",
+         "abu",
+         "simbel",
+         "build",
+         "ramesses"
+        ]
+       }
+      ],
+      "confidence": 0.4,
+      "status": "needs_fix"
+     },
+     {
+      "source": "Between 1964 and 1968, an international UNESCO campaign moved the temples to higher ground.",
+      "target": "Zwischen 1964 und 1968 wurden die Tempel im Rahmen einer internationalen UNESCO-Kampagne in höhere Lagen verlegt.",
+      "lang": "de",
+      "back": "Between 1964 and 1968, the temples were moved in the framework of an international UNESCO campaign to higher levels.",
+      "coverage": 0.875,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['framework', 'levels']",
+        "items": [
+         "framework",
+         "levels"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "88% source content words come back; not found: ['ground']",
+        "items": [
+         "ground"
+        ]
+       }
+      ],
+      "confidence": 0.925,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Today the dam protects farms from floods, but it also traps the silt that once fertilised the Nile valley.",
+      "target": "Heute schützt der Damm Landwirtschaftsbetriebe vor Überschwemmungen, fängt aber auch den Schlamm ein, der einst das Niltal düngte.",
+      "lang": "de",
+      "back": "Today the dam protects agricultural enterprises from floods, but also captures the silt, which once fertilized the Nile Valley.",
+      "coverage": 0.818,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['agricultural', 'enterprizes', 'captures']",
+        "items": [
+         "agricultural",
+         "enterprizes",
+         "captures"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "82% source content words come back; not found: ['farms', 'traps']",
+        "items": [
+         "farms",
+         "traps"
+        ]
+       }
+      ],
+      "confidence": 0.891,
+      "status": "machine_ok"
+     }
+    ],
+    "document": [],
+    "counts": {
+     "glossary_term_missing": 2,
+     "name_missing": 1,
+     "too_short": 1,
+     "number_missing": 1,
+     "omission_backcheck": 1
+    },
+    "mean_confidence": 0.741,
+    "lines_needing_fix": [
+     0,
+     1,
+     5
+    ],
+    "back_translation": "run"
+   },
+   "subtitles": {
+    "paths": {
+     "full.srt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.de.full.srt",
+     "full.vtt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.de.full.vtt",
+     "full.ass": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.de.full.ass",
+     "condensed.srt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.de.condensed.srt",
+     "condensed.vtt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.de.condensed.vtt",
+     "condensed.ass": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.de.condensed.ass"
+    },
+    "qa_full": {
+     "cues": 12,
+     "findings": [
+      {
+       "cue": 1,
+       "check": "min_duration",
+       "severity": "minor",
+       "detail": "0.51s < 5/6 s"
+      },
+      {
+       "cue": 7,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "19.5 cps > 17"
+      },
+      {
+       "cue": 8,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "19.4 cps > 17"
+      },
+      {
+       "cue": 9,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "17.0 cps > 17"
+      }
+     ],
+     "passed": false
+    },
+    "qa_condensed": {
+     "cues": 12,
+     "findings": [
+      {
+       "cue": 1,
+       "check": "min_duration",
+       "severity": "minor",
+       "detail": "0.51s < 5/6 s"
+      },
+      {
+       "cue": 7,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "19.5 cps > 17"
+      },
+      {
+       "cue": 8,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "19.4 cps > 17"
+      },
+      {
+       "cue": 9,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "17.0 cps > 17"
+      }
+     ],
+     "passed": false
+    },
+    "condense_todo": [
+     {
+      "cue": 0,
+      "text": "Der Aswan-Hochbehinderung auf dem Nile in Ägypten wurde zwischen 1960 und 1970",
+      "cps": 14.0,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 1,
+      "text": "gebaut.",
+      "cps": 13.8,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 3,
+      "text": "Hinter ihm liegt der Nassersee, der etwa 132 Kubikkilometer Wasser aufnehmen kann.",
+      "cps": 14.2,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 4,
+      "text": "Seine 12 Turbinen können bis zu 2.100 Megawatt Strom erzeugen.",
+      "cps": 13.4,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 5,
+      "text": "Ingenieure aus der Sowjetunion halfen bei der Planung und dem Bau des Staudamms mit.",
+      "cps": 16.7,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 6,
+      "text": "Das steigende Wasser bedrohte die für Ramses II.",
+      "cps": 8.9,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 7,
+      "text": "Zwischen 1964 und 1968 wurden die Tempel im Rahmen einer internationalen",
+      "cps": 19.8,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 8,
+      "text": "UNESCO-Kampagne in höhere Lagen verlegt.",
+      "cps": 19.4,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 9,
+      "text": "Heute schützt der Damm Landwirtschaftsbetriebe vor",
+      "cps": 17.4,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 10,
+      "text": "Überschwemmungen,",
+      "cps": 16.6,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 11,
+      "text": "fängt aber auch den Schlamm ein, der einst das Niltal düngte.",
+      "cps": 16.7,
+      "reason": "needs condensing to one line / slower read"
+     }
+    ],
+    "srt_full": "1\n00:00:00,500 --> 00:00:06,082\nDer Aswan-Hochbehinderung auf dem Nile in\nÄgypten wurde zwischen 1960 und 1970\n\n2\n00:00:06,162 --> 00:00:06,670\ngebaut.\n\n3\n00:00:06,970 --> 00:00:11,220\nEr ist 111 Meter hoch, ca.\n\n4\n00:00:11,520 --> 00:00:17,300\nHinter ihm liegt der Nassersee, der etwa\n132 Kubikkilometer Wasser aufnehmen kann.\n\n5\n00:00:17,600 --> 00:00:22,230\nSeine 12 Turbinen können bis zu 2.100\nMegawatt Strom erzeugen.\n\n6\n00:00:22,530 --> 00:00:27,550\nIngenieure aus der Sowjetunion halfen bei\nder Planung und dem Bau des Staudamms mit.\n\n7\n00:00:27,850 --> 00:00:33,250\nDas steigende Wasser bedrohte die für\nRamses II.\n\n8\n00:00:33,550 --> 00:00:37,186\nZwischen 1964 und 1968 wurden die Tempel\nim Rahmen einer internationalen\n\n9\n00:00:37,266 --> 00:00:39,330\nUNESCO-Kampagne in höhere Lagen verlegt.\n\n10\n00:00:39,630 --> 00:00:42,508\nHeute schützt der Damm\nLandwirtschaftsbetriebe vor\n\n11\n00:00:42,588 --> 00:00:43,614\nÜberschwemmungen,\n\n12\n00:00:43,694 --> 00:00:47,340\nfängt aber auch den Schlamm ein, der einst\ndas Niltal düngte.\n",
+    "ass_style": [
+     "Style: Default,DejaVu Sans,54,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,2,153,153,64,1"
+    ]
+   },
+   "dubbing": {
+    "voice": {
+     "id": "de_DE-thorsten-medium",
+     "engine": "piper",
+     "licence": "dataset CC0 (Thorsten-Voice); base rdh CC0",
+     "commercial_use": "yes",
+     "source": "languages.yaml (MODEL_CARD 2026-11-12)",
+     "installed": true
+    },
+    "blocked": null,
+    "needs_shortening": [
+     6
+    ],
+    "estimate_note": "durations are character-rate estimates; the rendered audio decides",
+    "lines": [
+     {
+      "idx": 0,
+      "voice": "de_DE-thorsten-medium",
+      "licence": "dataset CC0 (Thorsten-Voice); base rdh CC0",
+      "timing_target": {
+       "start": 0.5,
+       "end": 6.67,
+       "slot_s": 6.17
+      },
+      "estimated_s": 6.14,
+      "speed_needed": 0.995,
+      "action": "ok"
+     },
+     {
+      "idx": 1,
+      "voice": "de_DE-thorsten-medium",
+      "licence": "dataset CC0 (Thorsten-Voice); base rdh CC0",
+      "timing_target": {
+       "start": 6.97,
+       "end": 11.22,
+       "slot_s": 4.25
+      },
+      "estimated_s": 1.86,
+      "speed_needed": 0.438,
+      "action": "ok"
+     },
+     {
+      "idx": 2,
+      "voice": "de_DE-thorsten-medium",
+      "licence": "dataset CC0 (Thorsten-Voice); base rdh CC0",
+      "timing_target": {
+       "start": 11.52,
+       "end": 17.3,
+       "slot_s": 5.78
+      },
+      "estimated_s": 5.86,
+      "speed_needed": 1.014,
+      "action": "brisker_read"
+     },
+     {
+      "idx": 3,
+      "voice": "de_DE-thorsten-medium",
+      "licence": "dataset CC0 (Thorsten-Voice); base rdh CC0",
+      "timing_target": {
+       "start": 17.6,
+       "end": 22.23,
+       "slot_s": 4.63
+      },
+      "estimated_s": 4.43,
+      "speed_needed": 0.957,
+      "action": "ok"
+     },
+     {
+      "idx": 4,
+      "voice": "de_DE-thorsten-medium",
+      "licence": "dataset CC0 (Thorsten-Voice); base rdh CC0",
+      "timing_target": {
+       "start": 22.53,
+       "end": 27.55,
+       "slot_s": 5.02
+      },
+      "estimated_s": 6.0,
+      "speed_needed": 1.195,
+      "action": "brisker_read"
+     },
+     {
+      "idx": 5,
+      "voice": "de_DE-thorsten-medium",
+      "licence": "dataset CC0 (Thorsten-Voice); base rdh CC0",
+      "timing_target": {
+       "start": 27.85,
+       "end": 33.25,
+       "slot_s": 5.4
+      },
+      "estimated_s": 3.43,
+      "speed_needed": 0.635,
+      "action": "ok"
+     },
+     {
+      "idx": 6,
+      "voice": "de_DE-thorsten-medium",
+      "licence": "dataset CC0 (Thorsten-Voice); base rdh CC0",
+      "timing_target": {
+       "start": 33.55,
+       "end": 39.33,
+       "slot_s": 5.78
+      },
+      "estimated_s": 8.07,
+      "speed_needed": 1.396,
+      "action": "shorten_line"
+     },
+     {
+      "idx": 7,
+      "voice": "de_DE-thorsten-medium",
+      "licence": "dataset CC0 (Thorsten-Voice); base rdh CC0",
+      "timing_target": {
+       "start": 39.63,
+       "end": 47.34,
+       "slot_s": 7.71
+      },
+      "estimated_s": 9.29,
+      "speed_needed": 1.205,
+      "action": "brisker_read"
+     }
+    ]
+   },
+   "voiceover_line": {
+    "idx": 0,
+    "text": "Der Aswan-Hochbehinderung auf dem Nile in Ägypten wurde zwischen 1960 und 1970 gebaut.",
+    "voice": "de_DE-thorsten-medium",
+    "engine": "piper",
+    "license": "CC0 (Thorsten-Voice)",
+    "commercial": true,
+    "duration": 7.646791666666667,
+    "lufs": -18.03,
+    "cached": true
+   },
+   "seconds": 585.3,
+   "qa_recomputed": "2026-11-12T18:11:39"
+  },
+  "fr": {
+   "lang": "fr",
+   "started": "2026-11-12T17:34:03",
+   "mt_seconds": 73.6,
+   "mt_output": [
+    "L'ouvrage de l'Aswan a été construit entre 1960 et 1970.",
+    "Il mesure 111 mètres de haut et environ 3830 mètres de long.",
+    "Derrière lui se trouve le lac Nasser, qui peut contenir environ 132 kilomètres cubes d'eau.",
+    "Ses 12 turbines peuvent générer jusqu'à 2 100 mégawatts d'électricité.",
+    "Des ingénieurs de l'Union soviétique ont participé à la conception et à la construction du barrage.",
+    "La montée des eaux menaçait les temples d'Abou Simbel, construits pour Ramsès II.",
+    "Entre 1964 et 1968, une campagne internationale de l'UNESCO a déplacé les temples sur des terrains plus élevés.",
+    "Aujourd'hui, le barrage protège les exploitations agricoles des inondations, mais il retient également la vase qui fertilisait autrefois la vallée du Nil."
+   ],
+   "final": [
+    "L'ouvrage de l'Aswan a été construit entre 1960 et 1970.",
+    "Il mesure 111 mètres de haut et environ 3830 mètres de long.",
+    "Derrière lui se trouve le lac Nasser, qui peut contenir environ 132 kilomètres cubes d'eau.",
+    "Ses 12 turbines peuvent générer jusqu'à 2 100 mégawatts d'électricité.",
+    "Des ingénieurs de l'Union soviétique ont participé à la conception et à la construction du barrage.",
+    "La montée des eaux menaçait les temples d'Abou Simbel, construits pour Ramsès II.",
+    "Entre 1964 et 1968, une campagne internationale de l'UNESCO a déplacé les temples sur des terrains plus élevés.",
+    "Aujourd'hui, le barrage protège les exploitations agricoles des inondations, mais il retient également la vase qui fertilisait autrefois la vallée du Nil."
+   ],
+   "back_translation": {
+    "lines": [
+     "The work of Aswan was built between 1960 and 1970.",
+     "It measures 111 meters high and about 3830 meters long.",
+     "Behind it is the Nasser Lake, which can contain about 132 cubic kilometers of water.",
+     "Its 12 turbines can generate up to 2 100 megawatts of electricity.",
+     "Engineers from the Soviet Union participated in the design and construction of the dam.",
+     "The rising waters threatened the temples of Abou Simbel, built for Ramses II.",
+     "Between 1964 and 1968, an international campaign of UNESCO moved the temples to higher grounds.",
+     "Today, the dam protects agricultural operations from floods, but it also retains the silt that once fertilized the valley of the Nile."
+    ],
+    "note": "local-llamacpp/qwen3-4b-q4km",
+    "seconds": 36.7
+   },
+   "qa": {
+    "lang": "fr",
+    "lines": [
+     {
+      "source": "The Aswan High Dam on the Nile in Egypt was built between 1960 and 1970.",
+      "target": "L'ouvrage de l'Aswan a été construit entre 1960 et 1970.",
+      "lang": "fr",
+      "back": "The work of Aswan was built between 1960 and 1970.",
+      "coverage": 0.429,
+      "findings": [
+       {
+        "check": "glossary_term_missing",
+        "severity": "major",
+        "detail": "glossary: 'Aswan' must be rendered as 'Assouan'",
+        "term": "Aswan"
+       },
+       {
+        "check": "glossary_term_missing",
+        "severity": "major",
+        "detail": "glossary: 'Nile' must be rendered as 'Nil'",
+        "term": "Nile"
+       },
+       {
+        "check": "glossary_term_missing",
+        "severity": "major",
+        "detail": "glossary: 'Egypt' must be rendered as 'Égypte'",
+        "term": "Egypt"
+       },
+       {
+        "check": "name_missing",
+        "severity": "major",
+        "detail": "name 'Aswan High Dam' does not appear in the target",
+        "term": "Aswan High Dam"
+       },
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['work']",
+        "items": [
+         "work"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "major",
+        "detail": "only 43% of the source content words come back: missing ['high', 'dam', 'nile', 'egypt']",
+        "items": [
+         "high",
+         "dam",
+         "nile",
+         "egypt"
+        ]
+       }
+      ],
+      "confidence": 0.0,
+      "status": "needs_fix"
+     },
+     {
+      "source": "It is 111 metres high and about 3,830 metres long.",
+      "target": "Il mesure 111 mètres de haut et environ 3830 mètres de long.",
+      "lang": "fr",
+      "back": "It measures 111 meters high and about 3830 meters long.",
+      "coverage": 1.0,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['measures']",
+        "items": [
+         "measures"
+        ]
+       }
+      ],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Behind it lies Lake Nasser, which can hold about 132 cubic kilometres of water.",
+      "target": "Derrière lui se trouve le lac Nasser, qui peut contenir environ 132 kilomètres cubes d'eau.",
+      "lang": "fr",
+      "back": "Behind it is the Nasser Lake, which can contain about 132 cubic kilometers of water.",
+      "coverage": 0.75,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['contain']",
+        "items": [
+         "contain"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "75% source content words come back; not found: ['lies', 'hold']",
+        "items": [
+         "lies",
+         "hold"
+        ]
+       }
+      ],
+      "confidence": 0.85,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Its 12 turbines can generate up to 2,100 megawatts of electricity.",
+      "target": "Ses 12 turbines peuvent générer jusqu'à 2 100 mégawatts d'électricité.",
+      "lang": "fr",
+      "back": "Its 12 turbines can generate up to 2 100 megawatts of electricity.",
+      "coverage": 1.0,
+      "findings": [],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Engineers from the Soviet Union helped to design and build the dam.",
+      "target": "Des ingénieurs de l'Union soviétique ont participé à la conception et à la construction du barrage.",
+      "lang": "fr",
+      "back": "Engineers from the Soviet Union participated in the design and construction of the dam.",
+      "coverage": 0.857,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['participated']",
+        "items": [
+         "participated"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "86% source content words come back; not found: ['helped']",
+        "items": [
+         "helped"
+        ]
+       }
+      ],
+      "confidence": 0.914,
+      "status": "machine_ok"
+     },
+     {
+      "source": "The rising water threatened the temples of Abu Simbel, built for Ramesses II.",
+      "target": "La montée des eaux menaçait les temples d'Abou Simbel, construits pour Ramsès II.",
+      "lang": "fr",
+      "back": "The rising waters threatened the temples of Abou Simbel, built for Ramses II.",
+      "coverage": 0.75,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['abou', 'ramses']",
+        "items": [
+         "abou",
+         "ramses"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "75% source content words come back; not found: ['abu', 'ramesses']",
+        "items": [
+         "abu",
+         "ramesses"
+        ]
+       }
+      ],
+      "confidence": 0.85,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Between 1964 and 1968, an international UNESCO campaign moved the temples to higher ground.",
+      "target": "Entre 1964 et 1968, une campagne internationale de l'UNESCO a déplacé les temples sur des terrains plus élevés.",
+      "lang": "fr",
+      "back": "Between 1964 and 1968, an international campaign of UNESCO moved the temples to higher grounds.",
+      "coverage": 1.0,
+      "findings": [],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Today the dam protects farms from floods, but it also traps the silt that once fertilised the Nile valley.",
+      "target": "Aujourd'hui, le barrage protège les exploitations agricoles des inondations, mais il retient également la vase qui fertilisait autrefois la vallée du Nil.",
+      "lang": "fr",
+      "back": "Today, the dam protects agricultural operations from floods, but it also retains the silt that once fertilized the valley of the Nile.",
+      "coverage": 0.818,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['agricultural', 'operations', 'retains']",
+        "items": [
+         "agricultural",
+         "operations",
+         "retains"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "82% source content words come back; not found: ['farms', 'traps']",
+        "items": [
+         "farms",
+         "traps"
+        ]
+       }
+      ],
+      "confidence": 0.891,
+      "status": "machine_ok"
+     }
+    ],
+    "document": [],
+    "counts": {
+     "glossary_term_missing": 3,
+     "name_missing": 1,
+     "omission_backcheck": 1
+    },
+    "mean_confidence": 0.813,
+    "lines_needing_fix": [
+     0
+    ],
+    "back_translation": "run"
+   },
+   "subtitles": {
+    "paths": {
+     "full.srt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.fr.full.srt",
+     "full.vtt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.fr.full.vtt",
+     "full.ass": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.fr.full.ass",
+     "condensed.srt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.fr.condensed.srt",
+     "condensed.vtt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.fr.condensed.vtt",
+     "condensed.ass": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.fr.condensed.ass"
+    },
+    "qa_full": {
+     "cues": 14,
+     "findings": [
+      {
+       "cue": 5,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "19.7 cps > 17"
+      },
+      {
+       "cue": 6,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "19.5 cps > 17"
+      },
+      {
+       "cue": 9,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "19.3 cps > 17"
+      },
+      {
+       "cue": 10,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "18.9 cps > 17"
+      },
+      {
+       "cue": 10,
+       "check": "min_duration",
+       "severity": "minor",
+       "detail": "0.37s < 5/6 s"
+      },
+      {
+       "cue": 11,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "19.0 cps > 17"
+      },
+      {
+       "cue": 12,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "20.0 cps > 17"
+      },
+      {
+       "cue": 13,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "19.6 cps > 17"
+      }
+     ],
+     "passed": false
+    },
+    "qa_condensed": {
+     "cues": 14,
+     "findings": [
+      {
+       "cue": 5,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "19.7 cps > 17"
+      },
+      {
+       "cue": 6,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "19.5 cps > 17"
+      },
+      {
+       "cue": 9,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "19.3 cps > 17"
+      },
+      {
+       "cue": 10,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "18.9 cps > 17"
+      },
+      {
+       "cue": 10,
+       "check": "min_duration",
+       "severity": "minor",
+       "detail": "0.37s < 5/6 s"
+      },
+      {
+       "cue": 11,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "19.0 cps > 17"
+      },
+      {
+       "cue": 12,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "20.0 cps > 17"
+      },
+      {
+       "cue": 13,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "19.6 cps > 17"
+      }
+     ],
+     "passed": false
+    },
+    "condense_todo": [
+     {
+      "cue": 0,
+      "text": "L'ouvrage de l'Aswan a été construit entre 1960 et 1970.",
+      "cps": 9.1,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 1,
+      "text": "Il mesure 111 mètres de haut et environ 3830 mètres de long.",
+      "cps": 14.1,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 2,
+      "text": "Derrière lui se trouve le lac Nasser,",
+      "cps": 16.1,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 3,
+      "text": "qui peut contenir environ 132 kilomètres cubes d'eau.",
+      "cps": 15.6,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 4,
+      "text": "Ses 12 turbines peuvent générer jusqu'à 2 100 mégawatts d'électricité.",
+      "cps": 15.1,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 5,
+      "text": "Des ingénieurs de l'Union soviétique ont participé à la conception et à la",
+      "cps": 19.9,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 6,
+      "text": "construction du barrage.",
+      "cps": 19.5,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 7,
+      "text": "La montée des eaux menaçait les temples d'Abou Simbel,",
+      "cps": 15.1,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 8,
+      "text": "construits pour Ramsès II.",
+      "cps": 14.8,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 9,
+      "text": "Entre 1964 et 1968, une campagne internationale de l'UNESCO a déplacé les",
+      "cps": 19.6,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 10,
+      "text": "temples",
+      "cps": 18.9,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 11,
+      "text": "sur des terrains plus élevés.",
+      "cps": 19.0,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 12,
+      "text": "Aujourd'hui, le barrage protège les exploitations agricoles des inondations,",
+      "cps": 20.3,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 13,
+      "text": "mais il retient également la vase qui fertilisait autrefois la vallée du Nil.",
+      "cps": 19.8,
+      "reason": "needs condensing to one line / slower read"
+     }
+    ],
+    "srt_full": "1\n00:00:00,500 --> 00:00:06,670\nL'ouvrage de l'Aswan a été construit entre\n1960 et 1970.\n\n2\n00:00:06,970 --> 00:00:11,220\nIl mesure 111 mètres de haut et environ\n3830 mètres de long.\n\n3\n00:00:11,520 --> 00:00:13,816\nDerrière lui se trouve le lac Nasser,\n\n4\n00:00:13,896 --> 00:00:17,300\nqui peut contenir environ 132 kilomètres\ncubes d'eau.\n\n5\n00:00:17,600 --> 00:00:22,230\nSes 12 turbines peuvent générer jusqu'à 2\n100 mégawatts d'électricité.\n\n6\n00:00:22,530 --> 00:00:26,241\nDes ingénieurs de l'Union soviétique ont\nparticipé à la conception et à la\n\n7\n00:00:26,321 --> 00:00:27,550\nconstruction du barrage.\n\n8\n00:00:27,850 --> 00:00:31,415\nLa montée des eaux menaçait les temples\nd'Abou Simbel,\n\n9\n00:00:31,495 --> 00:00:33,250\nconstruits pour Ramsès II.\n\n10\n00:00:33,550 --> 00:00:37,276\nEntre 1964 et 1968, une campagne\ninternationale de l'UNESCO a déplacé les\n\n11\n00:00:37,356 --> 00:00:37,726\ntemples\n\n12\n00:00:37,806 --> 00:00:39,330\nsur des terrains plus élevés.\n\n13\n00:00:39,630 --> 00:00:43,380\nAujourd'hui, le barrage protège les\nexploitations agricoles des inondations,\n\n14\n00:00:43,460 --> 00:00:47,340\nmais il retient également la vase qui\nfertilisait autrefois la vallée du Nil.\n",
+    "ass_style": [
+     "Style: Default,DejaVu Sans,54,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,2,153,153,64,1"
+    ]
+   },
+   "dubbing": {
+    "voice": {
+     "id": "fr_FR-siwis-medium",
+     "engine": "piper",
+     "licence": "dataset SIWIS CC BY 4.0; base Hi-Fi TTS CC BY 4.0",
+     "commercial_use": "yes",
+     "attribution": "SIWIS database (CC BY 4.0); Hi-Fi TTS (CC BY 4.0)",
+     "source": "languages.yaml (MODEL_CARD 2026-11-12)",
+     "installed": false
+    },
+    "blocked": null,
+    "needs_shortening": [
+     4,
+     6,
+     7
+    ],
+    "estimate_note": "durations are character-rate estimates; the rendered audio decides",
+    "lines": [
+     {
+      "idx": 0,
+      "voice": "fr_FR-siwis-medium",
+      "licence": "dataset SIWIS CC BY 4.0; base Hi-Fi TTS CC BY 4.0",
+      "timing_target": {
+       "start": 0.5,
+       "end": 6.67,
+       "slot_s": 6.17
+      },
+      "estimated_s": 4.0,
+      "speed_needed": 0.648,
+      "action": "ok"
+     },
+     {
+      "idx": 1,
+      "voice": "fr_FR-siwis-medium",
+      "licence": "dataset SIWIS CC BY 4.0; base Hi-Fi TTS CC BY 4.0",
+      "timing_target": {
+       "start": 6.97,
+       "end": 11.22,
+       "slot_s": 4.25
+      },
+      "estimated_s": 4.29,
+      "speed_needed": 1.009,
+      "action": "brisker_read"
+     },
+     {
+      "idx": 2,
+      "voice": "fr_FR-siwis-medium",
+      "licence": "dataset SIWIS CC BY 4.0; base Hi-Fi TTS CC BY 4.0",
+      "timing_target": {
+       "start": 11.52,
+       "end": 17.3,
+       "slot_s": 5.78
+      },
+      "estimated_s": 6.5,
+      "speed_needed": 1.125,
+      "action": "brisker_read"
+     },
+     {
+      "idx": 3,
+      "voice": "fr_FR-siwis-medium",
+      "licence": "dataset SIWIS CC BY 4.0; base Hi-Fi TTS CC BY 4.0",
+      "timing_target": {
+       "start": 17.6,
+       "end": 22.23,
+       "slot_s": 4.63
+      },
+      "estimated_s": 5.0,
+      "speed_needed": 1.08,
+      "action": "brisker_read"
+     },
+     {
+      "idx": 4,
+      "voice": "fr_FR-siwis-medium",
+      "licence": "dataset SIWIS CC BY 4.0; base Hi-Fi TTS CC BY 4.0",
+      "timing_target": {
+       "start": 22.53,
+       "end": 27.55,
+       "slot_s": 5.02
+      },
+      "estimated_s": 7.07,
+      "speed_needed": 1.408,
+      "action": "shorten_line"
+     },
+     {
+      "idx": 5,
+      "voice": "fr_FR-siwis-medium",
+      "licence": "dataset SIWIS CC BY 4.0; base Hi-Fi TTS CC BY 4.0",
+      "timing_target": {
+       "start": 27.85,
+       "end": 33.25,
+       "slot_s": 5.4
+      },
+      "estimated_s": 5.79,
+      "speed_needed": 1.072,
+      "action": "brisker_read"
+     },
+     {
+      "idx": 6,
+      "voice": "fr_FR-siwis-medium",
+      "licence": "dataset SIWIS CC BY 4.0; base Hi-Fi TTS CC BY 4.0",
+      "timing_target": {
+       "start": 33.55,
+       "end": 39.33,
+       "slot_s": 5.78
+      },
+      "estimated_s": 7.93,
+      "speed_needed": 1.372,
+      "action": "shorten_line"
+     },
+     {
+      "idx": 7,
+      "voice": "fr_FR-siwis-medium",
+      "licence": "dataset SIWIS CC BY 4.0; base Hi-Fi TTS CC BY 4.0",
+      "timing_target": {
+       "start": 39.63,
+       "end": 47.34,
+       "slot_s": 7.71
+      },
+      "estimated_s": 11.0,
+      "speed_needed": 1.427,
+      "action": "shorten_line"
+     }
+    ]
+   },
+   "voiceover_line": {
+    "idx": 0,
+    "text": "L'ouvrage de l'Aswan a été construit entre 1960 et 1970.",
+    "voice": "fr_FR-siwis-medium",
+    "engine": "piper",
+    "license": "dataset CC BY 4.0 (SIWIS, datashare.is.ed.ac.uk/handle/10283/2353); base hifi_tts_92 (CC BY 4.0)",
+    "commercial": true,
+    "duration": 5.458854166666667,
+    "lufs": -18.01,
+    "cached": false
+   },
+   "seconds": 171.8,
+   "qa_recomputed": "2026-11-12T18:11:39"
+  },
+  "ar-EG": {
+   "lang": "ar-EG",
+   "started": "2026-11-12T18:10:13",
+   "mt_seconds": 15.5,
+   "mt_output": [
+    "تم بناء سد أسوان العالي على نهر النيل في مصر بين عامي ١٩٦٠ و ١٩٧٠.",
+    "يبلغ ارتفاعه ١١١ متر و طوله حوالي ٣٨٣٠ متر.",
+    "وخلفها بحيرة ناصر، اللي بتقدر تحمل حوالي ١٣٢ كيلومتر مكعب من المية.",
+    "بتقدر توربيناته الـ ١٢ توليد كهرباء تصل لـ ٢١٠٠ ميغاواط.",
+    "ساعد مهندسين من الاتحاد السوفياتي في تصميم السد وبنائه، وساعدوا على إنجازه.",
+    "هددت المياه اللي بترتفع معابد أبو سمبل، اللي بنيت لرامسس التاني.",
+    "بين سنة ١٩٦٤ وسنة ١٩٦٨، حملة دولية من اليونسكو نقلت المعابد لأرض أعلى.",
+    "اليوم السد بيحمي المزارع من الفيضانات، ولكنه بيسجن كمان الطمي اللي سبق وخصب وادي النيل."
+   ],
+   "dialect_before": [
+    {
+     "scores": {
+      "EG": 0.0,
+      "Gulf": 0.0,
+      "MSA": 1.0
+     },
+     "raw": {
+      "EG": 0,
+      "Gulf": 0,
+      "MSA": 0.7
+     },
+     "label": "uncertain",
+     "words": 15,
+     "evidence": {
+      "EG": [],
+      "Gulf": [],
+      "MSA": [
+       "تم"
+      ]
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.0,
+      "Gulf": 0.0,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0,
+      "Gulf": 0,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 9,
+     "evidence": {
+      "EG": [],
+      "Gulf": [],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.829,
+      "Gulf": 0.171,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 1.45,
+      "Gulf": 0.3,
+      "MSA": 0
+     },
+     "label": "EG",
+     "words": 12,
+     "evidence": {
+      "EG": [
+       "اللي",
+       "المية",
+       "بتقدر"
+      ],
+      "Gulf": [
+       "اللي"
+      ],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 1.0,
+      "Gulf": 0.0,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0.15,
+      "Gulf": 0,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 10,
+     "evidence": {
+      "EG": [
+       "بتقدر"
+      ],
+      "Gulf": [],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.0,
+      "Gulf": 0.0,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0,
+      "Gulf": 0,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 12,
+     "evidence": {
+      "EG": [],
+      "Gulf": [],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.636,
+      "Gulf": 0.218,
+      "MSA": 0.145
+     },
+     "raw": {
+      "EG": 1.75,
+      "Gulf": 0.6,
+      "MSA": 0.4
+     },
+     "label": "EG",
+     "words": 11,
+     "evidence": {
+      "EG": [
+       "التاني",
+       "اللي",
+       "بترتفع"
+      ],
+      "Gulf": [
+       "اللي"
+      ],
+      "MSA": [
+       "المياه"
+      ]
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.0,
+      "Gulf": 0.0,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0,
+      "Gulf": 0,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 13,
+     "evidence": {
+      "EG": [],
+      "Gulf": [],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.667,
+      "Gulf": 0.333,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0.6,
+      "Gulf": 0.3,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 15,
+     "evidence": {
+      "EG": [
+       "اللي",
+       "بيحمي",
+       "بيسجن"
+      ],
+      "Gulf": [
+       "اللي"
+      ],
+      "MSA": []
+     }
+    }
+   ],
+   "dialect_pass": [
+    {
+     "method": "lexical",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": {
+      "text": "ده بيو بناء سد أسوان العالي على نهر النيل في مصر بين عامي ١٩٦٠ و ١٩٧٠.",
+      "reason": "words with no source or lexicon counterpart (possible invented words): ['بيو']"
+     },
+     "forbidden_hits": [
+      "تم"
+     ]
+    },
+    {
+     "method": "router",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": null,
+     "forbidden_hits": []
+    },
+    {
+     "method": "router",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": null,
+     "forbidden_hits": []
+    },
+    {
+     "method": "router",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": null,
+     "forbidden_hits": []
+    },
+    {
+     "method": "lexical",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": {
+      "text": "ساعده مهندسين من الاتحاد السوفياتي في تصميم السد وبنائه، وساعدوا على إنجازه.",
+      "reason": "words with no source or lexicon counterpart (possible invented words): ['ساعده']"
+     },
+     "forbidden_hits": []
+    },
+    {
+     "method": "lexical",
+     "changes": [
+      "المياه -> المية (x1)"
+     ],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": {
+      "text": "هددت المياه اللي بترتفع معابد أبو سمبل، اللي بنيت لرامسس التاني.",
+      "reason": "no more dialectal than the lexical fallback"
+     },
+     "forbidden_hits": []
+    },
+    {
+     "method": "router",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": null,
+     "forbidden_hits": []
+    },
+    {
+     "method": "lexical",
+     "changes": [
+      "ولكنه -> بس هو (x1)"
+     ],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": {
+      "text": "اليوم السد بيحمي المزارع من الفيضانات، ولكنه بيسجن كمان الطمي اللي سبق وخصب وادي النيل.",
+      "reason": "no more dialectal than the lexical fallback"
+     },
+     "forbidden_hits": []
+    }
+   ],
+   "dialect_after": [
+    {
+     "scores": {
+      "EG": 0.0,
+      "Gulf": 0.0,
+      "MSA": 1.0
+     },
+     "raw": {
+      "EG": 0,
+      "Gulf": 0,
+      "MSA": 0.7
+     },
+     "label": "uncertain",
+     "words": 15,
+     "evidence": {
+      "EG": [],
+      "Gulf": [],
+      "MSA": [
+       "تم"
+      ]
+     }
+    },
+    {
+     "scores": {
+      "EG": 1.0,
+      "Gulf": 0.0,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 1.15,
+      "Gulf": 0,
+      "MSA": 0
+     },
+     "label": "EG",
+     "words": 10,
+     "evidence": {
+      "EG": [
+       "بيبلغ",
+       "ده"
+      ],
+      "Gulf": [],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.829,
+      "Gulf": 0.171,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 1.45,
+      "Gulf": 0.3,
+      "MSA": 0
+     },
+     "label": "EG",
+     "words": 12,
+     "evidence": {
+      "EG": [
+       "اللي",
+       "المية",
+       "بتقدر"
+      ],
+      "Gulf": [
+       "اللي"
+      ],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 1.0,
+      "Gulf": 0.0,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0.15,
+      "Gulf": 0,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 10,
+     "evidence": {
+      "EG": [
+       "بيقدر"
+      ],
+      "Gulf": [],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.0,
+      "Gulf": 0.0,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0,
+      "Gulf": 0,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 12,
+     "evidence": {
+      "EG": [],
+      "Gulf": [],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.821,
+      "Gulf": 0.179,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 2.75,
+      "Gulf": 0.6,
+      "MSA": 0
+     },
+     "label": "EG",
+     "words": 11,
+     "evidence": {
+      "EG": [
+       "التاني",
+       "اللي",
+       "المية",
+       "بترتفع"
+      ],
+      "Gulf": [
+       "اللي"
+      ],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.0,
+      "Gulf": 0.0,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0,
+      "Gulf": 0,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 13,
+     "evidence": {
+      "EG": [],
+      "Gulf": [],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.6,
+      "Gulf": 0.4,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0.9,
+      "Gulf": 0.6,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 16,
+     "evidence": {
+      "EG": [
+       "اللي",
+       "بس",
+       "بيحمي",
+       "بيسجن"
+      ],
+      "Gulf": [
+       "اللي",
+       "بس"
+      ],
+      "MSA": []
+     }
+    }
+   ],
+   "final": [
+    "تم بناء سد أسوان العالي على نهر النيل في مصر بين عامي ١٩٦٠ و ١٩٧٠.",
+    "ده بيبلغ ارتفاعه ١١١ متر و طوله حوالي ٣٨٣٠ متر.",
+    "وخلفها بحيرة ناصر، اللي بتقدر تحمل حوالي ١٣٢ كيلومتر مكعب من المية.",
+    "بيقدر توربيناته الـ ١٢ توليد كهرباء تصل لـ ٢١٠٠ ميغاواط.",
+    "ساعد مهندسين من الاتحاد السوفياتي في تصميم السد وبنائه، وساعدوا على إنجازه.",
+    "هددت المية اللي بترتفع معابد أبو سمبل، اللي بنيت لرامسس التاني.",
+    "بين سنة ١٩٦٤ وسنة ١٩٦٨، حملة دولية من اليونسكو نقلت المعابد لأرض أعلى.",
+    "اليوم السد بيحمي المزارع من الفيضانات، بس هو بيسجن كمان الطمي اللي سبق وخصب وادي النيل."
+   ],
+   "back_translation": {
+    "lines": [
+     "was built the high Aswan Dam on the Nile River in Egypt between the years 1960 and 1970.",
+     "It reaches a height of 111 meters and its length is about 3830 meters.",
+     "Behind it is Lake Nasser, which can hold about 132 cubic kilometers of water.",
+     "Its 12 turbines can generate electricity up to 2100 megawatts.",
+     "Engineers from the Soviet Union helped in the design and construction of the dam, and they helped in completing it.",
+     "The water that rises behind it threatens the temples of Abu Simbel, which were built for Ramses the Second.",
+     "Between the years 1964 and 1968, an international team from UNESCO moved the temples to higher ground.",
+     "Today the dam protects the farms from floods, but it also traps the silt that was previously fertile in the Nile Valley."
+    ],
+    "note": "local-llamacpp/qwen3-4b-q4km",
+    "seconds": 49.1
+   },
+   "qa": {
+    "lang": "ar-EG",
+    "lines": [
+     {
+      "source": "The Aswan High Dam on the Nile in Egypt was built between 1960 and 1970.",
+      "target": "تم بناء سد أسوان العالي على نهر النيل في مصر بين عامي ١٩٦٠ و ١٩٧٠.",
+      "lang": "ar-EG",
+      "back": "was built the high Aswan Dam on the Nile River in Egypt between the years 1960 and 1970.",
+      "coverage": 1.0,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['river', 'years']",
+        "items": [
+         "river",
+         "years"
+        ]
+       }
+      ],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     },
+     {
+      "source": "It is 111 metres high and about 3,830 metres long.",
+      "target": "ده بيبلغ ارتفاعه ١١١ متر و طوله حوالي ٣٨٣٠ متر.",
+      "lang": "ar-EG",
+      "back": "It reaches a height of 111 meters and its length is about 3830 meters.",
+      "coverage": 1.0,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['reaches']",
+        "items": [
+         "reaches"
+        ]
+       }
+      ],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Behind it lies Lake Nasser, which can hold about 132 cubic kilometres of water.",
+      "target": "وخلفها بحيرة ناصر، اللي بتقدر تحمل حوالي ١٣٢ كيلومتر مكعب من المية.",
+      "lang": "ar-EG",
+      "back": "Behind it is Lake Nasser, which can hold about 132 cubic kilometers of water.",
+      "coverage": 0.875,
+      "findings": [
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "88% source content words come back; not found: ['lies']",
+        "items": [
+         "lies"
+        ]
+       }
+      ],
+      "confidence": 0.925,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Its 12 turbines can generate up to 2,100 megawatts of electricity.",
+      "target": "بيقدر توربيناته الـ ١٢ توليد كهرباء تصل لـ ٢١٠٠ ميغاواط.",
+      "lang": "ar-EG",
+      "back": "Its 12 turbines can generate electricity up to 2100 megawatts.",
+      "coverage": 1.0,
+      "findings": [],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Engineers from the Soviet Union helped to design and build the dam.",
+      "target": "ساعد مهندسين من الاتحاد السوفياتي في تصميم السد وبنائه، وساعدوا على إنجازه.",
+      "lang": "ar-EG",
+      "back": "Engineers from the Soviet Union helped in the design and construction of the dam, and they helped in completing it.",
+      "coverage": 1.0,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['completing']",
+        "items": [
+         "completing"
+        ]
+       },
+       {
+        "check": "added_clause",
+        "severity": "major",
+        "detail": "read-back clause adds nothing from the source but says ['completing']: 'they helped in completing it.'",
+        "items": [
+         "completing"
+        ]
+       }
+      ],
+      "confidence": 0.7,
+      "status": "needs_fix"
+     },
+     {
+      "source": "The rising water threatened the temples of Abu Simbel, built for Ramesses II.",
+      "target": "هددت المية اللي بترتفع معابد أبو سمبل، اللي بنيت لرامسس التاني.",
+      "lang": "ar-EG",
+      "back": "The water that rises behind it threatens the temples of Abu Simbel, which were built for Ramses the Second.",
+      "coverage": 0.75,
+      "findings": [
+       {
+        "check": "glossary_term_missing",
+        "severity": "major",
+        "detail": "glossary: 'Ramesses II' must be rendered as 'رمسيس'",
+        "term": "Ramesses II"
+       },
+       {
+        "check": "unsupported_content",
+        "severity": "major",
+        "detail": "the back-translation contains ideas the source never said: ['rizes', 'behind', 'ramses', 'second']",
+        "items": [
+         "rizes",
+         "behind",
+         "ramses",
+         "second"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "75% source content words come back; not found: ['rizing', 'ramesses']",
+        "items": [
+         "rizing",
+         "ramesses"
+        ]
+       }
+      ],
+      "confidence": 0.4,
+      "status": "needs_fix"
+     },
+     {
+      "source": "Between 1964 and 1968, an international UNESCO campaign moved the temples to higher ground.",
+      "target": "بين سنة ١٩٦٤ وسنة ١٩٦٨، حملة دولية من اليونسكو نقلت المعابد لأرض أعلى.",
+      "lang": "ar-EG",
+      "back": "Between the years 1964 and 1968, an international team from UNESCO moved the temples to higher ground.",
+      "coverage": 0.875,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['years', 'team']",
+        "items": [
+         "years",
+         "team"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "88% source content words come back; not found: ['campaign']",
+        "items": [
+         "campaign"
+        ]
+       }
+      ],
+      "confidence": 0.925,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Today the dam protects farms from floods, but it also traps the silt that once fertilised the Nile valley.",
+      "target": "اليوم السد بيحمي المزارع من الفيضانات، بس هو بيسجن كمان الطمي اللي سبق وخصب وادي النيل.",
+      "lang": "ar-EG",
+      "back": "Today the dam protects the farms from floods, but it also traps the silt that was previously fertile in the Nile Valley.",
+      "coverage": 0.909,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['previously']",
+        "items": [
+         "previously"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "91% source content words come back; not found: ['once']",
+        "items": [
+         "once"
+        ]
+       }
+      ],
+      "confidence": 0.945,
+      "status": "machine_ok"
+     }
+    ],
+    "document": [],
+    "counts": {
+     "added_clause": 1,
+     "glossary_term_missing": 1,
+     "unsupported_content": 1
+    },
+    "mean_confidence": 0.862,
+    "lines_needing_fix": [
+     4,
+     5
+    ],
+    "back_translation": "run"
+   },
+   "subtitles": {
+    "paths": {
+     "full.srt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.ar-EG.full.srt",
+     "full.vtt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.ar-EG.full.vtt",
+     "full.ass": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.ar-EG.full.ass",
+     "condensed.srt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.ar-EG.condensed.srt",
+     "condensed.vtt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.ar-EG.condensed.vtt",
+     "condensed.ass": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.ar-EG.condensed.ass"
+    },
+    "qa_full": {
+     "cues": 10,
+     "findings": [],
+     "passed": true
+    },
+    "qa_condensed": {
+     "cues": 10,
+     "findings": [],
+     "passed": true
+    },
+    "condense_todo": [
+     {
+      "cue": 0,
+      "text": "تم بناء سد أسوان العالي على نهر النيل في مصر بين عامي ١٩٦٠ و ١٩٧٠.",
+      "cps": 10.7,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 1,
+      "text": "ده بيبلغ ارتفاعه ١١١ متر و طوله حوالي ٣٨٣٠ متر.",
+      "cps": 11.1,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 2,
+      "text": "وخلفها بحيرة ناصر، اللي بتقدر تحمل حوالي ١٣٢ كيلومتر مكعب من المية.",
+      "cps": 11.6,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 3,
+      "text": "بيقدر توربيناته الـ ١٢ توليد كهرباء تصل لـ ٢١٠٠ ميغاواط.",
+      "cps": 12.1,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 4,
+      "text": "ساعد مهندسين من الاتحاد السوفياتي في تصميم السد وبنائه،",
+      "cps": 15.1,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 6,
+      "text": "هددت المية اللي بترتفع معابد أبو سمبل، اللي بنيت لرامسس التاني.",
+      "cps": 11.7,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 7,
+      "text": "بين سنة ١٩٦٤ وسنة ١٩٦٨، حملة دولية من اليونسكو نقلت المعابد لأرض أعلى.",
+      "cps": 12.1,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 9,
+      "text": "بس هو بيسجن كمان الطمي اللي سبق وخصب وادي النيل.",
+      "cps": 11.2,
+      "reason": "needs condensing to one line / slower read"
+     }
+    ],
+    "srt_full": "1\n00:00:00,500 --> 00:00:06,670\n‏تم بناء سد أسوان العالي على نهر النيل في\n‏مصر بين عامي ١٩٦٠ و ١٩٧٠.\n\n2\n00:00:06,970 --> 00:00:11,220\n‏ده بيبلغ ارتفاعه ١١١ متر و طوله حوالي ٣٨٣٠\n‏متر.\n\n3\n00:00:11,520 --> 00:00:17,300\n‏وخلفها بحيرة ناصر، اللي بتقدر تحمل حوالي\n‏١٣٢ كيلومتر مكعب من المية.\n\n4\n00:00:17,600 --> 00:00:22,230\n‏بيقدر توربيناته الـ ١٢ توليد كهرباء تصل لـ\n‏٢١٠٠ ميغاواط.\n\n5\n00:00:22,530 --> 00:00:26,181\n‏ساعد مهندسين من الاتحاد السوفياتي في تصميم\n‏السد وبنائه،\n\n6\n00:00:26,261 --> 00:00:27,550\n‏وساعدوا على إنجازه.\n\n7\n00:00:27,850 --> 00:00:33,250\n‏هددت المية اللي بترتفع معابد أبو سمبل،\n‏اللي بنيت لرامسس التاني.\n\n8\n00:00:33,550 --> 00:00:39,330\n‏بين سنة ١٩٦٤ وسنة ١٩٦٨، حملة دولية من\n‏اليونسكو نقلت المعابد لأرض أعلى.\n\n9\n00:00:39,630 --> 00:00:42,957\n‏اليوم السد بيحمي المزارع من الفيضانات،\n\n10\n00:00:43,037 --> 00:00:47,340\n‏بس هو بيسجن كمان الطمي اللي سبق وخصب وادي\n‏النيل.\n",
+    "ass_style": [
+     "Style: Default,Noto Naskh Arabic,54,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,2,153,153,64,178"
+    ]
+   },
+   "dubbing": {
+    "voice": null,
+    "blocked": "no commercially cleared voice for ar-EG [ar_JO-kareem-medium (unverified)] - deliver subtitles, or supply a voice you hold the rights to",
+    "needs_shortening": [],
+    "estimate_note": "durations are character-rate estimates; the rendered audio decides",
+    "lines": [
+     {
+      "idx": 0,
+      "voice": null,
+      "licence": null,
+      "timing_target": {
+       "start": 0.5,
+       "end": 6.67,
+       "slot_s": 6.17
+      },
+      "estimated_s": 5.5,
+      "speed_needed": 0.891,
+      "action": "ok"
+     },
+     {
+      "idx": 1,
+      "voice": null,
+      "licence": null,
+      "timing_target": {
+       "start": 6.97,
+       "end": 11.22,
+       "slot_s": 4.25
+      },
+      "estimated_s": 3.92,
+      "speed_needed": 0.922,
+      "action": "ok"
+     },
+     {
+      "idx": 2,
+      "voice": null,
+      "licence": null,
+      "timing_target": {
+       "start": 11.52,
+       "end": 17.3,
+       "slot_s": 5.78
+      },
+      "estimated_s": 5.58,
+      "speed_needed": 0.965,
+      "action": "ok"
+     },
+     {
+      "idx": 3,
+      "voice": null,
+      "licence": null,
+      "timing_target": {
+       "start": 17.6,
+       "end": 22.23,
+       "slot_s": 4.63
+      },
+      "estimated_s": 4.67,
+      "speed_needed": 1.009,
+      "action": "brisker_read"
+     },
+     {
+      "idx": 4,
+      "voice": null,
+      "licence": null,
+      "timing_target": {
+       "start": 22.53,
+       "end": 27.55,
+       "slot_s": 5.02
+      },
+      "estimated_s": 6.25,
+      "speed_needed": 1.245,
+      "action": "brisker_read"
+     },
+     {
+      "idx": 5,
+      "voice": null,
+      "licence": null,
+      "timing_target": {
+       "start": 27.85,
+       "end": 33.25,
+       "slot_s": 5.4
+      },
+      "estimated_s": 5.25,
+      "speed_needed": 0.972,
+      "action": "ok"
+     },
+     {
+      "idx": 6,
+      "voice": null,
+      "licence": null,
+      "timing_target": {
+       "start": 33.55,
+       "end": 39.33,
+       "slot_s": 5.78
+      },
+      "estimated_s": 5.83,
+      "speed_needed": 1.009,
+      "action": "brisker_read"
+     },
+     {
+      "idx": 7,
+      "voice": null,
+      "licence": null,
+      "timing_target": {
+       "start": 39.63,
+       "end": 47.34,
+       "slot_s": 7.71
+      },
+      "estimated_s": 7.25,
+      "speed_needed": 0.94,
+      "action": "ok"
+     }
+    ]
+   },
+   "voiceover_line": {
+    "skipped": "no commercially cleared voice for ar-EG [ar_JO-kareem-medium (unverified)] - deliver subtitles, or supply a voice you hold the rights to"
+   },
+   "seconds": 65.1,
+   "qa_recomputed": "2026-11-12T18:11:39"
+  },
+  "ar-Gulf": {
+   "lang": "ar-Gulf",
+   "started": "2026-11-12T18:07:39",
+   "mt_seconds": 18.5,
+   "mt_output": [
+    "تم بناء سد أسوان العالي على نهر النيل في مصر بين عامي ١٩٦٠ و ١٩٧٠، وتم الانتهاء من بنائه في عام ٢٠٠٥.",
+    "ويبلغ ارتفاعه ١١١ مترا وطوله حوالي ٨٣٠ ٣ مترا.",
+    "وخلفها تقع بحيرة ناصر، اللي يمكن أن تحتفظ بنحو ١٣٢ كيلومترا مكعبا من المياه.",
+    "وتستطيع توربيناتها الـ ١٢ توليد ما يصل إلى ١٠٠ ٢ ميغاواط من الكهربا.",
+    "وقد ساعد مهندسون من الاتحاد السوفياتي في تصميم السد وبنائه.",
+    "وهددت المياه المرتفعة معابد أبو سمبل، اللي بنيت لرامسس الثاني.",
+    "وفيما بين عامي ١٩٦٤ و١٩٦٨، قامت اليونسكو بحملة دولية لنقل المعابد إلى أماكن أعلى.",
+    "واليوم يحمي السد المزارع من الفيضانات، ولكنه يحبس أيضا الطين اللي كان يخصب وادي النيل ذات يوم."
+   ],
+   "dialect_before": [
+    {
+     "scores": {
+      "EG": 0.0,
+      "Gulf": 0.0,
+      "MSA": 1.0
+     },
+     "raw": {
+      "EG": 0,
+      "Gulf": 0,
+      "MSA": 0.7
+     },
+     "label": "uncertain",
+     "words": 22,
+     "evidence": {
+      "EG": [],
+      "Gulf": [],
+      "MSA": [
+       "تم"
+      ]
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.0,
+      "Gulf": 0.0,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0,
+      "Gulf": 0,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 9,
+     "evidence": {
+      "EG": [],
+      "Gulf": [],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.115,
+      "Gulf": 0.115,
+      "MSA": 0.769
+     },
+     "raw": {
+      "EG": 0.3,
+      "Gulf": 0.3,
+      "MSA": 2.0
+     },
+     "label": "MSA",
+     "words": 14,
+     "evidence": {
+      "EG": [
+       "اللي"
+      ],
+      "Gulf": [
+       "اللي"
+      ],
+      "MSA": [
+       "أن",
+       "المياه",
+       "بنحو",
+       "يمكن"
+      ]
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.0,
+      "Gulf": 0.0,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0,
+      "Gulf": 0,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 13,
+     "evidence": {
+      "EG": [],
+      "Gulf": [],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.0,
+      "Gulf": 0.0,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0,
+      "Gulf": 0,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 10,
+     "evidence": {
+      "EG": [],
+      "Gulf": [],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.3,
+      "Gulf": 0.3,
+      "MSA": 0.4
+     },
+     "raw": {
+      "EG": 0.3,
+      "Gulf": 0.3,
+      "MSA": 0.4
+     },
+     "label": "uncertain",
+     "words": 10,
+     "evidence": {
+      "EG": [
+       "اللي"
+      ],
+      "Gulf": [
+       "اللي"
+      ],
+      "MSA": [
+       "المياه"
+      ]
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.0,
+      "Gulf": 0.0,
+      "MSA": 1.0
+     },
+     "raw": {
+      "EG": 0,
+      "Gulf": 0,
+      "MSA": 0.6
+     },
+     "label": "uncertain",
+     "words": 14,
+     "evidence": {
+      "EG": [],
+      "Gulf": [],
+      "MSA": [
+       "فيما"
+      ]
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.214,
+      "Gulf": 0.214,
+      "MSA": 0.571
+     },
+     "raw": {
+      "EG": 0.3,
+      "Gulf": 0.3,
+      "MSA": 0.8
+     },
+     "label": "MSA",
+     "words": 17,
+     "evidence": {
+      "EG": [
+       "اللي"
+      ],
+      "Gulf": [
+       "اللي"
+      ],
+      "MSA": [
+       "أيضا"
+      ]
+     }
+    }
+   ],
+   "dialect_pass": [
+    {
+     "method": "lexical",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": {
+      "text": "ليش هذي السد العالى بنيا على النهر النيل في مصر بين ١٩٦٠ و ١٩ٷ٠، وبيتنت الانتهاء من بنائه في ٢٠٠٥.",
+      "reason": "numbers changed ['1960', '1970', '2005'] -> ['1960', '19', '0', '2005']"
+     },
+     "forbidden_hits": [
+      "تم"
+     ]
+    },
+    {
+     "method": "lexical",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": {
+      "text": "وبيصل ارتفاعه ١١١ متر وطوله بيكير ٨٣٠ ٣ متر.",
+      "reason": "words with no source or lexicon counterpart (possible invented words): ['وبيصل', 'متر', 'بيكير', 'متر']"
+     },
+     "forbidden_hits": []
+    },
+    {
+     "method": "lexical",
+     "changes": [
+      "يمكن أن -> ممكن (x1)",
+      "المياه -> الماي (x1)"
+     ],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": {
+      "text": "واحدا بيحصل بحيرة ناصر، اللي بيمكن أن يحفظ بيكير ١٣٢ كيلومتر مكعب من الماء.",
+      "reason": "words with no source or lexicon counterpart (possible invented words): ['واحدا', 'بيحصل', 'يحفظ', 'بيكير', 'كيلومتر', 'مكعب']"
+     },
+     "forbidden_hits": [
+      "بنحو"
+     ]
+    },
+    {
+     "method": "lexical",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": {
+      "text": "واتي توربيناتها الـ ١٢ بيمكن توليد ما يصل إلى ١٠٠ ٢ ميغاواط من الكهربا.",
+      "reason": "words with no source or lexicon counterpart (possible invented words): ['واتي', 'بيمكن']"
+     },
+     "forbidden_hits": []
+    },
+    {
+     "method": "lexical",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": {
+      "text": "واي ساعد مهندسون من الاتحاد السوفييت في تصميم السد وبنائه.",
+      "reason": "words with no source or lexicon counterpart (possible invented words): ['واي', 'السوفييت']"
+     },
+     "forbidden_hits": []
+    },
+    {
+     "method": "lexical",
+     "changes": [
+      "المياه -> الماي (x1)"
+     ],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": {
+      "text": "وهددت الماء المرتفع معابد أبو سمبل، اللي بنيت لرامسس الثاني.",
+      "reason": "no more dialectal than the lexical fallback"
+     },
+     "forbidden_hits": []
+    },
+    {
+     "method": "lexical",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": {
+      "text": "وايما بين ١٩٦٤ و١٩٦٨، قام اليونسكو بحملة دولية لنقل المعابد إلى أماكن أعلى.",
+      "reason": "words with no source or lexicon counterpart (possible invented words): ['وايما', 'قام']"
+     },
+     "forbidden_hits": []
+    },
+    {
+     "method": "lexical",
+     "changes": [
+      "ولكنه -> بس هو (x1)",
+      "ذات يوم -> قبل (x1)"
+     ],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": {
+      "text": "واليوم يحمي السد المزارع من الفيضانات، ولكن يحبس أيضا الطين اللي كان يخصب وادي النيل ذات يوم.",
+      "reason": "no more dialectal than the lexical fallback"
+     },
+     "forbidden_hits": [
+      "أيضا"
+     ]
+    }
+   ],
+   "dialect_after": [
+    {
+     "scores": {
+      "EG": 0.0,
+      "Gulf": 0.0,
+      "MSA": 1.0
+     },
+     "raw": {
+      "EG": 0,
+      "Gulf": 0,
+      "MSA": 0.7
+     },
+     "label": "uncertain",
+     "words": 22,
+     "evidence": {
+      "EG": [],
+      "Gulf": [],
+      "MSA": [
+       "تم"
+      ]
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.0,
+      "Gulf": 0.0,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0,
+      "Gulf": 0,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 9,
+     "evidence": {
+      "EG": [],
+      "Gulf": [],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.207,
+      "Gulf": 0.552,
+      "MSA": 0.241
+     },
+     "raw": {
+      "EG": 0.6,
+      "Gulf": 1.6,
+      "MSA": 0.7
+     },
+     "label": "Gulf",
+     "words": 13,
+     "evidence": {
+      "EG": [
+       "اللي",
+       "ممكن"
+      ],
+      "Gulf": [
+       "اللي",
+       "الماي",
+       "ممكن"
+      ],
+      "MSA": [
+       "بنحو"
+      ]
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.0,
+      "Gulf": 0.0,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0,
+      "Gulf": 0,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 13,
+     "evidence": {
+      "EG": [],
+      "Gulf": [],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.0,
+      "Gulf": 0.0,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0,
+      "Gulf": 0,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 10,
+     "evidence": {
+      "EG": [],
+      "Gulf": [],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.187,
+      "Gulf": 0.812,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0.3,
+      "Gulf": 1.3,
+      "MSA": 0
+     },
+     "label": "Gulf",
+     "words": 10,
+     "evidence": {
+      "EG": [
+       "اللي"
+      ],
+      "Gulf": [
+       "اللي",
+       "الماي"
+      ],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.0,
+      "Gulf": 0.0,
+      "MSA": 1.0
+     },
+     "raw": {
+      "EG": 0,
+      "Gulf": 0,
+      "MSA": 0.6
+     },
+     "label": "uncertain",
+     "words": 14,
+     "evidence": {
+      "EG": [],
+      "Gulf": [],
+      "MSA": [
+       "فيما"
+      ]
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.3,
+      "Gulf": 0.3,
+      "MSA": 0.4
+     },
+     "raw": {
+      "EG": 0.6,
+      "Gulf": 0.6,
+      "MSA": 0.8
+     },
+     "label": "MSA",
+     "words": 17,
+     "evidence": {
+      "EG": [
+       "اللي",
+       "بس"
+      ],
+      "Gulf": [
+       "اللي",
+       "بس"
+      ],
+      "MSA": [
+       "أيضا"
+      ]
+     }
+    }
+   ],
+   "final": [
+    "تم بناء سد أسوان العالي على نهر النيل في مصر بين عامي ١٩٦٠ و ١٩٧٠، وتم الانتهاء من بنائه في عام ٢٠٠٥.",
+    "ويبلغ ارتفاعه ١١١ مترا وطوله حوالي ٨٣٠ ٣ مترا.",
+    "وخلفها تقع بحيرة ناصر، اللي ممكن تحتفظ بنحو ١٣٢ كيلومترا مكعبا من الماي.",
+    "وتستطيع توربيناتها الـ ١٢ توليد ما يصل إلى ١٠٠ ٢ ميغاواط من الكهربا.",
+    "وقد ساعد مهندسون من الاتحاد السوفياتي في تصميم السد وبنائه.",
+    "وهددت الماي المرتفعة معابد أبو سمبل، اللي بنيت لرامسس الثاني.",
+    "وفيما بين عامي ١٩٦٤ و١٩٦٨، قامت اليونسكو بحملة دولية لنقل المعابد إلى أماكن أعلى.",
+    "واليوم يحمي السد المزارع من الفيضانات، بس هو يحبس أيضا الطين اللي كان يخصب وادي النيل قبل."
+   ],
+   "back_translation": {
+    "lines": [
+     "was built on the Nile River in Egypt between the years 1960 and 1970, and was completed in the year 2005.",
+     "Its height is 111 meters and its length is about 830 3 meters.",
+     "Behind it lies Lake Nasser, which can hold approximately 132 cubic kilometers of water.",
+     "And its 12 turbines can generate up to 100 2 megawatts of electricity.",
+     "Engineers from the Soviet Union helped in the design and construction of the dam.",
+     "The high water level has damaged the temples of Abu Simbel, which were built for Ramses II.",
+     "And between the years 1964 and 1968, UNESCO launched an international campaign to move the temples to higher places.",
+     "Today, the dam protects the farms from floods, but it also traps the silt that was fertilizing the Nile Valley before."
+    ],
+    "note": "local-llamacpp/qwen3-4b-q4km",
+    "seconds": 47.6
+   },
+   "qa": {
+    "lang": "ar-Gulf",
+    "lines": [
+     {
+      "source": "The Aswan High Dam on the Nile in Egypt was built between 1960 and 1970.",
+      "target": "تم بناء سد أسوان العالي على نهر النيل في مصر بين عامي ١٩٦٠ و ١٩٧٠، وتم الانتهاء من بنائه في عام ٢٠٠٥.",
+      "lang": "ar-Gulf",
+      "back": "was built on the Nile River in Egypt between the years 1960 and 1970, and was completed in the year 2005.",
+      "coverage": 0.571,
+      "findings": [
+       {
+        "check": "too_long",
+        "severity": "major",
+        "detail": "target is 1.40x the source length (expected <= 1.4) - content probably added"
+       },
+       {
+        "check": "number_added",
+        "severity": "major",
+        "detail": "numbers in the target that the source does not have: ['2005']",
+        "items": [
+         "2005"
+        ]
+       },
+       {
+        "check": "name_unconfirmed",
+        "severity": "minor",
+        "detail": "name 'Aswan High Dam' is not recognisable in the back-translation",
+        "term": "Aswan High Dam"
+       },
+       {
+        "check": "unsupported_content",
+        "severity": "major",
+        "detail": "the back-translation contains ideas the source never said: ['river', 'years', 'completed', 'year']",
+        "items": [
+         "river",
+         "years",
+         "completed",
+         "year"
+        ]
+       },
+       {
+        "check": "added_clause",
+        "severity": "major",
+        "detail": "read-back clause adds nothing from the source but says ['completed', 'year']: 'was completed in the year 2005.'",
+        "items": [
+         "completed",
+         "year"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "major",
+        "detail": "only 57% of the source content words come back: missing ['aswan', 'high', 'dam']",
+        "items": [
+         "aswan",
+         "high",
+         "dam"
+        ]
+       }
+      ],
+      "confidence": 0.0,
+      "status": "needs_fix"
+     },
+     {
+      "source": "It is 111 metres high and about 3,830 metres long.",
+      "target": "ويبلغ ارتفاعه ١١١ مترا وطوله حوالي ٨٣٠ ٣ مترا.",
+      "lang": "ar-Gulf",
+      "back": "Its height is 111 meters and its length is about 830 3 meters.",
+      "coverage": 1.0,
+      "findings": [
+       {
+        "check": "number_missing",
+        "severity": "major",
+        "detail": "numbers missing or changed: ['3830'] (spelled-out numbers are not recognised - verify)",
+        "items": [
+         "3830"
+        ]
+       },
+       {
+        "check": "number_added",
+        "severity": "major",
+        "detail": "numbers in the target that the source does not have: ['830', '3']",
+        "items": [
+         "830",
+         "3"
+        ]
+       }
+      ],
+      "confidence": 0.4,
+      "status": "needs_fix"
+     },
+     {
+      "source": "Behind it lies Lake Nasser, which can hold about 132 cubic kilometres of water.",
+      "target": "وخلفها تقع بحيرة ناصر، اللي ممكن تحتفظ بنحو ١٣٢ كيلومترا مكعبا من الماي.",
+      "lang": "ar-Gulf",
+      "back": "Behind it lies Lake Nasser, which can hold approximately 132 cubic kilometers of water.",
+      "coverage": 1.0,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['approximately']",
+        "items": [
+         "approximately"
+        ]
+       }
+      ],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Its 12 turbines can generate up to 2,100 megawatts of electricity.",
+      "target": "وتستطيع توربيناتها الـ ١٢ توليد ما يصل إلى ١٠٠ ٢ ميغاواط من الكهربا.",
+      "lang": "ar-Gulf",
+      "back": "And its 12 turbines can generate up to 100 2 megawatts of electricity.",
+      "coverage": 1.0,
+      "findings": [
+       {
+        "check": "number_missing",
+        "severity": "major",
+        "detail": "numbers missing or changed: ['2100'] (spelled-out numbers are not recognised - verify)",
+        "items": [
+         "2100"
+        ]
+       },
+       {
+        "check": "number_added",
+        "severity": "major",
+        "detail": "numbers in the target that the source does not have: ['100', '2']",
+        "items": [
+         "100",
+         "2"
+        ]
+       }
+      ],
+      "confidence": 0.4,
+      "status": "needs_fix"
+     },
+     {
+      "source": "Engineers from the Soviet Union helped to design and build the dam.",
+      "target": "وقد ساعد مهندسون من الاتحاد السوفياتي في تصميم السد وبنائه.",
+      "lang": "ar-Gulf",
+      "back": "Engineers from the Soviet Union helped in the design and construction of the dam.",
+      "coverage": 1.0,
+      "findings": [],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     },
+     {
+      "source": "The rising water threatened the temples of Abu Simbel, built for Ramesses II.",
+      "target": "وهددت الماي المرتفعة معابد أبو سمبل، اللي بنيت لرامسس الثاني.",
+      "lang": "ar-Gulf",
+      "back": "The high water level has damaged the temples of Abu Simbel, which were built for Ramses II.",
+      "coverage": 0.625,
+      "findings": [
+       {
+        "check": "glossary_term_missing",
+        "severity": "major",
+        "detail": "glossary: 'Ramesses II' must be rendered as 'رمسيس'",
+        "term": "Ramesses II"
+       },
+       {
+        "check": "unsupported_content",
+        "severity": "major",
+        "detail": "the back-translation contains ideas the source never said: ['high', 'level', 'damaged', 'ramses']",
+        "items": [
+         "high",
+         "level",
+         "damaged",
+         "ramses"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "62% source content words come back; not found: ['rizing', 'threatened', 'ramesses']",
+        "items": [
+         "rizing",
+         "threatened",
+         "ramesses"
+        ]
+       }
+      ],
+      "confidence": 0.4,
+      "status": "needs_fix"
+     },
+     {
+      "source": "Between 1964 and 1968, an international UNESCO campaign moved the temples to higher ground.",
+      "target": "وفيما بين عامي ١٩٦٤ و١٩٦٨، قامت اليونسكو بحملة دولية لنقل المعابد إلى أماكن أعلى.",
+      "lang": "ar-Gulf",
+      "back": "And between the years 1964 and 1968, UNESCO launched an international campaign to move the temples to higher places.",
+      "coverage": 0.75,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "major",
+        "detail": "the back-translation contains ideas the source never said: ['years', 'launched', 'move', 'places']",
+        "items": [
+         "years",
+         "launched",
+         "move",
+         "places"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "75% source content words come back; not found: ['moved', 'ground']",
+        "items": [
+         "moved",
+         "ground"
+        ]
+       }
+      ],
+      "confidence": 0.7,
+      "status": "needs_fix"
+     },
+     {
+      "source": "Today the dam protects farms from floods, but it also traps the silt that once fertilised the Nile valley.",
+      "target": "واليوم يحمي السد المزارع من الفيضانات، بس هو يحبس أيضا الطين اللي كان يخصب وادي النيل قبل.",
+      "lang": "ar-Gulf",
+      "back": "Today, the dam protects the farms from floods, but it also traps the silt that was fertilizing the Nile Valley before.",
+      "coverage": 0.909,
+      "findings": [
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "91% source content words come back; not found: ['once']",
+        "items": [
+         "once"
+        ]
+       }
+      ],
+      "confidence": 0.945,
+      "status": "machine_ok"
+     }
+    ],
+    "document": [],
+    "counts": {
+     "too_long": 1,
+     "number_added": 3,
+     "name_unconfirmed": 1,
+     "unsupported_content": 3,
+     "added_clause": 1,
+     "omission_backcheck": 1,
+     "number_missing": 2,
+     "glossary_term_missing": 1
+    },
+    "mean_confidence": 0.606,
+    "lines_needing_fix": [
+     0,
+     1,
+     3,
+     5,
+     6
+    ],
+    "back_translation": "run"
+   },
+   "subtitles": {
+    "paths": {
+     "full.srt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.ar-Gulf.full.srt",
+     "full.vtt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.ar-Gulf.full.vtt",
+     "full.ass": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.ar-Gulf.full.ass",
+     "condensed.srt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.ar-Gulf.condensed.srt",
+     "condensed.vtt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.ar-Gulf.condensed.vtt",
+     "condensed.ass": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.ar-Gulf.condensed.ass"
+    },
+    "qa_full": {
+     "cues": 10,
+     "findings": [],
+     "passed": true
+    },
+    "qa_condensed": {
+     "cues": 10,
+     "findings": [],
+     "passed": true
+    },
+    "condense_todo": [
+     {
+      "cue": 0,
+      "text": "تم بناء سد أسوان العالي على نهر النيل في مصر بين عامي ١٩٦٠ و ١٩٧٠،",
+      "cps": 16.5,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 1,
+      "text": "وتم الانتهاء من بنائه في عام ٢٠٠٥.",
+      "cps": 16.2,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 2,
+      "text": "ويبلغ ارتفاعه ١١١ مترا وطوله حوالي ٨٣٠ ٣ مترا.",
+      "cps": 10.8,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 3,
+      "text": "وخلفها تقع بحيرة ناصر، اللي ممكن تحتفظ بنحو ١٣٢ كيلومترا مكعبا من الماي.",
+      "cps": 12.5,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 4,
+      "text": "وتستطيع توربيناتها الـ ١٢ توليد ما يصل إلى ١٠٠ ٢ ميغاواط من الكهربا.",
+      "cps": 14.7,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 5,
+      "text": "وقد ساعد مهندسون من الاتحاد السوفياتي في تصميم السد وبنائه.",
+      "cps": 11.8,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 6,
+      "text": "وهددت الماي المرتفعة معابد أبو سمبل، اللي بنيت لرامسس الثاني.",
+      "cps": 11.3,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 7,
+      "text": "وفيما بين عامي ١٩٦٤ و١٩٦٨، قامت اليونسكو بحملة دولية لنقل المعابد إلى أماكن أعلى.",
+      "cps": 14.0,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 9,
+      "text": "بس هو يحبس أيضا الطين اللي كان يخصب وادي النيل قبل.",
+      "cps": 11.5,
+      "reason": "needs condensing to one line / slower read"
+     }
+    ],
+    "srt_full": "1\n00:00:00,500 --> 00:00:04,492\n‏تم بناء سد أسوان العالي على نهر النيل في\n‏مصر بين عامي ١٩٦٠ و ١٩٧٠،\n\n2\n00:00:04,572 --> 00:00:06,670\n‏وتم الانتهاء من بنائه في عام ٢٠٠٥.\n\n3\n00:00:06,970 --> 00:00:11,220\n‏ويبلغ ارتفاعه ١١١ مترا وطوله حوالي ٨٣٠ ٣\n‏مترا.\n\n4\n00:00:11,520 --> 00:00:17,300\n‏وخلفها تقع بحيرة ناصر، اللي ممكن تحتفظ\n‏بنحو ١٣٢ كيلومترا مكعبا من الماي.\n\n5\n00:00:17,600 --> 00:00:22,230\n‏وتستطيع توربيناتها الـ ١٢ توليد ما يصل إلى\n‏١٠٠ ٢ ميغاواط من الكهربا.\n\n6\n00:00:22,530 --> 00:00:27,550\n‏وقد ساعد مهندسون من الاتحاد السوفياتي في\n‏تصميم السد وبنائه.\n\n7\n00:00:27,850 --> 00:00:33,250\n‏وهددت الماي المرتفعة معابد أبو سمبل، اللي\n‏بنيت لرامسس الثاني.\n\n8\n00:00:33,550 --> 00:00:39,330\n‏وفيما بين عامي ١٩٦٤ و١٩٦٨، قامت اليونسكو\n‏بحملة دولية لنقل المعابد إلى أماكن أعلى.\n\n9\n00:00:39,630 --> 00:00:42,842\n‏واليوم يحمي السد المزارع من الفيضانات،\n\n10\n00:00:42,922 --> 00:00:47,340\n‏بس هو يحبس أيضا الطين اللي كان يخصب وادي\n‏النيل قبل.\n",
+    "ass_style": [
+     "Style: Default,Noto Naskh Arabic,54,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,2,153,153,64,178"
+    ]
+   },
+   "dubbing": {
+    "voice": null,
+    "blocked": "no commercially cleared voice for ar-Gulf [ar_JO-kareem-medium (unverified)] - deliver subtitles, or supply a voice you hold the rights to",
+    "needs_shortening": [
+     0
+    ],
+    "estimate_note": "durations are character-rate estimates; the rendered audio decides",
+    "lines": [
+     {
+      "idx": 0,
+      "voice": null,
+      "licence": null,
+      "timing_target": {
+       "start": 0.5,
+       "end": 6.67,
+       "slot_s": 6.17
+      },
+      "estimated_s": 8.42,
+      "speed_needed": 1.365,
+      "action": "shorten_line"
+     },
+     {
+      "idx": 1,
+      "voice": null,
+      "licence": null,
+      "timing_target": {
+       "start": 6.97,
+       "end": 11.22,
+       "slot_s": 4.25
+      },
+      "estimated_s": 3.83,
+      "speed_needed": 0.901,
+      "action": "ok"
+     },
+     {
+      "idx": 2,
+      "voice": null,
+      "licence": null,
+      "timing_target": {
+       "start": 11.52,
+       "end": 17.3,
+       "slot_s": 5.78
+      },
+      "estimated_s": 6.0,
+      "speed_needed": 1.038,
+      "action": "brisker_read"
+     },
+     {
+      "idx": 3,
+      "voice": null,
+      "licence": null,
+      "timing_target": {
+       "start": 17.6,
+       "end": 22.23,
+       "slot_s": 4.63
+      },
+      "estimated_s": 5.67,
+      "speed_needed": 1.225,
+      "action": "brisker_read"
+     },
+     {
+      "idx": 4,
+      "voice": null,
+      "licence": null,
+      "timing_target": {
+       "start": 22.53,
+       "end": 27.55,
+       "slot_s": 5.02
+      },
+      "estimated_s": 4.92,
+      "speed_needed": 0.98,
+      "action": "ok"
+     },
+     {
+      "idx": 5,
+      "voice": null,
+      "licence": null,
+      "timing_target": {
+       "start": 27.85,
+       "end": 33.25,
+       "slot_s": 5.4
+      },
+      "estimated_s": 5.08,
+      "speed_needed": 0.941,
+      "action": "ok"
+     },
+     {
+      "idx": 6,
+      "voice": null,
+      "licence": null,
+      "timing_target": {
+       "start": 33.55,
+       "end": 39.33,
+       "slot_s": 5.78
+      },
+      "estimated_s": 6.75,
+      "speed_needed": 1.168,
+      "action": "brisker_read"
+     },
+     {
+      "idx": 7,
+      "voice": null,
+      "licence": null,
+      "timing_target": {
+       "start": 39.63,
+       "end": 47.34,
+       "slot_s": 7.71
+      },
+      "estimated_s": 7.5,
+      "speed_needed": 0.973,
+      "action": "ok"
+     }
+    ]
+   },
+   "voiceover_line": {
+    "skipped": "no commercially cleared voice for ar-Gulf [ar_JO-kareem-medium (unverified)] - deliver subtitles, or supply a voice you hold the rights to"
+   },
+   "seconds": 137.5,
+   "qa_recomputed": "2026-11-12T18:11:39"
+  },
+  "zh": {
+   "lang": "zh",
+   "started": "2026-11-12T17:42:43",
+   "mt_seconds": 129.6,
+   "mt_output": [
+    "阿斯旺高坝位于埃及尼罗河上，建于1960年至1970年间。",
+    "它高111米，长约3830米。",
+    "后面是纳赛尔湖，可容纳约132立方公里的水。",
+    "其12台涡轮机可发电量高达2,100兆瓦。",
+    "来自苏联的工程师帮助设计和建造了大坝。",
+    "水位上升威胁到为拉美西斯二世修建的阿布辛贝神庙。",
+    "1964年至1968年间，教科文组织的国际运动将寺庙迁移到较高的地点。",
+    "如今，这座水坝不仅保护农场免受洪灾的侵袭，而且还捕捉了曾经肥沃尼罗河谷的泥沙。"
+   ],
+   "final": [
+    "阿斯旺高坝位于埃及尼罗河上，建于1960年至1970年间。",
+    "它高111米，长约3830米。",
+    "后面是纳赛尔湖，可容纳约132立方公里的水。",
+    "其12台涡轮机可发电量高达2,100兆瓦。",
+    "来自苏联的工程师帮助设计和建造了大坝。",
+    "水位上升威胁到为拉美西斯二世修建的阿布辛贝神庙。",
+    "1964年至1968年间，教科文组织的国际运动将寺庙迁移到较高的地点。",
+    "如今，这座水坝不仅保护农场免受洪灾的侵袭，而且还捕捉了曾经肥沃尼罗河谷的泥沙。"
+   ],
+   "back_translation": {
+    "lines": [
+     "Aswan High Dam is located on the Nile River in Egypt, built between 1960 and 1970.",
+     "It is 111 meters high, about 3830 meters long.",
+     "Behind it is Naasir Lake, which can hold about 132 cubic kilometers of water.",
+     "Its 12 turbines can generate up to 2,100 megawatts of power.",
+     "Engineers from the Soviet Union helped design and build the dam.",
+     "The rising water threatens the temple built for Ramesses II.",
+     "From 1964 to 1968, the International UNESCO movement moved the temple to a higher location.",
+     "Now, this dam not only protects farms from flood damage, but also captures the silt from the once-fertile Nile Valley."
+    ],
+    "note": "local-llamacpp/qwen3-4b-q4km",
+    "seconds": 45.1
+   },
+   "qa": {
+    "lang": "zh",
+    "lines": [
+     {
+      "source": "The Aswan High Dam on the Nile in Egypt was built between 1960 and 1970.",
+      "target": "阿斯旺高坝位于埃及尼罗河上，建于1960年至1970年间。",
+      "lang": "zh",
+      "back": "Aswan High Dam is located on the Nile River in Egypt, built between 1960 and 1970.",
+      "coverage": 1.0,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['located', 'river']",
+        "items": [
+         "located",
+         "river"
+        ]
+       }
+      ],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     },
+     {
+      "source": "It is 111 metres high and about 3,830 metres long.",
+      "target": "它高111米，长约3830米。",
+      "lang": "zh",
+      "back": "It is 111 meters high, about 3830 meters long.",
+      "coverage": 1.0,
+      "findings": [],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Behind it lies Lake Nasser, which can hold about 132 cubic kilometres of water.",
+      "target": "后面是纳赛尔湖，可容纳约132立方公里的水。",
+      "lang": "zh",
+      "back": "Behind it is Naasir Lake, which can hold about 132 cubic kilometers of water.",
+      "coverage": 0.75,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['naasir']",
+        "items": [
+         "naasir"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "75% source content words come back; not found: ['lies', 'nasser']",
+        "items": [
+         "lies",
+         "nasser"
+        ]
+       }
+      ],
+      "confidence": 0.85,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Its 12 turbines can generate up to 2,100 megawatts of electricity.",
+      "target": "其12台涡轮机可发电量高达2,100兆瓦。",
+      "lang": "zh",
+      "back": "Its 12 turbines can generate up to 2,100 megawatts of power.",
+      "coverage": 0.75,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['power']",
+        "items": [
+         "power"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "75% source content words come back; not found: ['electricity']",
+        "items": [
+         "electricity"
+        ]
+       }
+      ],
+      "confidence": 0.85,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Engineers from the Soviet Union helped to design and build the dam.",
+      "target": "来自苏联的工程师帮助设计和建造了大坝。",
+      "lang": "zh",
+      "back": "Engineers from the Soviet Union helped design and build the dam.",
+      "coverage": 1.0,
+      "findings": [],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     },
+     {
+      "source": "The rising water threatened the temples of Abu Simbel, built for Ramesses II.",
+      "target": "水位上升威胁到为拉美西斯二世修建的阿布辛贝神庙。",
+      "lang": "zh",
+      "back": "The rising water threatens the temple built for Ramesses II.",
+      "coverage": 0.75,
+      "findings": [
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "75% source content words come back; not found: ['abu', 'simbel']",
+        "items": [
+         "abu",
+         "simbel"
+        ]
+       }
+      ],
+      "confidence": 0.85,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Between 1964 and 1968, an international UNESCO campaign moved the temples to higher ground.",
+      "target": "1964年至1968年间，教科文组织的国际运动将寺庙迁移到较高的地点。",
+      "lang": "zh",
+      "back": "From 1964 to 1968, the International UNESCO movement moved the temple to a higher location.",
+      "coverage": 0.625,
+      "findings": [
+       {
+        "check": "glossary_term_missing",
+        "severity": "major",
+        "detail": "glossary: 'UNESCO' must be rendered as '联合国教科文组织'",
+        "term": "UNESCO"
+       },
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['movement', 'location']",
+        "items": [
+         "movement",
+         "location"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "62% source content words come back; not found: ['between', 'campaign', 'ground']",
+        "items": [
+         "between",
+         "campaign",
+         "ground"
+        ]
+       }
+      ],
+      "confidence": 0.7,
+      "status": "needs_fix"
+     },
+     {
+      "source": "Today the dam protects farms from floods, but it also traps the silt that once fertilised the Nile valley.",
+      "target": "如今，这座水坝不仅保护农场免受洪灾的侵袭，而且还捕捉了曾经肥沃尼罗河谷的泥沙。",
+      "lang": "zh",
+      "back": "Now, this dam not only protects farms from flood damage, but also captures the silt from the once-fertile Nile Valley.",
+      "coverage": 0.636,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "major",
+        "detail": "the back-translation contains ideas the source never said: ['now', 'damage', 'captures', 'once-fertile']",
+        "items": [
+         "now",
+         "damage",
+         "captures",
+         "once-fertile"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "64% source content words come back; not found: ['today', 'traps', 'once', 'fertilized']",
+        "items": [
+         "today",
+         "traps",
+         "once",
+         "fertilized"
+        ]
+       }
+      ],
+      "confidence": 0.7,
+      "status": "needs_fix"
+     }
+    ],
+    "document": [],
+    "counts": {
+     "glossary_term_missing": 1,
+     "unsupported_content": 1
+    },
+    "mean_confidence": 0.869,
+    "lines_needing_fix": [
+     6,
+     7
+    ],
+    "back_translation": "run"
+   },
+   "subtitles": {
+    "paths": {
+     "full.srt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.zh.full.srt",
+     "full.vtt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.zh.full.vtt",
+     "full.ass": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.zh.full.ass",
+     "condensed.srt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.zh.condensed.srt",
+     "condensed.vtt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.zh.condensed.vtt",
+     "condensed.ass": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.zh.condensed.ass"
+    },
+    "qa_full": {
+     "cues": 10,
+     "findings": [],
+     "passed": true
+    },
+    "qa_condensed": {
+     "cues": 10,
+     "findings": [],
+     "passed": true
+    },
+    "condense_todo": [
+     {
+      "cue": 0,
+      "text": "阿斯旺高坝位于埃及尼罗河上，建于1960年至1970年间。",
+      "cps": 4.1,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 2,
+      "text": "后面是纳赛尔湖，可容纳约132立方公里的水。",
+      "cps": 3.5,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 3,
+      "text": "其12台涡轮机可发电量高达2,100兆瓦。",
+      "cps": 3.8,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 4,
+      "text": "来自苏联的工程师帮助设计和建造了大坝。",
+      "cps": 3.8,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 5,
+      "text": "水位上升威胁到为拉美西斯二世修建的阿布辛贝神庙。",
+      "cps": 4.4,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 7,
+      "text": "教科文组织的国际运动将寺庙迁移到较高的地点。",
+      "cps": 6.1,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 8,
+      "text": "如今，这座水坝不仅保护农场免受洪灾的侵袭，",
+      "cps": 5.2,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 9,
+      "text": "而且还捕捉了曾经肥沃尼罗河谷的泥沙。",
+      "cps": 5.1,
+      "reason": "needs condensing to one line / slower read"
+     }
+    ],
+    "srt_full": "1\n00:00:00,500 --> 00:00:06,670\n阿斯旺高坝位于埃及尼罗河上，建于\n1960年至1970年间。\n\n2\n00:00:06,970 --> 00:00:11,220\n它高111米，长约3830米。\n\n3\n00:00:11,520 --> 00:00:17,300\n后面是纳赛尔湖，可容纳约132立方\n公里的水。\n\n4\n00:00:17,600 --> 00:00:22,230\n其12台涡轮机可发电量高达2,100兆\n瓦。\n\n5\n00:00:22,530 --> 00:00:27,550\n来自苏联的工程师帮助设计和建造了\n大坝。\n\n6\n00:00:27,850 --> 00:00:33,250\n水位上升威胁到为拉美西斯二世修建\n的阿布辛贝神庙。\n\n7\n00:00:33,550 --> 00:00:35,617\n1964年至1968年间，\n\n8\n00:00:35,697 --> 00:00:39,330\n教科文组织的国际运动将寺庙迁移到\n较高的地点。\n\n9\n00:00:39,630 --> 00:00:43,702\n如今，这座水坝不仅保护农场免受洪\n灾的侵袭，\n\n10\n00:00:43,782 --> 00:00:47,340\n而且还捕捉了曾经肥沃尼罗河谷的泥\n沙。\n",
+    "ass_style": [
+     "Style: Default,WenQuanYi Zen Hei,59,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,2,153,153,64,134"
+    ]
+   },
+   "dubbing": {
+    "voice": {
+     "id": "zh_CN-chaowen-medium",
+     "engine": "piper",
+     "licence": "dataset CC0; base Hi-Fi TTS CC BY 4.0; needs Piper >= 1.5 + g2pW",
+     "commercial_use": "yes",
+     "attribution": "Hi-Fi TTS (CC BY 4.0)",
+     "source": "languages.yaml (MODEL_CARD 2026-11-12)",
+     "installed": false
+    },
+    "blocked": null,
+    "needs_shortening": [
+     6
+    ],
+    "estimate_note": "durations are character-rate estimates; the rendered audio decides",
+    "lines": [
+     {
+      "idx": 0,
+      "voice": "zh_CN-chaowen-medium",
+      "licence": "dataset CC0; base Hi-Fi TTS CC BY 4.0; needs Piper >= 1.5 + g2pW",
+      "timing_target": {
+       "start": 0.5,
+       "end": 6.67,
+       "slot_s": 6.17
+      },
+      "estimated_s": 6.44,
+      "speed_needed": 1.044,
+      "action": "brisker_read"
+     },
+     {
+      "idx": 1,
+      "voice": "zh_CN-chaowen-medium",
+      "licence": "dataset CC0; base Hi-Fi TTS CC BY 4.0; needs Piper >= 1.5 + g2pW",
+      "timing_target": {
+       "start": 6.97,
+       "end": 11.22,
+       "slot_s": 4.25
+      },
+      "estimated_s": 3.33,
+      "speed_needed": 0.784,
+      "action": "ok"
+     },
+     {
+      "idx": 2,
+      "voice": "zh_CN-chaowen-medium",
+      "licence": "dataset CC0; base Hi-Fi TTS CC BY 4.0; needs Piper >= 1.5 + g2pW",
+      "timing_target": {
+       "start": 11.52,
+       "end": 17.3,
+       "slot_s": 5.78
+      },
+      "estimated_s": 4.89,
+      "speed_needed": 0.846,
+      "action": "ok"
+     },
+     {
+      "idx": 3,
+      "voice": "zh_CN-chaowen-medium",
+      "licence": "dataset CC0; base Hi-Fi TTS CC BY 4.0; needs Piper >= 1.5 + g2pW",
+      "timing_target": {
+       "start": 17.6,
+       "end": 22.23,
+       "slot_s": 4.63
+      },
+      "estimated_s": 4.67,
+      "speed_needed": 1.009,
+      "action": "brisker_read"
+     },
+     {
+      "idx": 4,
+      "voice": "zh_CN-chaowen-medium",
+      "licence": "dataset CC0; base Hi-Fi TTS CC BY 4.0; needs Piper >= 1.5 + g2pW",
+      "timing_target": {
+       "start": 22.53,
+       "end": 27.55,
+       "slot_s": 5.02
+      },
+      "estimated_s": 4.22,
+      "speed_needed": 0.841,
+      "action": "ok"
+     },
+     {
+      "idx": 5,
+      "voice": "zh_CN-chaowen-medium",
+      "licence": "dataset CC0; base Hi-Fi TTS CC BY 4.0; needs Piper >= 1.5 + g2pW",
+      "timing_target": {
+       "start": 27.85,
+       "end": 33.25,
+       "slot_s": 5.4
+      },
+      "estimated_s": 5.33,
+      "speed_needed": 0.987,
+      "action": "ok"
+     },
+     {
+      "idx": 6,
+      "voice": "zh_CN-chaowen-medium",
+      "licence": "dataset CC0; base Hi-Fi TTS CC BY 4.0; needs Piper >= 1.5 + g2pW",
+      "timing_target": {
+       "start": 33.55,
+       "end": 39.33,
+       "slot_s": 5.78
+      },
+      "estimated_s": 7.78,
+      "speed_needed": 1.346,
+      "action": "shorten_line"
+     },
+     {
+      "idx": 7,
+      "voice": "zh_CN-chaowen-medium",
+      "licence": "dataset CC0; base Hi-Fi TTS CC BY 4.0; needs Piper >= 1.5 + g2pW",
+      "timing_target": {
+       "start": 39.63,
+       "end": 47.34,
+       "slot_s": 7.71
+      },
+      "estimated_s": 8.67,
+      "speed_needed": 1.125,
+      "action": "brisker_read"
+     }
+    ]
+   },
+   "voiceover_line": {
+    "idx": 0,
+    "error": "Error: # channels not specified"
+   },
+   "seconds": 242.3,
+   "qa_recomputed": "2026-11-12T18:11:39"
+  },
+  "ru": {
+   "lang": "ru",
+   "started": "2026-11-12T17:46:45",
+   "mt_seconds": 182.5,
+   "mt_output": [
+    "Асуанская высокая плотина на Ниле в Египте была построена между 1960 и 1970 годами.",
+    "Его высота составляет 111 метров, а длина — около 3830 метров.",
+    "За ним лежит озеро Насер, которое может вместить около 132 кубических километров воды.",
+    "Ее 12 турбин могут вырабатывать до 2100 мегаватт электроэнергии.",
+    "Инженеры из Советского Союза помогли спроектировать и построить плотину.",
+    "Воды, поднимавшиеся, угрожали храмам Абу Симбели, построенным для Рамесеса II.",
+    "Между 1964 и 1968 годами в рамках международной кампании ЮНЕСКО храмы были перенесены на более высокую точку.",
+    "Сегодня плотина защищает фермы от наводнений, но она также удерживает ила, который когда-то удобрял долину Нила."
+   ],
+   "final": [
+    "Асуанская высокая плотина на Ниле в Египте была построена между 1960 и 1970 годами.",
+    "Его высота составляет 111 метров, а длина — около 3830 метров.",
+    "За ним лежит озеро Насер, которое может вместить около 132 кубических километров воды.",
+    "Ее 12 турбин могут вырабатывать до 2100 мегаватт электроэнергии.",
+    "Инженеры из Советского Союза помогли спроектировать и построить плотину.",
+    "Воды, поднимавшиеся, угрожали храмам Абу Симбели, построенным для Рамесеса II.",
+    "Между 1964 и 1968 годами в рамках международной кампании ЮНЕСКО храмы были перенесены на более высокую точку.",
+    "Сегодня плотина защищает фермы от наводнений, но она также удерживает ила, который когда-то удобрял долину Нила."
+   ],
+   "back_translation": {
+    "lines": [
+     "The Aswan high dam on the Nile in Egypt was built between 1960 and 1970.",
+     "Its height is 111 meters, and its length — about 3830 meters.",
+     "Behind it lies Lake Nasser, which can hold about 132 cubic kilometers of water.",
+     "Its 12 turbines can generate up to 2100 megawatts of electricity.",
+     "Engineers from the Soviet Union helped design and build the dam.",
+     "The waters rising, threatened the temples of Abu Simbel, built for Ramesses II.",
+     "Between 1964 and 1968, within the framework of an international campaign by UNESCO, the temples were moved to a higher point.",
+     "Today the dam protects farms from floods, but it also retains silt, which once fertilized the Nile valley."
+    ],
+    "note": "local-llamacpp/qwen3-4b-q4km",
+    "seconds": 45.8
+   },
+   "qa": {
+    "lang": "ru",
+    "lines": [
+     {
+      "source": "The Aswan High Dam on the Nile in Egypt was built between 1960 and 1970.",
+      "target": "Асуанская высокая плотина на Ниле в Египте была построена между 1960 и 1970 годами.",
+      "lang": "ru",
+      "back": "The Aswan high dam on the Nile in Egypt was built between 1960 and 1970.",
+      "coverage": 1.0,
+      "findings": [],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     },
+     {
+      "source": "It is 111 metres high and about 3,830 metres long.",
+      "target": "Его высота составляет 111 метров, а длина — около 3830 метров.",
+      "lang": "ru",
+      "back": "Its height is 111 meters, and its length — about 3830 meters.",
+      "coverage": 1.0,
+      "findings": [],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Behind it lies Lake Nasser, which can hold about 132 cubic kilometres of water.",
+      "target": "За ним лежит озеро Насер, которое может вместить около 132 кубических километров воды.",
+      "lang": "ru",
+      "back": "Behind it lies Lake Nasser, which can hold about 132 cubic kilometers of water.",
+      "coverage": 1.0,
+      "findings": [],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Its 12 turbines can generate up to 2,100 megawatts of electricity.",
+      "target": "Ее 12 турбин могут вырабатывать до 2100 мегаватт электроэнергии.",
+      "lang": "ru",
+      "back": "Its 12 turbines can generate up to 2100 megawatts of electricity.",
+      "coverage": 1.0,
+      "findings": [],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Engineers from the Soviet Union helped to design and build the dam.",
+      "target": "Инженеры из Советского Союза помогли спроектировать и построить плотину.",
+      "lang": "ru",
+      "back": "Engineers from the Soviet Union helped design and build the dam.",
+      "coverage": 1.0,
+      "findings": [],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     },
+     {
+      "source": "The rising water threatened the temples of Abu Simbel, built for Ramesses II.",
+      "target": "Воды, поднимавшиеся, угрожали храмам Абу Симбели, построенным для Рамесеса II.",
+      "lang": "ru",
+      "back": "The waters rising, threatened the temples of Abu Simbel, built for Ramesses II.",
+      "coverage": 1.0,
+      "findings": [
+       {
+        "check": "glossary_term_missing",
+        "severity": "major",
+        "detail": "glossary: 'Abu Simbel' must be rendered as 'Абу-Симбел'",
+        "term": "Abu Simbel"
+       },
+       {
+        "check": "glossary_term_missing",
+        "severity": "major",
+        "detail": "glossary: 'Ramesses II' must be rendered as 'Рамсес'",
+        "term": "Ramesses II"
+       }
+      ],
+      "confidence": 0.4,
+      "status": "needs_fix"
+     },
+     {
+      "source": "Between 1964 and 1968, an international UNESCO campaign moved the temples to higher ground.",
+      "target": "Между 1964 и 1968 годами в рамках международной кампании ЮНЕСКО храмы были перенесены на более высокую точку.",
+      "lang": "ru",
+      "back": "Between 1964 and 1968, within the framework of an international campaign by UNESCO, the temples were moved to a higher point.",
+      "coverage": 0.875,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "major",
+        "detail": "the back-translation contains ideas the source never said: ['within', 'framework', 'point']",
+        "items": [
+         "within",
+         "framework",
+         "point"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "88% source content words come back; not found: ['ground']",
+        "items": [
+         "ground"
+        ]
+       }
+      ],
+      "confidence": 0.7,
+      "status": "needs_fix"
+     },
+     {
+      "source": "Today the dam protects farms from floods, but it also traps the silt that once fertilised the Nile valley.",
+      "target": "Сегодня плотина защищает фермы от наводнений, но она также удерживает ила, который когда-то удобрял долину Нила.",
+      "lang": "ru",
+      "back": "Today the dam protects farms from floods, but it also retains silt, which once fertilized the Nile valley.",
+      "coverage": 0.909,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['retains']",
+        "items": [
+         "retains"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "91% source content words come back; not found: ['traps']",
+        "items": [
+         "traps"
+        ]
+       }
+      ],
+      "confidence": 0.945,
+      "status": "machine_ok"
+     }
+    ],
+    "document": [],
+    "counts": {
+     "glossary_term_missing": 2,
+     "unsupported_content": 1
+    },
+    "mean_confidence": 0.881,
+    "lines_needing_fix": [
+     5,
+     6
+    ],
+    "back_translation": "run"
+   },
+   "subtitles": {
+    "paths": {
+     "full.srt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.ru.full.srt",
+     "full.vtt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.ru.full.vtt",
+     "full.ass": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.ru.full.ass",
+     "condensed.srt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.ru.condensed.srt",
+     "condensed.vtt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.ru.condensed.vtt",
+     "condensed.ass": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.ru.condensed.ass"
+    },
+    "qa_full": {
+     "cues": 11,
+     "findings": [
+      {
+       "cue": 3,
+       "check": "min_duration",
+       "severity": "minor",
+       "detail": "0.34s < 5/6 s"
+      },
+      {
+       "cue": 7,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "18.8 cps > 17"
+      },
+      {
+       "cue": 8,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "18.7 cps > 17"
+      }
+     ],
+     "passed": false
+    },
+    "qa_condensed": {
+     "cues": 11,
+     "findings": [
+      {
+       "cue": 3,
+       "check": "min_duration",
+       "severity": "minor",
+       "detail": "0.34s < 5/6 s"
+      },
+      {
+       "cue": 7,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "18.8 cps > 17"
+      },
+      {
+       "cue": 8,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "18.7 cps > 17"
+      }
+     ],
+     "passed": false
+    },
+    "condense_todo": [
+     {
+      "cue": 0,
+      "text": "Асуанская высокая плотина на Ниле в Египте была построена между 1960 и 1970 годами.",
+      "cps": 13.5,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 1,
+      "text": "Его высота составляет 111 метров, а длина — около 3830 метров.",
+      "cps": 14.6,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 2,
+      "text": "За ним лежит озеро Насер, которое может вместить около 132 кубических километров",
+      "cps": 14.9,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 3,
+      "text": "воды.",
+      "cps": 14.7,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 4,
+      "text": "Ее 12 турбин могут вырабатывать до 2100 мегаватт электроэнергии.",
+      "cps": 13.8,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 5,
+      "text": "Инженеры из Советского Союза помогли спроектировать и построить плотину.",
+      "cps": 14.3,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 6,
+      "text": "Воды, поднимавшиеся, угрожали храмам Абу Симбели, построенным для Рамесеса II.",
+      "cps": 14.4,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 7,
+      "text": "Между 1964 и 1968 годами в рамках международной кампании ЮНЕСКО храмы были",
+      "cps": 19.1,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 8,
+      "text": "перенесены на более высокую точку.",
+      "cps": 18.7,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 9,
+      "text": "Сегодня плотина защищает фермы от наводнений, но она также удерживает ила,",
+      "cps": 14.6,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 10,
+      "text": "который когда-то удобрял долину Нила.",
+      "cps": 14.4,
+      "reason": "needs condensing to one line / slower read"
+     }
+    ],
+    "srt_full": "1\n00:00:00,500 --> 00:00:06,670\nАсуанская высокая плотина на Ниле в Египте\nбыла построена между 1960 и 1970 годами.\n\n2\n00:00:06,970 --> 00:00:11,220\nЕго высота составляет 111 метров, а длина\n— около 3830 метров.\n\n3\n00:00:11,520 --> 00:00:16,880\nЗа ним лежит озеро Насер, которое может\nвместить около 132 кубических километров\n\n4\n00:00:16,960 --> 00:00:17,300\nводы.\n\n5\n00:00:17,600 --> 00:00:22,230\nЕе 12 турбин могут вырабатывать до 2100\nмегаватт электроэнергии.\n\n6\n00:00:22,530 --> 00:00:27,550\nИнженеры из Советского Союза помогли\nспроектировать и построить плотину.\n\n7\n00:00:27,850 --> 00:00:33,250\nВоды, поднимавшиеся, угрожали храмам Абу\nСимбели, построенным для Рамесеса II.\n\n8\n00:00:33,550 --> 00:00:37,430\nМежду 1964 и 1968 годами в рамках\nмеждународной кампании ЮНЕСКО храмы были\n\n9\n00:00:37,510 --> 00:00:39,330\nперенесены на более высокую точку.\n\n10\n00:00:39,630 --> 00:00:44,690\nСегодня плотина защищает фермы от\nнаводнений, но она также удерживает ила,\n\n11\n00:00:44,770 --> 00:00:47,340\nкоторый когда-то удобрял долину Нила.\n",
+    "ass_style": [
+     "Style: Default,DejaVu Sans,54,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,2,153,153,64,1"
+    ]
+   },
+   "dubbing": {
+    "voice": {
+     "id": "ru_RU-denis-medium",
+     "engine": "piper",
+     "licence": "dataset CC0; base rdh CC0",
+     "commercial_use": "yes",
+     "source": "languages.yaml (MODEL_CARD 2026-11-12)",
+     "installed": false
+    },
+    "blocked": null,
+    "needs_shortening": [
+     6
+    ],
+    "estimate_note": "durations are character-rate estimates; the rendered audio decides",
+    "lines": [
+     {
+      "idx": 0,
+      "voice": "ru_RU-denis-medium",
+      "licence": "dataset CC0; base rdh CC0",
+      "timing_target": {
+       "start": 0.5,
+       "end": 6.67,
+       "slot_s": 6.17
+      },
+      "estimated_s": 5.93,
+      "speed_needed": 0.961,
+      "action": "ok"
+     },
+     {
+      "idx": 1,
+      "voice": "ru_RU-denis-medium",
+      "licence": "dataset CC0; base rdh CC0",
+      "timing_target": {
+       "start": 6.97,
+       "end": 11.22,
+       "slot_s": 4.25
+      },
+      "estimated_s": 4.43,
+      "speed_needed": 1.042,
+      "action": "brisker_read"
+     },
+     {
+      "idx": 2,
+      "voice": "ru_RU-denis-medium",
+      "licence": "dataset CC0; base rdh CC0",
+      "timing_target": {
+       "start": 11.52,
+       "end": 17.3,
+       "slot_s": 5.78
+      },
+      "estimated_s": 6.14,
+      "speed_needed": 1.062,
+      "action": "brisker_read"
+     },
+     {
+      "idx": 3,
+      "voice": "ru_RU-denis-medium",
+      "licence": "dataset CC0; base rdh CC0",
+      "timing_target": {
+       "start": 17.6,
+       "end": 22.23,
+       "slot_s": 4.63
+      },
+      "estimated_s": 4.57,
+      "speed_needed": 0.987,
+      "action": "ok"
+     },
+     {
+      "idx": 4,
+      "voice": "ru_RU-denis-medium",
+      "licence": "dataset CC0; base rdh CC0",
+      "timing_target": {
+       "start": 22.53,
+       "end": 27.55,
+       "slot_s": 5.02
+      },
+      "estimated_s": 5.14,
+      "speed_needed": 1.024,
+      "action": "brisker_read"
+     },
+     {
+      "idx": 5,
+      "voice": "ru_RU-denis-medium",
+      "licence": "dataset CC0; base rdh CC0",
+      "timing_target": {
+       "start": 27.85,
+       "end": 33.25,
+       "slot_s": 5.4
+      },
+      "estimated_s": 5.57,
+      "speed_needed": 1.031,
+      "action": "brisker_read"
+     },
+     {
+      "idx": 6,
+      "voice": "ru_RU-denis-medium",
+      "licence": "dataset CC0; base rdh CC0",
+      "timing_target": {
+       "start": 33.55,
+       "end": 39.33,
+       "slot_s": 5.78
+      },
+      "estimated_s": 7.79,
+      "speed_needed": 1.348,
+      "action": "shorten_line"
+     },
+     {
+      "idx": 7,
+      "voice": "ru_RU-denis-medium",
+      "licence": "dataset CC0; base rdh CC0",
+      "timing_target": {
+       "start": 39.63,
+       "end": 47.34,
+       "slot_s": 7.71
+      },
+      "estimated_s": 8.0,
+      "speed_needed": 1.038,
+      "action": "brisker_read"
+     }
+    ]
+   },
+   "voiceover_line": {
+    "idx": 0,
+    "text": "Асуанская высокая плотина на Ниле в Египте была построена между 1960 и 1970 годами.",
+    "voice": "ru_RU-denis-medium",
+    "engine": "piper",
+    "license": "dataset CC0 (OHF-Voice/voice-datasets); base model rdh (CC0 per card)",
+    "commercial": true,
+    "duration": 7.997916666666667,
+    "lufs": -18.07,
+    "cached": false
+   },
+   "seconds": 255.9,
+   "qa_recomputed": "2026-11-12T18:11:39"
+  },
+  "hi": {
+   "lang": "hi",
+   "started": "2026-11-12T17:51:01",
+   "mt_seconds": 20.5,
+   "mt_output": [
+    "मिस्र में नील नदी पर असवान हाई बांध का निर्माण १९६० और १९७० के बीच किया गया था।",
+    "यह 111 मीटर ऊँचा और लगभग 3,830 मीटर लंबा है।",
+    "इसके पीछे नासर झील है, जो लगभग 132 घन किलोमीटर पानी रख सकती है।",
+    "इसके 12 टर्बाइन 2,100 मेगावाट तक बिजली उत्पन्न कर सकते हैं।",
+    "सोवियत संघ के इंजीनियरों ने बांध के डिजाइन और निर्माण में मदद की।",
+    "बढ़ते पानी ने अबू सिम्बेल के मंदिरों को खतरा पैदा कर दिया, जो रामेसेस द्वितीय के लिए बनाए गए थे।",
+    "1964 और 1968 के बीच, एक अंतर्राष्ट्रीय यूनेस्को अभियान ने मंदिरों को उच्च भूमि पर स्थानांतरित कर दिया।",
+    "आज बांध बाढ़ से खेतों की रक्षा करता है, लेकिन यह एक समय नील घाटी को उर्वरक प्रदान करने वाली मिट्टी को भी पकड़ लेता है।"
+   ],
+   "final": [
+    "मिस्र में नील नदी पर असवान हाई बांध का निर्माण १९६० और १९७० के बीच किया गया था।",
+    "यह 111 मीटर ऊँचा और लगभग 3,830 मीटर लंबा है।",
+    "इसके पीछे नासर झील है, जो लगभग 132 घन किलोमीटर पानी रख सकती है।",
+    "इसके 12 टर्बाइन 2,100 मेगावाट तक बिजली उत्पन्न कर सकते हैं।",
+    "सोवियत संघ के इंजीनियरों ने बांध के डिजाइन और निर्माण में मदद की।",
+    "बढ़ते पानी ने अबू सिम्बेल के मंदिरों को खतरा पैदा कर दिया, जो रामेसेस द्वितीय के लिए बनाए गए थे।",
+    "1964 और 1968 के बीच, एक अंतर्राष्ट्रीय यूनेस्को अभियान ने मंदिरों को उच्च भूमि पर स्थानांतरित कर दिया।",
+    "आज बांध बाढ़ से खेतों की रक्षा करता है, लेकिन यह एक समय नील घाटी को उर्वरक प्रदान करने वाली मिट्टी को भी पकड़ लेता है।"
+   ],
+   "back_translation": {
+    "lines": [
+     "The construction of the Aswan High Dam on the Nile River in Egypt was done between 1960 and 1970.",
+     "It is 111 meters high and approximately 3,830 meters long.",
+     "Behind it is Naasir Lake, which can hold approximately 132 cubic kilometers of water.",
+     "Its 12 turbines can generate up to 2,100 megawatts of electricity.",
+     "Engineers from the Soviet Union helped with the design and construction of the dam.",
+     "Rising water has now threatened the temples of Abu Simbel, which were built for Ramses II.",
+     "Between 1964 and 1968, an international UNESCO campaign relocated the temples to higher ground.",
+     "Today the dam protects fields from floods, but it also captures the fertile soil that once nourished the Nile Valley."
+    ],
+    "note": "local-llamacpp/qwen3-4b-q4km",
+    "seconds": 65.4
+   },
+   "qa": {
+    "lang": "hi",
+    "lines": [
+     {
+      "source": "The Aswan High Dam on the Nile in Egypt was built between 1960 and 1970.",
+      "target": "मिस्र में नील नदी पर असवान हाई बांध का निर्माण १९६० और १९७० के बीच किया गया था।",
+      "lang": "hi",
+      "back": "The construction of the Aswan High Dam on the Nile River in Egypt was done between 1960 and 1970.",
+      "coverage": 1.0,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['river', 'done']",
+        "items": [
+         "river",
+         "done"
+        ]
+       }
+      ],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     },
+     {
+      "source": "It is 111 metres high and about 3,830 metres long.",
+      "target": "यह 111 मीटर ऊँचा और लगभग 3,830 मीटर लंबा है।",
+      "lang": "hi",
+      "back": "It is 111 meters high and approximately 3,830 meters long.",
+      "coverage": 1.0,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['approximately']",
+        "items": [
+         "approximately"
+        ]
+       }
+      ],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Behind it lies Lake Nasser, which can hold about 132 cubic kilometres of water.",
+      "target": "इसके पीछे नासर झील है, जो लगभग 132 घन किलोमीटर पानी रख सकती है।",
+      "lang": "hi",
+      "back": "Behind it is Naasir Lake, which can hold approximately 132 cubic kilometers of water.",
+      "coverage": 0.75,
+      "findings": [
+       {
+        "check": "glossary_term_missing",
+        "severity": "major",
+        "detail": "glossary: 'Lake Nasser' must be rendered as 'नासिर'",
+        "term": "Lake Nasser"
+       },
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['naasir', 'approximately']",
+        "items": [
+         "naasir",
+         "approximately"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "75% source content words come back; not found: ['lies', 'nasser']",
+        "items": [
+         "lies",
+         "nasser"
+        ]
+       }
+      ],
+      "confidence": 0.7,
+      "status": "needs_fix"
+     },
+     {
+      "source": "Its 12 turbines can generate up to 2,100 megawatts of electricity.",
+      "target": "इसके 12 टर्बाइन 2,100 मेगावाट तक बिजली उत्पन्न कर सकते हैं।",
+      "lang": "hi",
+      "back": "Its 12 turbines can generate up to 2,100 megawatts of electricity.",
+      "coverage": 1.0,
+      "findings": [],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Engineers from the Soviet Union helped to design and build the dam.",
+      "target": "सोवियत संघ के इंजीनियरों ने बांध के डिजाइन और निर्माण में मदद की।",
+      "lang": "hi",
+      "back": "Engineers from the Soviet Union helped with the design and construction of the dam.",
+      "coverage": 1.0,
+      "findings": [],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     },
+     {
+      "source": "The rising water threatened the temples of Abu Simbel, built for Ramesses II.",
+      "target": "बढ़ते पानी ने अबू सिम्बेल के मंदिरों को खतरा पैदा कर दिया, जो रामेसेस द्वितीय के लिए बनाए गए थे।",
+      "lang": "hi",
+      "back": "Rising water has now threatened the temples of Abu Simbel, which were built for Ramses II.",
+      "coverage": 0.875,
+      "findings": [
+       {
+        "check": "glossary_term_missing",
+        "severity": "major",
+        "detail": "glossary: 'Abu Simbel' must be rendered as 'अबू सिम्बल'",
+        "term": "Abu Simbel"
+       },
+       {
+        "check": "glossary_term_missing",
+        "severity": "major",
+        "detail": "glossary: 'Ramesses II' must be rendered as 'रामसेस'",
+        "term": "Ramesses II"
+       },
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['now', 'ramses']",
+        "items": [
+         "now",
+         "ramses"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "88% source content words come back; not found: ['ramesses']",
+        "items": [
+         "ramesses"
+        ]
+       }
+      ],
+      "confidence": 0.4,
+      "status": "needs_fix"
+     },
+     {
+      "source": "Between 1964 and 1968, an international UNESCO campaign moved the temples to higher ground.",
+      "target": "1964 और 1968 के बीच, एक अंतर्राष्ट्रीय यूनेस्को अभियान ने मंदिरों को उच्च भूमि पर स्थानांतरित कर दिया।",
+      "lang": "hi",
+      "back": "Between 1964 and 1968, an international UNESCO campaign relocated the temples to higher ground.",
+      "coverage": 0.875,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['relocated']",
+        "items": [
+         "relocated"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "88% source content words come back; not found: ['moved']",
+        "items": [
+         "moved"
+        ]
+       }
+      ],
+      "confidence": 0.925,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Today the dam protects farms from floods, but it also traps the silt that once fertilised the Nile valley.",
+      "target": "आज बांध बाढ़ से खेतों की रक्षा करता है, लेकिन यह एक समय नील घाटी को उर्वरक प्रदान करने वाली मिट्टी को भी पकड़ लेता है।",
+      "lang": "hi",
+      "back": "Today the dam protects fields from floods, but it also captures the fertile soil that once nourished the Nile Valley.",
+      "coverage": 0.727,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "major",
+        "detail": "the back-translation contains ideas the source never said: ['fields', 'captures', 'soil', 'nourished']",
+        "items": [
+         "fields",
+         "captures",
+         "soil",
+         "nourished"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "73% source content words come back; not found: ['farms', 'traps', 'silt']",
+        "items": [
+         "farms",
+         "traps",
+         "silt"
+        ]
+       }
+      ],
+      "confidence": 0.7,
+      "status": "needs_fix"
+     }
+    ],
+    "document": [],
+    "counts": {
+     "glossary_term_missing": 3,
+     "unsupported_content": 1
+    },
+    "mean_confidence": 0.841,
+    "lines_needing_fix": [
+     2,
+     5,
+     7
+    ],
+    "back_translation": "run"
+   },
+   "subtitles": {
+    "paths": {
+     "full.srt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.hi.full.srt",
+     "full.vtt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.hi.full.vtt",
+     "full.ass": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.hi.full.ass",
+     "condensed.srt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.hi.condensed.srt",
+     "condensed.vtt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.hi.condensed.vtt",
+     "condensed.ass": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.hi.condensed.ass"
+    },
+    "qa_full": {
+     "cues": 11,
+     "findings": [],
+     "passed": true
+    },
+    "qa_condensed": {
+     "cues": 11,
+     "findings": [],
+     "passed": true
+    },
+    "condense_todo": [
+     {
+      "cue": 0,
+      "text": "मिस्र में नील नदी पर असवान हाई बांध का निर्माण १९६० और १९७० के बीच किया गया था।",
+      "cps": 12.8,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 1,
+      "text": "यह 111 मीटर ऊँचा और लगभग 3,830 मीटर लंबा है।",
+      "cps": 10.4,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 2,
+      "text": "इसके पीछे नासर झील है, जो लगभग 132 घन किलोमीटर पानी रख सकती है।",
+      "cps": 10.9,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 3,
+      "text": "इसके 12 टर्बाइन 2,100 मेगावाट तक बिजली उत्पन्न कर सकते हैं।",
+      "cps": 12.7,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 4,
+      "text": "सोवियत संघ के इंजीनियरों ने बांध के डिजाइन और निर्माण में मदद की।",
+      "cps": 12.9,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 5,
+      "text": "बढ़ते पानी ने अबू सिम्बेल के मंदिरों को खतरा पैदा कर दिया,",
+      "cps": 18.0,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 6,
+      "text": "जो रामेसेस द्वितीय के लिए बनाए गए थे।",
+      "cps": 17.6,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 7,
+      "text": "1964 और 1968 के बीच, एक अंतर्राष्ट्रीय यूनेस्को अभियान ने मंदिरों को उच्च भूमि पर",
+      "cps": 17.8,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 8,
+      "text": "स्थानांतरित कर दिया।",
+      "cps": 17.5,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 10,
+      "text": "लेकिन यह एक समय नील घाटी को उर्वरक प्रदान करने वाली मिट्टी को भी पकड़ लेता है।",
+      "cps": 15.2,
+      "reason": "needs condensing to one line / slower read"
+     }
+    ],
+    "srt_full": "1\n00:00:00,500 --> 00:00:06,670\nमिस्र में नील नदी पर असवान हाई बांध का\nनिर्माण १९६० और १९७० के बीच किया गया था।\n\n2\n00:00:06,970 --> 00:00:11,220\nयह 111 मीटर ऊँचा और लगभग 3,830 मीटर लंबा\nहै।\n\n3\n00:00:11,520 --> 00:00:17,300\nइसके पीछे नासर झील है, जो लगभग 132 घन\nकिलोमीटर पानी रख सकती है।\n\n4\n00:00:17,600 --> 00:00:22,230\nइसके 12 टर्बाइन 2,100 मेगावाट तक बिजली\nउत्पन्न कर सकते हैं।\n\n5\n00:00:22,530 --> 00:00:27,550\nसोवियत संघ के इंजीनियरों ने बांध के डिजाइन\nऔर निर्माण में मदद की।\n\n6\n00:00:27,850 --> 00:00:31,067\nबढ़ते पानी ने अबू सिम्बेल के मंदिरों को\nखतरा पैदा कर दिया,\n\n7\n00:00:31,147 --> 00:00:33,250\nजो रामेसेस द्वितीय के लिए बनाए गए थे।\n\n8\n00:00:33,550 --> 00:00:38,105\n1964 और 1968 के बीच, एक अंतर्राष्ट्रीय\nयूनेस्को अभियान ने मंदिरों को उच्च भूमि पर\n\n9\n00:00:38,185 --> 00:00:39,330\nस्थानांतरित कर दिया।\n\n10\n00:00:39,630 --> 00:00:42,120\nआज बांध बाढ़ से खेतों की रक्षा करता है,\n\n11\n00:00:42,200 --> 00:00:47,340\nलेकिन यह एक समय नील घाटी को उर्वरक प्रदान\nकरने वाली मिट्टी को भी पकड़ लेता है।\n",
+    "ass_style": [
+     "Style: Default,Noto Sans Devanagari,54,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,2,153,153,64,1"
+    ]
+   },
+   "dubbing": {
+    "voice": {
+     "id": "kokoro:hi (one of 4 voices in VOICES.md)",
+     "engine": "kokoro-82m",
+     "licence": "Apache-2.0",
+     "commercial_use": "yes",
+     "source": "Kokoro VOICES.md (grade C)",
+     "installed": false
+    },
+    "blocked": null,
+    "needs_shortening": [
+     5,
+     6
+    ],
+    "estimate_note": "durations are character-rate estimates; the rendered audio decides",
+    "lines": [
+     {
+      "idx": 0,
+      "voice": "kokoro:hi (one of 4 voices in VOICES.md)",
+      "licence": "Apache-2.0",
+      "timing_target": {
+       "start": 0.5,
+       "end": 6.67,
+       "slot_s": 6.17
+      },
+      "estimated_s": 6.08,
+      "speed_needed": 0.985,
+      "action": "ok"
+     },
+     {
+      "idx": 1,
+      "voice": "kokoro:hi (one of 4 voices in VOICES.md)",
+      "licence": "Apache-2.0",
+      "timing_target": {
+       "start": 6.97,
+       "end": 11.22,
+       "slot_s": 4.25
+      },
+      "estimated_s": 3.38,
+      "speed_needed": 0.795,
+      "action": "ok"
+     },
+     {
+      "idx": 2,
+      "voice": "kokoro:hi (one of 4 voices in VOICES.md)",
+      "licence": "Apache-2.0",
+      "timing_target": {
+       "start": 11.52,
+       "end": 17.3,
+       "slot_s": 5.78
+      },
+      "estimated_s": 4.85,
+      "speed_needed": 0.839,
+      "action": "ok"
+     },
+     {
+      "idx": 3,
+      "voice": "kokoro:hi (one of 4 voices in VOICES.md)",
+      "licence": "Apache-2.0",
+      "timing_target": {
+       "start": 17.6,
+       "end": 22.23,
+       "slot_s": 4.63
+      },
+      "estimated_s": 4.54,
+      "speed_needed": 0.981,
+      "action": "ok"
+     },
+     {
+      "idx": 4,
+      "voice": "kokoro:hi (one of 4 voices in VOICES.md)",
+      "licence": "Apache-2.0",
+      "timing_target": {
+       "start": 22.53,
+       "end": 27.55,
+       "slot_s": 5.02
+      },
+      "estimated_s": 5.0,
+      "speed_needed": 0.996,
+      "action": "ok"
+     },
+     {
+      "idx": 5,
+      "voice": "kokoro:hi (one of 4 voices in VOICES.md)",
+      "licence": "Apache-2.0",
+      "timing_target": {
+       "start": 27.85,
+       "end": 33.25,
+       "slot_s": 5.4
+      },
+      "estimated_s": 7.38,
+      "speed_needed": 1.367,
+      "action": "shorten_line"
+     },
+     {
+      "idx": 6,
+      "voice": "kokoro:hi (one of 4 voices in VOICES.md)",
+      "licence": "Apache-2.0",
+      "timing_target": {
+       "start": 33.55,
+       "end": 39.33,
+       "slot_s": 5.78
+      },
+      "estimated_s": 7.85,
+      "speed_needed": 1.358,
+      "action": "shorten_line"
+     },
+     {
+      "idx": 7,
+      "voice": "kokoro:hi (one of 4 voices in VOICES.md)",
+      "licence": "Apache-2.0",
+      "timing_target": {
+       "start": 39.63,
+       "end": 47.34,
+       "slot_s": 7.71
+      },
+      "estimated_s": 9.08,
+      "speed_needed": 1.178,
+      "action": "brisker_read"
+     }
+    ]
+   },
+   "voiceover_line": {
+    "skipped": "voice engine kokoro-82m not integrated"
+   },
+   "seconds": 86.3,
+   "qa_recomputed": "2026-11-12T18:11:39"
+  },
+  "es": {
+   "lang": "es",
+   "started": "2026-11-12T17:52:27",
+   "mt_seconds": 48.2,
+   "mt_output": [
+    "La presa de Asuán se construyó entre los años 1960 y 1970 sobre el río Nilo, en Egipto.",
+    "Tiene 111 metros de altura, 3.830 metros de largo y 111 de ancho.",
+    "Detrás de él se encuentra el lago Nasser, que puede contener unos 132 kilómetros cúbicos de agua.",
+    "Sus 12 turbinas pueden generar hasta 2.100 megavatios de energía eléctrica.",
+    "Ingenieros de la Unión Soviética ayudaron a diseñar y construir la represa, que fue inaugurada en 1960.",
+    "El aumento de las aguas amenazó los templos de Abu Simbel, construidos para Ramsés II.",
+    "Entre 1964 y 1968, una campaña internacional de la UNESCO trasladó los templos a terrenos más elevados.",
+    "Hoy en día la presa protege las granjas de las inundaciones, pero también atrapa el limo que una vez fertilizó el valle del Nilo."
+   ],
+   "final": [
+    "La presa de Asuán se construyó entre los años 1960 y 1970 sobre el río Nilo, en Egipto.",
+    "Tiene 111 metros de altura, 3.830 metros de largo y 111 de ancho.",
+    "Detrás de él se encuentra el lago Nasser, que puede contener unos 132 kilómetros cúbicos de agua.",
+    "Sus 12 turbinas pueden generar hasta 2.100 megavatios de energía eléctrica.",
+    "Ingenieros de la Unión Soviética ayudaron a diseñar y construir la represa, que fue inaugurada en 1960.",
+    "El aumento de las aguas amenazó los templos de Abu Simbel, construidos para Ramsés II.",
+    "Entre 1964 y 1968, una campaña internacional de la UNESCO trasladó los templos a terrenos más elevados.",
+    "Hoy en día la presa protege las granjas de las inundaciones, pero también atrapa el limo que una vez fertilizó el valle del Nilo."
+   ],
+   "back_translation": {
+    "lines": [
+     "The dam of Asuán was built between the years 1960 and 1970 on the River Nile, in Egypt.",
+     "It has 111 meters in height, 3.830 meters in length and 111 in width.",
+     "Behind it is the Lake Nasser, which can contain about 132 cubic kilometers of water.",
+     "Its 12 turbines can generate up to 2.100 megawatts of electrical energy.",
+     "Soviet engineers helped design and build the dam, which was inaugurated in 1960.",
+     "The rise of the waters threatened the temples of Abu Simbel, built for Ramses II.",
+     "Between 1964 and 1968, an international campaign of UNESCO moved the temples to more elevated grounds.",
+     "Today the dam protects the farms from floods, but it also traps the silt that once fertilized the Nile Valley."
+    ],
+    "note": "local-llamacpp/qwen3-4b-q4km",
+    "seconds": 57.9
+   },
+   "qa": {
+    "lang": "es",
+    "lines": [
+     {
+      "source": "The Aswan High Dam on the Nile in Egypt was built between 1960 and 1970.",
+      "target": "La presa de Asuán se construyó entre los años 1960 y 1970 sobre el río Nilo, en Egipto.",
+      "lang": "es",
+      "back": "The dam of Asuán was built between the years 1960 and 1970 on the River Nile, in Egypt.",
+      "coverage": 0.714,
+      "findings": [
+       {
+        "check": "name_missing",
+        "severity": "major",
+        "detail": "name 'Aswan High Dam' does not appear in the target",
+        "term": "Aswan High Dam"
+       },
+       {
+        "check": "unsupported_content",
+        "severity": "major",
+        "detail": "the back-translation contains ideas the source never said: ['asu', 'years', 'river']",
+        "items": [
+         "asu",
+         "years",
+         "river"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "71% source content words come back; not found: ['aswan', 'high']",
+        "items": [
+         "aswan",
+         "high"
+        ]
+       }
+      ],
+      "confidence": 0.4,
+      "status": "needs_fix"
+     },
+     {
+      "source": "It is 111 metres high and about 3,830 metres long.",
+      "target": "Tiene 111 metros de altura, 3.830 metros de largo y 111 de ancho.",
+      "lang": "es",
+      "back": "It has 111 meters in height, 3.830 meters in length and 111 in width.",
+      "coverage": 1.0,
+      "findings": [
+       {
+        "check": "number_added",
+        "severity": "major",
+        "detail": "numbers in the target that the source does not have: ['111']",
+        "items": [
+         "111"
+        ]
+       },
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['wide']",
+        "items": [
+         "wide"
+        ]
+       }
+      ],
+      "confidence": 0.7,
+      "status": "needs_fix"
+     },
+     {
+      "source": "Behind it lies Lake Nasser, which can hold about 132 cubic kilometres of water.",
+      "target": "Detrás de él se encuentra el lago Nasser, que puede contener unos 132 kilómetros cúbicos de agua.",
+      "lang": "es",
+      "back": "Behind it is the Lake Nasser, which can contain about 132 cubic kilometers of water.",
+      "coverage": 0.75,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['contain']",
+        "items": [
+         "contain"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "75% source content words come back; not found: ['lies', 'hold']",
+        "items": [
+         "lies",
+         "hold"
+        ]
+       }
+      ],
+      "confidence": 0.85,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Its 12 turbines can generate up to 2,100 megawatts of electricity.",
+      "target": "Sus 12 turbinas pueden generar hasta 2.100 megavatios de energía eléctrica.",
+      "lang": "es",
+      "back": "Its 12 turbines can generate up to 2.100 megawatts of electrical energy.",
+      "coverage": 1.0,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['energy']",
+        "items": [
+         "energy"
+        ]
+       }
+      ],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Engineers from the Soviet Union helped to design and build the dam.",
+      "target": "Ingenieros de la Unión Soviética ayudaron a diseñar y construir la represa, que fue inaugurada en 1960.",
+      "lang": "es",
+      "back": "Soviet engineers helped design and build the dam, which was inaugurated in 1960.",
+      "coverage": 0.857,
+      "findings": [
+       {
+        "check": "number_added",
+        "severity": "major",
+        "detail": "numbers in the target that the source does not have: ['1960']",
+        "items": [
+         "1960"
+        ]
+       },
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['opened']",
+        "items": [
+         "opened"
+        ]
+       },
+       {
+        "check": "added_clause",
+        "severity": "major",
+        "detail": "read-back clause adds nothing from the source but says ['opened']: 'was inaugurated in 1960.'",
+        "items": [
+         "opened"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "86% source content words come back; not found: ['union']",
+        "items": [
+         "union"
+        ]
+       }
+      ],
+      "confidence": 0.4,
+      "status": "needs_fix"
+     },
+     {
+      "source": "The rising water threatened the temples of Abu Simbel, built for Ramesses II.",
+      "target": "El aumento de las aguas amenazó los templos de Abu Simbel, construidos para Ramsés II.",
+      "lang": "es",
+      "back": "The rise of the waters threatened the temples of Abu Simbel, built for Ramses II.",
+      "coverage": 0.75,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['rize', 'ramses']",
+        "items": [
+         "rize",
+         "ramses"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "75% source content words come back; not found: ['rizing', 'ramesses']",
+        "items": [
+         "rizing",
+         "ramesses"
+        ]
+       }
+      ],
+      "confidence": 0.85,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Between 1964 and 1968, an international UNESCO campaign moved the temples to higher ground.",
+      "target": "Entre 1964 y 1968, una campaña internacional de la UNESCO trasladó los templos a terrenos más elevados.",
+      "lang": "es",
+      "back": "Between 1964 and 1968, an international campaign of UNESCO moved the temples to more elevated grounds.",
+      "coverage": 0.875,
+      "findings": [
+       {
+        "check": "unsupported_content",
+        "severity": "info",
+        "detail": "back-translation words not in the source (likely paraphrase): ['elevated']",
+        "items": [
+         "elevated"
+        ]
+       },
+       {
+        "check": "omission_backcheck",
+        "severity": "info",
+        "detail": "88% source content words come back; not found: ['higher']",
+        "items": [
+         "higher"
+        ]
+       }
+      ],
+      "confidence": 0.925,
+      "status": "machine_ok"
+     },
+     {
+      "source": "Today the dam protects farms from floods, but it also traps the silt that once fertilised the Nile valley.",
+      "target": "Hoy en día la presa protege las granjas de las inundaciones, pero también atrapa el limo que una vez fertilizó el valle del Nilo.",
+      "lang": "es",
+      "back": "Today the dam protects the farms from floods, but it also traps the silt that once fertilized the Nile Valley.",
+      "coverage": 1.0,
+      "findings": [],
+      "confidence": 1.0,
+      "status": "machine_ok"
+     }
+    ],
+    "document": [],
+    "counts": {
+     "name_missing": 1,
+     "unsupported_content": 1,
+     "number_added": 2,
+     "added_clause": 1
+    },
+    "mean_confidence": 0.766,
+    "lines_needing_fix": [
+     0,
+     1,
+     4
+    ],
+    "back_translation": "run"
+   },
+   "subtitles": {
+    "paths": {
+     "full.srt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.es.full.srt",
+     "full.vtt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.es.full.vtt",
+     "full.ass": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.es.full.ass",
+     "condensed.srt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.es.condensed.srt",
+     "condensed.vtt": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.es.condensed.vtt",
+     "condensed.ass": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.es.condensed.ass"
+    },
+    "qa_full": {
+     "cues": 15,
+     "findings": [
+      {
+       "cue": 1,
+       "check": "min_duration",
+       "severity": "minor",
+       "detail": "0.72s < 5/6 s"
+      },
+      {
+       "cue": 3,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "17.2 cps > 17"
+      },
+      {
+       "cue": 6,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "20.5 cps > 17"
+      },
+      {
+       "cue": 7,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "20.3 cps > 17"
+      },
+      {
+       "cue": 10,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "17.9 cps > 17"
+      },
+      {
+       "cue": 11,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "17.5 cps > 17"
+      },
+      {
+       "cue": 11,
+       "check": "min_duration",
+       "severity": "minor",
+       "detail": "0.51s < 5/6 s"
+      },
+      {
+       "cue": 12,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "17.6 cps > 17"
+      }
+     ],
+     "passed": false
+    },
+    "qa_condensed": {
+     "cues": 15,
+     "findings": [
+      {
+       "cue": 1,
+       "check": "min_duration",
+       "severity": "minor",
+       "detail": "0.72s < 5/6 s"
+      },
+      {
+       "cue": 3,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "17.2 cps > 17"
+      },
+      {
+       "cue": 6,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "20.5 cps > 17"
+      },
+      {
+       "cue": 7,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "20.3 cps > 17"
+      },
+      {
+       "cue": 10,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "17.9 cps > 17"
+      },
+      {
+       "cue": 11,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "17.5 cps > 17"
+      },
+      {
+       "cue": 11,
+       "check": "min_duration",
+       "severity": "minor",
+       "detail": "0.51s < 5/6 s"
+      },
+      {
+       "cue": 12,
+       "check": "reading_speed",
+       "severity": "major",
+       "detail": "17.6 cps > 17"
+      }
+     ],
+     "passed": false
+    },
+    "condense_todo": [
+     {
+      "cue": 0,
+      "text": "La presa de Asuán se construyó entre los años 1960 y 1970 sobre el río Nilo,",
+      "cps": 14.1,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 1,
+      "text": "en Egipto.",
+      "cps": 13.9,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 2,
+      "text": "Tiene 111 metros de altura, 3.830 metros de largo y 111 de ancho.",
+      "cps": 15.3,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 3,
+      "text": "Detrás de él se encuentra el lago Nasser,",
+      "cps": 17.2,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 4,
+      "text": "que puede contener unos 132 kilómetros cúbicos de agua.",
+      "cps": 16.6,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 5,
+      "text": "Sus 12 turbinas pueden generar hasta 2.100 megavatios de energía eléctrica.",
+      "cps": 16.2,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 6,
+      "text": "Ingenieros de la Unión Soviética ayudaron a diseñar y construir la represa,",
+      "cps": 20.8,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 7,
+      "text": "que fue inaugurada en 1960.",
+      "cps": 20.3,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 8,
+      "text": "El aumento de las aguas amenazó los templos de Abu Simbel,",
+      "cps": 16.1,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 9,
+      "text": "construidos para Ramsés II.",
+      "cps": 15.7,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 10,
+      "text": "Entre 1964 y 1968, una campaña internacional de la UNESCO trasladó los",
+      "cps": 18.1,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 11,
+      "text": "templos a",
+      "cps": 17.5,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 12,
+      "text": "terrenos más elevados.",
+      "cps": 17.6,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 13,
+      "text": "Hoy en día la presa protege las granjas de las inundaciones,",
+      "cps": 17.0,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
+      "cue": 14,
+      "text": "pero también atrapa el limo que una vez fertilizó el valle del Nilo.",
+      "cps": 16.6,
+      "reason": "needs condensing to one line / slower read"
+     }
+    ],
+    "srt_full": "1\n00:00:00,500 --> 00:00:05,873\nLa presa de Asuán se construyó entre los\naños 1960 y 1970 sobre el río Nilo,\n\n2\n00:00:05,953 --> 00:00:06,670\nen Egipto.\n\n3\n00:00:06,970 --> 00:00:11,220\nTiene 111 metros de altura, 3.830 metros\nde largo y 111 de ancho.\n\n4\n00:00:11,520 --> 00:00:13,909\nDetrás de él se encuentra el lago Nasser,\n\n5\n00:00:13,989 --> 00:00:17,300\nque puede contener unos 132 kilómetros\ncúbicos de agua.\n\n6\n00:00:17,600 --> 00:00:22,230\nSus 12 turbinas pueden generar hasta 2.100\nmegavatios de energía eléctrica.\n\n7\n00:00:22,530 --> 00:00:26,141\nIngenieros de la Unión Soviética ayudaron\na diseñar y construir la represa,\n\n8\n00:00:26,221 --> 00:00:27,550\nque fue inaugurada en 1960.\n\n9\n00:00:27,850 --> 00:00:31,455\nEl aumento de las aguas amenazó los\ntemplos de Abu Simbel,\n\n10\n00:00:31,535 --> 00:00:33,250\nconstruidos para Ramsés II.\n\n11\n00:00:33,550 --> 00:00:37,409\nEntre 1964 y 1968, una campaña\ninternacional de la UNESCO trasladó los\n\n12\n00:00:37,489 --> 00:00:38,003\ntemplos a\n\n13\n00:00:38,083 --> 00:00:39,330\nterrenos más elevados.\n\n14\n00:00:39,630 --> 00:00:43,164\nHoy en día la presa protege las granjas de\nlas inundaciones,\n\n15\n00:00:43,244 --> 00:00:47,340\npero también atrapa el limo que una vez\nfertilizó el valle del Nilo.\n",
+    "ass_style": [
+     "Style: Default,DejaVu Sans,54,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,2,153,153,64,1"
+    ]
+   },
+   "dubbing": {
+    "voice": {
+     "id": "es_ES-davefx-medium",
+     "engine": "piper",
+     "licence": "dataset CC0; base rdh CC0",
+     "commercial_use": "yes",
+     "source": "languages.yaml (MODEL_CARD 2026-11-12)",
+     "installed": false
+    },
+    "blocked": null,
+    "needs_shortening": [
+     4,
+     6
+    ],
+    "estimate_note": "durations are character-rate estimates; the rendered audio decides",
+    "lines": [
+     {
+      "idx": 0,
+      "voice": "es_ES-davefx-medium",
+      "licence": "dataset CC0; base rdh CC0",
+      "timing_target": {
+       "start": 0.5,
+       "end": 6.67,
+       "slot_s": 6.17
+      },
+      "estimated_s": 6.21,
+      "speed_needed": 1.006,
+      "action": "brisker_read"
+     },
+     {
+      "idx": 1,
+      "voice": "es_ES-davefx-medium",
+      "licence": "dataset CC0; base rdh CC0",
+      "timing_target": {
+       "start": 6.97,
+       "end": 11.22,
+       "slot_s": 4.25
+      },
+      "estimated_s": 4.64,
+      "speed_needed": 1.092,
+      "action": "brisker_read"
+     },
+     {
+      "idx": 2,
+      "voice": "es_ES-davefx-medium",
+      "licence": "dataset CC0; base rdh CC0",
+      "timing_target": {
+       "start": 11.52,
+       "end": 17.3,
+       "slot_s": 5.78
+      },
+      "estimated_s": 6.93,
+      "speed_needed": 1.199,
+      "action": "brisker_read"
+     },
+     {
+      "idx": 3,
+      "voice": "es_ES-davefx-medium",
+      "licence": "dataset CC0; base rdh CC0",
+      "timing_target": {
+       "start": 17.6,
+       "end": 22.23,
+       "slot_s": 4.63
+      },
+      "estimated_s": 5.36,
+      "speed_needed": 1.158,
+      "action": "brisker_read"
+     },
+     {
+      "idx": 4,
+      "voice": "es_ES-davefx-medium",
+      "licence": "dataset CC0; base rdh CC0",
+      "timing_target": {
+       "start": 22.53,
+       "end": 27.55,
+       "slot_s": 5.02
+      },
+      "estimated_s": 7.36,
+      "speed_needed": 1.466,
+      "action": "shorten_line"
+     },
+     {
+      "idx": 5,
+      "voice": "es_ES-davefx-medium",
+      "licence": "dataset CC0; base rdh CC0",
+      "timing_target": {
+       "start": 27.85,
+       "end": 33.25,
+       "slot_s": 5.4
+      },
+      "estimated_s": 6.14,
+      "speed_needed": 1.137,
+      "action": "brisker_read"
+     },
+     {
+      "idx": 6,
+      "voice": "es_ES-davefx-medium",
+      "licence": "dataset CC0; base rdh CC0",
+      "timing_target": {
+       "start": 33.55,
+       "end": 39.33,
+       "slot_s": 5.78
+      },
+      "estimated_s": 7.36,
+      "speed_needed": 1.273,
+      "action": "shorten_line"
+     },
+     {
+      "idx": 7,
+      "voice": "es_ES-davefx-medium",
+      "licence": "dataset CC0; base rdh CC0",
+      "timing_target": {
+       "start": 39.63,
+       "end": 47.34,
+       "slot_s": 7.71
+      },
+      "estimated_s": 9.21,
+      "speed_needed": 1.195,
+      "action": "brisker_read"
+     }
+    ]
+   },
+   "voiceover_line": {
+    "idx": 0,
+    "text": "La presa de Asuán se construyó entre los años 1960 y 1970 sobre el río Nilo, en Egipto.",
+    "voice": "es_ES-davefx-medium",
+    "engine": "piper",
+    "license": "dataset CC0 (OHF-Voice/voice-datasets); base model rdh (CC0 per card)",
+    "commercial": true,
+    "duration": 7.0170208333333335,
+    "lufs": -18.1,
+    "cached": false
+   },
+   "seconds": 113.4,
+   "qa_recomputed": "2026-11-12T18:11:39"
+  }
+ },
+ "summary": {
+  "de": {
+   "lines_needing_fix": [
+    1,
+    2,
+    6
+   ],
+   "finding_counts": {
+    "glossary_term_missing": 2,
+    "name_missing": 1,
+    "too_short": 1,
+    "number_missing": 1,
+    "omission_backcheck": 1
+   },
+   "mean_confidence": 0.741,
+   "back_translation": "local-llamacpp/qwen3-4b-q4km",
+   "subtitles_full_passed": false,
+   "subtitle_findings": 4,
+   "voice": "de_DE-thorsten-medium",
+   "voice_blocked": null,
+   "voiceover_line": {
+    "voice": "de_DE-thorsten-medium",
+    "duration": 7.646791666666667
+   }
+  },
+  "fr": {
+   "lines_needing_fix": [
+    1
+   ],
+   "finding_counts": {
+    "glossary_term_missing": 3,
+    "name_missing": 1,
+    "omission_backcheck": 1
+   },
+   "mean_confidence": 0.813,
+   "back_translation": "local-llamacpp/qwen3-4b-q4km",
+   "subtitles_full_passed": false,
+   "subtitle_findings": 8,
+   "voice": "fr_FR-siwis-medium",
+   "voice_blocked": null,
+   "voiceover_line": {
+    "voice": "fr_FR-siwis-medium",
+    "duration": 5.458854166666667
+   }
+  },
+  "ar-EG": {
+   "lines_needing_fix": [
+    5,
+    6
+   ],
+   "finding_counts": {
+    "added_clause": 1,
+    "glossary_term_missing": 1,
+    "unsupported_content": 1
+   },
+   "mean_confidence": 0.862,
+   "back_translation": "local-llamacpp/qwen3-4b-q4km",
+   "subtitles_full_passed": true,
+   "subtitle_findings": 0,
+   "voice": null,
+   "voice_blocked": "no commercially cleared voice for ar-EG [ar_JO-kareem-medium (unverified)] - deliver subtitles, or supply a voice you hold the rights to",
+   "voiceover_line": {
+    "skipped": "no commercially cleared voice for ar-EG [ar_JO-kareem-medium (unverified)] - deliver subtitles, or supply a voice you hold the rights to"
+   },
+   "dialect_labels_before": [
+    "uncertain",
+    "uncertain",
+    "EG",
+    "uncertain",
+    "uncertain",
+    "EG",
+    "uncertain",
+    "uncertain"
+   ],
+   "dialect_labels_after": [
+    "uncertain",
+    "EG",
+    "EG",
+    "uncertain",
+    "uncertain",
+    "EG",
+    "uncertain",
+    "uncertain"
+   ],
+   "dialect_methods": [
+    "lexical",
+    "router",
+    "router",
+    "router",
+    "lexical",
+    "lexical",
+    "router",
+    "lexical"
+   ]
+  },
+  "ar-Gulf": {
+   "lines_needing_fix": [
+    1,
+    2,
+    4,
+    6,
+    7
+   ],
+   "finding_counts": {
+    "too_long": 1,
+    "number_added": 3,
+    "name_unconfirmed": 1,
+    "unsupported_content": 3,
+    "added_clause": 1,
+    "omission_backcheck": 1,
+    "number_missing": 2,
+    "glossary_term_missing": 1
+   },
+   "mean_confidence": 0.606,
+   "back_translation": "local-llamacpp/qwen3-4b-q4km",
+   "subtitles_full_passed": true,
+   "subtitle_findings": 0,
+   "voice": null,
+   "voice_blocked": "no commercially cleared voice for ar-Gulf [ar_JO-kareem-medium (unverified)] - deliver subtitles, or supply a voice you hold the rights to",
+   "voiceover_line": {
+    "skipped": "no commercially cleared voice for ar-Gulf [ar_JO-kareem-medium (unverified)] - deliver subtitles, or supply a voice you hold the rights to"
+   },
+   "dialect_labels_before": [
+    "uncertain",
+    "uncertain",
+    "MSA",
+    "uncertain",
+    "uncertain",
+    "uncertain",
+    "uncertain",
+    "MSA"
+   ],
+   "dialect_labels_after": [
+    "uncertain",
+    "uncertain",
+    "Gulf",
+    "uncertain",
+    "uncertain",
+    "Gulf",
+    "uncertain",
+    "MSA"
+   ],
+   "dialect_methods": [
+    "lexical",
+    "lexical",
+    "lexical",
+    "lexical",
+    "lexical",
+    "lexical",
+    "lexical",
+    "lexical"
+   ]
+  },
+  "zh": {
+   "lines_needing_fix": [
+    7,
+    8
+   ],
+   "finding_counts": {
+    "glossary_term_missing": 1,
+    "unsupported_content": 1
+   },
+   "mean_confidence": 0.869,
+   "back_translation": "local-llamacpp/qwen3-4b-q4km",
+   "subtitles_full_passed": true,
+   "subtitle_findings": 0,
+   "voice": "zh_CN-chaowen-medium",
+   "voice_blocked": null,
+   "voiceover_line": {
+    "error": "Error: # channels not specified"
+   }
+  },
+  "ru": {
+   "lines_needing_fix": [
+    6,
+    7
+   ],
+   "finding_counts": {
+    "glossary_term_missing": 2,
+    "unsupported_content": 1
+   },
+   "mean_confidence": 0.881,
+   "back_translation": "local-llamacpp/qwen3-4b-q4km",
+   "subtitles_full_passed": false,
+   "subtitle_findings": 3,
+   "voice": "ru_RU-denis-medium",
+   "voice_blocked": null,
+   "voiceover_line": {
+    "voice": "ru_RU-denis-medium",
+    "duration": 7.997916666666667
+   }
+  },
+  "hi": {
+   "lines_needing_fix": [
+    3,
+    6,
+    8
+   ],
+   "finding_counts": {
+    "glossary_term_missing": 3,
+    "unsupported_content": 1
+   },
+   "mean_confidence": 0.841,
+   "back_translation": "local-llamacpp/qwen3-4b-q4km",
+   "subtitles_full_passed": true,
+   "subtitle_findings": 0,
+   "voice": "kokoro:hi (one of 4 voices in VOICES.md)",
+   "voice_blocked": null,
+   "voiceover_line": {
+    "skipped": "voice engine kokoro-82m not integrated"
+   }
+  },
+  "es": {
+   "lines_needing_fix": [
+    1,
+    2,
+    5
+   ],
+   "finding_counts": {
+    "name_missing": 1,
+    "unsupported_content": 1,
+    "number_added": 2,
+    "added_clause": 1
+   },
+   "mean_confidence": 0.766,
+   "back_translation": "local-llamacpp/qwen3-4b-q4km",
+   "subtitles_full_passed": false,
+   "subtitle_findings": 8,
+   "voice": "es_ES-davefx-medium",
+   "voice_blocked": null,
+   "voiceover_line": {
+    "voice": "es_ES-davefx-medium",
+    "duration": 7.0170208333333335
+   }
+  }
+ },
+ "first_run_arabic": {
+  "ar-EG": {
+   "mt_output": [
+    "تم بناء سد أسوان العالي على نهر النيل في مصر بين عامي ١٩٦٠ و ١٩٧٠.",
+    "يبلغ ارتفاعه ١١١ متر و طوله حوالي ٣٨٣٠ متر.",
+    "وخلفها بحيرة ناصر، اللي بتقدر تحمل حوالي ١٣٢ كيلومتر مكعب من المية.",
+    "بتقدر توربيناته الـ ١٢ توليد كهرباء تصل لـ ٢١٠٠ ميغاواط.",
+    "ساعد مهندسين من الاتحاد السوفياتي في تصميم السد وبنائه، وساعدوا على إنجازه.",
+    "هددت المياه اللي بترتفع معابد أبو سمبل، اللي بنيت لرامسس التاني.",
+    "بين سنة ١٩٦٤ وسنة ١٩٦٨، حملة دولية من اليونسكو نقلت المعابد لأرض أعلى.",
+    "اليوم السد بيحمي المزارع من الفيضانات، ولكنه بيسجن كمان الطمي اللي سبق وخصب وادي النيل."
+   ],
+   "final": [
+    "دي بيو سد أسوان العالي بيو بناء على نهر النيل في مصر بين ١٩٦٠ و ١٩٧٠",
+    "دي بيو ارتفاعه ١١١ متر و طوله كايل ٣٨٣٠ متر",
+    "وخلفها بحيرة ناصر، اللي بيدقير تحمل كايل ١٣٢ كيلومتر مكعب من المية",
+    "بيقدر توربيناته الـ ١٢ توليد كهرباء تصل لـ ٢١٠٠ ميغاواط",
+    "ساعد مهندسين من الاتحاد السوفياتي في تصميم السد وبنائه، وساعدوا على إنجازه",
+    "هددت المياه اللي بترتفع معابد أبو سمبل، اللي بنيت لرامسس التاني",
+    "بين ١٩٦٤ و ١٩٦٨، حملة دولية من اليونسكو نقلت المعابد لأرض أعلى",
+    "اليوم السد بيحمي المزارع من الفيضانات، ولكنه بيسجن كمان الطمي اللي سبق وخصب وادي النيل."
+   ],
+   "dialect_pass": [
+    {
+     "method": "router",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": null,
+     "forbidden_hits": []
+    },
+    {
+     "method": "router",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": null,
+     "forbidden_hits": []
+    },
+    {
+     "method": "router",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": null,
+     "forbidden_hits": []
+    },
+    {
+     "method": "router",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": null,
+     "forbidden_hits": []
+    },
+    {
+     "method": "router",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": null,
+     "forbidden_hits": []
+    },
+    {
+     "method": "router",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": null,
+     "forbidden_hits": []
+    },
+    {
+     "method": "router",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": null,
+     "forbidden_hits": []
+    },
+    {
+     "method": "lexical",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": {
+      "text": "اليوم السد بيحمي المزارع من الفيضانات، وليش بيسجن كمان الطمي اللي سبق وخصب وادي النيل",
+      "reason": "classified as Gulf"
+     },
+     "forbidden_hits": []
+    }
+   ],
+   "dialect_after": [
+    {
+     "scores": {
+      "EG": 1.0,
+      "Gulf": 0.0,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 1.0,
+      "Gulf": 0,
+      "MSA": 0
+     },
+     "label": "EG",
+     "words": 16,
+     "evidence": {
+      "EG": [
+       "دي"
+      ],
+      "Gulf": [],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 1.0,
+      "Gulf": 0.0,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 1.0,
+      "Gulf": 0,
+      "MSA": 0
+     },
+     "label": "EG",
+     "words": 10,
+     "evidence": {
+      "EG": [
+       "دي"
+      ],
+      "Gulf": [],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.667,
+      "Gulf": 0.333,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0.6,
+      "Gulf": 0.3,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 12,
+     "evidence": {
+      "EG": [
+       "اللي",
+       "بيدقير"
+      ],
+      "Gulf": [
+       "اللي"
+      ],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 1.0,
+      "Gulf": 0.0,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0.3,
+      "Gulf": 0,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 10,
+     "evidence": {
+      "EG": [
+       "بيقدر"
+      ],
+      "Gulf": [],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.0,
+      "Gulf": 0.0,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0,
+      "Gulf": 0,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 12,
+     "evidence": {
+      "EG": [],
+      "Gulf": [],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.6,
+      "Gulf": 0.4,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0.9,
+      "Gulf": 0.6,
+      "MSA": 0
+     },
+     "label": "EG",
+     "words": 11,
+     "evidence": {
+      "EG": [
+       "اللي",
+       "بترتفع"
+      ],
+      "Gulf": [
+       "اللي"
+      ],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.0,
+      "Gulf": 0.0,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0,
+      "Gulf": 0,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 12,
+     "evidence": {
+      "EG": [],
+      "Gulf": [],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.75,
+      "Gulf": 0.25,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0.9,
+      "Gulf": 0.3,
+      "MSA": 0
+     },
+     "label": "EG",
+     "words": 15,
+     "evidence": {
+      "EG": [
+       "اللي",
+       "بيحمي",
+       "بيسجن"
+      ],
+      "Gulf": [
+       "اللي"
+      ],
+      "MSA": []
+     }
+    }
+   ],
+   "back_translation": {
+    "lines": [
+     "This is the high Aswan Dam built on the Nile River in Egypt between 1960 and 1970",
+     "Its height is 111 meters and its length is about 3830 meters",
+     "Behind it is Lake Nasser, which can hold about 132 cubic kilometers of water",
+     "It can generate 12 turbines to produce electricity up to 2100 megawatts",
+     "Engineers from the Soviet Union helped in the design and construction of the dam, and they helped in completing it",
+     "The water that rises with the temples of Abu Simbel, which were built for Ramses the Second",
+     "Between 1964 and 1968, an international campaign from UNESCO moved the temples to higher ground",
+     "Today the dam protects the farms from floods, but it also traps the silt that was previously fertile in the Nile Valley."
+    ],
+    "note": "local-llamacpp/qwen3-4b-q4km",
+    "seconds": 44.8
+   }
+  },
+  "ar-Gulf": {
+   "mt_output": [
+    "تم بناء سد أسوان العالي على نهر النيل في مصر بين عامي ١٩٦٠ و ١٩٧٠، وتم الانتهاء من بنائه في عام ٢٠٠٥.",
+    "ويبلغ ارتفاعه ١١١ مترا وطوله حوالي ٨٣٠ ٣ مترا.",
+    "وخلفها تقع بحيرة ناصر، اللي يمكن أن تحتفظ بنحو ١٣٢ كيلومترا مكعبا من المياه.",
+    "وتستطيع توربيناتها الـ ١٢ توليد ما يصل إلى ١٠٠ ٢ ميغاواط من الكهربا.",
+    "وقد ساعد مهندسون من الاتحاد السوفياتي في تصميم السد وبنائه.",
+    "وهددت المياه المرتفعة معابد أبو سمبل، اللي بنيت لرامسس الثاني.",
+    "وفيما بين عامي ١٩٦٤ و١٩٦٨، قامت اليونسكو بحملة دولية لنقل المعابد إلى أماكن أعلى.",
+    "واليوم يحمي السد المزارع من الفيضانات، ولكنه يحبس أيضا الطين اللي كان يخصب وادي النيل ذات يوم."
+   ],
+   "final": [
+    "ليش هذي السد العالى بني بانهار نهر النيل فا مصر بين ١٩٦٠ و ١٩٧٠، وبيتامم من بنائه فا ٢٠٠٥.",
+    "واي بيرفه ١١١ ميتر وويس ٨٣٠ ٣ ميتر.",
+    "واي بيرفها بحيرة ناصر، اللي بيو حفظ بان ١٣٢ كيلومتر مكعب من الماء.",
+    "واي بيرف توربينات ١٢ بيو توليد ما يصل ١٠٠ ٢ ميغاواط من الكهربا.",
+    "واي بيرف مهندسون من الاتحاد السوفياتي فا تصميم السد وبنائه.",
+    "واي بيرف الماء المرتفى معابد أبو سمبل، اللي بنيت لرامسس الثاني.",
+    "وفيما بين عامي ١٩٦٤ و١٩٦٨، قامت اليونسكو بحملة دولية لنقل المعابد إلى أماكن أعلى.",
+    "واليوم يحمي السد المزارع من الفيضانات، وليش يحبس طين اللي كان يخصب وادي النيل ذات يوم."
+   ],
+   "dialect_pass": [
+    {
+     "method": "router",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": null,
+     "forbidden_hits": []
+    },
+    {
+     "method": "router",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": null,
+     "forbidden_hits": []
+    },
+    {
+     "method": "router",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": null,
+     "forbidden_hits": []
+    },
+    {
+     "method": "router",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": null,
+     "forbidden_hits": []
+    },
+    {
+     "method": "router",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": null,
+     "forbidden_hits": []
+    },
+    {
+     "method": "router",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": null,
+     "forbidden_hits": []
+    },
+    {
+     "method": "lexical",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": {
+      "text": "واي بيرف فين ١٩٦٤ و١٩٦٨، قام اليونسكو بحملة دولية لنقل المعابد إلى أماكن أعلاه.",
+      "reason": "classified as EG"
+     },
+     "forbidden_hits": []
+    },
+    {
+     "method": "router",
+     "changes": [],
+     "router": "local-llamacpp/qwen3-4b-q4km",
+     "router_rejected": null,
+     "forbidden_hits": []
+    }
+   ],
+   "dialect_after": [
+    {
+     "scores": {
+      "EG": 0.13,
+      "Gulf": 0.87,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0.3,
+      "Gulf": 2.0,
+      "MSA": 0
+     },
+     "label": "Gulf",
+     "words": 19,
+     "evidence": {
+      "EG": [
+       "بنائه"
+      ],
+      "Gulf": [
+       "ليش",
+       "هذي"
+      ],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 1.0,
+      "Gulf": 0.0,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0.3,
+      "Gulf": 0,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 8,
+     "evidence": {
+      "EG": [
+       "بيرفه"
+      ],
+      "Gulf": [],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.667,
+      "Gulf": 0.333,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0.6,
+      "Gulf": 0.3,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 13,
+     "evidence": {
+      "EG": [
+       "اللي",
+       "بيرفها"
+      ],
+      "Gulf": [
+       "اللي"
+      ],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.0,
+      "Gulf": 0.0,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0,
+      "Gulf": 0,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 13,
+     "evidence": {
+      "EG": [],
+      "Gulf": [],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.0,
+      "Gulf": 0.0,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0,
+      "Gulf": 0,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 10,
+     "evidence": {
+      "EG": [],
+      "Gulf": [],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.5,
+      "Gulf": 0.5,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0.3,
+      "Gulf": 0.3,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 11,
+     "evidence": {
+      "EG": [
+       "اللي"
+      ],
+      "Gulf": [
+       "اللي"
+      ],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.0,
+      "Gulf": 0.0,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0,
+      "Gulf": 0,
+      "MSA": 0
+     },
+     "label": "uncertain",
+     "words": 14,
+     "evidence": {
+      "EG": [],
+      "Gulf": [],
+      "MSA": []
+     }
+    },
+    {
+     "scores": {
+      "EG": 0.187,
+      "Gulf": 0.812,
+      "MSA": 0.0
+     },
+     "raw": {
+      "EG": 0.3,
+      "Gulf": 1.3,
+      "MSA": 0
+     },
+     "label": "Gulf",
+     "words": 16,
+     "evidence": {
+      "EG": [
+       "اللي"
+      ],
+      "Gulf": [
+       "اللي",
+       "ليش"
+      ],
+      "MSA": []
+     }
+    }
+   ],
+   "back_translation": {
+    "lines": [
+     "Why is this high dam built on the Nile river in Egypt between 1960 and 1970, and we started building it in 2005.",
+     "And it is 111 meters and is 830 3 meters.",
+     "And it creates Lake Nasser, which is to store 132 cubic kilometers of water.",
+     "And it has turbines 12 by generating up to 100 2 megawatts of electricity.",
+     "And it employs engineers from the Soviet Union in the design of the dam and its construction.",
+     "And it raises the water to the temples of Abu Simbel, which were built for Ramses II.",
+     "And between the years 1964 and 1968, UNESCO carried out an international campaign to move the temples to higher places.",
+     "And today the dam protects the farms from floods, and why does it hold back the soil that was once fertile in the Nile Valley."
+    ],
+    "note": "local-llamacpp/qwen3-4b-q4km",
+    "seconds": 44.1
+   }
+  },
+  "note": "Run 1 accepted router dialect rewrites containing invented words (بيو، كايل، واي بيرف) and a but->why swap; dialect.py now rejects these (novel_words, question-word guard) and run 2 below replaced it."
+ },
+ "dialect_contrast": {
+  "rows": [
+   {
+    "msa": "تم بناء سد أسوان العالي على نهر النيل في مصر بين عامي ١٩٦٠ و ١٩٧٠، وتم الانتهاء من بنائه في عام ٢٠٠٥.",
+    "msa_label": "uncertain",
+    "eg": "تم بناء سد أسوان العالي على نهر النيل في مصر بين عامي ١٩٦٠ و ١٩٧٠، وتم الانتهاء من بنائه في عام ٢٠٠٥.",
+    "eg_label": "uncertain",
+    "eg_changes": [],
+    "gulf": "تم بناء سد أسوان العالي على نهر النيل في مصر بين عامي ١٩٦٠ و ١٩٧٠، وتم الانتهاء من بنائه في عام ٢٠٠٥.",
+    "gulf_label": "uncertain",
+    "gulf_changes": [],
+    "differ": false
+   },
+   {
+    "msa": "ويبلغ ارتفاعه ١١١ مترا وطوله حوالي ٨٣٠ ٣ مترا.",
+    "msa_label": "uncertain",
+    "eg": "ويبلغ ارتفاعه ١١١ مترا وطوله حوالي ٨٣٠ ٣ مترا.",
+    "eg_label": "uncertain",
+    "eg_changes": [],
+    "gulf": "ويبلغ ارتفاعه ١١١ مترا وطوله حوالي ٨٣٠ ٣ مترا.",
+    "gulf_label": "uncertain",
+    "gulf_changes": [],
+    "differ": false
+   },
+   {
+    "msa": "وخلفها تقع بحيرة ناصر، اللي يمكن أن تحتفظ بنحو ١٣٢ كيلومترا مكعبا من المياه.",
+    "msa_label": "MSA",
+    "eg": "وخلفها تقع بحيرة ناصر، اللي ممكن تحتفظ بنحو ١٣٢ كيلومترا مكعبا من المية.",
+    "eg_label": "EG",
+    "eg_changes": [
+     "يمكن أن -> ممكن (x1)",
+     "المياه -> المية (x1)"
+    ],
+    "gulf": "وخلفها تقع بحيرة ناصر، اللي ممكن تحتفظ بنحو ١٣٢ كيلومترا مكعبا من الماي.",
+    "gulf_label": "Gulf",
+    "gulf_changes": [
+     "يمكن أن -> ممكن (x1)",
+     "المياه -> الماي (x1)"
+    ],
+    "differ": true
+   },
+   {
+    "msa": "وتستطيع توربيناتها الـ ١٢ توليد ما يصل إلى ١٠٠ ٢ ميغاواط من الكهربا.",
+    "msa_label": "uncertain",
+    "eg": "وتستطيع توربيناتها الـ ١٢ توليد ما يصل إلى ١٠٠ ٢ ميغاواط من الكهربا.",
+    "eg_label": "uncertain",
+    "eg_changes": [],
+    "gulf": "وتستطيع توربيناتها الـ ١٢ توليد ما يصل إلى ١٠٠ ٢ ميغاواط من الكهربا.",
+    "gulf_label": "uncertain",
+    "gulf_changes": [],
+    "differ": false
+   },
+   {
+    "msa": "وقد ساعد مهندسون من الاتحاد السوفياتي في تصميم السد وبنائه.",
+    "msa_label": "uncertain",
+    "eg": "وقد ساعد مهندسون من الاتحاد السوفياتي في تصميم السد وبنائه.",
+    "eg_label": "uncertain",
+    "eg_changes": [],
+    "gulf": "وقد ساعد مهندسون من الاتحاد السوفياتي في تصميم السد وبنائه.",
+    "gulf_label": "uncertain",
+    "gulf_changes": [],
+    "differ": false
+   },
+   {
+    "msa": "وهددت المياه المرتفعة معابد أبو سمبل، اللي بنيت لرامسس الثاني.",
+    "msa_label": "uncertain",
+    "eg": "وهددت المية المرتفعة معابد أبو سمبل، اللي بنيت لرامسس الثاني.",
+    "eg_label": "EG",
+    "eg_changes": [
+     "المياه -> المية (x1)"
+    ],
+    "gulf": "وهددت الماي المرتفعة معابد أبو سمبل، اللي بنيت لرامسس الثاني.",
+    "gulf_label": "Gulf",
+    "gulf_changes": [
+     "المياه -> الماي (x1)"
+    ],
+    "differ": true
+   },
+   {
+    "msa": "وفيما بين عامي ١٩٦٤ و١٩٦٨، قامت اليونسكو بحملة دولية لنقل المعابد إلى أماكن أعلى.",
+    "msa_label": "uncertain",
+    "eg": "وفيما بين عامي ١٩٦٤ و١٩٦٨، قامت اليونسكو بحملة دولية لنقل المعابد إلى أماكن أعلى.",
+    "eg_label": "uncertain",
+    "eg_changes": [],
+    "gulf": "وفيما بين عامي ١٩٦٤ و١٩٦٨، قامت اليونسكو بحملة دولية لنقل المعابد إلى أماكن أعلى.",
+    "gulf_label": "uncertain",
+    "gulf_changes": [],
+    "differ": false
+   },
+   {
+    "msa": "واليوم يحمي السد المزارع من الفيضانات، ولكنه يحبس أيضا الطين اللي كان يخصب وادي النيل ذات يوم.",
+    "msa_label": "MSA",
+    "eg": "واليوم يحمي السد المزارع من الفيضانات، بس هو يحبس كمان الطين اللي كان يخصب وادي النيل زمان.",
+    "eg_label": "uncertain",
+    "eg_changes": [
+     "أيضا -> كمان (x1)",
+     "ولكنه -> بس هو (x1)",
+     "ذات يوم -> زمان (x1)"
+    ],
+    "gulf": "واليوم يحمي السد المزارع من الفيضانات، بس هو يحبس أيضا الطين اللي كان يخصب وادي النيل قبل.",
+    "gulf_label": "MSA",
+    "gulf_changes": [
+     "ولكنه -> بس هو (x1)",
+     "ذات يوم -> قبل (x1)"
+    ],
+    "differ": true
+   }
+  ],
+  "lines_that_differ": 3,
+  "whole_text": {
+   "msa": {
+    "scores": {
+     "EG": 0.143,
+     "Gulf": 0.143,
+     "MSA": 0.714
+    },
+    "raw": {
+     "EG": 0.9,
+     "Gulf": 0.9,
+     "MSA": 4.5
+    },
+    "label": "MSA",
+    "words": 109,
+    "evidence": {
+     "EG": [
+      "اللي"
+     ],
+     "Gulf": [
+      "اللي"
+     ],
+     "MSA": [
+      "أن",
+      "أيضا",
+      "المياه",
+      "بنحو",
+      "تم",
+      "فيما",
+      "يمكن"
+     ]
+    }
+   },
+   "eg": {
+    "scores": {
+     "EG": 0.521,
+     "Gulf": 0.205,
+     "MSA": 0.274
+    },
+    "raw": {
+     "EG": 3.8,
+     "Gulf": 1.5,
+     "MSA": 2.0
+    },
+    "label": "EG",
+    "words": 108,
+    "evidence": {
+     "EG": [
+      "اللي",
+      "المية",
+      "بس",
+      "زمان",
+      "ممكن"
+     ],
+     "Gulf": [
+      "اللي",
+      "بس",
+      "ممكن"
+     ],
+     "MSA": [
+      "بنحو",
+      "تم",
+      "فيما"
+     ]
+    }
+   },
+   "gulf": {
+    "scores": {
+     "EG": 0.192,
+     "Gulf": 0.449,
+     "MSA": 0.359
+    },
+    "raw": {
+     "EG": 1.5,
+     "Gulf": 3.5,
+     "MSA": 2.8
+    },
+    "label": "Gulf",
+    "words": 108,
+    "evidence": {
+     "EG": [
+      "اللي",
+      "بس",
+      "ممكن"
+     ],
+     "Gulf": [
+      "اللي",
+      "الماي",
+      "بس",
+      "ممكن"
+     ],
+     "MSA": [
+      "أيضا",
+      "بنحو",
+      "تم",
+      "فيما"
+     ]
+    }
+   }
+  },
+  "note": "lexical substitution only changes function words present in the MT output; lines without such words stay MSA"
+ }
+}

@@ -85,8 +85,20 @@ def names(text: str) -> list[str]:
     return [n for n in dict.fromkeys(found) if n.lower() not in STOP]
 
 
+# a back-translation legitimately says "height" for "high", "meters" for "metres": fold such pairs before comparing
+FOLD = {"height": "high", "length": "long", "width": "wide", "depth": "deep", "construction": "build", "built": "build",
+        "building": "build", "inaugurated": "opened"}
+
+
+def _fold(w: str) -> str:
+    w = FOLD.get(w, w)
+    w = re.sub(r"tre(s?)$", r"ter\1", w)        # metre -> meter, kilometres -> kilometers
+    w = re.sub(r"is(e|ed|es|ing)$", r"iz\1", w)  # fertilised -> fertilized
+    return w
+
+
 def content_words(text: str) -> list[str]:
-    return [w for w in re.findall(r"[a-z][a-z'-]{2,}", text.lower()) if w not in STOP]
+    return [_fold(w) for w in re.findall(r"[a-z][a-z'-]{2,}", text.lower()) if w not in STOP]
 
 
 def _stem(w: str) -> str:

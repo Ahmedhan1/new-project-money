@@ -133,6 +133,8 @@ def main() -> None:
             if "final" in r:
                 r["qa"] = tq.check_lines(SOURCE, r["final"], lang, GLOSSARY[lang], (r.get("back_translation") or {}).get("lines"))
                 r["qa_recomputed"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+        if "ar-Gulf" in doc["languages"] and "mt_output" in doc["languages"]["ar-Gulf"]:
+            doc["dialect_contrast"] = dialect_contrast(doc["languages"]["ar-Gulf"]["mt_output"])
         doc["summary"] = summary(doc)
         OUT.write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
         return
@@ -146,6 +148,21 @@ def main() -> None:
         print(f"   done: {r.get('seconds')} s, qa counts {r.get('qa', {}).get('counts')}", flush=True)
         doc["summary"] = summary(doc)
         OUT.write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
+
+
+def dialect_contrast(msa_lines: list[str]) -> dict:
+    """Same real MSA machine translation (MADLAD <2ar>, from the ar-Gulf run) through the EG and the Gulf lexical
+    passes: do the outputs differ, and does the classifier tell the three apart? No model involved."""
+    eg = dialect.adapt_lines(msa_lines, "ar-EG", use_router=False)
+    gu = dialect.adapt_lines(msa_lines, "ar-Gulf", use_router=False)
+    rows = []
+    for m, e, g in zip(msa_lines, eg, gu):
+        rows.append({"msa": m, "msa_label": dialect.classify(m)["label"], "eg": e["text"], "eg_label": e["classifier"]["label"],
+                     "eg_changes": e["changes"], "gulf": g["text"], "gulf_label": g["classifier"]["label"], "gulf_changes": g["changes"],
+                     "differ": e["text"] != g["text"]})
+    whole = {k: dialect.classify(" ".join(r[k] for r in rows)) for k in ("msa", "eg", "gulf")}
+    return {"rows": rows, "lines_that_differ": sum(r["differ"] for r in rows), "whole_text": whole,
+            "note": "lexical substitution only changes function words present in the MT output; lines without such words stay MSA"}
 
 
 def summary(doc: dict) -> dict:
