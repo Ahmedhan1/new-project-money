@@ -4,8 +4,10 @@ A timeline is a JSON dict. It is **non-destructive**: sources are never modified
 with `nexus/timeline/ops.py`, and unknown keys are ignored by the renderer (but included in segment cache keys, so a new
 pixel-changing key can never be served a stale segment). Renderer: `nexus/timeline/render.py`, tests: `tests/fast/test_fx.py`.
 
-`render.render(tl, out, workdir, on_progress=None, draft=False, workers=None) -> {"output","duration","elapsed","segments",
-"segments_from_cache","sidecars","draft","workers","notes"}`
+`render.render(tl, out, workdir, on_progress=None, draft=False, workers=None, checkpoint=None) -> {"output","duration",
+"elapsed","segments","segments_from_cache","sidecars","draft","workers","notes","pieces","pieces_from_cache",
+"audio_from_cache","timings","pipeline","resumed","checkpoint"}`. Pipeline, cache keys and resume model:
+`docs/ACCOUNT2_RENDERER_ARCHITECTURE.md`; examples of every key: `docs/ACCOUNT2_EDITING_GUIDE.md`.
 
 ## Timeline keys
 | Key | Type / default | Meaning |
@@ -22,6 +24,9 @@ pixel-changing key can never be served a stale segment). Renderer: `nexus/timeli
 | `burn_subtitles` | true | Burn cues into the picture. |
 | `captions` | dict or absent | Caption style for burn-in: `{"style": classic|boxed|pop|karaoke, "position": bottom|middle|top, "words_per_cue": 2-4, "highlight": "#FFD400", "uppercase": false, "font_scale": 1.0}`. Absent = the legacy look. |
 | `subtitle_style` | dict | Legacy style overrides (used when `captions` is absent). |
+| `tracks` | list | Layers above the main storyline: video (z-ordered boxes with opacity and an effect stack), text, audio. See "Tracks" below. |
+| `slowmo` | `"none"` | Slow-motion profile for clips below 1x without their own `interpolate`: `none`, `blend`, `optical_flow` (minterpolate mci, slow). |
+| `render_pipeline` | `"pieces"` | `pieces` (cached pieces, stream-copy join) or `legacy` (xfade concat + full re-encode). |
 | `overlays` | list | Programme-wide: `{"type":"progress_bar","color","height","position"}`, `{"type":"watermark","text","opacity","position"}`. |
 | `markers`, `chapters`, `director`, `repurpose`, ... | any | Metadata, not rendered. |
 
@@ -62,7 +67,22 @@ Types: `video {src,in,out}`, `image {src,duration}`, `color {duration,color}`. A
 | `gain_spans` | video | `[{"in","out","db"}]` in source seconds: per-speaker level matching, applied before the clean-up chain (`audio.post.apply_speaker_gains`). |
 | `keyframes` from a face track | video | `platforms.tune` sets x/y keyframes from `faces.follow_keyframes` when the tracked subject moves inside a clip during a reframe (dead zone 3 %). |
 
-Still not wired: the audio-reactive waveform overlay (`fx/post.audio_viz*`), true per-sample speed-ramp audio, opacity keyframes.
+| `opacity`, `keyframes.opacity` | all | 0..1, the clip over black. |
+| `keyframes.rotation`, `rotation_fill` | all | Degrees clockwise over clip time; `zoom` (default, no corners) or `black`. |
+| `perspective` | all | `{"tl","tr","bl","br": [x, y]}` (0..1): the quad that is mapped onto the full frame (keystone correction). |
+| `mask.keyframes` | all | `{"x"|"y"|"w"|"h": [[t, v], ...]}` moving / tracked mask (`fx.post.mask_from_track` builds them from a face track). |
+| `split.layout` | video | also `main_left`, `main_right`, `main_top`, `thirds_h`, `thirds_v`. |
+
+## Tracks (multi-track timeline, `nexus/timeline/tracks.py`)
+`tl["tracks"]`: `{"id","kind": video|text|audio,"z","opacity","keyframes":{"opacity"},"hidden","mute","volume",
+"effects","grade","correct","lut","chroma_key","mask","items": [...]}`. The main `clips` are layer 0 and set the
+programme length; video/text layers draw in ascending `z`. Video items: `{"type","src","in","out"|"duration","start",
+"x","y","w","h","opacity","keyframes":{"opacity","pos_x","pos_y", + clip keyframes},"use_audio", + any clip key}`;
+text items: `{"text","subtitle","style","start","end","anim","from","opacity"}`; audio items: `{"src","start","in",
+"out","volume","role","fade_in","fade_out"}`. Ops in `ops.py`: `add_track`, `remove_track`, `set_track`, `add_item`,
+`remove_item`, `move_item`, `set_item`, `set_keyframes`. Interchange: `timeline/edl.py` (CMX3600 EDL, OTIO JSON).
+
+Still not wired: the audio-reactive waveform overlay (`fx/post.audio_viz*`), true per-sample speed-ramp audio.
 
 ## Draft and parallel rendering
 `draft=True` renders at half resolution with a fast preset into separate cache entries (for previews).

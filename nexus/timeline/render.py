@@ -68,6 +68,21 @@ def kf_expr(points, var: str = "t") -> str | None:
     return f"if(lt({var},{pts[0][0]:.4f}),{pts[0][1]:.5f},{expr})"
 
 
+def clip_opacity_expr(c: dict, var: str = "T") -> str | None:
+    """Opacity of a main-storyline clip (`opacity` x keyframes.opacity over clip-local time), None when opaque."""
+    parts = []
+    try:
+        const = float(c.get("opacity", 1.0))
+    except (TypeError, ValueError):
+        const = 1.0
+    if abs(const - 1.0) > 1e-6:
+        parts.append(f"{max(0.0, min(1.0, const)):.5f}")
+    ke = kf_expr((c.get("keyframes") or {}).get("opacity"), var)
+    if ke:
+        parts.append(f"({ke})")
+    return "*".join(parts) if parts else None
+
+
 def _fit_kf(W: int, H: int, c: dict, focus) -> str:
     """Cover fit whose crop position and zoom follow clip['keyframes'] x/y (0..1 subject position) and scale (>= 1)."""
     kf = c.get("keyframes") or {}
@@ -128,6 +143,8 @@ def segment_key(c: dict, tl: dict, draft: bool = False) -> str:
     on purpose: a new pixel- or sound-changing key can never be served a stale segment."""
     payload = {k: v for k, v in c.items() if k not in ("id", "label", "notes", "transition", "transition_dur")}
     payload["_g"] = [tl["width"], tl["height"], tl.get("fps", config.FPS), tl.get("grade", "none"), tl.get("lang", "en")]
+    if tl.get("slowmo") and c.get("type") == "video" and not c.get("interpolate"):
+        payload["_slowmo"] = tl["slowmo"]
     if tl.get("audio_fx", "none") != "none":
         payload["_afx"] = tl["audio_fx"]  # was missing before: changing the global audio chain must re-render
         if "clean_speech" in (tl.get("audio_fx"), c.get("audio_fx")):
@@ -203,8 +220,13 @@ def render_segment(c: dict, tl: dict, cache: Path, draft: bool = False, threads:
                 notes.append("stabilize requested but no stabilisation filter in this FFmpeg build")
         pre += fxp.orient_filters(c, notes)
         timing = ramp if ramp else f"setpts=(PTS-STARTPTS)/{speed}"
-        interp = fxp.interp_filter(c, fps, notes) if (speed < 1.0 or ramp) else None
-        v_pre = ",".join([*pre, timing, f"fps={fps}", *([interp] if interp else [])])
+        if speed < 1.0 or ramp:
+            cs = c if c.get("interpolate") else {**c, "interpolate": fxp.SLOWMO_PROFILES.get(tl.get("slowmo") or "none")}
+            interp = fxp.interp_filter(cs, fps, notes)
+        else:
+            interp = None
+        # an interpolator synthesises the output rate itself: an fps filter before it would only duplicate frames
+        v_pre = ",".join([*pre, timing, *([interp, "tpad=stop_mode=clone:stop_duration=0.25"] if interp else [f"fps={fps}"])])
         kfit = c.get("keyframes") and any(k in c["keyframes"] for k in ("x", "y", "scale")) and c.get("fit", "cover") == "cover"
         fit = _fit_kf(W, H, c, focus) if kfit else _fit(W, H, c.get("fit", "cover"), focus)
         v = f"{v_pre},{fit}"
@@ -238,6 +260,7 @@ def render_segment(c: dict, tl: dict, cache: Path, draft: bool = False, threads:
             lutf = [fxlut.filter_for(lut_val)]
         except (ValueError, KeyError) as e:
             notes.append(f"LUT skipped: {e}")
+    geo = [*fxp.perspective_filters(c, W, H, notes), *fxp.rotation_filters(c, W, H, kf_expr), *geo]
     chain = ",".join([*geo, *correct, *([grade] if grade else []), *lutf, *look, "format=yuv420p", "setsar=1"])
     fi, fo = float(c.get("fade_in", 0)), float(c.get("fade_out", 0))
     if fi:
@@ -269,7 +292,7 @@ def render_segment(c: dict, tl: dict, cache: Path, draft: bool = False, threads:
     fc.append(f"{cur}{chain}[v0]")
     last = "v0"
     if fxp.masks(c):
-        margs, mcur = fxp.mask_graph(c, fc, "[v0]", W, H, dur, n_in, scale, "mk")
+        margs, mcur = fxp.mask_graph(c, fc, "[v0]", W, H, dur, n_in, scale, "mk", fps)
         args += margs
         n_in += sum(1 for x in margs if x == "-i")
         last = mcur.strip("[]")
@@ -307,6 +330,15 @@ def render_segment(c: dict, tl: dict, cache: Path, draft: bool = False, threads:
         fc += clines
         n_in += 1
         last = clast.strip("[]")
+    oe = clip_opacity_expr(c, "T")
+    if oe:  # clip opacity on the main storyline: the clip over black
+        from . import tracks as _tracks
+        fc.append(f"color=c=black:s={W}x{H}:r={fps}:d={dur:.4f}[opbg]")
+        fc.append(_tracks.alpha_source(oe, W, H, fps, dur, "[opal]"))
+        fc.append(f"[{last}]format=yuva420p[opfg]")
+        fc.append("[opfg][opal]alphamerge[opfa]")
+        fc.append("[opbg][opfa]overlay=0:0:shortest=1,format=yuv420p[vop]")
+        last = "vop"
     a = []
     if has_audio:
         # speaker level matching first (source time: the segment's audio starts at the clip's in-point), so the
@@ -363,7 +395,19 @@ def _concat(segs: list[Path], tl: dict, out: Path, draft: bool = False) -> None:
     if not any(i and c.get("transition") == "crossfade" for i, c in enumerate(clips)):
         lst = out.with_suffix(".txt")
         lst.write_text("".join(f"file '{s}'\n" for s in segs), encoding="utf-8")  # FFmpeg reads concat lists as UTF-8
-        ff.run(["-f", "concat", "-safe", "0", "-i", lst, "-c", "copy", "-movflags", "+faststart", out], op="concat")
+        # Video: stream copy. Audio: decoded and held to each segment's picture, sample exact - a stream copy of the
+        # AAC packets carried every segment's encoder priming/padding along and drifted ~24 ms per clip
+        # (tests/fast/test_a2_av_sync.py).
+        from . import pieces as pz
+        fps = tl.get("fps", config.FPS)
+        vtmp, wav = out.with_suffix(".v.mp4"), out.with_suffix(".a.wav")
+        ff.run(["-f", "concat", "-safe", "0", "-i", lst, "-map", "0:v", "-c", "copy", vtmp], op="concat")
+        n = [max(1, round(float((ff.probe(s).get("video") or {}).get("duration") or 0) * fps)) for s in segs]
+        pz.programme_audio(segs, n, [0] * len(segs), fps, wav)
+        ff.run(["-i", vtmp, "-i", wav, "-map", "0:v", "-map", "1:a", "-c:v", "copy", *config.ACODEC,
+                "-movflags", "+faststart", out], op="concat-mux")
+        vtmp.unlink(missing_ok=True)
+        wav.unlink(missing_ok=True)
         return
     args: list = []
     for s in segs:
@@ -407,7 +451,16 @@ def _mix_graph(tl: dict, n_narr: int, has_music: bool, dur: float) -> tuple[list
     speech, other = ["[0:a]"], []
     for i, a in enumerate(tl.get("audio", [])):
         ms = int(float(a.get("start", 0)) * 1000)
-        fc.append(f"[{i + 1}:a]aresample={config.AUDIO_RATE},aformat=channel_layouts=stereo,"
+        cut = ""
+        if a.get("in") or a.get("out"):  # audio-track items: a window of the source
+            a_in = float(a.get("in") or 0)
+            cut = f"atrim=start={a_in:.4f}" + (f":end={float(a['out']):.4f}" if a.get("out") else "") + ",asetpts=PTS-STARTPTS,"
+            if a.get("out") and a.get("fade_out"):
+                ilen = float(a["out"]) - a_in
+                cut += f"afade=t=out:st={max(0.0, ilen - float(a['fade_out'])):.4f}:d={float(a['fade_out']):.4f},"
+        if a.get("fade_in"):
+            cut += f"afade=t=in:st=0:d={float(a['fade_in']):.4f},"
+        fc.append(f"[{i + 1}:a]{cut}aresample={config.AUDIO_RATE},aformat=channel_layouts=stereo,"
                   f"volume={a.get('volume', 1.0)},adelay={ms}:all=1[n{i}]")
         (speech if a.get("role") in SPEECH_ROLES else other).append(f"[n{i}]")
     if len(speech) > 1:
@@ -469,6 +522,110 @@ def _jl_cuts(tl: dict, workdir: Path) -> dict:
     return tl
 
 
+def pipeline(tl: dict) -> str:
+    """"pieces" (default: cached pieces + stream-copy join, timeline/pieces.py) or "legacy" (xfade concat + full
+    re-encode in the final mix). tl["render_pipeline"] or NEXUS_RENDER_PIPELINE choose; benchmarks compare both."""
+    v = tl.get("render_pipeline") or os.environ.get("NEXUS_RENDER_PIPELINE") or "pieces"
+    return "legacy" if v == "legacy" else "pieces"
+
+
+def _loudnorm_chain(inputs: list, fc: list[str], pre: str, target: float) -> str:
+    """Two-pass loudness normalisation: measure the mix, return the linear loudnorm filter for the second pass."""
+    err = ff.run([*inputs, "-filter_complex", ";".join(fc + [f"[{pre}]loudnorm=I={target}:TP=-1.5:LRA=11:print_format=json[m]"]),
+                  "-map", "[m]", "-vn", "-f", "null", "-"], op="mix-measure")
+    m = re.search(r"\{[^{}]*\"input_i\"[^{}]*\}", err, re.S)
+    meas = json.loads(m.group(0)) if m else None
+    if meas and meas["input_i"] not in ("-inf", "inf") and float(meas["input_i"]) > -60:
+        return (f"loudnorm=I={target}:TP=-1.5:LRA=11:measured_I={meas['input_i']}:measured_TP={meas['input_tp']}:"
+                f"measured_LRA={meas['input_lra']}:measured_thresh={meas['input_thresh']}:offset={meas['target_offset']}:linear=true")
+    return "anull"  # silent programme: nothing to normalise
+
+
+def _finish_pieces(tl: dict, out: Path, workdir: Path, segs: list[Path], layers: list[dict], all_results: list,
+                   seg_notes: list, draft: bool, w: int, threads: int | None, cp, t0: float, on_progress) -> dict:
+    """Stages 2-3 of the piece pipeline (see timeline/pieces.py)."""
+    from . import pieces as pz
+    fps = tl.get("fps", config.FPS)
+    W, H, _ = _size(tl, draft)
+    plan, frames = pz.plan(tl)
+    n, d, _names = pz.layout(tl)
+    dur = frames / fps
+    pcache = config.CACHE / ("pieces_draft" if draft else "pieces")
+    vcodec = _vcodec(draft, None)
+    enc_sig = " ".join(str(a) for a in vcodec)
+    cp.stage("pieces", pieces_total=len(plan))
+    timings = {"segments": round(time.time() - t0, 2)}
+    t1 = time.time()
+    narr = tl.get("audio", [])
+    music = tl.get("music") or {}
+    has_music = bool(music.get("src"))
+    akey = pz.audio_key(tl, segs, n, d, fps, _src_sig)
+    final_audio = pcache / f"audio_{akey}.m4a"
+
+    def audio_job() -> bool:
+        if final_audio.exists() and final_audio.stat().st_size > 0:
+            return True
+        pcache.mkdir(parents=True, exist_ok=True)
+        wav = workdir / f"programme_{out.stem}.wav"
+        pz.programme_audio(segs, n, d, fps, wav)
+        inputs: list = ["-i", wav]
+        for a in narr:
+            inputs += ["-i", a["src"]]
+        if has_music:
+            inputs += ["-stream_loop", "-1", "-i", music["src"]]
+        fc, pre = _mix_graph(tl, len(narr), has_music, dur)
+        ln = _loudnorm_chain(inputs, fc, pre, float(tl.get("target_lufs", -14.0)))
+        fc.append(f"[{pre}]{ln},aresample={config.AUDIO_RATE},alimiter=limit=0.79:level=disabled[aout]")
+        tmp = final_audio.with_suffix(f".{threading.get_ident()}.tmp.m4a")
+        ff.run([*inputs, "-filter_complex", ";".join(fc), "-map", "[aout]", "-vn", *config.ACODEC, "-t", f"{dur:.6f}", tmp],
+               op="final-audio")
+        os.replace(tmp, final_audio)
+        wav.unlink(missing_ok=True)
+        return False
+
+    done = [0]
+    lock = threading.Lock()
+
+    def one(pc):
+        r = pz.build(pc, segs, tl, pcache, W, H, dur, layers, vcodec, enc_sig, threads)
+        cp.done("pieces", r[0].stem, r[1])
+        with lock:
+            done[0] += 1
+            if on_progress:
+                on_progress(0.7 + 0.25 * done[0] / max(1, len(plan)))
+        return r
+
+    with ThreadPoolExecutor(max_workers=max(1, w)) as ex:
+        afut = ex.submit(audio_job)
+        presults = list(ex.map(one, plan))
+        audio_cached = afut.result()
+    cp.stage("final", audio_done=True)
+    timings["pieces_and_audio"] = round(time.time() - t1, 2)
+    t2 = time.time()
+    lst = workdir / f"pieces_{out.stem}.txt"
+    lst.write_text("".join(ff.concat_list_line(p) + "\n" for p, _ in presults), encoding="utf-8")
+    part = out.with_name(out.stem + ".partial" + (out.suffix or ".mp4"))
+    ff.run(["-f", "concat", "-safe", "0", "-i", lst, "-i", final_audio, "-map", "0:v", "-map", "1:a", "-c", "copy",
+            "-t", f"{dur:.6f}", "-movflags", "+faststart", part], op="final-mux")
+    os.replace(part, out)  # atomic: an interrupted render never leaves a truncated programme at `out`
+    timings["final"] = round(time.time() - t2, 2)
+    sidecars = {}
+    if tl.get("subtitles"):
+        sidecars["srt"] = str(subs.write_srt(tl["subtitles"], out.with_suffix(".srt")))
+        sidecars["vtt"] = str(subs.write_vtt(tl["subtitles"], out.with_suffix(".vtt")))
+    elapsed = time.time() - t0
+    cached = sum(1 for _, was in all_results if was)
+    pcached = sum(1 for _, was in presults if was)
+    cp.data["reused"]["audio"] = bool(audio_cached)
+    db.metric("render_rtf", elapsed / max(dur, 0.1), cached=cached, clips=len(segs), draft=draft, workers=w)
+    if on_progress:
+        on_progress(1.0)
+    return {"output": str(out), "duration": dur, "elapsed": round(elapsed, 2), "segments": len(all_results),
+            "segments_from_cache": cached, "sidecars": sidecars, "draft": draft, "workers": w, "notes": sorted(set(seg_notes)),
+            "pieces": len(plan), "pieces_from_cache": pcached, "audio_from_cache": bool(audio_cached), "timings": timings,
+            "pipeline": "pieces", "resumed": cp.data["resumed"], "checkpoint": cp.finish()}
+
+
 def _workers(n_clips: int, workers: int | None) -> tuple[int, int | None]:
     cpu = os.cpu_count() or 2
     w = workers if workers is not None else max(1, min(4, cpu // 2))
@@ -476,46 +633,66 @@ def _workers(n_clips: int, workers: int | None) -> tuple[int, int | None]:
     return w, (max(1, cpu // w) if w > 1 else None)
 
 
-def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = False, workers: int | None = None) -> dict:
+def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = False, workers: int | None = None,
+           checkpoint: dict | None = None) -> dict:
     """Render the full timeline. Returns stats incl. how many segments were reused from cache.
-    `draft` renders at half resolution with a fast preset (separate cache entries); `workers` segments render at once."""
+    `draft` renders at half resolution with a fast preset (separate cache entries); `workers` segments render at once.
+    Interrupted renders resume: finished segments are reused from the cache and `stats["checkpoint"]` (the shape of
+    RenderExecutionResult.checkpoint, see timeline/resume.py) says what was reused. `checkpoint` may pass the last
+    checkpoint of a run on another worker; by default it is read from `workdir`."""
+    from . import resume as rs
     t0 = time.time()
+    out, workdir = Path(out), Path(workdir)
     workdir.mkdir(parents=True, exist_ok=True)
     out.parent.mkdir(parents=True, exist_ok=True)
+    cp = rs.Checkpoint(workdir, out, tl, draft, seed=checkpoint)
     tl = _jl_cuts(tl, workdir)
+    from . import tracks as trk
+    tl = trk.with_audio(tl)
     cache = config.CACHE / "segments"
     clips = tl["clips"]
-    w, threads = _workers(len(clips), workers)
+    W, H, _ = _size(tl, draft)
+    layers = trk.plan(tl, W, H)
+    jobs = [(c, tl) for c in clips] + [(L["clip"], L["sub_tl"]) for L in layers if L["kind"] == "video"]
+    w, threads = _workers(len(jobs), workers)
     done = [0]
     lock = threading.Lock()
+    rs.clean_stale_tmp(cache)
+    cp.stage("segments", segments_total=len(jobs))
 
-    def one(c):
-        r = render_segment(c, tl, cache, draft, threads)
+    def one(job):
+        r = render_segment(job[0], job[1], cache, draft, threads)
+        cp.done("segments", r[0].stem, r[1])
         with lock:
             done[0] += 1
             if on_progress:
-                on_progress(0.7 * done[0] / len(clips))
+                on_progress(0.7 * done[0] / len(jobs))
         return r
 
     if w > 1:
         with ThreadPoolExecutor(max_workers=w) as ex:
-            results = list(ex.map(one, clips))
+            all_results = list(ex.map(one, jobs))
     else:
-        results = [one(c) for c in clips]
+        all_results = [one(j) for j in jobs]
+    results = all_results[: len(clips)]
+    for L, (p, _) in zip([x for x in layers if x["kind"] == "video"], all_results[len(clips):]):
+        L["seg"] = p
     segs = [p for p, _ in results]
-    cached = sum(1 for _, was in results if was)
+    cached = sum(1 for _, was in all_results if was)
     seg_notes = []
-    for s in segs:
+    for s in [p for p, _ in all_results]:
         nf = s.with_suffix(".notes.json")
         if nf.exists():
             seg_notes += json.loads(nf.read_text(encoding="utf-8"))
+    if pipeline(tl) == "pieces":
+        return _finish_pieces(tl, out, workdir, segs, layers, all_results, seg_notes, draft, w, threads, cp, t0, on_progress)
     prog = workdir / f"programme_{out.stem}.mp4"
+    cp.stage("programme")
     _concat(segs, tl, prog, draft)
     # The picture defines the programme length: each concatenated segment carries a few ms of AAC priming/padding, which
     # added up to 0.3 s of extra audio over 44 segments in the acceptance edit (QA: A/V stream length mismatch).
     _pp = ff.probe(prog)
     dur = float((_pp.get("video") or {}).get("duration") or _pp["duration"])
-    W, H, _ = _size(tl, draft)
     narr = tl.get("audio", [])
     music = tl.get("music") or {}
     has_music = bool(music.get("src"))
@@ -526,6 +703,7 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
         inputs += ["-stream_loop", "-1", "-i", music["src"]]
     fc, pre = _mix_graph(tl, len(narr), has_music, dur)
     target = float(tl.get("target_lufs", -14.0))
+    cp.stage("audio")
     # pass 1: measure the mixed programme
     err = ff.run([*inputs, "-filter_complex", ";".join(fc + [f"[{pre}]loudnorm=I={target}:TP=-1.5:LRA=11:print_format=json[m]"]),
                   "-map", "[m]", "-vn", "-f", "null", "-"], op="mix-measure")
@@ -540,6 +718,16 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
     vmap = ["-map", "0:v"]
     vlast = "0:v"
     vlines: list[str] = []
+    oargs: list = []
+    n_in = 1 + len(narr) + (1 if has_music else 0)
+    if layers:
+        largs, llines, lcur = trk.layer_graph(layers, W, H, tl.get("fps", config.FPS), 0.0, dur, tl.get("lang", "en"), n_in,
+                                              f"[{vlast}]")
+        if llines:
+            oargs += largs
+            vlines += llines
+            n_in += sum(1 for x in largs if x == "-i")
+            vlast = lcur.strip("[]")
     burn = tl.get("burn_subtitles", True) and tl.get("subtitles")
     if burn:
         from ..fx import captions
@@ -548,11 +736,10 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
         esc = str(ass).replace("\\", "/").replace(":", "\\:").replace("'", "\\'")
         vlines.append(f"[{vlast}]ass='{esc}'[vcap]")
         vlast = "vcap"
-    oargs: list = []
     if fxe.overlays_signature(tl):
-        n_in = 1 + len(narr) + (1 if has_music else 0)
-        oargs, olines, olast = fxe.overlay_graph(tl["overlays"], W, H, tl.get("fps", config.FPS), dur, 0.0, dur,
+        xargs, olines, olast = fxe.overlay_graph(tl["overlays"], W, H, tl.get("fps", config.FPS), dur, 0.0, dur,
                                                  tl.get("lang", "en"), n_in, f"[{vlast}]")
+        oargs += xargs
         vlines += olines
         vlast = olast.strip("[]")
     if vlines:
@@ -561,8 +748,11 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
         vcodec = _vcodec(draft, None)
     else:
         vcodec = ["-c:v", "copy"]
+    cp.stage("final")
+    part = out.with_name(out.stem + ".partial" + (out.suffix or ".mp4"))
     ff.run([*inputs, *oargs, "-filter_complex", ";".join(fc), *vmap, "-map", "[aout]", *vcodec, *config.ACODEC, "-t", f"{dur:.3f}",
-            "-movflags", "+faststart", out], op="final-mix")
+            "-movflags", "+faststart", part], op="final-mix")
+    os.replace(part, out)  # atomic: an interrupted render never leaves a truncated programme at `out`
     sidecars = {}
     if tl.get("subtitles"):
         sidecars["srt"] = str(subs.write_srt(tl["subtitles"], out.with_suffix(".srt")))
@@ -571,5 +761,6 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
     db.metric("render_rtf", elapsed / max(dur, 0.1), cached=cached, clips=len(segs), draft=draft, workers=w)
     if on_progress:
         on_progress(1.0)
-    return {"output": str(out), "duration": dur, "elapsed": round(elapsed, 2), "segments": len(segs),
-            "segments_from_cache": cached, "sidecars": sidecars, "draft": draft, "workers": w, "notes": sorted(set(seg_notes))}
+    return {"output": str(out), "duration": dur, "elapsed": round(elapsed, 2), "segments": len(all_results),
+            "segments_from_cache": cached, "sidecars": sidecars, "draft": draft, "workers": w, "notes": sorted(set(seg_notes)),
+            "resumed": cp.data["resumed"], "checkpoint": cp.finish()}
