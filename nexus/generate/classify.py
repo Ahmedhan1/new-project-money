@@ -89,7 +89,9 @@ def guard(doc: dict, path: str | Path | None = None) -> dict:
     """Validate a GeneratedMediaManifest and refuse an over-claimed classification."""
     contracts.check(doc, "GeneratedMediaManifest")
     if doc["classification"] == "generated-video":
-        prov = {"model": (doc.get("model") or {}).get("id"), "task": doc.get("task"), **(doc.get("provenance") or {})}
+        if not (doc.get("compute") or {}).get("gpu"):
+            raise ClassificationError("manifest claims generated-video but its compute record names no GPU")
+        prov ={"model": (doc.get("model") or {}).get("id"), "task": doc.get("task"), **(doc.get("provenance") or {})}
         local = path
         if local is None:
             uri = (doc.get("output") or {}).get("uri", "")
@@ -106,6 +108,10 @@ def manifest(task: str, provenance: dict, output: str | Path, *, inputs: list | 
     """Build a GeneratedMediaManifest whose classification comes from classify(), never from the caller."""
     out = Path(output)
     c = classify({**provenance, "task": provenance.get("task", task)}, path=out if path_check and out.exists() else None)
+    if c["classification"] == "generated-video" and not (compute or {}).get("gpu"):
+        # video models do not run on CPU (K-19); a depth-warp parallax can also pass the frame test, so the worker's
+        # compute record must name the GPU that ran the model
+        raise ClassificationError("cannot classify as generated-video: the compute record names no GPU")
     mid = provenance.get("model")
     lic = {}
     if mid:

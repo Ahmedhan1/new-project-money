@@ -150,6 +150,10 @@ def test_independent_motion_from_a_video_model_is_generated_video(home, tmp_path
     gm = classify.manifest("text_to_video", {"model": "wan21-t2v-1.3b"}, v, compute={"gpu": "test"})
     assert gm["classification"] == "generated-video" and gm["licence"]["class"] == "foss"
     classify.guard(gm)
+    with pytest.raises(classify.ClassificationError, match="GPU"):  # depth-warp parallax passes the frame test, so
+        classify.manifest("text_to_video", {"model": "wan21-t2v-1.3b"}, v, compute={"device": "cpu"})  # GPU evidence
+    with pytest.raises(classify.ClassificationError, match="GPU"):
+        classify.guard(dict(gm, compute={}))
     with pytest.raises(classify.ClassificationError):  # same frames, no model / simulated -> never generated-video
         classify.classify({"model": "wan21-t2v-1.3b", "simulated": True}, path=v)
     with pytest.raises(classify.ClassificationError):

@@ -53,9 +53,14 @@ def track_box(src: str | Path, box: tuple[float, float, float, float], *, start:
             if good.sum() >= 6:
                 p0, p1 = pts.reshape(-1, 2)[good], nxt.reshape(-1, 2)[good]
                 d = np.median(p1 - p0, axis=0)
-                s0 = np.median(np.linalg.norm(p0 - p0.mean(0), axis=1))
-                s1 = np.median(np.linalg.norm(p1 - p1.mean(0), axis=1))
-                s = float(np.clip(s1 / s0, 0.9, 1.1)) if s0 > 1 else 1.0
+                # scale = median ratio of pairwise point distances (robust to a few bad points), damped by half and
+                # limited to +-2 % per frame so feature churn cannot inflate the box
+                ii, jj = np.triu_indices(len(p0), 1)
+                d0 = np.linalg.norm(p0[ii] - p0[jj], axis=1)
+                d1 = np.linalg.norm(p1[ii] - p1[jj], axis=1)
+                ok_d = d0 > 4
+                s = float(np.median(d1[ok_d] / d0[ok_d])) if ok_d.sum() >= 5 else 1.0
+                s = float(np.clip(1 + 0.5 * (s - 1), 0.98, 1.02))
                 cx, cy = b[0] + b[2] / 2 + d[0], b[1] + b[3] / 2 + d[1]
                 b = _clip_box([cx - b[2] * s / 2, cy - b[3] * s / 2, b[2] * s, b[3] * s], w, h)
                 pts = p1.reshape(-1, 1, 2)
