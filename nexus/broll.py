@@ -221,12 +221,16 @@ DUP_REJECT = 0.92        # cosine to a picture already used in this edit: same i
 DUP_SOFT = 0.80          # above this a candidate is penalised in proportion (repeated look)
 SELF_REJECT = 0.88       # cosine to the speaker's own shot: the cutaway would look like the shot it covers
 VARIETY_PEN = 0.01       # same shot type and motion level as the previous cutaway
+# Pictures that never work as a cutaway over someone talking: another talking head, a studio panel, a text slide.
+NOT_BROLL = ("a person talking to the camera", "people sitting in a television studio", "a slide or page of text")
+NOT_BROLL_MARGIN = 0.015  # rejected when the picture matches one of these clearly better than the spoken text
 
 
 def _preview_path(c: dict) -> Path | None:
     url = c.get("preview_url") or (c.get("file_url") if c.get("kind") == "image" else None)
     if not url:
         return None
+    url = urllib.parse.quote(url, safe=":/~?&=%#+@,;")  # NASA ids can hold spaces and other characters
     dest = _cache_dir() / f"prev_{hashlib.sha1(url.encode()).hexdigest()[:20]}{Path(url.split('?')[0]).suffix.lower() or '.jpg'}"
     if not dest.exists() or dest.stat().st_size == 0:
         if c.get("source", "").startswith("NASA"):
@@ -288,12 +292,14 @@ def plan(tl: dict, *, max_share: float = 0.4, per_cut: float = 4.5, min_cut: flo
     if visual_rank is None:
         from .media import visual
         visual_rank = embed is not None or visual.available()
+    neg = None
     if visual_rank:
         if embed_text is None:
             from .media import visual
 
             def embed_text(t):
                 return visual.embed_texts([t])[0]
+            neg = visual.label_embeddings(NOT_BROLL)
         embed = embed or candidate_embedding
     total = total_duration(tl)
     ops = opportunities(tl)
@@ -372,6 +378,11 @@ def plan(tl: dict, *, max_share: float = 0.4, per_cut: float = 4.5, min_cut: flo
             import numpy as np
             vis = float(np.dot(t_emb, e))
             reasons = [f"visual match {vis:.3f} (SigLIP cosine of the spoken text and the picture)"]
+            if neg is not None:
+                nb = neg @ e
+                if float(nb.max()) > vis + NOT_BROLL_MARGIN:
+                    rejected.append(f"{c['id']}: picture reads as '{NOT_BROLL[int(nb.argmax())]}' ({float(nb.max()):.3f} > {vis:.3f})")
+                    continue
             bar = vis_min - (VIS_LEX_RELIEF if strong else 0.0)
             if vis < bar:
                 rejected.append(f"{c['id']}: visual match {vis:.3f} < {bar:.3f}")
