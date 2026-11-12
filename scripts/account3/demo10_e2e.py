@@ -30,6 +30,7 @@ def main() -> None:
     ap.add_argument("--niche", default="history")
     ap.add_argument("--scenes", type=int, default=4)
     ap.add_argument("--skip-render", action="store_true")
+    ap.add_argument("--reuse-research", action="store_true", help="reuse the cached research of a previous run (local cache)")
     a = ap.parse_args()
     from nexus import assets, create
     from nexus.intelligence import handoff, strategy
@@ -47,9 +48,15 @@ def main() -> None:
         (OUT / "demo10_e2e.json").write_text(json.dumps(rep, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
 
     # 1 research (real sources) + V2 assessment
-    t = time.time()
-    research = analyse(Ctx(min_interval=2.0, rate_limit_retries=4), a.topic, a.niche, "en")
-    research["runtime_s"] = round(time.time() - t, 1)
+    cache = ROOT / ".nexus" / "cache" / f"demo10_research_{a.topic.replace(' ', '_')}.json"
+    if a.reuse_research and cache.exists():
+        research = json.loads(cache.read_text(encoding="utf-8"))
+    else:
+        t = time.time()
+        research = analyse(Ctx(min_interval=2.0, rate_limit_retries=4), a.topic, a.niche, "en")
+        research["runtime_s"] = round(time.time() - t, 1)
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        cache.write_text(json.dumps(research, ensure_ascii=False, default=sorted), encoding="utf-8")
     asm = assess_v2.assess(research)
     S["research"] = {"seconds": research["runtime_s"], "score": research["opportunity"]["score"], "confidence": research["opportunity"]["confidence"],
                      "claims": len(research["brief"]["claims"]), "assessment_verdict": asm["verdict"], "uncertainty": asm["uncertainty"],
@@ -60,7 +67,7 @@ def main() -> None:
 
     # 2 original strategy (local LLM via the router) + handoff
     t = time.time()
-    brief = research["brief"]
+    brief = strategy.claims_from_research(research["brief"])  # numbered claims + source URL, conflicts dropped
     script = strategy.write_script(a.topic, brief, None, scenes=a.scenes, language="en")
     board = strategy.storyboard(script)
     h = handoff.build(script, board, brief)
