@@ -90,15 +90,16 @@ Secrets (Kaggle token, Google OAuth client, refresh tokens, worker-token hashes)
 ## 6. Test commands
 ```bash
 python -m ruff check .
-NEXUS_SCHEDULER_THREAD=0 python -m pytest -q tests/fast          # 392 passed, 4 skipped at handoff
+NEXUS_SCHEDULER_THREAD=0 python -m pytest -q tests/fast          # 399 passed, 4 skipped at handoff
 python -m pytest -q tests/e2e/test_studio_browser.py            # real Chromium run of the Studio
 NEXUS_LIVE=1 python -m pytest -q tests/live/test_kaggle_live.py  # needs the Kaggle token in the vault (uses GPU quota)
 python scripts/release_check.py                                 # fresh clone + hygiene + lint + fast suite
 ```
 
 ## 7. Known limitations (honest)
-- Google Drive: built and tested against a protocol-faithful fake server only; real Drive needs the owner's OAuth client
-  and consent (Demo B/E). Uploads through the API are synchronous (not yet durable jobs).
+- Google Drive: real-verified on three accounts (device flow, refresh, isolation, resumable upload, Demo E). Real token
+  revocation and Drive backup/restore are tested on the fake server only. Uploads through the API are synchronous.
+  OAuth consent is in Testing mode until the owner publishes it (refresh tokens expire after 7 days).
 - Kaggle weekly GPU allowance is a documented default (30 h) the owner can override; usage is measured by NEXUS.
   Quota-error detection is pattern-based and has not yet seen a real Kaggle quota message.
 - Cancel cannot stop a running Kaggle kernel (no official CLI command); it stops polling and never starts further steps.
@@ -112,4 +113,5 @@ python scripts/release_check.py                                 # fresh clone + 
   write outputs as artifacts; set the scheduler plan to these names. Start with Wan 2.1 1.3B on the T4.
 - **Account 3:** declare AI providers with `AIProviderCapability/v1`; implement `translate`, `publish_*` tasks the same
   way; publishing must stay manual-approval until the owner authorises platform OAuth.
-- **Owner:** Google OAuth client + Drive A/B/C consent; choose a host; rotate the Kaggle token that was pasted in chat.
+- **Owner:** publish the OAuth consent screen; choose a host; rotate the Kaggle tokens that were pasted in chat; back up the vault key.
+- Account 3 specifics (payload examples, error shapes, checkpoint rules, capability classes): `docs/ACCOUNT1_HANDOFF_TO_ACCOUNT3.md`.

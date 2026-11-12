@@ -1,20 +1,24 @@
 # Account 1 acceptance results (2026-11-12)
 
-Status per demo: **Done** (run for real, evidence linked) · **Done (local stand-in)** (real run, but a part that needs the
-owner was replaced by a local equivalent) · **Blocked on owner** (built and tested, cannot finish without the owner).
+Classes: **RV** real-verified · **MO** mocks/fake-server only · **P** partial · **BU** blocked by user · **BP** blocked by
+provider · **NI** not implemented. Finalization mission (Parts 1-12), demos A-K.
 
-| Demo | Status | Evidence |
-|---|---|---|
-| A. Browser startup from a clean environment | **Done** (dev host). A fresh NEXUS_HOME, the real app under uvicorn, Chromium: login, all 15 Studio sections, scheduler controls, mobile width; no page errors. The owner's PC installs nothing. A *permanent* host is not chosen yet (owner decision). | `tests/e2e/test_studio_browser.py`, `docs/results/account1/studio_*.png`, `studio_e2e.json` |
-| B. Three Drive connections | **Blocked on owner.** OAuth web + device flows, 3 isolated connections, refresh rotation, revocation, quota, folders, resumable upload with crash recovery and checksum are implemented and tested over real HTTP against a protocol-faithful fake Google server (95 tests). Real Google needs the owner's OAuth client and consent in a browser. | `tests/fast/test_cloud_storage.py`, `docs/results/account1/storage_resume.json`, `tests/live/test_drive_live.py` (owner-gated) |
-| C. Kaggle (one account), real GPU task, verified artifact | **Done.** Private kernels via the official CLI; 2× Tesla T4 (15 GB each), 31 GB RAM; probe 23.9 TFLOPS fp16; NVENC transcode of a 10 s clip to 1280×720 in 1.8 s; every artifact's SHA-256 re-computed and matched. Also submitted through the running app's HTTP API with the background poller; idempotent re-submission returns the same job. | `kaggle_probe.json`, `kaggle_transcode.json`, `lead_demos.json` (`demo_C_api_probe`) |
-| D. Remote job: progress, logs, interrupt, resume from checkpoint | **Done.** (1) Worker interruption: chunked_transcode stopped after 2 of 4 chunks, re-dispatched with checkpoint 2, finished only chunks 3-4. (2) Control-plane crash: API process SIGKILLed 7 s after dispatching a 6-chunk NVENC job on a NASA clip, down 25 s; after restart the dispatcher re-attached to the same Kaggle run (attempt 1, no duplicate GPU run) and the job succeeded; output 1280×720, 242.4 s, checksum matched locally. | `kaggle_resume.json`, `lead_demos.json` (`demo_D_control_plane_crash`) |
-| E. Cloud media flow (Drive → remote → Drive, no full-res download to the PC) | **Done (local stand-in) / Blocked on owner for Drive.** Source fetched by the Kaggle worker directly from an authorised https URL (NASA), processed on the GPU, result stored server-side (`NEXUS_HOME/compute/artifacts`); the browser only receives thumbnails/metadata unless the owner clicks play (Range stream). The Drive source/destination legs need Demo B. | `lead_demos.json`, Studio library screenshot |
-| F. Scheduler: daily target, pause/resume, quota exhaustion | **Done.** Target 1 master + 1 short (demo plan = real Kaggle probe jobs): start (ETA from measured median), pause (no new dispatch for 100 s), simulated quota exhaustion (allowance setting below measured usage) → resume refused, paused with reason "quota", warning notification, no account switching; restore → resume → stop condition reached → stopped. | `lead_demos.json` (`demo_F_scheduler`), `tests/fast/test_scheduler.py` |
-| G. URL ingestion | **Done.** NASA public-domain clip via https: redirect followed and re-validated, ffprobe-verified (h264+aac, 242.4 s), SHA-256, provenance, stored; duplicate detected on re-import. SSRF suite with the real resolver: 34/34 refused (private IPs via public DNS names, numeric tricks, metadata hosts, platform pages). | `ingest_live.json`, `ingest_ssrf_live.json`, `tests/fast/test_ingest.py` |
+| Demo | Class | What was run | Evidence |
+|---|---|---|---|
+| A. Stable HTTPS URL for the Studio | **BU** | App runs and the browser E2E passes on the dev host; a permanent host needs the owner (recommended: owner machine + Tailscale Funnel, zero cost). Nothing deployed publicly. | `ACCOUNT1_PROVIDER_COMPARISON.md` §2.1, `tests/e2e/test_studio_browser.py` |
+| B. Real Google Drive A/B/C | **RV** (revoke: **MO**) | Device flow on three real accounts, identity, encrypted refresh tokens, forced refresh, folders, resumable upload interrupted + resumed, sha256, download, move, delete; B cannot see A's file. Real revocation not run (would force the owner to reconnect). | `storage_drive_live.json`, `storage_drive_live_isolation.json` |
+| C. Kaggle GPU, one account | **RV** | Private kernels, 2× T4, probe + NVENC transcode, checksums, idempotent re-submit. | `kaggle_probe.json`, `kaggle_transcode.json`, `lead_demos.json` |
+| D. Interrupt + resume from checkpoint | **RV** | Worker stopped after 2/4 chunks, resumed at chunk 3. | `kaggle_resume.json` |
+| E. Drive → remote GPU → Drive, no PC download | **RV** | Drive A source (49.9 MB) → private Kaggle dataset → T4 NVENC (16× realtime) → Drive B `NEXUS/OriginalMedia/`; 144,587,842 bytes, sha256 matched after re-download. Job `rjob_be153ebe2736`. | `lead_demos.json`, Studio library |
+| F. Control-plane crash recovery | **RV** | API SIGKILLed during a 6-chunk job; after restart it re-attached to the same Kaggle run (no duplicate GPU run). | `lead_demos.json` (`demo_D_control_plane_crash`) |
+| G. Scheduler daily target, pause/resume/stop | **RV** | Real probe jobs; ETA from measured median; stop condition reached. | `lead_demos.json` (`demo_F_scheduler`) |
+| H. Quota exhaustion → safe pause | **P** / **BP** | Simulated exhaustion pauses safely with reason; GPU jobs wait queued (safe production mode, attempts 0) with no account switching. A real Kaggle quota message has not been seen. | `test_scheduler.py`, `test_cloud_compute.py` |
+| I. Secure link ingestion | **RV** | Authorised https source, redirect re-validated, ffprobe, sha256, provenance; SSRF 34/34 refused; platform pages refused. | `ingest_live.json`, `ingest_ssrf_live.json` |
+| J. Browser-only operation + observability | **RV** (dev host) | Studio: jobs, storage, alerts (storage threshold, quota labelled as estimate), GPU quota bar; alerts clear when resolved. | `tests/e2e/test_studio_browser.py`, `GET /api/v1/alerts` |
+| K. CI green on the newest commit | see PR #4 checks | Linux + Windows + windows-e2e; tests never start background workers (`conftest.py`), production startup still does. | GitHub Actions on PR #4 |
 
 ## Tests
-- Fast suite (all four sub-agents integrated): **392 passed, 4 skipped** (`NEXUS_SCHEDULER_THREAD=0 pytest tests/fast`).
+- Fast suite: **399 passed, 4 skipped** (`NEXUS_SCHEDULER_THREAD=0 pytest tests/fast`), ruff clean.
 - Real browser E2E of the Studio: passed. Security recovery checks: 7/7. Secret scan (tracked files): clean.
 - Live Kaggle evidence: probe, transcode, worker-loss resume, control-plane-crash resume, scheduler run.
 
@@ -38,5 +42,6 @@ owner was replaced by a local equivalent) · **Blocked on owner** (built and tes
 | 26 | Browser end-to-end | `tests/e2e/test_studio_browser.py` |
 
 ## Not complete (stated plainly)
-Real Google Drive (B, and the Drive legs of E), a permanent public host, a real owner-GPU/Colab pull worker, and a real
-Kaggle quota-exhaustion message have not been exercised. Each needs the owner (or real quota exhaustion).
+A permanent public host (owner decision), real Drive token revocation and Drive backup/restore runs, a real owner-GPU/Colab
+pull worker, and a real Kaggle quota-exhaustion message have not been exercised. OAuth consent is still in Testing mode
+(refresh tokens expire after 7 days until the owner publishes it).

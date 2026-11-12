@@ -20,7 +20,12 @@ REPEAT_S = 6 * 3600
 FAILS_IN_DAY = 3
 
 
+STATE_PREFIXES = ("storage:", "quota:", "reauth:")  # conditions that can clear; events (transfer/fails/lost) just expire
+_seen: set[str] = set()
+
+
 def _once(key: str, level: str, title: str, body: str, now: float) -> dict | None:
+    _seen.add(key)
     db.execute("CREATE TABLE IF NOT EXISTS alert_state(key TEXT PRIMARY KEY, last REAL, title TEXT)")
     r = db.query("SELECT last FROM alert_state WHERE key=?", (key,))
     if r and now - (r[0]["last"] or 0) < REPEAT_S:
@@ -46,7 +51,8 @@ def _storage(now: float) -> list[dict]:
             continue
         try:  # fresh figure from the provider itself (Drive: about.storageQuota; local: real disk space)
             q = artifacts.provider(cid).quota().model_dump()
-        except Exception:  # noqa: BLE001
+        except Exception:  # noqa: BLE001 - unknown now: keep any existing alert for this connection
+            _seen.update(r["key"] for r in db.query("SELECT key FROM alert_state WHERE key LIKE ?", (f"storage:{cid}:%",)))
             continue
         used, limit = q.get("used"), q.get("limit")
         if used is None or not limit:
@@ -83,11 +89,8 @@ def _jobs(now: float) -> list[dict]:
 
 
 def _quota(now: float) -> list[dict]:
-    try:
-        from .compute import dispatcher
-        qs = dispatcher.quota_status()
-    except Exception:  # noqa: BLE001
-        return []
+    from .compute import dispatcher  # an error here propagates: check() then keeps existing quota alerts
+    qs = dispatcher.quota_status()
     out = []
     for q in qs:
         q = q.model_dump() if hasattr(q, "model_dump") else q
@@ -101,12 +104,19 @@ def _quota(now: float) -> list[dict]:
 
 def check(now: float | None = None) -> list[dict]:
     now = now or time.time()
-    fired = []
-    for fn in (_storage, _transfers, _jobs, _quota):
+    fired, ok = [], set()
+    _seen.clear()
+    for fn, prefixes in ((_storage, ("storage:", "reauth:")), (_transfers, ()), (_jobs, ()), (_quota, ("quota:",))):
         try:
             fired += [a for a in fn(now) if a]
+            ok.update(prefixes)
         except Exception:  # noqa: BLE001 - one broken check must not stop the others
             continue
+    # a state alert whose check ran cleanly and no longer holds is resolved: drop it so the dashboard shows only what is true now
+    for r in db.query("SELECT key FROM alert_state"):
+        k = r["key"]
+        if k.startswith(tuple(ok)) and k not in _seen:
+            db.execute("DELETE FROM alert_state WHERE key=?", (k,))
     return fired
 
 

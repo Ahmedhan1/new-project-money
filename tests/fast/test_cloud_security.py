@@ -485,3 +485,27 @@ def test_alerts_fire_once_per_condition_and_label_estimates(home, monkeypatch):
     assert alerts.check(now=1_000_100.0) == []                       # same condition: no second notification
     assert any(n["title"].startswith("kaggle") for n in events.notifications())
     assert alerts.check(now=1_000_000.0 + alerts.REPEAT_S + 1)        # repeats after the quiet period while it lasts
+
+
+def test_resolved_state_alert_leaves_the_dashboard_but_kept_when_unknown(home, monkeypatch):
+    """A storage/quota alert that no longer holds disappears from `active()` on the next clean check; a check that
+    cannot read the figure (provider error) keeps the existing alert instead of declaring it resolved."""
+    from nexus.cloud import alerts
+    from nexus.contracts import QuotaStatus
+    import nexus.cloud.compute.dispatcher as d
+    hot = QuotaStatus(provider="kaggle", connection_id="kaggle_primary", resource="gpu_seconds_week", limit=1000, used=900,
+                      remaining=100, source="measured")
+    monkeypatch.setattr(d, "quota_status", lambda: [hot])
+    alerts.check(now=2_000_000.0)
+    assert any(a["key"].startswith("quota:kaggle") for a in alerts.active(now=2_000_001.0))
+
+    def broken():
+        raise RuntimeError("provider unreachable")
+    monkeypatch.setattr(d, "quota_status", broken)
+    alerts.check(now=2_000_010.0)
+    assert any(a["key"].startswith("quota:kaggle") for a in alerts.active(now=2_000_011.0))
+
+    cool = hot.model_copy(update={"used": 100, "remaining": 900})
+    monkeypatch.setattr(d, "quota_status", lambda: [cool])
+    alerts.check(now=2_000_020.0)
+    assert not any(a["key"].startswith("quota:kaggle") for a in alerts.active(now=2_000_021.0))

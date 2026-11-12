@@ -38,5 +38,18 @@ session branches exist. Working tree clean. The new branch `work/account-1-cloud
 GPU: Tesla T4 ×2, 15 GB each, 23.9 TFLOPS fp16 / 4.1 fp32 matmul; NVENC 5.6× realtime at 720p; Kaggle round trip
 ~95 s for a tiny job (queue + boot dominate). GPU seconds used this session: about 290 of an assumed 108,000/week.
 
+## Finalization (Parts 1-12)
+- CI blocker: tests started an embedded worker thread that claimed jobs (Linux + Windows failures); `tests/fast/conftest.py`
+  now disables background workers for tests, production startup still starts them. A follow-up test bug (wrong submit
+  result key) was caught by CI and fixed.
+- Real Google Drive on three owner accounts (device flow); Demo E ran fully in the cloud (Drive A → Kaggle T4 → Drive B).
+- Storage router: rules by media kind, failover, replication of masters, reserve; nothing deleted automatically.
+- Alerts (Part 8): storage thresholds, reauth, failed transfers, repeated failures, lost workers, quota (estimates labelled);
+  resolved state alerts clear. Studio dashboard shows alerts and the GPU quota bar. Dashboard disk figure now uses
+  total-free (the container's writable allowance), matching the storage alert.
+- Safe production mode: GPU jobs wait queued with a reason until an authorised GPU worker exists; no paid fallback.
+- Hosting: recommendation only (owner machine + Tailscale Funnel); nothing deployed.
+
 ## Owner actions outstanding
-Rotate both Kaggle tokens pasted in chat; Google OAuth client + Drive A/B/C consent; choose a host; back up the vault key.
+Rotate both Kaggle tokens pasted in chat (vault command in the setup guide); publish the Google OAuth consent screen to
+production; choose a host; back up the vault key.

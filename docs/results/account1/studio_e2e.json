@@ -6,40 +6,35 @@
    "errors": [],
    "notes": [],
    "buttons": 6,
-   "ms": 70
+   "ms": 42
   },
   "accounts": {
    "title": "Connected accounts",
    "errors": [],
-   "notes": [
-    "Storage service (Google Drive A/B/C, transfers, ingest) is not installed in this build: /api/v1/storage is not mounted. Showing what the shared database knows.",
-    "Compute service (remote workers: Kaggle, Colab handoff, user GPU) is not installed in this build: /api/v1/compute is not mounted."
-   ],
-   "buttons": 1,
-   "ms": 653
+   "notes": [],
+   "buttons": 6,
+   "ms": 537
   },
   "notifications": {
    "title": "Notifications",
    "errors": [],
    "notes": [],
    "buttons": 3,
-   "ms": 71
+   "ms": 63
   },
   "scheduler": {
    "title": "Scheduler",
    "errors": [],
    "notes": [],
    "buttons": 8,
-   "ms": 68
+   "ms": 74
   },
   "jobs": {
    "title": "Job queue",
    "errors": [],
-   "notes": [
-    "Compute service (remote workers: Kaggle, Colab handoff, user GPU) is not installed in this build: /api/v1/compute is not mounted. The list below is read from th"
-   ],
+   "notes": [],
    "buttons": 0,
-   "ms": 59
+   "ms": 60
   },
   "library": {
    "title": "Media library",
@@ -53,63 +48,58 @@
    "errors": [],
    "notes": [],
    "buttons": 1,
-   "ms": 40
+   "ms": 42
   },
   "compute": {
    "title": "Compute providers",
    "errors": [],
-   "notes": [
-    "Compute service (remote workers: Kaggle, Colab handoff, user GPU) is not installed in this build: /api/v1/compute is not mounted."
-   ],
-   "buttons": 0,
-   "ms": 58
+   "notes": [],
+   "buttons": 1,
+   "ms": 74
   },
   "storage": {
    "title": "Drive & storage",
    "errors": [],
-   "notes": [
-    "Storage service (Google Drive A/B/C, transfers, ingest) is not installed in this build: /api/v1/storage is not mounted."
-   ],
-   "buttons": 0,
-   "ms": 67
+   "notes": [],
+   "buttons": 5,
+   "ms": 70
   },
   "health": {
    "title": "Provider health",
    "errors": [],
    "notes": [],
    "buttons": 0,
-   "ms": 67
+   "ms": 81
   },
   "resources": {
    "title": "Resource monitor",
    "errors": [],
    "notes": [],
    "buttons": 0,
-   "ms": 251
+   "ms": 249
   },
   "logs": {
    "title": "Logs",
    "errors": [],
    "notes": [],
    "buttons": 1,
-   "ms": 66
+   "ms": 67
   },
   "checkpoints": {
    "title": "Checkpoints",
    "errors": [],
    "notes": [],
    "buttons": 0,
-   "ms": 66
+   "ms": 67
   },
   "security": {
    "title": "Security",
    "errors": [],
    "notes": [
-    "Storage service (Google Drive A/B/C, transfers, ingest) is not installed in this build: /api/v1/storage is not mounted.",
     "Secret values are never returned by any API; the vault is encrypted at rest.",
     "Disconnect a storage account from Connected accounts; that revokes and deletes its stored token."
    ],
-   "buttons": 1,
+   "buttons": 2,
    "ms": 67
   },
   "config": {
@@ -117,24 +107,12 @@
    "errors": [],
    "notes": [],
    "buttons": 1,
-   "ms": 67
+   "ms": 65
   }
  },
  "page_errors": [],
  "console_errors": [
   "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
-  "Failed to load resource: the server responded with a status of 404 (Not Found)",
-  "Failed to load resource: the server responded with a status of 404 (Not Found)",
-  "Failed to load resource: the server responded with a status of 404 (Not Found)",
-  "Failed to load resource: the server responded with a status of 404 (Not Found)",
-  "Failed to load resource: the server responded with a status of 404 (Not Found)",
-  "Failed to load resource: the server responded with a status of 404 (Not Found)",
-  "Failed to load resource: the server responded with a status of 404 (Not Found)",
-  "Failed to load resource: the server responded with a status of 404 (Not Found)",
-  "Failed to load resource: the server responded with a status of 404 (Not Found)",
-  "Failed to load resource: the server responded with a status of 404 (Not Found)",
-  "Failed to load resource: the server responded with a status of 404 (Not Found)",
-  "Failed to load resource: the server responded with a status of 404 (Not Found)",
   "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
  ],
  "failed_requests": [],
@@ -156,7 +134,7 @@
  "screenshots": [
   {
    "file": "studio_scheduler.png",
-   "bytes": 152429
+   "bytes": 154025
   },
   {
    "file": "studio_library.png",
@@ -164,11 +142,11 @@
   },
   {
    "file": "studio_dashboard.png",
-   "bytes": 153123
+   "bytes": 126203
   },
   {
    "file": "studio_mobile_light.png",
-   "bytes": 76353
+   "bytes": 69785
   }
  ],
  "cookie": {
@@ -178,7 +156,7 @@
  },
  "token_visible_to_js": false,
  "after_start": "running \u00b7 masters 0/2 \u00b7 shorts 0/4",
- "after_start_note": "compute service not installed in this build",
+ "after_start_note": "",
  "library": {
   "imgs": [
    320,

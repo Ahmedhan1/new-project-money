@@ -113,7 +113,7 @@ def summary():
                      "succeeded_today": sum(v for k, v in today.items() if k in scheduler.TERMINAL_OK), "recent": recent},
             "providers": _connections(),
             "storage": {"artifacts": art["n"], "artifact_bytes": art["b"], "transfers": xfer,
-                        "disk": {"total": du.total, "used": du.used, "free": du.free, "path": "NEXUS_HOME"}},
+                        "disk": {"total": du.total, "used": du.total - du.free, "free": du.free, "path": "NEXUS_HOME"}},  # used = total-free: what can still be written
             "notifications_unread": _rows("SELECT COUNT(*) n FROM notifications WHERE read = 0")[0]["n"],
             "scheduler": snap,
             "services": {"compute": "routes_compute" not in missing, "storage": "routes_storage" not in missing,
@@ -173,7 +173,7 @@ def resources():
         remote.append({**r, "accelerator": res.get("accelerator"), "duration_s": res.get("duration_s"), "metrics": res.get("metrics") or {}})
     return {"host": {"cpu_percent": psutil.cpu_percent(interval=0.2), "cpus": psutil.cpu_count(), "load_avg": load,
                      "ram": {"total": vm.total, "used": vm.total - vm.available, "percent": vm.percent},
-                     "disk": {"total": du.total, "used": du.used, "free": du.free, "percent": du.percent},
+                     "disk": {"total": du.total, "used": du.total - du.free, "free": du.free, "percent": round(100 * (du.total - du.free) / du.total, 1)},
                      "process_rss": proc.memory_info().rss, "uptime_s": round(time.time() - psutil.boot_time())},
             "remote_workers": remote, "measured_at": time.time()}
 
