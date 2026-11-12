@@ -17,10 +17,12 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 40
     env:
-      NEXUS_HOME: ${{ runner.temp }}\NEXUS dâta 数据
       PYTHONUTF8: "1"
     steps:
       - uses: actions/checkout@v4
+      - name: Data folder with a non-ASCII path (the UTF-8 bug class)
+        shell: pwsh
+        run: Add-Content -Path $env:GITHUB_ENV -Value "NEXUS_HOME=$env:RUNNER_TEMP\NEXUS dâta 数据" -Encoding utf8
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -52,6 +54,6 @@ jobs:
           name: windows-e2e-report
           path: |
             e2e_report.json
-            ${{ env.NEXUS_HOME }}\logs\**
+            ${{ runner.temp }}/NEXUS*/logs/**
           if-no-files-found: ignore
           retention-days: 7
