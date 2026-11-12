@@ -262,3 +262,12 @@ model_profiles:
     availability: batch_only
     quality: {reasoning: 8, writing: 8, json: 10, translation: 10, arabic: 5, summarization: 8, source: "bench_v2 n=36 (Kaggle T4x2, Q4_K_M)"}
     speed: fast
+  nemotron-nano-9b-v2-q4km:
+    family: nemotron
+    weights: "hf.co/bartowski/nvidia_NVIDIA-Nemotron-Nano-9B-v2-GGUF:Q4_K_M"
+    licence: "NVIDIA Open Model License (commercial use allowed under its terms)"
+    commercial_use: "yes"
+    context: 8192
+    availability: batch_only
+    quality: {reasoning: 8, writing: 8, json: 10, translation: 9, arabic: 3, summarization: 10, source: "bench_v2 n=36 (Kaggle T4x2, Q4_K_M)"}
+    speed: fast

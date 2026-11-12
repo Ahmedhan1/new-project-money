@@ -523,11 +523,11 @@ tasks:
   - id: A3-BENCH2
     priority: 2
     title: "Open-weight model benchmark V2 on Kaggle GPUs (36 items, Qwen/DeepSeek/Mistral/GLM/Nemotron) + task routing"
-    status: in_progress
+    status: tested
     acceptance: "Every routed task has a measured model; critical tasks below the bar require human review."
     test: "python scripts/account3/bench_v2_score.py docs/results/account3/models_bench_v2.json <kaggle outputs>"
     evidence: "docs/results/account3/models_bench_v2.json; docs/ACCOUNT3_MODEL_BENCHMARKS.md"
-    next: "Collect kernels A and C (Nemotron rerun with /no_think, Qwen 27B/35B with per-model disk cleanup)."
+    next: "Qwen3.6-35B-A3B / Qwen3.8-27B: download the text GGUF and ollama create (mmproj pull fails); >= 15 items per capability."
   - id: A3-CREATORS2
     acceptance: "Every dimension is a measured number with a method or null with a reason; incompatible references are reported, not averaged."
     priority: 2

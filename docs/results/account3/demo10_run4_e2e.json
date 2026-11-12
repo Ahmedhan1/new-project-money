@@ -1,0 +1,285 @@
+{
+ "schema": "nexus.Demo10/1",
+ "topic": "Aswan High Dam",
+ "started": "2026-11-12T23:32:43",
+ "steps": {
+  "research": {
+   "seconds": 297.1,
+   "score": 57.1,
+   "confidence": 0.52,
+   "claims": 23,
+   "assessment_verdict": "indicative only: score range 51.2-61.6; 20 single-source claim(s) need a second source before scripting",
+   "uncertainty": {
+    "score": 57.1,
+    "low": 51.2,
+    "high": 61.6,
+    "width": 10.4,
+    "unknown_factors": [
+     "competition"
+    ],
+    "method": "score recomputed with each unknown factor at its worst and best value (confidence 0.5)"
+   },
+   "credibility": {
+    "reference": 3,
+    "primary": 9
+   },
+   "cross_source": 0.13,
+   "geography": {
+    "EG": 11,
+    "SD": 1,
+    "SS": 1
+   }
+  },
+  "strategy": {
+   "seconds": 0.0,
+   "written_by": "local-llamacpp/qwen3-4b-q4km",
+   "title": "The Aswan High Dam: A Marvel of Engineering and History",
+   "checks": {
+    "originality": true,
+    "grounding": true,
+    "framing": true
+   },
+   "approved": true,
+   "scenes": [
+    "The Aswan High Dam, located in southern Egypt, is a monumental structure that has transformed the region's economy and culture. It was built with the help of the Soviet Union and has become a key part of Egypt's industrialization efforts.",
+    "Constructed between 1960 and 1970, the dam was designed to control flooding, increase water storage for irrigation, and generate hydroelectricity. Its unique features, like the deep grout curtain below its base, were relatively new at the time.",
+    "The Aswan High Dam has had a profound impact on Egypt's economy and culture. Despite concerns about sediment buildup, experts estimate it will function for at least 200 years.",
+    "The Aswan High Dam stands as a testament to human ingenuity and the complex relationship between engineering, history, and the Nile River. Its legacy continues to shape Egypt's future."
+   ],
+   "visual_queries": [
+    "Aswan High Dam",
+    "Archival",
+    "Lake Nasser",
+    "Egypt"
+   ],
+   "editorial_plan_decisions": 4,
+   "render_job": {
+    "gpu": false,
+    "ram_gb": 6,
+    "est_s": 140,
+    "models": [
+     "tts",
+     "llm-local"
+    ]
+   }
+  },
+  "render": {
+   "seconds": 61.4,
+   "output": "/home/user/new-project-money/.nexus/projects/prj_191069aaae/renders/master.mp4",
+   "status": "PASSED_AUTOMATED_CHECKS",
+   "stages": {
+    "1-pre-production": {
+     "passed": true,
+     "failed": [
+      "hook: opening: \"The Aswan High Dam, located in southern Egypt, is a monumental structu\""
+     ]
+    },
+    "2b-visual-plan": {
+     "passed": true,
+     "failed": [
+      "visual variety: visual kinds: ['licensed_photo', 'licensed_photo', 'licensed_photo', 'licensed_photo']"
+     ]
+    },
+    "2c-typography": {
+     "passed": true,
+     "failed": []
+    },
+    "2-assets": {
+     "passed": true,
+     "failed": []
+    },
+    "4-editing": {
+     "passed": true,
+     "failed": []
+    },
+    "5-technical": {
+     "passed": true,
+     "failed": []
+    }
+   },
+   "visual_plan": [
+    {
+     "scene": 0,
+     "kind": "licensed_photo",
+     "reason": null,
+     "rejected": 0
+    },
+    {
+     "scene": 1,
+     "kind": "licensed_photo",
+     "reason": null,
+     "rejected": 13
+    },
+    {
+     "scene": 2,
+     "kind": "licensed_photo",
+     "reason": null,
+     "rejected": 1
+    },
+    {
+     "scene": 3,
+     "kind": "licensed_photo",
+     "reason": null,
+     "rejected": 2
+    }
+   ],
+   "narration_verbatim": true,
+   "frames": "docs/results/account3/demo10_frames.jpg"
+  }
+ },
+ "gates": {
+  "sensational_claim": {
+   "rejected": true,
+   "framing": {
+    "ok": false,
+    "unsupported_framing": [
+     {
+      "where": "hook",
+      "phrase": "secret"
+     },
+     {
+      "where": "scene 1",
+      "phrase": "secret"
+     }
+    ],
+    "rule": "no sensational framing unless a sourced claim says it"
+   },
+   "reason": "handoff not approved: {'originality': True, 'grounding': True, 'framing': False}"
+  },
+  "geo_errors": [
+   "Aswan governorate (attempt 1): https://commons.wikimedia.org/w/api.php -> rate limited, retry after 16s",
+   "Belgorod governorate 1745 (attempt 1): https://commons.wikimedia.org/w/api.php -> rate limited, retry after 57s"
+  ],
+  "geographic_and_historical_imagery": {
+   "candidates": 13,
+   "refused": 8,
+   "accepted": [
+    "Aswan Governorate, Egypt - panoramio",
+    "Sheyakhah Oula, Qism Aswan, Aswan Governorate, Egypt - panoramio",
+    "Sheyakhah Oula, Qism Aswan, Aswan Governorate, Egypt - panoramio (9)",
+    "Sheyakhah Oula, Qism Aswan, Aswan Governorate, Egypt - panoramio (10)",
+    "Manteqet as Sad Al Aali, Qism Aswan, Aswan Governorate, Egypt - panoramio"
+   ],
+   "refusals": [
+    {
+     "title": "Flag of Aswan Governorate",
+     "ok": false,
+     "findings": [
+      "emblem: flag / coat of arms / logo used as scene footage for a scene that is not about it"
+     ]
+    },
+    {
+     "title": "Belgorod governorate 1745",
+     "ok": false,
+     "findings": [
+      "geo_mismatch: scene is in ['EG'] (Aswan High, Egypt, Aswan); asset names ['RU', 'UA'] (Belgorod, Ukraine, Russian)"
+     ]
+    },
+    {
+     "title": "1808. Tavricheskaia Governorate map",
+     "ok": false,
+     "findings": [
+      "geo_mismatch: scene is in ['EG'] (Aswan High, Egypt, Aswan); asset names ['RU'] (Russia)",
+      "historical_in_modern: asset dated 1808, scene is modern (present day)",
+      "old_map: historical map used for a scene that is not about maps or history"
+     ]
+    },
+    {
+     "title": "1808. Poltavskaia Kharkovskaia and Ekaterinoslavskaia Governorate map",
+     "ok": false,
+     "findings": [
+      "geo_mismatch: scene is in ['EG'] (Aswan High, Egypt, Aswan); asset names ['RU', 'UA'] (Poltavskaia, Poltava, Russia)",
+      "historical_in_modern: asset dated 1808, scene is modern (present day)",
+      "old_map: historical map used for a scene that is not about maps or history"
+     ]
+    },
+    {
+     "title": "Map of volosts of Yeniseysk Governorate (1893)",
+     "ok": false,
+     "findings": [
+      "geo_mismatch: scene is in ['EG'] (Aswan High, Egypt, Aswan); asset names ['RU'] (Russian)",
+      "old_map: historical map used for a scene that is not about maps or history"
+     ]
+    },
+    {
+     "title": "Orenburg Governorate map, 1905",
+     "ok": false,
+     "findings": [
+      "geo_mismatch: scene is in ['EG'] (Aswan High, Egypt, Aswan); asset names ['RU'] (Orenburg)"
+     ]
+    },
+    {
+     "title": "Tambovskaia and Penzinskaia Governorate map (1808)",
+     "ok": false,
+     "findings": [
+      "geo_mismatch: scene is in ['EG'] (Aswan High, Egypt, Aswan); asset names ['RU'] (Tambovskaia, Tambov, Russia)",
+      "historical_in_modern: asset dated 1808, scene is modern (present day)",
+      "old_map: historical map used for a scene that is not about maps or history"
+     ]
+    },
+    {
+     "title": "Belgorod governorate 1745",
+     "ok": false,
+     "findings": [
+      "geo_mismatch: scene is in ['EG'] (Aswan High, Egypt, Aswan); asset names ['RU', 'UA'] (Belgorod, Ukraine, Russian)"
+     ]
+    }
+   ]
+  },
+  "missing_glyphs": {
+   "stage": {
+    "stage": "2c-typography",
+    "checks": [
+     {
+      "check": "missing glyphs",
+      "ok": false,
+      "detail": "'Hieroglyph 𓂀 caption': no installed font can draw ['𓂀'] - would render as empty boxes",
+      "severity": "critical",
+      "fix": "font"
+     }
+    ],
+    "passed": false
+   },
+   "credits_render": {
+    "recall": 0.786,
+    "ocr": "Image: Lake Nasser by 4.1)! 4): sxe licensed CC BY-SA 4.0",
+    "ok": true
+   },
+   "per_language_ocr": {
+    "ar": 1.0,
+    "en": 1.0,
+    "zh": 1.0,
+    "hi": 0.842,
+    "ru": 1.0,
+    "de": 1.0
+   }
+  },
+  "title_cards": {
+   "three_of_four": false,
+   "approved_by_owner": true
+  },
+  "unsupported_translation": {
+   "gulf_dubbing": {
+    "refused": true,
+    "reason": "no commercially cleared voice for ar-Gulf [ar_JO-kareem-medium (unverified)] - deliver subtitles, or supply a voice you hold the rights to"
+   },
+   "gulf_readiness": {
+    "score": 31.5,
+    "level": "draft_needs_native_review",
+    "blockers": [
+     "transcription: whisper-small: one 'ar' code for all varieties - no dialect label, not measured on dialect speech",
+     "translation: real MT run: QA confidence 0.606, lines needing fix [1, 2, 4, 6, 7]; not native-reviewed; Gulf output still classifies as MSA (K-15)",
+     "human_reviewed: no native-speaker review recorded",
+     "tts: cleared voice None but the voice-over failed: no commercially cleared voice for ar-Gulf [ar_JO-kareem-medium (unverified)] - deliver subtitles, or supply a voice you hold the rights to"
+    ]
+   }
+  },
+  "duplicate_publishing": {
+   "same_manifest": true,
+   "deduplicated": true,
+   "visibility": "private",
+   "status": "draft"
+  }
+ },
+ "finished": "2026-11-12T23:35:07"
+}

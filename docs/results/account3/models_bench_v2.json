@@ -1,6 +1,6 @@
 {
  "schema": "nexus.ModelBenchmarkV2/1",
- "scored": "2026-11-12T23:21:54",
+ "scored": "2026-11-12T23:42:00",
  "runs": [
   {
    "file": "models_bench_v2_raw_a.json",
@@ -37,6 +37,26 @@
      {
       "rc": 0,
       "out": "##################################################################   99.1%\n#######################################################################   99.7%\n######################################################################## 100.0%\n>>> Creating ollama user...\n>>> Adding ollama user to video group...\n>>> Adding current user to ollama group...\n>>> Creating ollama systemd service...\n>>> The Ollama API is now available at 127.0.0.1:11434.\n>>> Install complete. Run \"ollama\" from the command line.\n"
+     }
+    ],
+    "ollama_version": "ollama version is 0.40.16"
+   }
+  },
+  {
+   "file": "models_bench_v2_raw_c.json",
+   "started": 1794524571.0276434,
+   "finished": 1794525162.0024543,
+   "env": {
+    "nvidia_smi": "Tesla T4, 15360 MiB\nTesla T4, 15360 MiB\n",
+    "internet": "HTTP/2 200",
+    "install": [
+     {
+      "rc": 22,
+      "out": "curl: (22) The requested URL returned error: 404\n"
+     },
+     {
+      "rc": 0,
+      "out": "#################################################################    98.3%\n#######################################################################   99.7%\n######################################################################## 100.0%\n>>> Creating ollama user...\n>>> Adding ollama user to video group...\n>>> Adding current user to ollama group...\n>>> Creating ollama systemd service...\n>>> The Ollama API is now available at 127.0.0.1:11434.\n>>> Install complete. Run \"ollama\" from the command line.\n"
      }
     ],
     "ollama_version": "ollama version is 0.40.16"
@@ -2608,22 +2628,23 @@
     "repo": "nvidia/NVIDIA-Nemotron-Nano-9B-v2",
     "licence": "NVIDIA Open Model License (commercial use allowed under its terms)",
     "params_b": 8.9,
-    "think": false
+    "think": false,
+    "system_suffix": "/no_think"
    },
    "pull_ok": true,
-   "pull_s": 141.6,
+   "pull_s": 95.4,
    "vram": "6317 MiB\n0 MiB",
    "capabilities": {
-    "json": 0.0,
-    "reasoning": 0.0,
-    "summarization": 0.0,
-    "translation": 0.0,
-    "dialect": 0.32,
-    "writing": 0.0,
-    "long_context": 0.0,
-    "grounding": 0.317,
-    "instruction": 0.25,
-    "strategy": 0.333
+    "json": 1.0,
+    "reasoning": 0.833,
+    "summarization": 0.975,
+    "translation": 0.882,
+    "dialect": 0.31,
+    "writing": 0.8,
+    "long_context": 1.0,
+    "grounding": 1.0,
+    "instruction": 1.0,
+    "strategy": 1.0
    },
    "n": {
     "json": 2,
@@ -2637,172 +2658,172 @@
     "instruction": 3,
     "strategy": 1
    },
-   "overall": 0.092,
+   "overall": 0.842,
    "failures": 0,
-   "mean_latency_s": 6.86,
-   "median_tokens_per_s": 20.6,
+   "mean_latency_s": 2.63,
+   "median_tokens_per_s": 25.5,
    "rows": [
     {
      "id": "json",
      "cap": "json",
-     "score": 0.0,
-     "latency_s": 6.77,
-     "tokens_per_s": 25.0,
-     "thinking_chars": 652,
+     "score": 1.0,
+     "latency_s": 2.18,
+     "tokens_per_s": 27.6,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "{\n  \"duration_s\": 90,\n  \"language\": \"en\",\n  \"tags\": [\"volcanoes\", \"geology\", \"formation\"],\n  \"title\": \"How Volcanoes Form\"\n}"
     },
     {
      "id": "extract",
      "cap": "json",
-     "score": 0.0,
-     "latency_s": 7.0,
-     "tokens_per_s": 24.5,
-     "thinking_chars": 605,
+     "score": 1.0,
+     "latency_s": 3.03,
+     "tokens_per_s": 27.2,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "{\n  \"city\": \"Lyon\",\n  \"date\": \"2026-03-14\",\n  \"deposit_eur\": 2500,\n  \"people\": [\"Lina Haddad\", \"Marco Rossi\"],\n  \"rent_eur\": 1250\n}"
     },
     {
      "id": "reason1",
      "cap": "reasoning",
-     "score": 0.0,
-     "latency_s": 3.75,
-     "tokens_per_s": 23.8,
-     "thinking_chars": 261,
+     "score": 1.0,
+     "latency_s": 0.96,
+     "tokens_per_s": 26.3,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "{\"answer\": \"16:15\"}"
     },
     {
      "id": "reason2",
      "cap": "reasoning",
-     "score": 0.0,
-     "latency_s": 3.74,
-     "tokens_per_s": 23.8,
-     "thinking_chars": 287,
+     "score": 1.0,
+     "latency_s": 0.86,
+     "tokens_per_s": 27.1,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "{\"answer\": \"36\"}"
     },
     {
      "id": "reason3",
      "cap": "reasoning",
-     "score": 0.0,
-     "latency_s": 3.81,
-     "tokens_per_s": 23.4,
-     "thinking_chars": 305,
+     "score": 1.0,
+     "latency_s": 0.79,
+     "tokens_per_s": 27.5,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "{\"answer\": \"no\"}"
     },
     {
      "id": "reason4",
      "cap": "reasoning",
      "score": 0.0,
-     "latency_s": 3.9,
-     "tokens_per_s": 22.9,
-     "thinking_chars": 219,
+     "latency_s": 0.83,
+     "tokens_per_s": 27.3,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "{\"answer\": \"34\"}"
     },
     {
      "id": "reason5",
      "cap": "reasoning",
-     "score": 0.0,
-     "latency_s": 3.97,
-     "tokens_per_s": 22.5,
-     "thinking_chars": 276,
+     "score": 1.0,
+     "latency_s": 0.78,
+     "tokens_per_s": 27.5,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "{\"answer\": \"Saturday\"}"
     },
     {
      "id": "reason6",
      "cap": "reasoning",
-     "score": 0.0,
-     "latency_s": 4.02,
-     "tokens_per_s": 22.0,
-     "thinking_chars": 250,
+     "score": 1.0,
+     "latency_s": 0.82,
+     "tokens_per_s": 26.7,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "{\"answer\": \"9\"}"
     },
     {
      "id": "summary",
      "cap": "summarization",
-     "score": 0.0,
-     "latency_s": 6.14,
-     "tokens_per_s": 21.2,
-     "thinking_chars": 535,
+     "score": 0.975,
+     "latency_s": 2.71,
+     "tokens_per_s": 27.1,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "Honeybees use a waggle dance to communicate flower locations: angle indicates direction relative to the sun, duration signals distance. Karl von Frisch decoded this in the 20th century, earning a 1973 Nobel Prize. Young bees learn accuracy by observing experienced foragers.\n"
     },
     {
      "id": "translate_de",
      "cap": "translation",
-     "score": 0.0,
+     "score": 1.0,
      "script_share": 1.0,
-     "sim": null,
-     "latency_s": 8.29,
-     "tokens_per_s": 20.3,
-     "thinking_chars": 642,
+     "sim": 0.8099,
+     "latency_s": 1.16,
+     "tokens_per_s": 27.8,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "Das Museum öffnet um neun Uhr morgens. Kinder unter zwölf Jahren können kostenlos eintritt.\n"
     },
     {
      "id": "translate_fr",
      "cap": "translation",
-     "score": 0.0,
+     "score": 1.0,
      "script_share": 1.0,
-     "sim": null,
-     "latency_s": 8.7,
-     "tokens_per_s": 19.2,
-     "thinking_chars": 673,
+     "sim": 0.792,
+     "latency_s": 1.17,
+     "tokens_per_s": 27.5,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "Le musée ouvre à neuf heures du matin. Les enfants de moins de douze ans entrent gratuitement.\n"
     },
     {
      "id": "translate_ar",
      "cap": "translation",
-     "score": 0.0,
+     "score": 1.0,
      "script_share": 1.0,
-     "sim": null,
-     "latency_s": 9.06,
-     "tokens_per_s": 18.5,
-     "thinking_chars": 614,
+     "sim": 0.8731,
+     "latency_s": 1.17,
+     "tokens_per_s": 27.5,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "يفتح المتحف في الساعة تسع صباحًا. الأطفال دون سن الثانية عشرة يدخلون مجانًا.\n"
     },
     {
      "id": "translate_zh",
      "cap": "translation",
-     "score": 0.0,
+     "score": 0.871,
      "script_share": 1.0,
-     "sim": null,
-     "latency_s": 8.96,
-     "tokens_per_s": 18.7,
-     "thinking_chars": 350,
+     "sim": 0.4708,
+     "latency_s": 1.18,
+     "tokens_per_s": 27.2,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "博物馆上午九点开放。十二岁以下的儿童可以免费进入。\n"
     },
     {
      "id": "translate_ru",
      "cap": "translation",
-     "score": 0.0,
+     "score": 1.0,
      "script_share": 1.0,
-     "sim": null,
-     "latency_s": 8.5,
-     "tokens_per_s": 19.8,
-     "thinking_chars": 619,
+     "sim": 0.9002,
+     "latency_s": 1.37,
+     "tokens_per_s": 27.0,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "Музей открывается в девять утра. Дети до двенадцати лет могут бесплатно зайти.\n"
     },
     {
      "id": "translate_hi",
      "cap": "translation",
-     "score": 0.0,
+     "score": 0.42,
      "script_share": 1.0,
-     "sim": null,
-     "latency_s": 8.22,
-     "tokens_per_s": 20.4,
-     "thinking_chars": 404,
+     "sim": 0.0204,
+     "latency_s": 6.62,
+     "tokens_per_s": 25.6,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "म्य्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्यम्य्य"
     },
     {
      "id": "dialect_egy",
@@ -2810,11 +2831,11 @@
      "score": 0.2,
      "own_markers": [],
      "other_markers": [],
-     "latency_s": 5.19,
-     "tokens_per_s": 20.8,
-     "thinking_chars": 440,
+     "latency_s": 3.51,
+     "tokens_per_s": 25.6,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "1. \"خروج مع الأصحاب يوم الجمعة، بس ما تنسى تاخد كمان كيس بلاستيك، قد ياخدوا حاجة من السوق.\"  \n2. \"اللي بيحبوا الخروج مع الأصحاب يوم الجمعة، يفضلوا تاخدوا كمان كيس، قد ياخدوا حاجة من السوق أو حتى من المول.\"\n"
     },
     {
      "id": "dialect_gulf",
@@ -2822,184 +2843,184 @@
      "score": 0.2,
      "own_markers": [],
      "other_markers": [],
-     "latency_s": 5.19,
-     "tokens_per_s": 20.9,
-     "thinking_chars": 394,
+     "latency_s": 2.21,
+     "tokens_per_s": 25.7,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "1. \"أحمد، نخرج مع الربع يوم الجمعة، ما عندك وقت؟\"  \n2. \"الربع يوم الجمعة، نذهب نأكل ونشرب، ما عندك مشكلة؟\"\n"
     },
     {
      "id": "titles",
      "cap": "writing",
-     "score": 0.0,
-     "latency_s": 8.05,
-     "tokens_per_s": 20.9,
-     "thinking_chars": 597,
+     "score": 0.8,
+     "latency_s": 2.17,
+     "tokens_per_s": 25.1,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "{\n  \"titles\": [\n    \"How Bees Communicate Through Dance\",\n    \"Bees: The Secret Language of Buzz\",\n    \"Understanding Bee Communication Methods\"\n  ]\n}"
     },
     {
      "id": "reason2_1",
      "cap": "reasoning",
-     "score": 0.0,
-     "latency_s": 4.22,
-     "tokens_per_s": 21.0,
-     "thinking_chars": 291,
+     "score": 1.0,
+     "latency_s": 1.01,
+     "tokens_per_s": 25.5,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "{\"answer\": \">625\"}"
     },
     {
      "id": "reason2_2",
      "cap": "reasoning",
-     "score": 0.0,
-     "latency_s": 4.22,
-     "tokens_per_s": 20.9,
-     "thinking_chars": 340,
+     "score": 1.0,
+     "latency_s": 0.87,
+     "tokens_per_s": 25.5,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "{\"answer\": \"Dana\"}"
     },
     {
      "id": "reason2_3",
      "cap": "reasoning",
      "score": 0.0,
-     "latency_s": 4.27,
-     "tokens_per_s": 20.7,
-     "thinking_chars": 304,
+     "latency_s": 1.05,
+     "tokens_per_s": 24.6,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "{\"answer\": \"93.75\"}"
     },
     {
      "id": "reason2_4",
      "cap": "reasoning",
-     "score": 0.0,
-     "latency_s": 4.3,
-     "tokens_per_s": 20.6,
-     "thinking_chars": 275,
+     "score": 1.0,
+     "latency_s": 0.89,
+     "tokens_per_s": 25.5,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "{\"answer\": \"5\"}"
     },
     {
      "id": "reason2_5",
      "cap": "reasoning",
-     "score": 0.0,
-     "latency_s": 4.33,
-     "tokens_per_s": 20.5,
-     "thinking_chars": 299,
+     "score": 1.0,
+     "latency_s": 0.85,
+     "tokens_per_s": 25.0,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "{\"answer\": \"5\"}"
     },
     {
      "id": "reason2_6",
      "cap": "reasoning",
-     "score": 0.0,
-     "latency_s": 4.37,
-     "tokens_per_s": 20.3,
-     "thinking_chars": 271,
+     "score": 1.0,
+     "latency_s": 0.86,
+     "tokens_per_s": 25.0,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "{\"answer\": \"5\"}"
     },
     {
      "id": "longctx1",
      "cap": "long_context",
-     "score": 0.0,
-     "latency_s": 17.05,
-     "tokens_per_s": 20.2,
-     "thinking_chars": 269,
+     "score": 1.0,
+     "latency_s": 14.79,
+     "tokens_per_s": 23.7,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "{\"answer\": \"1847\"}"
     },
     {
      "id": "longctx2",
      "cap": "long_context",
-     "score": 0.0,
-     "latency_s": 4.63,
-     "tokens_per_s": 19.6,
-     "thinking_chars": 288,
+     "score": 1.0,
+     "latency_s": 2.09,
+     "tokens_per_s": 23.6,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "{\"answer\": \"212\"}"
     },
     {
      "id": "longctx3",
      "cap": "long_context",
-     "score": 0.0,
-     "latency_s": 4.69,
-     "tokens_per_s": 19.1,
-     "thinking_chars": 248,
+     "score": 1.0,
+     "latency_s": 2.11,
+     "tokens_per_s": 23.3,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "{\"answer\": \"Ilse Marten\"}"
     },
     {
      "id": "synth",
      "cap": "grounding",
-     "score": 0.2,
+     "score": 1.0,
      "invented_numbers": [],
-     "latency_s": 29.29,
-     "tokens_per_s": 19.9,
-     "thinking_chars": 1222,
+     "latency_s": 19.29,
+     "tokens_per_s": 22.5,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "{\n  \"claims\": [\n    {\n      \"sources\": [\"S1\", \"S2\"],\n      \"text\": \"The Narrow Gate footbridge opened on 4 May 2019.\"\n    },\n    {\n      \"sources\": [\"S1\", \"S2\"],\n      \"text\": \"The footbridge is 48 m high.\"\n    },\n    {\n      \"sources\": [\"S1\", \"S2\"],\n      \"text\": \"The footbridge is 310 m long.\"\n   "
     },
     {
      "id": "unanswerable",
      "cap": "grounding",
-     "score": 0.0,
-     "latency_s": 4.7,
-     "tokens_per_s": 19.5,
-     "thinking_chars": 310,
+     "score": 1.0,
+     "latency_s": 1.09,
+     "tokens_per_s": 22.6,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "{\"answer\": \"not stated\"}"
     },
     {
      "id": "grounded_hook",
      "cap": "grounding",
-     "score": 0.75,
-     "latency_s": 4.64,
-     "tokens_per_s": 19.5,
-     "thinking_chars": 319,
+     "score": 1.0,
+     "latency_s": 1.86,
+     "tokens_per_s": 22.8,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "The Narrow Gate footbridge, opened in May 2019, is 48 m high and spans 310 m.\n"
     },
     {
      "id": "instr_list",
      "cap": "instruction",
-     "score": 0.75,
-     "latency_s": 4.41,
-     "tokens_per_s": 19.9,
-     "thinking_chars": 363,
+     "score": 1.0,
+     "latency_s": 1.3,
+     "tokens_per_s": 23.1,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "- Improves heart health  \n- Boosts mood naturally  \n- Strengthens leg muscles\n"
     },
     {
      "id": "instr_german",
      "cap": "instruction",
-     "score": 0.0,
-     "latency_s": 6.31,
-     "tokens_per_s": 20.2,
-     "thinking_chars": 623,
+     "score": 1.0,
+     "latency_s": 2.31,
+     "tokens_per_s": 22.6,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "Schlaf ist wichtig, weil er dem Körper und Geist ermöglicht, sich zu erholen und zu regenerieren. Ohne ausreichenden Schlaf können kognitive Funktionen und die körperliche Gesundheit beeinträchtigt werden.\n"
     },
     {
      "id": "instr_count",
      "cap": "instruction",
-     "score": 0.0,
-     "latency_s": 2.32,
-     "tokens_per_s": 20.7,
-     "thinking_chars": 145,
+     "score": 1.0,
+     "latency_s": 0.86,
+     "tokens_per_s": 22.9,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "{\"count\": 5}"
     },
     {
      "id": "translate_ar-EG",
      "cap": "dialect",
-     "score": 0.44,
+     "score": 0.402,
      "own_markers": [],
      "other_markers": [],
-     "latency_s": 6.24,
-     "tokens_per_s": 20.5,
-     "thinking_chars": 462,
+     "latency_s": 1.29,
+     "tokens_per_s": 23.3,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "المتحف يفتح في تسع صباحًا. الأطفال دون twelve يدخلوا مجانًا.\n"
     },
     {
      "id": "translate_ar-Gulf",
@@ -3007,22 +3028,22 @@
      "score": 0.44,
      "own_markers": [],
      "other_markers": [],
-     "latency_s": 6.21,
-     "tokens_per_s": 20.7,
-     "thinking_chars": 598,
+     "latency_s": 1.39,
+     "tokens_per_s": 23.0,
+     "thinking_chars": 0,
      "error": null,
-     "text": ""
+     "text": "المتحف يفتح في تسعة صباحًا. الأطفال دون سن الثانية عشرة يدخلون مجانًا.\n"
     },
     {
      "id": "strategy",
      "cap": "strategy",
-     "score": 0.333,
+     "score": 1.0,
      "invented_numbers": [],
-     "latency_s": 17.46,
-     "tokens_per_s": 20.6,
-     "thinking_chars": 1243,
+     "latency_s": 7.23,
+     "tokens_per_s": 22.7,
+     "thinking_chars": 0,
      "error": null,
-     "text": "{\n  \"beats\": [\n    \"A homeowner installs a lithium-ion battery pack, cutting energy costs by storing excess solar power.\",\n    \"The battery’s 10–15 kWh capacity powers lights and appliances during peak evening hours.\",\n    \"A graph shows lithium-ion battery"
+     "text": "{\n  \"beats\": [\n    \"A homeowner installs a lithium-ion battery pack to store solar energy.\",\n    \"The battery captures midday solar power, storing 10-15 kWh of energy.\",\n    \"The stored energy is used during the evening peak, reducing reliance on the grid.\"\n  ],\n  \"hook\": \"Lithium-ion home battery p"
     }
    ]
   },
@@ -3036,7 +3057,7 @@
     "think": false
    },
    "pull_ok": false,
-   "pull_s": 144.5,
+   "pull_s": 120.3,
    "vram": null,
    "capabilities": {},
    "n": {},
@@ -3479,7 +3500,7 @@
     "think": false
    },
    "pull_ok": false,
-   "pull_s": 122.9,
+   "pull_s": 128.2,
    "vram": null,
    "capabilities": {},
    "n": {},
@@ -3491,8 +3512,8 @@
   }
  },
  "not_run": {
-  "qwen3.6-35b-a3b": "  22 GB                         \u001b[K\npulling 8971ee4f331f: 100% ▕█████████████████ ▏ 896 MB/899 MB  122 MB/s      0s\u001b[K\u001b[?25h\u001b[?2026l\nError: file does not exist\n",
-  "qwen3.8-27b": " 927 MB                         \u001b[K\npulling 5fcd38a2a742: 100% ▕██████████████████▏   67 B                         \u001b[K\u001b[?25h\u001b[?2026l\nError: file does not exist\n"
+  "qwen3.6-35b-a3b": "  182 B                         \u001b[K\npulling 8971ee4f331f: 100% ▕█████████████████ ▏ 898 MB/899 MB  145 MB/s      0s\u001b[K\u001b[?25h\u001b[?2026l\nError: file does not exist\n",
+  "qwen3.8-27b": "  16 GB/ 16 GB   64 MB/s      0s\u001b[K\npulling cbb841a9ee06: 100% ▕█████████████████ ▏ 927 MB/927 MB  129 MB/s      0s\u001b[K\u001b[?25h\u001b[?2026l\nError: file does not exist\n"
  },
  "routing": {
   "deep_research": {
@@ -3512,16 +3533,16 @@
      "score": 0.972
     },
     {
+     "model": "nemotron-nano-9b-v2",
+     "score": 0.944
+    },
+    {
      "model": "glm-4.7-flash",
      "score": 0.917
     },
     {
      "model": "ministral-3-14b",
      "score": 0.917
-    },
-    {
-     "model": "qwen3-4b-think",
-     "score": 0.883
     }
    ],
    "requires_human_review": false
@@ -3547,12 +3568,12 @@
      "score": 1.0
     },
     {
-     "model": "glm-4.7-flash",
-     "score": 0.889
+     "model": "nemotron-nano-9b-v2",
+     "score": 0.933
     },
     {
-     "model": "qwen3.5-4b",
-     "score": 0.822
+     "model": "glm-4.7-flash",
+     "score": 0.889
     }
    ],
    "requires_human_review": false
@@ -3635,12 +3656,12 @@
      "score": 1.0
     },
     {
-     "model": "glm-4.7-flash",
-     "score": 0.9
+     "model": "nemotron-nano-9b-v2",
+     "score": 0.988
     },
     {
-     "model": "deepseek-r1-0528-qwen3-8b",
-     "score": 0.85
+     "model": "glm-4.7-flash",
+     "score": 0.9
     }
    ],
    "requires_human_review": false
@@ -3741,11 +3762,15 @@
     "instruction"
    ],
    "bar": 0.3,
-   "best": "ministral-3-14b",
+   "best": "nemotron-nano-9b-v2",
    "score": 1.0,
    "meets_bar": true,
    "critical": false,
    "ranking": [
+    {
+     "model": "nemotron-nano-9b-v2",
+     "score": 1.0
+    },
     {
      "model": "ministral-3-14b",
      "score": 1.0
@@ -3757,10 +3782,6 @@
     {
      "model": "qwen3-4b-think",
      "score": 1.0
-    },
-    {
-     "model": "qwen3.5-4b",
-     "score": 0.834
     }
    ],
    "requires_human_review": false
@@ -3771,11 +3792,15 @@
     "instruction"
    ],
    "bar": 0.3,
-   "best": "ministral-3-14b",
+   "best": "nemotron-nano-9b-v2",
    "score": 1.0,
    "meets_bar": true,
    "critical": false,
    "ranking": [
+    {
+     "model": "nemotron-nano-9b-v2",
+     "score": 1.0
+    },
     {
      "model": "ministral-3-14b",
      "score": 1.0
@@ -3787,10 +3812,6 @@
     {
      "model": "qwen3-4b-think",
      "score": 1.0
-    },
-    {
-     "model": "qwen3.5-4b",
-     "score": 0.834
     }
    ],
    "requires_human_review": false
@@ -3811,16 +3832,16 @@
      "score": 0.916
     },
     {
+     "model": "nemotron-nano-9b-v2",
+     "score": 0.916
+    },
+    {
      "model": "qwen3.5-9b",
      "score": 0.875
     },
     {
      "model": "glm-4.7-flash",
      "score": 0.875
-    },
-    {
-     "model": "deepseek-r1-0528-qwen3-8b",
-     "score": 0.792
     }
    ],
    "requires_human_review": false
@@ -3841,16 +3862,16 @@
      "score": 0.916
     },
     {
+     "model": "nemotron-nano-9b-v2",
+     "score": 0.916
+    },
+    {
      "model": "qwen3.5-9b",
      "score": 0.875
     },
     {
      "model": "glm-4.7-flash",
      "score": 0.875
-    },
-    {
-     "model": "deepseek-r1-0528-qwen3-8b",
-     "score": 0.792
     }
    ],
    "requires_human_review": false
@@ -3872,16 +3893,16 @@
      "score": 0.972
     },
     {
+     "model": "nemotron-nano-9b-v2",
+     "score": 0.944
+    },
+    {
      "model": "ministral-3-14b",
      "score": 0.917
     },
     {
      "model": "qwen3-4b-think",
      "score": 0.883
-    },
-    {
-     "model": "qwen3.5-4b",
-     "score": 0.833
     }
    ],
    "requires_human_review": false
@@ -3932,16 +3953,16 @@
      "score": 0.916
     },
     {
+     "model": "nemotron-nano-9b-v2",
+     "score": 0.916
+    },
+    {
      "model": "qwen3.5-9b",
      "score": 0.875
     },
     {
      "model": "glm-4.7-flash",
      "score": 0.875
-    },
-    {
-     "model": "deepseek-r1-0528-qwen3-8b",
-     "score": 0.792
     }
    ],
    "requires_human_review": false
@@ -3966,12 +3987,12 @@
      "score": 0.959
     },
     {
-     "model": "ministral-3-14b",
-     "score": 0.875
+     "model": "nemotron-nano-9b-v2",
+     "score": 0.916
     },
     {
-     "model": "qwen3.5-4b",
-     "score": 0.75
+     "model": "ministral-3-14b",
+     "score": 0.875
     }
    ],
    "requires_human_review": false
@@ -3984,7 +4005,7 @@
   "qwen3.5-9b": "ok",
   "deepseek-r1-0528-qwen3-8b": "2/36 empty answers",
   "ministral-3-14b": "ok",
-  "nemotron-nano-9b-v2": "35/36 empty answers (token budget spent on hidden reasoning) - harness issue, re-run",
+  "nemotron-nano-9b-v2": "ok",
   "qwen3.6-35b-a3b": "not run (pull failed)",
   "glm-4.7-flash": "ok",
   "qwen3.8-27b": "not run (pull failed)"

@@ -23,7 +23,7 @@ with a planted 48 m vs 52 m conflict is scored under grounding.
 | qwen3.5-9b | 9.7 | Apache-2.0 | **0.793** | 1.0 | 0.75 | 0.8 | 0.979 | 0.52 | 0.8 | 0.667 | 1.0 | 0.667 | 1.0 | 1.97 | 31.0 | 6403 MiB + 0 MiB | ok |
 | deepseek-r1-0528-qwen3-8b | 8.2 | MIT | **0.898** | 1.0 | 0.917 | 0.7 | 0.979 | 0.52 | 1.0 | 1.0 | 1.0 | 1.0 | 0.667 | 24.67 | 29.7 | 5267 MiB + 0 MiB | 2/36 empty answers |
 | ministral-3-14b | 13.9 | Apache-2.0 | **0.833** | 1.0 | 0.75 | 1.0 | 0.979 | 0.32 | 1.0 | 1.0 | 1.0 | 1.0 | 0.833 | 3.64 | 18.4 | 9303 MiB + 0 MiB | ok |
-| nemotron-nano-9b-v2 | 8.9 | NVIDIA Open Model License (commercial use allowed under its terms) | — | — | — | — | — | — | — | — | — | — | — | — | — | 6317 MiB + 0 MiB | **invalid**: 35/36 empty answers (token budget spent on hidden reasoning) - harness issue, re-run |
+| nemotron-nano-9b-v2 | 8.9 | NVIDIA Open Model License (commercial use allowed under its terms) | **0.842** | 1.0 | 0.833 | 0.975 | 0.882 | 0.31 | 0.8 | 1.0 | 1.0 | 1.0 | 1.0 | 2.63 | 25.5 | 6317 MiB + 0 MiB | ok |
 | qwen3.6-35b-a3b | 36.0 | Apache-2.0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | **invalid**: not run (pull failed) |
 | glm-4.7-flash | 31.2 | MIT | **0.804** | 1.0 | 0.75 | 0.8 | 0.979 | 0.32 | 1.0 | 1.0 | 1.0 | 0.667 | 1.0 | 3.03 | 60.7 | 8889 MiB + 9133 MiB | ok |
 | qwen3.8-27b | 27.8 | Apache-2.0 | — | — | — | — | — | — | — | — | — | — | — | — | — | — | **invalid**: not run (pull failed) |
@@ -38,10 +38,13 @@ context windows are 32k–256k; this run capped them at 4k/8k to fit two T4s, so
   summaries, instruction failures); with thinking it is slow and leaves 10/36 answers empty.
 - **Dialect is the open problem:** no model exceeds 0.52 on Egyptian/Gulf Arabic. Dialect output always needs native
   review (consistent with the language readiness matrix, K-15).
-- **Invalid runs are not scores.** Nemotron-Nano-9B-v2 returned 35/36 empty answers (its hidden reasoning used the whole
-  token budget); re-queued with its documented `/no_think` switch. Qwen3.6-35B-A3B and Qwen3.8-27B failed at
-  `ollama pull` ("file does not exist") after downloading — most likely disk, since earlier models were never removed;
-  the kernel now removes each model after use and logs free disk on failure. Re-run: kernel `nexus-a3-bench-v2-c`.
+- **Nemotron-Nano-9B-v2** is the best fast all-rounder once run correctly (≈ 2.6 s/item). Its first run returned 35/36
+  empty answers — hidden reasoning used the whole token budget — so that run was discarded as a harness error and
+  re-run with the model card's `/no_think` system switch (kernel `nexus-a3-bench-v2-c`). Lesson recorded: an empty
+  answer is a harness failure to investigate, never a score.
+- **Not measured: Qwen3.6-35B-A3B and Qwen3.8-27B.** Both fail at `ollama pull` with "file does not exist" while
+  fetching the repositories' vision projector (mmproj); the re-run proved it is not disk (944 GB free). Next step:
+  download the text GGUF directly and `ollama create` from a Modelfile.
 - **Limits:** 3–6 items per capability, so many scores sit at the 1.0 ceiling and differences under ~0.15 are not
   meaningful; translation saturates (0.979 for five models) because back-translation forgives style. A larger item set
   per capability is needed before routing on small differences.
@@ -49,22 +52,22 @@ context windows are 32k–256k; this run capped them at 4k/8k to fit two T4s, so
 ## Task routing (measured; bar = router min quality / 10)
 | Task | Best model | Score | Bar | Meets bar | Human review | Next best |
 |---|---|---|---|---|---|---|
-| deep_research | deepseek-r1-0528-qwen3-8b | 0.972 | 0.4 | yes | critical | glm-4.7-flash 0.917, ministral-3-14b 0.917 |
-| scriptwriting | ministral-3-14b | 1.0 | 0.4 | yes | critical | deepseek-r1-0528-qwen3-8b 1.0, glm-4.7-flash 0.889 |
+| deep_research | deepseek-r1-0528-qwen3-8b | 0.972 | 0.4 | yes | critical | nemotron-nano-9b-v2 0.944, glm-4.7-flash 0.917 |
+| scriptwriting | ministral-3-14b | 1.0 | 0.4 | yes | critical | deepseek-r1-0528-qwen3-8b 1.0, nemotron-nano-9b-v2 0.933 |
 | translation | qwen3.5-4b | 0.979 | 0.3 | yes | critical | qwen3.5-9b 0.979, glm-4.7-flash 0.979 |
 | dialect_adaptation | qwen3.5-9b | 0.52 | 0.4 | yes | **required** | deepseek-r1-0528-qwen3-8b 0.52, qwen3-4b-think 0.52 |
-| summarization | ministral-3-14b | 1.0 | 0.3 | yes |  | qwen3-4b-think 1.0, glm-4.7-flash 0.9 |
+| summarization | ministral-3-14b | 1.0 | 0.3 | yes |  | qwen3-4b-think 1.0, nemotron-nano-9b-v2 0.988 |
 | title_generation | glm-4.7-flash | 1.0 | 0.3 | yes |  | qwen3-4b 0.916, ministral-3-14b 0.916 |
 | hook_generation | glm-4.7-flash | 1.0 | 0.3 | yes |  | qwen3-4b 0.916, ministral-3-14b 0.916 |
 | topic_ideation | glm-4.7-flash | 1.0 | 0.3 | yes |  | qwen3-4b 0.916, ministral-3-14b 0.916 |
-| audience_classification | ministral-3-14b | 1.0 | 0.3 | yes |  | deepseek-r1-0528-qwen3-8b 1.0, qwen3-4b-think 1.0 |
-| data_extraction | ministral-3-14b | 1.0 | 0.3 | yes |  | deepseek-r1-0528-qwen3-8b 1.0, qwen3-4b-think 1.0 |
-| content_scoring | qwen3.5-4b | 0.916 | 0.3 | yes |  | qwen3.5-9b 0.875, glm-4.7-flash 0.875 |
-| reference_interpretation | qwen3.5-4b | 0.916 | 0.4 | yes | critical | qwen3.5-9b 0.875, glm-4.7-flash 0.875 |
-| quality_review | deepseek-r1-0528-qwen3-8b | 0.972 | 0.4 | yes | critical | ministral-3-14b 0.917, qwen3-4b-think 0.883 |
+| audience_classification | nemotron-nano-9b-v2 | 1.0 | 0.3 | yes |  | ministral-3-14b 1.0, deepseek-r1-0528-qwen3-8b 1.0 |
+| data_extraction | nemotron-nano-9b-v2 | 1.0 | 0.3 | yes |  | ministral-3-14b 1.0, deepseek-r1-0528-qwen3-8b 1.0 |
+| content_scoring | qwen3.5-4b | 0.916 | 0.3 | yes |  | nemotron-nano-9b-v2 0.916, qwen3.5-9b 0.875 |
+| reference_interpretation | qwen3.5-4b | 0.916 | 0.4 | yes | critical | nemotron-nano-9b-v2 0.916, qwen3.5-9b 0.875 |
+| quality_review | deepseek-r1-0528-qwen3-8b | 0.972 | 0.4 | yes | critical | nemotron-nano-9b-v2 0.944, ministral-3-14b 0.917 |
 | story_planning | glm-4.7-flash | 1.0 | 0.4 | yes | critical | qwen3-4b 0.916, ministral-3-14b 0.916 |
-| analytics_interpretation | qwen3.5-4b | 0.916 | 0.4 | yes | critical | qwen3.5-9b 0.875, glm-4.7-flash 0.875 |
-| general | qwen3-4b-think | 1.0 | 0.3 | yes |  | deepseek-r1-0528-qwen3-8b 0.959, ministral-3-14b 0.875 |
+| analytics_interpretation | qwen3.5-4b | 0.916 | 0.4 | yes | critical | nemotron-nano-9b-v2 0.916, qwen3.5-9b 0.875 |
+| general | qwen3-4b-think | 1.0 | 0.3 | yes |  | deepseek-r1-0528-qwen3-8b 0.959, nemotron-nano-9b-v2 0.916 |
 
 Rules now in the router (`router.CRITICAL`): deep_research, scriptwriting, translation, quality_review,
 analytics_interpretation, reference_interpretation and story_planning are **critical** — below the bar the result
