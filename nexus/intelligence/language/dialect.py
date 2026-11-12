@@ -16,7 +16,8 @@ PROFILES: dict[str, dict] = {
         "markers": {"ده": 1, "دي": 1, "دول": 1, "مش": 1, "عشان": 1, "علشان": 1, "دلوقتي": 1, "إزاي": 1, "ازاي": 1,
                     "كده": 1, "أوي": 1, "اوي": 1, "بتاع": 1, "بتاعة": 1, "عايز": 1, "عايزين": 1, "إمتى": 1, "فين": 1,
                     "إيه": 1, "ايه": 1, "مفيش": 1, "لسه": 1, "بقى": 0.7, "كويس": 1, "كويسة": 1, "حاجة": 0.7,
-                    "إحنا": 0.4, "احنا": 0.4, "اللي": 0.3, "بس": 0.3, "فيه": 0.3, "زي": 0.5, "خالص": 0.7, "برضه": 1},
+                    "إحنا": 0.4, "احنا": 0.4, "اللي": 0.3, "بس": 0.3, "فيه": 0.3, "زي": 0.5, "خالص": 0.7, "برضه": 1,
+                    "النهارده": 1, "انهارده": 1, "امبارح": 1, "بكرة": 0.7},
         "patterns": [(r"^ب[يتن][ء-ي]{3,}$", 0.3, "b-prefixed present verb"),
                      (r"^ه[يتن][ء-ي]{3,}$", 0.3, "h- future prefix")],
         "extra_lexicon": [("لا يوجد", "مفيش"), ("يوجد", "فيه"), ("كثيرا", "كتير"), ("كثيراً", "كتير"), ("كثير", "كتير"),
@@ -152,18 +153,56 @@ def _prompt(lines: list[str], tag: str, register: str) -> str:
             f"Arabic script only. Return JSON {{\"lines\": [...]}} with exactly {len(lines)} strings in order.\n\n{numbered}")
 
 
+_PREFIX = re.compile(r"^(?:[وف])?(?:ال|[بهل])?(?:[يتنأا])?")
+
+
+def _core(tok: str) -> str:
+    """Rough stem for comparison: drop a conjunction, the article or a b-/h-/l- prefix and a person prefix."""
+    c = _PREFIX.sub("", tok, count=1)
+    return c if len(c) >= 3 else tok
+
+
+def vocabulary(tag: str) -> set[str]:
+    """Every dialect/MSA form the profiles and the language pack know (markers + lexicon targets)."""
+    from ...speech import packs as lp
+    v = {w for p in PROFILES.values() for w in p["markers"]}
+    v |= {d for _, d in PROFILES[tag]["extra_lexicon"]} | {w for m, _ in PROFILES[tag]["extra_lexicon"] for w in m.split()}
+    for e in (lp.pack(tag).get("dialect") or {}).get("lexicon") or []:
+        v |= set(_norm(e["dialect"]).split()) | {_norm(m) for m in e.get("msa") or []}
+    return v
+
+
+def novel_words(src: str, cand: str, tag: str) -> list[str]:
+    """Words of `cand` that neither come from `src` (same rough stem) nor belong to the known dialect vocabulary.
+    A rewrite into dialect changes function words and verb prefixes; content words it invents are suspicious
+    (the 4B router model produced non-words such as بيو and كايل in the first Egyptian run)."""
+    st = {_core(t) for t in tokens(src)} | set(tokens(src))
+    voc = vocabulary(tag)
+    out = []
+    for t in tokens(cand):
+        if re.fullmatch(r"[\d\u0660-\u0669.,]+", t) or t in voc or t in st or _core(t) in st:
+            continue
+        if any(v in voc or v in st or _core(v) in st for v in _variants(t)):
+            continue
+        out.append(t)
+    return out
+
+
 def _accept(src: str, cand: str, tag: str, register: str, baseline: str) -> tuple[bool, str]:
     from .translation_qa import numbers
     if not cand or not cand.strip():
         return False, "empty"
     letters = [c for c in cand if c.isalpha()]
-    if letters and sum("؀" <= c <= "ۿ" for c in letters) / len(letters) < 0.85:
+    if letters and sum("\u0600" <= c <= "\u06ff" for c in letters) / len(letters) < 0.85:
         return False, "not Arabic script"
     if sorted(numbers(src)) != sorted(numbers(cand)):
         return False, f"numbers changed {numbers(src)} -> {numbers(cand)}"
     r = len(cand) / max(1, len(src))
     if not 0.6 <= r <= 1.6:
         return False, f"length ratio {r:.2f}"
+    nov = novel_words(src, cand, tag)
+    if len(nov) > max(1, int(0.1 * len(tokens(cand)))):
+        return False, f"words with no source or lexicon counterpart (possible invented words): {nov[:6]}"
     want = "EG" if tag == "ar-EG" else "Gulf"
     c, b = classify(cand), classify(baseline)
     if c["raw"][want] < b["raw"][want] and len(forbidden_hits(cand, tag, register)) >= len(forbidden_hits(baseline, tag, register)):
@@ -194,7 +233,8 @@ def adapt_lines(lines: list[str], tag: str, privacy: str = "internal", register:
     out = []
     for i, src in enumerate(lines):
         base, changes = lex[i]
-        res = {"source": src, "text": base, "method": "lexical", "changes": changes, "router": note}
+        res = {"source": src, "text": base, "method": "lexical", "changes": changes, "router": note,
+               "router_text": routed[i] if routed is not None else None}
         if routed is not None:
             ok, why = _accept(src, routed[i], tag, register, base)
             if ok:

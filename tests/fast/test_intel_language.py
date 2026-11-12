@@ -160,7 +160,7 @@ def test_router_adaptation_is_validated(monkeypatch):
         calls["task"], calls["privacy"] = task, kw["privacy"]
         return model_router.Result(text="", data={"lines": [calls.get("reply", "")]}, provider="stub", model="stub")
     monkeypatch.setattr(model_router, "complete", fake)
-    calls["reply"] = "المشروع ده كلف 450 مليون دولار، مش قليل."
+    calls["reply"] = "المشروع ده كلف 450 مليون دولار."
     r = dialect.adapt_lines(src, "ar-EG", privacy="private")[0]
     assert r["method"] == "router" and calls == {"task": "translation", "privacy": "private", "reply": calls["reply"]}
     calls["reply"] = "المشروع ده كلف 500 مليون دولار."   # number changed -> rejected, lexical fallback used
@@ -275,3 +275,24 @@ def test_back_translation_echo_is_retried_and_never_counted(monkeypatch):
 
 def test_sentence_split_keeps_german_ordinals():
     assert len(tq.sentences("Die Tempel wurden für Ramses II. gebaut. Sie stehen noch.")) == 2
+
+
+def test_router_invented_words_are_rejected(monkeypatch):
+    # real Qwen3-4B output from the first ar-EG demo run: pseudo-Egyptian non-words (بيو, كايل)
+    src = ["تم بناء سد أسوان العالي على نهر النيل في مصر بين عامي ١٩٦٠ و ١٩٧٠."]
+    bad = "دي بيو سد أسوان العالي بيو بناء على نهر النيل في مصر بين ١٩٦٠ و ١٩٧٠"
+    monkeypatch.setattr(model_router, "complete", lambda *a, **k: model_router.Result(text="", data={"lines": [bad]}, provider="s", model="s"))
+    r = dialect.adapt_lines(src, "ar-EG")[0]
+    assert r["method"] == "lexical" and "invented" in r["router_rejected"]["reason"] and r["router_text"] == bad
+
+
+def test_added_clause_found_in_back_translation():
+    src = "Engineers from the Soviet Union helped to design and build the dam."
+    r = tq.check_line(src, "ساعد مهندسين من الاتحاد السوفياتي في تصميم السد وبنائه، وساعدوا على إنجازه.", "ar-EG",
+                      back="Engineers from the Soviet Union helped in the design and construction of the dam, and they helped in completing it")
+    assert "added_clause" in checks(r)
+    ok = tq.check_line(SOURCE_LAST, "x" * 100 + ".", "ar", back="Today the dam protects the farms from floods, but it also traps the silt that once fertilised the Nile Valley.")
+    assert "added_clause" not in checks(ok)
+
+
+SOURCE_LAST = "Today the dam protects farms from floods, but it also traps the silt that once fertilised the Nile valley."

@@ -180,6 +180,17 @@ def _score(src: str, tgt: str, lang: str, f: list[dict], back: str | None) -> di
             f.append(_finding("unsupported_content", "major", f"the back-translation contains ideas the source never said: {unsupported[:8]}", items=unsupported[:8]))
         elif unsupported:
             f.append(_finding("unsupported_content", "info", f"back-translation words not in the source (likely paraphrase): {unsupported[:8]}", items=unsupported[:8]))
+        # A later clause of the read-back that brings no source content of its own but has unsupported words is an
+        # added clause ("..., and they helped in completing it" - ar-EG demo line 5).
+        clauses = [c for c in re.split(r",\s*(?:and|but|while|which|so)\s+|;\s*", back) if c.strip()]
+        used: set[str] = set()
+        for k, cl in enumerate(clauses):
+            cw = {_stem(w) for w in content_words(cl)}
+            fresh = (cw & s_st) - used
+            extra = [w for w in content_words(cl) if _stem(w) not in s_st]
+            if k and cw and not fresh and extra:
+                f.append(_finding("added_clause", "major", f"read-back clause adds nothing from the source but says {extra[:5]}: '{cl.strip()[:80]}'", items=extra[:5]))
+            used |= cw & s_st
         if coverage < 0.6:
             f.append(_finding("omission_backcheck", "major", f"only {coverage:.0%} of the source content words come back: missing {lost[:8]}", items=lost[:8]))
         elif lost:
