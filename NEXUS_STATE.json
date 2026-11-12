@@ -3,13 +3,13 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-12T14:28:46Z",
+ "updated": "2026-11-12T18:33:29Z",
  "git": {
-  "branch": "claude/hopeful-allen-luubcy",
-  "commit": "c69fc56",
-  "subject": "Final report: tests section; release check PASS on 9e9b527",
+  "branch": "work/account-1-cloud-platform",
+  "commit": "9bd5669",
+  "subject": "Account 1 docs: handoff to Accounts 2/3, setup guide, acceptance results, execution report, lead demo evidence; tasks, roadmap, work log, handoff",
   "dirty_files": 0,
-  "upstream": "origin/claude/hopeful-allen-luubcy",
+  "upstream": "origin/work/account-1-cloud-platform",
   "unpushed_commits": 1
  },
  "current_task": {
@@ -25,6 +25,13 @@
    "title": "Creative quality pass: measured rubric + series writer on the script schema + research/visual relevance",
    "status": "in_progress",
    "next": "1) Series visuals - derive the image query from the bible's location LOOK text (generic nouns), not its fictional name, and allow reuse of an image for a repeated location. 2) Repair off-bible locations instead of only reporting them. 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Scored rubric in the QA report."
+  },
+  {
+   "id": "ACC1-STORAGE",
+   "priority": 1,
+   "title": "Multi-account storage (Drive A/B/C), resumable transfers, SSRF-safe ingestion",
+   "status": "tested",
+   "next": "Owner runs setup_google and connects drive_a/b/c; then the live Drive test and Demo E with Drive legs."
   },
   {
    "id": "AUD-1",
@@ -46,21 +53,14 @@
    "title": "Growth: shorts extractor, retention rubric + auto retention pass, hook/title variants, reference-video style profile",
    "status": "tested",
    "next": "Extended by GRW-2."
-  },
-  {
-   "id": "MED-1",
-   "priority": 1,
-   "title": "Media engine: encoder detection, H.264/H.265/AV1 presets, size-targeted export, proxies, export verification, benchmark",
-   "status": "tested",
-   "next": "Use export.export() for final deliverables in the deliver job (max file size per platform); benchmark on the owner's machine."
   }
  ],
  "tasks": {
-  "total": 52,
+  "total": 57,
   "by_status": {
-   "verified": 17,
-   "tested": 12,
-   "blocked": 4,
+   "verified": 20,
+   "tested": 13,
+   "blocked": 5,
    "deferred": 1,
    "planned": 16,
    "in_progress": 2
@@ -103,6 +103,11 @@
    "id": "ANA-1",
    "title": "Analytics + monetisation intelligence from real platform data",
    "why": "Same OAuth authorisation as PUB-1. The revenue ledger exists but holds only manual entries."
+  },
+  {
+   "id": "ACC1-HOSTING",
+   "title": "Choose and deploy a permanent free host for the control plane",
+   "why": "Owner decision (public deployment needs explicit approval); see docs/ACCOUNT1_PROVIDER_COMPARISON.md."
   }
  ],
  "backup": {
