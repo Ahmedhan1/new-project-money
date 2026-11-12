@@ -69,3 +69,11 @@ def test_subtitle_cues_break_at_sentence_and_clause_boundaries():
     assert any(t.endswith("designed for?") for t in texts) and texts[-1].endswith("immunology.")
     assert cues[0]["start"] == 0.0 and abs(cues[-1]["end"] - 12.0) < 0.01 and all(a["end"] <= b["start"] + 1e-6 for a, b in zip(cues, cues[1:]))
     assert [c["text"] for c in subs.cues_from_text("Short line.", 0, 2)] == ["Short line."]
+
+
+def test_a_title_on_a_near_black_card_is_an_intended_still():
+    from nexus import quality
+    tl = {"clips": [{"id": "a", "type": "color", "duration": 3.0, "color": "0x0b1020", "text": [{"text": "Into the Cave"}]},
+                    {"id": "b", "type": "color", "duration": 2.0, "color": "black"}]}
+    spans = quality._intended_spans(tl, ("card",))
+    assert spans == [(0.0, 3.0)]                     # the titled card is by design; a bare black clip is not

@@ -21,7 +21,7 @@ import time
 import urllib.parse
 from pathlib import Path
 
-from . import config, net
+from . import config, costguard, net
 from .media import understand as und
 
 EMOTIONAL = re.compile(r"\b(i feel|i felt|i love|i loved|my (mom|mother|dad|father|family|kids|husband|wife)|proud|cried|tears|"
@@ -64,6 +64,42 @@ def terms(text: str, k: int = 6) -> list[str]:
 
 def _programme_text(tl: dict, a: float, b: float) -> str:
     return " ".join(s["text"] for s in tl.get("subtitles", []) if s["end"] > a + 0.1 and s["start"] < b - 0.1)
+
+
+def motion_profile(path, fps: float = 2.0, width: int = 96) -> list[float]:
+    """Mean absolute luma change between consecutive sampled frames (0-255), one value per 1/fps seconds."""
+    import subprocess
+    import numpy as np
+    from .media import ff
+    info = ff.probe(path)
+    v = info.get("video") or {}
+    if not v:
+        return []
+    h = max(2, int(round(v["height"] * width / v["width"] / 2)) * 2)
+    p = subprocess.run(["ffmpeg", "-hide_banner", "-nostdin", "-v", "error", "-i", str(path), "-an", "-vf",
+                        f"fps={fps},scale={width}:{h},format=gray", "-f", "rawvideo", "-"], capture_output=True, timeout=600)
+    n = len(p.stdout) // (width * h)
+    fr = np.frombuffer(p.stdout[: n * width * h], dtype=np.uint8).reshape(n, h, width).astype(np.float32)
+    return [float(np.abs(fr[i] - fr[i - 1]).mean()) for i in range(1, n)]
+
+
+def moving_in_point(path, dur: float, fps: float = 2.0, still: float = 0.6) -> float:
+    """Source in-point of the `dur`-second window with the most picture motion. Archive footage often opens on a static
+    shot (a rocket on the pad before launch was flagged as a 2.3 s frozen picture), so 0.0 is not a safe default."""
+    try:
+        m = motion_profile(path, fps)
+    except Exception:  # noqa: BLE001 - unreadable file: keep the start
+        return 0.0
+    k = max(1, int(round(dur * fps)))
+    if len(m) <= k:
+        return 0.0
+    best, best_i = -1.0, 0
+    for i in range(0, len(m) - k + 1):
+        w = m[i:i + k]
+        score = min(w) * 2 + sum(w) / k   # every part of the window must move, not just one burst
+        if score > best:
+            best, best_i = score, i
+    return round(best_i / fps, 2) if best > still else 0.0
 
 
 def opportunities(tl: dict, min_clip: float = 3.0) -> list[dict]:
@@ -122,6 +158,7 @@ def search_nasa(query: str, n: int = 12) -> list[dict]:
         out.append({"id": f"nasa:{nid}", "source": "NASA Image and Video Library", "kind": kind, "title": d.get("title") or nid,
                     "description": desc[:600], "keywords": [k.lower() for k in d.get("keywords") or []],
                     "file_url": f"{base}~medium.jpg" if kind == "image" else f"{base}~mobile.mp4",
+                    **({"hd_url": f"{base}~medium.mp4"} if kind == "video" else {}),
                     "page": f"https://images.nasa.gov/details/{nid}", "license": "public domain (NASA media; no endorsement implied)",
                     "credit": f"NASA ({d.get('center') or 'NASA'}) - {d.get('title') or nid}", "rights_note": rights_note,
                     "date": (d.get("date_created") or "")[:10]})
@@ -269,6 +306,26 @@ def fetch(asset: dict) -> Path:
     return dest
 
 
+def hd_window(asset: dict, start: float, dur: float) -> Path | None:
+    """The used window of a video asset from its 1280x720 rendition (range requests: only these seconds are read).
+    The 320x180 'mobile' file picks the in-point; upscaling it to 1080p was visibly soft. None when unavailable."""
+    url = asset.get("hd_url")
+    if not url:
+        return None
+    dest = _cache_dir() / f"{hashlib.sha1(f'{url}|{start:.2f}|{dur:.2f}'.encode()).hexdigest()[:20]}.hd.mp4"
+    if dest.exists() and dest.stat().st_size > 0:
+        return dest
+    try:
+        from .media import ff
+        costguard.authorize("nasa-media", "download")
+        ff.run(["-ss", f"{start:.2f}", "-i", url, "-t", f"{dur:.2f}", "-an", "-c:v", "libx264", "-preset", "veryfast",
+                "-crf", "18", "-pix_fmt", "yuv420p", dest], op="broll-hd-window")
+        return dest if dest.exists() and dest.stat().st_size > 0 else None
+    except Exception:  # noqa: BLE001 - offline / host refused: the mobile rendition still works
+        dest.unlink(missing_ok=True)
+        return None
+
+
 def apply(tl: dict, p: dict, size: tuple[int, int] | None = None, fetcher=None) -> tuple[dict, dict]:
     """Insert the planned cutaways. Stills are turned into Ken Burns clips; near-duplicate pictures are dropped."""
     from . import generate
@@ -305,10 +362,16 @@ def apply(tl: dict, p: dict, size: tuple[int, int] | None = None, fetcher=None) 
                 generate.animate_still(path, src, seconds=dur + 0.6, size=(W, H), move="in" if len(applied) % 2 == 0 else "out",
                                        source_provenance={"kind": "licensed", "id": a["id"]})
         c = by_id[ins["clip"]]
-        c["pip"] = {"src": str(src), "in": 0.0, "full": True, "start": ins["local_start"], "end": ins["local_end"],
+        src_in, rendition = 0.0, None
+        if a["kind"] == "video":
+            src_in = moving_in_point(path, dur)
+            hd = hd_window(a, src_in, dur + 0.5)
+            if hd:
+                src, src_in, rendition = hd, 0.0, "1280x720 window"
+        c["pip"] = {"src": str(src), "in": src_in, "full": True, "start": ins["local_start"], "end": ins["local_end"],
                     "provenance": {"kind": "footage" if a["kind"] == "video" else "animated_still", "source": a["source"],
                                    "id": a["id"], "title": a["title"], "license": a["license"], "page": a["page"],
-                                   "matched": ins["matched"]}}
+                                   "matched": ins["matched"], **({"rendition": rendition} if rendition else {})}}
         applied.append(ins)
         credits.append(a["credit"])
     out["credits"] = sorted(set((out.get("credits") or []) + credits))

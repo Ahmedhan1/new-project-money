@@ -103,3 +103,17 @@ def test_apply_inserts_full_frame_cutaways_that_change_pixels_and_keep_audio(hom
 def test_terms_drop_filler_and_keep_entities():
     t = broll.terms("We basically went to the International Space Station because it was really totally amazing")
     assert t[0] == "international space station" and "basically" not in t and "because" not in t and "totally" not in t
+
+
+def test_footage_in_point_skips_a_static_opening(tmp_path):
+    """Archive clips often open on a still shot (rocket on the pad): the cutaway must start where the picture moves."""
+    import subprocess
+    v = tmp_path / "clip.mp4"
+    # 6 s of a static frame, then 6 s of moving test pattern
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "color=c=gray:s=160x90:r=10:d=6",
+                    "-f", "lavfi", "-i", "testsrc2=s=160x90:r=10:d=6", "-filter_complex", "[0:v][1:v]concat=n=2:v=1[v]",
+                    "-map", "[v]", "-pix_fmt", "yuv420p", str(v)], check=True)
+    from nexus import broll
+    t = broll.moving_in_point(v, 3.0)
+    assert t >= 5.5, t
+    assert broll.hd_window({"kind": "video"}, 0, 3) is None          # no HD rendition known: keep the fetched file

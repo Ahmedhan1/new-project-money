@@ -491,7 +491,9 @@ def _intended_spans(tl: dict | None, kinds: tuple[str, ...]) -> list[tuple[float
     out = []
     for c, st in zip(tl["clips"], clip_starts(tl)):
         d = clip_duration(c)
-        if "card" in kinds and (c["type"] == "color" and not _is_black_colour(c.get("color", "")) or c.get("still") or c.get("intended_black")):
+        # a colour clip is a card when it is not black or carries text (a title on a near-black card is by design)
+        is_card = c["type"] == "color" and (not _is_black_colour(c.get("color", "")) or bool(c.get("text")))
+        if "card" in kinds and (is_card or c.get("still") or c.get("intended_black")):
             out.append((st, st + d))
         if "black" in kinds and c.get("intended_black"):
             out.append((st, st + d))
