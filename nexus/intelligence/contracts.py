@@ -82,11 +82,12 @@ def new_id(prefix: str) -> str:
     return f"{prefix}_{uuid.uuid4().hex[:10]}"
 
 
-def make(name: str, **fields) -> dict:
-    if name not in SCHEMAS:
-        raise ContractError(f"unknown contract {name}")
-    doc = {"schema": f"nexus.{name}/{VERSION}", **fields}
-    if "created" in SCHEMAS[name] and "created" not in doc:
+def make(contract: str, /, **fields) -> dict:
+    """make("CreativeStyleProfile", name=..., ...): the contract name is positional-only so a document field may be called `name`."""
+    if contract not in SCHEMAS:
+        raise ContractError(f"unknown contract {contract}")
+    doc = {"schema": f"nexus.{contract}/{VERSION}", **fields}
+    if "created" in SCHEMAS[contract] and "created" not in doc:
         doc["created"] = time.time()
     check(doc)
     return doc

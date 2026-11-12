@@ -169,3 +169,9 @@ def test_account3_api_mounted_and_degrades_cleanly(home):
     assert all(not m["available"] for m in models if m["hosting"] == "hosted_free")          # nothing hosted without authorisation
     r = c.post("/api/a3/ai/try", json={"task": "general", "prompt": "hi", "privacy": "private"})
     assert r.status_code in (200, 503)                                                         # 503 = no local model in this home, said plainly
+
+
+def test_make_accepts_a_field_called_name():
+    d = contracts.make("CreativeStyleProfile", id="s", name="Calm explainer", from_references=[], pacing={}, hook_patterns=[], structure=[],
+                       visual_rules=[], audio_rules=[], do_not_copy=[])
+    assert d["name"] == "Calm explainer" and contracts.validate(d) == []
