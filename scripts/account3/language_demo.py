@@ -120,6 +120,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--langs", default=",".join(LANGS))
     ap.add_argument("--fresh", action="store_true")
+    ap.add_argument("--reqa", action="store_true", help="recompute QA from stored outputs only")
     a = ap.parse_args()
     work = config.HOME / "projects" / "account3_language_demo"
     work.mkdir(parents=True, exist_ok=True)
@@ -127,6 +128,14 @@ def main() -> None:
     doc.update({"schema": "nexus.Account3LanguageDemo/1", "source": SOURCE, "source_note": SOURCE_NOTE, "glossary": GLOSSARY,
                 "timings": timings(), "machine": "4 CPU / 15 GB shared; MADLAD-400 3B int8 (CTranslate2), Qwen3-4B Q4_K_M via model router"})
     doc.setdefault("languages", {})
+    if a.reqa:  # recompute the deterministic QA from the stored translations + back-translations (no models)
+        for lang, r in doc["languages"].items():
+            if "final" in r:
+                r["qa"] = tq.check_lines(SOURCE, r["final"], lang, GLOSSARY[lang], (r.get("back_translation") or {}).get("lines"))
+                r["qa_recomputed"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+        doc["summary"] = summary(doc)
+        OUT.write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")
+        return
     for lang in a.langs.split(","):
         print(f"[{time.strftime('%H:%M:%S')}] {lang} ...", flush=True)
         try:

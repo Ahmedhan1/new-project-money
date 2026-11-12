@@ -153,6 +153,8 @@ def _prompt(lines: list[str], tag: str, register: str) -> str:
             f"Arabic script only. Return JSON {{\"lines\": [...]}} with exactly {len(lines)} strings in order.\n\n{numbered}")
 
 
+QUESTION_SRC = {"لماذا", "كيف", "ماذا", "أين", "متى", "ليه", "ليش", "إزاي", "ازاي", "شلون", "شنو", "إيه", "ايه", "فين", "وين", "إمتى", "هل"}
+QUESTION_DIALECT = {"ليه", "ليش", "إزاي", "ازاي", "شلون", "شنو", "إيه", "ايه", "فين", "وين", "إمتى"}
 _PREFIX = re.compile(r"^(?:[وف])?(?:ال|[بهل])?(?:[يتنأا])?")
 
 
@@ -200,6 +202,10 @@ def _accept(src: str, cand: str, tag: str, register: str, baseline: str) -> tupl
     r = len(cand) / max(1, len(src))
     if not 0.6 <= r <= 1.6:
         return False, f"length ratio {r:.2f}"
+    q_src = sum(1 for t in tokens(src) if any(v in QUESTION_SRC for v in _variants(t))) + src.count("\u061f") + src.count("?")
+    q_new = [t for t in tokens(cand) if any(v in QUESTION_DIALECT for v in _variants(t))]
+    if len(q_new) > q_src:
+        return False, f"introduces question words {q_new} the source does not have (meaning changed)"
     nov = novel_words(src, cand, tag)
     if len(nov) > max(1, int(0.1 * len(tokens(cand)))):
         return False, f"words with no source or lexicon counterpart (possible invented words): {nov[:6]}"

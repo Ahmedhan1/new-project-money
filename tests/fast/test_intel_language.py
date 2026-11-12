@@ -296,3 +296,12 @@ def test_added_clause_found_in_back_translation():
 
 
 SOURCE_LAST = "Today the dam protects farms from floods, but it also traps the silt that once fertilised the Nile valley."
+
+
+def test_router_question_word_swap_is_rejected(monkeypatch):
+    # real Qwen3-4B output from the first ar-Gulf demo run: "ولكنه" (but it) became "وليش" (and why)
+    src = ["واليوم يحمي السد المزارع من الفيضانات، ولكنه يحبس أيضا الطين."]
+    bad = "واليوم يحمي السد المزارع من الفيضانات، وليش يحبس طين."
+    monkeypatch.setattr(model_router, "complete", lambda *a, **k: model_router.Result(text="", data={"lines": [bad]}, provider="s", model="s"))
+    r = dialect.adapt_lines(src, "ar-Gulf")[0]
+    assert r["method"] == "lexical" and "question" in r["router_rejected"]["reason"]
