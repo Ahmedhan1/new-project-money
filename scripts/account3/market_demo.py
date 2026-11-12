@@ -55,7 +55,7 @@ def main() -> None:
     ai = None if a.no_ai else brief_mod._router_ai
     if a.only in (None, "reports"):
         for topic, niche, lang, fname in [t for t in TOPICS if not a.topic or t[2] == a.topic]:
-            ctx = Ctx()
+            ctx = Ctx(min_interval=3.0, rate_limit_retries=4)  # this IP is shared by several agents: be extra patient
             if a.record:
                 recording(ctx, Path(a.record) / fname.removesuffix(".json"))
             t0 = time.time()

@@ -58,7 +58,8 @@ class Ctx:
     youtube_key: Callable[[], str | None] = field(default=lambda: _youtube_key())
     calls: list = field(default_factory=list)
     min_interval: float = 2.0  # polite serial requests (Wikimedia API etiquette); tests set 0
-    rate_limit_wait: float = 45.0  # one patient retry after a 429; never more (we back off, we do not evade limits)
+    rate_limit_wait: float = 45.0  # patient retries after a 429 (we back off and wait, we do not evade limits)
+    rate_limit_retries: int = 1
     _last: float = 0.0
 
     def get(self, url: str, params: dict | None = None, cost: dict | None = None, text: bool = False):
@@ -67,7 +68,7 @@ class Ctx:
             raise HostNotDeclared(why)
         safe = {k: v for k, v in (params or {}).items() if k != "key"}  # never record an API key
         self.calls.append({"url": url, "params": safe, "cost": cost or {}})
-        for attempt in (0, 1):
+        for attempt in range(self.rate_limit_retries + 1):
             wait = self.min_interval - (time.monotonic() - self._last)
             if wait > 0:
                 time.sleep(wait)
@@ -75,7 +76,7 @@ class Ctx:
             try:
                 return self.fetch_text(url, params) if text else self.fetch_json(url, params)
             except net.RemoteUnavailable as e:
-                if attempt or not self.rate_limit_wait or not ("rate limited" in str(e) or "HTTP 429" in str(e)):
+                if attempt >= self.rate_limit_retries or not self.rate_limit_wait or not ("rate limited" in str(e) or "HTTP 429" in str(e)):
                     raise
                 self.calls[-1]["retried_after_rate_limit_s"] = self.rate_limit_wait
                 time.sleep(self.rate_limit_wait)
