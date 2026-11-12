@@ -44,7 +44,17 @@ def unload() -> None:
 
 
 def _sentences(text: str) -> list[str]:
-    return [s for s in re.split(r"(?<=[.!?؟。])\s+", text.strip()) if s]
+    """Sentence split that does not break after a number ("dem 24. Jahr", ordinals in German/Russian) and treats an
+    ellipsis as a sentence end."""
+    return [s for s in re.split(r"(?<=[!?؟。…])\s+|(?<=(?<!\d)\.)\s+", text.strip()) if s]
+
+
+_REPEAT = re.compile(r"\b(\w+(?:\s+\w+){1,5})([,;]?\s+\1\b)+", re.U)
+
+
+def collapse_repeats(text: str) -> str:
+    """'eine lange Zeit, eine lange Zeit' -> 'eine lange Zeit' (decoder loops shorter than no_repeat_ngram_size)."""
+    return _REPEAT.sub(r"\1", text)
 
 
 # Typical character-length ratio target/source for spoken text; well above it means invented content.
@@ -62,7 +72,7 @@ def _decode(tr, sp, lines: list[str], lang: str, **kw) -> list[str]:
     for src, r in zip(lines, res):
         txt = sp.decode_pieces(r.hypotheses[0]).strip()
         # The model sometimes appends a paraphrase of the same sentence; never return more sentences than the source had.
-        out.append(" ".join(_sentences(txt)[:max(1, len(_sentences(src)))]))
+        out.append(collapse_repeats(" ".join(_sentences(txt)[:max(1, len(_sentences(src)))])))
     return out
 
 

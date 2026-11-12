@@ -1,0 +1,422 @@
+{
+ "demo": 2,
+ "what": "Same source -> shorts factory (4 moments x 2 hook variants, YouTube Shorts 9:16) rendered + quality-scored through the API job",
+ "source": {
+  "title": "Artemis Interviews with NASA Astronaut Jeanette Epps - October 4, 2019",
+  "nasa_id": "iss061m2627771232_Live_Interviews_Jeanette_Epps_191004",
+  "url": "https://images.nasa.gov/details/iss061m2627771232_Live_Interviews_Jeanette_Epps_191004",
+  "duration_s": 1165.6,
+  "resolution": "1280x720",
+  "rights": "NASA-produced media, generally not subject to US copyright; used under NASA media usage guidelines (no endorsement implied)"
+ },
+ "shorts": [
+  {
+   "file": "renders/short-1-natural-youtube_shorts.mp4",
+   "duration_s": 23.23,
+   "quality": {
+    "score": 84.0,
+    "grade": "B",
+    "verdict": "needs_work",
+    "verdict_reasons": [
+     "major check failed: visual.sharpness, editing.caption_speed, editing.caption_safe_area"
+    ],
+    "categories": {
+     "visual": 91.7,
+     "editing": 78.8,
+     "audio": 89.3,
+     "localization": 66.7
+    },
+    "failed": [
+     {
+      "id": "visual.sharpness",
+      "level": "fail",
+      "detail": "median blur 0.56 over 11 detailed frames"
+     },
+     {
+      "id": "audio.level_jumps",
+      "level": "fail",
+      "detail": "7 unexplained >10 dB jump(s) at [8.4, 8.8, 9.6, 13.2]s"
+     },
+     {
+      "id": "audio.noise_floor",
+      "level": "fail",
+      "detail": "median -45.1 dBFS over 4.7s of pauses"
+     },
+     {
+      "id": "editing.pacing",
+      "level": "warn",
+      "detail": "2 shots (timeline), mean 11.6s, longest 19.2s"
+     },
+     {
+      "id": "editing.ending",
+      "level": "warn",
+      "detail": "last 0.25 s at -17.2 dBFS vs programme -13.0 dBFS; sound runs to the last frame (no out)"
+     },
+     {
+      "id": "editing.caption_speed",
+      "level": "fail",
+      "detail": "90th percentile 27.7 chars/s over 26 cues (max 30.4)"
+     },
+     {
+      "id": "editing.caption_safe_area",
+      "level": "fail",
+      "detail": "caption bottom margin 307px (need 672), side margin 64px (need 48), top of block 1536px [youtube_shorts safe zone]"
+     },
+     {
+      "id": "localization.reading_speed",
+      "level": "fail",
+      "detail": "8 of 26 cues above 20 chars/s for 'en'"
+     }
+    ],
+    "not_measured": [
+     "editing.subtitle_sync",
+     "localization.coverage",
+     "localization.ext",
+     "visual.subject_consistency",
+     "visual.generative_artifacts",
+     "visual.content_relevance",
+     "localization.translation_accuracy",
+     "audio.voice_naturalness",
+     "editing.storytelling"
+    ]
+   }
+  },
+  {
+   "file": "renders/short-2-natural-youtube_shorts.mp4",
+   "duration_s": 29.07,
+   "quality": {
+    "score": 84.1,
+    "grade": "B",
+    "verdict": "needs_work",
+    "verdict_reasons": [
+     "major check failed: visual.sharpness, editing.caption_speed, editing.caption_safe_area"
+    ],
+    "categories": {
+     "visual": 88.9,
+     "editing": 82.7,
+     "audio": 89.3,
+     "localization": 66.7
+    },
+    "failed": [
+     {
+      "id": "visual.sharpness",
+      "level": "fail",
+      "detail": "median blur 0.56 over 14 detailed frames"
+     },
+     {
+      "id": "visual.repeated_imagery",
+      "level": "fail",
+      "detail": "3 of 7 shots repeat earlier imagery"
+     },
+     {
+      "id": "audio.level_jumps",
+      "level": "fail",
+      "detail": "3 unexplained >10 dB jump(s) at [2.8, 27.2, 27.6]s"
+     },
+     {
+      "id": "audio.noise_floor",
+      "level": "fail",
+      "detail": "median -43.2 dBFS over 4.0s of pauses"
+     },
+     {
+      "id": "editing.ending",
+      "level": "warn",
+      "detail": "last 0.25 s at -14.4 dBFS vs programme -13.0 dBFS; sound runs to the last frame (no out)"
+     },
+     {
+      "id": "editing.caption_speed",
+      "level": "fail",
+      "detail": "90th percentile 28.5 chars/s over 32 cues (max 35.0)"
+     },
+     {
+      "id": "editing.caption_safe_area",
+      "level": "fail",
+      "detail": "caption bottom margin 307px (need 672), side margin 64px (need 48), top of block 1536px [youtube_shorts safe zone]"
+     },
+     {
+      "id": "localization.reading_speed",
+      "level": "fail",
+      "detail": "8 of 32 cues above 20 chars/s for 'en'"
+     }
+    ],
+    "not_measured": [
+     "editing.subtitle_sync",
+     "localization.coverage",
+     "localization.ext",
+     "visual.subject_consistency",
+     "visual.generative_artifacts",
+     "visual.content_relevance",
+     "localization.translation_accuracy",
+     "audio.voice_naturalness",
+     "editing.storytelling"
+    ]
+   }
+  },
+  {
+   "file": "renders/short-2-text_hook-youtube_shorts.mp4",
+   "duration_s": 29.07,
+   "quality": {
+    "score": 84.1,
+    "grade": "B",
+    "verdict": "needs_work",
+    "verdict_reasons": [
+     "major check failed: visual.sharpness, editing.caption_speed, editing.caption_safe_area"
+    ],
+    "categories": {
+     "visual": 88.9,
+     "editing": 82.7,
+     "audio": 89.3,
+     "localization": 66.7
+    },
+    "failed": [
+     {
+      "id": "visual.sharpness",
+      "level": "fail",
+      "detail": "median blur 0.56 over 14 detailed frames"
+     },
+     {
+      "id": "visual.repeated_imagery",
+      "level": "fail",
+      "detail": "3 of 7 shots repeat earlier imagery"
+     },
+     {
+      "id": "audio.level_jumps",
+      "level": "fail",
+      "detail": "3 unexplained >10 dB jump(s) at [2.8, 27.2, 27.6]s"
+     },
+     {
+      "id": "audio.noise_floor",
+      "level": "fail",
+      "detail": "median -43.2 dBFS over 4.0s of pauses"
+     },
+     {
+      "id": "editing.ending",
+      "level": "warn",
+      "detail": "last 0.25 s at -14.4 dBFS vs programme -13.0 dBFS; sound runs to the last frame (no out)"
+     },
+     {
+      "id": "editing.caption_speed",
+      "level": "fail",
+      "detail": "90th percentile 28.5 chars/s over 32 cues (max 35.0)"
+     },
+     {
+      "id": "editing.caption_safe_area",
+      "level": "fail",
+      "detail": "caption bottom margin 307px (need 672), side margin 64px (need 48), top of block 1536px [youtube_shorts safe zone]"
+     },
+     {
+      "id": "localization.reading_speed",
+      "level": "fail",
+      "detail": "8 of 32 cues above 20 chars/s for 'en'"
+     }
+    ],
+    "not_measured": [
+     "editing.subtitle_sync",
+     "localization.coverage",
+     "localization.ext",
+     "visual.subject_consistency",
+     "visual.generative_artifacts",
+     "visual.content_relevance",
+     "localization.translation_accuracy",
+     "audio.voice_naturalness",
+     "editing.storytelling"
+    ]
+   }
+  },
+  {
+   "file": "renders/short-3-natural-youtube_shorts.mp4",
+   "duration_s": 36.77,
+   "quality": {
+    "score": 88.3,
+    "grade": "B",
+    "verdict": "needs_work",
+    "verdict_reasons": [
+     "major check failed: visual.sharpness, editing.caption_safe_area"
+    ],
+    "categories": {
+     "visual": 89.7,
+     "editing": 88.5,
+     "audio": 89.3,
+     "localization": 83.3
+    },
+    "failed": [
+     {
+      "id": "visual.sharpness",
+      "level": "fail",
+      "detail": "median blur 0.56 over 16 detailed frames"
+     },
+     {
+      "id": "visual.banding",
+      "level": "warn",
+      "detail": "16% of flat tile pairs show a small step"
+     },
+     {
+      "id": "audio.level_jumps",
+      "level": "fail",
+      "detail": "12 unexplained >10 dB jump(s) at [6.4, 6.8, 8.0, 8.4]s"
+     },
+     {
+      "id": "audio.noise_floor",
+      "level": "fail",
+      "detail": "median -45.4 dBFS over 7.8s of pauses"
+     },
+     {
+      "id": "editing.caption_speed",
+      "level": "warn",
+      "detail": "90th percentile 24.1 chars/s over 31 cues (max 31.3)"
+     },
+     {
+      "id": "editing.caption_safe_area",
+      "level": "fail",
+      "detail": "caption bottom margin 307px (need 672), side margin 64px (need 48), top of block 1536px [youtube_shorts safe zone]"
+     },
+     {
+      "id": "localization.reading_speed",
+      "level": "warn",
+      "detail": "4 of 31 cues above 20 chars/s for 'en'"
+     }
+    ],
+    "not_measured": [
+     "visual.continuity",
+     "editing.subtitle_sync",
+     "localization.coverage",
+     "localization.ext",
+     "visual.subject_consistency",
+     "visual.generative_artifacts",
+     "visual.content_relevance",
+     "localization.translation_accuracy",
+     "audio.voice_naturalness",
+     "editing.storytelling"
+    ]
+   }
+  },
+  {
+   "file": "renders/short-3-text_hook-youtube_shorts.mp4",
+   "duration_s": 36.77,
+   "quality": {
+    "score": 88.3,
+    "grade": "B",
+    "verdict": "needs_work",
+    "verdict_reasons": [
+     "major check failed: visual.sharpness, editing.caption_safe_area"
+    ],
+    "categories": {
+     "visual": 89.7,
+     "editing": 88.5,
+     "audio": 89.3,
+     "localization": 83.3
+    },
+    "failed": [
+     {
+      "id": "visual.sharpness",
+      "level": "fail",
+      "detail": "median blur 0.56 over 16 detailed frames"
+     },
+     {
+      "id": "visual.banding",
+      "level": "warn",
+      "detail": "16% of flat tile pairs show a small step"
+     },
+     {
+      "id": "audio.level_jumps",
+      "level": "fail",
+      "detail": "12 unexplained >10 dB jump(s) at [6.4, 6.8, 8.0, 8.4]s"
+     },
+     {
+      "id": "audio.noise_floor",
+      "level": "fail",
+      "detail": "median -45.4 dBFS over 7.8s of pauses"
+     },
+     {
+      "id": "editing.caption_speed",
+      "level": "warn",
+      "detail": "90th percentile 24.1 chars/s over 31 cues (max 31.3)"
+     },
+     {
+      "id": "editing.caption_safe_area",
+      "level": "fail",
+      "detail": "caption bottom margin 307px (need 672), side margin 64px (need 48), top of block 1536px [youtube_shorts safe zone]"
+     },
+     {
+      "id": "localization.reading_speed",
+      "level": "warn",
+      "detail": "4 of 31 cues above 20 chars/s for 'en'"
+     }
+    ],
+    "not_measured": [
+     "visual.continuity",
+     "editing.subtitle_sync",
+     "localization.coverage",
+     "localization.ext",
+     "visual.subject_consistency",
+     "visual.generative_artifacts",
+     "visual.content_relevance",
+     "localization.translation_accuracy",
+     "audio.voice_naturalness",
+     "editing.storytelling"
+    ]
+   }
+  },
+  {
+   "file": "renders/short-4-natural-youtube_shorts.mp4",
+   "duration_s": 22.13,
+   "quality": {
+    "score": 92.2,
+    "grade": "A",
+    "verdict": "needs_work",
+    "verdict_reasons": [
+     "major check failed: visual.sharpness, editing.caption_safe_area"
+    ],
+    "categories": {
+     "visual": 91.2,
+     "editing": 92.3,
+     "audio": 89.3,
+     "localization": 100.0
+    },
+    "failed": [
+     {
+      "id": "visual.sharpness",
+      "level": "fail",
+      "detail": "median blur 0.56 over 11 detailed frames"
+     },
+     {
+      "id": "audio.level_jumps",
+      "level": "fail",
+      "detail": "5 unexplained >10 dB jump(s) at [8.0, 8.4, 12.0, 12.4]s"
+     },
+     {
+      "id": "audio.noise_floor",
+      "level": "fail",
+      "detail": "median -44.6 dBFS over 4.7s of pauses"
+     },
+     {
+      "id": "editing.caption_safe_area",
+      "level": "fail",
+      "detail": "caption bottom margin 307px (need 672), side margin 64px (need 48), top of block 1536px [youtube_shorts safe zone]"
+     }
+    ],
+    "not_measured": [
+     "visual.continuity",
+     "editing.subtitle_sync",
+     "localization.coverage",
+     "localization.ext",
+     "visual.subject_consistency",
+     "visual.generative_artifacts",
+     "visual.content_relevance",
+     "localization.translation_accuracy",
+     "audio.voice_naturalness",
+     "editing.storytelling"
+    ]
+   }
+  }
+ ],
+ "after_fixes": {
+  "short4_v2": {
+   "change": "captions in the platform-safe lower band + level-matched speech",
+   "score_before": 92.2,
+   "score_after": 94.2
+  }
+ },
+ "other_platforms": "TikTok/Reels/Facebook Reels/Snapchat versions come from the same timelines via the deliver job (tested in tests/fast/test_edit_flow.py); not rendered for this demo",
+ "scores_note": "content_potential/hook/pacing are editorial measurements of the transcript, not view predictions"
+}

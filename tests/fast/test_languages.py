@@ -115,3 +115,13 @@ def test_ass_burn_in_renders_non_latin_scripts(home, tmp_path, tag):
                          capture_output=True, check=True).stdout
     f = np.frombuffer(raw[: 640 * 360], dtype=np.uint8).reshape(360, 640)
     assert (np.abs(f.astype(int) - 128) > 60).sum() > 300  # caption glyphs drawn over the flat grey
+
+
+def test_mt_post_processing_fixes_the_errors_found_in_the_real_german_run():
+    """Found by language QA on Demo 3 (MADLAD-400, German): truncation at an ordinal, a decoder loop, an added sentence."""
+    from nexus.speech import mt
+    assert mt._sentences("Wenn wir uns dem 24. Jahr nähern, wird es jemand erfahren.") == [
+        "Wenn wir uns dem 24. Jahr nähern, wird es jemand erfahren."]
+    assert len(mt._sentences("Ich hoffe, du fliegst eines Tages zum Mond… Ich wünsche dir viel Erfolg.")) == 2
+    assert mt.collapse_repeats("Das ist eine lange Zeit, eine lange Zeit.") == "Das ist eine lange Zeit."
+    assert mt.collapse_repeats("Wir sehen uns, wir sehen es.") == "Wir sehen uns, wir sehen es."

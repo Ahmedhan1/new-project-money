@@ -1,0 +1,197 @@
+{
+ "label": {
+  "seconds": {
+   "generated": 0.0,
+   "animated_still": 23.89,
+   "motion_graphics": 0.0,
+   "footage": 0.0,
+   "slideshow": 0.0
+  },
+  "share": {
+   "generated": 0.0,
+   "animated_still": 1.0,
+   "motion_graphics": 0.0,
+   "footage": 0.0,
+   "slideshow": 0.0
+  },
+  "generated_stills": 4,
+  "describe_as": "animated stills (4 AI-generated still(s))"
+ },
+ "quality": {
+  "score": 97.6,
+  "grade": "A",
+  "verdict": "pass",
+  "verdict_reasons": [
+   "major check below its bar: visual.exposure"
+  ],
+  "categories": {
+   "visual": 97.2,
+   "editing": 98.1,
+   "audio": 96.4,
+   "localization": 100.0
+  },
+  "failed": [
+   {
+    "id": "visual.exposure",
+    "level": "warn",
+    "severity": "major",
+    "detail": "12.7% crushed/clipped pixels on average",
+    "fix": "grade-exposure"
+   },
+   {
+    "id": "audio.noise_floor",
+    "level": "fail",
+    "severity": "minor",
+    "detail": "median -42.6 dBFS over 1.6s of pauses",
+    "fix": "denoise"
+   },
+   {
+    "id": "editing.caption_line_length",
+    "level": "warn",
+    "severity": "minor",
+    "detail": "longest line ~42 chars",
+    "fix": "resegment-captions"
+   }
+  ],
+  "not_measured": [
+   {
+    "id": "editing.subtitle_sync",
+    "why": "no transcript/analysis to align cues with speech",
+    "critical": false
+   },
+   {
+    "id": "localization.coverage",
+    "why": "no source transcript to compare cue coverage against",
+    "critical": false
+   },
+   {
+    "id": "localization.ext",
+    "why": "localize.qa raised: 'module' object is not callable",
+    "critical": false
+   },
+   {
+    "id": "visual.subject_consistency",
+    "why": "face/subject identity across shots needs a face or subject-embedding model",
+    "critical": false
+   },
+   {
+    "id": "visual.generative_artifacts",
+    "why": "artefacts of generative video/image models need a learned detector or a human",
+    "critical": false
+   },
+   {
+    "id": "visual.content_relevance",
+    "why": "whether the picture matches what is said needs a vision-language model or a human",
+    "critical": false
+   },
+   {
+    "id": "localization.translation_accuracy",
+    "why": "meaning-level translation accuracy needs a bilingual reviewer (or a model-based metric)",
+    "critical": false
+   },
+   {
+    "id": "audio.voice_naturalness",
+    "why": "naturalness of synthetic voices needs listening tests (MOS) or a learned predictor",
+    "critical": false
+   },
+   {
+    "id": "editing.storytelling",
+    "why": "story, argument and emotional arc are creative judgements for a human",
+    "critical": false
+   }
+  ],
+  "note": "Automated measurements of technical and editorial craft. Not a prediction of audience performance; creative quality still needs a human."
+ },
+ "render": {
+  "duration": 22.1,
+  "elapsed": 41.74,
+  "segments": 4
+ },
+ "generation": [
+  {
+   "kind": "generated",
+   "model": "sd15-lcm",
+   "model_name": "Stable Diffusion 1.5 + LCM-LoRA (4-step)",
+   "licence": "CreativeML OpenRAIL-M (SD 1.5) + OpenRAIL++-M (latent-consistency/lcm-lora-sdv1-5)",
+   "commercial_use": "yes",
+   "conditions": "OpenRAIL use-based restrictions (Attachment A) must be passed on; outputs are yours; no safety checker shipped by NEXUS - the restrictions still apply",
+   "seed": 11,
+   "prompt": "the surface of the moon at lunar dawn, a dark collapsed skylight pit opening into a lava tube, long shadows, photograph, detailed",
+   "steps": 6,
+   "size": [
+    768,
+    432
+   ],
+   "provider": "local-diffusers",
+   "seconds_taken": 136.26,
+   "load_seconds": 33.03,
+   "peak_rss_gb": 5.98
+  },
+  {
+   "kind": "generated",
+   "model": "sd15-lcm",
+   "model_name": "Stable Diffusion 1.5 + LCM-LoRA (4-step)",
+   "licence": "CreativeML OpenRAIL-M (SD 1.5) + OpenRAIL++-M (latent-consistency/lcm-lora-sdv1-5)",
+   "commercial_use": "yes",
+   "conditions": "OpenRAIL use-based restrictions (Attachment A) must be passed on; outputs are yours; no safety checker shipped by NEXUS - the restrictions still apply",
+   "seed": 22,
+   "prompt": "inside a vast lava tube cave, smooth basalt walls, a beam of light from an opening in the ceiling, photograph, cinematic",
+   "steps": 6,
+   "size": [
+    768,
+    432
+   ],
+   "provider": "local-diffusers",
+   "seconds_taken": 109.31,
+   "load_seconds": 21.04,
+   "peak_rss_gb": 5.96
+  },
+  {
+   "kind": "generated",
+   "model": "sd15-lcm",
+   "model_name": "Stable Diffusion 1.5 + LCM-LoRA (4-step)",
+   "licence": "CreativeML OpenRAIL-M (SD 1.5) + OpenRAIL++-M (latent-consistency/lcm-lora-sdv1-5)",
+   "commercial_use": "yes",
+   "conditions": "OpenRAIL use-based restrictions (Attachment A) must be passed on; outputs are yours; no safety checker shipped by NEXUS - the restrictions still apply",
+   "seed": 33,
+   "prompt": "astronauts in white spacesuits with helmet lamps exploring a dark cave, rocky floor, cinematic photograph",
+   "steps": 6,
+   "size": [
+    768,
+    432
+   ],
+   "provider": "local-diffusers",
+   "seconds_taken": 222.31,
+   "load_seconds": 18.16,
+   "peak_rss_gb": 5.99
+  },
+  {
+   "kind": "generated",
+   "model": "sd15-lcm",
+   "model_name": "Stable Diffusion 1.5 + LCM-LoRA (4-step)",
+   "licence": "CreativeML OpenRAIL-M (SD 1.5) + OpenRAIL++-M (latent-consistency/lcm-lora-sdv1-5)",
+   "commercial_use": "yes",
+   "conditions": "OpenRAIL use-based restrictions (Attachment A) must be passed on; outputs are yours; no safety checker shipped by NEXUS - the restrictions still apply",
+   "seed": 44,
+   "prompt": "a small inflatable habitat module inside a huge moon cave, soft interior lights, science illustration, detailed",
+   "steps": 6,
+   "size": [
+    768,
+    432
+   ],
+   "provider": "local-diffusers",
+   "seconds_taken": 135.24,
+   "load_seconds": 30.51,
+   "peak_rss_gb": 5.96
+  }
+ ],
+ "narration_voice": "en_US-joe-medium (CC0)",
+ "lines": [
+  "Beneath the Moon's surface, collapsed skylights open into ancient lava tubes.",
+  "These caves could shield explorers from radiation, from extreme temperature swings and from micrometeorites.",
+  "Astronauts already rehearse cave work on Earth, living underground in total darkness for days at a time.",
+  "One day, a habitat inside a lunar cave could become a long-term home on the Moon."
+ ],
+ "what": "Create-from-idea with real image generation on CPU: 4 SD 1.5 + LCM stills, animated (Ken Burns), CC0 narration, captions, music bed",
+ "honest_label": "animated stills with AI-generated stills - NOT generated video; claim guard refused 'AI-generated video'"
+}

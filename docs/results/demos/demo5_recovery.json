@@ -1,0 +1,253 @@
+{
+ "demo": 5,
+ "what": "Interrupt a real production job (German localisation: translate stage done, render stage running), SIGKILL the app, restart, recover",
+ "job": "job_d35f75c7f3",
+ "killed_at_utc": "2026-11-12T09:15:19Z",
+ "restarted_at_utc": "2026-11-12T09:15:27Z",
+ "recovery_note": "worker embedded-vm-17377 lost at stage 'render-qa'; resumed from last checkpoint",
+ "retries": 1,
+ "stages": {
+  "translate-dub": {
+   "status": "done",
+   "started": 1794474767.9345093,
+   "finished": 1794474833.0719364,
+   "seconds": 65.137,
+   "runs": 1,
+   "output": {
+    "review": {
+     "stage": "language-de",
+     "checks": [
+      {
+       "check": "script [de]",
+       "ok": true,
+       "detail": "100% Latin letters",
+       "severity": "info",
+       "fix": "retranslate"
+      },
+      {
+       "check": "clean text [de]",
+       "ok": true,
+       "detail": "no model artefacts",
+       "severity": "info",
+       "fix": "retranslate"
+      },
+      {
+       "check": "no code-switching [de]",
+       "ok": true,
+       "detail": "every word is in the target script",
+       "severity": "info",
+       "fix": "retranslate"
+      },
+      {
+       "check": "line alignment [de]",
+       "ok": true,
+       "detail": "12/12 lines",
+       "severity": "info",
+       "fix": "retranslate"
+      },
+      {
+       "check": "numbers preserved [de]",
+       "ok": false,
+       "detail": "numbers missing/changed in lines [(4, ['2022', '2024'])] (may be spelled out - verify)",
+       "severity": "minor",
+       "fix": null
+      },
+      {
+       "check": "no added/dropped content [de]",
+       "ok": false,
+       "detail": "lines [4, 8, 12] are much longer/shorter than the source - possible invented or missing content",
+       "severity": "major",
+       "fix": "retranslate"
+      },
+      {
+       "check": "native-speaker review [de]",
+       "ok": false,
+       "detail": "REQUIRED before publishing - machine translation can still miss nuance and tone",
+       "severity": "minor",
+       "fix": null
+      },
+      {
+       "check": "back-translation [de]",
+       "ok": false,
+       "detail": "back-translation not run (ModuleNotFoundError: local LLM unavailable) - meaning was not cross-checked",
+       "severity": "minor",
+       "fix": null
+      },
+      {
+       "check": "subtitles empty_cues [de]",
+       "ok": true,
+       "detail": "none",
+       "severity": "info",
+       "fix": null
+      },
+      {
+       "check": "subtitles script [de]",
+       "ok": true,
+       "detail": "all in Latn",
+       "severity": "info",
+       "fix": null
+      },
+      {
+       "check": "subtitles overlap [de]",
+       "ok": true,
+       "detail": "none",
+       "severity": "info",
+       "fix": null
+      },
+      {
+       "check": "subtitles reading_speed [de]",
+       "ok": false,
+       "detail": "6 cue(s) above 17 chars/s",
+       "severity": "minor",
+       "fix": null
+      },
+      {
+       "check": "subtitles line_length [de]",
+       "ok": true,
+       "detail": "ok",
+       "severity": "info",
+       "fix": null
+      },
+      {
+       "check": "subtitles voice_licence [de]",
+       "ok": true,
+       "detail": "a commercially cleared voice exists",
+       "severity": "info",
+       "fix": null
+      }
+     ],
+     "passed": false,
+     "lines": [
+      {
+       "source": "tents and in our little camp the temperature was always about six",
+       "target": "Zelte und in unserem kleinen Camp war die Temperatur immer etwa sechs Grad."
+      },
+      {
+       "source": "dehydrated food that we had to rehydrate and the other big thing in",
+       "target": "Dehydriertes Essen, das wir rehydrieren mussten und die andere gro\u00dfe Sache in der Wohnung."
+      },
+      {
+       "source": "out if you are on the mission for sure well I think it'll be quite some time before anyone finds out if they're on the mission so I would suspect you know",
+       "target": "Ich denke, es wird eine ganze Weile dauern, bis jemand herausfindet, ob er auf der Mission ist."
+      },
+      {
+       "source": "as we get closer and closer to 24 2024 probably two years prior 2022 or so someone would find out that they're on the mission.",
+       "target": "Wenn wir uns dem 24."
+      },
+      {
+       "source": "So it would be a couple of years or so before any of us knew.",
+       "target": "Es w\u00fcrde also ungef\u00e4hr ein paar Jahre dauern, bis irgendjemand von uns es wusste."
+      },
+      {
+       "source": "Supposed to be on the last mission",
+       "target": "Er sollte auf der letzten Mission sein."
+      },
+      {
+       "source": "process, which is a long time?",
+       "target": "Prozess, das ist eine lange Zeit?"
+      },
+      {
+       "source": "It is a long time.",
+       "target": "Das ist eine lange Zeit, eine lange Zeit."
+      },
+      {
+       "source": "is we have two commercial crew vehicles that are being developed to take astronauts to the International Space Station.",
+       "target": "Wir haben zwei kommerzielle Crew-Fahrzeuge, die entwickelt werden, um Astronauten zur Internationalen Raumstation zu bef\u00f6rdern."
+      },
+      {
+       "source": "And one is being developed by SpaceX and the other is being developed by Boeing.",
+       "target": "Die eine wird von SpaceX entwickelt, die andere von Boeing \u2013 und beide sind in der Entwicklung."
+      },
+      {
+       "source": "from Syracuse, you went to Corcoran, my wife went to Corcoran, too.",
+       "target": "Von Syrakus aus bist du nach Corcoran gefahren, meine Frau ist auch nach Corcoran."
+      },
+      {
+       "source": "Well, I hope to hear about you going to the moon someday.",
+       "target": "Nun, ich hoffe zu h\u00f6ren, dass du eines Tages auf den Mond f\u00e4hrst\u2026 Ich w\u00fcnsche dir viel Erfolg."
+      }
+     ]
+    }
+   }
+  },
+  "render-qa": {
+   "status": "done",
+   "started": 1794475107.3508031,
+   "finished": 1794475181.988441,
+   "seconds": 74.638,
+   "runs": 2,
+   "output": {
+    "output": "renders/main_de.mp4",
+    "status": "NEEDS_FIXES",
+    "issues": [
+     "[major] no added/dropped content [de]: lines [4, 8, 12] are much longer/shorter than the source - possible invented or missing content",
+     "[minor] numbers preserved [de]: numbers missing/changed in lines [(4, ['2022', '2024'])] (may be spelled out - verify)",
+     "[minor] native-speaker review [de]: REQUIRED before publishing - machine translation can still miss nuance and tone",
+     "[minor] back-translation [de]: back-translation not run (ModuleNotFoundError: local LLM unavailable) - meaning was not cross-checked",
+     "[minor] subtitles reading_speed [de]: 6 cue(s) above 17 chars/s",
+     "[minor] subtitle reading speed: 3 cues above 25 chars/s"
+    ],
+    "lines": [
+     {
+      "source": "tents and in our little camp the temperature was always about six",
+      "target": "Zelte und in unserem kleinen Camp war die Temperatur immer etwa sechs Grad."
+     },
+     {
+      "source": "dehydrated food that we had to rehydrate and the other big thing in",
+      "target": "Dehydriertes Essen, das wir rehydrieren mussten und die andere gro\u00dfe Sache in der Wohnung."
+     },
+     {
+      "source": "out if you are on the mission for sure well I think it'll be quite some time before anyone finds out if they're on the mission so I would suspect you know",
+      "target": "Ich denke, es wird eine ganze Weile dauern, bis jemand herausfindet, ob er auf der Mission ist."
+     },
+     {
+      "source": "as we get closer and closer to 24 2024 probably two years prior 2022 or so someone would find out that they're on the mission.",
+      "target": "Wenn wir uns dem 24."
+     },
+     {
+      "source": "So it would be a couple of years or so before any of us knew.",
+      "target": "Es w\u00fcrde also ungef\u00e4hr ein paar Jahre dauern, bis irgendjemand von uns es wusste."
+     },
+     {
+      "source": "Supposed to be on the last mission",
+      "target": "Er sollte auf der letzten Mission sein."
+     },
+     {
+      "source": "process, which is a long time?",
+      "target": "Prozess, das ist eine lange Zeit?"
+     },
+     {
+      "source": "It is a long time.",
+      "target": "Das ist eine lange Zeit, eine lange Zeit."
+     },
+     {
+      "source": "is we have two commercial crew vehicles that are being developed to take astronauts to the International Space Station.",
+      "target": "Wir haben zwei kommerzielle Crew-Fahrzeuge, die entwickelt werden, um Astronauten zur Internationalen Raumstation zu bef\u00f6rdern."
+     },
+     {
+      "source": "And one is being developed by SpaceX and the other is being developed by Boeing.",
+      "target": "Die eine wird von SpaceX entwickelt, die andere von Boeing \u2013 und beide sind in der Entwicklung."
+     },
+     {
+      "source": "from Syracuse, you went to Corcoran, my wife went to Corcoran, too.",
+      "target": "Von Syrakus aus bist du nach Corcoran gefahren, meine Frau ist auch nach Corcoran."
+     },
+     {
+      "source": "Well, I hope to hear about you going to the moon someday.",
+      "target": "Nun, ich hoffe zu h\u00f6ren, dass du eines Tages auf den Mond f\u00e4hrst\u2026 Ich w\u00fcnsche dir viel Erfolg."
+     }
+    ]
+   }
+  }
+ },
+ "proof": {
+  "translate-dub runs": 1,
+  "render-qa runs": 2,
+  "meaning": "the 65 s translation stage (MADLAD-400 load + 35 lines) was not repeated; only the interrupted render stage re-ran"
+ },
+ "result": {
+  "output": "renders/main_de.mp4",
+  "status": "NEEDS_FIXES"
+ },
+ "also_covered_by": "tests/fast/test_jobs.py::test_worker_killed_mid_job_resumes_without_repeating_stages (CI, Linux + Windows)"
+}
