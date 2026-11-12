@@ -46,11 +46,20 @@ Types: `video {src,in,out}`, `image {src,duration}`, `color {duration,color}`. A
 | `pip` | all | Picture-in-picture / cutaway `{"src","in","x","y","w","h"?,"shape": rect|circle,"start","end"}`; `w`=1, `x`=`y`=0 is a full-frame cutaway over the clip's own audio (how the director inserts B-roll). |
 | `notes`, `label` | all | Metadata (excluded from the cache key). |
 
-## Not wired into the renderer yet
-Builders exist in `nexus/fx/post.py` / `nexus/fx/titles.py` but the renderer does not call them yet: chroma key,
-masks, split screen, freeze frames, credits roll, audio-reactive waveform overlay. J-cuts/L-cuts are planned by the
-director (`clip.notes.cut`) but rendered as hard cuts. Speed ramps change picture timing exactly; their audio follows
-the ramp's average rate only.
+## Post-production keys (wired, tested on rendered output in tests/fast/test_fx.py)
+| Key | Applies to | Meaning |
+|---|---|---|
+| `freeze` | video | `{"at", "duration"}` or a list: hold the frame at clip-local `at`; audio is silent under the hold; clip duration grows. |
+| `split` | video | `{"srcs": [path or {"src","in"}], "layout": "h"|"v"|"grid", "gap", "color"}`: the clip is panel 1. |
+| `chroma_key` | all | `{"color": "#00FF00", "similarity", "blend", "despill", "bg": image/video path or "#RRGGBB"}`. |
+| `mask` | all | `{"shape": rect|ellipse, "x","y","w","h" (0..1), "feather", "effect": black|blur|dim|pixelate, "region": outside|inside, "amount"}` or a list. |
+| `credits` | all | `{"title", "lines": [...]}` rolled from bottom to top over the clip. |
+| `keyframes` | video (x/y/scale with fit cover), all (volume) | `{"x"|"y": [[t, 0..1, "linear"|"ease"], ...], "scale": [[t, >=1], ...], "volume": [[t, gain], ...]}` over clip-local time; x/y move the crop window (reframing), scale zooms. |
+| `audio_lead` | video | J-cut: the clip's audio starts this many seconds before its picture (taken from the source before `in`), the previous clip's audio fades out under it. |
+| `audio_tail` | video | L-cut: the clip's audio continues this many seconds under the next picture (taken from the source after `out`). |
+| `pip.full` | all | Full-frame cutaway (B-roll): cover-cropped, short fades, no border; the clip's own audio continues. |
+
+Still not wired: the audio-reactive waveform overlay (`fx/post.audio_viz*`), true per-sample speed-ramp audio, opacity keyframes.
 
 ## Draft and parallel rendering
 `draft=True` renders at half resolution with a fast preset into separate cache entries (for previews).

@@ -46,8 +46,39 @@ _dirs_lock = threading.Lock()
 def clip_duration(c: dict) -> float:
     if c["type"] == "video":
         rd = fxe.ramp_duration(c) if any((e or {}).get("type") == "speed_ramp" for e in c.get("effects") or []) else None
-        return rd if rd is not None else (c["out"] - c["in"]) / float(c.get("speed", 1.0))
+        base = rd if rd is not None else (c["out"] - c["in"]) / float(c.get("speed", 1.0))
+        return base + (fxp.freeze_total(c) if c.get("freeze") else 0.0)
     return float(c["duration"])
+
+
+def kf_expr(points, var: str = "t") -> str | None:
+    """Keyframes [[t, value, "linear"|"ease"], ...] -> an FFmpeg expression in `var` (held before the first and after
+    the last key)."""
+    pts = sorted((float(p[0]), float(p[1]), (p[2] if len(p) > 2 else "linear")) for p in points or [] if len(p) >= 2)
+    if not pts:
+        return None
+    if len(pts) == 1:
+        return f"{pts[0][1]:.5f}"
+    expr = f"{pts[-1][1]:.5f}"
+    for (t0, v0, mode), (t1, v1, _) in reversed(list(zip(pts, pts[1:]))):
+        u = f"(({var}-{t0:.4f})/{max(t1 - t0, 1e-4):.4f})"
+        if mode == "ease":
+            u = f"({u}*{u}*(3-2*{u}))"
+        expr = f"if(lt({var},{t1:.4f}),{v0:.5f}+({v1 - v0:.5f})*{u},{expr})"
+    return f"if(lt({var},{pts[0][0]:.4f}),{pts[0][1]:.5f},{expr})"
+
+
+def _fit_kf(W: int, H: int, c: dict, focus) -> str:
+    """Cover fit whose crop position and zoom follow clip['keyframes'] x/y (0..1 subject position) and scale (>= 1)."""
+    kf = c.get("keyframes") or {}
+    xe = kf_expr(kf.get("x")) or f"{float(focus[0]):.4f}"
+    ye = kf_expr(kf.get("y")) or f"{float(focus[1]):.4f}"
+    f = (f"scale={W}:{H}:force_original_aspect_ratio=increase,"
+         f"crop={W}:{H}:x='(iw-{W})*clip({xe},0,1)':y='(ih-{H})*clip({ye},0,1)'")
+    ze = kf_expr(kf.get("scale"), "ot")
+    if ze:
+        f += f",zoompan=z='max(1,{ze})':x='(iw-iw/zoom)/2':y='(ih-ih/zoom)/2':d=1:s={W}x{H}"
+    return f
 
 
 def total_duration(tl: dict) -> float:
@@ -167,7 +198,10 @@ def render_segment(c: dict, tl: dict, cache: Path, draft: bool = False, threads:
         pre += fxp.orient_filters(c, notes)
         timing = ramp if ramp else f"setpts=(PTS-STARTPTS)/{speed}"
         interp = fxp.interp_filter(c, fps, notes) if (speed < 1.0 or ramp) else None
-        v = ",".join([*pre, timing, f"fps={fps}", *([interp] if interp else []), _fit(W, H, c.get("fit", "cover"), focus)])
+        v_pre = ",".join([*pre, timing, f"fps={fps}", *([interp] if interp else [])])
+        kfit = c.get("keyframes") and any(k in c["keyframes"] for k in ("x", "y", "scale")) and c.get("fit", "cover") == "cover"
+        fit = _fit_kf(W, H, c, focus) if kfit else _fit(W, H, c.get("fit", "cover"), focus)
+        v = f"{v_pre},{fit}"
     elif c["type"] == "image":
         args += ["-i", c["src"]]
         kb = c.get("kenburns", "in")
@@ -190,14 +224,41 @@ def render_segment(c: dict, tl: dict, cache: Path, draft: bool = False, threads:
         a_src = "[0:a]"
     geo, look = fxe.video_filters(c, W, H, fps, dur, scale)
     correct = fxp.correct_filters(c.get("correct"), notes)
-    chain = ",".join([v, *geo, *correct, *([grade] if grade else []), *look, "format=yuv420p", "setsar=1"])
+    chain = ",".join([*geo, *correct, *([grade] if grade else []), *look, "format=yuv420p", "setsar=1"])
     fi, fo = float(c.get("fade_in", 0)), float(c.get("fade_out", 0))
     if fi:
         chain += f",fade=t=in:st=0:d={fi}"
     if fo:
         chain += f",fade=t=out:st={max(0, dur - fo):.3f}:d={fo}"
-    fc = [f"[0:v]{chain}[v0]"]
+    fc: list[str] = []
+    sopts = fxp.split_opts(c) if c["type"] == "video" else None
+    if c["type"] == "video" and (c.get("freeze") or sopts):
+        fc.append(f"[0:v]{v_pre}[vb]")
+        cur = "[vb]"
+        if c.get("freeze"):
+            cur = fxp.freeze_video(fc, cur, dur - fxp.freeze_total(c), c, fps)
+        if sopts:
+            sargs, cur = fxp.split_graph(sopts, fc, cur, W, H, fps, dur, n_in, scale)
+            args += sargs
+            n_in += sum(1 for x in sargs if x == "-i")
+        else:
+            fc.append(f"{cur}{fit}[vf]")
+            cur = "[vf]"
+    else:
+        fc.append(f"[0:v]{v}[vf]")
+        cur = "[vf]"
+    ko = fxp.chroma_opts(c)
+    if ko:
+        cargs, cur = fxp.chroma_graph(ko, fc, cur, W, H, fps, dur, n_in, "ck", notes)
+        args += cargs
+        n_in += sum(1 for x in cargs if x == "-i")
+    fc.append(f"{cur}{chain}[v0]")
     last = "v0"
+    if fxp.masks(c):
+        margs, mcur = fxp.mask_graph(c, fc, "[v0]", W, H, dur, n_in, scale, "mk")
+        args += margs
+        n_in += sum(1 for x in margs if x == "-i")
+        last = mcur.strip("[]")
     for i, t in enumerate(c.get("text", [])):
         png = text.overlay_png(t["text"], t.get("style", "title"), W, H, t.get("lang", tl.get("lang", "en")))
         st, en = float(t.get("start", 0)), float(t.get("end", dur))
@@ -225,6 +286,13 @@ def render_segment(c: dict, tl: dict, cache: Path, draft: bool = False, threads:
             last = "vp"
         else:
             notes.append("pip source missing or unusable: picture-in-picture skipped")
+    if isinstance(c.get("credits"), dict):
+        from ..fx import titles
+        cargs, clines, clast = titles.credits_lines(c["credits"], W, H, dur, tl.get("lang", "en"), n_in, f"[{last}]")
+        args += cargs
+        fc += clines
+        n_in += 1
+        last = clast.strip("[]")
     a = []
     if has_audio:
         if ramp:
@@ -242,10 +310,18 @@ def render_segment(c: dict, tl: dict, cache: Path, draft: bool = False, threads:
             a.append(afx)
         if c.get("volume", 1.0) != 1.0:
             a.append(f"volume={c['volume']}")
-        if fi:
-            a.append(f"afade=t=in:st=0:d={fi}")
-        if fo:
-            a.append(f"afade=t=out:st={max(0, dur - fo):.3f}:d={fo}")
+        ve = kf_expr((c.get("keyframes") or {}).get("volume"))
+        if ve:
+            a.append(f"volume='{ve}':eval=frame")
+        afi = max(fi, float(c.get("audio_fade_in", 0)))   # J/L-cuts: the neighbour's audio crosses the cut
+        afo = max(fo, float(c.get("audio_fade_out", 0)))
+        if afi:
+            a.append(f"afade=t=in:st=0:d={afi}")
+        if afo:
+            a.append(f"afade=t=out:st={max(0, dur - afo):.3f}:d={afo}")
+    if c.get("freeze") and has_audio:
+        fc.append(f"{a_src}{','.join(a) or 'anull'}[ab]")
+        a_src, a = fxp.freeze_audio(fc, "[ab]", dur - fxp.freeze_total(c), c), []
     a += [f"aresample={config.AUDIO_RATE}", "aformat=channel_layouts=stereo", f"apad=whole_dur={dur:.3f}", f"atrim=0:{dur:.3f}"]
     fc.append(f"{a_src}{','.join(a)}[a]")
     tmp = out.with_suffix(f".{threading.get_ident()}.tmp.mp4")
@@ -333,6 +409,40 @@ def _mix_graph(tl: dict, n_narr: int, has_music: bool, dur: float) -> tuple[list
     return fc, "pre"
 
 
+def _jl_cuts(tl: dict, workdir: Path) -> dict:
+    """J-cut (clip['audio_lead']=L: its audio starts L s before its picture) and L-cut (clip['audio_tail']=T: its audio
+    continues T s under the next picture). The extra audio is taken from the source beyond the cut and mixed in as
+    dialogue; the neighbour's own audio fades across the same span. Returns a modified copy of the timeline."""
+    if not any(c.get("audio_lead") or c.get("audio_tail") for c in tl["clips"]):
+        return tl
+    import copy as _copy
+    tl = _copy.deepcopy(tl)
+    starts = clip_starts(tl)
+    for i, c in enumerate(tl["clips"]):
+        if c["type"] != "video" or c.get("mute"):
+            continue
+        sp = float(c.get("speed", 1.0))
+        for key, neighbour in (("audio_lead", i - 1), ("audio_tail", i + 1)):
+            span = float(c.get(key) or 0)
+            if span <= 0 or not (0 <= neighbour < len(tl["clips"])):
+                continue
+            span = min(span, clip_duration(tl["clips"][neighbour]) * 0.8)
+            a0 = c["in"] - span * sp if key == "audio_lead" else c["out"]
+            if a0 < 0:
+                continue
+            wav = workdir / f"jl_{c['id']}_{key}_{span:.2f}.wav"
+            ff.run(["-ss", f"{a0:.3f}", "-t", f"{span * sp:.3f}", "-i", c["src"], "-vn", "-ac", "2", "-ar", config.AUDIO_RATE,
+                    "-af", f"{','.join(fxe.atempo_chain(sp)) or 'anull'},afade=t={'in' if key == 'audio_lead' else 'out'}:"
+                           f"st={0 if key == 'audio_lead' else max(0.0, span - 0.25):.3f}:d={min(0.25, span / 2):.3f}", wav],
+                   op="jl-cut")
+            at = starts[i] - span if key == "audio_lead" else starts[i] + clip_duration(c)
+            tl.setdefault("audio", []).append({"src": str(wav), "start": round(at, 3), "role": "dialogue", "volume": 1.0,
+                                               "clip": c["id"], "jl": key})
+            nb = tl["clips"][neighbour]
+            nb["audio_fade_out" if key == "audio_lead" else "audio_fade_in"] = round(span, 3)
+    return tl
+
+
 def _workers(n_clips: int, workers: int | None) -> tuple[int, int | None]:
     cpu = os.cpu_count() or 2
     w = workers if workers is not None else max(1, min(4, cpu // 2))
@@ -346,6 +456,7 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
     t0 = time.time()
     workdir.mkdir(parents=True, exist_ok=True)
     out.parent.mkdir(parents=True, exist_ok=True)
+    tl = _jl_cuts(tl, workdir)
     cache = config.CACHE / "segments"
     clips = tl["clips"]
     w, threads = _workers(len(clips), workers)

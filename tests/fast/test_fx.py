@@ -160,3 +160,99 @@ def test_legacy_timeline_renders_unchanged_keys(home, media, tmp_path):
     k1 = render.segment_key(c, tl)
     assert render.segment_key({**c, "effects": [{"type": "vignette"}]}, tl) != k1
     assert render.segment_key({**c, "label": "x", "notes": {"a": 1}}, tl) == k1
+
+
+# ---------------------------------------------------------------- FX-2: builders wired into the renderer
+def _gray_frame(path, t, w=W, h=H):
+    return _frame(path, t, (w, h)).astype(int)
+
+
+def _band_level(path, t0, dur, lo, hi):
+    err = subprocess.run(["ffmpeg", "-ss", f"{t0:.2f}", "-t", f"{dur:.2f}", "-i", str(path), "-af",
+                          f"highpass=f={lo},lowpass=f={hi},volumedetect", "-f", "null", "-"], capture_output=True, text=True).stderr
+    return float(err.split("mean_volume:")[1].split("dB")[0])
+
+
+def test_freeze_frame_holds_the_picture_and_silences_audio(home, media, tmp_path):
+    c = ops.video_clip(media["a"], 0, 2.0, freeze={"at": 0.5, "duration": 1.0})
+    assert abs(render.clip_duration(c) - 3.0) < 1e-6
+    st = render.render(_tl([c]), tmp_path / "fz.mp4", tmp_path / "w")
+    assert abs(st["duration"] - 3.0) < 0.1
+    f1, f2 = _gray_frame(tmp_path / "fz.mp4", 0.7), _gray_frame(tmp_path / "fz.mp4", 1.3)
+    assert np.abs(f1 - f2).mean() < 1.0                          # held frame
+    assert _band_level(tmp_path / "fz.mp4", 0.8, 0.5, 100, 2000) < -50  # silence under the freeze
+
+
+def test_split_screen_shows_both_sources(home, media, tmp_path):
+    c = ops.video_clip(media["gray"], 0, 1.5, split={"srcs": [media["b"]], "layout": "h", "gap": 0})
+    render.render(_tl([c]), tmp_path / "sp.mp4", tmp_path / "w")
+    f = _gray_frame(tmp_path / "sp.mp4", 0.7)
+    left, right = f[:, : W // 2 - 4], f[:, W // 2 + 4:]
+    assert left.std() < 6 and right.std() > 20                  # flat grey panel | colour bars panel
+
+
+def test_chroma_key_replaces_the_green_screen(home, media, tmp_path):
+    green = _src(media["dir"] / "green.mp4", d=2.0, pattern="color=c=0x00FF00")
+    red = media["dir"] / "red.png"
+    from PIL import Image
+    Image.new("RGB", (W, H), (220, 20, 20)).save(red)
+    c = ops.video_clip(green, 0, 1.0, chroma_key={"color": "#00FF00", "similarity": 0.2, "bg": str(red)})
+    render.render(_tl([c]), tmp_path / "ck.mp4", tmp_path / "w")
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-ss", "0.5", "-i", str(tmp_path / "ck.mp4"), "-frames:v", "1", "-f", "rawvideo",
+                          "-pix_fmt", "rgb24", "-"], capture_output=True, check=True).stdout
+    px = np.frombuffer(raw[: W * H * 3], dtype=np.uint8).reshape(H, W, 3).astype(int)
+    assert px[..., 0].mean() > 150 and px[..., 1].mean() < 90    # red background where the green was
+
+
+def test_mask_blacks_out_only_outside_its_region(home, media, tmp_path):
+    c = ops.video_clip(media["gray"], 0, 1.0, mask={"shape": "rect", "x": 0.25, "y": 0.25, "w": 0.5, "h": 0.5, "feather": 0,
+                                                     "effect": "black", "region": "outside"})
+    render.render(_tl([c]), tmp_path / "mk.mp4", tmp_path / "w")
+    f = _gray_frame(tmp_path / "mk.mp4", 0.5)
+    assert f[:10, :10].mean() < 25 and f[H // 2 - 5: H // 2 + 5, W // 2 - 5: W // 2 + 5].mean() > 100
+
+
+def test_credits_roll_moves_up(home, media, tmp_path):
+    c = ops.color_clip(3.0, credits={"title": "Credits", "lines": ["Footage: NASA", "Edit: NEXUS", "Music: procedural"]})
+    render.render(_tl([c]), tmp_path / "cr.mp4", tmp_path / "w")
+
+    def text_rows(t):
+        f = _gray_frame(tmp_path / "cr.mp4", t)
+        rows = np.where((f > 150).sum(1) > 3)[0]
+        return rows.mean() if len(rows) else None
+    a, b = text_rows(1.0), text_rows(2.0)
+    assert a is not None and b is not None and b < a - 10       # the text block moved up
+
+
+def test_keyframed_pan_and_volume(home, media, tmp_path):
+    from PIL import Image
+    grad = media["dir"] / "grad.png"
+    Image.fromarray(np.tile(np.linspace(0, 255, 640).astype("uint8"), (180, 1))).convert("RGB").save(grad)
+    wide = media["dir"] / "wide.mp4"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-loop", "1", "-i", str(grad), "-f", "lavfi", "-i", "sine=f=500:d=2:r=48000",
+                    "-t", "2", "-c:v", "libx264", "-preset", "ultrafast", "-pix_fmt", "yuv420p", "-c:a", "aac", str(wide)], check=True)
+    c = ops.video_clip(str(wide), 0, 2.0, keyframes={"x": [[0, 0.0], [2.0, 1.0, "ease"]], "volume": [[0, 0.05], [1.5, 1.0]]})
+    tl = _tl([c])
+    tl["width"], tl["height"] = 180, 320                          # vertical crop of a wide gradient
+    render.render(tl, tmp_path / "kf.mp4", tmp_path / "w")
+    early, late = _frame(tmp_path / "kf.mp4", 0.1, (180, 320)), _frame(tmp_path / "kf.mp4", 1.9, (180, 320))
+    assert late.mean() > early.mean() + 60                       # the crop window travelled from the dark to the bright end
+    assert _band_level(tmp_path / "kf.mp4", 1.6, 0.3, 300, 800) > _band_level(tmp_path / "kf.mp4", 0.05, 0.3, 300, 800) + 15
+
+
+def test_j_cut_brings_the_next_clip_audio_under_the_previous_picture(home, media, tmp_path):
+    lo = _src(media["dir"] / "jc_lo.mp4", d=4.0, tone=300)
+    hi = _src(media["dir"] / "jc_hi.mp4", d=4.0, pattern="smptebars", tone=2000)
+    a = ops.video_clip(lo, 0, 2.0)
+    b = ops.video_clip(hi, 1.0, 3.0, audio_lead=0.8)             # b's 2 kHz tone is heard 0.8 s before its picture
+
+    def band(path, t0):
+        err = subprocess.run(["ffmpeg", "-ss", f"{t0:.2f}", "-t", "0.4", "-i", str(path), "-af",
+                              "bandpass=f=2000:width_type=h:w=150,bandpass=f=2000:width_type=h:w=150,volumedetect", "-f", "null", "-"],
+                             capture_output=True, text=True).stderr
+        return float(err.split("mean_volume:")[1].split("dB")[0])
+    st = render.render(_tl([a, b]), tmp_path / "jc.mp4", tmp_path / "w")
+    assert abs(st["duration"] - 4.0) < 0.1                       # picture timing unchanged
+    assert band(tmp_path / "jc.mp4", 1.5) > band(tmp_path / "jc.mp4", 0.3) + 15
+    st2 = render.render(_tl([ops.video_clip(lo, 0, 2.0), ops.video_clip(hi, 1.0, 3.0)]), tmp_path / "hard.mp4", tmp_path / "w2")
+    assert band(tmp_path / "hard.mp4", 1.5) < band(tmp_path / "jc.mp4", 1.5) - 15   # without the J-cut: no 2 kHz there
