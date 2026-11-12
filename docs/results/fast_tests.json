@@ -1,6 +1,6 @@
 {
- "summary": "199 passed, 4 failed, 4 skipped",
- "ok": false,
+ "summary": "209 passed, 0 failed, 4 skipped",
+ "ok": true,
  "date": "2026-11-12",
  "platform": "Linux",
  "python": "3.13.18"

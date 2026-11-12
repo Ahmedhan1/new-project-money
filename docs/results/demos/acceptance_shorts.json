@@ -1,0 +1,1142 @@
+{
+ "collected_utc": "2026-11-12T14:14:41Z",
+ "demo": 2,
+ "what": "5-10 distinct shorts from the same master",
+ "job": "job_ee1c177e9a",
+ "status": "done",
+ "stages": {
+  "select-and-build": {
+   "status": "done",
+   "seconds": 0.464,
+   "runs": 1
+  },
+  "render-and-score": {
+   "status": "done",
+   "seconds": 569.119,
+   "runs": 1
+  }
+ },
+ "moments_considered": 8,
+ "rendered": [
+  {
+   "branch": "short-1-natural-youtube_shorts",
+   "output": "renders/short-1-natural-youtube_shorts.mp4",
+   "seconds": 17.7,
+   "quality": {
+    "score": 91.4,
+    "grade": "A",
+    "verdict": "needs_work",
+    "verdict_reasons": [
+     "major check failed: visual.sharpness, editing.caption_speed"
+    ],
+    "categories": {
+     "visual": 86.1,
+     "editing": 92.3,
+     "audio": 98.2,
+     "localization": 86.7
+    },
+    "failed": [
+     {
+      "id": "visual.sharpness",
+      "level": "fail",
+      "severity": "major",
+      "detail": "median blur 0.57 over 14 detailed frames",
+      "fix": "replace-or-upscale-source"
+     },
+     {
+      "id": "visual.continuity",
+      "level": "warn",
+      "severity": "major",
+      "detail": "audio level jump at 17.00s: -12.2 dB -> -18.6 dB (-6.4 dB) across a hard cut",
+      "fix": "match-grade"
+     },
+     {
+      "id": "visual.repeated_imagery",
+      "level": "fail",
+      "severity": "minor",
+      "detail": "5 of 7 shots repeat earlier imagery",
+      "fix": "replace-repeated-shot"
+     },
+     {
+      "id": "audio.noise_floor",
+      "level": "warn",
+      "severity": "minor",
+      "detail": "median -52.6 dBFS over 4.5s of pauses",
+      "fix": "denoise"
+     },
+     {
+      "id": "editing.caption_speed",
+      "level": "fail",
+      "severity": "major",
+      "detail": "90th percentile 28.5 chars/s over 33 cues (max 35.0)",
+      "fix": "resegment-captions"
+     },
+     {
+      "id": "localization.reading_speed",
+      "level": "warn",
+      "severity": "minor",
+      "detail": "8 of 33 cues above 20 chars/s for 'en'",
+      "fix": "resegment-captions"
+     },
+     {
+      "id": "localization.ext.reading_speed",
+      "level": "fail",
+      "severity": "minor",
+      "detail": "8 cue(s) above 20 chars/s",
+      "fix": "language-review"
+     }
+    ],
+    "not_measured": [
+     {
+      "id": "editing.subtitle_sync",
+      "why": "no transcript/analysis to align cues with speech",
+      "critical": false
+     },
+     {
+      "id": "localization.coverage",
+      "why": "no source transcript to compare cue coverage against",
+      "critical": false
+     },
+     {
+      "id": "visual.subject_consistency",
+      "why": "face/subject identity across shots needs a face or subject-embedding model",
+      "critical": false
+     },
+     {
+      "id": "visual.generative_artifacts",
+      "why": "artefacts of generative video/image models need a learned detector or a human",
+      "critical": false
+     },
+     {
+      "id": "visual.content_relevance",
+      "why": "whether the picture matches what is said needs a vision-language model or a human",
+      "critical": false
+     },
+     {
+      "id": "localization.translation_accuracy",
+      "why": "meaning-level translation accuracy needs a bilingual reviewer (or a model-based metric)",
+      "critical": false
+     },
+     {
+      "id": "audio.voice_naturalness",
+      "why": "naturalness of synthetic voices needs listening tests (MOS) or a learned predictor",
+      "critical": false
+     },
+     {
+      "id": "editing.storytelling",
+      "why": "story, argument and emotional arc are creative judgements for a human",
+      "critical": false
+     }
+    ],
+    "note": "Automated measurements of technical and editorial craft. Not a prediction of audience performance; creative quality still needs a human."
+   }
+  },
+  {
+   "branch": "short-2-natural-youtube_shorts",
+   "output": "renders/short-2-natural-youtube_shorts.mp4",
+   "seconds": 60.45,
+   "quality": {
+    "score": 95.9,
+    "grade": "A",
+    "verdict": "needs_work",
+    "verdict_reasons": [
+     "major check failed: visual.sharpness"
+    ],
+    "categories": {
+     "visual": 91.2,
+     "editing": 96.2,
+     "audio": 98.2,
+     "localization": 100.0
+    },
+    "failed": [
+     {
+      "id": "visual.sharpness",
+      "level": "fail",
+      "severity": "major",
+      "detail": "median blur 0.57 over 16 detailed frames",
+      "fix": "replace-or-upscale-source"
+     },
+     {
+      "id": "audio.noise_floor",
+      "level": "warn",
+      "severity": "minor",
+      "detail": "median -51.6 dBFS over 7.4s of pauses",
+      "fix": "denoise"
+     },
+     {
+      "id": "editing.caption_speed",
+      "level": "warn",
+      "severity": "major",
+      "detail": "90th percentile 22.0 chars/s over 31 cues (max 33.3)",
+      "fix": "resegment-captions"
+     }
+    ],
+    "not_measured": [
+     {
+      "id": "visual.continuity",
+      "why": "needs the timeline (cut positions and sources)",
+      "critical": false
+     },
+     {
+      "id": "editing.subtitle_sync",
+      "why": "no transcript/analysis to align cues with speech",
+      "critical": false
+     },
+     {
+      "id": "localization.coverage",
+      "why": "no source transcript to compare cue coverage against",
+      "critical": false
+     },
+     {
+      "id": "visual.subject_consistency",
+      "why": "face/subject identity across shots needs a face or subject-embedding model",
+      "critical": false
+     },
+     {
+      "id": "visual.generative_artifacts",
+      "why": "artefacts of generative video/image models need a learned detector or a human",
+      "critical": false
+     },
+     {
+      "id": "visual.content_relevance",
+      "why": "whether the picture matches what is said needs a vision-language model or a human",
+      "critical": false
+     },
+     {
+      "id": "localization.translation_accuracy",
+      "why": "meaning-level translation accuracy needs a bilingual reviewer (or a model-based metric)",
+      "critical": false
+     },
+     {
+      "id": "audio.voice_naturalness",
+      "why": "naturalness of synthetic voices needs listening tests (MOS) or a learned predictor",
+      "critical": false
+     },
+     {
+      "id": "editing.storytelling",
+      "why": "story, argument and emotional arc are creative judgements for a human",
+      "critical": false
+     }
+    ],
+    "note": "Automated measurements of technical and editorial craft. Not a prediction of audience performance; creative quality still needs a human."
+   }
+  },
+  {
+   "branch": "short-3-natural-youtube_shorts",
+   "output": "renders/short-3-natural-youtube_shorts.mp4",
+   "seconds": 24.06,
+   "quality": {
+    "score": 89.7,
+    "grade": "B",
+    "verdict": "needs_work",
+    "verdict_reasons": [
+     "major check failed: visual.sharpness, editing.caption_speed"
+    ],
+    "categories": {
+     "visual": 90.3,
+     "editing": 84.6,
+     "audio": 98.2,
+     "localization": 80.0
+    },
+    "failed": [
+     {
+      "id": "visual.sharpness",
+      "level": "fail",
+      "severity": "major",
+      "detail": "median blur 0.56 over 16 detailed frames",
+      "fix": "replace-or-upscale-source"
+     },
+     {
+      "id": "visual.repeated_imagery",
+      "level": "warn",
+      "severity": "minor",
+      "detail": "1 of 4 shots repeat earlier imagery",
+      "fix": "replace-repeated-shot"
+     },
+     {
+      "id": "audio.noise_floor",
+      "level": "warn",
+      "severity": "minor",
+      "detail": "median -50.4 dBFS over 5.7s of pauses",
+      "fix": "denoise"
+     },
+     {
+      "id": "editing.pacing",
+      "level": "fail",
+      "severity": "minor",
+      "detail": "4 shots (timeline), mean 10.6s, longest 32.0s",
+      "fix": "repace"
+     },
+     {
+      "id": "editing.caption_speed",
+      "level": "fail",
+      "severity": "major",
+      "detail": "90th percentile 26.8 chars/s over 51 cues (max 30.0)",
+      "fix": "resegment-captions"
+     },
+     {
+      "id": "localization.reading_speed",
+      "level": "fail",
+      "severity": "minor",
+      "detail": "19 of 51 cues above 20 chars/s for 'en'",
+      "fix": "resegment-captions"
+     },
+     {
+      "id": "localization.ext.reading_speed",
+      "level": "fail",
+      "severity": "minor",
+      "detail": "20 cue(s) above 20 chars/s",
+      "fix": "language-review"
+     }
+    ],
+    "not_measured": [
+     {
+      "id": "editing.subtitle_sync",
+      "why": "no transcript/analysis to align cues with speech",
+      "critical": false
+     },
+     {
+      "id": "localization.coverage",
+      "why": "no source transcript to compare cue coverage against",
+      "critical": false
+     },
+     {
+      "id": "visual.subject_consistency",
+      "why": "face/subject identity across shots needs a face or subject-embedding model",
+      "critical": false
+     },
+     {
+      "id": "visual.generative_artifacts",
+      "why": "artefacts of generative video/image models need a learned detector or a human",
+      "critical": false
+     },
+     {
+      "id": "visual.content_relevance",
+      "why": "whether the picture matches what is said needs a vision-language model or a human",
+      "critical": false
+     },
+     {
+      "id": "localization.translation_accuracy",
+      "why": "meaning-level translation accuracy needs a bilingual reviewer (or a model-based metric)",
+      "critical": false
+     },
+     {
+      "id": "audio.voice_naturalness",
+      "why": "naturalness of synthetic voices needs listening tests (MOS) or a learned predictor",
+      "critical": false
+     },
+     {
+      "id": "editing.storytelling",
+      "why": "story, argument and emotional arc are creative judgements for a human",
+      "critical": false
+     }
+    ],
+    "note": "Automated measurements of technical and editorial craft. Not a prediction of audience performance; creative quality still needs a human."
+   }
+  },
+  {
+   "branch": "short-4-natural-youtube_shorts",
+   "output": "renders/short-4-natural-youtube_shorts.mp4",
+   "seconds": 41.09,
+   "quality": {
+    "score": 98.1,
+    "grade": "A",
+    "verdict": "pass",
+    "verdict_reasons": [
+     "major check below its bar: visual.sharpness"
+    ],
+    "categories": {
+     "visual": 95.6,
+     "editing": 100.0,
+     "audio": 98.2,
+     "localization": 100.0
+    },
+    "failed": [
+     {
+      "id": "visual.sharpness",
+      "level": "warn",
+      "severity": "major",
+      "detail": "median blur 0.55 over 11 detailed frames",
+      "fix": "replace-or-upscale-source"
+     },
+     {
+      "id": "audio.noise_floor",
+      "level": "warn",
+      "severity": "minor",
+      "detail": "median -56.2 dBFS over 4.0s of pauses",
+      "fix": "denoise"
+     }
+    ],
+    "not_measured": [
+     {
+      "id": "visual.continuity",
+      "why": "needs the timeline (cut positions and sources)",
+      "critical": false
+     },
+     {
+      "id": "editing.subtitle_sync",
+      "why": "no transcript/analysis to align cues with speech",
+      "critical": false
+     },
+     {
+      "id": "localization.coverage",
+      "why": "no source transcript to compare cue coverage against",
+      "critical": false
+     },
+     {
+      "id": "visual.subject_consistency",
+      "why": "face/subject identity across shots needs a face or subject-embedding model",
+      "critical": false
+     },
+     {
+      "id": "visual.generative_artifacts",
+      "why": "artefacts of generative video/image models need a learned detector or a human",
+      "critical": false
+     },
+     {
+      "id": "visual.content_relevance",
+      "why": "whether the picture matches what is said needs a vision-language model or a human",
+      "critical": false
+     },
+     {
+      "id": "localization.translation_accuracy",
+      "why": "meaning-level translation accuracy needs a bilingual reviewer (or a model-based metric)",
+      "critical": false
+     },
+     {
+      "id": "audio.voice_naturalness",
+      "why": "naturalness of synthetic voices needs listening tests (MOS) or a learned predictor",
+      "critical": false
+     },
+     {
+      "id": "editing.storytelling",
+      "why": "story, argument and emotional arc are creative judgements for a human",
+      "critical": false
+     }
+    ],
+    "note": "Automated measurements of technical and editorial craft. Not a prediction of audience performance; creative quality still needs a human."
+   }
+  },
+  {
+   "branch": "short-5-natural-youtube_shorts",
+   "output": "renders/short-5-natural-youtube_shorts.mp4",
+   "seconds": 23.93,
+   "quality": {
+    "score": 93.6,
+    "grade": "A",
+    "verdict": "needs_work",
+    "verdict_reasons": [
+     "major check failed: visual.sharpness"
+    ],
+    "categories": {
+     "visual": 90.3,
+     "editing": 92.3,
+     "audio": 98.2,
+     "localization": 93.3
+    },
+    "failed": [
+     {
+      "id": "visual.sharpness",
+      "level": "fail",
+      "severity": "major",
+      "detail": "median blur 0.57 over 15 detailed frames",
+      "fix": "replace-or-upscale-source"
+     },
+     {
+      "id": "visual.repeated_imagery",
+      "level": "warn",
+      "severity": "minor",
+      "detail": "1 of 4 shots repeat earlier imagery",
+      "fix": "replace-repeated-shot"
+     },
+     {
+      "id": "audio.noise_floor",
+      "level": "warn",
+      "severity": "minor",
+      "detail": "median -49.9 dBFS over 3.5s of pauses",
+      "fix": "denoise"
+     },
+     {
+      "id": "editing.pacing",
+      "level": "warn",
+      "severity": "minor",
+      "detail": "4 shots (timeline), mean 7.9s, longest 18.5s",
+      "fix": "repace"
+     },
+     {
+      "id": "editing.caption_speed",
+      "level": "warn",
+      "severity": "major",
+      "detail": "90th percentile 23.8 chars/s over 32 cues (max 32.4)",
+      "fix": "resegment-captions"
+     },
+     {
+      "id": "localization.ext.reading_speed",
+      "level": "fail",
+      "severity": "minor",
+      "detail": "4 cue(s) above 20 chars/s",
+      "fix": "language-review"
+     }
+    ],
+    "not_measured": [
+     {
+      "id": "editing.subtitle_sync",
+      "why": "no transcript/analysis to align cues with speech",
+      "critical": false
+     },
+     {
+      "id": "localization.coverage",
+      "why": "no source transcript to compare cue coverage against",
+      "critical": false
+     },
+     {
+      "id": "visual.subject_consistency",
+      "why": "face/subject identity across shots needs a face or subject-embedding model",
+      "critical": false
+     },
+     {
+      "id": "visual.generative_artifacts",
+      "why": "artefacts of generative video/image models need a learned detector or a human",
+      "critical": false
+     },
+     {
+      "id": "visual.content_relevance",
+      "why": "whether the picture matches what is said needs a vision-language model or a human",
+      "critical": false
+     },
+     {
+      "id": "localization.translation_accuracy",
+      "why": "meaning-level translation accuracy needs a bilingual reviewer (or a model-based metric)",
+      "critical": false
+     },
+     {
+      "id": "audio.voice_naturalness",
+      "why": "naturalness of synthetic voices needs listening tests (MOS) or a learned predictor",
+      "critical": false
+     },
+     {
+      "id": "editing.storytelling",
+      "why": "story, argument and emotional arc are creative judgements for a human",
+      "critical": false
+     }
+    ],
+    "note": "Automated measurements of technical and editorial craft. Not a prediction of audience performance; creative quality still needs a human."
+   }
+  },
+  {
+   "branch": "short-6-natural-youtube_shorts",
+   "output": "renders/short-6-natural-youtube_shorts.mp4",
+   "seconds": 33.61,
+   "quality": {
+    "score": 91.3,
+    "grade": "A",
+    "verdict": "needs_work",
+    "verdict_reasons": [
+     "major check failed: visual.sharpness, editing.caption_speed"
+    ],
+    "categories": {
+     "visual": 88.9,
+     "editing": 88.5,
+     "audio": 98.2,
+     "localization": 86.7
+    },
+    "failed": [
+     {
+      "id": "visual.sharpness",
+      "level": "fail",
+      "severity": "major",
+      "detail": "median blur 0.55 over 16 detailed frames",
+      "fix": "replace-or-upscale-source"
+     },
+     {
+      "id": "visual.repeated_imagery",
+      "level": "fail",
+      "severity": "minor",
+      "detail": "2 of 5 shots repeat earlier imagery",
+      "fix": "replace-repeated-shot"
+     },
+     {
+      "id": "audio.noise_floor",
+      "level": "warn",
+      "severity": "minor",
+      "detail": "median -53.1 dBFS over 5.2s of pauses",
+      "fix": "denoise"
+     },
+     {
+      "id": "editing.pacing",
+      "level": "warn",
+      "severity": "minor",
+      "detail": "5 shots (timeline), mean 8.7s, longest 13.7s",
+      "fix": "repace"
+     },
+     {
+      "id": "editing.caption_speed",
+      "level": "fail",
+      "severity": "major",
+      "detail": "90th percentile 25.0 chars/s over 43 cues (max 30.3)",
+      "fix": "resegment-captions"
+     },
+     {
+      "id": "localization.reading_speed",
+      "level": "warn",
+      "severity": "minor",
+      "detail": "9 of 43 cues above 20 chars/s for 'en'",
+      "fix": "resegment-captions"
+     },
+     {
+      "id": "localization.ext.reading_speed",
+      "level": "fail",
+      "severity": "minor",
+      "detail": "9 cue(s) above 20 chars/s",
+      "fix": "language-review"
+     }
+    ],
+    "not_measured": [
+     {
+      "id": "editing.subtitle_sync",
+      "why": "no transcript/analysis to align cues with speech",
+      "critical": false
+     },
+     {
+      "id": "localization.coverage",
+      "why": "no source transcript to compare cue coverage against",
+      "critical": false
+     },
+     {
+      "id": "visual.subject_consistency",
+      "why": "face/subject identity across shots needs a face or subject-embedding model",
+      "critical": false
+     },
+     {
+      "id": "visual.generative_artifacts",
+      "why": "artefacts of generative video/image models need a learned detector or a human",
+      "critical": false
+     },
+     {
+      "id": "visual.content_relevance",
+      "why": "whether the picture matches what is said needs a vision-language model or a human",
+      "critical": false
+     },
+     {
+      "id": "localization.translation_accuracy",
+      "why": "meaning-level translation accuracy needs a bilingual reviewer (or a model-based metric)",
+      "critical": false
+     },
+     {
+      "id": "audio.voice_naturalness",
+      "why": "naturalness of synthetic voices needs listening tests (MOS) or a learned predictor",
+      "critical": false
+     },
+     {
+      "id": "editing.storytelling",
+      "why": "story, argument and emotional arc are creative judgements for a human",
+      "critical": false
+     }
+    ],
+    "note": "Automated measurements of technical and editorial craft. Not a prediction of audience performance; creative quality still needs a human."
+   }
+  },
+  {
+   "branch": "short-7-natural-youtube_shorts",
+   "output": "renders/short-7-natural-youtube_shorts.mp4",
+   "seconds": 24.27,
+   "quality": {
+    "score": 92.6,
+    "grade": "A",
+    "verdict": "needs_work",
+    "verdict_reasons": [
+     "major check failed: visual.sharpness"
+    ],
+    "categories": {
+     "visual": 90.3,
+     "editing": 92.3,
+     "audio": 98.2,
+     "localization": 86.7
+    },
+    "failed": [
+     {
+      "id": "visual.sharpness",
+      "level": "fail",
+      "severity": "major",
+      "detail": "median blur 0.56 over 16 detailed frames",
+      "fix": "replace-or-upscale-source"
+     },
+     {
+      "id": "visual.repeated_imagery",
+      "level": "warn",
+      "severity": "minor",
+      "detail": "1 of 3 shots repeat earlier imagery",
+      "fix": "replace-repeated-shot"
+     },
+     {
+      "id": "audio.noise_floor",
+      "level": "warn",
+      "severity": "minor",
+      "detail": "median -54.9 dBFS over 6.3s of pauses",
+      "fix": "denoise"
+     },
+     {
+      "id": "editing.pacing",
+      "level": "warn",
+      "severity": "minor",
+      "detail": "3 shots (timeline), mean 12.2s, longest 17.7s",
+      "fix": "repace"
+     },
+     {
+      "id": "editing.caption_speed",
+      "level": "warn",
+      "severity": "major",
+      "detail": "90th percentile 24.3 chars/s over 37 cues (max 39.5)",
+      "fix": "resegment-captions"
+     },
+     {
+      "id": "localization.reading_speed",
+      "level": "warn",
+      "severity": "minor",
+      "detail": "4 of 37 cues above 20 chars/s for 'en'",
+      "fix": "resegment-captions"
+     },
+     {
+      "id": "localization.ext.reading_speed",
+      "level": "fail",
+      "severity": "minor",
+      "detail": "5 cue(s) above 20 chars/s",
+      "fix": "language-review"
+     }
+    ],
+    "not_measured": [
+     {
+      "id": "editing.subtitle_sync",
+      "why": "no transcript/analysis to align cues with speech",
+      "critical": false
+     },
+     {
+      "id": "localization.coverage",
+      "why": "no source transcript to compare cue coverage against",
+      "critical": false
+     },
+     {
+      "id": "visual.subject_consistency",
+      "why": "face/subject identity across shots needs a face or subject-embedding model",
+      "critical": false
+     },
+     {
+      "id": "visual.generative_artifacts",
+      "why": "artefacts of generative video/image models need a learned detector or a human",
+      "critical": false
+     },
+     {
+      "id": "visual.content_relevance",
+      "why": "whether the picture matches what is said needs a vision-language model or a human",
+      "critical": false
+     },
+     {
+      "id": "localization.translation_accuracy",
+      "why": "meaning-level translation accuracy needs a bilingual reviewer (or a model-based metric)",
+      "critical": false
+     },
+     {
+      "id": "audio.voice_naturalness",
+      "why": "naturalness of synthetic voices needs listening tests (MOS) or a learned predictor",
+      "critical": false
+     },
+     {
+      "id": "editing.storytelling",
+      "why": "story, argument and emotional arc are creative judgements for a human",
+      "critical": false
+     }
+    ],
+    "note": "Automated measurements of technical and editorial craft. Not a prediction of audience performance; creative quality still needs a human."
+   }
+  },
+  {
+   "branch": "short-8-natural-youtube_shorts",
+   "output": "renders/short-8-natural-youtube_shorts.mp4",
+   "seconds": 49.17,
+   "quality": {
+    "score": 92.9,
+    "grade": "A",
+    "verdict": "needs_work",
+    "verdict_reasons": [
+     "major check failed: visual.sharpness, editing.caption_speed"
+    ],
+    "categories": {
+     "visual": 91.2,
+     "editing": 92.3,
+     "audio": 98.2,
+     "localization": 86.7
+    },
+    "failed": [
+     {
+      "id": "visual.sharpness",
+      "level": "fail",
+      "severity": "major",
+      "detail": "median blur 0.56 over 14 detailed frames",
+      "fix": "replace-or-upscale-source"
+     },
+     {
+      "id": "audio.noise_floor",
+      "level": "warn",
+      "severity": "minor",
+      "detail": "median -55.6 dBFS over 5.4s of pauses",
+      "fix": "denoise"
+     },
+     {
+      "id": "editing.caption_speed",
+      "level": "fail",
+      "severity": "major",
+      "detail": "90th percentile 25.3 chars/s over 28 cues (max 29.4)",
+      "fix": "resegment-captions"
+     },
+     {
+      "id": "localization.reading_speed",
+      "level": "warn",
+      "severity": "minor",
+      "detail": "4 of 28 cues above 20 chars/s for 'en'",
+      "fix": "resegment-captions"
+     },
+     {
+      "id": "localization.ext.reading_speed",
+      "level": "fail",
+      "severity": "minor",
+      "detail": "4 cue(s) above 20 chars/s",
+      "fix": "language-review"
+     }
+    ],
+    "not_measured": [
+     {
+      "id": "visual.continuity",
+      "why": "needs the timeline (cut positions and sources)",
+      "critical": false
+     },
+     {
+      "id": "editing.subtitle_sync",
+      "why": "no transcript/analysis to align cues with speech",
+      "critical": false
+     },
+     {
+      "id": "localization.coverage",
+      "why": "no source transcript to compare cue coverage against",
+      "critical": false
+     },
+     {
+      "id": "visual.subject_consistency",
+      "why": "face/subject identity across shots needs a face or subject-embedding model",
+      "critical": false
+     },
+     {
+      "id": "visual.generative_artifacts",
+      "why": "artefacts of generative video/image models need a learned detector or a human",
+      "critical": false
+     },
+     {
+      "id": "visual.content_relevance",
+      "why": "whether the picture matches what is said needs a vision-language model or a human",
+      "critical": false
+     },
+     {
+      "id": "localization.translation_accuracy",
+      "why": "meaning-level translation accuracy needs a bilingual reviewer (or a model-based metric)",
+      "critical": false
+     },
+     {
+      "id": "audio.voice_naturalness",
+      "why": "naturalness of synthetic voices needs listening tests (MOS) or a learned predictor",
+      "critical": false
+     },
+     {
+      "id": "editing.storytelling",
+      "why": "story, argument and emotional arc are creative judgements for a human",
+      "critical": false
+     }
+    ],
+    "note": "Automated measurements of technical and editorial craft. Not a prediction of audience performance; creative quality still needs a human."
+   }
+  }
+ ],
+ "not_rendered": [],
+ "shorts": [
+  {
+   "branch": "short-1-natural-youtube_shorts",
+   "title": "How will our bodies adapt to a lower gravitational",
+   "duration": 29.26,
+   "start": 911.04,
+   "end": 942.86,
+   "variant": "natural",
+   "platform": "youtube_shorts",
+   "context_status": "ok",
+   "hashtags": [
+    "#StarTrek",
+    "#Fiction",
+    "#Life",
+    "#Movies",
+    "#Science"
+   ],
+   "scores": {
+    "content_potential": 87.5,
+    "hook_strength": 80.0,
+    "pacing": 78.2,
+    "completeness": 100.0,
+    "note": "editorial heuristics measured on the transcript; not a prediction of views or reach",
+    "retention_rubric": 93
+   },
+   "quality": null,
+   "file": {
+    "video": "h264 1080x1920",
+    "video_s": 29.2,
+    "audio": "aac",
+    "audio_s": 29.2,
+    "bytes": 13325413
+   },
+   "sha256": "a944db6f382e82eed376a0650fd49f8c19be07a18b364997d9602eb294f9c49c"
+  },
+  {
+   "branch": "short-2-natural-youtube_shorts",
+   "title": "We had each person had tents",
+   "duration": 36.86,
+   "start": 586.42,
+   "end": 623.28,
+   "variant": "natural",
+   "platform": "youtube_shorts",
+   "context_status": "ok",
+   "hashtags": [
+    "#Caves",
+    "#Food",
+    "#Light"
+   ],
+   "scores": {
+    "content_potential": 83.6,
+    "hook_strength": 90.0,
+    "pacing": 97.2,
+    "completeness": 60.0,
+    "note": "editorial heuristics measured on the transcript; not a prediction of views or reach",
+    "retention_rubric": 93
+   },
+   "quality": null,
+   "file": {
+    "video": "h264 1080x1920",
+    "video_s": 36.9,
+    "audio": "aac",
+    "audio_s": 36.867,
+    "bytes": 17081786
+   },
+   "sha256": "49bb4268c6e720a0511531d70b71b1ebb99cd9089ed030b1937c55b68e2a47b4"
+  },
+  {
+   "branch": "short-3-natural-youtube_shorts",
+   "title": "Even yesterday out flying",
+   "duration": 42.32,
+   "start": 1055.3,
+   "end": 1099.52,
+   "variant": "natural",
+   "platform": "youtube_shorts",
+   "context_status": "ok",
+   "hashtags": [
+    "#Houston",
+    "#Privileged"
+   ],
+   "scores": {
+    "content_potential": 83.4,
+    "hook_strength": 65.0,
+    "pacing": 82.8,
+    "completeness": 100.0,
+    "note": "editorial heuristics measured on the transcript; not a prediction of views or reach",
+    "retention_rubric": 93
+   },
+   "quality": null,
+   "file": {
+    "video": "h264 1080x1920",
+    "video_s": 42.3,
+    "audio": "aac",
+    "audio_s": 42.3,
+    "bytes": 19834877
+   },
+   "sha256": "1865f00730e52dc3d678ea2626ff6599b6a6836e8400313a012d89e30d37d9b8"
+  },
+  {
+   "branch": "short-4-natural-youtube_shorts",
+   "title": "We have to determine how safe the caves",
+   "duration": 22.1,
+   "start": 717.92,
+   "end": 740.02,
+   "variant": "natural",
+   "platform": "youtube_shorts",
+   "context_status": "ok",
+   "hashtags": [
+    "#Moon",
+    "#Caves"
+   ],
+   "scores": {
+    "content_potential": 83.3,
+    "hook_strength": 70.0,
+    "pacing": 100.0,
+    "completeness": 100.0,
+    "note": "editorial heuristics measured on the transcript; not a prediction of views or reach",
+    "retention_rubric": 93
+   },
+   "quality": null,
+   "file": {
+    "video": "h264 1080x1920",
+    "video_s": 22.1,
+    "audio": "aac",
+    "audio_s": 22.1,
+    "bytes": 10395046
+   },
+   "sha256": "211cbd219f13fbee622a9bbf4c7b88f57628f683000c7ffb3136bf7a269ecacd"
+  },
+  {
+   "branch": "short-5-natural-youtube_shorts",
+   "title": "We went down about a 160-meter shaft",
+   "duration": 31.76,
+   "start": 554.14,
+   "end": 586.5,
+   "variant": "natural",
+   "platform": "youtube_shorts",
+   "context_status": "ok",
+   "hashtags": [
+    "#Flat",
+    "#Area",
+    "#Cave"
+   ],
+   "scores": {
+    "content_potential": 83.2,
+    "hook_strength": 80.0,
+    "pacing": 95.1,
+    "completeness": 60.0,
+    "note": "editorial heuristics measured on the transcript; not a prediction of views or reach",
+    "retention_rubric": 93
+   },
+   "quality": null,
+   "file": {
+    "video": "h264 1080x1920",
+    "video_s": 31.8,
+    "audio": "aac",
+    "audio_s": 31.767,
+    "bytes": 15126508
+   },
+   "sha256": "3ed7a7ddee1bf4e40198d9cf86652cf3fe1a9c6697daba4f0ce418123c7edf7d"
+  },
+  {
+   "branch": "short-6-natural-youtube_shorts",
+   "title": "We do the same things",
+   "duration": 43.36,
+   "start": 814.66,
+   "end": 858.76,
+   "variant": "natural",
+   "platform": "youtube_shorts",
+   "context_status": "ok",
+   "hashtags": [
+    "#NASA",
+    "#InternationalSpaceStation",
+    "#International",
+    "#Space",
+    "#Station"
+   ],
+   "scores": {
+    "content_potential": 82.8,
+    "hook_strength": 60.0,
+    "pacing": 94.5,
+    "completeness": 100.0,
+    "note": "editorial heuristics measured on the transcript; not a prediction of views or reach",
+    "retention_rubric": 93
+   },
+   "quality": null,
+   "file": {
+    "video": "h264 1080x1920",
+    "video_s": 43.333333,
+    "audio": "aac",
+    "audio_s": 43.333,
+    "bytes": 20283414
+   },
+   "sha256": "c9969b438fe232df18fe33f524cfb3fd968084dbf93bd85a0560875dddb20618"
+  },
+  {
+   "branch": "short-7-natural-youtube_shorts",
+   "title": "We fly the T-38 jets, we practice robotics",
+   "duration": 36.74,
+   "start": 345.24,
+   "end": 382.34,
+   "variant": "natural",
+   "platform": "youtube_shorts",
+   "context_status": "ok",
+   "hashtags": [
+    "#PacificNorthwest",
+    "#UnitedStates",
+    "#Class",
+    "#Leadership",
+    "#Team"
+   ],
+   "scores": {
+    "content_potential": 81.2,
+    "hook_strength": 65.0,
+    "pacing": 96.1,
+    "completeness": 80.0,
+    "note": "editorial heuristics measured on the transcript; not a prediction of views or reach",
+    "retention_rubric": 93
+   },
+   "quality": null,
+   "file": {
+    "video": "h264 1080x1920",
+    "video_s": 36.733333,
+    "audio": "aac",
+    "audio_s": 36.733,
+    "bytes": 17471233
+   },
+   "sha256": "747f12d9eb074e2f0de034ac56bd0dd3db623e4f43252330b763eab6b9fd4e4d"
+  },
+  {
+   "branch": "short-8-natural-youtube_shorts",
+   "title": "Well I hope to at some point",
+   "duration": 29.4,
+   "start": 870.56,
+   "end": 899.6,
+   "variant": "natural",
+   "platform": "youtube_shorts",
+   "context_status": "ok",
+   "hashtags": [
+    "#InternationalSpaceStation",
+    "#Research"
+   ],
+   "scores": {
+    "content_potential": 70.4,
+    "hook_strength": 60.0,
+    "pacing": 100.0,
+    "completeness": 40.0,
+    "note": "editorial heuristics measured on the transcript; not a prediction of views or reach",
+    "retention_rubric": 93
+   },
+   "quality": null,
+   "file": {
+    "video": "h264 1080x1920",
+    "video_s": 29.4,
+    "audio": "aac",
+    "audio_s": 29.4,
+    "bytes": 13137948
+   },
+   "sha256": "f155474d869c25eb0a9aca55b1988343ed3b8f20dda803bb917f6ccd42f9913c"
+  }
+ ],
+ "overlap_check": [
+  {
+   "a": "short-2-natural-youtube_shorts",
+   "b": "short-5-natural-youtube_shorts",
+   "overlap_s": 0.08
+  }
+ ],
+ "contact_sheet": "docs/results/demos/acceptance_shorts_contact.jpg",
+ "note": "scores are editorial heuristics measured on the transcript; not a prediction of views or reach",
+ "inspection": {
+  "openings": "all 8 open on the guest, face centred (face track); title card + word-highlight captions; see acceptance_shorts_openings.jpg",
+  "fixed_this_round": [
+   "no short opens on an interviewer question (sentence-level speaker voting)",
+   "every short ends with an out (editing.ending: 0 of 8)",
+   "language QA runs inside the score"
+  ],
+  "remaining": [
+   "titles are verbatim opening words, several are fragments (K-23; editable in Review)",
+   "single camera angle: repeated imagery",
+   "720p source in 9:16 is soft (visual.sharpness)",
+   "caption speed bursts p90 22-28 chars/s (K-21)"
+  ]
+ }
+}

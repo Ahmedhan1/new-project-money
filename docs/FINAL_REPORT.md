@@ -15,7 +15,7 @@ a run on the owner's Windows PC, native-speaker review of the translations, and 
 | # | Demo | Result | Evidence |
 |---|---|---|---|
 | 1 | 3-5 min cinematic edit from licensed footage | **Done.** 4:04.7, 1920x1080 H.264/AAC, A/V 244.667/244.667 s, automated QA passed, quality 92.5 "pass". 16 licensed cutaways (NASA, Openverse) with credits. | `acceptance_cinematic.json`, contact sheet |
-| 2 | 5-10 distinct shorts | SHORTS_RESULT | `acceptance_shorts.json` |
+| 2 | 5-10 distinct shorts | **Done.** 8 distinct shorts (22-43 s, 1080x1920, A/V in sync), quality 89.7-98.1 (1 pass, 7 needs_work: soft 720p source, caption-speed bursts); all open on the guest, face-tracked, all end with an out. Titles are weak fragments: rewrite in Review. | `acceptance_shorts.json` |
 | 3 | >= 3 platform adaptations | **Done.** 16:9 (YouTube, Facebook), 4:5 (Instagram feed), 9:16 (TikTok); face-tracked crops; captions above TikTok's bottom 30 % / inside Instagram's centre square (inspected on frames); all exports verified; caption.txt + upload steps per platform. | `acceptance_platforms.json`, frame sheets |
 | 4 | Multilingual subtitle package | **Done.** 7 languages (de, fr, ar-EG, ar-Gulf, zh, ru, hi); ar-EG/de/fr/hi pass automated checks, ar-Gulf/ru/zh flagged; `commercially_ready` stays empty until a reviewer approves every line. | `acceptance_subtitles.json` |
 | 5 | Dubbed version with a commercially cleared voice | DUB_RESULT | `acceptance_dub.json` |

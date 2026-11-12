@@ -29,8 +29,8 @@ Real media used for verification: a 19.4-minute NASA interview (public domain, N
 | Audio | Loudness normalisation, ducking, level matching at cuts and between speakers | V | RMS-targeted leveller: interviewer/guest gap 7.5 dB -> 0 dB on the real span (7880635); level-jump flags 30 -> 6 (remaining = natural prosody) |
 | Audio | Speech denoise (RNNoise) + gated leveller | V (minor gap) | pauses −39.3 → −42.1 dBFS on the 4-min edit; bar is −48 (measured over 0.6 s of short gaps) |
 | Audio | De-reverb, stem/dialogue isolation from music | N | no licence-clean CPU model integrated |
-| Shorts | Moment selection, context check, hook variants, captions, batch | V | `acceptance_shorts.json` |
-| Shorts | Face-tracked reframing; never open on the interviewer | V | YuNet focus spans; interviewer hook cap + guest-only titles (0f1a991) |
+| Shorts | Moment selection, context check, hook variants, captions, batch | V | `acceptance_shorts.json`: 8 distinct 22-43 s shorts, quality 89.7-98.1 (1 pass, 7 needs_work: source sharpness, caption-speed bursts), all with an out |
+| Shorts | Face-tracked reframing; never open on the interviewer; titles | V / P | openings inspected on all 8; titles are verbatim fragments (K-23), editable in Review |
 | Platforms | Profiles with evidence kinds, tune/check/deliverables, deliver job with export verify + size cap | V | `acceptance_platforms.json`: 16:9/4:5/9:16 for 4 platforms, face-tracked crops, safe zones inspected on frames, caption.txt + hashtags from speech |
 | Languages | Subtitles de/fr/ar-EG/ar-Gulf/zh/ru/hi from real MT, per-language QA, subtitle package | V | `acceptance_subtitles.json`: ready ar-EG/de/fr/hi; ar-Gulf/ru/zh flagged NEEDS_FIXES by QA |
 | Languages | Egyptian vs Gulf Arabic as separate profiles | P | separate packs, lexicon checks; MT model has no dialect control, so Gulf output is mostly MSA (flagged) |
