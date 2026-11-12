@@ -505,3 +505,43 @@ def test_routes_require_owner(api, monkeypatch):
     assert api.get("/api/v1/storage/connections").status_code == 401
     ok = api.get("/api/v1/storage/connections", headers={"Authorization": "Bearer owner-token-EXAMPLE-123"})
     assert ok.status_code == 200
+
+
+def test_failover_to_next_allowed_destination_and_opt_in_replication(home, tmp_path, monkeypatch):
+    """Part 4: an upload failure on the primary moves to the owner's next allowed destination (never another account
+    of the same provider to get around a quota), and masters are replicated to the configured backup destination."""
+    from pathlib import Path
+
+    from nexus.cloud.storage import artifacts as A
+    from nexus.contracts import QuotaStatus
+
+    class F:
+        def __init__(self, ref): self.ref = ref
+    class Stub:
+        def __init__(self, cid, fail=False):
+            self.cid, self.fail, self.files = cid, fail, {}
+            self.INFO = type("I", (), {"provider": "stub"})
+        def quota(self):
+            return QuotaStatus(provider="stub", connection_id=self.cid, resource="storage_bytes", limit=10**9, used=0,
+                               remaining=10**9, source="provider_api")
+        def upload(self, src, path, **k):
+            if self.fail:
+                raise OSError("network down")
+            self.files[path] = Path(src).read_bytes()
+            return F(f"{self.cid}:{path}")
+    stubs = {"p1": Stub("p1", fail=True), "p2": Stub("p2"), "bk": Stub("bk")}
+    monkeypatch.setattr(A, "provider", lambda c: stubs[c])
+    monkeypatch.setattr(A, "check_authorized", lambda c: None)
+    monkeypatch.setattr(A, "_put_manifest", lambda *a, **k: None)
+    monkeypatch.setattr(A, "_location_valid", lambda lo, sha: True)
+    copied = []
+    monkeypatch.setattr(A, "copy_to", lambda aid, c: copied.append(c) or A.get(aid))
+    monkeypatch.setattr(A, "rules", lambda: {"order": ["p1", "p2"], "kinds": {}, "reserve_bytes": 0, "replicate": {"master": ["bk"]},
+                                             "authorized_remote": ["p1", "p2", "bk"]})
+    f = tmp_path / "m.mp4"
+    f.write_bytes(b"x" * 1000)
+    m = A.store_file(f, kind="master")
+    assert [lo.connection_id for lo in m.locations] == ["p2"] and stubs["p2"].files and not stubs["p1"].files
+    assert copied == ["bk"]                                         # backup replica requested for a master
+    with pytest.raises(OSError):                                    # an explicit destination never fails over silently
+        A.store_file(tmp_path / "m.mp4", kind="short", connection_id="p1")

@@ -163,10 +163,13 @@ class KaggleProvider(Provider):
         for p in d.iterdir():
             if p.is_file():
                 p.unlink()
+        staged = [i for i in bundle.get("inputs") or [] if i.get("dataset_file")]
+        datasets = [self.stage_dataset(user, i) for i in staged]
+        bundle = {**bundle, "inputs": [{k: v for k, v in i.items() if k != "_stage_path"} for i in bundle.get("inputs") or []]}
         (d / "nexus_job.py").write_text(worker_kit.build_script(bundle), encoding="utf-8")
         meta = {"id": f"{user}/{slug}", "title": slug, "code_file": "nexus_job.py", "language": "python", "kernel_type": "script",
                 "is_private": True, "enable_gpu": bool(gpu), "enable_tpu": False, "enable_internet": True,
-                "dataset_sources": [], "competition_sources": [], "kernel_sources": [], "model_sources": []}
+                "dataset_sources": datasets, "competition_sources": [], "kernel_sources": [], "model_sources": []}
         (d / "kernel-metadata.json").write_text(json.dumps(meta, indent=1), encoding="utf-8")
         args = ["kernels", "push", "-p", str(d), "-t", str(int(min(timeout_s, SESSION_MAX_S)))]
         if gpu:
@@ -175,6 +178,39 @@ class KaggleProvider(Provider):
         self._classify(rc, out, err, "push")
         save_conn(self.connection_id, "kaggle", status="ok", last_success=time.time(), auth_failed="")
         return f"{user}/{slug}"
+
+    can_stage_inputs = True
+
+    def stage_dataset(self, user: str, inp: dict, wait_s: float = 600) -> str:
+        """Upload one large input as a PRIVATE Kaggle dataset (official `kaggle datasets create`, private unless --public)
+        named after its content hash, so the same file is uploaded once and reused by later jobs. Returns its ref."""
+        ref = f"{user}/nexus-in-{inp['sha256'][:16]}"
+        rc, out, err = self.run(["datasets", "status", ref], None, 60)
+        if rc == 0 and "ready" in (out + err).lower():
+            return ref
+        d = compute_dir("kaggle_datasets", ref.split("/")[1])
+        for p in d.iterdir():
+            if p.is_file():
+                p.unlink()
+        src = Path(inp["_stage_path"])
+        try:
+            os.link(src, d / inp["dataset_file"])
+        except OSError:
+            shutil.copyfile(src, d / inp["dataset_file"])
+        (d / "dataset-metadata.json").write_text(json.dumps({"title": ref.split("/")[1], "id": ref,
+                                                             "licenses": [{"name": "other"}]}), encoding="utf-8")
+        rc, out, err = self.run(["datasets", "create", "-p", str(d), "-q"], None, 1800)
+        if rc != 0 and "already" not in (out + err).lower():
+            self._classify(rc, out, err, "dataset create")
+        t0 = time.time()
+        while time.time() - t0 < wait_s:
+            rc, out, err = self.run(["datasets", "status", ref], None, 60)
+            if "ready" in (out + err).lower():
+                return ref
+            if "error" in (out + err).lower():
+                raise ProviderError(f"Kaggle dataset {ref} failed to process: {(out + err)[-300:]}")
+            time.sleep(10)
+        raise ProviderError(f"Kaggle dataset {ref} not ready after {wait_s:.0f} s")
 
     def poll(self, ref: str) -> RemoteStatus:
         rc, out, err = self.run(["kernels", "status", ref], None, 60)

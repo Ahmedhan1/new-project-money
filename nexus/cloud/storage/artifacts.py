@@ -183,17 +183,58 @@ def store_file(src: str | Path, *, kind: str, name: str | None = None, connectio
                 emit("storage.uploaded", f"{name}: already stored on {cid} (deduplicated by sha256)",
                      artifact_id=existing.artifact_id, connection_id=cid, deduplicated=True)
                 return existing
-    p = provider(cid)
     path = safe_rel(dest_path or f"{folder_for(kind, project_id)}/{name}")
-    try:
-        f = p.upload(src, path, mime=mime, chunk_size=chunk_size, transfer_id=transfer_id, on_chunk=on_chunk,
-                     props={"nexus_kind": kind, "nexus_retention": retention})
-    except Exception as e:
-        emit("storage.failed", f"upload of {name} to {cid} failed: {e}", connection_id=cid)
-        raise
-    return _finish_store(p, cid, f, path, sha, size, existing, name=name, kind=kind, mime=mime, project_id=project_id,
-                         job_id=job_id, provenance=provenance, retention=retention, expires_at=expires_at,
-                         write_manifest=write_manifest)
+    # failover: when the upload to the chosen destination fails technically, try the next destination in the owner's
+    # order that is authorised and has room. A quota refusal is not "retried on another account": it is reported, and the
+    # next destination is only used because the owner listed it as an allowed destination for this kind.
+    candidates = [cid] if connection_id else [cid] + [c for c in _order_for(kind) if c != cid]
+    errors = []
+    for i, c in enumerate(candidates):
+        if i:
+            try:
+                check_authorized(c)
+                q = provider(c).quota()
+                if q.remaining is not None and q.remaining - rules().get("reserve_bytes", 0) < size:
+                    errors.append(f"{c}: not enough free space")
+                    continue
+            except Exception as e:  # noqa: BLE001
+                errors.append(f"{c}: {e}")
+                continue
+        p = provider(c)
+        try:
+            f = p.upload(src, path, mime=mime, chunk_size=chunk_size, transfer_id=transfer_id if i == 0 else None,
+                         on_chunk=on_chunk, props={"nexus_kind": kind, "nexus_retention": retention})
+        except Exception as e:  # noqa: BLE001
+            emit("storage.failed", f"upload of {name} to {c} failed: {e}", connection_id=c)
+            errors.append(f"{c}: {e}")
+            if connection_id:
+                raise
+            continue
+        if i:
+            emit("storage.uploaded", f"{name}: failed over to {c} after: {'; '.join(errors)}"[:500], connection_id=c, failover=True)
+        m = _finish_store(p, c, f, path, sha, size, existing, name=name, kind=kind, mime=mime, project_id=project_id,
+                          job_id=job_id, provenance=provenance, retention=retention, expires_at=expires_at,
+                          write_manifest=write_manifest)
+        return replicate(m)
+    raise StorageError(f"upload of {name} failed on every allowed destination: {'; '.join(errors)}")
+
+
+def _order_for(kind: str | None) -> list[str]:
+    r = rules()
+    return list((r.get("kinds") or {}).get(kind or "", None) or r.get("order") or ["local"])
+
+
+def replicate(m: ArtifactManifest) -> ArtifactManifest:
+    """Opt-in backup copies: storage_rules.json "replicate": {"master": ["drive_a"], ...}. Each copy is verified by SHA-256
+    (copy_to). A failed replica is reported and leaves the primary copy untouched."""
+    for c in (rules().get("replicate") or {}).get(m.kind, []):
+        if any(lo.connection_id == c for lo in m.locations):
+            continue
+        try:
+            m = copy_to(m.artifact_id, c)
+        except Exception as e:  # noqa: BLE001
+            emit("storage.failed", f"replica of {m.name} to {c} failed: {e}"[:500], artifact_id=m.artifact_id, connection_id=c)
+    return m
 
 
 def _finish_store(p, cid, f, path, sha, size, existing, *, name, kind, mime, project_id, job_id, provenance, retention,

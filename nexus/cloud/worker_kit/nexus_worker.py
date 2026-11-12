@@ -221,8 +221,14 @@ class Context:
                 p.write_bytes(base64.b64decode(i["b64"]))
             elif i.get("url"):
                 download(i["url"], p, int(i.get("max_bytes") or 2 * 2 ** 30))
+            elif i.get("dataset_file"):
+                # staged by the control plane as a PRIVATE Kaggle dataset attached to this kernel (no token on the worker)
+                hits = sorted(Path("/kaggle/input").rglob(Path(i["dataset_file"]).name)) if Path("/kaggle/input").exists() else []
+                if not hits:
+                    raise ValueError(f"input {i['name']} not found under /kaggle/input (dataset not attached?)")
+                p = hits[0]
             else:
-                raise ValueError(f"input {i['name']} has neither b64 nor url")
+                raise ValueError(f"input {i['name']} has neither b64, url nor dataset_file")
             if i.get("sha256") and sha256_file(p) != i["sha256"]:
                 raise ValueError(f"input {i['name']} checksum mismatch")
             total += p.stat().st_size

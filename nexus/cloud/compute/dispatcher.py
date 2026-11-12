@@ -113,6 +113,32 @@ def _sha(p: Path) -> str:
     return h.hexdigest()
 
 
+DELIVER_KINDS = {"master", "short", "localized", "proxy", "thumbnail", "audio", "subtitle", "analysis", "project_file", "other"}
+
+
+def deliver_outputs(job_id: str, dest: str, artifacts: list) -> dict:
+    """Copy a succeeded job's verified outputs to the storage connection named in ProductionJobManifest.output_destination
+    (download -> upload -> SHA-256 re-check, nexus.cloud.storage.artifacts.copy_to). Logs and checkpoints stay local.
+    A delivery failure is reported, never hidden, and does not undo the compute result."""
+    from ..storage import artifacts as store
+    out = {"destination": dest, "delivered": [], "failed": []}
+    for a in artifacts:
+        aid = a.get("artifact_id") if isinstance(a, dict) else getattr(a, "artifact_id", None)
+        kind = a.get("kind") if isinstance(a, dict) else getattr(a, "kind", None)
+        if not aid or kind not in DELIVER_KINDS:
+            continue
+        try:
+            m = store.copy_to(aid, dest)
+            loc = next(lo for lo in m.locations if lo.connection_id == dest)
+            out["delivered"].append({"artifact_id": aid, "name": m.name, "size": m.size, "sha256": m.sha256, "path": loc.path,
+                                     "ref": loc.ref})
+            emit("storage.uploaded", f"{m.name} -> {dest}:{loc.path} (sha256 verified)", job_id, artifact_id=aid, destination=dest)
+        except Exception as e:  # noqa: BLE001 - reported per artifact; the owner can retry with POST /storage/artifacts/{id}/copy
+            out["failed"].append({"artifact_id": aid, "error": str(e)[:300]})
+            emit("storage.failed", f"delivery of {aid} to {dest} failed: {e}"[:500], job_id, artifact_id=aid, destination=dest)
+    return out
+
+
 class Dispatcher:
     def __init__(self, providers: dict[str, Provider] | None = None, poll_min: float = 5.0, poll_max: float = 60.0):
         self.providers = providers if providers is not None else default_providers()
@@ -204,9 +230,23 @@ class Dispatcher:
             a = ArtifactManifest(**json.loads(r[0]["manifest"]))
             path = artifact_path(a)
             if path is None:
-                raise ValueError(f"input artifact {aid} has no local copy")
+                # the input lives only in cloud storage (e.g. Drive): stream it to the control plane's cache (server side,
+                # never the owner's PC), verifying its SHA-256, then stage it for the worker
+                from ..storage import artifacts as store
+                path = config.CACHE / "remote_inputs" / a.sha256[:16] / Path(a.name).name
+                if not (path.exists() and path.stat().st_size == a.size):
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    store.fetch_local(a, path)
+                emit("job.progress", f"input {a.name} fetched from cloud storage to the control plane ({a.size} bytes, sha256 verified)",
+                     m.job_id, artifact_id=aid)
             if a.size > worker_kit.INLINE_MAX:
-                raise ValueError(f"input {a.name} is {a.size} bytes (> {worker_kit.INLINE_MAX} inline limit): pass an https params.input_url")
+                if not getattr(p, "can_stage_inputs", False):
+                    raise ValueError(f"input {a.name} is {a.size} bytes (> {worker_kit.INLINE_MAX} inline limit) and provider "
+                                     f"{p.provider} cannot stage files: pass an https params.input_url")
+                staged = f"{a.sha256[:16]}_{Path(a.name).name}"
+                inputs.append({"name": a.name, "sha256": a.sha256, "size": a.size, "dataset_file": staged,
+                               "_stage_path": str(path)})
+                continue
             inputs.append({"name": a.name, "sha256": a.sha256, "size": a.size, "b64": base64.b64encode(path.read_bytes()).decode()})
         cp = last_checkpoint(m.job_id)
         return {"job_id": m.job_id, "task": m.task, "params": m.params, "attempt": attempt, "provider": p.provider,
@@ -474,6 +514,9 @@ class Dispatcher:
             data["postprocess"] = extra
         data["artifacts"] = job_artifacts(jid)
         data.update(accelerator=res.accelerator, duration_s=res.duration_s, metrics=res.metrics, provider=res.provider)
+        dest = (json.loads(row["manifest"]) if row.get("manifest") else {}).get("output_destination")
+        if dest:
+            data["delivery"] = deliver_outputs(jid, dest, data["artifacts"])
         _set(jid, status="succeeded", finished=time.time(), result=json.dumps(data, default=str), error=None)
         emit("job.succeeded", f"{row['task']} succeeded on {res.provider} in {res.duration_s}s ({len(res.artifacts)} verified artifact(s))", jid,
              provider=res.provider, accelerator=res.accelerator, duration_s=res.duration_s, artifacts=len(data["artifacts"]))
