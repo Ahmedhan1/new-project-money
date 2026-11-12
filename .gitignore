@@ -30,3 +30,6 @@ rclone.conf
 .nexus-restored*/
 .nexus-old/
 .ruff_cache/
+
+# agent worktrees (local only)
+.claude/worktrees/
