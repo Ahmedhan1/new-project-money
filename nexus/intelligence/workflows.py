@@ -45,9 +45,10 @@ def strategy_job(job: jobs.Job) -> dict:
     w = job.stage("write", write)
     doc = {"id": job.id, "report": p["report"], **w, "submitted": None}
     o = w["script"]["originality"]
-    if p.get("submit") and o["ok"] and o["grounding"]["ok"]:
+    if p.get("submit") and o["ok"] and o["grounding"]["ok"] and o.get("framing", {"ok": True})["ok"]:
         doc["submitted"] = job.stage("submit", lambda: strategy.submit(w["script"], w["storyboard"], br, style))
     db.put_doc("a3_strategy", doc, job.id)
-    issues = ([] if o["ok"] else ["originality check failed"]) + ([] if o["grounding"]["ok"] else ["grounding: " + str(o["grounding"])[:160]])
+    issues = ([] if o["ok"] else ["originality check failed"]) + ([] if o["grounding"]["ok"] else ["grounding: " + str(o["grounding"])[:160]]) + \
+        ([] if o.get("framing", {"ok": True})["ok"] else ["framing: " + str(o["framing"]["unsupported_framing"])[:160]])
     return {"strategy": job.id, "status": "ok" if not issues else "NEEDS_REVIEW", "issues": issues,
             "production_job": (doc["submitted"] or {}).get("job")}

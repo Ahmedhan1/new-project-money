@@ -39,6 +39,23 @@ def originality(script: dict, style: dict | None = None, reference_texts: list[s
             "rule": "no do_not_copy phrase; at most 5 % of 6-word sequences shared with any reference transcript"}
 
 
+SENSATIONAL = re.compile(r"\b(secret|secrets|shocking|nobody (?:knows|tells)|you won'?t believe|mind[- ]blowing|hidden truth|"
+                         r"they don'?t want you|the truth about|insane|unbelievable|conspiracy|exposed)\b", re.I)
+
+
+def framing(script: dict, brief: dict | None) -> dict:
+    """Clickbait framing the facts do not support (found on a real run: 'the dam has a secret' with no secret in the
+    research). A sensational word is allowed only when the same word occurs in a sourced claim."""
+    corpus = " ".join(c.get("text", "") for c in (brief or {}).get("claims", [])).lower()
+    hits = []
+    for where, text in [("title", script.get("title", "")), ("hook", script.get("hook", ""))] + \
+            [(f"scene {i + 1}", s.get("narration", "")) for i, s in enumerate(script.get("scenes", []))]:
+        for m in SENSATIONAL.finditer(text or ""):
+            if m.group(0).lower() not in corpus:
+                hits.append({"where": where, "phrase": m.group(0)})
+    return {"ok": not hits, "unsupported_framing": hits, "rule": "no sensational framing unless a sourced claim says it"}
+
+
 def grounding(script: dict, brief: dict | None) -> dict:
     """Every number in the narration must appear in a claim of the research brief; claims cited must exist."""
     if not brief:
@@ -102,7 +119,8 @@ def write_script(topic: str, brief: dict | None = None, style: dict | None = Non
     doc = C.make("ContentScript", id=C.new_id("scr"), title=str(body["title"])[:90], language=language,
                  scenes=[{k: s.get(k) for k in ("purpose", "narration", "visual", "claim_ids")} for s in body["scenes"]],
                  brief_id=(brief or {}).get("id"), style_id=st.get("id"), sources=sorted(set(map(str, sources))),
-                 originality={**orig, "grounding": grounding(body, brief), "written_by": how, "hook": body.get("hook", "")})
+                 originality={**orig, "grounding": grounding(body, brief), "framing": framing(body, brief), "written_by": how,
+                              "hook": body.get("hook", "")})
     return doc
 
 
@@ -138,8 +156,8 @@ def production_job(script: dict, board: dict, brief: dict | None = None, style: 
 
 def submit(script: dict, board: dict, brief: dict | None = None, style: dict | None = None, require_checks: bool = True) -> dict:
     o = script["originality"]
-    if require_checks and not (o["ok"] and o["grounding"]["ok"]):
-        raise ValueError(f"script not approved for production: originality={o['ok']} grounding={o['grounding']}")
+    if require_checks and not (o["ok"] and o["grounding"]["ok"] and o.get("framing", {"ok": True})["ok"]):
+        raise ValueError(f"script not approved for production: originality={o['ok']} grounding={o['grounding']} framing={o.get('framing')}")
     from .. import jobs
     params = production_job(script, board, brief, style)
     return {**jobs.submit("create-from-idea", params), "params": params}

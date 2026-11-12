@@ -54,13 +54,20 @@ States: **V** verified end to end in the product · **I** implemented + tested, 
 | 7 Publishing | **Blocked** on owner OAuth: the adapter stops with the exact steps; nothing uploaded |
 | 8 Performance learning | **Blocked** on owner analytics; statistics demonstrated on a public dataset, clearly labelled |
 
-### Demo 4 detail (real run, this machine)
-Research job `job_5b44ec38c6` (Aswan High Dam, history) → strategy job `job_ed38aa3fc3`: Qwen3-4B wrote 4 scenes citing
-claim ids; originality ok (0 % shared 6-grams, no banned phrases), grounding ok (every number in a sourced claim) →
-Account 2 `create-from-idea` job submitted with the verified facts + approved direction.
-Reviewer notes on that script (why the gates are necessary but not sufficient): the hook "the dam has a secret" is
-clickbait the facts do not support (grounding checks numbers, not framing); one visual suggests "the logo of the
-Egyptian government" (an official emblem — should not be used). Both belong in a human review step before production.
+### Demo 4 detail (real run, this machine) — `docs/results/account3/demo4_strategy_to_production.json`
+Research job `job_5b44ec38c6` (Aswan High Dam, history; score 56, confidence 0.41) → strategy job `job_ed38aa3fc3`:
+Qwen3-4B wrote 4 scenes citing claim ids; originality ok (0 % shared 6-grams), grounding ok (every number sourced) →
+Account 2 `create-from-idea` job `job_2ce2cebdc1` rendered a 46.3 s video (research 24 s, script 308 s, assemble 58 s,
+render+QA 77 s) that **passed automated QA**. Frames were then inspected by eye (`demo4_frames.jpg`) and showed defects
+automated QA did not catch:
+- wrong image: an 18th-century Russian map ("Belgorod governorate 1745") for the *Aswan* Governorate — lexical match (Account 2);
+- the credits card renders as empty boxes: an Arabic name in the attribution put the whole line in an Arabic-only font (Account 2);
+- 2 of 4 scenes are plain title cards (Account 2 visuals);
+- clickbait hook "the dam has a secret", unsupported by the research (Account 3) → **fixed**: `strategy.framing` now blocks
+  submission of sensational framing that no sourced claim supports (regression test from this run);
+- Account 2 paraphrases the approved script instead of using it verbatim (integration request `create_video(script=...)`).
+Verdict: the chain research → original strategy → production works end to end; the output is not publishable without
+the Account 2 fixes above and a human review.
 
 ## Bugs found by running the integrated system (fixed, with regression tests)
 - **Deadlock**: the job runner holds the CPU lock; the research brief takes it again for the local LLM → the worker

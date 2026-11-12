@@ -1,0 +1,134 @@
+{
+ "demo": "Account 3 Demo 4 - original strategy -> Account 2 production",
+ "date": "2026-11-12",
+ "machine": "4 vCPU, 15 GB RAM, no GPU",
+ "research": {
+  "job": "job_5b44ec38c6",
+  "topic": "Aswan High Dam",
+  "score": 56.0,
+  "confidence": 0.41,
+  "claims": 20,
+  "sources": [
+   "https://en.wikipedia.org/wiki/Aswan_High_Dam",
+   "https://en.wikipedia.org/wiki/Aswan_Governorate",
+   "https://images.nasa.gov/details/iss073e0879542",
+   "https://images.nasa.gov/details/iss074e0315952",
+   "https://images.nasa.gov/details/sts083-747-026",
+   "https://images.nasa.gov/details/61a-200-0019",
+   "https://images.nasa.gov/details/s43-96-096",
+   "https://images.nasa.gov/details/iss040e105768",
+   "https://images.nasa.gov/details/STS102-303-017",
+   "https://images.nasa.gov/details/sts080-745-004",
+   "https://images.nasa.gov/details/iss012e11654"
+  ]
+ },
+ "strategy": {
+  "job": "job_ed38aa3fc3",
+  "title": "The Aswan High Dam: A Monument of Engineering and Change",
+  "written_by": "local-llamacpp/qwen3-4b-q4km",
+  "originality_ok": true,
+  "grounding": {
+   "ok": true,
+   "unsupported_numbers": [],
+   "unknown_claim_ids": []
+  },
+  "hook": "Did you know the Aswan High Dam has a secret? It's not just a dam—it's a key player in Egypt's history and future.",
+  "scenes": [
+   {
+    "purpose": "Hook and setup",
+    "narration": "This towering structure, built between 1960 and 1970, is one of the world's largest embankment dams. It was developed with Soviet help to control floods, boost irrigation, and generate power.",
+    "visual": "Aerial view of the Aswan High Dam at sunset, with a close-up of the massive concrete structure and a worker in orange gear standing near it.",
+    "claim_ids": [
+     "c9",
+     "c10",
+     "c12"
+    ]
+   },
+   {
+    "purpose": "Escalation",
+    "narration": "The dam's construction was driven by Egypt's industrialization goals, but its impact went far beyond just power. It transformed the Aswan Governorate, creating Lake Nasser and changing the region's economy and culture.",
+    "visual": "A time-lapse showing the construction of the dam, transitioning to a map highlighting Lake Nasser and the surrounding governorate.",
+    "claim_ids": [
+     "c7",
+     "c13",
+     "c6"
+    ]
+   },
+   {
+    "purpose": "Escalation",
+    "narration": "Even with its massive size, the dam is designed to last for at least 200 years. It's a testament to engineering that will stand for generations, even as it continues to shape Egypt's future.",
+    "visual": "A time-lapse of the dam's construction, followed by a slow zoom on the structure, with text overlay stating '200 years of service' in bold font.",
+    "claim_ids": [
+     "c16",
+     "c9"
+    ]
+   },
+   {
+    "purpose": "Payoff and conclusion",
+    "narration": "From controlling the Nile to powering a nation, the Aswan High Dam is more than just a structure—it's a symbol of Egypt's progress and a key part of its modern identity.",
+    "visual": "Aerial view of the dam at sunrise, with a slow zoom out to show the entire Nile River and surrounding areas, ending with the logo of the Egyptian government.",
+    "claim_ids": [
+     "c1",
+     "c7",
+     "c10"
+    ]
+   }
+  ],
+  "storyboard_shots": 11
+ },
+ "production": {
+  "job": "job_2ce2cebdc1",
+  "account2_kind": "create-from-idea",
+  "stages": {
+   "project": 0.002,
+   "research": 24.174,
+   "script": 307.689,
+   "assemble": 57.793,
+   "render-qa": 76.635
+  },
+  "result": {
+   "status": "PASSED_AUTOMATED_CHECKS",
+   "issues": [],
+   "title": "The Aswan High Dam: A Monument of Engineering and Change"
+  },
+  "duration_s": 46.33,
+  "final_narration": [
+   "Did you know the Aswan High Dam has a secret? It's not just a dam—it's a key player in Egypt's history and future.",
+   "Built between 1960 and 1970, this structure is one of the world's largest embankment dams. Developed with Soviet help, it controls floods, boosts irrigation, and generates power.",
+   "The dam created Lake Nasser, transforming the Aswan Governorate. This vast area, covering 62,726 square kilometres, now shapes Egypt's economy and culture.",
+   "Designed to last at least 200 years, the dam stands as a testament to engineering. From controlling the Nile to powering a nation, it's a symbol of Egypt's progress."
+  ],
+  "credits": [
+   "\"Belgorod governorate 1745\" - public domain (CC0). Source: https://commons.wikimedia.org/wiki/File:Belgorod_governorate_1745.jpg",
+   "\"Aswan High Dam-1\" by شرف الدين, licensed CC BY-SA 3.0. Source: https://commons.wikimedia.org/wiki/File:Aswan_High_Dam-1.jpg"
+  ]
+ },
+ "inspection": {
+  "frames": "docs/results/account3/demo4_frames.jpg (one frame every 6 s)",
+  "automated_qa": "PASSED_AUTOMATED_CHECKS",
+  "defects_found_by_eye": [
+   {
+    "defect": "wrong image: 18th-century Russian map 'Belgorod governorate 1745' illustrates the Aswan Governorate (lexical match on 'governorate')",
+    "owner": "Account 2 (create/assets image search)",
+    "note": "session-3 patch in docs/handoff has a title-relevance gate for this"
+   },
+   {
+    "defect": "credits card renders as tofu boxes: attribution contains an Arabic name, so the whole line was set in an Arabic-only font",
+    "owner": "Account 2 (timeline/text font selection for mixed scripts)"
+   },
+   {
+    "defect": "2 of 4 scenes are plain title cards (no picture found)",
+    "owner": "Account 2 (visuals)"
+   },
+   {
+    "defect": "clickbait hook 'the dam has a secret' unsupported by the research",
+    "owner": "Account 3",
+    "fix": "strategy.framing gate added (blocks submission); regression test from this run"
+   },
+   {
+    "defect": "Account 2 re-writes the narration from the notes; the approved Account 3 script is paraphrased, not used verbatim",
+    "owner": "Account 2 integration request: create_video(script=...)"
+   }
+  ]
+ }
+}

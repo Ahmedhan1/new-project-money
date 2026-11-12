@@ -59,3 +59,14 @@ def test_router_script_is_schema_validated(home, monkeypatch):
     monkeypatch.setattr("nexus.intelligence.model_router.complete", fake)
     s = strategy.write_script("batteries", BRIEF, STYLE, scenes=3, privacy="private")
     assert calls == [("scriptwriting", "private", ["title", "hook", "scenes"])] and s["originality"]["written_by"] == "p/m"
+
+
+
+def test_clickbait_framing_blocks_production_unless_sourced(home):
+    """Real run 2026-11-12: 'Did you know the Aswan High Dam has a secret?' passed originality + grounding."""
+    s = {"title": "The Secret Dam", "hook": "Did you know the dam has a secret?", "scenes": [{"narration": "Built between 1960 and 1970."}]}
+    f = strategy.framing(s, BRIEF)
+    assert not f["ok"] and {h["where"] for h in f["unsupported_framing"]} == {"title", "hook"}
+    sourced = {"claims": [{"id": "c1", "text": "The vault kept a secret archive until 1990."}]}
+    assert strategy.framing({"title": "x", "hook": "The archive had a secret.", "scenes": []}, sourced)["ok"]
+    assert strategy.framing({"title": "Why batteries change solar", "hook": "Why does noon matter at 8 pm?", "scenes": []}, BRIEF)["ok"]

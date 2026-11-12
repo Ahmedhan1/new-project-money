@@ -63,3 +63,5 @@ All six work streams are merged into `work/account-3-intelligence-growth`. Featu
 | 2 | Consume `CreativeStyleProfile` via `creators.to_account2_reference_style()` in the director | style transfer |
 | 2 | Apply `production` overrides from accepted `GrowthRecommendation`s only after owner acceptance | growth loop |
 | 2 | Render `LocalizationManifest` dubbing lines (voices are licence/consent-gated on our side) | dubbing |
+| 2 | Image relevance gate in create/assets (Demo 4: "Belgorod governorate 1745" map shown for the Aswan Governorate) | wrong visuals pass QA |
+| 2 | Mixed-script text in overlays/credits: pick a font per run, not per line (Demo 4: credits rendered as tofu) | unreadable credits |
