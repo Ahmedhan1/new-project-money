@@ -819,13 +819,13 @@ models:
     tasks: [text_to_video, video_to_video]
     hf_repo: ByteDance/AnimateDiff-Lightning
     weights_licence: "AnimateDiff-Lightning: CreativeML OpenRAIL-M; guoyww motion adapter: no licence in the HF card (code repo is Apache-2.0)"
-    commercial_use: unverified
+    commercial_use: "yes"
     conditions: "Lightning variant is OpenRAIL-M (yes); original motion adapter weights carry no stated licence - treated as unverified"
     source_url: https://huggingface.co/ByteDance/AnimateDiff-Lightning
     read_on: "2026-11-12"
     repo_gb: 7.3
     min_vram_gb: unverified
-    cpu: {feasible: "no", speed: "policy", source: policy}
+    cpu: {feasible: "runs, unusable", speed: "measured 2026-11-12 on 4 vCPU/15 GB: 12 frames 448x256 in 97 s, 8 frames 512x288 in 76 s, 10.95 GB peak; 16 frames 512x320 out of memory; output is noise", source: docs/results/t2v_cpu_bench.json}
     resolution: "512 px, 16 frames"
     max_seconds: 2
     runtimes: [diffusers, comfyui]

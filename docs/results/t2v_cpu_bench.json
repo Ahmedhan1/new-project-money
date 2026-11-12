@@ -1,0 +1,46 @@
+{
+ "date": "2026-11-12",
+ "torch": "2.15.0+cpu",
+ "threads": 4,
+ "device": "cpu",
+ "dtype": "float32",
+ "download_seconds": 0.6,
+ "motion_module_bytes": 907702248,
+ "load_seconds": 13.2,
+ "clips": [
+  {
+   "prompt": "waves rolling onto a rocky beach at sunset, cinematic photograph",
+   "seed": 7,
+   "w": 448,
+   "h": 256,
+   "frames": 12,
+   "seconds": 97.2,
+   "file": "t2v_0.mp4",
+   "fps": 8,
+   "peak_rss_gb": 10.95
+  },
+  {
+   "prompt": "an astronaut walking slowly inside a dark lava tube cave with a helmet lamp, cinematic",
+   "seed": 11,
+   "w": 512,
+   "h": 288,
+   "frames": 8,
+   "seconds": 75.9,
+   "file": "t2v_1.mp4",
+   "fps": 8,
+   "peak_rss_gb": 10.95
+  }
+ ],
+ "total_seconds": 193.1,
+ "model": "AnimateDiff-Lightning 4-step (ByteDance, CreativeML OpenRAIL-M - card read 2026-11-12) motion module on SD 1.5 (OpenRAIL-M), diffusers 0.43, fp32 CPU, VAE slicing",
+ "verdict": "NOT USABLE: both clips are over-saturated noise with no coherent subject (see t2v_cpu_strip.jpg). 16 frames at 512x320 ran out of the 15 GB RAM (OOM); 8-12 frames at reduced resolution fit (10.95 GB peak) but are outside what the motion module was trained on.",
+ "conclusion": "Generated video is not feasible on this 4-vCPU / 15 GB / no-GPU machine at a usable quality. Needs a GPU (Wan 2.1 T2V 1.3B ~8 GB VRAM) via the owner's machine or an authorised free GPU (GEN-2).",
+ "attempts": [
+  {
+   "frames": 16,
+   "w": 512,
+   "h": 320,
+   "result": "killed by the kernel (out of memory)"
+  }
+ ]
+}
