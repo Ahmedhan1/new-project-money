@@ -6,7 +6,7 @@
    "errors": [],
    "notes": [],
    "buttons": 6,
-   "ms": 65
+   "ms": 60
   },
   "accounts": {
    "title": "Connected accounts",
@@ -16,21 +16,21 @@
     "Compute service (remote workers: Kaggle, Colab handoff, user GPU) is not installed in this build: /api/v1/compute is not mounted."
    ],
    "buttons": 1,
-   "ms": 635
+   "ms": 652
   },
   "notifications": {
    "title": "Notifications",
    "errors": [],
    "notes": [],
    "buttons": 3,
-   "ms": 68
+   "ms": 84
   },
   "scheduler": {
    "title": "Scheduler",
    "errors": [],
    "notes": [],
    "buttons": 8,
-   "ms": 69
+   "ms": 75
   },
   "jobs": {
    "title": "Job queue",
@@ -39,21 +39,21 @@
     "Compute service (remote workers: Kaggle, Colab handoff, user GPU) is not installed in this build: /api/v1/compute is not mounted. The list below is read from th"
    ],
    "buttons": 0,
-   "ms": 63
+   "ms": 71
   },
   "library": {
    "title": "Media library",
    "errors": [],
    "notes": [],
    "buttons": 0,
-   "ms": 66
+   "ms": 67
   },
   "review": {
    "title": "Review & approval",
    "errors": [],
    "notes": [],
    "buttons": 1,
-   "ms": 42
+   "ms": 41
   },
   "compute": {
    "title": "Compute providers",
@@ -62,7 +62,7 @@
     "Compute service (remote workers: Kaggle, Colab handoff, user GPU) is not installed in this build: /api/v1/compute is not mounted."
    ],
    "buttons": 0,
-   "ms": 74
+   "ms": 58
   },
   "storage": {
    "title": "Drive & storage",
@@ -71,35 +71,35 @@
     "Storage service (Google Drive A/B/C, transfers, ingest) is not installed in this build: /api/v1/storage is not mounted."
    ],
    "buttons": 0,
-   "ms": 66
+   "ms": 67
   },
   "health": {
    "title": "Provider health",
    "errors": [],
    "notes": [],
    "buttons": 0,
-   "ms": 66
+   "ms": 68
   },
   "resources": {
    "title": "Resource monitor",
    "errors": [],
    "notes": [],
    "buttons": 0,
-   "ms": 257
+   "ms": 250
   },
   "logs": {
    "title": "Logs",
    "errors": [],
    "notes": [],
    "buttons": 1,
-   "ms": 62
+   "ms": 66
   },
   "checkpoints": {
    "title": "Checkpoints",
    "errors": [],
    "notes": [],
    "buttons": 0,
-   "ms": 65
+   "ms": 67
   },
   "security": {
    "title": "Security",
@@ -117,7 +117,7 @@
    "errors": [],
    "notes": [],
    "buttons": 1,
-   "ms": 67
+   "ms": 65
   }
  },
  "page_errors": [],
@@ -156,15 +156,15 @@
  "screenshots": [
   {
    "file": "studio_scheduler.png",
-   "bytes": 152571
+   "bytes": 152376
   },
   {
    "file": "studio_library.png",
-   "bytes": 97596
+   "bytes": 97464
   },
   {
    "file": "studio_dashboard.png",
-   "bytes": 153098
+   "bytes": 153123
   },
   {
    "file": "studio_mobile_light.png",
@@ -201,7 +201,7 @@
   "bg": "rgb(245, 247, 251)"
  },
  "after_logout_status": 401,
- "seconds": 4.0,
+ "seconds": 4.5,
  "server_tracebacks": 0,
  "fixtures": "remote_jobs rows with provider 'fixture', two checkpoints, one failed-job event, one info notification, and a local ffmpeg-made thumbnail + 2 s master; everything else is live server state",
  "date": "2026-11-12"
