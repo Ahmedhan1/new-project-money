@@ -23,7 +23,7 @@ def submit(manifest_id: str, max_retries: int = engine.MAX_ATTEMPTS) -> dict:
     return jobs.submit(KIND, {"manifest_id": manifest_id}, project_id=m["project_id"], max_retries=max_retries)
 
 
-@jobs.handler(KIND)
+@jobs.handler(KIND, heavy=False)  # network-bound: never blocks renders
 def run(job) -> dict:
     mid = job.params["manifest_id"]
     m = engine.get(mid)

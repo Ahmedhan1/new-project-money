@@ -32,9 +32,13 @@ STALE_S = 30.0
 ACTIVE = ("queued", "running")
 
 
-def handler(kind: str):
+LIGHT: set[str] = set()  # network-bound kinds (uploads, API polling) that must not wait for the CPU-heavy lock
+
+
+def handler(kind: str, heavy: bool = True):
     def deco(fn):
         HANDLERS[kind] = fn
+        (LIGHT.discard if heavy else LIGHT.add)(kind)
         return fn
     return deco
 
@@ -228,8 +232,11 @@ def run_job(job: Job) -> str:
         fn = HANDLERS.get(job.kind)
         if fn is None:
             raise LookupError(f"no handler registered for job kind '{job.kind}'")
-        with heavy_lock():
+        if job.kind in LIGHT:
             result = fn(job)
+        else:
+            with heavy_lock():
+                result = fn(job)
         db.execute("UPDATE jobs SET status='done', progress=1, finished=?, result=? WHERE id=?",
                    (time.time(), json.dumps(result, default=str, ensure_ascii=False), job.id))
         job.log("job done")

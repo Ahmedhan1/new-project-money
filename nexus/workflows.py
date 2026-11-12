@@ -319,3 +319,7 @@ def deliver_(job: jobs.Job) -> dict:
     return job.stage("render-check-package", lambda: publish.deliver(p, tl, a["platforms"], a.get("title") or p.name,
                                                                      a.get("description", ""), a.get("lang") or tl.get("lang", "en"),
                                                                      analysis_by_src=_analysis(p) or None))
+
+
+# Account 3 job kinds (registered by import): publish-upload
+from .intelligence.publishing import jobs_handler as _a3_publish  # noqa: E402,F401

@@ -65,13 +65,13 @@ def provider_settings(pid: str) -> dict:
 
 
 def api_key(pid: str) -> str | None:
-    """Env NEXUS_KEY_<ID>, then Account 1's vault when present, then NEXUS_HOME/secrets/<id>.key (never in Git)."""
+    """Env NEXUS_KEY_<ID>, then Account 1's vault ("ai.<id>") when present, then NEXUS_HOME/secrets/<id>.key (never in Git)."""
     env = os.environ.get("NEXUS_KEY_" + pid.upper().replace("-", "_"))
     if env:
         return env
     try:
         from ... import vault  # Account 1 (work/account-1-cloud-platform)
-        v = vault.get(f"ai/{pid}")  # type: ignore[attr-defined]
+        v = vault.get(f"ai.{pid}")  # type: ignore[attr-defined]  # vault names: [a-z0-9_.-]
         if v:
             return v
     except Exception:
@@ -110,7 +110,7 @@ def eligibility(entry: dict, privacy: str) -> tuple[bool, str]:
         if not s.get("authorized"):
             return False, f"{pid}: not authorised by the owner (settings.json ai_providers.{pid}.authorized)"
         if not api_key(pid):
-            return False, f"{pid}: no API key (env NEXUS_KEY_{pid.upper().replace('-', '_')} or vault ai/{pid})"
+            return False, f"{pid}: no API key (env NEXUS_KEY_{pid.upper().replace('-', '_')} or vault ai.{pid})"
         suffix = entry.get("free_model_suffix")
         if suffix and not entry["model"].endswith(suffix):
             return False, f"{pid}: {entry['model']} is not a free variant"

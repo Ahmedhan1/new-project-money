@@ -42,7 +42,7 @@ Rules enforced by `validate()`: confidence ∈ [0,1]; evidence items need a sour
    `nexus/cloud/contracts.py` (it already has `nexus/cloud/`), Account 2 keeps `nexus/contracts/`. Account 3 stays out of
    it (`nexus/intelligence/contracts.py`).
 2. Account 1's `AIProviderCapability/v1` expects Account 3 to declare providers — implemented by
-   `contracts.to_account1_ai_capability()`; the router reads keys from Account 1's vault (`vault.get("ai/<provider>")`)
+   `contracts.to_account1_ai_capability()`; the router reads keys from Account 1's vault (`vault.get("ai.<provider>")`)
    when that module is present, otherwise env `NEXUS_KEY_<PROVIDER>`.
 3. Remote LLM execution on Account 1's Kaggle GPU: an owner-run OpenAI-compatible server (vLLM/SGLang/llama.cpp server)
    registers as provider `owner-openai-compatible` (`settings.json ai_providers.owner-openai-compatible.base_url` + models

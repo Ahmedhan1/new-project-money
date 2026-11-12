@@ -288,3 +288,9 @@ def test_weak_hashtags_dropped_and_description_fits(home):
     assert d["ok"] and len(d["description"]) <= 160
     assert "#When" not in d["tags"]
     assert creds.env_name("pub.youtube.main.refresh_token") == "NEXUS_PUB_YOUTUBE_MAIN_REFRESH_TOKEN"
+
+
+def test_upload_job_is_registered_and_light(home):
+    from nexus import jobs, workflows  # noqa: F401
+    assert "publish-upload" in jobs.HANDLERS and "publish-upload" in jobs.LIGHT          # uploads never wait for renders
+    assert "render" not in jobs.LIGHT and "create-from-idea" not in jobs.LIGHT
