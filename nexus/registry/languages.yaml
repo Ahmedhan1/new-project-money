@@ -1,0 +1,758 @@
+# NEXUS language packs. One entry per BCP-47-style tag. Adding a language = one pack entry here (+ fonts on the
+# machine, + optionally a voice). Format, rules and the licence table: docs/LANGUAGES.md.
+#
+# Licence facts were read on 2026-11-12 from the sources cited per entry. `commercial_use` is a QUOTED string:
+#   "yes"         the voice model card AND its training dataset (and the base model it was fine-tuned from) allow it
+#   "no"          a licence in the chain forbids commercial use (e.g. CC BY-NC-SA)
+#   "unverified"  the card says "Unknown"/"See URL", the URL has no licence, or a fine-tuning base model is research-only
+# A licence is never upgraded by assumption. NEXUS never selects a voice whose commercial_use != "yes" unless the
+# caller passes allow_unlicensed_voice=True, and the choice is then reported in the language QA.
+schema_version: 1
+read_on: "2026-11-12"
+
+sources:
+  piper_voices_index: "https://huggingface.co/rhasspy/piper-voices/resolve/main/voices.json (read 2026-11-12)"
+  piper_model_cards: "https://huggingface.co/rhasspy/piper-voices/tree/main/<lang>/<locale>/<name>/<quality>/MODEL_CARD (each read 2026-11-12)"
+  piper_repo_licence: "rhasspy/piper-voices repo metadata: MIT (the per-voice DATASET licence is what limits use)"
+  ohf_voice_datasets: "https://github.com/OHF-Voice/voice-datasets - README: 'These datasets are licensed under CC0' (read 2026-11-12)"
+  hifi_tts: "https://www.openslr.org/109/ - Hi-Fi TTS licence CC BY 4.0 (read 2026-11-12); base model of several Piper 1.5 voices"
+  lessac_base: "https://www.cstr.ed.ac.uk/projects/blizzard/2013/lessac_blizzard2013/license.html - Blizzard 2013 Lessac licence (research use); voices fine-tuned from Piper's lessac checkpoint are marked unverified"
+  madlad_card: "https://huggingface.co/google/madlad400-3b-mt (Apache-2.0; 'research models have not been assessed for production usecases'; read 2026-11-12)"
+  madlad_vocab: "https://huggingface.co/Nextcloud-AI/madlad400-3b-mt-ct2-int8/resolve/main/shared_vocabulary.json - 492 <2xx> target tokens (checked 2026-11-12)"
+  whisper: "https://github.com/openai/whisper (MIT; 99-language tokenizer list), weights via Systran/faster-whisper-small (MIT)"
+  subtitle_norms: "editorial defaults in line with common streaming/broadcast practice (42 chars x 2 lines for alphabetic scripts, ~16/13 chars for Chinese/Japanese); NOT individually re-verified against a distributor guide - check yours"
+
+# MADLAD-400 target tokens that were verified to exist in the model vocabulary (2026-11-12). Pack mt.target must be one.
+# Checked and ABSENT: afb (Gulf Arabic), acm, apc, ajp, aeb, ars, acw, ayl, shu, yue.
+mt_supported_targets: [en, de, fr, ar, arz, ary, zh, zh_Hant, ru, hi, es, pt, tr, id, ja]
+
+aliases:
+  ar-msa: ar
+  arb: ar
+  ar-eg: ar-EG
+  arz: ar-EG
+  egyptian: ar-EG
+  ar-gulf: ar-Gulf
+  afb: ar-Gulf
+  ar-kw: ar-Gulf
+  ar-ae: ar-Gulf
+  ar-sa: ar-Gulf
+  ar-qa: ar-Gulf
+  ar-bh: ar-Gulf
+  ar-om: ar-Gulf
+  zh-cn: zh
+  zh-hans: zh
+  pt-br: pt
+  en-us: en
+  en-gb: en
+  de-de: de
+  fr-fr: fr
+  es-es: es
+
+# Fonts: ordered candidate files per script set. {WINFONTS} = %WINDIR%\Fonts, {USERFONTS} = NEXUS_HOME/assets/fonts
+# (drop a font there to add coverage), "#n" = face index inside a .ttc. The first existing file that covers the
+# pack's sample text wins; config.font_report(tag) says which one and what is missing.
+font_sets:
+  latin:
+    files:
+      - "{USERFONTS}/NotoSans-Bold.ttf"
+      - /usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf
+      - /usr/share/fonts/truetype/noto/NotoSans-Bold.ttf
+      - /usr/share/fonts/truetype/freefont/FreeSansBold.ttf
+      - /usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf
+      - "{WINFONTS}/segoeuib.ttf"
+      - "{WINFONTS}/arialbd.ttf"
+      - /System/Library/Fonts/Supplemental/Arial Bold.ttf
+      - /Library/Fonts/Arial Bold.ttf
+    families: [DejaVu Sans, Noto Sans, FreeSans, Segoe UI, Arial]
+  arabic:
+    files:
+      - "{USERFONTS}/NotoNaskhArabic-Bold.ttf"
+      - /usr/share/fonts/truetype/noto/NotoNaskhArabic-Bold.ttf
+      - /usr/share/fonts/truetype/noto/NotoSansArabic-Bold.ttf
+      - /usr/share/fonts/opentype/noto/NotoNaskhArabic-Bold.otf
+      - /usr/share/fonts/truetype/kacst/KacstOne-Bold.ttf
+      - /usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf
+      - /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
+      - /usr/share/fonts/truetype/freefont/FreeSerif.ttf
+      - "{WINFONTS}/tahomabd.ttf"
+      - "{WINFONTS}/segoeuib.ttf"
+      - "{WINFONTS}/arialbd.ttf"
+      - /System/Library/Fonts/GeezaPro.ttc
+      - /System/Library/Fonts/Supplemental/GeezaPro.ttc
+    families: [Noto Naskh Arabic, Noto Sans Arabic, DejaVu Sans, Tahoma, Segoe UI, Arial, Geeza Pro]
+  cjk_sc:
+    files:
+      - "{USERFONTS}/NotoSansSC-Bold.otf"
+      - "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc#2"
+      - "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc#2"
+      - /usr/share/fonts/truetype/wqy/wqy-zenhei.ttc
+      - /usr/share/fonts/truetype/wqy/wqy-microhei.ttc
+      - /usr/share/fonts/truetype/arphic/uming.ttc
+      - "{WINFONTS}/msyhbd.ttc"
+      - "{WINFONTS}/msyh.ttc"
+      - "{WINFONTS}/simhei.ttf"
+      - /System/Library/Fonts/PingFang.ttc
+      - /System/Library/Fonts/STHeiti Medium.ttc
+    families: [Noto Sans CJK SC, WenQuanYi Zen Hei, WenQuanYi Micro Hei, Microsoft YaHei, SimHei, PingFang SC]
+  cjk_ja:
+    files:
+      - "{USERFONTS}/NotoSansJP-Bold.otf"
+      - "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc#0"
+      - "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc#0"
+      - /usr/share/fonts/opentype/ipafont-gothic/ipag.ttf
+      - /usr/share/fonts/truetype/fonts-japanese-gothic.ttf
+      - /usr/share/fonts/truetype/takao-gothic/TakaoPGothic.ttf
+      - /usr/share/fonts/truetype/wqy/wqy-zenhei.ttc
+      - "{WINFONTS}/YuGothB.ttc"
+      - "{WINFONTS}/meiryob.ttc"
+      - "{WINFONTS}/msgothic.ttc"
+      - /System/Library/Fonts/Hiragino Sans GB.ttc
+    families: [Noto Sans CJK JP, IPAGothic, TakaoPGothic, Yu Gothic, Meiryo, MS Gothic, Hiragino Sans]
+  devanagari:
+    files:
+      - "{USERFONTS}/NotoSansDevanagari-Bold.ttf"
+      - /usr/share/fonts/truetype/noto/NotoSansDevanagari-Bold.ttf
+      - /usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf
+      - /usr/share/fonts/opentype/noto/NotoSansDevanagari-Bold.otf
+      - /usr/share/fonts/truetype/lohit-devanagari/Lohit-Devanagari.ttf
+      - /usr/share/fonts/truetype/freefont/FreeSans.ttf
+      - /usr/share/fonts/truetype/freefont/FreeSerif.ttf
+      - "{WINFONTS}/NirmalaB.ttf"
+      - "{WINFONTS}/Nirmala.ttf"
+      - "{WINFONTS}/mangal.ttf"
+      - /System/Library/Fonts/Kohinoor.ttc
+      - /System/Library/Fonts/Supplemental/DevanagariMT.ttc
+    families: [Noto Sans Devanagari, Lohit Devanagari, FreeSans, Nirmala UI, Mangal, Kohinoor Devanagari]
+  last_resort:
+    # Covers almost the whole BMP but has no OpenType shaping for Arabic/Devanagari: legible boxes-free fallback only.
+    last_resort: true
+    files:
+      - /usr/share/fonts/opentype/unifont/unifont.otf
+      - /usr/share/fonts/truetype/unifont/unifont.ttf
+    families: [Unifont]
+
+subtitle_defaults:
+  max_chars_per_line: 42
+  max_lines: 2
+  max_cps: 17          # characters per second incl. spaces
+  min_duration: 0.8
+  max_duration: 7.0
+  min_gap: 0.08
+  max_extend: 0.8      # how far a cue may run past the end of its speech span to stay readable
+  line_break: space    # space = break between words; char = break between characters/segments (CJK)
+  break_after: ".!?…;:,"
+  punctuation: ".,!?;:…\"'()-"
+  numerals: latn
+  karaoke: true        # word-level highlight is meaningful (word timings exist / words are space separated)
+
+packs:
+  en:
+    name: English
+    native_name: English
+    script: Latn
+    direction: ltr
+    status: proven            # proven = used in an e2e test before (Test C); implemented = pack + unit tests only
+    sample: "The quick brown fox jumps over the lazy dog."
+    fonts: [latin, last_resort]
+    asr: {model: whisper-small, code: en, licence: MIT, commercial_use: "yes"}
+    mt: {model: mt-madlad400-3b, target: en, licence: "Apache-2.0", commercial_use: "yes", length_ratio: [0.5, 1.6]}
+    tts:
+      voices:
+        - id: en_US-joe-medium
+          engine: piper
+          path: en/en_US/joe/medium
+          gender: male
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/en/en_US/joe/medium/MODEL_CARD
+          licence: "dataset CC0 (OHF-Voice/voice-datasets); base model rdh (CC0 per card)"
+          dataset_licence: CC0
+          commercial_use: "yes"
+          card_read_on: "2026-11-12"
+        - id: en_US-ljspeech-medium
+          engine: piper
+          path: en/en_US/ljspeech/medium
+          gender: female
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/en/en_US/ljspeech/medium/MODEL_CARD
+          licence: "public domain (LJ Speech); trained from scratch"
+          dataset_licence: public domain
+          commercial_use: "yes"
+          card_read_on: "2026-11-12"
+      fallback: {engine: espeak-ng, voice: en-us, licence: "GPL-3.0 engine; generated audio is not covered by the GPL", commercial_use: "yes"}
+    subtitles: {max_cps: 20}
+    typography: {quotes: ["“", "”"]}
+    needs_native_review: false
+
+  de:
+    name: German
+    native_name: Deutsch
+    script: Latn
+    direction: ltr
+    status: proven
+    sample: "Größere Übungen für Äpfel, Öl und Straße."
+    fonts: [latin, last_resort]
+    asr: {model: whisper-small, code: de, licence: MIT, commercial_use: "yes"}
+    mt: {model: mt-madlad400-3b, target: de, licence: "Apache-2.0", commercial_use: "yes", length_ratio: [0.6, 1.45]}
+    tts:
+      voices:
+        - id: de_DE-thorsten-medium
+          engine: piper
+          path: de/de_DE/thorsten/medium
+          gender: male
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/de/de_DE/thorsten/medium/MODEL_CARD
+          licence: "dataset CC0 (Thorsten-Voice); base model rdh (CC0 per card)"
+          dataset_licence: CC0
+          commercial_use: "yes"
+          card_read_on: "2026-11-12"
+        - id: de_DE-kerstin-medium
+          engine: piper
+          path: de/de_DE/kerstin/medium
+          gender: female
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/de/de_DE/kerstin/medium/MODEL_CARD
+          licence: "dataset CC0 (OHF-Voice/voice-datasets); base model hifi_tts_92 (Hi-Fi TTS, CC BY 4.0)"
+          dataset_licence: CC0
+          base_licence: "CC BY 4.0 (attribution: Hi-Fi TTS)"
+          commercial_use: "yes"
+          card_read_on: "2026-11-12"
+      fallback: {engine: espeak-ng, voice: de, licence: "GPL-3.0 engine; generated audio is not covered by the GPL", commercial_use: "yes"}
+    subtitles: {max_cps: 17}
+    typography: {quotes: ["„", "“"], keep: "ß and umlauts are preserved (NFC); uppercase ß becomes SS (Unicode default)"}
+    needs_native_review: false
+
+  fr:
+    name: French
+    native_name: Français
+    script: Latn
+    direction: ltr
+    status: implemented
+    sample: "Où est l’élève ? « Ça va » : très bien !"
+    fonts: [latin, last_resort]
+    asr: {model: whisper-small, code: fr, licence: MIT, commercial_use: "yes"}
+    mt: {model: mt-madlad400-3b, target: fr, licence: "Apache-2.0", commercial_use: "yes", length_ratio: [0.6, 1.5]}
+    tts:
+      voices:
+        - id: fr_FR-siwis-medium
+          engine: piper
+          path: fr/fr_FR/siwis/medium
+          gender: female
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/siwis/medium/MODEL_CARD
+          licence: "dataset CC BY 4.0 (SIWIS, datashare.is.ed.ac.uk/handle/10283/2353); base hifi_tts_92 (CC BY 4.0)"
+          dataset_licence: "CC BY 4.0 - attribution required"
+          commercial_use: "yes"
+          attribution: "SIWIS French Speech Synthesis Database (CC BY 4.0); Hi-Fi TTS (CC BY 4.0)"
+          card_read_on: "2026-11-12"
+        - id: fr_FR-mls-medium
+          engine: piper
+          path: fr/fr_FR/mls/medium
+          gender: multi
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/mls/medium/MODEL_CARD
+          licence: "dataset CC BY 4.0 (Multilingual LibriSpeech, openslr.org/94); trained from scratch"
+          dataset_licence: "CC BY 4.0 - attribution required"
+          commercial_use: "yes"
+          attribution: "Multilingual LibriSpeech (CC BY 4.0)"
+          card_read_on: "2026-11-12"
+        - id: fr_FR-upmc-medium
+          engine: piper
+          path: fr/fr_FR/upmc/medium
+          gender: multi
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/upmc/medium/MODEL_CARD
+          licence: "dataset CC BY-SA 4.0; fine-tuned from the lessac voice (Blizzard 2013 research licence)"
+          dataset_licence: "CC BY-SA 4.0"
+          commercial_use: "unverified"
+          card_read_on: "2026-11-12"
+        - id: fr_FR-tom-medium
+          engine: piper
+          path: fr/fr_FR/tom/medium
+          gender: male
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/fr/fr_FR/tom/medium/MODEL_CARD
+          licence: "card: AGPLv3 (applied to a voice model; effect on generated audio not established)"
+          dataset_licence: AGPLv3
+          commercial_use: "unverified"
+          card_read_on: "2026-11-12"
+      fallback: {engine: espeak-ng, voice: fr-fr, licence: "GPL-3.0 engine; generated audio is not covered by the GPL", commercial_use: "yes"}
+    subtitles: {max_cps: 17}
+    typography: {quotes: ["«", "»"], quote_inner_space: true, space_before_high_punct: true}
+    needs_native_review: false
+
+  ar:
+    name: Modern Standard Arabic
+    native_name: العربية الفصحى
+    script: Arab
+    direction: rtl
+    status: proven
+    sample: "الطاقة الشمسية أرخص مصدر للكهرباء، أليس كذلك؟"
+    fonts: [arabic, last_resort]
+    asr: {model: whisper-small, code: ar, licence: MIT, commercial_use: "yes", note: "Whisper has one Arabic code; dialects are transcribed as 'ar'"}
+    mt: {model: mt-madlad400-3b, target: ar, licence: "Apache-2.0", commercial_use: "yes", length_ratio: [0.55, 1.35]}
+    tts:
+      voices:
+        - &kareem
+          id: ar_JO-kareem-medium
+          engine: piper
+          path: ar/ar_JO/kareem/medium
+          gender: male
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/ar/ar_JO/kareem/medium/MODEL_CARD
+          licence: "card: 'License: See URL'; dataset repo github.com/AliMokhammad/arabicttstrain has no licence file; fine-tuned from lessac (Blizzard 2013 research licence)"
+          dataset_licence: "none stated"
+          commercial_use: "unverified"
+          card_read_on: "2026-11-12"
+          note: "Only Arabic Piper voice. Jordanian/MSA-leaning accent, not Egyptian or Gulf."
+      fallback: {engine: espeak-ng, voice: ar, licence: "GPL-3.0 engine; generated audio is not covered by the GPL", commercial_use: "yes"}
+    subtitles: {max_cps: 17, numerals: arab, break_after: ".!?؟…؛:،,", punctuation: "،؛؟.!:«»()"}
+    typography: {quotes: ["«", "»"], punct_map: {",": "،", ";": "؛", "?": "؟"}}
+    needs_native_review: false
+
+  ar-EG:
+    name: Egyptian Arabic
+    native_name: العربية المصرية
+    script: Arab
+    direction: rtl
+    status: proven
+    sample: "ده بيخلّي الطاقة الشمسية أرخص مصدر للكهربا، مش كده؟"
+    fonts: [arabic, last_resort]
+    asr: {model: whisper-small, code: ar, licence: MIT, commercial_use: "yes", note: "no Egyptian-specific Whisper code"}
+    mt:
+      model: mt-madlad400-3b
+      target: arz
+      licence: "Apache-2.0"
+      commercial_use: "yes"
+      length_ratio: [0.55, 1.35]
+      note: "<2arz> exists in the MADLAD vocabulary and produced Egyptian forms in Test C; arz comes from MADLAD's noisy web data, so the rule layer below runs on top"
+    tts:
+      voices:
+        - *kareem
+      fallback: {engine: espeak-ng, voice: ar, licence: "GPL-3.0 engine; generated audio is not covered by the GPL", commercial_use: "yes"}
+    subtitles: {max_cps: 17, numerals: arab, break_after: ".!?؟…؛:،,", punctuation: "،؛؟.!:«»()"}
+    typography: {quotes: ["«", "»"], punct_map: {",": "،", ";": "؛", "?": "؟"}}
+    needs_native_review: true
+    dialect:
+      base: ar
+      variant: "Cairene (Masri)"
+      adaptation: rule-based
+      quality_statement: >-
+        Rule-based adaptation layer: MADLAD-400 output (arz, else MSA) followed by word/phrase substitutions for
+        common function words and expressions. It produces recognisably Egyptian function words, not native-quality
+        Egyptian writing: verb morphology, word order, idiom and register are mostly left as the MT produced them.
+        A native Egyptian reviewer must approve every line before publishing.
+      llm_style: |-
+        Egyptian colloquial Arabic (Masri) as spoken in Cairo, written in Arabic script only.
+        Use everyday Egyptian words, for example: ده/دي (this), مش (not), عشان (because), دلوقتي (now), إزاي (how),
+        ليه (why), كده (like this), اللي (which), أوي (very), بتاع (of), and b-prefixed present verbs such as بيحوّل، بنستخدم.
+        Example - MSA: "هذا يجعل الطاقة الشمسية أرخص مصدر للكهرباء" -> Masri: "ده بيخلّي الطاقة الشمسية أرخص مصدر للكهربا".
+      markers: [ده, دي, مش, عشان, علشان, دلوقتي, إزاي, ازاي, ليه, كده, اللي, أوي, قوي, بتاع, إحنا, احنا, كمان, بقى, لسه, عايز, فيه, زي, يعني, إيه, فين, بس, حاجة, كويس]
+      lexicon:
+        - {msa: [هذا], dialect: ده}
+        - {msa: [هذه], dialect: دي}
+        - {msa: [ذلك], dialect: ده}
+        - {msa: [تلك], dialect: دي}
+        - {msa: [هؤلاء], dialect: دول}
+        - {msa: [ليس, ليست, لسنا], dialect: مش}
+        - {msa: [لماذا], dialect: ليه}
+        - {msa: [كيف], dialect: إزاي}
+        - {msa: [ماذا], dialect: إيه}
+        - {msa: [متى], dialect: إمتى}
+        - {msa: [أين], dialect: فين}
+        - {msa: [الآن], dialect: دلوقتي}
+        - {msa: [لأن, لان], dialect: عشان}
+        - {msa: [جدا, جداً], dialect: أوي}
+        - {msa: [الذي, التي, الذين, اللذان, اللتان], dialect: اللي}
+        - {msa: [أريد], dialect: عايز}
+        - {msa: [نريد], dialect: عايزين}
+        - {msa: [يريد], dialect: عايز}
+        - {msa: [هناك], dialect: فيه}
+        - {msa: [أيضا, أيضاً], dialect: كمان}
+        - {msa: [فقط], dialect: بس}
+        - {msa: [لكن, ولكن], dialect: بس}
+        - {msa: [مثل], dialect: زي}
+        - {msa: [شيء, شيئا, شيئاً], dialect: حاجة}
+        - {msa: [جيد], dialect: كويس}
+        - {msa: [نعم], dialect: أيوه}
+        - {msa: [نحن], dialect: إحنا}
+        - {msa: [يجعل], dialect: بيخلّي}
+        - {msa: [يجعلها], dialect: بيخلّيها}
+        - {msa: [يعمل], dialect: بيشتغل}
+        - {msa: [الكهرباء], dialect: الكهربا}
+        - {msa: [هكذا], dialect: كده}
+      patterns:
+        - {match: "سوف ([يتنأ])", replace: "ه\\1", note: "future particle -> h- prefix (هيكون)"}
+      pronunciation:
+        ده: دَه
+        دي: دِي
+        دلوقتي: دِلْوَقْتِي
+        إزاي: إِزَّاي
+        عشان: عَشَان
+        أوي: أَوِي
+        كده: كِدَه
+
+  ar-Gulf:
+    name: Gulf Arabic
+    native_name: العربية الخليجية
+    script: Arab
+    direction: rtl
+    status: implemented
+    sample: "هذي الطاقة الشمسية أرخص مصدر للكهربا، صح؟"
+    fonts: [arabic, last_resort]
+    asr: {model: whisper-small, code: ar, licence: MIT, commercial_use: "yes", note: "no Gulf-specific Whisper code"}
+    mt:
+      model: mt-madlad400-3b
+      target: ar
+      licence: "Apache-2.0"
+      commercial_use: "yes"
+      length_ratio: [0.55, 1.35]
+      note: "MADLAD-400 has no Gulf Arabic target (afb/acm/ars absent from the vocabulary, checked 2026-11-12): translate to MSA, then adapt"
+    tts:
+      voices:
+        - *kareem
+      fallback: {engine: espeak-ng, voice: ar, licence: "GPL-3.0 engine; generated audio is not covered by the GPL", commercial_use: "yes"}
+    subtitles: {max_cps: 17, numerals: arab, break_after: ".!?؟…؛:،,", punctuation: "،؛؟.!:«»()"}
+    typography: {quotes: ["«", "»"], punct_map: {",": "،", ";": "؛", "?": "؟"}}
+    needs_native_review: true
+    dialect:
+      base: ar
+      variant: "Eastern Gulf (Kuwait/Bahrain/Qatar/UAE-leaning khaleeji; Saudi Najdi forms such as وش are not used)"
+      adaptation: rule-based
+      quality_statement: >-
+        Rule-based adaptation layer over MSA machine translation (no Gulf Arabic MT model exists in the stack).
+        It swaps common function words and expressions for Gulf forms; grammar, verb morphology, idiom and register
+        remain MSA-like, and Gulf varieties differ between countries. This is not native-quality Gulf writing.
+        A native Gulf reviewer must approve every line before publishing.
+      llm_style: |-
+        Gulf Arabic (khaleeji, Kuwait/Bahrain/Qatar/UAE usage), written in Arabic script only.
+        Use everyday Gulf words, for example: هذي (this, f.), شنو (what), ليش (why), شلون (how), الحين (now), وايد (very/many),
+        أبي/نبي (I/we want), مو (not), وين (where), اللي (which), زين (good), شي (thing), راح + verb (future).
+        Example - MSA: "لماذا هذه الطاقة رخيصة الآن؟" -> Gulf: "ليش هذي الطاقة رخيصة الحين؟".
+      markers: [هذي, شنو, ليش, شلون, الحين, وايد, أبي, نبي, يبي, مو, وين, اللي, زين, شي, راح, هذولا, ذاك, ذيك]
+      lexicon:
+        - {msa: [هذه], dialect: هذي}
+        - {msa: [هؤلاء], dialect: هذولا}
+        - {msa: [ذلك], dialect: ذاك}
+        - {msa: [تلك], dialect: ذيك}
+        - {msa: [ليس, ليست, لسنا], dialect: مو}
+        - {msa: [لماذا], dialect: ليش}
+        - {msa: [كيف], dialect: شلون}
+        - {msa: [ماذا], dialect: شنو}
+        - {msa: [أين], dialect: وين}
+        - {msa: [الآن], dialect: الحين}
+        - {msa: [لأن, لان], dialect: لأن}
+        - {msa: [جدا, جداً, كثيرا, كثيراً], dialect: وايد}
+        - {msa: [الذي, التي, الذين, اللذان, اللتان], dialect: اللي}
+        - {msa: [أريد], dialect: أبي}
+        - {msa: [نريد], dialect: نبي}
+        - {msa: [يريد], dialect: يبي}
+        - {msa: [هناك], dialect: فيه}
+        - {msa: [فقط], dialect: بس}
+        - {msa: [شيء, شيئا, شيئاً], dialect: شي}
+        - {msa: [جيد], dialect: زين}
+        - {msa: [نعم], dialect: إي}
+        - {msa: [نحن], dialect: احنا}
+        - {msa: [يعمل], dialect: يشتغل}
+        - {msa: [الكهرباء], dialect: الكهربا}
+        - {msa: [هكذا], dialect: جذي}
+      patterns:
+        - {match: "سوف ", replace: "راح ", note: "future particle -> raah"}
+      pronunciation:
+        الحين: الْحِين
+        وايد: وَايِد
+        شلون: شْلُون
+        ليش: لِيش
+        جذي: چِذِي
+
+  zh:
+    name: Chinese (Simplified, Mandarin)
+    native_name: 简体中文
+    script: Hans
+    direction: ltr
+    status: implemented
+    sample: "太阳能电池板把阳光直接转化为电能。"
+    fonts: [cjk_sc, last_resort]
+    asr: {model: whisper-small, code: zh, licence: MIT, commercial_use: "yes", note: "Whisper may output Traditional characters; convert if needed (no converter installed)"}
+    mt: {model: mt-madlad400-3b, target: zh, licence: "Apache-2.0", commercial_use: "yes", length_ratio: [0.15, 0.8]}
+    tts:
+      voices:
+        - id: zh_CN-chaowen-medium
+          engine: piper
+          path: zh/zh_CN/chaowen/medium
+          gender: male
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/zh/zh_CN/chaowen/medium/MODEL_CARD
+          licence: "dataset CC0 (OHF-Voice/voice-datasets); base hifi_tts_92 (CC BY 4.0); needs Piper >= 1.5 with g2pW"
+          dataset_licence: CC0
+          base_licence: "CC BY 4.0 (attribution: Hi-Fi TTS)"
+          commercial_use: "yes"
+          card_read_on: "2026-11-12"
+        - id: zh_CN-huayan-medium
+          engine: piper
+          path: zh/zh_CN/huayan/medium
+          gender: female
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/zh/zh_CN/huayan/medium/MODEL_CARD
+          licence: "card: 'License: Unknown'; fine-tuned from lessac"
+          dataset_licence: unknown
+          commercial_use: "unverified"
+          card_read_on: "2026-11-12"
+        - id: zh_CN-xiao_ya-medium
+          engine: piper
+          path: zh/zh_CN/xiao_ya/medium
+          gender: female
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/zh/zh_CN/xiao_ya/medium/MODEL_CARD
+          licence: "dataset: Data Baker BZNSYP - 'Non-commercial use'"
+          dataset_licence: non-commercial
+          commercial_use: "no"
+          card_read_on: "2026-11-12"
+      fallback: {engine: espeak-ng, voice: cmn, licence: "GPL-3.0 engine; generated audio is not covered by the GPL", commercial_use: "yes"}
+    subtitles: {max_chars_per_line: 16, max_cps: 9, line_break: char, break_after: "。！？；：，、", punctuation: "，。！？；：、“”‘’（）《》", karaoke: false}
+    typography: {quotes: ["“", "”"], full_width: true, punct_map: {",": "，", ".": "。", "!": "！", "?": "？", ":": "：", ";": "；"}}
+    needs_native_review: false
+
+  ru:
+    name: Russian
+    native_name: Русский
+    script: Cyrl
+    direction: ltr
+    status: implemented
+    sample: "Съешь же ещё этих мягких французских булок, да выпей чаю."
+    fonts: [latin, last_resort]
+    asr: {model: whisper-small, code: ru, licence: MIT, commercial_use: "yes"}
+    mt: {model: mt-madlad400-3b, target: ru, licence: "Apache-2.0", commercial_use: "yes", length_ratio: [0.6, 1.5]}
+    tts:
+      voices:
+        - id: ru_RU-denis-medium
+          engine: piper
+          path: ru/ru_RU/denis/medium
+          gender: male
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/ru/ru_RU/denis/medium/MODEL_CARD
+          licence: "dataset CC0 (OHF-Voice/voice-datasets); base model rdh (CC0 per card)"
+          dataset_licence: CC0
+          commercial_use: "yes"
+          card_read_on: "2026-11-12"
+        - id: ru_RU-dmitri-medium
+          engine: piper
+          path: ru/ru_RU/dmitri/medium
+          gender: male
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/ru/ru_RU/dmitri/medium/MODEL_CARD
+          licence: "dataset CC0; fine-tuned from lessac (Blizzard 2013 research licence)"
+          dataset_licence: CC0
+          commercial_use: "unverified"
+          card_read_on: "2026-11-12"
+        - id: ru_RU-irina-medium
+          engine: piper
+          path: ru/ru_RU/irina/medium
+          gender: female
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/ru/ru_RU/irina/medium/MODEL_CARD
+          licence: "card: 'License: Unknown' (RHVoice data)"
+          dataset_licence: unknown
+          commercial_use: "unverified"
+          card_read_on: "2026-11-12"
+        - id: ru_RU-ruslan-medium
+          engine: piper
+          path: ru/ru_RU/ruslan/medium
+          gender: male
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/ru/ru_RU/ruslan/medium/MODEL_CARD
+          licence: "dataset CC BY-NC-SA 4.0 (RUSLAN corpus)"
+          dataset_licence: CC BY-NC-SA 4.0
+          commercial_use: "no"
+          card_read_on: "2026-11-12"
+      fallback: {engine: espeak-ng, voice: ru, licence: "GPL-3.0 engine; generated audio is not covered by the GPL", commercial_use: "yes"}
+    subtitles: {max_cps: 17}
+    typography: {quotes: ["«", "»"], keep: "ё is preserved"}
+    needs_native_review: false
+
+  hi:
+    name: Hindi
+    native_name: हिन्दी
+    script: Deva
+    direction: ltr
+    status: implemented
+    sample: "सौर ऊर्जा बिजली का सबसे सस्ता स्रोत है।"
+    fonts: [devanagari, last_resort]
+    render: ass_if_no_raqm    # Devanagari conjuncts need HarfBuzz: Pillow+libraqm or libass
+    asr: {model: whisper-small, code: hi, licence: MIT, commercial_use: "yes"}
+    mt: {model: mt-madlad400-3b, target: hi, licence: "Apache-2.0", commercial_use: "yes", length_ratio: [0.6, 1.6]}
+    tts:
+      voices:
+        - id: hi_IN-rohan-medium
+          engine: piper
+          path: hi/hi_IN/rohan/medium
+          gender: male
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/hi/hi_IN/rohan/medium/MODEL_CARD
+          licence: "dataset IIT Madras IndicTTS (custom licence PDF, not reviewed here); fine-tuned from lessac"
+          dataset_licence: "IndicTTS licence (https://www.iitm.ac.in/donlab/indictts/downloads/license.pdf) - unread"
+          commercial_use: "unverified"
+          card_read_on: "2026-11-12"
+        - id: hi_IN-pratham-medium
+          engine: piper
+          path: hi/hi_IN/pratham/medium
+          gender: male
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/hi/hi_IN/pratham/medium/MODEL_CARD
+          licence: "CC BY-NC-SA 4.0"
+          dataset_licence: CC BY-NC-SA 4.0
+          commercial_use: "no"
+          card_read_on: "2026-11-12"
+        - id: hi_IN-priyamvada-medium
+          engine: piper
+          path: hi/hi_IN/priyamvada/medium
+          gender: female
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/hi/hi_IN/priyamvada/medium/MODEL_CARD
+          licence: "CC BY-NC-SA 4.0"
+          dataset_licence: CC BY-NC-SA 4.0
+          commercial_use: "no"
+          card_read_on: "2026-11-12"
+      fallback: {engine: espeak-ng, voice: hi, licence: "GPL-3.0 engine; generated audio is not covered by the GPL", commercial_use: "yes"}
+    subtitles: {max_cps: 17, break_after: "।॥.!?…;:,", punctuation: "।॥,?!:;\"'()-"}
+    typography: {quotes: ["“", "”"], sentence_end: "।"}
+    needs_native_review: false
+
+  es:
+    name: Spanish
+    native_name: Español
+    script: Latn
+    direction: ltr
+    status: implemented
+    sample: "¿Dónde está el niño? ¡Aquí, señor!"
+    fonts: [latin, last_resort]
+    asr: {model: whisper-small, code: es, licence: MIT, commercial_use: "yes"}
+    mt: {model: mt-madlad400-3b, target: es, licence: "Apache-2.0", commercial_use: "yes", length_ratio: [0.6, 1.5]}
+    tts:
+      voices:
+        - id: es_ES-davefx-medium
+          engine: piper
+          path: es/es_ES/davefx/medium
+          gender: male
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/es/es_ES/davefx/medium/MODEL_CARD
+          licence: "dataset CC0 (OHF-Voice/voice-datasets); base model rdh (CC0 per card)"
+          dataset_licence: CC0
+          commercial_use: "yes"
+          card_read_on: "2026-11-12"
+        - id: es_ES-sharvard-medium
+          engine: piper
+          path: es/es_ES/sharvard/medium
+          gender: multi
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/es/es_ES/sharvard/medium/MODEL_CARD
+          licence: "dataset CC BY 3.0 (Sharvard corpus); base hifi_tts_92 (CC BY 4.0)"
+          dataset_licence: "CC BY 3.0 - attribution required"
+          commercial_use: "yes"
+          attribution: "Sharvard corpus (CC BY 3.0); Hi-Fi TTS (CC BY 4.0)"
+          card_read_on: "2026-11-12"
+      fallback: {engine: espeak-ng, voice: es, licence: "GPL-3.0 engine; generated audio is not covered by the GPL", commercial_use: "yes"}
+    subtitles: {max_cps: 17}
+    typography: {quotes: ["«", "»"]}
+    needs_native_review: false
+
+  pt:
+    name: Portuguese (Brazil)
+    native_name: Português
+    script: Latn
+    direction: ltr
+    status: implemented
+    sample: "A energia solar é a fonte de eletricidade mais barata, não é?"
+    fonts: [latin, last_resort]
+    asr: {model: whisper-small, code: pt, licence: MIT, commercial_use: "yes"}
+    mt: {model: mt-madlad400-3b, target: pt, licence: "Apache-2.0", commercial_use: "yes", length_ratio: [0.6, 1.5], note: "MADLAD has one 'pt' tag; output variety (BR/PT) is not controlled"}
+    tts:
+      voices:
+        - id: pt_BR-cadu-medium
+          engine: piper
+          path: pt/pt_BR/cadu/medium
+          gender: male
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/pt/pt_BR/cadu/medium/MODEL_CARD
+          licence: "dataset CC0 (OHF-Voice/voice-datasets); base model rdh (CC0 per card)"
+          dataset_licence: CC0
+          commercial_use: "yes"
+          card_read_on: "2026-11-12"
+        - id: pt_BR-jeff-medium
+          engine: piper
+          path: pt/pt_BR/jeff/medium
+          gender: male
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/pt/pt_BR/jeff/medium/MODEL_CARD
+          licence: "dataset CC0 (OHF-Voice/voice-datasets); base model rdh (CC0 per card)"
+          dataset_licence: CC0
+          commercial_use: "yes"
+          card_read_on: "2026-11-12"
+        - id: pt_BR-faber-medium
+          engine: piper
+          path: pt/pt_BR/faber/medium
+          gender: male
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/pt/pt_BR/faber/medium/MODEL_CARD
+          licence: "dataset CC0; fine-tuned from lessac (Blizzard 2013 research licence)"
+          dataset_licence: CC0
+          commercial_use: "unverified"
+          card_read_on: "2026-11-12"
+      fallback: {engine: espeak-ng, voice: pt-br, licence: "GPL-3.0 engine; generated audio is not covered by the GPL", commercial_use: "yes"}
+    subtitles: {max_cps: 17}
+    typography: {quotes: ["“", "”"]}
+    needs_native_review: false
+
+  tr:
+    name: Turkish
+    native_name: Türkçe
+    script: Latn
+    direction: ltr
+    status: implemented
+    sample: "Güneş enerjisi en ucuz elektrik kaynağıdır; ışık, ağaç, şğüçöı."
+    fonts: [latin, last_resort]
+    asr: {model: whisper-small, code: tr, licence: MIT, commercial_use: "yes"}
+    mt: {model: mt-madlad400-3b, target: tr, licence: "Apache-2.0", commercial_use: "yes", length_ratio: [0.6, 1.5]}
+    tts:
+      voices:
+        - id: tr_TR-dfki-medium
+          engine: piper
+          path: tr/tr_TR/dfki/medium
+          gender: male
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/tr/tr_TR/dfki/medium/MODEL_CARD
+          licence: "dataset CC BY-NC-SA 4.0 (DFKI)"
+          dataset_licence: CC BY-NC-SA 4.0
+          commercial_use: "no"
+          card_read_on: "2026-11-12"
+      fallback: {engine: espeak-ng, voice: tr, licence: "GPL-3.0 engine; generated audio is not covered by the GPL", commercial_use: "yes"}
+    subtitles: {max_cps: 17}
+    typography: {quotes: ["“", "”"], keep: "dotted/dotless i: upper-casing uses Turkish rules is NOT implemented (Python upper() maps i->I)"}
+    needs_native_review: false
+
+  id:
+    name: Indonesian
+    native_name: Bahasa Indonesia
+    script: Latn
+    direction: ltr
+    status: implemented
+    sample: "Panel surya mengubah sinar matahari langsung menjadi listrik."
+    fonts: [latin, last_resort]
+    asr: {model: whisper-small, code: id, licence: MIT, commercial_use: "yes"}
+    mt: {model: mt-madlad400-3b, target: id, licence: "Apache-2.0", commercial_use: "yes", length_ratio: [0.6, 1.5]}
+    tts:
+      voices:
+        - id: id_ID-news_tts-medium
+          engine: piper
+          path: id/id_ID/news_tts/medium
+          gender: female
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/id/id_ID/news_tts/medium/MODEL_CARD
+          licence: "card: 'License: See URL' (URL points at an unrelated Kaggle notebook); fine-tuned from lessac"
+          dataset_licence: "none stated"
+          commercial_use: "unverified"
+          card_read_on: "2026-11-12"
+      fallback: {engine: espeak-ng, voice: id, licence: "GPL-3.0 engine; generated audio is not covered by the GPL", commercial_use: "yes"}
+    subtitles: {max_cps: 17}
+    typography: {quotes: ["“", "”"]}
+    needs_native_review: false
+
+  ja:
+    name: Japanese
+    native_name: 日本語
+    script: Jpan
+    direction: ltr
+    status: implemented
+    sample: "太陽光パネルは日光を直接電気に変えます。"
+    fonts: [cjk_ja, last_resort]
+    asr: {model: whisper-small, code: ja, licence: MIT, commercial_use: "yes"}
+    mt: {model: mt-madlad400-3b, target: ja, licence: "Apache-2.0", commercial_use: "yes", length_ratio: [0.2, 0.9]}
+    tts:
+      voices:
+        - id: ja_JP-hi_fi_captain-medium
+          engine: piper
+          path: ja/ja_JP/hi_fi_captain/medium
+          gender: multi
+          source_url: https://huggingface.co/rhasspy/piper-voices/blob/main/ja/ja_JP/hi_fi_captain/medium/MODEL_CARD
+          licence: "dataset CC BY-NC-SA 4.0 (NICT Hi-Fi-CAPTAIN)"
+          dataset_licence: CC BY-NC-SA 4.0
+          commercial_use: "no"
+          card_read_on: "2026-11-12"
+      fallback: {engine: espeak-ng, voice: ja, licence: "GPL-3.0 engine; generated audio is not covered by the GPL", commercial_use: "yes", note: "eSpeak NG Japanese support is minimal"}
+    subtitles: {max_chars_per_line: 13, max_cps: 5, line_break: char, break_after: "。！？、", punctuation: "、。！？「」『』（）", karaoke: false}
+    typography: {quotes: ["「", "」"], full_width: true, punct_map: {",": "、", ".": "。", "!": "！", "?": "？"}}
+    needs_native_review: false

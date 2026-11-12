@@ -90,7 +90,7 @@ def synthesize(text: str, out: Path, lang: str = "en", voice: str | None = None,
         v = voice or models.voice_for(lang)
         if not lookup("piper", v):
             _piper(text, out, v, length_scale)
-        meta = models.catalog()["voices"][v]
+        meta = models.voice_meta(v)
         return {"voice": v, "license": meta["license"], "commercial": meta["commercial"]}
 
     def espeak_run():

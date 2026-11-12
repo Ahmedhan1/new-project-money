@@ -202,7 +202,7 @@ def expectation(tl: dict) -> dict:
 
 
 def render_with_qa(project, tl: dict, name: str, analyses: dict | None = None, max_rounds: int = 3,
-                   extra_stages: list[dict] | None = None, extra: dict | None = None) -> tuple[dict, dict]:
+                   extra_stages: list[dict] | None = None, extra: dict | None = None, draft: bool = False) -> tuple[dict, dict]:
     """Render, review, apply targeted corrections, re-check. Returns (render stats, approval report)."""
     from . import edit
     from .timeline import render, subs
@@ -210,7 +210,7 @@ def render_with_qa(project, tl: dict, name: str, analyses: dict | None = None, m
     corrections = []
     stats: dict = {}
     for rnd in range(max_rounds):
-        stats = render.render(tl, out, project.dir / "work")
+        stats = render.render(tl, out, project.dir / "work", draft=draft)
         known = {m["path"]: {"license": m.get("rights", "user-supplied"), "source": "user upload"} for m in project.data.get("media", [])}
         known.update(project.data.get("generated", {}))
         stages = [asset_review(tl, known), editing_review(tl), technical_review(out, expectation(tl))]

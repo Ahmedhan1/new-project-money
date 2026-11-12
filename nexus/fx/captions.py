@@ -94,8 +94,12 @@ def _layout(W: int, H: int, o: dict, style: str) -> dict:
     align = {"bottom": 2, "middle": 5, "top": 8}[pos]
     if pos == "bottom":
         mv = int(H * (0.07 if not vertical else 0.16))  # keep clear of vertical-platform UI
+        if isinstance(o.get("safe_bottom"), (int, float)):  # set by platforms.tune from the destination's safe zone
+            mv = max(mv, int(H * (float(o["safe_bottom"]) + 0.02)))
     elif pos == "top":
         mv = int(H * (0.06 if not vertical else 0.12))
+        if isinstance(o.get("safe_top"), (int, float)):
+            mv = max(mv, int(H * (float(o["safe_top"]) + 0.02)))
     else:
         mv = 0
     return {"size": size, "side": side, "align": align, "mv": mv}
@@ -127,7 +131,11 @@ def write_ass(cues: list[dict], path: Path, W: int, H: int, lang: str = "en", op
         return subs.write_ass(cues, path, W, H, lang, legacy_style)
     style = o["style"]
     L = _layout(W, H, o, style)
-    font = "Noto Naskh Arabic" if _is_ar(lang) else "DejaVu Sans"
+    try:  # the language pack's font family (fontconfig name), e.g. WenQuanYi Zen Hei for zh, FreeSans for hi
+        from ..speech import packs
+        font = packs.font_family(lang)
+    except Exception:  # noqa: BLE001 - unknown language: previous behaviour
+        font = "Noto Naskh Arabic" if _is_ar(lang) else "DejaVu Sans"
     white, black = "&H00FFFFFF", "&H00101010"
     hi = ass_colour(o["highlight"])
     size = L["size"]

@@ -100,7 +100,7 @@ Canonical names: `youtube`, `youtube_shorts`, `tiktok`, `instagram_reels`, `inst
 
 **Languages** (WS D): `languages.yaml` packs keyed by BCP-47-style tag (`en`, `de`, `fr`, `ar`, `ar-EG`, `ar-Gulf`, `zh`,
 `ru`, `hi`, …). `localize.packs()`, `localize.pack(tag)`, `config.font_for(tag)`, `config.font_name_for(tag)`,
-`localize.qa(tl_or_cues, tag) -> report`. A pack states for ASR, MT and TTS: model id, licence, `commercial_use: yes|no|unverified`.
+`localize.qa_cues(cues, tag) -> report` (speech/packs.qa). A pack states for ASR, MT and TTS: model id, licence, `commercial_use: yes|no|unverified`.
 A voice with `commercial_use != yes` is never selected silently.
 
 **Media engine** (WS E): `encoders.detect() -> {"h264":[...],"hevc":[...],"av1":[...],"hw":[...]}`,
