@@ -318,3 +318,49 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+# ---------------------------------------------------------------- task routing from measured scores
+TASK_CAPS = {
+    "deep_research": ["reasoning", "grounding", "long_context"], "scriptwriting": ["writing", "grounding", "instruction"],
+    "translation": ["translation"], "dialect_adaptation": ["dialect"], "summarization": ["summarization", "long_context"],
+    "title_generation": ["writing", "strategy"], "hook_generation": ["writing", "strategy"], "topic_ideation": ["strategy", "writing"],
+    "audience_classification": ["json", "instruction"], "data_extraction": ["json", "instruction"],
+    "content_scoring": ["reasoning", "strategy"], "reference_interpretation": ["reasoning", "strategy"],
+    "quality_review": ["reasoning", "grounding", "instruction"], "story_planning": ["strategy", "writing"],
+    "analytics_interpretation": ["reasoning", "strategy"], "general": ["reasoning", "instruction"],
+}
+
+
+def valid_run(m: dict) -> tuple[bool, str]:
+    """A run where most answers are empty measured the harness, not the model (Nemotron spent its budget thinking)."""
+    rows = m.get("rows") or []
+    if not rows:
+        return False, "not run (pull failed)"
+    empty = sum(1 for r in rows if not (r.get("text") or "").strip())
+    if empty / len(rows) > 0.5:
+        return False, f"{empty}/{len(rows)} empty answers (token budget spent on hidden reasoning) - harness issue, re-run"
+    return True, f"{empty}/{len(rows)} empty answers" if empty else "ok"
+
+
+def routing(scored: dict) -> dict:
+    """Per task: models ranked by the mean of the task's capabilities; bar = router min_q / 10; critical tasks below
+    the bar are routed with requires_human_review."""
+    from .router import CRITICAL, TASKS
+    out = {}
+    valid = {k: v for k, v in scored.items() if valid_run(v)[0]}
+    for task, caps in TASK_CAPS.items():
+        rank = []
+        for name, m in valid.items():
+            vals = [m["capabilities"].get(c) for c in caps]
+            if any(v is None for v in vals):
+                continue
+            rank.append((round(sum(vals) / len(vals), 3), -(m.get("mean_latency_s") or 99), name))
+        rank.sort(reverse=True)
+        bar = (TASKS.get(task, {"min_q": 4 if task == "dialect_adaptation" else 3})["min_q"]) / 10
+        best = rank[0] if rank else None
+        out[task] = {"capabilities": caps, "bar": bar, "best": best[2] if best else None, "score": best[0] if best else None,
+                     "meets_bar": bool(best and best[0] >= bar), "critical": task in CRITICAL or task == "dialect_adaptation",
+                     "ranking": [{"model": n, "score": s} for s, _, n in rank[:4]]}
+        out[task]["requires_human_review"] = out[task]["critical"] and (not out[task]["meets_bar"] or (best and best[0] < 0.7))
+    return out

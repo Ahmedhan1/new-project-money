@@ -188,8 +188,12 @@ def test_below_quality_bar_runs_as_labelled_draft_unless_strict(settings, server
     _Srv.replies = [(200, "draft answer")]
     r = router.complete("deep_research", "q", entries=[weak], use_cache=False)
     assert r.text == "draft answer" and r.below_bar["required"] == 4 and r.below_bar["used_quality"] == 2
+    assert r.requires_human_review  # deep_research is critical: below the bar a person must review it
+    _Srv.replies = [(200, "light draft")]
+    light = router.complete("title_generation", "q", entries=[_entry("owner-openai-compatible", "tiny", q=2)], use_cache=False)
+    assert light.below_bar and not light.requires_human_review  # labelled draft, review optional
     with pytest.raises(router.NoProviderAvailable):
         router.complete("deep_research", "q", entries=[weak], use_cache=False, strict=True)
     _Srv.replies = [(200, "fine")]
     ok = router.complete("general", "q2", entries=[_entry("owner-openai-compatible", "big", q=8)], use_cache=False)
-    assert ok.below_bar is None
+    assert ok.below_bar is None and not ok.requires_human_review

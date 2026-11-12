@@ -1,7 +1,7 @@
 {
  "schema": "nexus.Demo10/1",
  "topic": "Aswan High Dam",
- "started": "2026-11-12T23:07:25",
+ "started": "2026-11-12T23:23:24",
  "steps": {
   "research": {
    "seconds": 297.1,
@@ -25,16 +25,13 @@
    },
    "cross_source": 0.13,
    "geography": {
-    "EG": 7,
-    "SS": 2,
-    "GM": 2,
+    "EG": 11,
     "SD": 1,
-    "GH": 1,
-    "GY": 1
+    "SS": 1
    }
   },
   "strategy": {
-   "seconds": 167.1,
+   "seconds": 0.0,
    "written_by": "local-llamacpp/qwen3-4b-q4km",
    "title": "The Aswan High Dam: A Marvel of Engineering and History",
    "checks": {
@@ -65,68 +62,6 @@
      "llm-local"
     ]
    }
-  },
-  "render": {
-   "seconds": 107.7,
-   "output": "/home/user/new-project-money/.nexus/projects/prj_f06c880c14/renders/master.mp4",
-   "status": "NEEDS_FIXES",
-   "stages": {
-    "1-pre-production": {
-     "passed": false,
-     "failed": [
-      "hook: opening: \"The Aswan High Dam, located in southern Egypt, is a monumental structu\"",
-      "fact-check: no research text was available - facts are UNVERIFIED"
-     ]
-    },
-    "2b-visual-plan": {
-     "passed": true,
-     "failed": []
-    },
-    "2c-typography": {
-     "passed": true,
-     "failed": []
-    },
-    "2-assets": {
-     "passed": true,
-     "failed": []
-    },
-    "4-editing": {
-     "passed": true,
-     "failed": []
-    },
-    "5-technical": {
-     "passed": true,
-     "failed": []
-    }
-   },
-   "visual_plan": [
-    {
-     "scene": 0,
-     "kind": "licensed_photo",
-     "reason": null,
-     "rejected": 0
-    },
-    {
-     "scene": 1,
-     "kind": "fact_graphic",
-     "reason": "no licensed image passed the context gate; scene states '1970,'",
-     "rejected": 0
-    },
-    {
-     "scene": 2,
-     "kind": "fact_graphic",
-     "reason": "no licensed image passed the context gate; scene states '200 years'",
-     "rejected": 0
-    },
-    {
-     "scene": 3,
-     "kind": "licensed_photo",
-     "reason": null,
-     "rejected": 0
-    }
-   ],
-   "narration_verbatim": true,
-   "frames": "docs/results/account3/demo10_frames.jpg"
   }
  },
  "gates": {
@@ -149,15 +84,66 @@
    "reason": "handoff not approved: {'originality': True, 'grounding': True, 'framing': False}"
   },
   "geo_errors": [
-   "Aswan governorate: https://commons.wikimedia.org/w/api.php -> rate limited, retry after 51s",
-   "governorate map: https://commons.wikimedia.org/w/api.php -> rate limited, retry after 50s",
-   "Belgorod governorate 1745: https://commons.wikimedia.org/w/api.php -> rate limited, retry after 50s"
+   "Aswan governorate (attempt 1): https://commons.wikimedia.org/w/api.php -> HTTP 429",
+   "governorate map (attempt 1): https://commons.wikimedia.org/w/api.php -> rate limited, retry after 34s",
+   "Belgorod governorate 1745 (attempt 1): https://commons.wikimedia.org/w/api.php -> rate limited, retry after 56s",
+   "Belgorod governorate 1745 (attempt 2): https://commons.wikimedia.org/w/api.php -> HTTP 429"
   ],
   "geographic_and_historical_imagery": {
-   "candidates": 0,
-   "refused": 0,
+   "candidates": 6,
+   "refused": 6,
    "accepted": [],
-   "refusals": []
+   "refusals": [
+    {
+     "title": "Belgorod governorate 1745",
+     "ok": false,
+     "findings": [
+      "geo_mismatch: scene is in ['EG'] (Aswan High, Egypt, Aswan); asset names ['RU', 'UA'] (Belgorod, Ukraine, Russian)"
+     ]
+    },
+    {
+     "title": "1808. Tavricheskaia Governorate map",
+     "ok": false,
+     "findings": [
+      "geo_mismatch: scene is in ['EG'] (Aswan High, Egypt, Aswan); asset names ['RU'] (Russia)",
+      "historical_in_modern: asset dated 1808, scene is modern (present day)",
+      "old_map: historical map used for a scene that is not about maps or history"
+     ]
+    },
+    {
+     "title": "1808. Poltavskaia Kharkovskaia and Ekaterinoslavskaia Governorate map",
+     "ok": false,
+     "findings": [
+      "geo_mismatch: scene is in ['EG'] (Aswan High, Egypt, Aswan); asset names ['RU', 'UA'] (Poltavskaia, Poltava, Russia)",
+      "historical_in_modern: asset dated 1808, scene is modern (present day)",
+      "old_map: historical map used for a scene that is not about maps or history"
+     ]
+    },
+    {
+     "title": "Map of volosts of Yeniseysk Governorate (1893)",
+     "ok": false,
+     "findings": [
+      "geo_mismatch: scene is in ['EG'] (Aswan High, Egypt, Aswan); asset names ['RU'] (Russian)",
+      "old_map: historical map used for a scene that is not about maps or history"
+     ]
+    },
+    {
+     "title": "Orenburg Governorate map, 1905",
+     "ok": false,
+     "findings": [
+      "geo_mismatch: scene is in ['EG'] (Aswan High, Egypt, Aswan); asset names ['RU'] (Orenburg)"
+     ]
+    },
+    {
+     "title": "Tambovskaia and Penzinskaia Governorate map (1808)",
+     "ok": false,
+     "findings": [
+      "geo_mismatch: scene is in ['EG'] (Aswan High, Egypt, Aswan); asset names ['RU'] (Tambovskaia, Tambov, Russia)",
+      "historical_in_modern: asset dated 1808, scene is modern (present day)",
+      "old_map: historical map used for a scene that is not about maps or history"
+     ]
+    }
+   ]
   },
   "missing_glyphs": {
    "stage": {
@@ -213,6 +199,5 @@
    "visibility": "private",
    "status": "draft"
   }
- },
- "finished": "2026-11-12T23:17:01"
+ }
 }

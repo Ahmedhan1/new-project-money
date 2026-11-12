@@ -33,6 +33,10 @@ TASKS: dict[str, dict] = {
     "analytics_interpretation": {"cap": "reasoning", "min_q": 4, "light": False},
     "general": {"cap": "reasoning", "min_q": 3, "light": True},
 }
+# Tasks whose output can mislead an audience or the owner (facts, scripts, translations, QA verdicts, analytics). Below
+# the bar their result is not a draft to skim but REQUIRES a human review before use (Result.requires_human_review).
+CRITICAL = {"deep_research", "scriptwriting", "translation", "quality_review", "analytics_interpretation", "reference_interpretation",
+            "story_planning"}
 PRIVACY_RANK = {"public": 0, "internal": 1, "private": 2}
 SPEED_RANK = {"fast": 0, "medium": 1, "slow": 2}
 BREAKER_FAILS, BREAKER_COOLDOWN = 3, 300.0
@@ -54,6 +58,11 @@ class Result:
     cached: bool = False
     fallbacks: list[str] = field(default_factory=list)
     usage: dict = field(default_factory=dict)
+    @property
+    def requires_human_review(self) -> bool:
+        """True when a CRITICAL task ran below its quality bar: a person must review before the output is used."""
+        return bool(self.below_bar and self.below_bar.get("requires_human_review"))
+
     # set when no eligible model met the task's quality bar and the best one below it was used (strict=False);
     # callers must show it ("draft quality - review before use"), never present the output as meeting the bar
     below_bar: dict | None = None
@@ -303,7 +312,7 @@ def complete(task: str, prompt: str, *, system: str = "You are a precise assista
         if strict or not low:
             raise NoProviderAvailable(task, why)
         ranked = sorted(low, key=lambda e: (-e["_q"], -PRIVACY_RANK[e["privacy"]]))
-        bar = {"required": TASKS[task]["min_q"], "reasons": why[:6]}
+        bar = {"required": TASKS[task]["min_q"], "reasons": why[:6], "requires_human_review": task in CRITICAL}
     tried: list[str] = []
     for e in ranked:
         key = _cache_key(task, prompt, system, schema, e["model"])

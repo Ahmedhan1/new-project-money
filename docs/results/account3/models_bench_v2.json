@@ -3493,5 +3493,500 @@
  "not_run": {
   "qwen3.6-35b-a3b": "  22 GB                         \u001b[K\npulling 8971ee4f331f: 100% ▕█████████████████ ▏ 896 MB/899 MB  122 MB/s      0s\u001b[K\u001b[?25h\u001b[?2026l\nError: file does not exist\n",
   "qwen3.8-27b": " 927 MB                         \u001b[K\npulling 5fcd38a2a742: 100% ▕██████████████████▏   67 B                         \u001b[K\u001b[?25h\u001b[?2026l\nError: file does not exist\n"
+ },
+ "routing": {
+  "deep_research": {
+   "capabilities": [
+    "reasoning",
+    "grounding",
+    "long_context"
+   ],
+   "bar": 0.4,
+   "best": "deepseek-r1-0528-qwen3-8b",
+   "score": 0.972,
+   "meets_bar": true,
+   "critical": true,
+   "ranking": [
+    {
+     "model": "deepseek-r1-0528-qwen3-8b",
+     "score": 0.972
+    },
+    {
+     "model": "glm-4.7-flash",
+     "score": 0.917
+    },
+    {
+     "model": "ministral-3-14b",
+     "score": 0.917
+    },
+    {
+     "model": "qwen3-4b-think",
+     "score": 0.883
+    }
+   ],
+   "requires_human_review": false
+  },
+  "scriptwriting": {
+   "capabilities": [
+    "writing",
+    "grounding",
+    "instruction"
+   ],
+   "bar": 0.4,
+   "best": "ministral-3-14b",
+   "score": 1.0,
+   "meets_bar": true,
+   "critical": true,
+   "ranking": [
+    {
+     "model": "ministral-3-14b",
+     "score": 1.0
+    },
+    {
+     "model": "deepseek-r1-0528-qwen3-8b",
+     "score": 1.0
+    },
+    {
+     "model": "glm-4.7-flash",
+     "score": 0.889
+    },
+    {
+     "model": "qwen3.5-4b",
+     "score": 0.822
+    }
+   ],
+   "requires_human_review": false
+  },
+  "translation": {
+   "capabilities": [
+    "translation"
+   ],
+   "bar": 0.3,
+   "best": "qwen3.5-4b",
+   "score": 0.979,
+   "meets_bar": true,
+   "critical": true,
+   "ranking": [
+    {
+     "model": "qwen3.5-4b",
+     "score": 0.979
+    },
+    {
+     "model": "qwen3.5-9b",
+     "score": 0.979
+    },
+    {
+     "model": "glm-4.7-flash",
+     "score": 0.979
+    },
+    {
+     "model": "ministral-3-14b",
+     "score": 0.979
+    }
+   ],
+   "requires_human_review": false
+  },
+  "dialect_adaptation": {
+   "capabilities": [
+    "dialect"
+   ],
+   "bar": 0.4,
+   "best": "qwen3.5-9b",
+   "score": 0.52,
+   "meets_bar": true,
+   "critical": true,
+   "ranking": [
+    {
+     "model": "qwen3.5-9b",
+     "score": 0.52
+    },
+    {
+     "model": "deepseek-r1-0528-qwen3-8b",
+     "score": 0.52
+    },
+    {
+     "model": "qwen3-4b-think",
+     "score": 0.52
+    },
+    {
+     "model": "qwen3.5-4b",
+     "score": 0.32
+    }
+   ],
+   "requires_human_review": true
+  },
+  "summarization": {
+   "capabilities": [
+    "summarization",
+    "long_context"
+   ],
+   "bar": 0.3,
+   "best": "ministral-3-14b",
+   "score": 1.0,
+   "meets_bar": true,
+   "critical": false,
+   "ranking": [
+    {
+     "model": "ministral-3-14b",
+     "score": 1.0
+    },
+    {
+     "model": "qwen3-4b-think",
+     "score": 1.0
+    },
+    {
+     "model": "glm-4.7-flash",
+     "score": 0.9
+    },
+    {
+     "model": "deepseek-r1-0528-qwen3-8b",
+     "score": 0.85
+    }
+   ],
+   "requires_human_review": false
+  },
+  "title_generation": {
+   "capabilities": [
+    "writing",
+    "strategy"
+   ],
+   "bar": 0.3,
+   "best": "glm-4.7-flash",
+   "score": 1.0,
+   "meets_bar": true,
+   "critical": false,
+   "ranking": [
+    {
+     "model": "glm-4.7-flash",
+     "score": 1.0
+    },
+    {
+     "model": "qwen3-4b",
+     "score": 0.916
+    },
+    {
+     "model": "ministral-3-14b",
+     "score": 0.916
+    },
+    {
+     "model": "qwen3.5-4b",
+     "score": 0.9
+    }
+   ],
+   "requires_human_review": false
+  },
+  "hook_generation": {
+   "capabilities": [
+    "writing",
+    "strategy"
+   ],
+   "bar": 0.3,
+   "best": "glm-4.7-flash",
+   "score": 1.0,
+   "meets_bar": true,
+   "critical": false,
+   "ranking": [
+    {
+     "model": "glm-4.7-flash",
+     "score": 1.0
+    },
+    {
+     "model": "qwen3-4b",
+     "score": 0.916
+    },
+    {
+     "model": "ministral-3-14b",
+     "score": 0.916
+    },
+    {
+     "model": "qwen3.5-4b",
+     "score": 0.9
+    }
+   ],
+   "requires_human_review": false
+  },
+  "topic_ideation": {
+   "capabilities": [
+    "strategy",
+    "writing"
+   ],
+   "bar": 0.3,
+   "best": "glm-4.7-flash",
+   "score": 1.0,
+   "meets_bar": true,
+   "critical": false,
+   "ranking": [
+    {
+     "model": "glm-4.7-flash",
+     "score": 1.0
+    },
+    {
+     "model": "qwen3-4b",
+     "score": 0.916
+    },
+    {
+     "model": "ministral-3-14b",
+     "score": 0.916
+    },
+    {
+     "model": "qwen3.5-4b",
+     "score": 0.9
+    }
+   ],
+   "requires_human_review": false
+  },
+  "audience_classification": {
+   "capabilities": [
+    "json",
+    "instruction"
+   ],
+   "bar": 0.3,
+   "best": "ministral-3-14b",
+   "score": 1.0,
+   "meets_bar": true,
+   "critical": false,
+   "ranking": [
+    {
+     "model": "ministral-3-14b",
+     "score": 1.0
+    },
+    {
+     "model": "deepseek-r1-0528-qwen3-8b",
+     "score": 1.0
+    },
+    {
+     "model": "qwen3-4b-think",
+     "score": 1.0
+    },
+    {
+     "model": "qwen3.5-4b",
+     "score": 0.834
+    }
+   ],
+   "requires_human_review": false
+  },
+  "data_extraction": {
+   "capabilities": [
+    "json",
+    "instruction"
+   ],
+   "bar": 0.3,
+   "best": "ministral-3-14b",
+   "score": 1.0,
+   "meets_bar": true,
+   "critical": false,
+   "ranking": [
+    {
+     "model": "ministral-3-14b",
+     "score": 1.0
+    },
+    {
+     "model": "deepseek-r1-0528-qwen3-8b",
+     "score": 1.0
+    },
+    {
+     "model": "qwen3-4b-think",
+     "score": 1.0
+    },
+    {
+     "model": "qwen3.5-4b",
+     "score": 0.834
+    }
+   ],
+   "requires_human_review": false
+  },
+  "content_scoring": {
+   "capabilities": [
+    "reasoning",
+    "strategy"
+   ],
+   "bar": 0.3,
+   "best": "qwen3.5-4b",
+   "score": 0.916,
+   "meets_bar": true,
+   "critical": false,
+   "ranking": [
+    {
+     "model": "qwen3.5-4b",
+     "score": 0.916
+    },
+    {
+     "model": "qwen3.5-9b",
+     "score": 0.875
+    },
+    {
+     "model": "glm-4.7-flash",
+     "score": 0.875
+    },
+    {
+     "model": "deepseek-r1-0528-qwen3-8b",
+     "score": 0.792
+    }
+   ],
+   "requires_human_review": false
+  },
+  "reference_interpretation": {
+   "capabilities": [
+    "reasoning",
+    "strategy"
+   ],
+   "bar": 0.4,
+   "best": "qwen3.5-4b",
+   "score": 0.916,
+   "meets_bar": true,
+   "critical": true,
+   "ranking": [
+    {
+     "model": "qwen3.5-4b",
+     "score": 0.916
+    },
+    {
+     "model": "qwen3.5-9b",
+     "score": 0.875
+    },
+    {
+     "model": "glm-4.7-flash",
+     "score": 0.875
+    },
+    {
+     "model": "deepseek-r1-0528-qwen3-8b",
+     "score": 0.792
+    }
+   ],
+   "requires_human_review": false
+  },
+  "quality_review": {
+   "capabilities": [
+    "reasoning",
+    "grounding",
+    "instruction"
+   ],
+   "bar": 0.4,
+   "best": "deepseek-r1-0528-qwen3-8b",
+   "score": 0.972,
+   "meets_bar": true,
+   "critical": true,
+   "ranking": [
+    {
+     "model": "deepseek-r1-0528-qwen3-8b",
+     "score": 0.972
+    },
+    {
+     "model": "ministral-3-14b",
+     "score": 0.917
+    },
+    {
+     "model": "qwen3-4b-think",
+     "score": 0.883
+    },
+    {
+     "model": "qwen3.5-4b",
+     "score": 0.833
+    }
+   ],
+   "requires_human_review": false
+  },
+  "story_planning": {
+   "capabilities": [
+    "strategy",
+    "writing"
+   ],
+   "bar": 0.4,
+   "best": "glm-4.7-flash",
+   "score": 1.0,
+   "meets_bar": true,
+   "critical": true,
+   "ranking": [
+    {
+     "model": "glm-4.7-flash",
+     "score": 1.0
+    },
+    {
+     "model": "qwen3-4b",
+     "score": 0.916
+    },
+    {
+     "model": "ministral-3-14b",
+     "score": 0.916
+    },
+    {
+     "model": "qwen3.5-4b",
+     "score": 0.9
+    }
+   ],
+   "requires_human_review": false
+  },
+  "analytics_interpretation": {
+   "capabilities": [
+    "reasoning",
+    "strategy"
+   ],
+   "bar": 0.4,
+   "best": "qwen3.5-4b",
+   "score": 0.916,
+   "meets_bar": true,
+   "critical": true,
+   "ranking": [
+    {
+     "model": "qwen3.5-4b",
+     "score": 0.916
+    },
+    {
+     "model": "qwen3.5-9b",
+     "score": 0.875
+    },
+    {
+     "model": "glm-4.7-flash",
+     "score": 0.875
+    },
+    {
+     "model": "deepseek-r1-0528-qwen3-8b",
+     "score": 0.792
+    }
+   ],
+   "requires_human_review": false
+  },
+  "general": {
+   "capabilities": [
+    "reasoning",
+    "instruction"
+   ],
+   "bar": 0.3,
+   "best": "qwen3-4b-think",
+   "score": 1.0,
+   "meets_bar": true,
+   "critical": false,
+   "ranking": [
+    {
+     "model": "qwen3-4b-think",
+     "score": 1.0
+    },
+    {
+     "model": "deepseek-r1-0528-qwen3-8b",
+     "score": 0.959
+    },
+    {
+     "model": "ministral-3-14b",
+     "score": 0.875
+    },
+    {
+     "model": "qwen3.5-4b",
+     "score": 0.75
+    }
+   ],
+   "requires_human_review": false
+  }
+ },
+ "validity": {
+  "qwen3-4b": "ok",
+  "qwen3-4b-think": "10/36 empty answers",
+  "qwen3.5-4b": "ok",
+  "qwen3.5-9b": "ok",
+  "deepseek-r1-0528-qwen3-8b": "2/36 empty answers",
+  "ministral-3-14b": "ok",
+  "nemotron-nano-9b-v2": "35/36 empty answers (token budget spent on hidden reasoning) - harness issue, re-run",
+  "qwen3.6-35b-a3b": "not run (pull failed)",
+  "glm-4.7-flash": "ok",
+  "qwen3.8-27b": "not run (pull failed)"
  }
 }
