@@ -126,4 +126,15 @@ def test_platform_text_respects_limits_and_uses_only_spoken_words(platform):
     lim = {**growth.TEXT_LIMITS["default"], **growth.TEXT_LIMITS[platform]}
     assert len(t["title"]) <= lim["title_max"] and len(t["description"]) <= lim["description_max"]
     spoken = set(re.findall(r"\w+", SOLAR.lower()))
-    assert all(h[1:].lower() in spoken for h in t["hashtags"])
+    joined = re.sub(r"\W+", "", SOLAR.lower())
+    assert all(h[1:].lower() in spoken or h[1:].lower() in joined for h in t["hashtags"])   # entities join their words
+    assert len(t["hashtags"]) <= growth.HASHTAGS_EDITORIAL
+
+
+def test_hashtags_are_entities_and_repeated_words_never_fillers():
+    text = ("Basically we always go to the cave. Absolutely, sometimes the cave in New Mexico has microbes, and the "
+            "microbes have gotten tougher. NASA funds it.")
+    tags = growth.hashtags(text, 60)
+    assert tags[:2] == ["#NewMexico", "#NASA"] and "#Cave" in tags and "#Microbes" in tags
+    assert not {"#Basically", "#Absolutely", "#Sometimes", "#Gotten", "#Always"} & set(tags)
+    assert growth.platform_text(text, platform="youtube_shorts")["hashtags"] == tags[:growth.HASHTAGS_EDITORIAL]

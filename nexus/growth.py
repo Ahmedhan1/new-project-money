@@ -648,7 +648,7 @@ TEXT_LIMITS: dict[str, dict] = {
     "snapchat_spotlight": {"title_max": 60, "description_max": 160, "caption_max": 160, "hashtags_max": 3},
 }
 _STOP_TAGS = set("this that with from your what have about they them there their were been into just like over more most very "
-                 "really because which while would could should these those going thing things think".split())
+                 "really because which while would could should these those going thing things think feel feels felt know knew want wanted said says make made take took look looked".split())
 
 
 def _clip_text(s: str, n: int | None) -> str:
@@ -658,18 +658,37 @@ def _clip_text(s: str, n: int | None) -> str:
     return s
 
 
+HASHTAGS_EDITORIAL = 5  # a few relevant tags; a platform's maximum (YouTube 60, Instagram 30) is a ceiling, not a target
+
+
+def hashtags(text: str, n: int = HASHTAGS_EDITORIAL) -> list[str]:
+    """Up to `n` hashtags from what was actually said: named entities first, then content words the speaker repeated.
+    Adverbs, fillers and generic words never become tags (a short once got #Absolutely, #Sometimes, #Gotten)."""
+    from . import broll
+    from .media import understand as und
+    if n <= 0:
+        return []
+    ents = [e for e in re.findall(r"\b(?:[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+|[A-Z]{2,})\b", text or "")
+            if e.split()[0].lower() not in und.STOP]
+    freq: dict[str, int] = {}
+    for w in re.findall(r"[a-zA-Z]{4,}", (text or "").lower()):
+        if w not in und.STOP and w not in broll.GENERIC and w not in _STOP_TAGS and not w.endswith("ly"):
+            freq[w] = freq.get(w, 0) + 1
+    out: list[str] = []
+    for t in ents + [w for w in sorted(freq, key=lambda w: (-freq[w], w)) if freq[w] >= 2]:
+        tag = "#" + "".join(p[:1].upper() + p[1:] for p in t.split())
+        if tag.lower() not in {x.lower() for x in out}:
+            out.append(tag)
+    return out[:n]
+
+
 def platform_text(text: str, title: str | None = None, platform: str = "default", limits: dict | None = None,
                   use_llm: bool = False) -> dict:
     """Deterministic title/description/hashtags/caption for one platform, within its limits. Hashtags come only from
     words the speaker actually used (no trend-bait). `use_llm` is accepted for API symmetry; the local LLM is not used
     here so the output is reproducible."""
     lim = {**TEXT_LIMITS["default"], **TEXT_LIMITS.get(platform, {}), **{k: v for k, v in (limits or {}).items() if v}}
-    words = [w.strip(".,!?;:\"'()").lower() for w in (text or "").split()]
-    counts: dict[str, int] = {}
-    for w in words:
-        if len(w) >= 5 and w.isalpha() and w not in _STOP_TAGS:
-            counts[w] = counts.get(w, 0) + 1
-    tags = ["#" + w.capitalize() for w, _ in sorted(counts.items(), key=lambda x: (-x[1], x[0]))][: int(lim["hashtags_max"] or 0)]
+    tags = hashtags(text, min(int(lim["hashtags_max"] or 0), HASHTAGS_EDITORIAL))
     t = _clip_text(title or sh.suggest_title(text or ""), lim["title_max"])
     first = re.split(r"(?<=[.!?])\s+", (text or "").strip())[:2]
     desc = _clip_text(" ".join(first), lim["description_max"])
