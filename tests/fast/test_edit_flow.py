@@ -118,6 +118,11 @@ def test_destination_selector_shares_renders_and_writes_packages(client, tmp_pat
     assert len(yt["title"]) <= 100 and yt["check"]["checks"]                                # title within YouTube's limit
     assert (p.dir / res["packages"]["tiktok"]["folder"] / "MANUAL_UPLOAD.md").read_text(encoding="utf-8").startswith("# Upload to")
     assert (p.dir / res["packages"]["tiktok"]["cover"]).exists()
+    # the upload steps say "paste caption.txt": it exists, within TikTok's limit, with tags from what was said
+    cap = (p.dir / res["packages"]["tiktok"]["folder"] / "caption.txt").read_text(encoding="utf-8")
+    tt = json.loads((p.dir / res["packages"]["tiktok"]["folder"] / "metadata.json").read_text(encoding="utf-8"))
+    assert len(cap) <= 2201 and tt["hashtags"] and all(h in cap for h in tt["hashtags"]) and len(tt["hashtags"]) <= 5
+    assert tt["description"] and tt["description_source"].startswith("draft")
 
 
 def test_shorts_factory_job_selects_by_topic_and_saves_variants(client, tmp_path):

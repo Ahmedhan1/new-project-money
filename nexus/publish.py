@@ -32,6 +32,19 @@ PLATFORMS = {
 AUTO_PUBLISH = {p: "not implemented - manual upload package only" for p in PLATFORMS}
 
 
+def _platform_texts(tl: dict, title: str, description: str, n_tags: int) -> tuple[str, list[str]]:
+    """(description, hashtags) for a package. Hashtags come from what is said in the programme (entities and repeated
+    words, growth.hashtags); without a description from the user, the programme's opening sentences are used."""
+    from . import growth
+    spoken = " ".join(q["text"] for q in tl.get("subtitles") or [])
+    desc = description.strip()
+    if not desc and spoken:
+        first = re.split(r"(?<=[.!?])\s+", spoken.strip())[0]
+        desc = first if len(first) <= 280 else first[:279].rsplit(" ", 1)[0].rstrip(",;:") + "…"
+        desc = desc[:1].upper() + desc[1:]
+    return desc, growth.hashtags(f"{title}. {spoken}", n_tags)
+
+
 def _hashtags(title: str, script: dict | None, n: int) -> list[str]:
     words = re.findall(r"[A-Za-z]{4,}", title + " " + " ".join(s.get("on_screen_text", "") for s in (script or {}).get("scenes", [])))
     seen, out = set(), []
@@ -171,18 +184,20 @@ def deliver(project, tl: dict, destinations: list[str], title: str, description:
             chk = platforms.check(video, name)
             chk["export_verify"] = out["groups"][-1]["verify"]
             chk["ok"] = bool(chk["ok"] and ver.get("ok"))
-            tags = _hashtags(title, project.data.get("script"), min(int(v.get("hashtags_max") or 5), 5))
+            desc_in, tags = _platform_texts(tl, title, description, min(int(v.get("hashtags_max") or 5), 5))
             cap_limit = v.get("caption_max_chars") or v.get("caption_max_utf16")
             meta = {"platform": name, "display": prof["display"], "language": lang, "video": str(video.relative_to(project.dir)),
                     "shared_render_with": [x for x in g["platforms"] if x != name],
                     "title": _limit_text(title, v.get("title_max_chars")),
-                    "description": _limit_text(description.strip(), v.get("description_max_chars"), v.get("description_max_bytes")),
+                    "description": _limit_text(desc_in, v.get("description_max_chars"), v.get("description_max_bytes")),
+                    "description_source": "yours" if description.strip() else "draft from the programme's first sentence - edit before posting",
                     "hashtags": tags, "check": chk, "tuning": notes, "captions": stats["sidecars"],
                     "music_policy": v.get("music_policy"), "upload_api": v.get("upload_api"),
                     "auto_publish": "not performed: needs your own authorised app/account for this platform",
                     "human_approval": "PENDING", "built": time.strftime("%Y-%m-%dT%H:%M:%S")}
-            if cap_limit:
-                meta["caption_text"] = _limit_text(" ".join([meta["title"], meta["description"], " ".join(tags)]).strip(), int(cap_limit))
+            meta["caption_text"] = _limit_text("\n\n".join(x for x in (meta["title"], meta["description"], " ".join(tags)) if x).strip(),
+                                               int(cap_limit) if cap_limit else 5000)
+            (d / "caption.txt").write_text(meta["caption_text"] + "\n", encoding="utf-8")  # the upload steps say "paste caption.txt"
             vw, vh = ptl["width"], ptl["height"]
             meta["cover"] = str(thumbnail(str(video), title, d / "cover.jpg", (1280, 720) if vw > vh else (720, 1280), lang=lang).relative_to(project.dir))
             steps = v.get("manual_upload") or ["Open the platform's upload page and use the files in this folder."]
