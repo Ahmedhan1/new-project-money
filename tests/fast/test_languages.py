@@ -153,3 +153,34 @@ def test_voiceover_mode_keeps_the_original_speaker_audible_and_labels_the_synthe
     assert not c.get("mute") and 0 < c["volume"] < 0.5                       # original speaker still audible
     assert out["audio"][0]["synthetic"] and out["audio"][0]["role"] == "narration"
     assert "voice-over" in review["label"] and out["dub"]["voice"]["commercial"]
+
+
+def test_translation_units_are_whole_sentences_split_back_by_word_share(monkeypatch):
+    from nexus import localize as L
+    seen = []
+    monkeypatch.setattr(L, "translate_lines", lambda lines, lang, context="": seen.extend(lines) or [x.upper() for x in lines])
+    src = ["We went down a shaft in the cave,", "and then we hiked about 300 meters and", "found a flat sandy area.", "Done."]
+    out = L.translate_sentences(src, "de")
+    assert seen == [" ".join(src[:3]), "Done."]                     # MT never sees a fragment
+    assert " ".join(out[:3]) == " ".join(src[:3]).upper() and out[3] == "DONE."
+    assert [len(x.split()) for x in out[:3]] == [8, 8, 5]           # split in proportion to each clip's words
+    assert L.split_by_share("我们下到洞里然后走了很远", [1, 1]) == ["我们下到洞里", "然后走了很远"]
+
+
+def test_narration_units_use_the_words_inside_the_clip():
+    from nexus import localize as L
+    words = [{"start": i * 0.5, "end": i * 0.5 + 0.4, "word": w} for i, w in enumerate("one two three four five six".split())]
+    an = {"transcript": {"segments": [{"start": 0, "end": 3, "text": "one two three four five six", "words": words}]}}
+    tl = {"clips": [{"type": "video", "src": "s.mp4", "in": 1.0, "out": 2.0}]}
+    assert L.narration_units(tl, {"s.mp4": an})[0]["text"] == "three four"
+
+
+def test_merged_sentence_that_comes_back_short_is_retranslated_line_by_line(monkeypatch):
+    from nexus import localize as L
+    def fake(lines, lang, context=""):
+        return ["kurz." if len(x.split()) > 10 else "übersetzt " * len(x.split()) for x in lines]   # drops content when long
+    monkeypatch.setattr(L, "translate_lines", fake)
+    src = ["we went down a long shaft in the cave", "and then we found a flat sandy area."]
+    out = L.translate_sentences(src, "de")
+    assert all(len(o.split()) == len(s.split()) for o, s in zip(out, src))
+    assert [len(g) for g in L.sentence_groups(["a " * 20, "b " * 20 + "."])] == [1, 1]   # never past GROUP_MAX_WORDS

@@ -91,6 +91,71 @@ def translate_lines(lines: list[str], lang: str, context: str = "") -> list[str]
     return [_finish_line(x, lang) for x in out]
 
 
+GROUP_MAX_WORDS = 28  # longer inputs made MADLAD drop whole clauses (a 49-word group lost its last sentence)
+
+
+def _short(src: str, tgt: str, lang: str) -> bool:
+    """Target much shorter than the source: content was probably dropped (word count for spaced scripts)."""
+    if " " in tgt.strip() and lang not in ("zh", "ja"):
+        return len(tgt.split()) < 0.6 * len(src.split())
+    return len(tgt) < 0.4 * len(src)
+
+
+def sentence_groups(lines: list[str], max_words: int = GROUP_MAX_WORDS) -> list[list[int]]:
+    """Consecutive lines that together form whole sentences (a line not ending in . ! ? continues into the next),
+    without growing past `max_words` source words."""
+    groups, cur = [], []
+    for i, ln in enumerate(lines):
+        if cur and sum(len(lines[j].split()) for j in cur) + len(ln.split()) > max_words:
+            groups.append(cur)
+            cur = []
+        cur.append(i)
+        if re.search(r"[.!?…。！？]['\")\]]?\s*$", ln.strip()) or i == len(lines) - 1:
+            groups.append(cur)
+            cur = []
+    return groups
+
+
+def split_by_share(text: str, weights: list[int]) -> list[str]:
+    """Split a translated sentence over the clips it spans, in proportion to the source words of each clip.
+    Scripts without spaces (zh) are split by characters."""
+    if len(weights) == 1:
+        return [text]
+    spaced = " " in text.strip()
+    toks = text.split() if spaced else list(text.strip())
+    total = max(1, sum(weights))
+    out, pos = [], 0
+    for k, w in enumerate(weights):
+        n = len(toks) - pos if k == len(weights) - 1 else max(1 if pos < len(toks) else 0, round(len(toks) * w / total))
+        part = toks[pos: pos + n]
+        pos += n
+        out.append((" " if spaced else "").join(part))
+    return out
+
+
+def translate_sentences(lines: list[str], lang: str, context: str = "") -> list[str]:
+    """Translate whole sentences, never fragments: lines are joined into sentences, translated, then split back.
+    Fragment input made MT invent endings (\"the other big thing in\" -> \"... in der Wohnung\")."""
+    groups = sentence_groups(lines)
+    joined = [" ".join(lines[i] for i in g) for g in groups]
+    tr = translate_lines(joined, lang, context)
+    redo = [k for k, (g, src, t) in enumerate(zip(groups, joined, tr)) if len(g) > 1 and _short(src, t, lang)]
+    if redo:  # merged sentence came back short: translate those lines one by one instead (never lose content)
+        parts = translate_lines([lines[i] for k in redo for i in groups[k]], lang, context)
+        out, pos = [""] * len(lines), 0
+        for k in redo:
+            for i in groups[k]:
+                out[i] = parts[pos]
+                pos += 1
+        groups_left = [(g, t) for k, (g, t) in enumerate(zip(groups, tr)) if k not in redo]
+    else:
+        out, groups_left = [""] * len(lines), list(zip(groups, tr))
+    for g, t in groups_left:
+        for i, part in zip(g, split_by_share(t, [len(lines[i].split()) for i in g])):
+            out[i] = part
+    return out
+
+
 def _finish_line(text: str, lang: str) -> str:
     """Dialect adaptation (rule-based, for packs with a dialect profile) and the language's typography."""
     p = lp.get(lang)
@@ -139,7 +204,7 @@ def language_review(source: list[str], target: list[str], lang: str, back: list[
     lost = [(i + 1, sorted(_numbers(s) - _numbers(t))) for i, (s, t) in enumerate(zip(source, target)) if _numbers(s) - _numbers(t)]
     checks.append(qa._c(f"numbers preserved [{lang}]", not lost,
                         "all digits carried over" if not lost else f"numbers missing/changed in lines {lost[:4]} (may be spelled out - verify)", "minor"))
-    odd = [i + 1 for i, (s, t) in enumerate(zip(source, target)) if len(t) < 0.4 * len(s) or (lang != "en" and mt.too_long(s, t, lang))]
+    odd = [i + 1 for i, (s, t) in enumerate(zip(source, target)) if _short(s, t, lang) or (lang != "en" and mt.too_long(s, t, lang))]
     checks.append(qa._c(f"no added/dropped content [{lang}]", not odd, "line lengths consistent with the source" if not odd else
                         f"lines {odd} are much longer/shorter than the source - possible invented or missing content", "major", fix="retranslate"))
     if lang == "ar-EG":
@@ -182,7 +247,14 @@ def narration_units(tl: dict, analyses: dict | None = None) -> list[dict]:
         txt = c.get("narration")
         if not txt and analyses and c.get("src") in analyses and analyses[c["src"]].get("transcript"):
             segs = analyses[c["src"]]["transcript"]["segments"]
-            txt = " ".join(s["text"] for s in segs if s["start"] >= c["in"] - 0.3 and s["end"] <= c["out"] + 0.3)
+            words = [w for s in segs for w in (s.get("words") or [])]
+            if words:  # exactly the words heard in this clip: whole sentences when the cut follows sentence boundaries
+                txt = " ".join(str(w.get("word", "")).strip() for w in words
+                               if c["in"] - 0.05 <= (w["start"] + w["end"]) / 2 <= c["out"] + 0.05).strip()
+                # (segment-based text gave fragments such as "the other big thing in", which MT completed with
+                # invented words: "...in der Wohnung")
+            else:
+                txt = " ".join(s["text"] for s in segs if s["start"] >= c["in"] - 0.3 and s["end"] <= c["out"] + 0.3)
         if txt:
             units.append({"clip": i, "start": st, "text": txt.strip()})
     return units
@@ -199,7 +271,7 @@ def localize(project, tl: dict, lang: str, analyses: dict | None = None, context
     if lang == source_lang:
         lines, olines, back = src_lines, overlay_texts, None
     else:
-        lines = translate_lines(src_lines, lang, context)
+        lines = translate_sentences(src_lines, lang, context)
         olines = translate_lines(overlay_texts, lang, context) if overlay_texts else []
         try:
             back = llm_translate_lines(lines, source_lang, context)  # different model than the translator = independent evidence
@@ -210,7 +282,12 @@ def localize(project, tl: dict, lang: str, analyses: dict | None = None, context
         for t in c.get("text", []):
             t["text"], t["lang"] = olines[k], lang
             k += 1
-    review = language_review(src_lines, lines, lang, back)
+    # Review whole sentences (numbers and meaning move between the clips a sentence spans once it is split back).
+    groups = sentence_groups(src_lines)
+    j_src = [" ".join(src_lines[i] for i in g) for g in groups]
+    j_tgt = [" ".join(lines[i] for i in g if lines[i]) for g in groups]
+    j_back = [" ".join(back[i] for i in g if back[i]) for g in groups] if back else None
+    review = language_review(j_src, j_tgt, lang, j_back)
     if lang != source_lang and back is None and "back_note" in locals():
         review["checks"].append(qa._c(f"back-translation [{lang}]", False, back_note, "minor"))
     review["lines"] = [{"source": s, "target": t} for s, t in zip(src_lines, lines)]
