@@ -1,5 +1,6 @@
-"""Task routing with privacy classes, quotas, circuit breakers, structured-output validation, caching and an honest
-'no provider' result. Never routes to a paid endpoint (the cost guard is consulted for every network call)."""
+"""Task routing with privacy classes, quotas, token budgets, circuit breakers, structured-output validation, caching and
+an honest 'no provider' result. Never routes to a paid endpoint (the cost guard is consulted for every network call)
+nor to a service that needs a payment method or has no free quota."""
 from __future__ import annotations
 
 import hashlib
@@ -86,9 +87,26 @@ def _usage_today(pid: str) -> int:
     return rows[0]["n"] if rows else 0
 
 
+def _usage_tokens_today(pid: str) -> int:
+    day = time.strftime("%Y-%m-%d")
+    rows = db.query("SELECT SUM(CAST(json_extract(meta, '$.tokens') AS INTEGER)) n FROM metrics WHERE name='ai_request' AND meta LIKE ?",
+                    (f'%"provider": "{pid}"%"day": "{day}"%',))
+    return int(rows[0]["n"] or 0) if rows else 0
+
+
 def _usage_last_minute(pid: str) -> int:
     rows = db.query("SELECT COUNT(*) n FROM metrics WHERE name='ai_request' AND ts>? AND meta LIKE ?", (time.time() - 60, f'%"provider": "{pid}"%'))
     return rows[0]["n"] if rows else 0
+
+
+def estimate_tokens(text: str) -> int:
+    """Token estimate without a tokenizer, deliberately on the high side so budgets are never exceeded:
+    ~3.5 chars/token for Latin/Cyrillic, 1 token per CJK character, 2.5 chars/token for Arabic/Devanagari."""
+    if not text:
+        return 0
+    cjk = sum(1 for c in text if "぀" <= c <= "鿿" or "가" <= c <= "힯")
+    dense = sum(1 for c in text if "؀" <= c <= "ۿ" or "ऀ" <= c <= "ॿ")
+    return int(cjk + dense / 2.5 + (len(text) - cjk - dense) / 3.5) + 8
 
 
 def _breaker_open(pid: str) -> bool:
@@ -96,11 +114,22 @@ def _breaker_open(pid: str) -> bool:
     return bool(b and b["fails"] >= BREAKER_FAILS and time.time() - b["since"] < BREAKER_COOLDOWN)
 
 
-def eligibility(entry: dict, privacy: str) -> tuple[bool, str]:
-    """Why a (provider, model) entry may or may not take a request of this privacy class right now."""
+def zero_spend_block(entry: dict) -> str | None:
+    """Static zero-spend gate: services needing a card or without any free quota are never used."""
+    if entry.get("payment_method_required") is True:
+        return f"{entry.get('provider', entry.get('id'))}: requires a payment method - never used (zero spend)"
+    if entry.get("free_quota") == "none":
+        return f"{entry.get('provider', entry.get('id'))}: no free quota exists - never used (zero spend)"
+    return None
+
+
+def eligibility(entry: dict, privacy: str, need_tokens: int = 0) -> tuple[bool, str]:
+    """Why a (provider, model) entry may or may not take a request of this privacy class (and size) right now."""
     pid = entry["provider"]
     if PRIVACY_RANK[privacy] > PRIVACY_RANK[entry["privacy"]]:
         return False, f"{pid}: data class '{privacy}' may not leave for a '{entry['hosting']}' provider"
+    if blocked := zero_spend_block(entry):
+        return False, blocked
     s = provider_settings(pid)
     if s.get("disabled"):
         return False, f"{pid}: disabled by the owner"
@@ -119,6 +148,17 @@ def eligibility(entry: dict, privacy: str) -> tuple[bool, str]:
             return False, f"{pid}: 90 % of the daily free quota used"
         if q.get("rpm") and _usage_last_minute(pid) >= q["rpm"]:
             return False, f"{pid}: per-minute limit reached"
+        if q.get("tpd") and _usage_tokens_today(pid) + need_tokens > int(q["tpd"] * 0.9):
+            return False, f"{pid}: 90 % of the daily free token quota would be used"
+        if q.get("tpm") and need_tokens > int(q["tpm"]):
+            return False, f"{pid}: request (~{need_tokens} tokens) exceeds the per-minute token limit {q['tpm']}"
+    # owner-set daily limits apply to every provider kind and are never relaxed by documented quotas
+    if s.get("daily_requests") and _usage_today(pid) >= int(s["daily_requests"]):
+        return False, f"{pid}: owner daily request limit {s['daily_requests']} reached"
+    if s.get("daily_tokens") and _usage_tokens_today(pid) + need_tokens > int(s["daily_tokens"]):
+        return False, f"{pid}: owner daily token limit {s['daily_tokens']} would be exceeded"
+    if need_tokens and entry.get("context") and need_tokens > int(entry["context"]):
+        return False, f"{pid}/{entry['model']}: ~{need_tokens} tokens do not fit its {entry['context']}-token context"
     if _breaker_open(pid):
         return False, f"{pid}: circuit open after {BREAKER_FAILS} consecutive failures (retry after {int(BREAKER_COOLDOWN)} s)"
     if entry["hosting"] == "in_process" and entry.get("kind") == "llamacpp_inprocess":
@@ -129,25 +169,40 @@ def eligibility(entry: dict, privacy: str) -> tuple[bool, str]:
     return True, "ok"
 
 
+MIN_MEASURED_ITEMS = 5  # a benchmark score replaces the estimate only when it rests on at least this many items
+
+
+def _measured(entry: dict, cap: str) -> tuple[float | None, int]:
+    """Latest measured score and its sample size (the newest benchmark run supersedes older ones)."""
+    rows = db.query("SELECT value v, CAST(COALESCE(json_extract(meta, '$.n'), 0) AS INTEGER) n FROM metrics WHERE name=? AND meta LIKE ? "
+                    "ORDER BY ts DESC, id DESC LIMIT 1", (f"ai_quality.{cap}", f'%"model": "{entry["model"]}"%'))
+    return (rows[0]["v"], rows[0]["n"]) if rows else (None, 0)
+
+
 def _measured_quality(entry: dict, cap: str) -> float | None:
-    rows = db.query("SELECT AVG(value) v, COUNT(*) n FROM metrics WHERE name=? AND meta LIKE ?",
-                    (f"ai_quality.{cap}", f'%"model": "{entry["model"]}"%'))
-    return rows[0]["v"] if rows and rows[0]["n"] else None
+    v, n = _measured(entry, cap)
+    return v if v is not None and n >= MIN_MEASURED_ITEMS else None
 
 
-def candidates(task: str, privacy: str = "internal", entries: list[dict] | None = None) -> tuple[list[dict], list[str]]:
+def candidates(task: str, privacy: str = "internal", entries: list[dict] | None = None,
+               need_tokens: int = 0) -> tuple[list[dict], list[str]]:
     if task not in TASKS:
         raise KeyError(f"unknown AI task '{task}' (known: {', '.join(TASKS)})")
     t = TASKS[task]
     ok, why = [], []
     for e in entries if entries is not None else _entries():
-        good, reason = eligibility(e, privacy)
+        good, reason = eligibility(e, privacy, need_tokens)
         q = (e.get("quality") or {}).get(t["cap"], 0)
-        mq = _measured_quality(e, t["cap"])
-        q = mq if mq is not None else q
+        mv, mn = _measured(e, t["cap"])
+        if mv is not None and mn >= MIN_MEASURED_ITEMS:
+            q, qsrc = round(mv, 2), f"measured n={mn}"
+        else:
+            qsrc = (e.get("quality") or {}).get("source", "estimate")
+            if mv is not None:
+                qsrc += f" (bench {round(mv, 2)} on n={mn} < {MIN_MEASURED_ITEMS} items: not used)"
         if good and q < t["min_q"]:
-            good, reason = False, f"{e['provider']}/{e['model']}: quality {q} < {t['min_q']} needed for {task}"
-        (ok.append({**e, "_q": q}) if good else why.append(reason))
+            good, reason = False, f"{e['provider']}/{e['model']}: quality {q} ({qsrc}) < {t['min_q']} needed for {task}"
+        (ok.append({**e, "_q": q, "_q_source": qsrc}) if good else why.append(reason))
     if t["light"]:  # adequate + fastest + most private first
         ok.sort(key=lambda e: (SPEED_RANK.get(e.get("speed", "medium"), 1), -PRIVACY_RANK[e["privacy"]], -e["_q"]))
     else:           # strongest first; ties go to the more private / local provider
@@ -157,12 +212,16 @@ def candidates(task: str, privacy: str = "internal", entries: list[dict] | None 
 
 def _entries() -> list[dict]:
     out = reg.models()
-    # owner-run servers: models declared in settings (licence must be stated by the owner)
+    # owner-run servers: models declared in settings; facts come from `model_profiles` when the id is known there,
+    # otherwise the owner must state licence/quality in settings (unknown quality = 0 = never chosen)
     s = provider_settings("owner-openai-compatible")
     if s.get("base_url"):
         base = reg.providers()["owner-openai-compatible"]
+        profiles = reg.catalog().get("model_profiles") or {}
         for m in s.get("models", []):
-            out.append({**{k: v for k, v in base.items() if k != "models"}, "provider": base["id"], **m})
+            m = {"model": m} if isinstance(m, str) else m
+            prof = profiles.get(m.get("profile") or m["model"], {})
+            out.append({**{k: v for k, v in base.items() if k != "models"}, "provider": base["id"], **prof, **m})
     return out
 
 
@@ -226,7 +285,8 @@ def complete(task: str, prompt: str, *, system: str = "You are a precise assista
     """Run one AI task on the best eligible provider, falling back down the ranked list."""
     if privacy not in PRIVACY_RANK:
         raise ValueError("privacy must be public, internal or private")
-    ranked, why = candidates(task, privacy, entries)
+    need = estimate_tokens(system) + estimate_tokens(prompt) + max_tokens
+    ranked, why = candidates(task, privacy, entries, need_tokens=need)
     if not ranked:
         raise NoProviderAvailable(task, why)
     tried: list[str] = []
@@ -253,14 +313,16 @@ def complete(task: str, prompt: str, *, system: str = "You are a precise assista
             lat = round(time.time() - t0, 3)
             with _lock:
                 _breaker.pop(e["provider"], None)
+            tokens = usage.get("total_tokens") or (need - max_tokens + estimate_tokens(text))
             db.metric("ai_request", lat, provider=e["provider"], model=e["model"], task=task, day=time.strftime("%Y-%m-%d"),
-                      tokens=usage.get("total_tokens"))
+                      tokens=int(tokens), tokens_estimated=not usage.get("total_tokens"))
             if use_cache:
                 _cache_put(key, {"text": text, "data": data, "usage": usage})
             return Result(text, data, e["provider"], e["model"], lat, False, tried, usage)
     raise NoProviderAvailable(task, why + tried)
 
 
+# ----------------------------------------------------------------- introspection (UI, CLI, Account 1)
 def status(privacy: str = "public") -> dict:
     """Per task: which provider would run it now, and why the others would not."""
     out = {}
@@ -270,18 +332,87 @@ def status(privacy: str = "public") -> dict:
     return out
 
 
-def health() -> list[dict]:
+def _pct(xs: list[float], p: float) -> float | None:
+    if not xs:
+        return None
+    xs = sorted(xs)
+    return round(xs[min(len(xs) - 1, int(round(p * (len(xs) - 1))))], 3)
+
+
+def health(window: int = 50) -> list[dict]:
+    """Per provider: counts, response-time percentiles over the last `window` successes, last success/failure, today's
+    requests and tokens next to documented and owner-set limits, circuit state, and whether zero-spend blocks it."""
     rows = []
     for pid, p in reg.providers().items():
-        m = db.query("SELECT COUNT(*) n, AVG(value) lat FROM metrics WHERE name='ai_request' AND meta LIKE ?", (f'%"provider": "{pid}"%',))[0]
-        f = db.query("SELECT COUNT(*) n FROM metrics WHERE name='ai_failure' AND meta LIKE ?", (f'%"provider": "{pid}"%',))[0]
-        rows.append({"provider": pid, "hosting": p["hosting"], "requests": m["n"], "mean_latency_s": round(m["lat"] or 0, 2), "failures": f["n"],
-                     "circuit": "open" if _breaker_open(pid) else "closed", "today": _usage_today(pid), "quotas": p.get("quotas", {})})
+        like = f'%"provider": "{pid}"%'
+        m = db.query("SELECT COUNT(*) n, AVG(value) lat, MAX(ts) last FROM metrics WHERE name='ai_request' AND meta LIKE ?", (like,))[0]
+        lats = [r["value"] for r in db.query("SELECT value FROM metrics WHERE name='ai_request' AND meta LIKE ? ORDER BY ts DESC LIMIT ?",
+                                             (like, window))]
+        f = db.query("SELECT COUNT(*) n, MAX(ts) last FROM metrics WHERE name='ai_failure' AND meta LIKE ?", (like,))[0]
+        err = db.query("SELECT meta FROM metrics WHERE name='ai_failure' AND meta LIKE ? ORDER BY ts DESC LIMIT 1", (like,))
+        s = provider_settings(pid)
+        rows.append({"provider": pid, "hosting": p["hosting"], "requests": m["n"], "mean_latency_s": round(m["lat"] or 0, 2),
+                     "p50_latency_s": _pct(lats, 0.5), "p95_latency_s": _pct(lats, 0.95), "last_success": m["last"],
+                     "failures": f["n"], "last_failure": f["last"],
+                     "last_error": json.loads(err[0]["meta"]).get("error") if err else None,
+                     "circuit": "open" if _breaker_open(pid) else "closed", "today": _usage_today(pid),
+                     "tokens_today": _usage_tokens_today(pid), "quotas": p.get("quotas", {}),
+                     "owner_limits": {k: s[k] for k in ("daily_requests", "daily_tokens") if k in s},
+                     "zero_spend_blocked": zero_spend_block(p) is not None})
     return rows
+
+
+def route_explain(task: str, privacy: str = "internal", prompt_chars: int = 2000, max_tokens: int = 900) -> dict:
+    """The routing decision in words for the UI: who would run `task` now, in which order, and why others would not."""
+    if privacy not in PRIVACY_RANK:
+        raise ValueError("privacy must be public, internal or private")
+    need = int(prompt_chars / 3.5) + 8 + max_tokens
+    ok, why = candidates(task, privacy, need_tokens=need)
+    t = TASKS[task]
+    ranked = [{"provider": e["provider"], "model": e["model"], "hosting": e["hosting"], "privacy_max": e["privacy"],
+               "quality": e["_q"], "quality_source": e["_q_source"], "speed": e.get("speed", "medium"),
+               "licence": e.get("licence"), "local": e["hosting"] in ("in_process", "owner_worker")} for e in ok]
+    return {"task": task, "privacy": privacy, "capability": t["cap"], "min_quality": t["min_q"],
+            "ordering": "fastest adequate model first (light task)" if t["light"] else
+                        "strongest model first; ties go to the more private provider",
+            "estimated_tokens": need, "chosen": ranked[0] if ranked else None, "ranked": ranked, "excluded": why,
+            "answer": f"{task} runs on {ranked[0]['provider']}/{ranked[0]['model']}" if ranked else
+                      f"no provider can run {task} with '{privacy}' data now - queue it or ask a human",
+            "gates": ["privacy class", "zero spend (no card, free quota only, cost guard)", "owner authorisation + key (hosted)",
+                      "documented and owner-set quotas", "context / token budget", "circuit breaker", "minimum quality"]}
+
+
+def account1_capabilities(connection_prefix: str = "a3") -> list[dict]:
+    """AIProviderCapability/v1 documents for Account 1's scheduler, one per provider the router could ever use.
+    `tasks` = tasks whose quality bar at least one of its models meets; runtime gates (keys, quotas, breaker) stay here."""
+    from .. import contracts
+    ents = _entries()
+    out = []
+    for pid, p in reg.providers().items():
+        if zero_spend_block(p):
+            continue
+        mine = [e for e in ents if e["provider"] == pid]
+        tasks = sorted({t for t, d in TASKS.items() for e in mine if (e.get("quality") or {}).get(d["cap"], 0) >= d["min_q"]})
+        q, quotas = p.get("quotas") or {}, []
+        for key, period in (("rpd", "daily"), ("rpm", "per-minute")):
+            if q.get(key):
+                quotas.append({"contract": "QuotaStatus/v1", "provider": pid, "connection_id": f"{connection_prefix}:{pid}",
+                               "resource": "api_requests", "limit": float(q[key]),
+                               "used": float(_usage_today(pid)) if key == "rpd" else None, "period": period,
+                               "source": "documented", "measured_at": time.time(), "exhausted": False})
+        uses = {e.get("commercial_use") or ("yes" if e.get("licence") in ("Apache-2.0", "MIT") else "unverified") for e in mine}
+        commercial = "no" if "no" in uses else ("yes" if uses == {"yes"} else "unverified")
+        cap = contracts.make("ProviderCapability", provider=pid, connection_id=f"{connection_prefix}:{pid}", tasks=tasks,
+                             models=[e["model"] for e in mine], local=p["hosting"] in ("in_process", "owner_worker"),
+                             commercial_use=commercial, hosting=p["hosting"], privacy={"max": p["privacy"]}, quotas=quotas,
+                             verified=str(p.get("verified", "unverified")))
+        out.append(contracts.to_account1_ai_capability(cap))
+    return out
 
 
 def _reset_for_tests() -> None:
     _breaker.clear()
 
 
-__all__ = ["TASKS", "NoProviderAvailable", "Result", "complete", "candidates", "status", "health", "eligibility", "Path"]
+__all__ = ["TASKS", "NoProviderAvailable", "Result", "complete", "candidates", "status", "health", "eligibility",
+           "route_explain", "account1_capabilities", "estimate_tokens", "Path"]

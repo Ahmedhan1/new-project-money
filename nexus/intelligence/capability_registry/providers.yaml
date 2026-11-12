@@ -1,10 +1,18 @@
-# Account 3 AI provider + model catalogue (seed; agent B extends and verifies it).
+# Account 3 AI provider + model catalogue - the ROUTING facts. Full research table with sources:
+# docs/ACCOUNT3_AI_MODEL_CATALOG.md (every fact there carries a URL and the date it was checked).
+#
 # hosting:   in_process (this machine) | owner_worker (an endpoint the owner runs: Ollama/vLLM/SGLang/llama.cpp server,
 #            local or on Account 1's authorised remote GPU) | hosted_free (third-party API used only on its free tier)
 # privacy:   max data class the provider may receive: private (user media / unreleased work), internal, public
-# quality:   0-10 per capability; `source: measured` only after model_router.bench ran here, else `estimate`
-# A hosted_free provider is used only when ALL hold: owner authorised it in settings.json ("ai_providers":{"<id>":{"authorized":true}}),
-# its API key is present (env NEXUS_KEY_<ID> or the vault), the model is on the free tier, and today's quota is not spent.
+# quality:   0-10 per capability; `source: estimate` until model_router.bench measured it here - measured values are
+#            stored as db metrics `ai_quality.<cap>` and override these numbers automatically.
+# payment_method_required: true  -> the router NEVER routes there (zero-spend rule: no card-requiring service)
+#                          "unverified" -> the first-party docs do not say; the owner sees it at sign-up and decides
+# free_quota: none        -> there is no zero-cost path at all; never routed
+# quotas:    documented numbers only (rpm, rpd, tpm, tpd); missing = not published. The owner can always set stricter
+#            limits in settings.json: ai_providers.<id>.{daily_requests, daily_tokens}.
+# A hosted_free provider is used only when ALL hold: owner authorised it (settings.json ai_providers.<id>.authorized),
+# its API key is present (env NEXUS_KEY_<ID> or the vault), the model is a free model, and today's quota is not spent.
 checked: "2026-11-12"
 providers:
   - id: local-llamacpp
@@ -16,7 +24,7 @@ providers:
     commercial_use: "yes"
     payment_method_required: false
     quotas: {}
-    verified: "2026-11-12 (runs here: Qwen3-4B Q4_K_M, ~5 tok/s on 4 CPU threads)"
+    verified: "2026-11-12 (runs here: Qwen3-4B Q4_K_M on 4 CPU threads; see docs/results/account3/models_bench.json)"
     models:
       - model: qwen3-4b-q4km
         family: Qwen3
@@ -31,6 +39,7 @@ providers:
         languages: [en, de, fr, ar, zh, ru, hi, es, pt, tr, ja, ko, it]
         quality: {reasoning: 4, writing: 4, json: 6, translation: 4, arabic: 3, summarization: 5, source: estimate}
         speed: slow
+
   - id: owner-openai-compatible
     name: Owner-run OpenAI-compatible server (Ollama / vLLM / SGLang / llama.cpp server)
     kind: openai_compatible
@@ -41,44 +50,66 @@ providers:
     commercial_use: "per model"
     payment_method_required: false
     quotas: {}
-    verified: "2026-11-12 (protocol tested against llama.cpp's OpenAI-compatible server)"
-    models: []          # discovered from GET /v1/models at runtime; licence per model must be declared in settings
+    verified: "2026-11-12 (llama-cpp-python 0.3.36 server with Qwen3-0.6B Q8_0 measured here)"
+    # Models come from settings.json ai_providers.owner-openai-compatible.models ([{model: <id served>, ...}]).
+    # When the id matches a profile in `model_profiles` below, its licence/quality/context facts are filled in.
+    models: []
+
   - id: groq
-    name: Groq API (free tier)
+    name: Groq API (free plan)
     kind: openai_compatible
     hosting: hosted_free
     base_url: https://api.groq.com/openai/v1
     host: api.groq.com
     privacy: public
+    privacy_note: "no retention by default; inputs/outputs may be logged up to 30 days for troubleshooting/abuse (console.groq.com/docs/your-data)"
     commercial_use: "per model"
-    payment_method_required: false
-    quotas: {rpm: 30, rpd: 1000, source: "documented, varies per model - console.groq.com/docs/rate-limits"}
-    verified: unverified
+    payment_method_required: unverified
+    # console.groq.com/docs/rate-limits (2026-11-12) labels these the Developer-plan base limits; the owner's free-plan
+    # numbers are shown at console.groq.com/settings/limits.
+    quotas: {rpm: 30, rpd: 1000, tpm: 8000, tpd: 200000, source: "documented base limits, console.groq.com/docs/rate-limits, 2026-11-12"}
+    verified: "2026-11-12 (models + limits page; card requirement not stated)"
     models:
-      - model: llama-3.3-70b-versatile
-        family: Llama 3.3
-        licence: Llama 3.3 Community License
+      - model: openai/gpt-oss-20b
+        family: gpt-oss
+        licence: Apache-2.0
+        context: 131072
+        quality: {reasoning: 6, writing: 6, json: 7, translation: 5, arabic: 4, summarization: 6, source: estimate}
+        speed: fast
+      - model: openai/gpt-oss-120b
+        family: gpt-oss
+        licence: Apache-2.0
         context: 131072
         quality: {reasoning: 7, writing: 7, json: 7, translation: 6, arabic: 5, summarization: 7, source: estimate}
         speed: fast
+      - model: qwen/qwen3.8-27b
+        family: Qwen3.8
+        licence: Apache-2.0
+        context: 131072
+        quality: {reasoning: 7, writing: 7, json: 7, translation: 7, arabic: 6, summarization: 7, source: estimate}
+        speed: fast
+
   - id: cerebras
-    name: Cerebras Inference (free tier)
+    name: Cerebras Inference
     kind: openai_compatible
     hosting: hosted_free
     base_url: https://api.cerebras.ai/v1
     host: api.cerebras.ai
     privacy: public
     commercial_use: "per model"
-    payment_method_required: false
-    quotas: {rpm: 30, rpd: 14400, source: "documented, varies per model - inference-docs.cerebras.ai"}
-    verified: unverified
+    # www.cerebras.ai/pricing (2026-11-12): "Add a valid payment method to receive a one-time $5 promotional credit",
+    # expires after 30 days -> not a zero-spend provider; kept for documentation, never routed.
+    payment_method_required: true
+    quotas: {rpm: 5, tpm: 90000, tpd: 1000000, source: "documented Free Trial limits, inference-docs.cerebras.ai/support/rate-limits, 2026-11-12"}
+    verified: "2026-11-12"
     models:
-      - model: qwen-3-32b
-        family: Qwen3
+      - model: qwen-3.8-27b
+        family: Qwen3.8
         licence: Apache-2.0
-        context: 32768
+        context: 64000
         quality: {reasoning: 7, writing: 7, json: 7, translation: 7, arabic: 6, summarization: 7, source: estimate}
         speed: fast
+
   - id: gemini
     name: Google Gemini API (free tier)
     kind: openai_compatible
@@ -86,18 +117,23 @@ providers:
     base_url: https://generativelanguage.googleapis.com/v1beta/openai
     host: generativelanguage.googleapis.com
     privacy: public
-    privacy_note: "free-tier prompts may be used to improve Google products - never send private data"
+    privacy_note: "free tier: 'Used to improve our products: Yes' (aistudio.google.com/docs/pricing) - never send private or internal data"
     commercial_use: "yes (API terms)"
-    payment_method_required: false
-    quotas: {rpm: 10, rpd: 250, source: "documented, varies per model - ai.google.dev/gemini-api/docs/rate-limits"}
-    verified: unverified
+    payment_method_required: false   # free tier needs no billing account (aistudio.google.com/docs/rate-limits)
+    quotas: {source: "per model and per project, shown at aistudio.google.com/rate-limit; not published for these models"}
+    verified: "2026-11-12 (pricing page lists 'Free of charge' for these ids)"
     models:
-      - model: gemini-2.5-flash
-        family: Gemini 2.5
+      - model: gemini-3.5-flash-lite
+        family: Gemini 3.5
         licence: proprietary API
-        context: 1000000
+        quality: {reasoning: 7, writing: 7, json: 7, translation: 7, arabic: 6, summarization: 7, source: estimate}
+        speed: fast
+      - model: gemini-3.8-flash
+        family: Gemini 3.8
+        licence: proprietary API
         quality: {reasoning: 8, writing: 8, json: 8, translation: 8, arabic: 7, summarization: 8, source: estimate}
         speed: fast
+
   - id: openrouter-free
     name: OpenRouter (only ':free' model variants)
     kind: openai_compatible
@@ -109,12 +145,74 @@ providers:
     commercial_use: "per model"
     payment_method_required: false
     free_model_suffix: ":free"
-    quotas: {rpm: 20, rpd: 50, source: "documented for accounts without credits - openrouter.ai/docs/api-reference/limits"}
+    quotas: {rpm: 20, rpd: 50, source: "documented for accounts with < 10 credits purchased, openrouter.ai/docs/api-reference/limits, 2026-11-12"}
+    verified: "2026-11-12 (limits page; free-model list at openrouter.ai/models?max_price=0 changes often)"
+    models:
+      - model: liquid/lfm-3-1.7b:free
+        family: LFM 3
+        licence: unverified
+        context: 262144
+        quality: {reasoning: 3, writing: 3, json: 4, translation: 3, arabic: 2, summarization: 4, source: estimate}
+        speed: fast
+
+  - id: mistral-free
+    name: Mistral La Plateforme (Experiment plan)
+    kind: openai_compatible
+    hosting: hosted_free
+    base_url: https://api.mistral.ai/v1
+    host: api.mistral.ai
+    privacy: public
+    privacy_note: "Experiment plan: requests may be used for training (third-party reports; Mistral help article not reachable 2026-11-12) - public data only"
+    commercial_use: "per model"
+    payment_method_required: unverified   # help.mistral.ai describes phone verification, no card; page 404'd when re-checked
+    quotas: {source: "not published; shown in the Mistral admin console (Limits)"}
     verified: unverified
     models:
-      - model: qwen/qwen3-235b-a22b:free
-        family: Qwen3
-        licence: Apache-2.0
-        context: 40960
-        quality: {reasoning: 8, writing: 7, json: 7, translation: 7, arabic: 6, summarization: 7, source: estimate}
-        speed: medium
+      - model: mistral-small-latest
+        family: Mistral Small
+        licence: "Apache-2.0 weights (Mistral Small 4); API alias unverified"
+        quality: {reasoning: 6, writing: 6, json: 6, translation: 6, arabic: 5, summarization: 6, source: estimate}
+        speed: fast
+
+  - id: huggingface-free
+    name: Hugging Face Inference Providers (router)
+    kind: openai_compatible
+    hosting: hosted_free
+    base_url: https://router.huggingface.co/v1
+    host: router.huggingface.co
+    privacy: public
+    commercial_use: "per model"
+    payment_method_required: false
+    # huggingface.co/docs/inference-providers/pricing (2026-11-12): Free users get NO monthly credits; usage needs
+    # purchased credits or PRO. No zero-spend path -> never routed.
+    free_quota: none
+    quotas: {source: "free users: no included credits"}
+    verified: "2026-11-12"
+    models: []
+
+# Facts for models an owner serves on owner-openai-compatible (matched by the served model id).
+model_profiles:
+  qwen3-0.6b-q8:
+    family: Qwen3
+    version: "3"
+    weights: Qwen/Qwen3-0.6B-GGUF (Qwen3-0.6B-Q8_0.gguf, 639 MB)
+    licence: Apache-2.0
+    commercial_use: "yes"
+    context: 4096
+    ram_gb: 1.2
+    vram_gb: 0
+    inputs: [text]
+    outputs: [text, json]
+    prompt_suffix: " /no_think"
+    json_schema: llamacpp   # served by llama-cpp-python's server: schemas become a grammar
+    quality: {reasoning: 3, writing: 3, json: 4, translation: 3, arabic: 2, summarization: 4, source: estimate}
+    speed: medium
+  qwen3-4b-q4km:
+    family: Qwen3
+    weights: Qwen/Qwen3-4B-GGUF
+    licence: Apache-2.0
+    commercial_use: "yes"
+    context: 8192
+    prompt_suffix: " /no_think"
+    quality: {reasoning: 4, writing: 4, json: 6, translation: 4, arabic: 3, summarization: 5, source: estimate}
+    speed: slow

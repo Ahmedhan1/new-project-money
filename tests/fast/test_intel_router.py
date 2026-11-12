@@ -131,7 +131,11 @@ def test_catalogue_entries_are_complete_and_map_to_account1():
     from nexus.intelligence import capability_registry as reg
     for p in reg.catalog()["providers"]:
         assert {"id", "kind", "hosting", "privacy", "commercial_use", "payment_method_required", "quotas", "verified"} <= set(p), p["id"]
-        assert p["payment_method_required"] is False
+        assert p["payment_method_required"] in (False, True, "unverified")
+        if p["payment_method_required"] is True or p.get("free_quota") == "none":            # documented, never routed
+            for m in p.get("models") or [{"model": "x"}]:
+                e = {**p, "provider": p["id"], **m}
+                assert "zero spend" in router.eligibility(e, "public")[1]
         if p["hosting"] == "hosted_free":
             assert costguard.FREE_TIER_HOSTS.get(p["host"]) == p["id"]
     cap = contracts.make("ProviderCapability", provider="groq", connection_id="c1", tasks=["general"], models=["m"], local=False,
