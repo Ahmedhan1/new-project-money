@@ -186,6 +186,54 @@ def interp_filter(c: dict, fps: int, notes: list[str]) -> str | None:
     return None
 
 
+# Timeline-wide slow-motion quality profile (tl["slowmo"]) for clips slowed down (speed < 1 or a ramp) that have no
+# `interpolate` of their own. "optical_flow" = motion-compensated minterpolate (mci): smooth but slow on CPU, opt-in.
+SLOWMO_PROFILES = {"none": None, "blend": "blend", "optical_flow": "mci"}
+
+
+# ------------------------------------------------------------------ geometry: perspective + animated rotation
+def perspective_filters(c: dict, W: int, H: int, notes: list[str]) -> list[str]:
+    """Keystone / perspective correction: c["perspective"] = {"tl": [x, y], "tr": [x, y], "bl": [x, y], "br": [x, y]}
+    (0..1 positions in the fitted frame of the four corners of the area that should fill the frame)."""
+    pc = c.get("perspective")
+    if not isinstance(pc, dict):
+        return []
+    if not has("perspective"):
+        notes.append("perspective filter unavailable in this FFmpeg build; skipped")
+        return []
+    pts = []
+    for k, dflt in (("tl", (0, 0)), ("tr", (1, 0)), ("bl", (0, 1)), ("br", (1, 1))):
+        v = pc.get(k) or dflt
+        try:
+            x, y = float(v[0]), float(v[1])
+        except (TypeError, ValueError, IndexError):
+            x, y = dflt
+        pts.append((min(1.5, max(-0.5, x)) * W, min(1.5, max(-0.5, y)) * H))
+    xs = ":".join(f"x{i}={x:.2f}:y{i}={y:.2f}" for i, (x, y) in enumerate(pts))
+    return [f"perspective={xs}:interpolation=linear:sense=source"]
+
+
+def rotation_filters(c: dict, W: int, H: int, kf_expr) -> list[str]:
+    """Animated rotation: c["keyframes"]["rotation"] in degrees (clockwise) over clip time. By default the picture is
+    zoomed just enough (for the largest angle) that no corner shows; c["rotation_fill"] = "black" keeps the full
+    picture with black corners instead."""
+    pts = (c.get("keyframes") or {}).get("rotation")
+    expr = kf_expr(pts, "t")
+    if not expr:
+        return []
+    try:
+        amax = max(abs(float(p[1])) for p in pts if len(p) >= 2)
+    except ValueError:
+        amax = 0.0
+    out = []
+    if c.get("rotation_fill") != "black" and amax > 0:
+        th = math.radians(min(amax, 45.0))
+        k = math.cos(th) + max(W / H, H / W) * math.sin(th)
+        out.append(f"scale={even(W * k)}:{even(H * k)}")
+    out.append(f"rotate=a='({expr})*PI/180':ow={W}:oh={H}:c=black")
+    return out
+
+
 # ------------------------------------------------------------------ freeze frames
 def freezes(c: dict) -> list[tuple[float, float]]:
     """[(at, duration)] in clip-local output seconds (before earlier freezes are inserted), sorted."""
@@ -507,16 +555,36 @@ def split_opts(c: dict) -> dict | None:
     if not srcs:
         return None
     layout = s.get("layout", "h")
-    if layout not in ("h", "v", "grid"):
+    if layout not in SPLIT_LAYOUTS:
         layout = "h"
-    if layout == "grid" or len(srcs) >= 3:
+    if layout in ("h", "v") and len(srcs) >= 3:
         layout = "grid"
     return {"layout": layout, "srcs": srcs, "gap": int(min(64, max(0, _f(s, "gap", 6)))), "color": _hex(s.get("color"), "000000")}
+
+
+# h / v: side by side / stacked (2-3 panels); grid: 2x2; main_left / main_right: the clip in a 2/3-wide main panel,
+# the others stacked in the remaining third; main_top: main panel on top 2/3, the others side by side under it;
+# thirds_h / thirds_v: three equal columns / rows (the clip plus two sources).
+SPLIT_LAYOUTS = ("h", "v", "grid", "main_left", "main_right", "main_top", "thirds_h", "thirds_v")
 
 
 def split_cells(opts: dict, W: int, H: int, scale: float = 1.0) -> list[tuple[int, int, int, int]]:
     n = 1 + len(opts["srcs"])
     g = int(opts["gap"] * scale) // 2 * 2
+    lay = opts["layout"]
+    if lay in ("main_left", "main_right", "main_top"):
+        k = max(1, n - 1)
+        if lay == "main_top":
+            mh = (H * 2 // 3 - g // 2) // 2 * 2
+            sw = (W - g * (k - 1)) // k // 2 * 2
+            return [(0, 0, W, mh)] + [(i * (sw + g), mh + g, sw, H - mh - g) for i in range(k)]
+        mw = (W * 2 // 3 - g // 2) // 2 * 2
+        sh = (H - g * (k - 1)) // k // 2 * 2
+        mx, sx = (0, mw + g) if lay == "main_left" else (W - mw, 0)
+        return [(mx, 0, mw, H)] + [(sx, i * (sh + g), W - mw - g, sh) for i in range(k)]
+    if lay in ("thirds_h", "thirds_v"):
+        lay = "h" if lay == "thirds_h" else "v"
+        opts = {**opts, "layout": lay}
     if opts["layout"] == "h":
         w = (W - g * (n - 1)) // n // 2 * 2
         return [(i * (w + g), 0, w, H) for i in range(n)]
