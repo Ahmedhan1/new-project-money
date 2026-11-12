@@ -1,49 +1,72 @@
-"""Text rendering to transparent PNG overlays (Pillow). Handles Arabic shaping/RTL."""
+"""Text rendering to transparent PNG overlays (Pillow). Script-aware fonts (registry/languages.yaml), complex shaping
+through Raqm (Arabic joining/RTL, Devanagari conjuncts and matras), Han wrapping without spaces."""
 from __future__ import annotations
 
 import hashlib
+import re
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont, features
 
-from .. import config
+from .. import config, models
 
 _RAQM = features.check("raqm")
+# Han may not start a line with closing punctuation or end one with an opening bracket (basic kinsoku rules).
+_NO_LINE_START = set("。，、；：！？）》」』】〕…·,.;:!?)%")
+_NO_LINE_END = set("（《「『【〔(")
 
 
 def is_rtl(text: str) -> bool:
-    return any("֐" <= ch <= "ࣿ" or "ﭐ" <= ch <= "ﻼ" for ch in text)
+    return any("\u0590" <= ch <= "\u08ff" or "\ufb1d" <= ch <= "\ufefc" for ch in text)
+
+
+def script_of(text: str, lang: str = "en") -> str:
+    """Script used to choose font and shaping: the text's own dominant script, else the language's."""
+    return models.script_of(text) if any(ch.isalpha() for ch in text) else models.script_for(lang)
 
 
 def _prep(text: str) -> tuple[str, dict]:
-    """Return text + ImageDraw kwargs so that RTL scripts render correctly."""
-    if not is_rtl(text):
-        return text, {}
-    if _RAQM:
-        return text, {"direction": "rtl", "language": "ar"}
-    import arabic_reshaper
-    from bidi.algorithm import get_display
-    return get_display(arabic_reshaper.reshape(text)), {}
+    """Return text + ImageDraw kwargs so that complex scripts render correctly."""
+    if is_rtl(text):
+        if _RAQM:
+            return text, {"direction": "rtl", "language": "ar"}
+        import arabic_reshaper
+        from bidi.algorithm import get_display
+        return get_display(arabic_reshaper.reshape(text)), {}
+    if _RAQM and any("\u0900" <= ch <= "\u097f" for ch in text):
+        return text, {"language": "hi"}   # Raqm/HarfBuzz forms conjuncts and reorders matras (no Raqm: unshaped - see report)
+    return text, {}
 
 
 def font(size: int, lang: str = "en", text: str = "") -> ImageFont.FreeTypeFont:
-    path = config.font_for("ar" if (lang.startswith("ar") or is_rtl(text)) else lang)
+    path, index, _family = config.font_face_for(script_of(text, lang) if text else lang)
     kw = {"layout_engine": ImageFont.Layout.RAQM} if _RAQM else {}
-    return ImageFont.truetype(path, size, **kw)
+    return ImageFont.truetype(path, size, index=index, **kw)
+
+
+def _han_tokens(text: str) -> list[str]:
+    """Break units for unspaced text: single Han characters, but Latin words / numbers stay whole."""
+    return re.findall(r"[A-Za-z0-9][A-Za-z0-9.,%:+\-]*|\s+|.", text)
 
 
 def wrap(draw: ImageDraw.ImageDraw, text: str, fnt, max_w: int) -> list[str]:
     lines: list[str] = []
     for para in text.split("\n"):
+        han = models.script_of(para) == "han"
+        units = _han_tokens(para) if han else para.split()
+        sep = "" if han else " "
         cur = ""
-        for word in para.split():
-            trial = f"{cur} {word}".strip()
+        for u in units:
+            if han and u.isspace():
+                u = " "
+            trial = (cur + sep + u) if cur else u.strip()
             t, kw = _prep(trial)
-            if draw.textlength(t, font=fnt, **kw) <= max_w or not cur:
+            fits = draw.textlength(t, font=fnt, **kw) <= max_w
+            if fits or not cur or (han and (u in _NO_LINE_START or cur[-1] in _NO_LINE_END)):
                 cur = trial
             else:
-                lines.append(cur)
-                cur = word
+                lines.append(cur.rstrip())
+                cur = u.strip()
         lines.append(cur)
     return lines
 

@@ -319,14 +319,23 @@ def _render_parts(c: dict, tl: dict, cache: Path, head: int, tail: int, draft: b
     """Render a clip as video-only head / body / tail parts (frame counts) + PCM audio, in one FFmpeg run.
     Heads/tails (and the body when `mezz_body`, i.e. it will get captions burned in) use the mezzanine encoder."""
     W, H, scale = _geometry(tl, draft)
-    key = f"{segment_key(c, tl, draft)}_h{head}t{tail}{'m' if mezz_body and not draft else ''}"
-    paths = {"body": cache / f"part_{key}_b.mp4", "audio": cache / f"part_{key}_a.wav"}
-    if head:
-        paths["head"] = cache / f"part_{key}_h.mp4"
-    if tail:
-        paths["tail"] = cache / f"part_{key}_t.mp4"
-    if all(p.exists() and p.stat().st_size > 0 for p in paths.values()):
-        return paths, True
+    base = f"{segment_key(c, tl, draft)}_h{head}t{tail}"
+
+    def names(m: bool) -> dict:
+        key = base + ("m" if m and not draft else "")
+        ps = {"body": cache / f"part_{key}_b.mp4", "audio": cache / f"part_{base}_a.wav"}
+        if head:
+            ps["head"] = cache / f"part_{key}_h.mp4"
+        if tail:
+            ps["tail"] = cache / f"part_{key}_t.mp4"
+        return ps
+
+    # either quality variant of the body serves: a caption edit must never send a clip back to its source
+    for m in (mezz_body, not mezz_body):
+        ps = names(m)
+        if all(p.exists() and p.stat().st_size > 0 for p in ps.values()):
+            return {**ps, "body_mezz": m and not draft}, True
+    paths = names(mezz_body)
     cache.mkdir(parents=True, exist_ok=True)
     enc = encoder(draft)
     mezz = encoder(draft, mezzanine=True)
@@ -351,7 +360,7 @@ def _render_parts(c: dict, tl: dict, cache: Path, head: int, tail: int, draft: b
     ff.run([*enc["pre"], *g["args"], *th, "-filter_complex", ";".join(fc), *outs], op="render-segment")
     for name, t in tmps.items():
         t.replace(paths[name])
-    return paths, False
+    return {**paths, "body_mezz": mezz_body and not draft}, False
 
 
 # ------------------------------------------------------------------ stage 2: pieces
@@ -607,7 +616,7 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
     for pc in plan:
         i = pc["clip"]
         inputs = [str(parts[i - 1]["tail"]), str(parts[i]["head"])] if pc["kind"] == "xf" else [str(parts[i]["body"])]
-        pieces.append({**pc, "inputs": inputs})
+        pieces.append({**pc, "inputs": inputs, "burn": pc["burn"] or (pc["kind"] == "body" and parts[i]["body_mezz"])})
     narr = tl.get("audio", [])
     music = tl.get("music") or {}
     has_music = bool(music.get("src"))

@@ -25,8 +25,12 @@ models:
     license: Apache-2.0 (google/madlad400-3b-mt, CTranslate2 int8 conversion by Nextcloud)
     commercial: true
 
-# Piper voices (huggingface.co/rhasspy/piper-voices). `commercial` reflects the
-# TRAINING DATASET licence stated in each MODEL_CARD.
+# Piper voices (huggingface.co/rhasspy/piper-voices). `commercial` reflects the TRAINING DATA licence stated
+# in each MODEL_CARD (read 2026-11-11 for en/de/ar, 2026-11-12 for the rest) AND the data of the base model
+# a voice was fine-tuned from: a voice fine-tuned from `lessac` (Blizzard 2013 data, research only) or from
+# `ryan` (CC BY-NC-SA) is a derivative of non-commercial data and is NOT cleared, even if its own data is CC0.
+# Clean bases: `rdh` (nl_BE, CC0), `hifi_tts_92` (Hi-Fi TTS reader 92 / LibriVox, CC BY 4.0), trained from scratch.
+# `card` quotes the MODEL_CARD lines the decision rests on.
 voices:
   en_US-joe-medium:
     lang: en
@@ -34,28 +38,149 @@ voices:
     gender: male
     license: CC0
     commercial: true
+    card: "Dataset License: CC0 (OHF-Voice/voice-datasets); finetuned from rdh base (nl_BE, CC0)"
   en_US-ljspeech-medium:
     lang: en
     path: en/en_US/ljspeech/medium
     gender: female
     license: public domain (LJ Speech)
     commercial: true
+    card: "License: public domain; trained from scratch on LJ Speech"
   de_DE-thorsten-medium:
     lang: de
     path: de/de_DE/thorsten/medium
     gender: male
     license: CC0 (Thorsten-Voice)
     commercial: true
+    card: "Dataset License: CC0; finetuned from rdh base (CC0)"
+  de_DE-kerstin-medium:
+    lang: de
+    path: de/de_DE/kerstin/medium
+    gender: female
+    license: CC0
+    commercial: true
+    card: "Dataset License: CC0 (OHF-Voice/voice-datasets); finetuned from hifi_tts_92 base (CC BY 4.0)"
+  fr_FR-siwis-medium:
+    lang: fr
+    path: fr/fr_FR/siwis/medium
+    gender: female
+    license: "CC BY 4.0 (SIWIS French Speech Synthesis Database) - credit 'SIWIS database, University of Edinburgh / Idiap' in published work"
+    commercial: true
+    attribution: "Voice: Piper fr_FR-siwis-medium, trained on the SIWIS French Speech Synthesis Database (CC BY 4.0)"
+    card: "Dataset License: CC-BY 4.0 (datashare.is.ed.ac.uk/handle/10283/2353); finetuned from hifi_tts_92 base"
+  ru_RU-denis-medium:
+    lang: ru
+    path: ru/ru_RU/denis/medium
+    gender: male
+    license: CC0
+    commercial: true
+    card: "Dataset License: CC0 (OHF-Voice/voice-datasets); finetuned from rdh base (CC0)"
+  es_ES-davefx-medium:
+    lang: es
+    path: es/es_ES/davefx/medium
+    gender: male
+    license: CC0
+    commercial: true
+    card: "Dataset License: CC0 (OHF-Voice/voice-datasets); finetuned from rdh base (CC0)"
+  pt_BR-cadu-medium:
+    lang: pt-BR
+    path: pt/pt_BR/cadu/medium
+    gender: male
+    license: CC0
+    commercial: true
+    card: "Dataset License: CC0 (OHF-Voice/voice-datasets); finetuned from rdh base (CC0)"
+  it_IT-serena-medium:
+    lang: it
+    path: it/it_IT/serena/medium
+    gender: female
+    license: "CC BY 4.0 (committa/serena-synthetic-it-27h, synthetic audio from Qwen3-TTS-1.7B-Base, Apache-2.0) - attribution required"
+    commercial: true
+    attribution: "Voice: Piper it_IT-serena-medium, trained on serena-synthetic-it-27h by Marco Baccarani / Committa (CC BY 4.0)"
+    card: "Dataset License: CC-BY-4.0; trained from scratch. Dataset card: audio generated with Qwen3-TTS (Apache-2.0) default 'Serena' speaker; no real-person reference audio; author did not verify Qwen3-TTS training-data consent"
+  nl_NL-alex-medium:
+    lang: nl
+    path: nl/nl_NL/alex/medium
+    gender: male
+    license: CC0
+    commercial: true
+    card: "Dataset License: CC0 (OHF-Voice/voice-datasets); finetuned from rdh base (CC0)"
+  pl_PL-darkman-medium:
+    lang: pl
+    path: pl/pl_PL/darkman/medium
+    gender: male
+    license: CC0
+    commercial: true
+    card: "Dataset License: CC0 (OHF-Voice/voice-datasets); finetuned from rdh base (CC0)"
+  uk_UA-ukrainian_tts-medium:
+    lang: uk
+    path: uk/uk_UA/ukrainian_tts/medium
+    gender: female
+    license: CC0
+    commercial: true
+    card: "Dataset License: CC0 (OHF-Voice/voice-datasets); trained from scratch; 3 speakers (lada, mykyta, tetiana), speaker 0 used"
   ar_JO-kareem-medium:
     lang: ar
     path: ar/ar_JO/kareem/medium
     gender: male
     license: "UNVERIFIED - model card says 'See URL'; dataset repo AliMokhammad/arabicttstrain has no licence file"
     commercial: false   # treated as not cleared until a licence is confirmed
-    note: "Only Arabic Piper voice. Jordanian/MSA-leaning, not Egyptian. Use for drafts; clear-licence fallback is espeak-ng (robotic). Candidate replacement: Chatterbox Multilingual (MIT) - needs benchmarking."
+    card: "Dataset License: See URL (github.com/AliMokhammad/arabicttstrain); finetuned from lessac (research-only data) - two independent reasons it is not cleared"
+    note: "Only Arabic voice in rhasspy/piper-voices (re-checked 2026-11-12: kareem low/medium only). Jordanian/MSA-leaning, not Egyptian or Gulf. Drafts only; clear-licence fallback is espeak-ng (robotic). Candidate replacement: Chatterbox Multilingual (MIT) - needs benchmarking."
 
-# Voices evaluated and rejected
+# Commercially cleared but NOT runnable in the current install (kept here so nobody re-does the licence work).
+blocked_voices:
+  zh_CN-chaowen-medium:
+    lang: zh
+    path: zh/zh_CN/chaowen/medium
+    license: CC0
+    commercial: true
+    card: "Dataset License: CC0 (OHF-Voice/voice-datasets); finetuned from hifi_tts_92 base; phoneme_type pinyin via g2pW"
+    blocked_by: "piper's Chinese phonemizer imports unicode_rbnf and transformers (BertTokenizer 'bert-base-chinese', Apache-2.0) and needs the g2pW onnx model (huggingface.co/datasets/rhasspy/piper-checkpoints zh/zh_CN/_resources/g2pw.tar.gz). None installed; PyPI was not an allowed host for LANG-1."
+
+# Voices evaluated and rejected (MODEL_CARD evidence)
 rejected_voices:
   en_US-ryan-medium: "CC BY-NC-SA 4.0 dataset - non-commercial"
   en_US-hfc_male-medium: "CC BY-NC-SA 4.0 dataset - non-commercial"
   en_US-lessac-medium: "Blizzard 2013 licence - research only"
+  de_DE-thorsten-high: "CC0 data but finetuned from lessac (research-only base) - use thorsten-medium (rdh base)"
+  fr_FR-upmc-medium: "CC BY-SA 4.0 data, finetuned from lessac"
+  fr_FR-tom-medium: "AGPLv3 dataset licence - copyleft terms on the voice; not cleared"
+  fr_FR-mls-medium: "CC BY 4.0, scratch - acceptable but 125-speaker MLS read speech; siwis-medium preferred"
+  fr_FR-gilles-low: "CC0 data but finetuned from ryan (CC BY-NC-SA base)"
+  zh_CN-huayan-medium: "dataset licence Unknown; finetuned from lessac"
+  zh_CN-xiao_ya-medium: "BZNSYP / Data Baker - non-commercial use"
+  ru_RU-dmitri-medium: "CC0 data but finetuned from lessac"
+  ru_RU-irina-medium: "dataset licence Unknown (RHVoice); finetuned from lessac"
+  ru_RU-ruslan-medium: "RUSLAN corpus CC BY-NC-SA 4.0 - non-commercial"
+  hi_IN-pratham-medium: "CC BY-NC-SA 4.0 - non-commercial"
+  hi_IN-priyamvada-medium: "CC BY-NC-SA 4.0 - non-commercial"
+  hi_IN-rohan-medium: "IIT Madras IndicTTS licence PDF (iitm.ac.in, not reachable in this task) - unverified; also finetuned from lessac"
+  es_ES-sharvard-medium: "CC BY 3.0 data, hifi base - acceptable; davefx preferred (CC0, single speaker)"
+  es_AR-daniela-high: "CC BY-SA 4.0 data, finetuned from lessac"
+  es_MX-ald-medium: "Unlicense data, but finetuned from an older davefx voice whose base is not stated"
+  es_MX-claude-high: "licence field points at a HF Space (apache-2.0) with no dataset provenance"
+  pt_PT-tugão-medium: "CC0 data but finetuned from lessac"
+  pt_BR-faber-medium: "CC0 data but finetuned from lessac"
+  pt_BR-edresson-low: "CC BY 4.0 data, finetuned from ryan (CC BY-NC-SA base)"
+  it_IT-paola-medium: "licence 'See URL'; finetuned from lessac"
+  it_IT-riccardo-x_low: "M-AILABS licence 'See URL' - unverified"
+  tr_TR-dfki-medium: "CC BY-NC-SA 4.0 - non-commercial (only Turkish Piper voice)"
+  id_ID-news_tts-medium: "licence 'See URL' pointing at an unrelated Malayalam Kaggle notebook; finetuned from lessac (only Indonesian Piper voice)"
+  ar_JO-kareem-low: "same dataset as kareem-medium (unverified), lessac base"
+  pl_PL-gosia-medium: "CC0 data but finetuned from lessac"
+  pl_PL-mc_speech-medium: "CC0 data but finetuned from lessac"
+  nl_BE-nathalie-medium: "CC0 data but finetuned from lessac"
+
+# Clearly licensed neural TTS candidates for a later CPU/GPU benchmark (PyTorch, NOT deployed - no install in LANG-1).
+# Licence evidence = `cardData.license` from huggingface.co/api/models/<repo>, read 2026-11-12; re-read before deploying.
+tts_candidates:
+  - {name: "Chatterbox Multilingual (ResembleAI/chatterbox)", license: MIT, languages: "ar da de el en es fi fr he hi it ja ko ms nl no pl pt ru sv sw tr zh (HF card)",
+     note: "MIT code + weights per model card; covers the Arabic, Hindi, Turkish and Chinese gaps; voice cloning - consent rules apply"}
+  - {name: "Kokoro-82M (hexgrad/Kokoro-82M)", license: Apache-2.0, languages: "en, fr, es, it, pt-BR, hi, zh, ja",
+     note: "HF card lists en only; hi/zh/fr/es/it/pt voices per upstream VOICES.md - verify per-voice data before use"}
+  - {name: "MeloTTS (myshell-ai/MeloTTS-*)", license: MIT, languages: "en, es, fr, zh, ja, ko", note: "MIT; CPU real-time"}
+  - {name: "Qwen3-TTS-12Hz-1.7B-Base", license: Apache-2.0, languages: "zh, en, ja, ko, de, fr, ru, pt, es, it",
+     note: "Apache-2.0 per HF API (checked 2026-11-12); GPU-class; source of the serena Italian voice data"}
+  - {name: "XTTS-v2 (coqui/XTTS-v2)", license: "coqui-public-model-license - NON-COMMERCIAL", languages: "17 incl. ar, hi, zh, tr",
+     note: "REJECTED for commercial output; listed so it is not picked by mistake"}
+  - {name: "facebook/mms-tts-* (e.g. mms-tts-hin)", license: "cc-by-nc-4.0 - NON-COMMERCIAL", languages: "1100+", note: "REJECTED for commercial output"}

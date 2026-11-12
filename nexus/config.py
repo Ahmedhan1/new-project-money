@@ -75,8 +75,77 @@ def _first_existing(cands: list[str]) -> str:
 FONT_LATIN = _first_existing(FONT_LATIN_CANDIDATES)
 
 
+# Fonts per script come from registry/languages.yaml (`fonts`, referenced by each language's `font`).
+def _lang_registry() -> dict:
+    import functools
+
+    import yaml
+
+    @functools.lru_cache(maxsize=1)
+    def load() -> dict:
+        return yaml.safe_load((REGISTRY_DIR / "languages.yaml").read_text(encoding="utf-8"))
+    global _lang_registry
+    _lang_registry = load
+    return load()
+
+
+def _font_key(lang: str) -> str:
+    reg = _lang_registry()
+    code = lang if lang in reg["languages"] else reg.get("aliases", {}).get(lang)
+    if code is None:
+        low = {k.lower(): k for k in reg["languages"]} | {k.lower(): v for k, v in reg.get("aliases", {}).items()}
+        code = low.get(str(lang).lower())
+    if code is not None:
+        return reg["languages"][code]["font"]
+    if str(lang).lower().startswith("ar"):
+        return "arabic"
+    lang = {"han": "han_sc"}.get(lang, lang)
+    return lang if lang in reg["fonts"] else "latin"   # a script name ("han", "devanagari", ...) is accepted too
+
+
+def _has_glyphs(path: str, index: int, sample: str) -> bool:
+    """True when every sample character renders differently from the font's missing-glyph box (no tofu)."""
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+        f = ImageFont.truetype(path, 32, index=index)
+
+        def px(ch: str) -> bytes:
+            im = Image.new("L", (64, 64))
+            ImageDraw.Draw(im).text((8, 8), ch, font=f, fill=255)
+            return im.tobytes()
+        tofu = px("\U0010FFFD")
+        return all(px(ch) != tofu and any(px(ch)) for ch in sample)
+    except Exception:
+        return False
+
+
+_FACE_CACHE: dict = {}
+
+
+def font_face_for(lang: str) -> tuple[str, int, str]:
+    """(font file, collection index, fontconfig family) for a language code or script name. The first candidate that
+    exists AND really contains the script's sample glyphs wins; Latin DejaVu is the last resort."""
+    key = _font_key(lang)
+    if key not in _FACE_CACHE:
+        spec = _lang_registry()["fonts"][key]
+        found = None
+        for c in spec["files"]:
+            f = c["file"].replace("%WINDIR%", str(_WINFONTS.parent))
+            if Path(f).exists() and _has_glyphs(f, int(c.get("index", 0)), spec.get("sample", "")):
+                found = (f, int(c.get("index", 0)), c.get("family", spec["family"]))
+                break
+        _FACE_CACHE[key] = found or (FONT_LATIN, 0, "DejaVu Sans")
+    return _FACE_CACHE[key]
+
+
 def font_for(lang: str) -> str:
-    return _first_existing(FONT_ARABIC_CANDIDATES) if lang.startswith("ar") else FONT_LATIN
+    """Font file that contains the language's script (TrueType collections: see font_face_for for the index)."""
+    return font_face_for(lang)[0]
+
+
+def font_name_for(lang: str) -> str:
+    """fontconfig family name for ASS subtitles (libass), matching the file font_for returns."""
+    return font_face_for(lang)[2]
 
 
 def ensure_dirs() -> None:

@@ -144,6 +144,7 @@ def write_ass(cues: list[dict], path: Path, W: int, H: int, lang: str = "en", op
     font = _font_name(lang)
     white, black = "&H00FFFFFF", "&H00101010"
     hi = ass_colour(o["highlight"])
+    hi_tag = f"&H{hi[-6:]}&"  # override tags take &HBBGGRR&
     size = L["size"]
     if style == "boxed":
         pad = max(2, int(size * 0.28))
@@ -192,7 +193,7 @@ def write_ass(cues: list[dict], path: Path, W: int, H: int, lang: str = "en", op
                 b = wt[g[j + 1]][0] if j + 1 < len(g) else g_end
                 if b - a < 0.005:
                     continue
-                txt = " ".join(f"{{\\1c{hi}}}{words[k]}{{\\1c{white}}}" if k == wi else words[k] for k in g)
+                txt = " ".join(f"{{\\1c{hi_tag}}}{words[k]}{{\\1c&HFFFFFF&}}" if k == wi else words[k] for k in g)
                 anim = "{\\fscx78\\fscy78\\t(0,90,\\fscx110\\fscy110)\\t(90,170,\\fscx100\\fscy100)}" if j == 0 else ""
                 lines.append(f"Dialogue: 0,{_t(a)},{_t(b)},Default,,0,0,0,,{anim}{txt}")
     path.write_text(_header(W, H, sl) + "\n".join(lines) + "\n", encoding="utf-8")

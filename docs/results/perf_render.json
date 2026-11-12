@@ -1,0 +1,193 @@
+{
+ "date": "2026-11-12",
+ "task": "PERF-1",
+ "machine": {
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "os_cpu_count": 4,
+  "platform": "Linux-6.18.44-fc-v378-x86_64-with-glibc2.39",
+  "python": "3.13.18",
+  "ffmpeg": "ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers",
+  "notes": "Cloud container. 4 visible vCPUs but ~1.5-2 cores of real throughput (4 parallel CPU-bound processes run 2.5x slower each); other agents were running FFmpeg/tests in the same container during measurement, so wall times vary by up to ~60% between identical runs. Ranges over repeated runs are reported, not single numbers.",
+  "hardware_h264_encoders": {
+   "h264_nvenc": false,
+   "h264_qsv": false,
+   "h264_vaapi": false,
+   "h264_videotoolbox": false,
+   "h264_amf": false
+  },
+  "hw_note": "none works in this container (no GPU / VAAPI device); the NEXUS_HWENC=1 path was not exercised on real hardware"
+ },
+ "timeline": {
+  "description": "synthetic 62.0 s programme, 1280x720 @30 fps, 8 clips: 7 video clips of 8.0 s cut from 9 s lavfi sources (testsrc2 1920x1080, mandelbrot, life, cellauto at 1280x720; H.264 crf 22 + AAC of an amplitude-modulated 180 Hz sine as speech-like audio) and one 7.5 s colour clip with a title overlay; 0.5 s crossfades into clips 3, 6 and 8; 21 burned caption cues over the whole programme (legacy classic style); procedural 'calm' music bed at volume 0.4 with ducking. The life/cellauto sources are high-entropy noise (~37 Mbit/s at crf 20), so every render is dominated by x264 encode time: a pessimistic case.",
+  "edits": {
+   "edit_one_clip": "clip 5 grade none -> warm",
+   "edit_caption": "text of cue 3 changed"
+  },
+  "script": "bench.py in the agent scratchpad (not committed); builds the timeline with nexus.timeline / nexus.audio.music"
+ },
+ "baseline_runs_old_renderer": {
+  "baseline": {
+   "cold_s": 52.16,
+   "warm_s": 39.2,
+   "edit_one_clip_s": 45.73,
+   "edit_caption_s": 39.53,
+   "qa_passed": true
+  },
+  "base1": {
+   "cold_s": 52.51,
+   "warm_s": 39.81,
+   "edit_one_clip_s": 44.38,
+   "edit_caption_s": 38.54,
+   "qa_passed": true
+  },
+  "base2": {
+   "cold_s": 53.75,
+   "warm_s": 42.19,
+   "edit_one_clip_s": 54.54,
+   "edit_caption_s": 60.3,
+   "qa_passed": true
+  }
+ },
+ "new_runs": {
+  "new1": {
+   "cold_s": 24.13,
+   "warm_s": 0.43,
+   "edit_one_clip_s": 12.02,
+   "edit_caption_s": 1.87,
+   "qa_passed": true,
+   "draft_cold_s": 12.77,
+   "serial_cold_s": 33.95,
+   "cold_stage_timings": {
+    "segments": 8.62,
+    "pieces_and_audio": 15.12,
+    "final": 0.39
+   },
+   "workers": 2
+  },
+  "new2": {
+   "cold_s": 37.84,
+   "warm_s": 0.49,
+   "edit_one_clip_s": 16.03,
+   "edit_caption_s": 2.49,
+   "qa_passed": true,
+   "draft_cold_s": 17.03,
+   "serial_cold_s": 51.58,
+   "cold_stage_timings": {
+    "segments": 13.59,
+    "pieces_and_audio": 23.77,
+    "final": 0.47
+   },
+   "workers": 2
+  },
+  "final3": {
+   "cold_s": 39.53,
+   "warm_s": 0.59,
+   "edit_one_clip_s": 14.98,
+   "edit_caption_s": 2.68,
+   "qa_passed": true,
+   "draft_cold_s": 17.04,
+   "serial_cold_s": 48.29,
+   "cold_stage_timings": {
+    "segments": 14.13,
+    "pieces_and_audio": 24.92,
+    "final": 0.48
+   },
+   "workers": 2
+  },
+  "final4": {
+   "cold_s": 36.67,
+   "warm_s": 0.53,
+   "edit_one_clip_s": 15.03,
+   "edit_caption_s": 2.47,
+   "qa_passed": true,
+   "draft_cold_s": 16.2,
+   "serial_cold_s": 46.32,
+   "cold_stage_timings": {
+    "segments": 13.17,
+    "pieces_and_audio": 23.04,
+    "final": 0.46
+   },
+   "workers": 2
+  }
+ },
+ "summary_seconds": {
+  "cold_s": {
+   "baseline": {
+    "min": 52.16,
+    "max": 53.75,
+    "median": 52.51
+   },
+   "new": {
+    "min": 24.13,
+    "max": 39.53,
+    "median": 37.84
+   }
+  },
+  "warm_s": {
+   "baseline": {
+    "min": 39.2,
+    "max": 42.19,
+    "median": 39.81
+   },
+   "new": {
+    "min": 0.43,
+    "max": 0.59,
+    "median": 0.53
+   }
+  },
+  "edit_one_clip_s": {
+   "baseline": {
+    "min": 44.38,
+    "max": 54.54,
+    "median": 45.73
+   },
+   "new": {
+    "min": 12.02,
+    "max": 16.03,
+    "median": 15.03
+   }
+  },
+  "edit_caption_s": {
+   "baseline": {
+    "min": 38.54,
+    "max": 60.3,
+    "median": 39.53
+   },
+   "new": {
+    "min": 1.87,
+    "max": 2.68,
+    "median": 2.49
+   }
+  }
+ },
+ "new_only": {
+  "draft_cold_s": {
+   "min": 12.77,
+   "max": 17.04,
+   "median": 17.03
+  },
+  "serial_cold_s_workers_1": {
+   "min": 33.95,
+   "max": 51.58,
+   "median": 48.29
+  }
+ },
+ "what_changed": [
+  "clips render as video-only head/body/tail parts + PCM audio, cache-missing clips in parallel (ThreadPoolExecutor, workers=cpu//2, -threads cpu//workers)",
+  "transitions are short xfade pieces (tail+head) instead of an xfade chain re-encoding the whole programme",
+  "captions and programme overlays are burned per piece at programme time (setpts shift for libass); burned pieces are a second cache level, so caption edits re-burn only the pieces they touch",
+  "intermediate parts that are always re-encoded (transition heads/tails, bodies that get captions) use a mezzanine encode (x264 ultrafast crf 14): ~2x faster to encode, ~3x faster to decode on this content",
+  "final pass is a pure stream copy (concat demuxer) of video pieces + finished audio; no full-programme video re-encode",
+  "audio: sample-exact programme audio from PCM parts; loudness measured with ebur128 (cheaper than loudnorm's 192 kHz analysis) and applied as the equivalent linear gain; mix + AAC encode run in parallel with the video pieces and are cached by input hash",
+  "draft=True: half resolution, x264 ultrafast crf 30, separate cache namespace (cache/segments_draft)"
+ ],
+ "removed_or_not_helping": [
+  "a first version without the mezzanine encode and with audio on the critical path was measured at 43-51 s cold (no better than baseline); kept only the changes above",
+  "parallelism alone helps little on this container: workers=1 cold 34-52 s vs workers=2 24-40 s (same machine, interleaved runs) for the final pipeline"
+ ],
+ "honest_limits": [
+  "cold renders encode most frames twice (mezzanine part + final burned piece) because captions cover the programme; the win comes from cheaper intermediates and removing two full-programme re-encodes",
+  "a timing edit that shifts later clips re-burns every later piece that carries captions or a progress bar (burned at programme time)",
+  "changing a transition's duration re-renders the two neighbouring clips from source (head/tail split points change)"
+ ]
+}

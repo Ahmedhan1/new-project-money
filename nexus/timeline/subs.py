@@ -1,7 +1,36 @@
-"""Subtitle cues: build from transcripts, write SRT / VTT / ASS."""
+"""Subtitle cues: build from transcripts, write SRT / VTT / ASS. Script-aware: Han is split per character
+(no spaces, ~16 characters per cue), sentence/clause marks per script come from registry/languages.yaml."""
 from __future__ import annotations
 
+import re
 from pathlib import Path
+
+HAN_CUE_CHARS = 16
+_TERM = ".!?\u061f\u06d4\u2026\u0964\u0965\u3002\uff01\uff1f"     # . ! ? ؟ ۔ … । ॥ 。 ！ ？
+_CLAUSE = ",;:\u060c\u061b\uff0c\u3001\uff1b\uff1a"                    # , ; : ، ؛ ， 、 ； ：
+_NO_START = set("。，、；：！？）》」』】…,.;:!?)%")
+
+
+def _is_han(text: str) -> bool:
+    han = sum("\u3400" <= ch <= "\u9fff" or "\uf900" <= ch <= "\ufaff" for ch in text)
+    letters = sum(ch.isalpha() for ch in text)
+    return letters > 0 and han / letters > 0.5
+
+
+def _limit(text: str, max_chars: int | None, lang: str | None) -> tuple[bool, int]:
+    """(unspaced Han?, max characters per cue) for this text."""
+    han = _is_han(text) if lang is None or lang == "en" else (lang.split("-")[0] in ("zh", "ja") or _is_han(text))
+    if max_chars is None:
+        max_chars = HAN_CUE_CHARS if han else 42
+    elif han and max_chars > 2 * HAN_CUE_CHARS:   # a Latin-sized limit makes unreadable Han cues
+        max_chars = HAN_CUE_CHARS
+    return han, max_chars
+
+
+def _units(text: str, han: bool) -> list[str]:
+    if not han:
+        return text.split()
+    return re.findall(r"[A-Za-z0-9][A-Za-z0-9.,%:+\-]*|\S", text)
 
 
 def _ts(t: float, sep: str = ",") -> str:
@@ -11,38 +40,41 @@ def _ts(t: float, sep: str = ",") -> str:
     return f"{h:02d}:{m:02d}:{s:02d}{sep}{int(round((t - int(t)) * 1000)) % 1000:03d}"
 
 
-def cues_from_transcript(segments: list[dict], max_chars: int = 42, max_dur: float = 5.0) -> list[dict]:
-    """Split whisper segments into readable cues using word timestamps."""
+def cues_from_transcript(segments: list[dict], max_chars: int | None = None, max_dur: float = 5.0, lang: str | None = None) -> list[dict]:
+    """Split whisper segments into readable cues using word timestamps (Han: joined without spaces)."""
     cues: list[dict] = []
     for seg in segments:
         words = seg.get("words") or []
         if not words:
             cues.append({"start": seg["start"], "end": seg["end"], "text": seg["text"]})
             continue
+        han, limit = _limit(seg.get("text") or "".join(w["word"] for w in words), max_chars, lang)
+        sep = "" if han else " "
         cur: list[dict] = []
         for w in words:
-            trial = " ".join(x["word"] for x in cur + [w])
-            if cur and (len(trial) > max_chars or w["end"] - cur[0]["start"] > max_dur):
-                cues.append({"start": cur[0]["start"], "end": cur[-1]["end"], "text": " ".join(x["word"] for x in cur)})
+            trial = sep.join(x["word"].strip() for x in cur + [w])
+            if cur and (len(trial) > limit or w["end"] - cur[0]["start"] > max_dur) and not (han and w["word"].strip()[:1] in _NO_START):
+                cues.append({"start": cur[0]["start"], "end": cur[-1]["end"], "text": sep.join(x["word"].strip() for x in cur)})
                 cur = []
             cur.append(w)
         if cur:
-            cues.append({"start": cur[0]["start"], "end": cur[-1]["end"], "text": " ".join(x["word"] for x in cur)})
+            cues.append({"start": cur[0]["start"], "end": cur[-1]["end"], "text": sep.join(x["word"].strip() for x in cur)})
     return fix_timing(cues)
 
 
-def cues_from_text(text: str, start: float, end: float, max_chars: int = 42) -> list[dict]:
-    """Spread a known narration text over [start,end] proportionally to length."""
-    words = text.split()
+def cues_from_text(text: str, start: float, end: float, max_chars: int | None = None, lang: str | None = None) -> list[dict]:
+    """Spread a known narration text over [start,end] proportionally to length (characters; Han per character)."""
+    han, limit = _limit(text, max_chars, lang)
+    sep = "" if han else " "
     chunks, cur = [], ""
-    for w in words:
-        if cur and len(cur) + 1 + len(w) > max_chars:
+    for w in _units(text, han):
+        if cur and len(cur) + len(sep) + len(w) > limit and not (han and w in _NO_START):
             chunks.append(cur)
             cur = ""
-        cur = f"{cur} {w}".strip()
+        cur = f"{cur}{sep}{w}".strip() if not han else cur + w
         # Break where a viewer expects it: a sentence never shares a cue with the start of the next one,
         # and a long cue ends at a clause boundary rather than mid-phrase.
-        if (cur[-1] in ".!?\u061f\u06d4\u2026" and len(cur) >= max_chars * 0.35) or (cur[-1] in ",;:\u060c" and len(cur) >= max_chars * 0.7):
+        if (cur[-1] in _TERM and len(cur) >= limit * 0.35) or (cur[-1] in _CLAUSE and len(cur) >= limit * 0.7):
             chunks.append(cur)
             cur = ""
     if cur:
@@ -85,7 +117,10 @@ def write_vtt(cues: list[dict], path: Path) -> Path:
 
 def write_ass(cues: list[dict], path: Path, W: int, H: int, lang: str = "en", style: dict | None = None) -> Path:
     st = {"size": 0.048, "margin_v": 0.07, "outline": 3, "primary": "&H00FFFFFF", "back": "&H96000000", **(style or {})}
-    font = "Noto Naskh Arabic" if lang.startswith("ar") else "DejaVu Sans"
+    from .. import config, models
+    sample = " ".join(c["text"] for c in cues[:20])
+    # The cue text decides when it disagrees with `lang` (e.g. Han subtitles written with the default lang="en").
+    font = config.font_name_for(lang if models.script_of(sample) == models.script_for(lang) or not sample.strip() else models.script_of(sample))
     size = int(H * st["size"]) if W >= H else int(W * st["size"] * 1.25)
     mv = int(H * st["margin_v"]) if W >= H else int(H * 0.16)  # keep clear of vertical-platform UI
     head = f"""[Script Info]

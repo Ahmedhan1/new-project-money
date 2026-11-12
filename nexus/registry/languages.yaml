@@ -1,0 +1,461 @@
+# Language registry (LANG-1). One entry per target language; everything language-specific in
+# localize / mt / asr / subs / text / config fonts is read from here. Facts were checked on 2026-11-12:
+#  - `madlad`: the MADLAD-400 target tag. Every tag listed was verified to be a single piece in the
+#    model's shared_vocabulary.json AND spiece.model (.nexus/models/madlad400-3b). Absent from the
+#    vocabulary: afb (Gulf), ars (Najdi), acm (Mesopotamian), apc / ajp (Levantine), aeb (Tunisian), yue.
+#    Present Arabic varieties: ar (MSA), arz (Egyptian), ary (Moroccan).
+#  - `voice`: the Piper voice used for the dub (details + licence evidence in models.yaml `voices`), or
+#    null -> eSpeak NG (`espeak` voice code), GPL engine, output unencumbered, robotic quality.
+#  - `status`: available      = translation + subtitles + a commercially usable dub that passed the measured gates
+#              subtitles-only = translation + subtitles are usable; the dub is a draft (licence not verified or too weak)
+#              unavailable    = this pipeline cannot produce the language correctly (see `reason`)
+#    Machine translation ALWAYS still needs a native-speaker review before publishing.
+#  - `length_ratio`: target characters per English source character (typical / max / min). Measured on the
+#    solar test lines (docs/results/languages.json); max is the invented-content guard, min the dropped-content guard.
+#  - `dub_threshold`: minimum share of script words (characters for Han) Whisper-small must hear back from the dub.
+#  - `cue_chars`: max characters per subtitle cue (Han is counted per character, no spaces).
+
+fonts:
+  latin:
+    family: DejaVu Sans
+    sample: "AÄéß"
+    files:
+      - {file: /usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf, family: DejaVu Sans}
+      - {file: /usr/share/fonts/truetype/noto/NotoSans-Bold.ttf, family: Noto Sans}
+      - {file: "%WINDIR%/Fonts/segoeuib.ttf", family: Segoe UI}
+      - {file: "%WINDIR%/Fonts/arialbd.ttf", family: Arial}
+      - {file: "/System/Library/Fonts/Supplemental/Arial Bold.ttf", family: Arial}
+  cyrillic:
+    family: DejaVu Sans
+    sample: "Жщы"
+    files:
+      - {file: /usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf, family: DejaVu Sans}
+      - {file: /usr/share/fonts/truetype/noto/NotoSans-Bold.ttf, family: Noto Sans}
+      - {file: "%WINDIR%/Fonts/segoeuib.ttf", family: Segoe UI}
+      - {file: "%WINDIR%/Fonts/arialbd.ttf", family: Arial}
+      - {file: "/System/Library/Fonts/Supplemental/Arial Bold.ttf", family: Arial}
+  arabic:
+    family: Noto Naskh Arabic
+    sample: "ضظغ"
+    files:
+      - {file: /usr/share/fonts/truetype/noto/NotoNaskhArabic-Bold.ttf, family: Noto Naskh Arabic}
+      - {file: /usr/share/fonts/truetype/noto/NotoSansArabic-Bold.ttf, family: Noto Sans Arabic}
+      - {file: "%WINDIR%/Fonts/tahomabd.ttf", family: Tahoma}
+      - {file: "%WINDIR%/Fonts/segoeuib.ttf", family: Segoe UI}
+      - {file: "%WINDIR%/Fonts/arialbd.ttf", family: Arial}
+      - {file: /System/Library/Fonts/GeezaPro.ttc, family: Geeza Pro}
+      - {file: /usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf, family: DejaVu Sans}
+  devanagari:
+    family: Noto Sans Devanagari
+    sample: "हिक्ष"
+    files:   # Linux: apt fonts-noto-core
+      - {file: /usr/share/fonts/truetype/noto/NotoSansDevanagari-Bold.ttf, family: Noto Sans Devanagari}
+      - {file: /usr/share/fonts/truetype/noto/NotoSansDevanagari-Regular.ttf, family: Noto Sans Devanagari}
+      - {file: /usr/share/fonts/truetype/lohit-devanagari/Lohit-Devanagari.ttf, family: Lohit Devanagari}
+      - {file: /usr/share/fonts/truetype/freefont/FreeSansBold.ttf, family: FreeSans}
+      - {file: "%WINDIR%/Fonts/NirmalaB.ttf", family: Nirmala UI}
+      - {file: "%WINDIR%/Fonts/mangalb.ttf", family: Mangal}
+      - {file: /System/Library/Fonts/Kohinoor.ttc, family: Kohinoor Devanagari}
+      - {file: /System/Library/Fonts/Supplemental/DevanagariMT.ttc, family: Devanagari MT}
+  han_sc:
+    family: Noto Sans CJK SC
+    sample: "汉语电池"
+    files:   # Linux: apt fonts-noto-cjk (index 2 = SC in the Noto CJK collection)
+      - {file: /usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc, index: 2, family: Noto Sans CJK SC}
+      - {file: /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc, index: 2, family: Noto Sans CJK SC}
+      - {file: /usr/share/fonts/truetype/wqy/wqy-zenhei.ttc, index: 0, family: WenQuanYi Zen Hei}
+      - {file: "%WINDIR%/Fonts/msyhbd.ttc", index: 0, family: Microsoft YaHei}
+      - {file: "%WINDIR%/Fonts/simhei.ttf", family: SimHei}
+      - {file: /System/Library/Fonts/PingFang.ttc, index: 0, family: PingFang SC}
+      - {file: "/System/Library/Fonts/STHeiti Medium.ttc", index: 0, family: Heiti SC}
+
+# Sentence terminators per script (subtitle cue breaks, MT sentence-count trim). Clause marks: preferred long-cue breaks.
+scripts:
+  latin: {chars: "latin", terminators: ".!?…", clause: ",;:", spaces: true}
+  cyrillic: {chars: "cyrillic", terminators: ".!?…", clause: ",;:", spaces: true}
+  arabic: {chars: "arabic", terminators: ".!?؟۔…", clause: "،؛,;:", spaces: true}
+  devanagari: {chars: "devanagari", terminators: "।॥.!?", clause: ",;:", spaces: true}
+  han: {chars: "han", terminators: "。！？!?…", clause: "，、；：,;:", spaces: false}
+
+dialect_markers:
+  # Whole words or word endings typical of the dialect and NOT of MSA. Density = share of words that match.
+  ar-EG: {min_density: 0.06,
+          words: [ده, دي, مش, عشان, علشان, دلوقتي, إزاي, ازاي, ليه, كده, اللي, أوي, قوي, بتاع, إحنا, احنا, كمان, بقى, لسه, عايز, فيه, زي, يعني],
+          prefixes: "^(بي|بت|بن|بيت|هي|هت|هن)\\w{2,}"}
+  ar-GULF: {min_density: 0.06,
+            words: [الحين, وايد, واجد, شلون, ليش, شنو, وش, ايش, مو, مب, أبي, ابي, يبي, نبي, تبي, يبون, نبغى, ابغى, أبغى, جذي, چذي, كذا, زين, حق, ترى, اللي, هذيل, هذولا, عشان, قاعد, قاعدين],
+            prefixes: "^(هال|بي|بن|بت)\\w{2,}",
+            # Egyptian-only forms: if these dominate, the output is Masri, not Gulf
+            exclude: [ده, دي, دلوقتي, إزاي, ازاي, كده, أوي, بتاع, مش, عايز, لسه]}
+
+aliases:   # other spellings that resolve to a registry code
+  pt: pt-BR
+  pt-br: pt-BR
+  zh-CN: zh
+  zh-Hans: zh
+  cmn: zh
+  arz: ar-EG
+  afb: ar-GULF
+  ar-AE: ar-GULF
+  ar-KW: ar-GULF
+  ar-QA: ar-GULF
+  ar-BH: ar-GULF
+  ar-gulf: ar-GULF
+  ar-eg: ar-EG
+  en-US: en
+  en-GB: en
+  de-DE: de
+  fr-FR: fr
+  es-ES: es
+  ru-RU: ru
+  hi-IN: hi
+  it-IT: it
+  tr-TR: tr
+  id-ID: id
+
+languages:
+  en:
+    name: English
+    native: English
+    script: latin
+    direction: ltr
+    madlad: en
+    whisper: en
+    tts: en
+    espeak: en-us
+    voice: en_US-joe-medium
+    pace: 1.0
+    font: latin
+    numerals: western
+    length_ratio: {typical: 1.0, max: 1.4, min: 0.45}
+    cue_chars: 42
+    dub_threshold: 0.6
+    translation: madlad
+    priority: 1
+    status: available
+    reason: "source language of the test footage; Piper joe (CC0, rdh CC0 base)"
+  de:
+    name: German
+    native: Deutsch
+    script: latin
+    direction: ltr
+    madlad: de
+    whisper: de
+    tts: de
+    espeak: de
+    voice: de_DE-thorsten-medium
+    pace: 1.0
+    font: latin
+    numerals: western
+    length_ratio: {typical: 1.2, max: 1.38, min: 0.5}
+    cue_chars: 42
+    dub_threshold: 0.6
+    translation: madlad
+    priority: 2
+    status: available
+    reason: "MADLAD de + Piper thorsten (CC0); measured in test C"
+  fr:
+    name: French
+    native: Français
+    script: latin
+    direction: ltr
+    madlad: fr
+    whisper: fr
+    tts: fr
+    espeak: fr
+    voice: fr_FR-siwis-medium
+    pace: 1.0
+    font: latin
+    numerals: western
+    length_ratio: {typical: 1.25, max: 1.5, min: 0.5}
+    cue_chars: 42
+    dub_threshold: 0.6
+    translation: madlad
+    priority: 3
+    status: available
+    reason: "MADLAD fr + Piper siwis (CC BY 4.0 data - attribution required)"
+  ar-EG:
+    name: Egyptian Arabic
+    native: مصري
+    script: arabic
+    direction: rtl
+    madlad: arz
+    whisper: ar
+    tts: ar-EG
+    espeak: ar
+    voice: ar_JO-kareem-medium
+    pace: 0.85
+    font: arabic
+    numerals: western-or-arabic-indic
+    length_ratio: {typical: 1.0, max: 1.3, min: 0.4}
+    cue_chars: 42
+    dub_threshold: 0.6
+    dialect: ar-EG
+    translation: madlad
+    priority: 4
+    status: subtitles-only
+    reason: "MADLAD arz gives genuine Masri (dialect-marker check); the only Arabic Piper voice (kareem, Jordanian) has an UNVERIFIED licence -> dub is a draft"
+  ar-GULF:
+    name: Gulf Arabic
+    native: خليجي
+    bcp47: afb
+    script: arabic
+    direction: rtl
+    madlad: null      # afb / ars / acm absent from the MADLAD vocabulary (verified)
+    msa_pivot: ar
+    whisper: ar
+    tts: ar-GULF
+    espeak: ar
+    voice: ar_JO-kareem-medium
+    pace: 0.85
+    font: arabic
+    numerals: western-or-arabic-indic
+    length_ratio: {typical: 1.0, max: 1.3, min: 0.4}
+    cue_chars: 42
+    dub_threshold: 0.6
+    dialect: ar-GULF
+    translation: madlad-msa+llm-dialect
+    priority: 5
+    status: unavailable
+    reason: "No Gulf tag in MADLAD. MSA -> Gulf adaptation by the local Qwen3-4B was implemented with strict validation and tested (3 prompt designs, 5 lines): it copied MSA unchanged, made meaning errors and code-switched (English/Thai), Gulf-marker density far below 6%. Output is rejected instead of shipping MSA labelled as Gulf. Use `ar` (MSA) for Gulf audiences until a stronger model or a human adapter is available."
+  zh:
+    name: Chinese (Mandarin, Simplified)
+    native: 简体中文
+    script: han
+    direction: ltr
+    madlad: zh
+    whisper: zh
+    whisper_prompt: "以下是普通话的句子。"
+    tts: zh
+    espeak: cmn
+    voice: null       # zh_CN-chaowen-medium (CC0) is cleared but needs unicode-rbnf + transformers + the g2pW model (see models.yaml)
+    pace: 1.0
+    font: han_sc
+    numerals: western
+    length_ratio: {typical: 0.32, max: 0.5, min: 0.15}
+    cue_chars: 16
+    dub_threshold: 0.6
+    translation: madlad
+    priority: 6
+    status: subtitles-only
+    reason: "MADLAD zh is good; the only commercially clear Piper voice (chaowen, CC0) cannot run without extra packages not installed in this task -> eSpeak NG fallback"
+  ru:
+    name: Russian
+    native: Русский
+    script: cyrillic
+    direction: ltr
+    madlad: ru
+    whisper: ru
+    tts: ru
+    espeak: ru
+    voice: ru_RU-denis-medium
+    pace: 1.0
+    font: cyrillic
+    numerals: western
+    length_ratio: {typical: 1.15, max: 1.5, min: 0.45}
+    cue_chars: 42
+    dub_threshold: 0.6
+    translation: madlad
+    priority: 7
+    status: available
+    reason: "MADLAD ru + Piper denis (CC0, rdh CC0 base)"
+  hi:
+    name: Hindi
+    native: हिन्दी
+    script: devanagari
+    direction: ltr
+    madlad: hi
+    whisper: hi
+    tts: hi
+    espeak: hi
+    voice: null       # pratham/priyamvada CC BY-NC-SA; rohan: IITM licence unverified + lessac base
+    pace: 1.0
+    font: devanagari
+    numerals: western-or-devanagari
+    length_ratio: {typical: 1.0, max: 1.3, min: 0.4}
+    cue_chars: 42
+    dub_threshold: 0.6
+    translation: madlad
+    priority: 8
+    status: subtitles-only
+    reason: "MADLAD hi; no commercially clear Piper voice -> eSpeak NG (robotic)"
+  ar:
+    name: Modern Standard Arabic
+    native: العربية الفصحى
+    script: arabic
+    direction: rtl
+    madlad: ar
+    whisper: ar
+    tts: ar
+    espeak: ar
+    voice: ar_JO-kareem-medium
+    pace: 0.85
+    font: arabic
+    numerals: western-or-arabic-indic
+    length_ratio: {typical: 1.0, max: 1.3, min: 0.4}
+    cue_chars: 42
+    dub_threshold: 0.6
+    translation: madlad
+    priority: 9
+    status: subtitles-only
+    reason: "MADLAD ar is correct MSA; the only Arabic Piper voice (kareem) has an UNVERIFIED licence -> dub is a draft"
+  es:
+    name: Spanish
+    native: Español
+    script: latin
+    direction: ltr
+    madlad: es
+    whisper: es
+    tts: es
+    espeak: es
+    voice: es_ES-davefx-medium
+    pace: 1.0
+    font: latin
+    numerals: western
+    length_ratio: {typical: 1.2, max: 1.45, min: 0.5}
+    cue_chars: 42
+    dub_threshold: 0.6
+    translation: madlad
+    priority: 10
+    status: available
+    reason: "MADLAD es + Piper davefx (CC0, rdh CC0 base)"
+  pt-BR:
+    name: Portuguese (Brazil)
+    native: Português (Brasil)
+    script: latin
+    direction: ltr
+    madlad: pt
+    whisper: pt
+    tts: pt-BR
+    espeak: pt-br
+    voice: pt_BR-cadu-medium
+    pace: 1.0
+    font: latin
+    numerals: western
+    length_ratio: {typical: 1.15, max: 1.4, min: 0.5}
+    cue_chars: 42
+    dub_threshold: 0.6
+    translation: madlad
+    priority: 11
+    status: available
+    reason: "MADLAD pt (Brazilian-leaning spelling) + Piper cadu (CC0, rdh CC0 base)"
+  it:
+    name: Italian
+    native: Italiano
+    script: latin
+    direction: ltr
+    madlad: it
+    whisper: it
+    tts: it
+    espeak: it
+    voice: it_IT-serena-medium
+    pace: 1.0
+    font: latin
+    numerals: western
+    length_ratio: {typical: 1.25, max: 1.45, min: 0.5}
+    cue_chars: 42
+    dub_threshold: 0.6
+    translation: madlad
+    priority: 12
+    status: available
+    reason: "MADLAD it + Piper serena (CC BY 4.0 synthetic data from Apache-2.0 Qwen3-TTS - attribution required)"
+  tr:
+    name: Turkish
+    native: Türkçe
+    script: latin
+    direction: ltr
+    madlad: tr
+    whisper: tr
+    tts: tr
+    espeak: tr
+    voice: null       # tr_TR-dfki-medium is CC BY-NC-SA 4.0
+    pace: 1.0
+    font: latin
+    numerals: western
+    length_ratio: {typical: 1.1, max: 1.4, min: 0.45}
+    cue_chars: 42
+    dub_threshold: 0.6
+    translation: madlad
+    priority: 13
+    status: subtitles-only
+    reason: "MADLAD tr; the only Piper voice (dfki) is non-commercial -> eSpeak NG (robotic)"
+  id:
+    name: Indonesian
+    native: Bahasa Indonesia
+    script: latin
+    direction: ltr
+    madlad: id
+    whisper: id
+    tts: id
+    espeak: id
+    voice: null       # id_ID-news_tts-medium: licence "See URL" pointing at an unrelated Malayalam corpus + lessac base
+    pace: 1.0
+    font: latin
+    numerals: western
+    length_ratio: {typical: 1.1, max: 1.35, min: 0.45}
+    cue_chars: 42
+    dub_threshold: 0.6
+    translation: madlad
+    priority: 14
+    status: subtitles-only
+    reason: "MADLAD id; the only Piper voice has no verifiable licence -> eSpeak NG (robotic)"
+  nl:
+    name: Dutch
+    native: Nederlands
+    script: latin
+    direction: ltr
+    madlad: nl
+    whisper: nl
+    tts: nl
+    espeak: nl
+    voice: nl_NL-alex-medium
+    pace: 1.0
+    font: latin
+    numerals: western
+    length_ratio: {typical: 1.15, max: 1.45, min: 0.5}
+    cue_chars: 42
+    dub_threshold: 0.6
+    translation: madlad
+    priority: 15
+    status: available
+    reason: "MADLAD nl + Piper alex (CC0, rdh CC0 base)"
+  pl:
+    name: Polish
+    native: Polski
+    script: latin
+    direction: ltr
+    madlad: pl
+    whisper: pl
+    tts: pl
+    espeak: pl
+    voice: pl_PL-darkman-medium
+    pace: 1.0
+    font: latin
+    numerals: western
+    length_ratio: {typical: 1.15, max: 1.45, min: 0.45}
+    cue_chars: 42
+    dub_threshold: 0.6
+    translation: madlad
+    priority: 16
+    status: available
+    reason: "MADLAD pl + Piper darkman (CC0, rdh CC0 base)"
+  uk:
+    name: Ukrainian
+    native: Українська
+    script: cyrillic
+    direction: ltr
+    madlad: uk
+    whisper: uk
+    tts: uk
+    espeak: uk
+    voice: uk_UA-ukrainian_tts-medium
+    pace: 1.0
+    font: cyrillic
+    numerals: western
+    length_ratio: {typical: 1.15, max: 1.5, min: 0.45}
+    cue_chars: 42
+    dub_threshold: 0.6
+    translation: madlad
+    priority: 17
+    status: available
+    reason: "MADLAD uk + Piper ukrainian_tts (CC0, trained from scratch)"
