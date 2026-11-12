@@ -259,7 +259,7 @@ def _concat(segs: list[Path], tl: dict, out: Path, draft: bool = False) -> None:
     clips = tl["clips"]
     if not any(i and c.get("transition") == "crossfade" for i, c in enumerate(clips)):
         lst = out.with_suffix(".txt")
-        lst.write_text("".join(f"file '{s}'\n" for s in segs))
+        lst.write_text("".join(f"file '{s}'\n" for s in segs), encoding="utf-8")  # FFmpeg reads concat lists as UTF-8
         ff.run(["-f", "concat", "-safe", "0", "-i", lst, "-c", "copy", "-movflags", "+faststart", out], op="concat")
         return
     args: list = []
@@ -363,7 +363,7 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
     for s in segs:
         nf = s.with_suffix(".notes.json")
         if nf.exists():
-            seg_notes += json.loads(nf.read_text())
+            seg_notes += json.loads(nf.read_text(encoding="utf-8"))
     prog = workdir / f"programme_{out.stem}.mp4"
     _concat(segs, tl, prog, draft)
     dur = ff.duration(prog)

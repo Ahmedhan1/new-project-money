@@ -54,7 +54,7 @@ def _cached(key: str, out: Path) -> dict | None:
     if not (wav.exists() and meta.exists() and wav.stat().st_size > 44):
         return None
     try:
-        info = json.loads(meta.read_text())
+        info = json.loads(meta.read_text(encoding="utf-8"))
     except ValueError:
         return None
     shutil.copyfile(wav, out)
@@ -67,7 +67,7 @@ def _store(key: str, out: Path, info: dict) -> None:
     tmp = d / f"{key}.tmp.wav"
     shutil.copyfile(out, tmp)
     tmp.replace(d / f"{key}.wav")
-    (d / f"{key}.json").write_text(json.dumps({k: v for k, v in info.items() if k not in ("path", "cached")}, ensure_ascii=False))
+    (d / f"{key}.json").write_text(json.dumps({k: v for k, v in info.items() if k not in ("path", "cached")}, ensure_ascii=False), encoding="utf-8")
 
 
 def synthesize(text: str, out: Path, lang: str = "en", voice: str | None = None, length_scale: float = 1.0,

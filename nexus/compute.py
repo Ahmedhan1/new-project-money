@@ -51,7 +51,7 @@ def detect_hardware() -> dict:
             gpu = {"name": name, "vram_gb": round(int(mem) / 1024, 1), "driver": drv, "cuda": True}
     cpu = ""
     try:
-        cpu = next(l.split(":", 1)[1].strip() for l in Path("/proc/cpuinfo").read_text().splitlines() if l.startswith("model name"))
+        cpu = next(l.split(":", 1)[1].strip() for l in Path("/proc/cpuinfo").read_text(encoding="utf-8").splitlines() if l.startswith("model name"))
     except (OSError, StopIteration):
         pass
     vm, du = psutil.virtual_memory(), shutil.disk_usage(config.HOME if config.HOME.exists() else "/")
@@ -142,7 +142,7 @@ class KaggleWorker(Worker):
         ok, why = self.available()
         if not ok:
             raise WorkerLost(why)
-        user = os.environ.get("KAGGLE_USERNAME") or json.loads((Path.home() / ".kaggle" / "kaggle.json").read_text())["username"]
+        user = os.environ.get("KAGGLE_USERNAME") or json.loads((Path.home() / ".kaggle" / "kaggle.json").read_text(encoding="utf-8"))["username"]
         d = config.CACHE / "kaggle" / job_id
         d.mkdir(parents=True, exist_ok=True)
         (d / "job.py").write_text(script)

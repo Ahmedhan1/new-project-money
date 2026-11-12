@@ -42,7 +42,7 @@ class CostGuardError(RuntimeError):
 
 @functools.lru_cache(maxsize=1)
 def manifest() -> dict[str, dict]:
-    raw = yaml.safe_load((config.REGISTRY_DIR / "components.yaml").read_text())
+    raw = yaml.safe_load((config.REGISTRY_DIR / "components.yaml").read_text(encoding="utf-8"))
     out = {}
     for c in raw["components"]:
         out[c["id"]] = {**raw["defaults"], **c}

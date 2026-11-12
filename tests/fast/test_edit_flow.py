@@ -114,9 +114,9 @@ def test_destination_selector_shares_renders_and_writes_packages(client, tmp_pat
     res = job["result"]
     assert res["renders"] == 2 and set(res["packages"]) == {"youtube_shorts", "tiktok", "youtube"}
     assert res["packages"]["tiktok"]["video"] == res["packages"]["youtube_shorts"]["video"]   # shared vertical render
-    yt = json.loads((p.dir / res["packages"]["youtube"]["folder"] / "metadata.json").read_text())
+    yt = json.loads((p.dir / res["packages"]["youtube"]["folder"] / "metadata.json").read_text(encoding="utf-8"))
     assert len(yt["title"]) <= 100 and yt["check"]["checks"]                                # title within YouTube's limit
-    assert (p.dir / res["packages"]["tiktok"]["folder"] / "MANUAL_UPLOAD.md").read_text().startswith("# Upload to")
+    assert (p.dir / res["packages"]["tiktok"]["folder"] / "MANUAL_UPLOAD.md").read_text(encoding="utf-8").startswith("# Upload to")
     assert (p.dir / res["packages"]["tiktok"]["cover"]).exists()
 
 

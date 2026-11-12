@@ -44,7 +44,7 @@ def _analysis(p: prj.Project) -> dict[str, dict]:
     for m in p.data["media"]:
         f = p.dir / "reports" / f"analysis_{m['id']}.json"
         if m["path"] not in _analyses and f.exists():
-            _analyses[m["path"]] = json.loads(f.read_text())
+            _analyses[m["path"]] = json.loads(f.read_text(encoding="utf-8"))
         if m["path"] in _analyses:
             out[m["path"]] = _analyses[m["path"]]
     return out
@@ -176,7 +176,7 @@ def api_project(pid: str, branch: str = "main"):
         tl = _tl_view(p.timeline(branch))
     except KeyError:
         tl = None
-    reports = [json.loads(f.read_text()) for f in sorted((p.dir / "reports").glob("*.qa.json"))]
+    reports = [json.loads(f.read_text(encoding="utf-8")) for f in sorted((p.dir / "reports").glob("*.qa.json"))]
     renders = [str(f.relative_to(p.dir)) for f in sorted(p.dir.rglob("*.mp4")) if "work" not in f.parts and "media" not in f.parts]
     return {"id": p.id, "name": p.name, "kind": p.kind, "media": p.data["media"], "history": p.history(), "timeline": tl,
             "reports": reports, "renders": renders, "proposal": p.data.get("proposal"), "script": p.data.get("script"),

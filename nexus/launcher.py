@@ -28,7 +28,7 @@ def _alive(name: str) -> dict | None:
     if not f.exists():
         return None
     try:
-        info = json.loads(f.read_text())
+        info = json.loads(f.read_text(encoding="utf-8"))
         p = psutil.Process(info["pid"])
         if p.is_running() and p.status() != psutil.STATUS_ZOMBIE and abs(p.create_time() - info["started"]) < 5:
             return info

@@ -269,7 +269,7 @@ def produce(project, script: dict, *, lang: str = "en", size=(1280, 720), style:
     still = [(p, c) for p, c in frames if p is not None]
     if still:
         project.data["storyboard"] = str(storyboard_sheet(still, project.dir / "reports" / "storyboard.png"))
-    (project.dir / "reports" / "script.json").write_text(json.dumps(script, indent=1, ensure_ascii=False))
+    (project.dir / "reports" / "script.json").write_text(json.dumps(script, indent=1, ensure_ascii=False), encoding="utf-8")
     project.save()
     if style.get("preset"):
         from . import presets

@@ -74,7 +74,7 @@ class Project:
         b = self._branch(branch)
         b["versions"] = b["versions"][: b["head"] + 1]  # a new edit discards the redo tail
         vid = f"{branch}-{len(b['versions']):03d}-{int(time.time() * 1000) % 100000}"
-        (self.dir / "timelines" / f"{vid}.json").write_text(json.dumps(tl, indent=1, ensure_ascii=False))
+        (self.dir / "timelines" / f"{vid}.json").write_text(json.dumps(tl, indent=1, ensure_ascii=False), encoding="utf-8")
         b["versions"].append({"id": vid, "note": note, "ts": time.time()})
         b["head"] = len(b["versions"]) - 1
         self.save()
@@ -86,7 +86,7 @@ class Project:
             if b["head"] < 0:
                 raise KeyError(f"no timeline on branch {branch}")
             vid = b["versions"][b["head"]]["id"]
-        return json.loads((self.dir / "timelines" / f"{vid}.json").read_text())
+        return json.loads((self.dir / "timelines" / f"{vid}.json").read_text(encoding="utf-8"))
 
     def undo(self, branch: str = "main") -> dict:
         b = self._branch(branch)

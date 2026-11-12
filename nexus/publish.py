@@ -82,7 +82,7 @@ def package(project, tl: dict, platform: str, title: str, description: str = "",
             "technical_qa": "passed" if tech["passed"] else [c["detail"] for c in tech["checks"] if not c["ok"]], "notes": notes,
             "auto_publish": AUTO_PUBLISH[platform], "upload": "manual - open the platform's upload page and use the files in this folder",
             "human_approval": "PENDING"}
-    (d / "metadata.json").write_text(json.dumps(meta, indent=1, ensure_ascii=False))
+    (d / "metadata.json").write_text(json.dumps(meta, indent=1, ensure_ascii=False), encoding="utf-8")
     return meta
 
 

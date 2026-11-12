@@ -97,7 +97,7 @@ def _repo(b: StorageBackend, pw: str | None, create: bool) -> tuple[dict, bytes 
         t = Path(d) / "repo.json"
         if b.exists("repo.json"):
             b.get("repo.json", t)
-            repo = json.loads(t.read_text())
+            repo = json.loads(t.read_text(encoding="utf-8"))
         elif create:
             repo = {"format": FORMAT, "created": time.time(), "encrypted": bool(pw)}
             if pw:

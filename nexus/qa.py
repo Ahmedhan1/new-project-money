@@ -191,7 +191,7 @@ def approve(project_dir: Path, name: str, stages: list[dict], extra: dict | None
               "known_issues": [f"[{c['severity']}] {c['check']}: {c['detail']}" for c in critical + major + minor],
               "stages": stages, **(extra or {})}
     (project_dir / "reports").mkdir(parents=True, exist_ok=True)
-    (project_dir / "reports" / f"{name}.qa.json").write_text(json.dumps(report, indent=1, ensure_ascii=False))
+    (project_dir / "reports" / f"{name}.qa.json").write_text(json.dumps(report, indent=1, ensure_ascii=False), encoding="utf-8")
     db.metric("qa_pass", 1.0 if status == "PASSED_AUTOMATED_CHECKS" else 0.0, output=name)
     return report
 
