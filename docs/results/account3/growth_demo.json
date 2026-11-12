@@ -1,0 +1,2738 @@
+{
+ "schema": "nexus.account3.growth_demo/1",
+ "generated": "2026-11-12T17:12:55Z",
+ "runtime_s": 114.52,
+ "part1_public_dataset": {
+  "label": "public dataset, not the owner's channel",
+  "dataset": {
+   "name": "YouTube Video Metadata",
+   "author": "Tisha Nawani",
+   "publisher": "Mendeley Data",
+   "version": "V1",
+   "published": "2026-05-12",
+   "doi": "10.17632/4gf2nhbr9d.1",
+   "url": "https://data.mendeley.com/datasets/4gf2nhbr9d/1",
+   "licence": "CC BY 4.0 (http://creativecommons.org/licenses/by/4.0), read from the Mendeley public API data_licence field",
+   "sha256": "56c938bc9c69a368929c320f54e3d32ec06b916945c0b74abdb57719929abc8e",
+   "changes": "derived title features and views/day; no rows redistributed"
+  },
+  "assumptions": {
+   "snapshot_date": "2026-05-11",
+   "age_band_days": [
+    3,
+    30
+   ],
+   "why": "one snapshot per video; views are normalised by age (views/day) and compared only within a 3-30 day age band"
+  },
+  "counts": {
+   "rows": 3951,
+   "used": 1568,
+   "dropped": {
+    "age_out_of_band": 2379,
+    "zero_or_missing_views": 2,
+    "zero_duration": 2
+   }
+  },
+  "overall": [
+   {
+    "feature": "title_question",
+    "segment": {
+     "platform": "youtube"
+    },
+    "metric": "log10(1+views/day)",
+    "n": [
+     1464,
+     104
+    ],
+    "means": [
+     4.327154,
+     4.385528
+    ],
+    "effect": 0.058374,
+    "ci": [
+     -0.107599,
+     0.224348
+    ],
+    "cohens_d": 0.0804,
+    "p_value": 0.487392,
+    "p_adjusted": 0.487392,
+    "verdict": "inconclusive",
+    "why": "adjusted p=0.4874; CI [-0.107599, 0.224348] includes 0 or p >= 0.05 - no reliable difference at this sample size",
+    "tests_corrected_for": 5,
+    "robust_to_outliers": false,
+    "median_diff": 0.028148,
+    "median_ci": [
+     -0.142914,
+     0.164045
+    ],
+    "record_ids_sample": [
+     "youtube:Ia40S3Vyrdg@2026-05-11",
+     "youtube:4ncK_2t0fZY@2026-05-11",
+     "youtube:9ENYz8Gj-1Y@2026-05-11"
+    ]
+   },
+   {
+    "feature": "title_number",
+    "segment": {
+     "platform": "youtube"
+    },
+    "metric": "log10(1+views/day)",
+    "n": [
+     842,
+     726
+    ],
+    "means": [
+     4.357214,
+     4.300652
+    ],
+    "effect": -0.056562,
+    "ci": [
+     -0.127404,
+     0.01428
+    ],
+    "cohens_d": -0.078,
+    "p_value": 0.117526,
+    "p_adjusted": 0.346928,
+    "verdict": "inconclusive",
+    "why": "adjusted p=0.3469; CI [-0.127404, 0.01428] includes 0 or p >= 0.05 - no reliable difference at this sample size",
+    "tests_corrected_for": 5,
+    "robust_to_outliers": true,
+    "median_diff": -0.112558,
+    "median_ci": [
+     -0.188135,
+     -0.042897
+    ],
+    "record_ids_sample": [
+     "youtube:4e8-YSbR4Ug@2026-05-11",
+     "youtube:SMB6g4fnFaU@2026-05-11",
+     "youtube:EFn3x7KjLN4@2026-05-11"
+    ]
+   },
+   {
+    "feature": "title_exclamation",
+    "segment": {
+     "platform": "youtube"
+    },
+    "metric": "log10(1+views/day)",
+    "n": [
+     1387,
+     181
+    ],
+    "means": [
+     4.321525,
+     4.403829
+    ],
+    "effect": 0.082304,
+    "ci": [
+     -0.013247,
+     0.177855
+    ],
+    "cohens_d": 0.1134,
+    "p_value": 0.091056,
+    "p_adjusted": 0.346928,
+    "verdict": "inconclusive",
+    "why": "adjusted p=0.3469; CI [-0.013247, 0.177855] includes 0 or p >= 0.05 - no reliable difference at this sample size",
+    "tests_corrected_for": 5,
+    "robust_to_outliers": false,
+    "median_diff": 0.084382,
+    "median_ci": [
+     -0.002712,
+     0.213611
+    ],
+    "record_ids_sample": [
+     "youtube:Fj48AR9JAjE@2026-05-11",
+     "youtube:4ncK_2t0fZY@2026-05-11",
+     "youtube:kOxzw9Tenw4@2026-05-11"
+    ]
+   },
+   {
+    "feature": "title_allcaps_word",
+    "segment": {
+     "platform": "youtube"
+    },
+    "metric": "log10(1+views/day)",
+    "n": [
+     1115,
+     453
+    ],
+    "means": [
+     4.301038,
+     4.404835
+    ],
+    "effect": 0.103797,
+    "ci": [
+     0.026757,
+     0.180837
+    ],
+    "cohens_d": 0.1433,
+    "p_value": 0.008331,
+    "p_adjusted": 0.041655,
+    "verdict": "association",
+    "why": "adjusted p=0.04165 < 0.05 and the 95% CI excludes 0; association only - confounders not controlled",
+    "tests_corrected_for": 5,
+    "robust_to_outliers": false,
+    "median_diff": 0.077239,
+    "median_ci": [
+     -0.012238,
+     0.170159
+    ],
+    "record_ids_sample": [
+     "youtube:YGzzBT5fSTM@2026-05-11",
+     "youtube:5m2RldUOXVQ@2026-05-11",
+     "youtube:uWf69CF55yQ@2026-05-11"
+    ]
+   },
+   {
+    "feature": "title_long_over_60_chars",
+    "segment": {
+     "platform": "youtube"
+    },
+    "metric": "log10(1+views/day)",
+    "n": [
+     454,
+     1114
+    ],
+    "means": [
+     4.382309,
+     4.310126
+    ],
+    "effect": -0.072183,
+    "ci": [
+     -0.154802,
+     0.010436
+    ],
+    "cohens_d": -0.0995,
+    "p_value": 0.086732,
+    "p_adjusted": 0.346928,
+    "verdict": "inconclusive",
+    "why": "adjusted p=0.3469; CI [-0.154802, 0.010436] includes 0 or p >= 0.05 - no reliable difference at this sample size",
+    "tests_corrected_for": 5,
+    "robust_to_outliers": true,
+    "median_diff": -0.118693,
+    "median_ci": [
+     -0.190639,
+     -0.031541
+    ],
+    "record_ids_sample": [
+     "youtube:4e8-YSbR4Ug@2026-05-11",
+     "youtube:SMB6g4fnFaU@2026-05-11",
+     "youtube:EFn3x7KjLN4@2026-05-11"
+    ]
+   }
+  ],
+  "like_rate": [
+   {
+    "feature": "title_question",
+    "segment": {
+     "platform": "youtube"
+    },
+    "metric": "like_rate (likes/views)",
+    "n": [
+     1464,
+     104
+    ],
+    "means": [
+     0.017404,
+     0.028083
+    ],
+    "effect": 0.010679,
+    "ci": [
+     0.006367,
+     0.014992
+    ],
+    "cohens_d": 0.632,
+    "p_value": 3e-06,
+    "p_adjusted": 6e-06,
+    "verdict": "association",
+    "why": "adjusted p=6e-06 < 0.05 and the 95% CI excludes 0; association only - confounders not controlled",
+    "tests_corrected_for": 5,
+    "robust_to_outliers": true,
+    "median_diff": 0.009848,
+    "median_ci": [
+     0.004937,
+     0.017433
+    ],
+    "record_ids_sample": [
+     "youtube:Ia40S3Vyrdg@2026-05-11",
+     "youtube:4ncK_2t0fZY@2026-05-11",
+     "youtube:9ENYz8Gj-1Y@2026-05-11"
+    ]
+   },
+   {
+    "feature": "title_number",
+    "segment": {
+     "platform": "youtube"
+    },
+    "metric": "like_rate (likes/views)",
+    "n": [
+     842,
+     726
+    ],
+    "means": [
+     0.020296,
+     0.015578
+    ],
+    "effect": -0.004718,
+    "ci": [
+     -0.006363,
+     -0.003073
+    ],
+    "cohens_d": -0.2785,
+    "p_value": 0.0,
+    "p_adjusted": 0.0,
+    "verdict": "association",
+    "why": "adjusted p=0 < 0.05 and the 95% CI excludes 0; association only - confounders not controlled",
+    "tests_corrected_for": 5,
+    "robust_to_outliers": true,
+    "median_diff": -0.003957,
+    "median_ci": [
+     -0.005019,
+     -0.00255
+    ],
+    "record_ids_sample": [
+     "youtube:4e8-YSbR4Ug@2026-05-11",
+     "youtube:SMB6g4fnFaU@2026-05-11",
+     "youtube:EFn3x7KjLN4@2026-05-11"
+    ]
+   },
+   {
+    "feature": "title_exclamation",
+    "segment": {
+     "platform": "youtube"
+    },
+    "metric": "like_rate (likes/views)",
+    "n": [
+     1387,
+     181
+    ],
+    "means": [
+     0.017243,
+     0.024772
+    ],
+    "effect": 0.007529,
+    "ci": [
+     0.00465,
+     0.010409
+    ],
+    "cohens_d": 0.4446,
+    "p_value": 1e-06,
+    "p_adjusted": 3e-06,
+    "verdict": "association",
+    "why": "adjusted p=3e-06 < 0.05 and the 95% CI excludes 0; association only - confounders not controlled",
+    "tests_corrected_for": 5,
+    "robust_to_outliers": true,
+    "median_diff": 0.009763,
+    "median_ci": [
+     0.006274,
+     0.011948
+    ],
+    "record_ids_sample": [
+     "youtube:Fj48AR9JAjE@2026-05-11",
+     "youtube:4ncK_2t0fZY@2026-05-11",
+     "youtube:kOxzw9Tenw4@2026-05-11"
+    ]
+   },
+   {
+    "feature": "title_allcaps_word",
+    "segment": {
+     "platform": "youtube"
+    },
+    "metric": "like_rate (likes/views)",
+    "n": [
+     1115,
+     453
+    ],
+    "means": [
+     0.016957,
+     0.020954
+    ],
+    "effect": 0.003996,
+    "ci": [
+     0.002002,
+     0.00599
+    ],
+    "cohens_d": 0.2349,
+    "p_value": 9.1e-05,
+    "p_adjusted": 9.1e-05,
+    "verdict": "association",
+    "why": "adjusted p=9.1e-05 < 0.05 and the 95% CI excludes 0; association only - confounders not controlled",
+    "tests_corrected_for": 5,
+    "robust_to_outliers": false,
+    "median_diff": 0.002239,
+    "median_ci": [
+     -0.000236,
+     0.004117
+    ],
+    "record_ids_sample": [
+     "youtube:YGzzBT5fSTM@2026-05-11",
+     "youtube:5m2RldUOXVQ@2026-05-11",
+     "youtube:uWf69CF55yQ@2026-05-11"
+    ]
+   },
+   {
+    "feature": "title_long_over_60_chars",
+    "segment": {
+     "platform": "youtube"
+    },
+    "metric": "like_rate (likes/views)",
+    "n": [
+     454,
+     1114
+    ],
+    "means": [
+     0.022608,
+     0.016279
+    ],
+    "effect": -0.006329,
+    "ci": [
+     -0.008249,
+     -0.004409
+    ],
+    "cohens_d": -0.3753,
+    "p_value": 0.0,
+    "p_adjusted": 0.0,
+    "verdict": "association",
+    "why": "adjusted p=0 < 0.05 and the 95% CI excludes 0; association only - confounders not controlled",
+    "tests_corrected_for": 5,
+    "robust_to_outliers": true,
+    "median_diff": -0.0066,
+    "median_ci": [
+     -0.008788,
+     -0.005029
+    ],
+    "record_ids_sample": [
+     "youtube:4e8-YSbR4Ug@2026-05-11",
+     "youtube:SMB6g4fnFaU@2026-05-11",
+     "youtube:EFn3x7KjLN4@2026-05-11"
+    ]
+   }
+  ],
+  "segmented_verdicts": {
+   "insufficient_data": 64,
+   "inconclusive": 12,
+   "association": 2
+  },
+  "segmented": [
+   {
+    "feature": "title_number",
+    "segment": {
+     "niche": "gaming",
+     "format": "long_gt_60s"
+    },
+    "metric": "log10(1+views/day)",
+    "n": [
+     88,
+     48
+    ],
+    "means": [
+     4.423689,
+     4.306281
+    ],
+    "effect": -0.117408,
+    "ci": [
+     -0.341831,
+     0.107015
+    ],
+    "cohens_d": -0.1884,
+    "p_value": 0.301585,
+    "p_adjusted": 1.0,
+    "verdict": "inconclusive",
+    "why": "adjusted p=1; CI [-0.341831, 0.107015] includes 0 or p >= 0.05 - no reliable difference at this sample size",
+    "tests_corrected_for": 74,
+    "robust_to_outliers": false,
+    "median_diff": -0.028484,
+    "median_ci": [
+     -0.364059,
+     0.227355
+    ],
+    "record_ids_sample": [
+     "youtube:Vo6QTBMdUfU@2026-05-11",
+     "youtube:QF5YpZI1wnk@2026-05-11",
+     "youtube:6NPtGfzPREk@2026-05-11"
+    ]
+   },
+   {
+    "feature": "title_exclamation",
+    "segment": {
+     "niche": "gaming",
+     "format": "long_gt_60s"
+    },
+    "metric": "log10(1+views/day)",
+    "n": [
+     95,
+     41
+    ],
+    "means": [
+     4.438492,
+     4.251935
+    ],
+    "effect": -0.186557,
+    "ci": [
+     -0.385839,
+     0.012724
+    ],
+    "cohens_d": -0.3009,
+    "p_value": 0.066234,
+    "p_adjusted": 1.0,
+    "verdict": "inconclusive",
+    "why": "adjusted p=1; CI [-0.385839, 0.012724] includes 0 or p >= 0.05 - no reliable difference at this sample size",
+    "tests_corrected_for": 74,
+    "robust_to_outliers": true,
+    "median_diff": -0.282797,
+    "median_ci": [
+     -0.517041,
+     -0.03089
+    ],
+    "record_ids_sample": [
+     "youtube:Vjf1hXpPVvc@2026-05-11",
+     "youtube:hqoRM96ASkw@2026-05-11",
+     "youtube:wkaLKwI4wY4@2026-05-11"
+    ]
+   },
+   {
+    "feature": "title_allcaps_word",
+    "segment": {
+     "niche": "gaming",
+     "format": "long_gt_60s"
+    },
+    "metric": "log10(1+views/day)",
+    "n": [
+     64,
+     72
+    ],
+    "means": [
+     4.383329,
+     4.381292
+    ],
+    "effect": -0.002037,
+    "ci": [
+     -0.215131,
+     0.211057
+    ],
+    "cohens_d": -0.0033,
+    "p_value": 0.984942,
+    "p_adjusted": 1.0,
+    "verdict": "inconclusive",
+    "why": "adjusted p=1; CI [-0.215131, 0.211057] includes 0 or p >= 0.05 - no reliable difference at this sample size",
+    "tests_corrected_for": 74,
+    "robust_to_outliers": false,
+    "median_diff": 0.075296,
+    "median_ci": [
+     -0.244466,
+     0.325318
+    ],
+    "record_ids_sample": [
+     "youtube:xEtvOq4LFSk@2026-05-11",
+     "youtube:wDGaqsopROE@2026-05-11",
+     "youtube:6NPtGfzPREk@2026-05-11"
+    ]
+   },
+   {
+    "feature": "title_long_over_60_chars",
+    "segment": {
+     "niche": "gaming",
+     "format": "long_gt_60s"
+    },
+    "metric": "log10(1+views/day)",
+    "n": [
+     74,
+     62
+    ],
+    "means": [
+     4.476104,
+     4.270232
+    ],
+    "effect": -0.205872,
+    "ci": [
+     -0.409622,
+     -0.002122
+    ],
+    "cohens_d": -0.3335,
+    "p_value": 0.047695,
+    "p_adjusted": 1.0,
+    "verdict": "inconclusive",
+    "why": "adjusted p=1; CI [-0.409622, -0.002122] includes 0 or p >= 0.05 - no reliable difference at this sample size",
+    "tests_corrected_for": 74,
+    "robust_to_outliers": true,
+    "median_diff": -0.316665,
+    "median_ci": [
+     -0.480627,
+     -0.03957
+    ],
+    "record_ids_sample": [
+     "youtube:wDGaqsopROE@2026-05-11",
+     "youtube:neYHOAfnHxI@2026-05-11",
+     "youtube:wkaLKwI4wY4@2026-05-11"
+    ]
+   },
+   {
+    "feature": "title_number",
+    "segment": {
+     "niche": "news",
+     "format": "long_gt_60s"
+    },
+    "metric": "log10(1+views/day)",
+    "n": [
+     121,
+     283
+    ],
+    "means": [
+     4.545807,
+     4.347725
+    ],
+    "effect": -0.198082,
+    "ci": [
+     -0.308981,
+     -0.087183
+    ],
+    "cohens_d": -0.4001,
+    "p_value": 0.000528,
+    "p_adjusted": 0.038016,
+    "verdict": "association",
+    "why": "adjusted p=0.03802 < 0.05 and the 95% CI excludes 0; association only - confounders not controlled",
+    "tests_corrected_for": 74,
+    "robust_to_outliers": true,
+    "median_diff": -0.284776,
+    "median_ci": [
+     -0.378129,
+     -0.121054
+    ],
+    "record_ids_sample": [
+     "youtube:BqALH4yvHVA@2026-05-11",
+     "youtube:Je-Gwm7fy5I@2026-05-11",
+     "youtube:fFYOUGCGiX0@2026-05-11"
+    ]
+   },
+   {
+    "feature": "title_exclamation",
+    "segment": {
+     "niche": "news",
+     "format": "long_gt_60s"
+    },
+    "metric": "log10(1+views/day)",
+    "n": [
+     368,
+     36
+    ],
+    "means": [
+     4.403936,
+     4.438898
+    ],
+    "effect": 0.034961,
+    "ci": [
+     -0.141073,
+     0.210996
+    ],
+    "cohens_d": 0.0695,
+    "p_value": 0.690641,
+    "p_adjusted": 1.0,
+    "verdict": "inconclusive",
+    "why": "adjusted p=1; CI [-0.141073, 0.210996] includes 0 or p >= 0.05 - no reliable difference at this sample size",
+    "tests_corrected_for": 74,
+    "robust_to_outliers": false,
+    "median_diff": 0.228418,
+    "median_ci": [
+     -0.012678,
+     0.348737
+    ],
+    "record_ids_sample": [
+     "youtube:U2NFu2IOJMs@2026-05-11",
+     "youtube:3bzuqzXZwK0@2026-05-11",
+     "youtube:LFP4mJqLoJg@2026-05-11"
+    ]
+   },
+   {
+    "feature": "title_allcaps_word",
+    "segment": {
+     "niche": "news",
+     "format": "long_gt_60s"
+    },
+    "metric": "log10(1+views/day)",
+    "n": [
+     303,
+     101
+    ],
+    "means": [
+     4.425298,
+     4.352313
+    ],
+    "effect": -0.072985,
+    "ci": [
+     -0.209981,
+     0.06401
+    ],
+    "cohens_d": -0.1453,
+    "p_value": 0.293894,
+    "p_adjusted": 1.0,
+    "verdict": "inconclusive",
+    "why": "adjusted p=1; CI [-0.209981, 0.06401] includes 0 or p >= 0.05 - no reliable difference at this sample size",
+    "tests_corrected_for": 74,
+    "robust_to_outliers": false,
+    "median_diff": -0.164938,
+    "median_ci": [
+     -0.343065,
+     0.010674
+    ],
+    "record_ids_sample": [
+     "youtube:U2NFu2IOJMs@2026-05-11",
+     "youtube:N70CJsoIFqA@2026-05-11",
+     "youtube:GJ4ND2y0G08@2026-05-11"
+    ]
+   },
+   {
+    "feature": "title_long_over_60_chars",
+    "segment": {
+     "niche": "news",
+     "format": "long_gt_60s"
+    },
+    "metric": "log10(1+views/day)",
+    "n": [
+     65,
+     339
+    ],
+    "means": [
+     4.405248,
+     4.407398
+    ],
+    "effect": 0.002149,
+    "ci": [
+     -0.13411,
+     0.138409
+    ],
+    "cohens_d": 0.0043,
+    "p_value": 0.975068,
+    "p_adjusted": 1.0,
+    "verdict": "inconclusive",
+    "why": "adjusted p=1; CI [-0.13411, 0.138409] includes 0 or p >= 0.05 - no reliable difference at this sample size",
+    "tests_corrected_for": 74,
+    "robust_to_outliers": false,
+    "median_diff": -0.036439,
+    "median_ci": [
+     -0.224718,
+     0.127928
+    ],
+    "record_ids_sample": [
+     "youtube:U2NFu2IOJMs@2026-05-11",
+     "youtube:BqALH4yvHVA@2026-05-11",
+     "youtube:Z98fpYAUBEM@2026-05-11"
+    ]
+   },
+   {
+    "feature": "title_allcaps_word",
+    "segment": {
+     "niche": "sports",
+     "format": "long_gt_60s"
+    },
+    "metric": "log10(1+views/day)",
+    "n": [
+     40,
+     90
+    ],
+    "means": [
+     4.26933,
+     4.471877
+    ],
+    "effect": 0.202547,
+    "ci": [
+     0.007829,
+     0.397265
+    ],
+    "cohens_d": 0.4188,
+    "p_value": 0.041715,
+    "p_adjusted": 1.0,
+    "verdict": "inconclusive",
+    "why": "adjusted p=1; CI [0.007829, 0.397265] includes 0 or p >= 0.05 - no reliable difference at this sample size",
+    "tests_corrected_for": 74,
+    "robust_to_outliers": true,
+    "median_diff": 0.258216,
+    "median_ci": [
+     0.01624,
+     0.455411
+    ],
+    "record_ids_sample": [
+     "youtube:4jD4jhMBynM@2026-05-11",
+     "youtube:pH63UHgA4ag@2026-05-11",
+     "youtube:DQLYVjho0YQ@2026-05-11"
+    ]
+   },
+   {
+    "feature": "title_number",
+    "segment": {
+     "niche": "AI",
+     "format": "long_gt_60s"
+    },
+    "metric": "log10(1+views/day)",
+    "n": [
+     105,
+     67
+    ],
+    "means": [
+     4.204293,
+     4.188767
+    ],
+    "effect": -0.015526,
+    "ci": [
+     -0.180462,
+     0.14941
+    ],
+    "cohens_d": -0.0303,
+    "p_value": 0.85249,
+    "p_adjusted": 1.0,
+    "verdict": "inconclusive",
+    "why": "adjusted p=1; CI [-0.180462, 0.14941] includes 0 or p >= 0.05 - no reliable difference at this sample size",
+    "tests_corrected_for": 74,
+    "robust_to_outliers": false,
+    "median_diff": 0.034552,
+    "median_ci": [
+     -0.182964,
+     0.205618
+    ],
+    "record_ids_sample": [
+     "youtube:xJ4QHnIV7Jo@2026-05-11",
+     "youtube:fYRmnrDFPes@2026-05-11",
+     "youtube:p08q3K_2x4U@2026-05-11"
+    ]
+   },
+   {
+    "feature": "title_exclamation",
+    "segment": {
+     "niche": "AI",
+     "format": "long_gt_60s"
+    },
+    "metric": "log10(1+views/day)",
+    "n": [
+     142,
+     30
+    ],
+    "means": [
+     4.115425,
+     4.590262
+    ],
+    "effect": 0.474837,
+    "ci": [
+     0.288798,
+     0.660876
+    ],
+    "cohens_d": 0.9896,
+    "p_value": 6e-06,
+    "p_adjusted": 0.000444,
+    "verdict": "association",
+    "why": "adjusted p=0.000444 < 0.05 and the 95% CI excludes 0; association only - confounders not controlled",
+    "tests_corrected_for": 74,
+    "robust_to_outliers": true,
+    "median_diff": 0.425646,
+    "median_ci": [
+     0.22936,
+     0.667101
+    ],
+    "record_ids_sample": [
+     "youtube:NdU6UdUKaYc@2026-05-11",
+     "youtube:pSHnj6jEChk@2026-05-11",
+     "youtube:DO62BDjulR4@2026-05-11"
+    ]
+   },
+   {
+    "feature": "title_allcaps_word",
+    "segment": {
+     "niche": "AI",
+     "format": "long_gt_60s"
+    },
+    "metric": "log10(1+views/day)",
+    "n": [
+     122,
+     50
+    ],
+    "means": [
+     4.126686,
+     4.372851
+    ],
+    "effect": 0.246166,
+    "ci": [
+     0.059749,
+     0.432582
+    ],
+    "cohens_d": 0.4919,
+    "p_value": 0.010348,
+    "p_adjusted": 0.682968,
+    "verdict": "inconclusive",
+    "why": "adjusted p=0.683; CI [0.059749, 0.432582] includes 0 or p >= 0.05 - no reliable difference at this sample size",
+    "tests_corrected_for": 74,
+    "robust_to_outliers": true,
+    "median_diff": 0.288729,
+    "median_ci": [
+     0.142515,
+     0.518774
+    ],
+    "record_ids_sample": [
+     "youtube:xJ4QHnIV7Jo@2026-05-11",
+     "youtube:T0ZkvbZe9Dw@2026-05-11",
+     "youtube:6rGhvV3rZa4@2026-05-11"
+    ]
+   },
+   {
+    "feature": "title_long_over_60_chars",
+    "segment": {
+     "niche": "AI",
+     "format": "long_gt_60s"
+    },
+    "metric": "log10(1+views/day)",
+    "n": [
+     92,
+     80
+    ],
+    "means": [
+     4.16607,
+     4.235247
+    ],
+    "effect": 0.069177,
+    "ci": [
+     -0.084468,
+     0.222821
+    ],
+    "cohens_d": 0.1352,
+    "p_value": 0.375367,
+    "p_adjusted": 1.0,
+    "verdict": "inconclusive",
+    "why": "adjusted p=1; CI [-0.084468, 0.222821] includes 0 or p >= 0.05 - no reliable difference at this sample size",
+    "tests_corrected_for": 74,
+    "robust_to_outliers": false,
+    "median_diff": 0.026172,
+    "median_ci": [
+     -0.161814,
+     0.199957
+    ],
+    "record_ids_sample": [
+     "youtube:8SeAWP9Pz8E@2026-05-11",
+     "youtube:WnzR5aOElvw@2026-05-11",
+     "youtube:FG5JsLHPW_I@2026-05-11"
+    ]
+   },
+   {
+    "feature": "title_number",
+    "segment": {
+     "niche": "movies",
+     "format": "long_gt_60s"
+    },
+    "metric": "log10(1+views/day)",
+    "n": [
+     42,
+     34
+    ],
+    "means": [
+     4.445185,
+     4.60209
+    ],
+    "effect": 0.156904,
+    "ci": [
+     -0.088863,
+     0.402671
+    ],
+    "cohens_d": 0.2898,
+    "p_value": 0.207291,
+    "p_adjusted": 1.0,
+    "verdict": "inconclusive",
+    "why": "adjusted p=1; CI [-0.088863, 0.402671] includes 0 or p >= 0.05 - no reliable difference at this sample size",
+    "tests_corrected_for": 74,
+    "robust_to_outliers": false,
+    "median_diff": 0.162996,
+    "median_ci": [
+     -0.253444,
+     0.431842
+    ],
+    "record_ids_sample": [
+     "youtube:eaU_pAtET3o@2026-05-11",
+     "youtube:xqHl-zT83KE@2026-05-11",
+     "youtube:hsbX9d9IMNw@2026-05-11"
+    ]
+   }
+  ],
+  "segmented_insufficient": [
+   {
+    "feature": "title_number",
+    "segment": {
+     "niche": "music",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     19,
+     57
+    ]
+   },
+   {
+    "feature": "title_exclamation",
+    "segment": {
+     "niche": "music",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     69,
+     7
+    ]
+   },
+   {
+    "feature": "title_allcaps_word",
+    "segment": {
+     "niche": "music",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     55,
+     21
+    ]
+   },
+   {
+    "feature": "title_long_over_60_chars",
+    "segment": {
+     "niche": "music",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     25,
+     51
+    ]
+   },
+   {
+    "feature": "title_question",
+    "segment": {
+     "niche": "music",
+     "format": "short_le_60s"
+    },
+    "n": [
+     59,
+     4
+    ]
+   },
+   {
+    "feature": "title_number",
+    "segment": {
+     "niche": "music",
+     "format": "short_le_60s"
+    },
+    "n": [
+     50,
+     13
+    ]
+   },
+   {
+    "feature": "title_exclamation",
+    "segment": {
+     "niche": "music",
+     "format": "short_le_60s"
+    },
+    "n": [
+     59,
+     4
+    ]
+   },
+   {
+    "feature": "title_allcaps_word",
+    "segment": {
+     "niche": "music",
+     "format": "short_le_60s"
+    },
+    "n": [
+     44,
+     19
+    ]
+   },
+   {
+    "feature": "title_long_over_60_chars",
+    "segment": {
+     "niche": "music",
+     "format": "short_le_60s"
+    },
+    "n": [
+     15,
+     48
+    ]
+   },
+   {
+    "feature": "title_question",
+    "segment": {
+     "niche": "gaming",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     126,
+     10
+    ]
+   },
+   {
+    "feature": "title_question",
+    "segment": {
+     "niche": "gaming",
+     "format": "short_le_60s"
+    },
+    "n": [
+     57,
+     5
+    ]
+   },
+   {
+    "feature": "title_number",
+    "segment": {
+     "niche": "gaming",
+     "format": "short_le_60s"
+    },
+    "n": [
+     43,
+     19
+    ]
+   },
+   {
+    "feature": "title_exclamation",
+    "segment": {
+     "niche": "gaming",
+     "format": "short_le_60s"
+    },
+    "n": [
+     56,
+     6
+    ]
+   },
+   {
+    "feature": "title_allcaps_word",
+    "segment": {
+     "niche": "gaming",
+     "format": "short_le_60s"
+    },
+    "n": [
+     53,
+     9
+    ]
+   },
+   {
+    "feature": "title_long_over_60_chars",
+    "segment": {
+     "niche": "gaming",
+     "format": "short_le_60s"
+    },
+    "n": [
+     35,
+     27
+    ]
+   },
+   {
+    "feature": "title_question",
+    "segment": {
+     "niche": "news",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     378,
+     26
+    ]
+   },
+   {
+    "feature": "title_question",
+    "segment": {
+     "niche": "news",
+     "format": "short_le_60s"
+    },
+    "n": [
+     58,
+     6
+    ]
+   },
+   {
+    "feature": "title_number",
+    "segment": {
+     "niche": "news",
+     "format": "short_le_60s"
+    },
+    "n": [
+     56,
+     8
+    ]
+   },
+   {
+    "feature": "title_exclamation",
+    "segment": {
+     "niche": "news",
+     "format": "short_le_60s"
+    },
+    "n": [
+     55,
+     9
+    ]
+   },
+   {
+    "feature": "title_allcaps_word",
+    "segment": {
+     "niche": "news",
+     "format": "short_le_60s"
+    },
+    "n": [
+     50,
+     14
+    ]
+   },
+   {
+    "feature": "title_long_over_60_chars",
+    "segment": {
+     "niche": "news",
+     "format": "short_le_60s"
+    },
+    "n": [
+     12,
+     52
+    ]
+   },
+   {
+    "feature": "title_question",
+    "segment": {
+     "niche": "sports",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     128,
+     2
+    ]
+   },
+   {
+    "feature": "title_number",
+    "segment": {
+     "niche": "sports",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     26,
+     104
+    ]
+   },
+   {
+    "feature": "title_exclamation",
+    "segment": {
+     "niche": "sports",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     124,
+     6
+    ]
+   },
+   {
+    "feature": "title_long_over_60_chars",
+    "segment": {
+     "niche": "sports",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     18,
+     112
+    ]
+   },
+   {
+    "feature": "title_question",
+    "segment": {
+     "niche": "sports",
+     "format": "short_le_60s"
+    },
+    "n": [
+     94,
+     3
+    ]
+   },
+   {
+    "feature": "title_number",
+    "segment": {
+     "niche": "sports",
+     "format": "short_le_60s"
+    },
+    "n": [
+     81,
+     16
+    ]
+   },
+   {
+    "feature": "title_exclamation",
+    "segment": {
+     "niche": "sports",
+     "format": "short_le_60s"
+    },
+    "n": [
+     89,
+     8
+    ]
+   },
+   {
+    "feature": "title_allcaps_word",
+    "segment": {
+     "niche": "sports",
+     "format": "short_le_60s"
+    },
+    "n": [
+     86,
+     11
+    ]
+   },
+   {
+    "feature": "title_long_over_60_chars",
+    "segment": {
+     "niche": "sports",
+     "format": "short_le_60s"
+    },
+    "n": [
+     26,
+     71
+    ]
+   },
+   {
+    "feature": "title_question",
+    "segment": {
+     "niche": "education",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     24,
+     1
+    ]
+   },
+   {
+    "feature": "title_number",
+    "segment": {
+     "niche": "education",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     17,
+     8
+    ]
+   },
+   {
+    "feature": "title_exclamation",
+    "segment": {
+     "niche": "education",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     23,
+     2
+    ]
+   },
+   {
+    "feature": "title_allcaps_word",
+    "segment": {
+     "niche": "education",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     20,
+     5
+    ]
+   },
+   {
+    "feature": "title_long_over_60_chars",
+    "segment": {
+     "niche": "education",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     11,
+     14
+    ]
+   },
+   {
+    "feature": "title_question",
+    "segment": {
+     "niche": "education",
+     "format": "short_le_60s"
+    },
+    "n": [
+     86,
+     9
+    ]
+   },
+   {
+    "feature": "title_number",
+    "segment": {
+     "niche": "education",
+     "format": "short_le_60s"
+    },
+    "n": [
+     69,
+     26
+    ]
+   },
+   {
+    "feature": "title_exclamation",
+    "segment": {
+     "niche": "education",
+     "format": "short_le_60s"
+    },
+    "n": [
+     89,
+     6
+    ]
+   },
+   {
+    "feature": "title_allcaps_word",
+    "segment": {
+     "niche": "education",
+     "format": "short_le_60s"
+    },
+    "n": [
+     83,
+     12
+    ]
+   },
+   {
+    "feature": "title_long_over_60_chars",
+    "segment": {
+     "niche": "education",
+     "format": "short_le_60s"
+    },
+    "n": [
+     11,
+     84
+    ]
+   },
+   {
+    "feature": "title_question",
+    "segment": {
+     "niche": "technology",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     55,
+     7
+    ]
+   },
+   {
+    "feature": "title_number",
+    "segment": {
+     "niche": "technology",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     29,
+     33
+    ]
+   },
+   {
+    "feature": "title_exclamation",
+    "segment": {
+     "niche": "technology",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     55,
+     7
+    ]
+   },
+   {
+    "feature": "title_allcaps_word",
+    "segment": {
+     "niche": "technology",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     46,
+     16
+    ]
+   },
+   {
+    "feature": "title_long_over_60_chars",
+    "segment": {
+     "niche": "technology",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     29,
+     33
+    ]
+   },
+   {
+    "feature": "title_question",
+    "segment": {
+     "niche": "technology",
+     "format": "short_le_60s"
+    },
+    "n": [
+     63,
+     8
+    ]
+   },
+   {
+    "feature": "title_number",
+    "segment": {
+     "niche": "technology",
+     "format": "short_le_60s"
+    },
+    "n": [
+     62,
+     9
+    ]
+   },
+   {
+    "feature": "title_exclamation",
+    "segment": {
+     "niche": "technology",
+     "format": "short_le_60s"
+    },
+    "n": [
+     65,
+     6
+    ]
+   },
+   {
+    "feature": "title_allcaps_word",
+    "segment": {
+     "niche": "technology",
+     "format": "short_le_60s"
+    },
+    "n": [
+     69,
+     2
+    ]
+   },
+   {
+    "feature": "title_long_over_60_chars",
+    "segment": {
+     "niche": "technology",
+     "format": "short_le_60s"
+    },
+    "n": [
+     15,
+     56
+    ]
+   },
+   {
+    "feature": "title_question",
+    "segment": {
+     "niche": "AI",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     156,
+     16
+    ]
+   },
+   {
+    "feature": "title_question",
+    "segment": {
+     "niche": "AI",
+     "format": "short_le_60s"
+    },
+    "n": [
+     19,
+     4
+    ]
+   },
+   {
+    "feature": "title_exclamation",
+    "segment": {
+     "niche": "AI",
+     "format": "short_le_60s"
+    },
+    "n": [
+     21,
+     2
+    ]
+   },
+   {
+    "feature": "title_allcaps_word",
+    "segment": {
+     "niche": "AI",
+     "format": "short_le_60s"
+    },
+    "n": [
+     20,
+     3
+    ]
+   },
+   {
+    "feature": "title_long_over_60_chars",
+    "segment": {
+     "niche": "AI",
+     "format": "short_le_60s"
+    },
+    "n": [
+     13,
+     10
+    ]
+   },
+   {
+    "feature": "title_question",
+    "segment": {
+     "niche": "movies",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     74,
+     2
+    ]
+   },
+   {
+    "feature": "title_exclamation",
+    "segment": {
+     "niche": "movies",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     66,
+     10
+    ]
+   },
+   {
+    "feature": "title_allcaps_word",
+    "segment": {
+     "niche": "movies",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     51,
+     25
+    ]
+   },
+   {
+    "feature": "title_long_over_60_chars",
+    "segment": {
+     "niche": "movies",
+     "format": "long_gt_60s"
+    },
+    "n": [
+     8,
+     68
+    ]
+   },
+   {
+    "feature": "title_question",
+    "segment": {
+     "niche": "movies",
+     "format": "short_le_60s"
+    },
+    "n": [
+     11,
+     1
+    ]
+   },
+   {
+    "feature": "title_number",
+    "segment": {
+     "niche": "movies",
+     "format": "short_le_60s"
+    },
+    "n": [
+     11,
+     1
+    ]
+   },
+   {
+    "feature": "title_exclamation",
+    "segment": {
+     "niche": "movies",
+     "format": "short_le_60s"
+    },
+    "n": [
+     11,
+     1
+    ]
+   },
+   {
+    "feature": "title_allcaps_word",
+    "segment": {
+     "niche": "movies",
+     "format": "short_le_60s"
+    },
+    "n": [
+     9,
+     3
+    ]
+   },
+   {
+    "feature": "title_long_over_60_chars",
+    "segment": {
+     "niche": "movies",
+     "format": "short_le_60s"
+    },
+    "n": [
+     5,
+     7
+    ]
+   }
+  ],
+  "recommendations": [
+   {
+    "schema": "nexus.GrowthRecommendation/1",
+    "id": "rec_337927db21",
+    "kind": "pattern",
+    "text": "In platform=youtube, videos with 'title_allcaps_word' differ on log10(1+views/day) by +0.104 (mean; 95% CI +0.0268..+0.181; median diff +0.0772, CI -0.0122..+0.17; n=453 vs 1115; Holm-adjusted p=0.0417). Association only - test 'title' in a controlled experiment before acting. The median-difference CI includes 0, so the mean difference may be driven by a few outliers.",
+    "evidence": [
+     {
+      "source": "public dataset, not the owner's channel: Mendeley 10.17632/4gf2nhbr9d.1",
+      "retrieved": "2026-11-12",
+      "kind": "analytics",
+      "feature": "title_allcaps_word",
+      "segment": {
+       "platform": "youtube"
+      },
+      "metric": "log10(1+views/day)",
+      "n": [
+       1115,
+       453
+      ],
+      "mean_diff": 0.103797,
+      "ci95": [
+       0.026757,
+       0.180837
+      ],
+      "median_diff": 0.077239,
+      "median_ci95": [
+       -0.012238,
+       0.170159
+      ],
+      "p_adjusted": 0.041655,
+      "record_ids_sample": [
+       "youtube:YGzzBT5fSTM@2026-05-11",
+       "youtube:5m2RldUOXVQ@2026-05-11",
+       "youtube:uWf69CF55yQ@2026-05-11",
+       "youtube:VtpzmK1IEcw@2026-05-11",
+       "youtube:KRK1lhIUBiE@2026-05-11"
+      ]
+     }
+    ],
+    "confidence": 0.25,
+    "target": "account3",
+    "status": "proposed",
+    "experiment_id": null,
+    "variable": "title",
+    "packaging": {
+     "feature": "title_allcaps_word"
+    },
+    "phrasing": "router:local-llamacpp/qwen3-4b-q4km",
+    "narrative": "Videos with 'title_allcaps_word' on YouTube show a 0.104 difference in log10(1+views/day) (mean; 95% CI +0.0268 to +0.181; median diff +0.0772, CI -0.0122 to +0.17; n=453 vs 1115; Holm-adjusted p=0.0417). The association is only tested in a controlled experiment before acting, and the median-difference CI includes 0, suggesting the mean difference may be influenced by a few outliers."
+   },
+   {
+    "schema": "nexus.GrowthRecommendation/1",
+    "id": "rec_03d3b15ef9",
+    "kind": "pattern",
+    "text": "In niche=news, format=long_gt_60s, videos with 'title_number' differ on log10(1+views/day) by -0.198 (mean; 95% CI -0.309..-0.0872; median diff -0.285, CI -0.378..-0.121; n=283 vs 121; Holm-adjusted p=0.038). Association only - test 'title' in a controlled experiment before acting.",
+    "evidence": [
+     {
+      "source": "public dataset, not the owner's channel: Mendeley 10.17632/4gf2nhbr9d.1",
+      "retrieved": "2026-11-12",
+      "kind": "analytics",
+      "feature": "title_number",
+      "segment": {
+       "niche": "news",
+       "format": "long_gt_60s"
+      },
+      "metric": "log10(1+views/day)",
+      "n": [
+       121,
+       283
+      ],
+      "mean_diff": -0.198082,
+      "ci95": [
+       -0.308981,
+       -0.087183
+      ],
+      "median_diff": -0.284776,
+      "median_ci95": [
+       -0.378129,
+       -0.121054
+      ],
+      "p_adjusted": 0.038016,
+      "record_ids_sample": [
+       "youtube:BqALH4yvHVA@2026-05-11",
+       "youtube:Je-Gwm7fy5I@2026-05-11",
+       "youtube:fFYOUGCGiX0@2026-05-11",
+       "youtube:3bzuqzXZwK0@2026-05-11",
+       "youtube:PHepUgu2t3A@2026-05-11"
+      ]
+     }
+    ],
+    "confidence": 0.35,
+    "target": "account3",
+    "status": "proposed",
+    "experiment_id": null,
+    "variable": "title",
+    "packaging": {
+     "feature": "title_number"
+    },
+    "phrasing": "deterministic"
+   },
+   {
+    "schema": "nexus.GrowthRecommendation/1",
+    "id": "rec_f548b0b328",
+    "kind": "pattern",
+    "text": "In niche=AI, format=long_gt_60s, videos with 'title_exclamation' differ on log10(1+views/day) by +0.475 (mean; 95% CI +0.289..+0.661; median diff +0.426, CI +0.229..+0.667; n=30 vs 142; Holm-adjusted p=0.000444). Association only - test 'title' in a controlled experiment before acting.",
+    "evidence": [
+     {
+      "source": "public dataset, not the owner's channel: Mendeley 10.17632/4gf2nhbr9d.1",
+      "retrieved": "2026-11-12",
+      "kind": "analytics",
+      "feature": "title_exclamation",
+      "segment": {
+       "niche": "AI",
+       "format": "long_gt_60s"
+      },
+      "metric": "log10(1+views/day)",
+      "n": [
+       142,
+       30
+      ],
+      "mean_diff": 0.474837,
+      "ci95": [
+       0.288798,
+       0.660876
+      ],
+      "median_diff": 0.425646,
+      "median_ci95": [
+       0.22936,
+       0.667101
+      ],
+      "p_adjusted": 0.000444,
+      "record_ids_sample": [
+       "youtube:NdU6UdUKaYc@2026-05-11",
+       "youtube:pSHnj6jEChk@2026-05-11",
+       "youtube:DO62BDjulR4@2026-05-11",
+       "youtube:6JoUcQ1qmAc@2026-05-11",
+       "youtube:7xNuQ3hCZVc@2026-05-11"
+      ]
+     }
+    ],
+    "confidence": 0.35,
+    "target": "account3",
+    "status": "proposed",
+    "experiment_id": null,
+    "variable": "title",
+    "packaging": {
+     "feature": "title_exclamation"
+    },
+    "phrasing": "deterministic"
+   },
+   {
+    "schema": "nexus.GrowthRecommendation/1",
+    "id": "rec_1d9087295a",
+    "kind": "pattern",
+    "text": "In platform=youtube, videos with 'title_question' differ on like_rate (likes/views) by +0.0107 (mean; 95% CI +0.00637..+0.015; median diff +0.00985, CI +0.00494..+0.0174; n=104 vs 1464; Holm-adjusted p=6e-06). Association only - test 'title' in a controlled experiment before acting.",
+    "evidence": [
+     {
+      "source": "public dataset, not the owner's channel: Mendeley 10.17632/4gf2nhbr9d.1",
+      "retrieved": "2026-11-12",
+      "kind": "analytics",
+      "feature": "title_question",
+      "segment": {
+       "platform": "youtube"
+      },
+      "metric": "like_rate (likes/views)",
+      "n": [
+       1464,
+       104
+      ],
+      "mean_diff": 0.010679,
+      "ci95": [
+       0.006367,
+       0.014992
+      ],
+      "median_diff": 0.009848,
+      "median_ci95": [
+       0.004937,
+       0.017433
+      ],
+      "p_adjusted": 6e-06,
+      "record_ids_sample": [
+       "youtube:Ia40S3Vyrdg@2026-05-11",
+       "youtube:4ncK_2t0fZY@2026-05-11",
+       "youtube:9ENYz8Gj-1Y@2026-05-11",
+       "youtube:h7rcqnlyaBA@2026-05-11",
+       "youtube:HQsqM9NylS0@2026-05-11"
+      ]
+     }
+    ],
+    "confidence": 0.35,
+    "target": "account3",
+    "status": "proposed",
+    "experiment_id": null,
+    "variable": "title",
+    "packaging": {
+     "feature": "title_question"
+    },
+    "phrasing": "deterministic"
+   },
+   {
+    "schema": "nexus.GrowthRecommendation/1",
+    "id": "rec_8c098aacce",
+    "kind": "pattern",
+    "text": "In platform=youtube, videos with 'title_number' differ on like_rate (likes/views) by -0.00472 (mean; 95% CI -0.00636..-0.00307; median diff -0.00396, CI -0.00502..-0.00255; n=726 vs 842; Holm-adjusted p=0). Association only - test 'title' in a controlled experiment before acting.",
+    "evidence": [
+     {
+      "source": "public dataset, not the owner's channel: Mendeley 10.17632/4gf2nhbr9d.1",
+      "retrieved": "2026-11-12",
+      "kind": "analytics",
+      "feature": "title_number",
+      "segment": {
+       "platform": "youtube"
+      },
+      "metric": "like_rate (likes/views)",
+      "n": [
+       842,
+       726
+      ],
+      "mean_diff": -0.004718,
+      "ci95": [
+       -0.006363,
+       -0.003073
+      ],
+      "median_diff": -0.003957,
+      "median_ci95": [
+       -0.005019,
+       -0.00255
+      ],
+      "p_adjusted": 0.0,
+      "record_ids_sample": [
+       "youtube:4e8-YSbR4Ug@2026-05-11",
+       "youtube:SMB6g4fnFaU@2026-05-11",
+       "youtube:EFn3x7KjLN4@2026-05-11",
+       "youtube:nw2NM5mYAMQ@2026-05-11",
+       "youtube:NoTFoclj2PM@2026-05-11"
+      ]
+     }
+    ],
+    "confidence": 0.35,
+    "target": "account3",
+    "status": "proposed",
+    "experiment_id": null,
+    "variable": "title",
+    "packaging": {
+     "feature": "title_number"
+    },
+    "phrasing": "deterministic"
+   },
+   {
+    "schema": "nexus.GrowthRecommendation/1",
+    "id": "rec_ec55227373",
+    "kind": "pattern",
+    "text": "In platform=youtube, videos with 'title_exclamation' differ on like_rate (likes/views) by +0.00753 (mean; 95% CI +0.00465..+0.0104; median diff +0.00976, CI +0.00627..+0.0119; n=181 vs 1387; Holm-adjusted p=3e-06). Association only - test 'title' in a controlled experiment before acting.",
+    "evidence": [
+     {
+      "source": "public dataset, not the owner's channel: Mendeley 10.17632/4gf2nhbr9d.1",
+      "retrieved": "2026-11-12",
+      "kind": "analytics",
+      "feature": "title_exclamation",
+      "segment": {
+       "platform": "youtube"
+      },
+      "metric": "like_rate (likes/views)",
+      "n": [
+       1387,
+       181
+      ],
+      "mean_diff": 0.007529,
+      "ci95": [
+       0.00465,
+       0.010409
+      ],
+      "median_diff": 0.009763,
+      "median_ci95": [
+       0.006274,
+       0.011948
+      ],
+      "p_adjusted": 3e-06,
+      "record_ids_sample": [
+       "youtube:Fj48AR9JAjE@2026-05-11",
+       "youtube:4ncK_2t0fZY@2026-05-11",
+       "youtube:kOxzw9Tenw4@2026-05-11",
+       "youtube:_rQiTC7woSg@2026-05-11",
+       "youtube:aG0xV-BPabs@2026-05-11"
+      ]
+     }
+    ],
+    "confidence": 0.35,
+    "target": "account3",
+    "status": "proposed",
+    "experiment_id": null,
+    "variable": "title",
+    "packaging": {
+     "feature": "title_exclamation"
+    },
+    "phrasing": "deterministic"
+   },
+   {
+    "schema": "nexus.GrowthRecommendation/1",
+    "id": "rec_99a59b2e8f",
+    "kind": "pattern",
+    "text": "In platform=youtube, videos with 'title_allcaps_word' differ on like_rate (likes/views) by +0.004 (mean; 95% CI +0.002..+0.00599; median diff +0.00224, CI -0.000236..+0.00412; n=453 vs 1115; Holm-adjusted p=9.1e-05). Association only - test 'title' in a controlled experiment before acting. The median-difference CI includes 0, so the mean difference may be driven by a few outliers.",
+    "evidence": [
+     {
+      "source": "public dataset, not the owner's channel: Mendeley 10.17632/4gf2nhbr9d.1",
+      "retrieved": "2026-11-12",
+      "kind": "analytics",
+      "feature": "title_allcaps_word",
+      "segment": {
+       "platform": "youtube"
+      },
+      "metric": "like_rate (likes/views)",
+      "n": [
+       1115,
+       453
+      ],
+      "mean_diff": 0.003996,
+      "ci95": [
+       0.002002,
+       0.00599
+      ],
+      "median_diff": 0.002239,
+      "median_ci95": [
+       -0.000236,
+       0.004117
+      ],
+      "p_adjusted": 9.1e-05,
+      "record_ids_sample": [
+       "youtube:YGzzBT5fSTM@2026-05-11",
+       "youtube:5m2RldUOXVQ@2026-05-11",
+       "youtube:uWf69CF55yQ@2026-05-11",
+       "youtube:VtpzmK1IEcw@2026-05-11",
+       "youtube:KRK1lhIUBiE@2026-05-11"
+      ]
+     }
+    ],
+    "confidence": 0.25,
+    "target": "account3",
+    "status": "proposed",
+    "experiment_id": null,
+    "variable": "title",
+    "packaging": {
+     "feature": "title_allcaps_word"
+    },
+    "phrasing": "deterministic"
+   },
+   {
+    "schema": "nexus.GrowthRecommendation/1",
+    "id": "rec_00b5cea5bc",
+    "kind": "pattern",
+    "text": "In platform=youtube, videos with 'title_long_over_60_chars' differ on like_rate (likes/views) by -0.00633 (mean; 95% CI -0.00825..-0.00441; median diff -0.0066, CI -0.00879..-0.00503; n=1114 vs 454; Holm-adjusted p=0). Association only - test 'title' in a controlled experiment before acting.",
+    "evidence": [
+     {
+      "source": "public dataset, not the owner's channel: Mendeley 10.17632/4gf2nhbr9d.1",
+      "retrieved": "2026-11-12",
+      "kind": "analytics",
+      "feature": "title_long_over_60_chars",
+      "segment": {
+       "platform": "youtube"
+      },
+      "metric": "like_rate (likes/views)",
+      "n": [
+       454,
+       1114
+      ],
+      "mean_diff": -0.006329,
+      "ci95": [
+       -0.008249,
+       -0.004409
+      ],
+      "median_diff": -0.0066,
+      "median_ci95": [
+       -0.008788,
+       -0.005029
+      ],
+      "p_adjusted": 0.0,
+      "record_ids_sample": [
+       "youtube:4e8-YSbR4Ug@2026-05-11",
+       "youtube:SMB6g4fnFaU@2026-05-11",
+       "youtube:EFn3x7KjLN4@2026-05-11",
+       "youtube:5m2RldUOXVQ@2026-05-11",
+       "youtube:oXrZrlor6Os@2026-05-11"
+      ]
+     }
+    ],
+    "confidence": 0.35,
+    "target": "account3",
+    "status": "proposed",
+    "experiment_id": null,
+    "variable": "title",
+    "packaging": {
+     "feature": "title_long_over_60_chars"
+    },
+    "phrasing": "deterministic"
+   }
+  ],
+  "next_experiments": [
+   {
+    "schema": "nexus.ExperimentManifest/1",
+    "id": "exp_b73052db4b",
+    "hypothesis": "'title_exclamation' changes watch-time share (observed association d=+0.99 in public/observational data)",
+    "variable": "title",
+    "variants": [
+     {
+      "id": "A",
+      "desc": "current style"
+     },
+     {
+      "id": "B",
+      "desc": "with title_exclamation",
+      "params": {
+       "title": "title_exclamation"
+      }
+     }
+    ],
+    "platform": "youtube",
+    "metric": "watch_time_share",
+    "min_samples": 1,
+    "status": "planned",
+    "results": null,
+    "confidence": null,
+    "limitations": [
+     "correlation within one channel is not causation outside it",
+     "platform distribution changes over time; results expire"
+    ],
+    "sample_unit": "platform",
+    "assumptions": {
+     "alpha": 0.05,
+     "power": 0.8,
+     "baseline": 0.5,
+     "mde": 0.1,
+     "method": "decided by the platform's own test; NEXUS records the owner-entered result",
+     "unit": "platform"
+    },
+    "compare_at_day": 7,
+    "assignment": [],
+    "history": [
+     {
+      "t": 1794503465.3737342,
+      "status": "planned"
+     }
+    ],
+    "source_pattern": {
+     "feature": "title_exclamation",
+     "segment": {
+      "niche": "AI",
+      "format": "long_gt_60s"
+     },
+     "cohens_d": 0.9896,
+     "p_adjusted": 0.000444
+    }
+   }
+  ],
+  "caveats": [
+   "public cross-section sampled by search query, NOT the owner's channel and NOT trending data",
+   "collection date not stated: ages assume a 2026-05-11 snapshot (+-1-2 days changes views/day of young videos)",
+   "observational: channel size, topic, thumbnail and promotion are not controlled - associations, not causes",
+   "views/day over the first days is front-loaded; the 3-30 day band reduces but does not remove age effects",
+   "Holm correction across every test in a family; segment tests have small groups and mostly report insufficient_data"
+  ]
+ },
+ "part2_synthetic": {
+  "label": "synthetic fixture (not real data)",
+  "experiments": {
+   "tiny_3_vs_5_clicks": {
+    "schema": "nexus.ExperimentManifest/1",
+    "id": "exp_e9cca54496",
+    "hypothesis": "question titles raise CTR",
+    "variable": "title",
+    "variants": [
+     {
+      "id": "A"
+     },
+     {
+      "id": "B",
+      "params": {
+       "title": "question"
+      }
+     }
+    ],
+    "platform": "tiktok",
+    "metric": "ctr",
+    "min_samples": 8158,
+    "status": "collecting",
+    "results": {
+     "verdict": "insufficient_data",
+     "comparisons": [
+      {
+       "test": "two_proportion_z",
+       "rates": [
+        0.3,
+        0.5
+       ],
+       "effect": 0.2,
+       "ci": [
+        -0.220365,
+        0.620365
+       ],
+       "p_value": 0.36131,
+       "relative_lift": 0.6667,
+       "n": [
+        10,
+        10
+       ],
+       "successes": [
+        3,
+        5
+       ],
+       "control": "A",
+       "variant": "B",
+       "record_ids": [
+        "youtube:t1@2026-01-08",
+        "youtube:t2@2026-01-08"
+       ],
+       "p_adjusted": 0.36131,
+       "min_samples": 8158,
+       "verdict": "insufficient_data",
+       "why": "smallest arm has 10 samples; at least 8158 per arm are required before any call"
+      }
+     ],
+     "compare_at_day": 7,
+     "alpha": 0.05,
+     "correction": "holm",
+     "evaluated": 1794503465.37496,
+     "sample_unit": "impressions",
+     "winner": null,
+     "note": "winner = best arm among significant comparisons vs control; with >2 arms, variants are not tested against each other"
+    },
+    "confidence": 0.0,
+    "limitations": [
+     "correlation within one channel is not causation outside it",
+     "platform distribution changes over time; results expire"
+    ],
+    "sample_unit": "impressions",
+    "assumptions": {
+     "alpha": 0.05,
+     "power": 0.8,
+     "baseline": 0.05,
+     "mde": 0.2,
+     "method": "two-proportion z-test, baseline 0.05, relative lift +20%",
+     "unit": "impressions"
+    },
+    "compare_at_day": 7,
+    "assignment": [],
+    "history": [
+     {
+      "t": 1794503465.374859,
+      "status": "planned"
+     },
+     {
+      "t": 1794503465.3749652,
+      "status": "running",
+      "note": ""
+     },
+     {
+      "t": 1794503465.3749795,
+      "status": "collecting",
+      "note": ""
+     }
+    ]
+   },
+   "large_clear_effect": {
+    "schema": "nexus.ExperimentManifest/1",
+    "id": "exp_af70958b37",
+    "hypothesis": "question titles raise CTR",
+    "variable": "title",
+    "variants": [
+     {
+      "id": "A"
+     },
+     {
+      "id": "B",
+      "params": {
+       "title": "question"
+      }
+     }
+    ],
+    "platform": "tiktok",
+    "metric": "ctr",
+    "min_samples": 8158,
+    "status": "concluded",
+    "results": {
+     "verdict": "winner",
+     "comparisons": [
+      {
+       "test": "two_proportion_z",
+       "rates": [
+        0.05,
+        0.07
+       ],
+       "effect": 0.02,
+       "ci": [
+        0.015349,
+        0.024651
+       ],
+       "p_value": 0.0,
+       "relative_lift": 0.4,
+       "n": [
+        20000,
+        20000
+       ],
+       "successes": [
+        1000,
+        1400
+       ],
+       "control": "A",
+       "variant": "B",
+       "record_ids": [
+        "youtube:a0@2026-01-08",
+        "youtube:a1@2026-01-08",
+        "youtube:a2@2026-01-08",
+        "youtube:a3@2026-01-08",
+        "youtube:b0@2026-01-08",
+        "youtube:b1@2026-01-08",
+        "youtube:b2@2026-01-08",
+        "youtube:b3@2026-01-08"
+       ],
+       "p_adjusted": 0.0,
+       "min_samples": 8158,
+       "verdict": "winner",
+       "why": "adjusted p=0 < 0.05 and the 95% CI excludes 0"
+      }
+     ],
+     "compare_at_day": 7,
+     "alpha": 0.05,
+     "correction": "holm",
+     "evaluated": 1794503465.3751569,
+     "sample_unit": "impressions",
+     "winner": "B",
+     "note": "winner = best arm among significant comparisons vs control; with >2 arms, variants are not tested against each other"
+    },
+    "confidence": 1.0,
+    "limitations": [
+     "correlation within one channel is not causation outside it",
+     "platform distribution changes over time; results expire"
+    ],
+    "sample_unit": "impressions",
+    "assumptions": {
+     "alpha": 0.05,
+     "power": 0.8,
+     "baseline": 0.05,
+     "mde": 0.2,
+     "method": "two-proportion z-test, baseline 0.05, relative lift +20%",
+     "unit": "impressions"
+    },
+    "compare_at_day": 7,
+    "assignment": [],
+    "history": [
+     {
+      "t": 1794503465.375026,
+      "status": "planned"
+     },
+     {
+      "t": 1794503465.375162,
+      "status": "running",
+      "note": ""
+     },
+     {
+      "t": 1794503465.3751743,
+      "status": "collecting",
+      "note": ""
+     },
+     {
+      "t": 1794503465.375183,
+      "status": "concluded",
+      "note": "winner at corrected alpha"
+     }
+    ]
+   },
+   "youtube_test_and_compare": {
+    "schema": "nexus.ExperimentManifest/1",
+    "id": "exp_8ca1a80e29",
+    "hypothesis": "face thumbnail gets more watch-time share",
+    "variable": "thumbnail",
+    "variants": [
+     {
+      "id": "A"
+     },
+     {
+      "id": "B",
+      "params": {
+       "thumbnail": "face"
+      }
+     }
+    ],
+    "platform": "youtube",
+    "metric": "watch_time_share",
+    "min_samples": 1,
+    "status": "inconclusive",
+    "results": {
+     "verdict": "inconclusive",
+     "platform": {
+      "outcome": "preferred",
+      "variant": "B",
+      "watch_time_share": {
+       "A": 0.47,
+       "B": 0.53
+      },
+      "entered_by": "owner",
+      "entered": 1794503465.3752275,
+      "source": "YouTube Studio Test & compare (owner-entered)"
+     }
+    },
+    "confidence": 0.5,
+    "limitations": [
+     "correlation within one channel is not causation outside it",
+     "platform distribution changes over time; results expire"
+    ],
+    "sample_unit": "platform",
+    "assumptions": {
+     "alpha": 0.05,
+     "power": 0.8,
+     "baseline": 0.5,
+     "mde": 0.1,
+     "method": "decided by the platform's own test; NEXUS records the owner-entered result",
+     "unit": "platform"
+    },
+    "compare_at_day": 7,
+    "assignment": [
+     {
+      "upload": "upload_1",
+      "variants": [
+       "A",
+       "B"
+      ],
+      "method": "youtube_test_and_compare",
+      "note": "set up in YouTube Studio by the owner; result is entered with record_platform_result"
+     }
+    ],
+    "history": [
+     {
+      "t": 1794503465.375221,
+      "status": "planned"
+     },
+     {
+      "t": 1794503465.3752306,
+      "status": "inconclusive",
+      "note": "platform outcome preferred"
+     }
+    ],
+    "platform_result": {
+     "outcome": "preferred",
+     "variant": "B",
+     "watch_time_share": {
+      "A": 0.47,
+      "B": 0.53
+     },
+     "entered_by": "owner",
+     "entered": 1794503465.3752275,
+     "source": "YouTube Studio Test & compare (owner-entered)"
+    }
+   }
+  },
+  "weak_openings": [
+   {
+    "record_id": "youtube:weak@2026-01-08",
+    "video_id": "weak",
+    "drops": {
+     "3": 0.45,
+     "5": 0.462,
+     "15": 0.642
+    },
+    "windows": {
+     "3": {
+      "status": "weak",
+      "drop": 0.45,
+      "baseline_median": 0.21,
+      "threshold": 0.26,
+      "baseline_n": 8,
+      "excess": 0.24
+     },
+     "5": {
+      "status": "weak",
+      "drop": 0.462,
+      "baseline_median": 0.222,
+      "threshold": 0.272,
+      "baseline_n": 8,
+      "excess": 0.24
+     },
+     "15": {
+      "status": "weak",
+      "drop": 0.642,
+      "baseline_median": 0.282,
+      "threshold": 0.332,
+      "baseline_n": 8,
+      "excess": 0.36
+     }
+    },
+    "weak": true
+   }
+  ],
+  "loss_localisation": {
+   "record_id": "youtube:weak@2026-01-08",
+   "median_loss_per_s": 0.006,
+   "segments": [
+    {
+     "t0": 0.0,
+     "t1": 3.0,
+     "loss": 0.45,
+     "rate_vs_median": 25.0,
+     "clips": [
+      {
+       "index": 0,
+       "type": "video",
+       "src": "/a.mp4",
+       "start": 0.0,
+       "end": 4.0
+      }
+     ],
+     "speech_share": 0.9,
+     "editorial_flags": [
+      {
+       "check": "average shot length",
+       "detail": "9.3s over 3 shots (rule of thumb <= 3.5s; punch-ins count as shot changes)",
+       "fix": "add_punch_ins"
+      },
+      {
+       "check": "pattern interrupts",
+       "detail": "one every 9.3s on average (cuts, effects, text; rule of thumb every 4.0s)",
+       "fix": "add_punch_ins"
+      },
+      {
+       "check": "dead air",
+       "detail": "14.5s in 1 pause(s) > 1.2s",
+       "fix": "tighten_pauses"
+      }
+     ]
+    },
+    {
+     "t0": 10.0,
+     "t1": 18.0,
+     "loss": 0.24,
+     "rate_vs_median": 5.0,
+     "clips": [
+      {
+       "index": 1,
+       "type": "video",
+       "src": "/b.mp4",
+       "start": 4.0,
+       "end": 22.0
+      }
+     ],
+     "speech_share": 0.0,
+     "editorial_flags": [
+      {
+       "check": "average shot length",
+       "detail": "9.3s over 3 shots (rule of thumb <= 3.5s; punch-ins count as shot changes)",
+       "fix": "add_punch_ins"
+      },
+      {
+       "check": "longest static stretch",
+       "detail": "18.0s at 4.0-22.0s (rule of thumb <= 6.0s)",
+       "fix": "add_punch_ins"
+      },
+      {
+       "check": "pattern interrupts",
+       "detail": "one every 9.3s on average (cuts, effects, text; rule of thumb every 4.0s)",
+       "fix": "add_punch_ins"
+      },
+      {
+       "check": "dead air",
+       "detail": "14.5s in 1 pause(s) > 1.2s",
+       "fix": "tighten_pauses"
+      }
+     ]
+    }
+   ],
+   "retention_report_score": 54,
+   "note": "localisation is descriptive: a drop next to a clip does not prove the clip caused it"
+  },
+  "recommendations": [
+   {
+    "schema": "nexus.GrowthRecommendation/1",
+    "id": "rec_69ac5cea10",
+    "kind": "weak_opening",
+    "text": "1 of 9 videos lose viewers in the opening faster than this channel's baseline (largest excess 36% at the flagged window, baseline of 8 videos). Open on the strongest self-contained line, speech within 1.5s, no fade-in. Test it as a 'hook'/'opening' experiment before making it the default.",
+    "evidence": [
+     {
+      "source": "retention curve vs channel baseline (leave-one-out median + 2 MAD)",
+      "retrieved": "2026-11-12",
+      "kind": "analytics",
+      "record_id": "youtube:weak@2026-01-08",
+      "windows": {
+       "3": {
+        "status": "weak",
+        "drop": 0.45,
+        "baseline_median": 0.21,
+        "threshold": 0.26,
+        "baseline_n": 8,
+        "excess": 0.24
+       },
+       "5": {
+        "status": "weak",
+        "drop": 0.462,
+        "baseline_median": 0.222,
+        "threshold": 0.272,
+        "baseline_n": 8,
+        "excess": 0.24
+       },
+       "15": {
+        "status": "weak",
+        "drop": 0.642,
+        "baseline_median": 0.282,
+        "threshold": 0.332,
+        "baseline_n": 8,
+        "excess": 0.36
+       }
+      }
+     }
+    ],
+    "confidence": 0.35,
+    "target": "account2",
+    "status": "proposed",
+    "experiment_id": null,
+    "production": {
+     "director_profile": "commercial",
+     "director_overrides": {
+      "opening": "cold_open"
+     },
+     "retention_fixes": [
+      "trim_lead",
+      "remove_lead_fade",
+      "add_hook_text"
+     ],
+     "instructions": "start on the strongest line; tighter opening",
+     "hook_max_s": 1.5
+    },
+    "label": "synthetic fixture (not real data)"
+   },
+   {
+    "schema": "nexus.GrowthRecommendation/1",
+    "id": "rec_20c71be204",
+    "kind": "retention_loss",
+    "text": "Viewers leave 25.0x faster than this video's median rate at 0.0-3.0s (45% of the audience), where the edit has: static/long shot, low speech share 0.9. One video: treat as a lead, not a rule.",
+    "evidence": [
+     {
+      "source": "retention curve loss localisation",
+      "retrieved": "2026-11-12",
+      "kind": "analytics",
+      "record_id": "youtube:weak@2026-01-08",
+      "t0": 0.0,
+      "t1": 3.0,
+      "loss": 0.45,
+      "rate_vs_median": 25.0,
+      "clips": [
+       0
+      ],
+      "flags": [
+       "average shot length",
+       "dead air",
+       "pattern interrupts"
+      ]
+     }
+    ],
+    "confidence": 0.25,
+    "target": "account2",
+    "status": "proposed",
+    "experiment_id": null,
+    "production": {
+     "director_profile": "documentary",
+     "director_overrides": {
+      "shot_len": [
+       3.0,
+       9.0
+      ],
+      "pause_tolerance": 0.5
+     },
+     "retention_fixes": [
+      "add_punch_ins",
+      "tighten_pauses"
+     ],
+     "instructions": "faster"
+    },
+    "label": "synthetic fixture (not real data)"
+   },
+   {
+    "schema": "nexus.GrowthRecommendation/1",
+    "id": "rec_b322d2543f",
+    "kind": "retention_loss",
+    "text": "Viewers leave 5.0x faster than this video's median rate at 10.0-18.0s (24% of the audience), where the edit has: static/long shot, low speech share 0.0. One video: treat as a lead, not a rule.",
+    "evidence": [
+     {
+      "source": "retention curve loss localisation",
+      "retrieved": "2026-11-12",
+      "kind": "analytics",
+      "record_id": "youtube:weak@2026-01-08",
+      "t0": 10.0,
+      "t1": 18.0,
+      "loss": 0.24,
+      "rate_vs_median": 5.0,
+      "clips": [
+       1
+      ],
+      "flags": [
+       "average shot length",
+       "dead air",
+       "longest static stretch",
+       "pattern interrupts"
+      ]
+     }
+    ],
+    "confidence": 0.25,
+    "target": "account2",
+    "status": "proposed",
+    "experiment_id": null,
+    "production": {
+     "director_profile": "documentary",
+     "director_overrides": {
+      "shot_len": [
+       3.0,
+       9.0
+      ],
+      "pause_tolerance": 0.5
+     },
+     "retention_fixes": [
+      "add_punch_ins",
+      "tighten_pauses"
+     ],
+     "instructions": "faster"
+    },
+    "label": "synthetic fixture (not real data)"
+   },
+   {
+    "schema": "nexus.GrowthRecommendation/1",
+    "id": "rec_edefe37856",
+    "kind": "experiment_result",
+    "text": "Experiment exp_e9cca54496 (title): insufficient_data - no variant is declared better. B vs A: effect 0.2 CI [-0.220365, 0.620365] (smallest arm has 10 samples; at least 8158 per arm are required before any call)",
+    "evidence": [
+     {
+      "source": "experiment evaluation",
+      "retrieved": "2026-11-12",
+      "kind": "analytics",
+      "experiment_id": "exp_e9cca54496",
+      "verdict": "insufficient_data"
+     }
+    ],
+    "confidence": 0.1,
+    "target": "account3",
+    "status": "proposed",
+    "experiment_id": "exp_e9cca54496",
+    "label": "synthetic fixture (not real data)"
+   },
+   {
+    "schema": "nexus.GrowthRecommendation/1",
+    "id": "rec_d12da217c4",
+    "kind": "experiment_result",
+    "text": "Experiment exp_af70958b37: variant B wins on ctr (effect +0.02, 95% CI [0.015349, 0.024651], Holm p=0, n=[20000, 20000] impressions). Adopt it as the default for tiktok and re-test in 8-12 weeks.",
+    "evidence": [
+     {
+      "source": "experiment evaluation",
+      "retrieved": "2026-11-12",
+      "kind": "analytics",
+      "experiment_id": "exp_af70958b37",
+      "comparison": "B",
+      "effect": 0.02,
+      "ci95": [
+       0.015349,
+       0.024651
+      ],
+      "p_adjusted": 0.0,
+      "n": [
+       20000,
+       20000
+      ]
+     }
+    ],
+    "confidence": 0.9,
+    "target": "account3",
+    "status": "proposed",
+    "experiment_id": "exp_af70958b37",
+    "packaging": {
+     "title": "question"
+    },
+    "label": "synthetic fixture (not real data)"
+   }
+  ],
+  "production_dict_check": {
+   "rec_69ac5cea10": [],
+   "rec_20c71be204": [],
+   "rec_b322d2543f": []
+  }
+ }
+}
