@@ -91,15 +91,34 @@ confidence, angles) is ignored by pydantic/`create_video` and kept for traceabil
 - `docs/results/account3/market_report_ai_ar.json` - Arabic-language topic (الذكاء الاصطناعي, ar Wikipedia demand).
 - `docs/results/account3/market_trends.json` - trend monitor on a 7-topic watchlist.
 - `docs/results/account3/market_niches_check.json` - which configured Wikipedia categories exist.
-See "Demo results" below for numbers.
+### Demo results (observed 2026-11-12; Wikipedia readership, not video demand)
+
+| Report | Score / confidence | Demand (mean views/day, Action-API pageviews) | Localisation measured | Claims / verified | AI |
+|---|---|---|---|---|---|
+| JWST (en, science) | 63.0 / 0.43 | 1,261 last 7 d vs 1,338 prev 28 d (ratio 0.94) | de 151/day, ar 17/day; fr/hi/zh/ru skipped (hosts not declared) | 22 / 6 (3 AI claims rejected by the re-check) | data_extraction: local Qwen3-4B via router; deep_research: no provider (local quality 3.33 < 4 needed) |
+| الذكاء الاصطناعي (ar) | 57.8 / 0.42 | 926 vs 815 (ratio 1.14) | de 1,150/day; fr/hi/zh/ru skipped | 18 / 2 | none available at run time -> deterministic fallback (recorded) |
+
+Unknown in both: freshness (GDELT not declared, no RSS configured) and competition (no YouTube key). Openverse and NASA
+answered; Wikimedia rate-limited the shared IP repeatedly (HTTP 429) - the demo uses `Ctx(min_interval=3,
+rate_limit_retries=4)`. `production_brief` in both files was regenerated offline from the saved opportunity + brief
+with the final `to_production_brief()` (claims in the video language only); everything else is the live run.
+
+Trend monitor (`market_trends.json`, 7 topics): Black hole falling (0.66), Large language model falling (0.81),
+رمضان rising (1.19), others stable; none met the `emerging` rule (>= 1.5x and >= 20/day) on that day.
+`market_niches_check.json`: all configured categories of the 15 niches exist on en/ar Wikipedia.
+
+Known limits seen in the evidence: the automatic support test matches numbers and words, not meaning - e.g. an AI claim
+"will be the largest telescope ever sent into space" is "verified" by two older NASA captions written before launch.
+That is why notes say "a human verifies before publishing" and why two Wikipedia editions are labelled
+"same publisher".
 
 ## Tests
 
-`tests/fast/test_intel_market.py` (16 tests, < 1 s, no network): replays trimmed real responses
+`tests/fast/test_intel_market.py` (17 tests, < 1 s, no network): replays trimmed real responses
 (`tests/fast/fixtures_market/jwst_en.json`, recorded with `--record`) and synthetic response-shape fixtures
 (`shapes.json`, clearly marked, for hosts that could not be recorded). Covers: host rule, adapter statuses, contract
 validity, unknown competition, localisation skips, cross-checking, AI claim re-check + NoProviderAvailable fallback,
-conflicts, window stats without imputation, trend monitor, REST-vs-Action pageviews, GDELT, RSS/Atom, YouTube quota +
+conflicts, lone-year cross-language rule, window stats without imputation, trend monitor, REST-vs-Action pageviews, GDELT, RSS/Atom, YouTube quota +
 key not leaked, Trends disabled, niche DB + custom niches, score/confidence arithmetic.
 
 ## Not available / unverified

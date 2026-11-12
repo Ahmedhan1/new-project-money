@@ -1460,5 +1460,6 @@
    "cost": {}
   }
  ],
- "runtime_s": 572.1
+ "runtime_s": 572.1,
+ "production_brief_note": "regenerated offline from this file's opportunity + brief with the final to_production_brief()"
 }

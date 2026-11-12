@@ -161,10 +161,173 @@
    "data": {}
   },
   "openverse": {
-   "status": "error",
-   "reason": "RemoteUnavailable: https://api.openverse.org/v1/images/ -> HTTP 504",
-   "items": [],
-   "data": {}
+   "status": "ok",
+   "reason": "",
+   "items": [
+    {
+     "source": "openverse",
+     "url": "https://www.flickr.com/photos/50785054@N03/51329294265",
+     "date": null,
+     "licence": "BY 2.0",
+     "title": "The James Webb Space Telescope Stowed",
+     "kind": "visual"
+    },
+    {
+     "source": "openverse",
+     "url": "https://www.flickr.com/photos/50785054@N03/51313419238",
+     "date": null,
+     "licence": "BY 2.0",
+     "title": "James Webb Space Telescope Testing Progress Continues",
+     "kind": "visual"
+    },
+    {
+     "source": "openverse",
+     "url": "https://www.flickr.com/photos/50785054@N03/51760507200",
+     "date": null,
+     "licence": "BY 2.0",
+     "title": "The James Webb Space Telescope Fairing",
+     "kind": "visual"
+    },
+    {
+     "source": "openverse",
+     "url": "https://www.flickr.com/photos/50785054@N03/51412207042",
+     "date": null,
+     "licence": "BY 2.0",
+     "title": "James Webb Space Telescope Artist Conception",
+     "kind": "visual"
+    },
+    {
+     "source": "openverse",
+     "url": "https://www.flickr.com/photos/50785054@N03/51769333532",
+     "date": null,
+     "licence": "BY 2.0",
+     "title": "Ariane 5 Rollout with James Webb Space Telescope",
+     "kind": "visual"
+    },
+    {
+     "source": "openverse",
+     "url": "https://www.flickr.com/photos/50785054@N03/51413202793",
+     "date": null,
+     "licence": "BY 2.0",
+     "title": "James Webb Space Telescope Artist Conception",
+     "kind": "visual"
+    },
+    {
+     "source": "openverse",
+     "url": "https://www.flickr.com/photos/50785054@N03/51770268113",
+     "date": null,
+     "licence": "BY 2.0",
+     "title": "Ariane 5 Rollout with James Webb Space Telescope",
+     "kind": "visual"
+    },
+    {
+     "source": "openverse",
+     "url": "https://www.flickr.com/photos/50785054@N03/6888421535",
+     "date": null,
+     "licence": "BY 2.0",
+     "title": "How the James Webb Space Telescope will deploy post-launch.",
+     "kind": "visual"
+    },
+    {
+     "source": "openverse",
+     "url": "https://www.flickr.com/photos/50785054@N03/20891061202",
+     "date": null,
+     "licence": "BY 2.0",
+     "title": "Arrival of the James Webb Space Telescope Flight Backplane",
+     "kind": "visual"
+    },
+    {
+     "source": "openverse",
+     "url": "https://www.flickr.com/photos/50785054@N03/51308188165",
+     "date": null,
+     "licence": "BY 2.0",
+     "title": "The James Webb Space Telescope at Northrop Grumman",
+     "kind": "visual"
+    },
+    {
+     "source": "openverse",
+     "url": "https://www.flickr.com/photos/50785054@N03/51589158751",
+     "date": null,
+     "licence": "BY 2.0",
+     "title": "The James Webb Space Telescope En Route",
+     "kind": "visual"
+    },
+    {
+     "source": "openverse",
+     "url": "https://www.flickr.com/photos/50785054@N03/51590064930",
+     "date": null,
+     "licence": "BY 2.0",
+     "title": "The James Webb Space Telescope Revealed",
+     "kind": "visual"
+    },
+    {
+     "source": "openverse",
+     "url": "https://www.flickr.com/photos/50785054@N03/51589387053",
+     "date": null,
+     "licence": "BY 2.0",
+     "title": "The James Webb Space Telescope Revealed",
+     "kind": "visual"
+    },
+    {
+     "source": "openverse",
+     "url": "https://www.flickr.com/photos/50785054@N03/51589829414",
+     "date": null,
+     "licence": "BY 2.0",
+     "title": "The James Webb Space Telescope Enters the Cleanroom Airlock",
+     "kind": "visual"
+    },
+    {
+     "source": "openverse",
+     "url": "https://www.flickr.com/photos/50785054@N03/51589376523",
+     "date": null,
+     "licence": "BY 2.0",
+     "title": "The James Webb Space Telescope En Route",
+     "kind": "visual"
+    },
+    {
+     "source": "openverse",
+     "url": "https://www.flickr.com/photos/50785054@N03/51584657771",
+     "date": null,
+     "licence": "BY 2.0",
+     "title": "The James Webb Space Telescope Unloaded from the MN Colibri",
+     "kind": "visual"
+    },
+    {
+     "source": "openverse",
+     "url": "https://www.flickr.com/photos/50785054@N03/8057234761",
+     "date": null,
+     "licence": "BY 2.0",
+     "title": "James Webb Space Telescope Mirrors Undergoing Cryogenic Testing",
+     "kind": "visual"
+    },
+    {
+     "source": "openverse",
+     "url": "https://www.flickr.com/photos/50785054@N03/10998914353",
+     "date": null,
+     "licence": "BY 2.0",
+     "title": "Test James Webb Space Telescope Mirror and Backplane",
+     "kind": "visual"
+    },
+    {
+     "source": "openverse",
+     "url": "https://www.flickr.com/photos/50785054@N03/15416601098",
+     "date": null,
+     "licence": "BY 2.0",
+     "title": "The Heart of the James Webb Space Telescope",
+     "kind": "visual"
+    },
+    {
+     "source": "openverse",
+     "url": "https://www.flickr.com/photos/50785054@N03/51603558336",
+     "date": null,
+     "licence": "BY 2.0",
+     "title": "The James Webb Space Telescope in the Cleanroom at the Launch Site",
+     "kind": "visual"
+    }
+   ],
+   "data": {
+    "result_count": 240
+   }
   },
   "nasa": {
    "status": "ok",
@@ -376,11 +539,11 @@
  },
  "opportunity": {
   "schema": "nexus.ContentOpportunity/1",
-  "id": "opp_da073ca6e2",
+  "id": "opp_56c93dfb58",
   "topic": "James Webb Space Telescope",
   "niche": "science",
   "language": "en",
-  "score": 70.7,
+  "score": 63.0,
   "factors": {
    "demand": {
     "value": 0.526,
@@ -430,7 +593,7 @@
     ]
    },
    "evidence": {
-    "value": 0.795,
+    "value": 0.509,
     "orientation": "higher_is_better",
     "evidence": [
      {
@@ -468,15 +631,33 @@
     "method": "sources count + share of claims verified in >= 2 sources + claims from independent publishers",
     "observed": {
      "sources": 22,
-     "claims": 37,
-     "verified": 18,
-     "independent": 9
+     "claims": 22,
+     "verified": 6,
+     "independent": 0
     }
    },
    "production_cost": {
-    "value": 0.032,
+    "value": 0.003,
     "orientation": "higher_is_worse",
     "evidence": [
+     {
+      "source": "openverse",
+      "retrieved": "2026-11-12",
+      "url": "https://www.flickr.com/photos/50785054@N03/51329294265",
+      "kind": "visual"
+     },
+     {
+      "source": "openverse",
+      "retrieved": "2026-11-12",
+      "url": "https://www.flickr.com/photos/50785054@N03/51313419238",
+      "kind": "visual"
+     },
+     {
+      "source": "openverse",
+      "retrieved": "2026-11-12",
+      "url": "https://www.flickr.com/photos/50785054@N03/51760507200",
+      "kind": "visual"
+     },
      {
       "source": "nasa",
       "retrieved": "2026-11-12",
@@ -499,6 +680,7 @@
     "confidence": 0.6,
     "method": "1 - (0.7*log(count of commercially usable CC/NASA visuals) + 0.3*research depth); counts are search hits, not checked assets",
     "observed": {
+     "openverse": 240,
      "nasa": 727
     }
    },
@@ -571,7 +753,7 @@
     }
    },
    "creative_potential": {
-    "value": 1.0,
+    "value": 0.85,
     "orientation": "higher_is_better",
     "evidence": [],
     "confidence": 0.3,
@@ -616,6 +798,24 @@
     "kind": "source"
    },
    {
+    "source": "openverse",
+    "retrieved": "2026-11-12",
+    "url": "https://www.flickr.com/photos/50785054@N03/51329294265",
+    "kind": "visual"
+   },
+   {
+    "source": "openverse",
+    "retrieved": "2026-11-12",
+    "url": "https://www.flickr.com/photos/50785054@N03/51313419238",
+    "kind": "visual"
+   },
+   {
+    "source": "openverse",
+    "retrieved": "2026-11-12",
+    "url": "https://www.flickr.com/photos/50785054@N03/51760507200",
+    "kind": "visual"
+   },
+   {
     "source": "nasa",
     "retrieved": "2026-11-12",
     "url": "https://images.nasa.gov/details/News Conference on the Engineering of the James Webb Space Telescope",
@@ -655,7 +855,7 @@
    }
   ],
   "confidence": 0.43,
-  "brief_id": "brief_7811f8b638",
+  "brief_id": "brief_9a60173cbb",
   "status": "proposed",
   "score_note": "0-100 confidence-weighted mean of known factors; factors with no data are excluded and lower 'confidence'. Not a prediction of views or revenue.",
   "unknown_factors": [
@@ -665,7 +865,7 @@
  },
  "brief": {
   "schema": "nexus.ResearchBrief/1",
-  "id": "brief_7811f8b638",
+  "id": "brief_9a60173cbb",
   "topic": "James Webb Space Telescope",
   "language": "en",
   "sources": [
@@ -912,15 +1112,11 @@
     "lang": "en",
     "by": "ai",
     "supported_by": [
-     "s1",
-     "s2",
-     "s4",
      "s6",
-     "s11",
      "s21"
     ],
     "status": "verified",
-    "independence": "independent publishers"
+    "independence": "same publisher (e.g. two Wikipedia editions)"
    },
    {
     "text": "The JWST sunshield is about 21 m × 14 m (69 ft × 46 ft), roughly the size of a tennis court, and is too big to fit in any existing rocket.",
@@ -983,11 +1179,10 @@
     "lang": "en",
     "by": "ai",
     "supported_by": [
-     "s1",
-     "s2"
+     "s1"
     ],
-    "status": "verified",
-    "independence": "same publisher (e.g. two Wikipedia editions)"
+    "status": "single_source",
+    "independence": "n/a"
    },
    {
     "text": "It is the largest telescope in space, and is equipped with high-resolution and high-sensitivity instruments, allowing it to view objects too old, distant, or faint for the Hubble Space Telescope.",
@@ -1187,252 +1382,6 @@
     ],
     "status": "verified",
     "independence": "same publisher (e.g. two Wikipedia editions)"
-   },
-   {
-    "text": "NASA held a virtual media briefing on Tuesday, Nov.",
-    "source_ids": [
-     "s4"
-    ],
-    "lang": "en",
-    "by": "deterministic",
-    "supported_by": [
-     "s4"
-    ],
-    "status": "single_source",
-    "independence": "n/a"
-   },
-   {
-    "text": "2, to discuss the engineering of the James Webb Space Telescope, the world’s largest and most powerful space science telescope.",
-    "source_ids": [
-     "s4"
-    ],
-    "lang": "en",
-    "by": "deterministic",
-    "supported_by": [
-     "s1",
-     "s4",
-     "s20"
-    ],
-    "status": "verified",
-    "independence": "independent publishers"
-   },
-   {
-    "text": "James Webb Space Telescope Mirror Alignment Update briefing at Goddard Space Flight Center in Greenbelt Maryland on March 16, 2022.",
-    "source_ids": [
-     "s5"
-    ],
-    "lang": "en",
-    "by": "deterministic",
-    "supported_by": [
-     "s5"
-    ],
-    "status": "single_source",
-    "independence": "n/a"
-   },
-   {
-    "text": "It is the impressive result of efforts from NASA, the European Space Agency and the Canadian Space Agency and will peer to the edges of the visible universe.",
-    "source_ids": [
-     "s6"
-    ],
-    "lang": "en",
-    "by": "deterministic",
-    "supported_by": [
-     "s6",
-     "s21"
-    ],
-    "status": "verified",
-    "independence": "same publisher (e.g. two Wikipedia editions)"
-   },
-   {
-    "text": "Caption: One dozen (out of 18) flight mirror segments that make up the primary mirror on NASA's James Webb Space Telescope have been installed at NASA's Goddard Space Flight Center.",
-    "source_ids": [
-     "s7"
-    ],
-    "lang": "en",
-    "by": "deterministic",
-    "supported_by": [
-     "s1",
-     "s3",
-     "s7",
-     "s8"
-    ],
-    "status": "verified",
-    "independence": "independent publishers"
-   },
-   {
-    "text": "Credits: NASA/Chris Gunn  More: Since December 2015, the team of scientists and engineers have been working tirelessly to install all the primary mirror segments onto the telescope structure in the large clean room at NASA's Goddard Space Flight Center in Greenbelt, Maryland.",
-    "source_ids": [
-     "s7"
-    ],
-    "lang": "en",
-    "by": "deterministic",
-    "supported_by": [
-     "s7",
-     "s8"
-    ],
-    "status": "verified",
-    "independence": "same publisher (e.g. two Wikipedia editions)"
-   },
-   {
-    "text": "A view of the one dozen (out of 18) flight mirror segments that make up the primary mirror on NASA's James Webb Space Telescope have been installed at NASA's Goddard Space Flight Center.",
-    "source_ids": [
-     "s8"
-    ],
-    "lang": "en",
-    "by": "deterministic",
-    "supported_by": [
-     "s1",
-     "s3",
-     "s7",
-     "s8"
-    ],
-    "status": "verified",
-    "independence": "independent publishers"
-   },
-   {
-    "text": "Inside NASA's Goddard Space Flight Center in Greenbelt, Maryland the James Webb Space Telescope team completed the environmental portion of vibration testing on the telescope.",
-    "source_ids": [
-     "s9"
-    ],
-    "lang": "en",
-    "by": "deterministic",
-    "supported_by": [
-     "s1",
-     "s4",
-     "s7",
-     "s8",
-     "s9"
-    ],
-    "status": "verified",
-    "independence": "independent publishers"
-   },
-   {
-    "text": "A shaker table is used to shake satellites to ensure a spacecraft like Webb can withstand the shaking that comes with a ride into space on a rocket.",
-    "source_ids": [
-     "s9"
-    ],
-    "lang": "en",
-    "by": "deterministic",
-    "supported_by": [
-     "s9"
-    ],
-    "status": "single_source",
-    "independence": "n/a"
-   },
-   {
-    "text": "Media Briefings: James Webb Space Telescope's First Full-Color Images and Data.",
-    "source_ids": [
-     "s10"
-    ],
-    "lang": "en",
-    "by": "deterministic",
-    "supported_by": [
-     "s10",
-     "s11"
-    ],
-    "status": "verified",
-    "independence": "same publisher (e.g. two Wikipedia editions)"
-   },
-   {
-    "text": "NASA, in partnership with ESA (European Space Agency) and CSA (Canadian Space Agency), released the James Webb Space Telescope’s first full-color images and spectroscopic data on July 12, 2022.",
-    "source_ids": [
-     "s11"
-    ],
-    "lang": "en",
-    "by": "deterministic",
-    "supported_by": [
-     "s11"
-    ],
-    "status": "single_source",
-    "independence": "n/a"
-   },
-   {
-    "text": "Webb is the biggest telescope ever launched into space.",
-    "source_ids": [
-     "s11"
-    ],
-    "lang": "en",
-    "by": "deterministic",
-    "supported_by": [
-     "s1",
-     "s2",
-     "s6",
-     "s9",
-     "s11",
-     "s21"
-    ],
-    "status": "verified",
-    "independence": "independent publishers"
-   },
-   {
-    "text": "A rare view of the James Webb Space Telescope face-on, from the NASA Goddard cleanroom observation window.",
-    "source_ids": [
-     "s12"
-    ],
-    "lang": "en",
-    "by": "deterministic",
-    "supported_by": [
-     "s1",
-     "s12",
-     "s13",
-     "s14",
-     "s15",
-     "s16",
-     "s17",
-     "s18",
-     "s19",
-     "s22"
-    ],
-    "status": "verified",
-    "independence": "independent publishers"
-   },
-   {
-    "text": "Building the James Webb Space Telescope is challenging.",
-    "source_ids": [
-     "s20"
-    ],
-    "lang": "en",
-    "by": "deterministic",
-    "supported_by": [
-     "s1",
-     "s2",
-     "s4",
-     "s5",
-     "s6",
-     "s7",
-     "s8",
-     "s9",
-     "s10",
-     "s11",
-     "s12",
-     "s13",
-     "s14",
-     "s15",
-     "s16",
-     "s17",
-     "s18",
-     "s19",
-     "s20",
-     "s21",
-     "s22"
-    ],
-    "status": "verified",
-    "independence": "independent publishers"
-   },
-   {
-    "text": "It is NASA's most ambitious and complex space science observatory.",
-    "source_ids": [
-     "s20"
-    ],
-    "lang": "en",
-    "by": "deterministic",
-    "supported_by": [
-     "s1",
-     "s4",
-     "s20"
-    ],
-    "status": "verified",
-    "independence": "independent publishers"
    }
   ],
   "conflicts": [],
@@ -1449,8 +1398,8 @@
    "By the numbers: build the story around the verified figures (1.5, 10, 18, 1961)",
    "Misconceptions about James Webb Space Telescope: pick claims that are verified in >= 2 sources and contrast them with common assumptions (human picks the assumptions)"
   ],
-  "confidence": 0.69,
-  "created": 1794505834.59727,
+  "confidence": 0.56,
+  "created": 1794507078.4308047,
   "method": [
    "claims: AI (data_extraction) + deterministic, all re-checked against source text",
    "angles: deterministic only (NoProviderAvailable)"
@@ -1483,21 +1432,34 @@
     "by": "ai",
     "reason": "cited sources do not contain the claim's numbers/words"
    }
+  ],
+  "ai_errors": [
+   {
+    "task": "deep_research",
+    "error": "NoProviderAvailable",
+    "reasons": [
+     "local-llamacpp/qwen3-4b-q4km: quality 3.33 < 4 needed for deep_research",
+     "groq: not authorised by the owner (settings.json ai_providers.groq.authorized)",
+     "cerebras: not authorised by the owner (settings.json ai_providers.cerebras.authorized)",
+     "gemini: not authorised by the owner (settings.json ai_providers.gemini.authorized)",
+     "openrouter-free: not authorised by the owner (settings.json ai_providers.openrouter-free.authorized)"
+    ]
+   }
   ]
  },
  "production_brief": {
   "topic": "James Webb Space Telescope",
-  "scenes": 8,
+  "scenes": 4,
   "lang": "en",
-  "notes": "Research for: James Webb Space Telescope. Facts below were found in >= 2 sources by an automatic check of their numbers and words (not a semantic fact-check): a human verifies before publishing.\n- The James Webb Space Telescope will be the largest telescope ever sent into space. [1][2][4][6][11][21]\n- The Webb was launched on 25 December 2021 on an Ariane 5 rocket from Kourou, French Guiana. [1][3]\n- The James Webb Space Telescope (JWST) is a space telescope designed to conduct infrared astronomy. [1][2]\n- Each layer is made of a thin (50 microns for the first layer, 25 microns for the others) Kapton membrane coated with aluminum for reflectivity. [2][3]\n- سيتموضع مقراب جيمس ويب الفضائي على بعد 1.5 مليون كيلومتر خلف الأرض والشمس في نقطة لاغرانج L2، وسوف يحوم حول تلك النقطة في مدار دائري ليقوم بالرصد. [1][3]\n- تتكون المرآة الأساسية لمقراب جيمس ويب، وهي عنصر المقراب البصري، من 18 قطعة من المرايا سداسية الأضلاع المصنوعة من البيريليوم المطلي بالذهب واللائي تتحد لتكوين مرآة قُطرها 6.5 مترًا (21 قدمًا)، وهي أكبر بكثير من مرآة هابل التي تبلغ 2.4 مترًا (7 أقدام و10 بوصات). [1][3]\n- وقد سمي على اسم جيمس إدوين ويب، الذي كان مديرًا لناسا من سنة 1961 إلى سنة 1968 ولعب دورًا أساسيًا في برنامج أبولو. [1][3]\n- 2, to discuss the engineering of the James Webb Space Telescope, the world’s largest and most powerful space science telescope. [1][4][20]\n- It is the impressive result of efforts from NASA, the European Space Agency and the Canadian Space Agency and will peer to the edges of the visible universe. [6][21]\n- Caption: One dozen (out of 18) flight mirror segments that make up the primary mirror on NASA's James Webb Space Telescope have been installed at NASA's Goddard Space Flight Center. [1][3][7][8]\n- Credits: NASA/Chris Gunn  More: Since December 2015, the team of scientists and engineers have been working tirelessly to install all the primary mirror segments onto the telescope structure in the large clean room at NASA's Goddard Space Flight Center in Greenbelt, Maryland. [7][8]\n- A view of the one dozen (out of 18) flight mirror segments that make up the primary mirror on NASA's James Webb Space Telescope have been installed at NASA's Goddard Space Flight Center. [1][3][7][8]\n- Inside NASA's Goddard Space Flight Center in Greenbelt, Maryland the James Webb Space Telescope team completed the environmental portion of vibration testing on the telescope. [1][4][7][8][9]\n- Media Briefings: James Webb Space Telescope's First Full-Color Images and Data. [10][11]\n- Webb is the biggest telescope ever launched into space. [1][2][6][9][11][21]\n- A rare view of the James Webb Space Telescope face-on, from the NASA Goddard cleanroom observation window. [1][12][13][14][15][16][17][18][19][22]\n- Building the James Webb Space Telescope is challenging. [1][2][4][5][6][7][8][9][10][11][12][13][14][15][16][17][18][19][20][21][22]\n- It is NASA's most ambitious and complex space science observatory. [1][4][20]\n\nSingle-source facts (use only with attribution, e.g. 'according to ...'):\n- The James Webb Space Telescope is designed to conduct observations in various fields of astronomy and cosmology, including the study of the first stars and the formation of the first galaxies, as well as detailed atmospheric characterization of potentially habitable exoplanets. [1]\n- The JWST sunshield is about 21 m × 14 m (69 ft × 46 ft), roughly the size of a tennis court, and is too big to fit in any existing rocket. [2]\n- The JWST sunshield is a passive thermal control system deployed post-launch to shield the telescope and instrumentation from the light and heat of the Sun, Earth, and Moon. [2]\n- The JWST is the largest telescope in space, and is equipped with high-resolution and high-sensitivity instruments, allowing it to view objects too old, distant, or faint for the Hubble Space Telescope. [1]\n- It is the largest telescope in space, and is equipped with high-resolution and high-sensitivity instruments, allowing it to view objects too old, distant, or faint for the Hubble Space Telescope. [1]\n- Despite Webb's mirror diameter being 2.7 times larger than that of the Hubble Space Telescope, it produces images of comparable resolution because it observes in the infrared spectrum, which has longer wavelengths than the Hubble's visible spectrum. [1]\n\nSources:\n[1] James Webb Space Telescope - https://en.wikipedia.org/wiki/James_Webb_Space_Telescope (CC BY-SA 4.0 (Wikipedia) - facts cited, text not copied)\n[2] James Webb Space Telescope sunshield - https://en.wikipedia.org/wiki/James_Webb_Space_Telescope_sunshield (CC BY-SA 4.0 (Wikipedia) - facts cited, text not copied)\n[3] مقراب جيمس ويب الفضائي - https://ar.wikipedia.org/wiki/%D9%85%D9%82%D8%B1%D8%A7%D8%A8_%D8%AC%D9%8A%D9%85%D8%B3_%D9%88%D9%8A%D8%A8_%D8%A7%D9%84%D9%81%D8%B6%D8%A7%D8%A6%D9%8A (CC BY-SA 4.0 (Wikipedia) - facts cited, text not copied)\n[4] News Conference on the Engineering of the James Webb Space Telescope - https://images.nasa.gov/details/News Conference on the Engineering of the James Webb Space Telescope (NASA media guidelines - check item rights)\n[5] James Webb Space Telescope Mirror Alignment Update - https://images.nasa.gov/details/GSFC_20220315_Webb_Alignment_Briefing (NASA media guidelines - check item rights)\n[6] James Webb Space Telescope: An Overview - https://images.nasa.gov/details/James_Webb_Space_Telescope__An_Overview_1080 (NASA media guidelines - check item rights)\n[7] By the Dozen: NASA's James Webb Space Telescope Mirrors - https://images.nasa.gov/details/by-the-dozen-nasas-james-webb-space-telescope-mirrors_23938941370_o (NASA media guidelines - check item rights)\n[8] By the Dozen: NASA's James Webb Space Telescope Mirrors - https://images.nasa.gov/details/by-the-dozen-nasas-james-webb-space-telescope-mirrors_23607727573_o (NASA media guidelines - check item rights)\n[9] Vibration Testing of NASA's James Webb Space Telescope - https://images.nasa.gov/details/Social_Media_Video_Master_A (NASA media guidelines - check item rights)\n[10] Media Briefings: James Webb Space Telescope's First Full-Color Images and Data - https://images.nasa.gov/details/Media Briefings James Webb Space Telescopes First Full Color Images and Data (NASA media guidelines - check item rights)\n[11] First Full-Color Images and Data from the James Webb Space Telescope - https://images.nasa.gov/details/First Fulll Color Images and Data from the James Webb Space Telescope (NASA media guidelines - check item rights)\n[12] James Webb Space Telescope Revealed - https://images.nasa.gov/details/GSFC_20171208_Archive_e000355 (NASA media guidelines - check item rights)\n[13] James Webb Space Telescope Revealed - https://images.nasa.gov/details/GSFC_20171208_Archive_e000356 (NASA media guidelines - check item rights)\n[14] James Webb Space Telescope Revealed - https://images.nasa.gov/details/GSFC_20171208_Archive_e000350 (NASA media guidelines - check item rights)\n[15] James Webb Space Telescope Revealed - https://images.nasa.gov/details/GSFC_20171208_Archive_e000349 (NASA media guidelines - check item rights)\n[16] James Webb Space Telescope Revealed - https://images.nasa.gov/details/GSFC_20171208_Archive_e000357 (NASA media guidelines - check item rights)\n[17] James Webb Space Telescope Revealed - https://images.nasa.gov/details/GSFC_20171208_Archive_e000354 (NASA media guidelines - check item rights)\n[18] James Webb Space Telescope Revealed - https://images.nasa.gov/details/GSFC_20171208_Archive_e000359 (NASA media guidelines - check item rights)\n[19] James Webb Space Telescope Revealed - https://images.nasa.gov/details/GSFC_20171208_Archive_e000358 (NASA media guidelines - check item rights)\n[20] James Webb Space Telescope: Worth the Wait - https://images.nasa.gov/details/12987-Worth_the_Wait (NASA media guidelines - check item rights)\n[21] Top Ten Facts about the James Webb Space Telescope - https://images.nasa.gov/details/12395-Top_Ten_JWST_Facts_H264 (NASA media guidelines - check item rights)\n[22] James Webb Space Telescope Revealed - https://images.nasa.gov/details/GSFC_20171208_Archive_e000352 (NASA media guidelines - check item rights)",
+  "notes": "Research for: James Webb Space Telescope. Facts below were found in >= 2 sources by an automatic check of their numbers and words (not a semantic fact-check): a human verifies before publishing.\n- The James Webb Space Telescope will be the largest telescope ever sent into space. [6][21]\n- The Webb was launched on 25 December 2021 on an Ariane 5 rocket from Kourou, French Guiana. [1][3]\n- Each layer is made of a thin (50 microns for the first layer, 25 microns for the others) Kapton membrane coated with aluminum for reflectivity. [2][3]\n\nSingle-source facts (use only with attribution, e.g. 'according to ...'):\n- The James Webb Space Telescope is designed to conduct observations in various fields of astronomy and cosmology, including the study of the first stars and the formation of the first galaxies, as well as detailed atmospheric characterization of potentially habitable exoplanets. [1]\n- The JWST sunshield is about 21 m × 14 m (69 ft × 46 ft), roughly the size of a tennis court, and is too big to fit in any existing rocket. [2]\n- The JWST sunshield is a passive thermal control system deployed post-launch to shield the telescope and instrumentation from the light and heat of the Sun, Earth, and Moon. [2]\n- The JWST is the largest telescope in space, and is equipped with high-resolution and high-sensitivity instruments, allowing it to view objects too old, distant, or faint for the Hubble Space Telescope. [1]\n- The James Webb Space Telescope (JWST) is a space telescope designed to conduct infrared astronomy. [1]\n- It is the largest telescope in space, and is equipped with high-resolution and high-sensitivity instruments, allowing it to view objects too old, distant, or faint for the Hubble Space Telescope. [1]\n\nSources:\n[1] James Webb Space Telescope - https://en.wikipedia.org/wiki/James_Webb_Space_Telescope (CC BY-SA 4.0 (Wikipedia) - facts cited, text not copied)\n[2] James Webb Space Telescope sunshield - https://en.wikipedia.org/wiki/James_Webb_Space_Telescope_sunshield (CC BY-SA 4.0 (Wikipedia) - facts cited, text not copied)\n[3] مقراب جيمس ويب الفضائي - https://ar.wikipedia.org/wiki/%D9%85%D9%82%D8%B1%D8%A7%D8%A8_%D8%AC%D9%8A%D9%85%D8%B3_%D9%88%D9%8A%D8%A8_%D8%A7%D9%84%D9%81%D8%B6%D8%A7%D8%A6%D9%8A (CC BY-SA 4.0 (Wikipedia) - facts cited, text not copied)\n[4] News Conference on the Engineering of the James Webb Space Telescope - https://images.nasa.gov/details/News Conference on the Engineering of the James Webb Space Telescope (NASA media guidelines - check item rights)\n[5] James Webb Space Telescope Mirror Alignment Update - https://images.nasa.gov/details/GSFC_20220315_Webb_Alignment_Briefing (NASA media guidelines - check item rights)\n[6] James Webb Space Telescope: An Overview - https://images.nasa.gov/details/James_Webb_Space_Telescope__An_Overview_1080 (NASA media guidelines - check item rights)\n[7] By the Dozen: NASA's James Webb Space Telescope Mirrors - https://images.nasa.gov/details/by-the-dozen-nasas-james-webb-space-telescope-mirrors_23938941370_o (NASA media guidelines - check item rights)\n[8] By the Dozen: NASA's James Webb Space Telescope Mirrors - https://images.nasa.gov/details/by-the-dozen-nasas-james-webb-space-telescope-mirrors_23607727573_o (NASA media guidelines - check item rights)\n[9] Vibration Testing of NASA's James Webb Space Telescope - https://images.nasa.gov/details/Social_Media_Video_Master_A (NASA media guidelines - check item rights)\n[10] Media Briefings: James Webb Space Telescope's First Full-Color Images and Data - https://images.nasa.gov/details/Media Briefings James Webb Space Telescopes First Full Color Images and Data (NASA media guidelines - check item rights)\n[11] First Full-Color Images and Data from the James Webb Space Telescope - https://images.nasa.gov/details/First Fulll Color Images and Data from the James Webb Space Telescope (NASA media guidelines - check item rights)\n[12] James Webb Space Telescope Revealed - https://images.nasa.gov/details/GSFC_20171208_Archive_e000355 (NASA media guidelines - check item rights)\n[13] James Webb Space Telescope Revealed - https://images.nasa.gov/details/GSFC_20171208_Archive_e000356 (NASA media guidelines - check item rights)\n[14] James Webb Space Telescope Revealed - https://images.nasa.gov/details/GSFC_20171208_Archive_e000350 (NASA media guidelines - check item rights)\n[15] James Webb Space Telescope Revealed - https://images.nasa.gov/details/GSFC_20171208_Archive_e000349 (NASA media guidelines - check item rights)\n[16] James Webb Space Telescope Revealed - https://images.nasa.gov/details/GSFC_20171208_Archive_e000357 (NASA media guidelines - check item rights)\n[17] James Webb Space Telescope Revealed - https://images.nasa.gov/details/GSFC_20171208_Archive_e000354 (NASA media guidelines - check item rights)\n[18] James Webb Space Telescope Revealed - https://images.nasa.gov/details/GSFC_20171208_Archive_e000359 (NASA media guidelines - check item rights)\n[19] James Webb Space Telescope Revealed - https://images.nasa.gov/details/GSFC_20171208_Archive_e000358 (NASA media guidelines - check item rights)\n[20] James Webb Space Telescope: Worth the Wait - https://images.nasa.gov/details/12987-Worth_the_Wait (NASA media guidelines - check item rights)\n[21] Top Ten Facts about the James Webb Space Telescope - https://images.nasa.gov/details/12395-Top_Ten_JWST_Facts_H264 (NASA media guidelines - check item rights)\n[22] James Webb Space Telescope Revealed - https://images.nasa.gov/details/GSFC_20171208_Archive_e000352 (NASA media guidelines - check item rights)",
   "vertical": false,
   "preset": "scientific",
   "market": {
-   "opportunity_id": "opp_da073ca6e2",
-   "brief_id": "brief_7811f8b638",
-   "score": 70.7,
+   "opportunity_id": "opp_56c93dfb58",
+   "brief_id": "brief_9a60173cbb",
+   "score": 63.0,
    "confidence": 0.43,
-   "verified_claims": 18,
+   "verified_claims": 3,
    "angles": [
     "de-language version: the de Wikipedia article 'James-Webb-Weltraumteleskop' averages 151 views/day (last 7 days) - original narration in de, not a translation of a competitor",
     "ar-language version: the ar Wikipedia article 'مقراب جيمس ويب الفضائي' averages 17 views/day (last 7 days) - original narration in ar, not a translation of a competitor",
@@ -1553,7 +1515,8 @@
     "format": "json",
     "redirects": 1
    },
-   "cost": {}
+   "cost": {},
+   "retried_after_rate_limit_s": 45.0
   },
   {
    "url": "https://ar.wikipedia.org/w/api.php",
@@ -1565,8 +1528,7 @@
     "format": "json",
     "redirects": 1
    },
-   "cost": {},
-   "retried_after_rate_limit_s": 45.0
+   "cost": {}
   },
   {
    "url": "https://de.wikipedia.org/w/api.php",
@@ -1592,7 +1554,8 @@
     "format": "json",
     "redirects": 1
    },
-   "cost": {}
+   "cost": {},
+   "retried_after_rate_limit_s": 45.0
   },
   {
    "url": "https://api.openverse.org/v1/images/",
@@ -1613,5 +1576,6 @@
    "cost": {}
   }
  ],
- "runtime_s": 334.6
+ "runtime_s": 191.7,
+ "production_brief_note": "regenerated offline from this file's opportunity + brief with the final to_production_brief()"
 }
