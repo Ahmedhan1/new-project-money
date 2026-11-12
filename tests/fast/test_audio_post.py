@@ -58,3 +58,49 @@ def test_clean_speech_lowers_the_noise_floor_without_lowering_speech(noisy, tmp_
     (f_old, s_old), (f_new, s_new) = out["voice_level"], out["clean_speech"]
     assert f_new < f_old - 3          # quieter pauses
     assert abs(s_new - s_old) < 3     # speech level kept
+
+
+def test_leveller_gives_a_spiky_voice_nearly_the_same_gain_as_a_smooth_one(tmp_path):
+    """Acceptance edit: the peak-based leveller left the interviewer (spiky line) 7.5 dB below the guest on equal input
+    (the RMS-targeted setting: 0 dB on that real span). Synthetic: same RMS, crest factor +17 dB."""
+    import subprocess
+    import numpy as np
+    from nexus.audio import post
+    src = tmp_path / "two.wav"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i",
+                    "aevalsrc='if(lt(t,4),0.05*sin(2*PI*220*t),0.05*sqrt(50)*lt(mod(t*110,1),0.02)*sin(2*PI*900*t))':s=16000:d=8",
+                    str(src)], check=True)
+    def gap(af):
+        x = np.frombuffer(subprocess.run(["ffmpeg", "-v", "error", "-i", str(src), "-af", af, "-f", "f32le", "-ac", "1", "-"],
+                                         capture_output=True).stdout, dtype=np.float32)
+        return 10 * np.log10((x[16000:56000] ** 2).mean()) - 10 * np.log10((x[72000:120000] ** 2).mean())
+    assert abs(gap("anull")) < 0.5
+    old = gap("dynaudnorm=f=250:g=15:p=0.9:m=8:s=6")
+    new = gap(post.LEVEL.split(",")[0])
+    assert new < old - 1.2 and new < 4.0, (old, new)
+    assert post.chain_signature() != post.chain_signature("voice_level")
+
+
+def test_speaker_gains_match_the_main_speaker_and_render_inside_the_clip(home, tmp_path):
+    import subprocess
+    import numpy as np
+    from nexus.audio import post
+    from nexus.timeline import ops, render
+    assert post.speaker_gains({"G": {"db": -20, "seconds": 300}, "I": {"db": -29, "seconds": 40},
+                               "X": {"db": -21.5, "seconds": 10}}) == {"I": 9.0}          # < 3 dB differences are left
+    assert post.speaker_gains({"I": {"db": -40, "seconds": 5}, "G": {"db": -20, "seconds": 50}})["I"] == post.SPK_MAX_DB
+    src = tmp_path / "s.mp4"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "color=c=gray:s=160x90:r=25:d=4", "-f", "lavfi",
+                    "-i", "sine=f=440:d=4", "-filter_complex", "[1:a]volume=0.1[a]", "-map", "0:v", "-map", "[a]",
+                    "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", str(src)], check=True)
+    c = ops.video_clip(str(src), 1.0, 4.0)
+    c["gain_spans"] = [{"in": 2.0, "out": 3.0, "db": 9.0}]                                   # source time
+    tl = {"version": 1, "width": 160, "height": 90, "fps": 25, "lang": "en", "grade": "none", "clips": [c], "audio": [],
+          "music": None, "subtitles": [], "markers": [], "target_lufs": -14.0}
+    out = tmp_path / "o.mp4"
+    render.render(tl, out, tmp_path / "w", workers=1)
+    x = np.frombuffer(subprocess.run(["ffmpeg", "-v", "error", "-i", str(out), "-ac", "1", "-ar", "16000", "-f", "f32le", "-"],
+                                     capture_output=True).stdout, dtype=np.float32)
+    db = lambda a, b: 10 * np.log10((x[int(a * 16000):int(b * 16000)] ** 2).mean())  # noqa: E731
+    assert db(1.2, 1.8) - db(0.2, 0.8) > 7.0          # programme 1-2 s = source 2-3 s is boosted by ~9 dB
+    assert abs(db(2.2, 2.8) - db(0.2, 0.8)) < 1.5

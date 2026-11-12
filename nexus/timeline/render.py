@@ -132,7 +132,7 @@ def segment_key(c: dict, tl: dict, draft: bool = False) -> str:
         payload["_afx"] = tl["audio_fx"]  # was missing before: changing the global audio chain must re-render
         if "clean_speech" in (tl.get("audio_fx"), c.get("audio_fx")):
             from ..audio import post as apost
-            payload["_afx_model"] = apost.chain_name_in_use()  # model installed or not changes the sound
+            payload["_afx_model"] = apost.chain_signature()  # model installed or not, and the exact filters, change the sound
     if draft:
         payload["_draft"] = DRAFT_SCALE
     for k in ("src",):
@@ -295,6 +295,11 @@ def render_segment(c: dict, tl: dict, cache: Path, draft: bool = False, threads:
         last = clast.strip("[]")
     a = []
     if has_audio:
+        # speaker level matching first (source time: the segment's audio starts at the clip's in-point), so the
+        # gate and leveller below see both voices at the same level
+        for gs in c.get("gain_spans") or []:
+            a.append(f"volume=enable='between(t,{float(gs['in']) - c['in']:.3f},{float(gs['out']) - c['in']:.3f})':"
+                     f"volume={float(gs['db']):.2f}dB")
         if ramp:
             # audio follows the ramp's average rate (pitch-preserving atempo); exact per-sample ramping is not done
             a += fxe.atempo_chain((c["out"] - c["in"]) / max(dur, 1e-3))

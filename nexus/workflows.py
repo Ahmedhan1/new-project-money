@@ -84,8 +84,14 @@ def direct_(job: jobs.Job) -> dict:
 
     def build():
         tl = json.loads((p.dir / "work" / "director_timeline.json").read_text(encoding="utf-8"))
+        spk_report = None
+        try:  # match speakers recorded at different levels (interviewer vs guest mic); needs diarisation turns
+            from .audio import post as apost
+            tl, spk_report = apost.apply_speaker_gains(tl, _analysis(p))
+        except Exception as e:  # noqa: BLE001 - level matching is an improvement, never a reason to fail the edit
+            spk_report = {"error": f"{type(e).__name__}: {e}"[:200]}
         vid = p.save_timeline(tl, f"director: {r['profile']} -> {r['summary']['programme_seconds']:.0f}s", a.get("branch", "main"))
-        return {"version": vid}
+        return {"version": vid, "speaker_levels": spk_report}
 
     r = {**r, **job.stage("build-timeline", build)}
     if not a.get("broll"):
