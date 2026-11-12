@@ -89,3 +89,53 @@ the Account 2 fixes above and a human review.
 - Account 1 (`nexus/contracts.py`) and Account 2 (`nexus/contracts/`) collide on the import name `nexus.contracts`.
 - Account 2: accept an approved `ContentScript` verbatim in `create_video` (today passed as notes/direction).
 - Account 1: `batch_llm` job kind for the Kaggle worker (persistent serving is not allowed there).
+
+---
+
+# V2 — Intelligence, real-world quality & final integration (2026-11-12, later session)
+
+Branch `work/account-3-intelligence-growth`, draft PR #5. Nothing merged into `main` or into Account 1/2 branches.
+Every claim below links to evidence in the repository; "by eye" means frames were inspected, not only automated QA.
+
+## Demo 4 defects → gates → Demo 10 (real research, real render)
+| Demo 4 defect | Gate (tested) | Demo 10 evidence |
+|---|---|---|
+| 18th-century Russian map for modern Aswan | `visual_context`: geo_mismatch, historical_in_modern, old_map | the exact "Belgorod governorate 1745" + 6 other historical maps refused before download |
+| credits rendered as empty boxes | `fonts` glyph-coverage runs + `typography` missing-glyph gate (critical) + OCR read-back | OCR recall ar/en/zh/ru/de 1.0, hi 0.84; a hieroglyph without a font blocks the render |
+| 2 of 4 scenes were title cards | `scene_plan`: licensed photo → fact graphic → flagged card; > 25 % blocks | run 4: 4/4 licensed photos, 0 cards |
+| sensational hook "the dam has a secret" | `strategy.framing` + script review + handoff refusal | refused at handoff |
+| approved script paraphrased | `create_video(script=...)` verbatim | narration identical in all four runs |
+| (new) unsupported dubbing | readiness + dubbing gate | ar-Gulf dubbing refused (no cleared voice); readiness 31.5 "draft_needs_native_review" |
+| (new) duplicate publishing | idempotency key | second create returns the same private draft |
+
+Iterations, each found by **inspecting frames by eye** and fixed with a regression test (`docs/results/account3/demo10_run{1..4}_*`):
+1. run 1 — fact-graphic labels broken ("Constructed between 1960 and the dam was", "…it will func"); Giza pyramids for
+   an Aswan sentence (same country) → `key_fact` rewrite, `place_mismatch`.
+2. run 2 — a real "High Dam Burg, Aswan" photo refused (place words compared as phrases) → distinctive place words.
+3. run 3 — Philae temple for "The Aswan High Dam…"; "Flag of Aswan Governorate" accepted → `subject_unverified`, `emblem`.
+4. run 4 (final) — the real Aswan High Dam on scene 1, all automated stages pass, render 61 s.
+   **Residual, by eye:** scene 2 (construction narrative) shows Philae temple — its visual query names no structure, so
+   the subject rule does not apply. Fix belongs in asset ranking (request A2-2), not in a stricter gate.
+Also found on the real research and fixed: place resolver mapped "Kourou" → Guinea, "Upper Egypt" → Ghana/Gambia/Guyana,
+"New Valley" → Colombia/Honduras/Italy.
+
+## Parts 3–9
+- **Models (Part 3):** 36-item benchmark on Kaggle T4×2, 8 models measured (`docs/ACCOUNT3_MODEL_BENCHMARKS.md`):
+  DeepSeek-R1-Qwen3-8B 0.90 (slow), Nemotron-Nano-9B 0.84 (2.6 s), Ministral-3-14B 0.83, GLM-4.7-Flash 0.80,
+  Qwen3.5-4B 0.80; dialect ≤ 0.52 everywhere. Task routing derived from measurements; critical tasks below the bar set
+  `requires_human_review`. Qwen3.6-35B/3.8-27B not measured (Ollama mmproj pull failure; cause isolated).
+- **Creators V2 (Part 4):** 14 measured dimensions incl. OCR text share, colour, motion; weighted blends report conflicts.
+- **Market V2 (Part 5):** credibility, cross-publisher verification, recency, geography, language demand, coverage and an
+  uncertainty interval (Aswan: 57.1 in [51.2, 61.6], 3/23 claims cross-confirmed → "indicative only").
+- **Languages (Part 6):** readiness per language (8 dimensions), terminology memory, native-review workflow + API.
+  No language is publishable without native review; Gulf Arabic still classifies as MSA.
+- **Publishing (Part 7):** **blocked** — no Google OAuth client exists; nothing uploaded.
+- **Analytics (Part 8):** first-party ledger joining platform analytics to production facts and experiment arms; no
+  owner data exists yet.
+- **Integration (Part 9):** one `nexus.contracts` package; local three-account merge: 538 passed, 2 failures that also
+  fail on Account 1's own branch (test bugs, documented), 1 Account 3 test literal (fixed). Strategy Handoff validated
+  by Account 2's own validator.
+
+## Verification
+Fast suite on this branch: 363 passed, 3 skipped (before the last gate commits; CI re-runs on every push). Linux and
+Windows CI were red from `9fc6cfb` (undeclared `pycountry`) and green again from `ba777cf`.
