@@ -204,6 +204,7 @@ model_profiles:
     inputs: [text]
     outputs: [text, json]
     prompt_suffix: " /no_think"
+    json_schema: llamacpp   # served by llama-cpp-python's server: schemas become a grammar
     quality: {reasoning: 3, writing: 3, json: 4, translation: 3, arabic: 2, summarization: 4, source: estimate}
     speed: medium
   qwen3-4b-q4km:

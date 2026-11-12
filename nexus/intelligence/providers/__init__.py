@@ -47,6 +47,10 @@ def openai_chat(entry: dict, prompt: str, system: str, schema: dict | None, max_
             "max_tokens": max_tokens, "temperature": temperature}
     if schema is not None:
         body["response_format"] = {"type": "json_object"}
+        # llama.cpp's server turns a schema into a sampling grammar (required keys cannot be skipped). Only sent to
+        # servers that declare it (catalogue `json_schema: llamacpp`); hosted APIs get plain JSON mode.
+        if entry.get("json_schema") == "llamacpp" and schema.get("properties"):
+            body["response_format"]["schema"] = schema
     headers = {"Content-Type": "application/json", "User-Agent": config.USER_AGENT}
     key = api_key(entry["provider"])
     if key:

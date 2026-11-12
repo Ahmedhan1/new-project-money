@@ -110,6 +110,15 @@ def test_measured_bench_quality_overrides_estimates(settings, server):
     assert any("(measured)" in w for w in ex["excluded"])
 
 
+def test_schema_grammar_only_for_servers_that_declare_it(settings, server):
+    from nexus.intelligence.providers import openai_chat
+    schema = {"type": "object", "required": ["a"], "properties": {"a": {"type": "string"}}}
+    base = _entry("owner-openai-compatible", "m", base_url=server)
+    openai_chat(base, "p", "s", schema, 10, 0.1)
+    openai_chat({**base, "json_schema": "llamacpp"}, "p", "s", schema, 10, 0.1)
+    assert "schema" not in _Srv.seen[0]["response_format"] and _Srv.seen[1]["response_format"]["schema"] == schema
+
+
 def test_strip_reasoning():
     assert strip_reasoning("<think>a\nb</think> ok") == "ok"
     assert strip_reasoning("<think>never closed") == ""

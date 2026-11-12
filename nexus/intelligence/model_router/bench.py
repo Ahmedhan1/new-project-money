@@ -47,6 +47,18 @@ REASON_QS = [("A train leaves at 14:40 and the trip takes 95 minutes. At what ti
              ("If all bloops are razzies and no razzies are lazzies, can a bloop be a lazzie? Answer yes or no.", "no")]
 
 
+# JSON schemas passed with the structured items exactly as a router caller would (grammar-constrained where supported)
+S_JSON = {"type": "object", "required": ["title", "tags", "language", "duration_s"],
+          "properties": {"title": {"type": "string"}, "tags": {"type": "array", "items": {"type": "string"}, "minItems": 3, "maxItems": 3},
+                         "language": {"type": "string"}, "duration_s": {"type": "number"}}}
+S_EXTRACT = {"type": "object", "required": ["people", "date", "city", "rent_eur", "deposit_eur"],
+             "properties": {"people": {"type": "array", "items": {"type": "string"}}, "date": {"type": "string"},
+                            "city": {"type": "string"}, "rent_eur": {"type": "number"}, "deposit_eur": {"type": "number"}}}
+S_ANSWER = {"type": "object", "required": ["answer"], "properties": {"answer": {"type": "string"}}}
+S_TITLES = {"type": "object", "required": ["titles"],
+            "properties": {"titles": {"type": "array", "items": {"type": "string"}, "minItems": 3, "maxItems": 3}}}
+
+
 # ----------------------------------------------------------------- scorers (pure, unit-tested)
 def parse_json(text: str):
     from .router import _parse
@@ -165,13 +177,13 @@ def score_titles(text: str, keyword: str = "bees") -> float:
 # ----------------------------------------------------------------- task set
 def taskset() -> list[dict]:
     items = [
-        {"id": "json", "cap": "json", "schema": True, "max_tokens": 160,
+        {"id": "json", "cap": "json", "schema": S_JSON, "max_tokens": 160,
          "prompt": 'Describe this video as JSON with keys "title" (string), "tags" (exactly 3 strings), "language" '
                    '(ISO code) and "duration_s" (number): a 90-second English explainer about how volcanoes form.'},
-        {"id": "extract", "cap": "json", "schema": True, "max_tokens": 160,
+        {"id": "extract", "cap": "json", "schema": S_EXTRACT, "max_tokens": 160,
          "prompt": 'Extract from the text a JSON object with keys "people" (list of full names), "date" (YYYY-MM-DD), '
                    f'"city", "rent_eur" (number), "deposit_eur" (number).\nText: {EXTRACT_TEXT}'},
-        *[{"id": f"reason{i}", "cap": "reasoning", "schema": True, "max_tokens": 80, "gold": g,
+        *[{"id": f"reason{i}", "cap": "reasoning", "schema": S_ANSWER, "max_tokens": 80, "gold": g,
            "prompt": f'{q}\nReply as JSON: {{"answer": "<answer>"}}'} for i, (q, g) in enumerate(REASON_QS, 1)],
         {"id": "summary", "cap": "summarization", "max_tokens": 120,
          "prompt": f"Summarise the text in at most 40 words, plain prose.\nText: {SUMMARY_TEXT}"},
@@ -181,7 +193,7 @@ def taskset() -> list[dict]:
          "prompt": "اكتب جملتين باللهجة المصرية العامية (مش الفصحى) عن الخروج مع الأصحاب يوم الجمعة. اكتب الجملتين فقط."},
         {"id": "dialect_gulf", "cap": "arabic", "want": "gulf", "max_tokens": 100,
          "prompt": "اكتب جملتين باللهجة الخليجية العامية (مو الفصحى) عن الخروج مع الربع يوم الجمعة. اكتب الجملتين فقط."},
-        {"id": "titles", "cap": "writing", "schema": True, "max_tokens": 160,
+        {"id": "titles", "cap": "writing", "schema": S_TITLES, "max_tokens": 160,
          "prompt": 'Write 3 different YouTube titles for a video about how bees communicate. Each title at most 60 '
                    'characters, must contain the word "bees", no all-caps, no clickbait. Reply as JSON {"titles": [..]}.'},
     ]
@@ -240,7 +252,7 @@ def run_entry(entry: dict, items: list[dict], log=print) -> list[dict]:
     from ..providers import call
     rows = []
     for it in items:
-        schema = {"type": "object"} if it.get("schema") else None
+        schema = it.get("schema")
         t0 = time.time()
         try:
             text, usage = call(entry, it["prompt"], SYS, schema, it["max_tokens"], 0.2)
@@ -255,20 +267,25 @@ def run_entry(entry: dict, items: list[dict], log=print) -> list[dict]:
     return rows
 
 
-def backtranslate(rows_by_model: dict[str, list[dict]]) -> None:
-    """Back-translate every translation output into English with MADLAD-400 (one batch, under the heavy lock)."""
+def backtranslate(rows_by_model: dict[str, list[dict]]) -> str | None:
+    """Back-translate every translation output into English with MADLAD-400 (one batch, under the heavy lock).
+    Returns an error string instead of raising: the run's other results must survive a missing MT model."""
     from ... import jobs
     from ...speech import mt
     todo = [(m, r) for m, rows in rows_by_model.items() for r in rows if r["id"].startswith("translate_") and r["output"].strip()]
     if not todo:
-        return
-    with jobs.heavy_lock():
-        try:
-            outs = mt.translate([r["output"].replace("\n", " ") for _, r in todo], "en")
-        finally:
-            mt.unload()
+        return None
+    try:
+        with jobs.heavy_lock():
+            try:
+                outs = mt.translate([r["output"].replace("\n", " ") for _, r in todo], "en")
+            finally:
+                mt.unload()
+    except Exception as e:  # recorded; translation is then scored on script share only (sim = None)
+        return f"back-translation unavailable: {type(e).__name__}: {str(e)[:160]}"
     for (_, r), b in zip(todo, outs):
         r["back_translation"] = b
+    return None
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -318,13 +335,15 @@ def main(argv: list[str] | None = None) -> int:
         entries[e["model"]] = e
     if not a.no_backtranslate:
         print("[mt] back-translating with MADLAD-400")
-        backtranslate(rows_by_model)
+        if bt_err := backtranslate(rows_by_model):
+            notes.append(bt_err)
+            print(bt_err)
     result = {"run": run_id, "date": time.strftime("%Y-%m-%d"), "machine": "4 vCPU, 15 GB RAM, no GPU (shared with other agents)",
               "scoring": __doc__.split("Fixed task set")[1].split("Also recorded")[0].strip(), "notes": notes, "models": {}}
     for model, rows in rows_by_model.items():
         it_by_id = {i["id"]: i for i in items}
         for r in rows:
-            r.update(score_item(it_by_id[r["id"]], r["output"], None if a.no_backtranslate else r.get("back_translation", "")))
+            r.update(score_item(it_by_id[r["id"]], r["output"], r.get("back_translation")))
             if r.get("error"):
                 r["score"] = 0.0
         agg = aggregate(rows)
