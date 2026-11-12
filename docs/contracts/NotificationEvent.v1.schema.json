@@ -1,0 +1,61 @@
+{
+ "additionalProperties": false,
+ "properties": {
+  "contract": {
+   "const": "NotificationEvent/v1",
+   "default": "NotificationEvent/v1",
+   "title": "Contract",
+   "type": "string"
+  },
+  "notification_id": {
+   "title": "Notification Id",
+   "type": "string"
+  },
+  "level": {
+   "enum": [
+    "info",
+    "success",
+    "warning",
+    "error"
+   ],
+   "title": "Level",
+   "type": "string"
+  },
+  "title": {
+   "title": "Title",
+   "type": "string"
+  },
+  "body": {
+   "default": "",
+   "title": "Body",
+   "type": "string"
+  },
+  "source_event": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Source Event"
+  },
+  "read": {
+   "default": false,
+   "title": "Read",
+   "type": "boolean"
+  },
+  "at": {
+   "title": "At",
+   "type": "number"
+  }
+ },
+ "required": [
+  "level",
+  "title"
+ ],
+ "title": "NotificationEvent",
+ "type": "object"
+}

@@ -1,0 +1,48 @@
+{
+ "additionalProperties": false,
+ "properties": {
+  "contract": {
+   "const": "JobCheckpoint/v1",
+   "default": "JobCheckpoint/v1",
+   "title": "Contract",
+   "type": "string"
+  },
+  "job_id": {
+   "title": "Job Id",
+   "type": "string"
+  },
+  "step": {
+   "title": "Step",
+   "type": "string"
+  },
+  "seq": {
+   "minimum": 0,
+   "title": "Seq",
+   "type": "integer"
+  },
+  "state": {
+   "additionalProperties": true,
+   "title": "State",
+   "type": "object"
+  },
+  "artifacts": {
+   "description": "artifact ids produced so far",
+   "items": {
+    "type": "string"
+   },
+   "title": "Artifacts",
+   "type": "array"
+  },
+  "created_at": {
+   "title": "Created At",
+   "type": "number"
+  }
+ },
+ "required": [
+  "job_id",
+  "step",
+  "seq"
+ ],
+ "title": "JobCheckpoint",
+ "type": "object"
+}

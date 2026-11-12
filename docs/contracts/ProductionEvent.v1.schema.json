@@ -1,0 +1,70 @@
+{
+ "additionalProperties": false,
+ "properties": {
+  "contract": {
+   "const": "ProductionEvent/v1",
+   "default": "ProductionEvent/v1",
+   "title": "Contract",
+   "type": "string"
+  },
+  "event_id": {
+   "title": "Event Id",
+   "type": "string"
+  },
+  "job_id": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Job Id"
+  },
+  "type": {
+   "enum": [
+    "job.submitted",
+    "job.dispatched",
+    "job.progress",
+    "job.checkpoint",
+    "job.succeeded",
+    "job.failed",
+    "job.cancelled",
+    "job.retrying",
+    "worker.lost",
+    "quota.exhausted",
+    "storage.uploaded",
+    "storage.failed",
+    "ingest.stored",
+    "ingest.rejected",
+    "scheduler.paused",
+    "scheduler.resumed",
+    "scheduler.stopped",
+    "provider.health"
+   ],
+   "title": "Type",
+   "type": "string"
+  },
+  "message": {
+   "default": "",
+   "title": "Message",
+   "type": "string"
+  },
+  "data": {
+   "additionalProperties": true,
+   "title": "Data",
+   "type": "object"
+  },
+  "at": {
+   "title": "At",
+   "type": "number"
+  }
+ },
+ "required": [
+  "type"
+ ],
+ "title": "ProductionEvent",
+ "type": "object"
+}

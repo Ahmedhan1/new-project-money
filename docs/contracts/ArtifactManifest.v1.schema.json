@@ -1,0 +1,171 @@
+{
+ "$defs": {
+  "ArtifactLocation": {
+   "additionalProperties": false,
+   "description": "Where one copy of an artifact lives. `provider` is a StorageProvider id; `connection_id` names the authorised\naccount (e.g. drive_a) - never a credential.",
+   "properties": {
+    "provider": {
+     "title": "Provider",
+     "type": "string"
+    },
+    "connection_id": {
+     "title": "Connection Id",
+     "type": "string"
+    },
+    "ref": {
+     "description": "provider-native id or key (Drive file id, object key, local relative path)",
+     "title": "Ref",
+     "type": "string"
+    },
+    "path": {
+     "default": "",
+     "description": "human-readable path, e.g. NEXUS/Masters/prj_x/master.mp4",
+     "title": "Path",
+     "type": "string"
+    },
+    "verified_at": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Verified At"
+    }
+   },
+   "required": [
+    "provider",
+    "connection_id",
+    "ref"
+   ],
+   "title": "ArtifactLocation",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "properties": {
+  "contract": {
+   "const": "ArtifactManifest/v1",
+   "default": "ArtifactManifest/v1",
+   "title": "Contract",
+   "type": "string"
+  },
+  "artifact_id": {
+   "title": "Artifact Id",
+   "type": "string"
+  },
+  "kind": {
+   "enum": [
+    "source",
+    "proxy",
+    "analysis",
+    "master",
+    "short",
+    "localized",
+    "thumbnail",
+    "audio",
+    "subtitle",
+    "project_file",
+    "archive",
+    "log",
+    "checkpoint",
+    "other"
+   ],
+   "title": "Kind",
+   "type": "string"
+  },
+  "name": {
+   "title": "Name",
+   "type": "string"
+  },
+  "mime": {
+   "title": "Mime",
+   "type": "string"
+  },
+  "size": {
+   "minimum": 0,
+   "title": "Size",
+   "type": "integer"
+  },
+  "sha256": {
+   "pattern": "^[0-9a-f]{64}$",
+   "title": "Sha256",
+   "type": "string"
+  },
+  "project_id": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Project Id"
+  },
+  "produced_by_job": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Produced By Job"
+  },
+  "locations": {
+   "items": {
+    "$ref": "#/$defs/ArtifactLocation"
+   },
+   "title": "Locations",
+   "type": "array"
+  },
+  "provenance": {
+   "additionalProperties": true,
+   "description": "licence, source URL, generator, model...",
+   "title": "Provenance",
+   "type": "object"
+  },
+  "retention": {
+   "default": "keep",
+   "enum": [
+    "keep",
+    "temporary",
+    "archive"
+   ],
+   "title": "Retention",
+   "type": "string"
+  },
+  "expires_at": {
+   "anyOf": [
+    {
+     "type": "number"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Expires At"
+  },
+  "created_at": {
+   "title": "Created At",
+   "type": "number"
+  }
+ },
+ "required": [
+  "kind",
+  "name",
+  "mime",
+  "size",
+  "sha256"
+ ],
+ "title": "ArtifactManifest",
+ "type": "object"
+}
