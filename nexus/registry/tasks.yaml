@@ -68,11 +68,11 @@ tasks:
   - id: WIN-1
     priority: 1
     title: "One-click Windows launchers (SETUP/START/STOP/STATUS/DOCTOR/BACKUP/RESTORE/CHECKPOINT/RESUME/UPDATE)"
-    status: implemented
+    status: verified
     acceptance: "On a clean Windows 10/11 machine, double-clicking NEXUS_SETUP then NEXUS_START opens the app; a previous project opens after a reboot."
     test: "Manual on Windows (acceptance test F). The Python launcher under the .bat files is tested on Linux and in CI on windows-latest."
-    evidence: "tests/fast/test_launcher.py (start -> health -> previous project -> stop with the real API) passes on Linux and on the windows-latest CI runner; the .bat/.ps1 wrappers themselves have NOT been run on real Windows."
-    next: "Run NEXUS_SETUP.bat and NEXUS_START.bat on the user's Windows machine; fix whatever fails (likely llama-cpp-python wheel, espeak-ng, Blender path)."
+    evidence: "windows-e2e.yml run 43202615448 on a clean windows-latest VM: NEXUS_SETUP.bat -> NEXUS_START.bat -> API e2e (non-ASCII NEXUS_HOME, Arabic/Chinese text, real render) -> STATUS -> BACKUP --drill -> STOP, all green."
+    next: "Owner runs NEXUS_SETUP/NEXUS_START on their own PC (GPU drivers, antivirus, real models)."
   - id: WIN-2
     priority: 3
     title: "Packaged Windows app (evaluate Tauri shell vs PyInstaller vs portable Python)"
@@ -169,6 +169,7 @@ tasks:
     acceptance: "A 3-5 s generated clip is produced on an authorised free GPU worker and inserted into a timeline with provenance."
     test: "End-to-end on a real Kaggle session."
     next: "Needs the user's Kaggle account (free, phone-verified) - then implement the real job hand-off in compute.KaggleWorker."
+    evidence: "AnimateDiff on 4 CPU cores ran (docs/results/t2v_cpu_bench.json) but the output is noise at feasible settings: CPU is not usable for video generation."
   - id: GEN-3
     priority: 3
     title: "VFX basics (background removal/keying, masks, compositing) and enhancement (stabilise, upscale, interpolate)"
@@ -363,33 +364,37 @@ tasks:
   - id: FX-2
     priority: 2
     title: "Wire chroma key, masks, split screen, freeze frames, credits roll, audio-reactive overlay and real J/L-cut audio overlaps"
-    status: planned
+    status: tested
     deps: [FX-1]
     acceptance: "Each is a timeline key in docs/TIMELINE.md, rendered and asserted on pixels/audio in tests/fast/test_fx.py."
     test: "pytest tests/fast/test_fx.py"
-    next: "Builders exist in nexus/fx/post.py and fx/titles.py; render_segment does not call them yet."
+    next: "Audio-reactive overlay, opacity keyframes and a multi-track model are still not wired (docs/TIMELINE.md)."
+    evidence: "Freeze, split screen, chroma key, masks, credits roll, position/scale/volume keyframes, J/L-cut audio wired in render.py; 20+ pixel/audio tests in test_fx.py; credits + full-frame cutaways used in the 4-min acceptance edit."
   - id: BRL-1
     priority: 1
     title: "B-roll for single-camera sources (licensed stock, generated stills, the user's own extra footage) placed by the director"
-    status: planned
+    status: verified
     deps: [DIR-1, GEN-0]
     acceptance: "On a single-camera interview the quality check 'repeated imagery' improves; every inserted shot carries provenance and licence."
     test: "Re-run Demo 1 with B-roll; compare visual.repeated_imagery."
-    next: "Director already plans cutaways from low-speech shots and emits clip.pip; add a B-roll source library and topic-matched search."
+    next: "Matching is lexical (titles/keywords); add a visual relevance check (CLIP-class model, licence first) and owner review in the UI."
+    evidence: "nexus/broll.py: NASA Image & Video Library + Openverse search with licence/credit/provenance, programme-subject gate, phash dedupe, Ken Burns stills; 16 cutaways (27% share) on the 4-min acceptance edit, credits in the timeline."
   - id: DIA-1
     priority: 2
     title: "Speaker diarisation (interviewer vs guest) with a licence suitable for commercial use"
-    status: planned
+    status: verified
     acceptance: "Analysis carries speaker labels; director uses them for J/L-cuts and lower thirds; prompt_like heuristic switches off."
     test: "Two-speaker fixture with known turns."
-    next: "Evaluate pyannote (model licence + HF gating) vs simple embedding clustering on CPU; record licence evidence."
+    next: "Correction UI; merged question+answer segments (Whisper) still need word-level speaker turns."
+    evidence: "WeSpeaker ResNet34 ONNX (CC BY 4.0) + agglomerative clustering: 3 speakers, silhouette 0.72 on the NASA interview (docs/results/diarization_demo.json); roles guest/interviewer; rename/merge/reassign/set_name keep the automatic result; shorts never open on the interviewer; lower thirds only from names a person set."
   - id: AUD-2
     priority: 2
     title: "Stronger dialogue cleanup (noise floor findings in every real render)"
-    status: planned
+    status: verified
     acceptance: "audio.noise_floor passes on the NASA interview edit without audible artefacts."
     test: "Quality score before/after on Demo 1."
-    next: "Try FFmpeg arnndn with an RNNoise model (BSD) and a gated expander; A/B by ear and by score."
+    next: "De-reverb and music/dialogue stem separation: no licence-clean CPU model integrated yet."
+    evidence: "RNNoise (arnndn, BSD model) + gate + leveller: noise floor -39.9 -> -43.8 dBFS, SNR 25.3 -> 29.1 dB on the real edit (docs/results/audio_post.json)."
   - id: LANG-2
     priority: 2
     title: "Native review workflow + licensed Arabic and Hindi voices"
