@@ -137,7 +137,7 @@ LANG_SCRIPT = {"ar": "arabic", "fa": "arabic", "ur": "arabic", "he": "hebrew", "
                "el": "greek", "hi": "devanagari", "mr": "devanagari", "ne": "devanagari", "th": "thai", "zh": "cjk", "ja": "cjk", "ko": "cjk"}
 RTL = ("ar", "fa", "ur", "he")
 CPS_BY_LANG = {"default": 20.0, "zh": 9.0, "ja": 4.0, "ko": 12.0}   # engineering defaults after the Netflix per-language guides
-BIDI_OPEN, BIDI_ISO = "‪‫‭‮", "⁦⁧⁨"
+BIDI_OPEN, BIDI_ISO = "\u202a\u202b\u202d\u202e", "\u2066\u2067\u2068"
 SUB_STYLE = {"size": 0.048, "margin_v": 0.07, "outline": 3, "primary": "&H00FFFFFF", "back": "&H96000000", "outline_colour": "&H00101010"}
 
 FLASH_S = 0.5
@@ -1072,11 +1072,11 @@ def localization_checks(tl: dict | None, lang: str, analysis: dict | None = None
             t = q["text"]
             opens = sum(t.count(ch) for ch in BIDI_OPEN)
             isos = sum(t.count(ch) for ch in BIDI_ISO)
-            if opens != t.count("‬") or isos != t.count("⁩"):
+            if opens != t.count("\u202c") or isos != t.count("\u2069"):
                 bidi += 1
-            elif base in RTL and re.match(r"^[\s\"'(]*[A-Za-z0-9]", t) and not t.startswith(("‏", "‫", "⁧", "؜")):
+            elif base in RTL and re.match(r"^[\s\"'(]*[A-Za-z0-9]", t) and not t.startswith(("\u200f", "\u202b", "\u2067", "\u061c")):
                 bidi += 1  # an RTL line starting with a Latin/digit run is laid out from the wrong side without a mark
-            elif base not in RTL and any(ch in t for ch in "‏‫‮⁧"):
+            elif base not in RTL and any(ch in t for ch in "\u200f\u202b\u202e\u2067"):
                 bidi += 1
         run.lvl("localization.bidi", bidi, f"{bidi} cue(s) with unbalanced or missing bidi controls")
     dubs = [a for a in (tl or {}).get("audio", []) if a.get("lang", "").split("-")[0] == base and a.get("role", "narration") in SPEECH_ROLES]
