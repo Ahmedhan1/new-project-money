@@ -55,6 +55,20 @@ def _is_ar(lang: str) -> bool:
     return str(lang or "en").lower().startswith("ar")
 
 
+def _font_name(lang: str) -> str:
+    """fontconfig family for libass: Noto Naskh Arabic for Arabic; config.font_name_for (LANG-1) for others when present."""
+    if _is_ar(lang):
+        return "Noto Naskh Arabic"
+    from .. import config
+    fn = getattr(config, "font_name_for", None)
+    if fn is not None:
+        try:
+            return str(fn(lang)) or "DejaVu Sans"
+        except Exception:
+            pass
+    return "DejaVu Sans"
+
+
 def _case(s: str, o: dict, lang: str) -> str:
     from ..timeline.text import is_rtl
     return s.upper() if o.get("uppercase") and not _is_ar(lang) and not is_rtl(s) else s
@@ -127,7 +141,7 @@ def write_ass(cues: list[dict], path: Path, W: int, H: int, lang: str = "en", op
         return subs.write_ass(cues, path, W, H, lang, legacy_style)
     style = o["style"]
     L = _layout(W, H, o, style)
-    font = "Noto Naskh Arabic" if _is_ar(lang) else "DejaVu Sans"
+    font = _font_name(lang)
     white, black = "&H00FFFFFF", "&H00101010"
     hi = ass_colour(o["highlight"])
     size = L["size"]

@@ -457,10 +457,17 @@ def commentary_timeline(project, src: str, analysis: dict, comments: list[dict],
     return _finish(tl, cues)
 
 
-def _keywords(text: str, k: int = 3, avoid: Counter | None = None) -> list[str]:
-    words = [w for w in re.findall(r"[a-zA-Z][a-zA-Z'-]+", text.lower()) if w not in analyze.STOP and len(w) > 3]
+_FILLER = set("almost main make makes made really just also like much many most last first next does done very actually fast faster "
+               "anyone everyone someone expected because them these those what when where which while would could should still even every "
+               "thing things something going get gets got want know think said says really little lot lots way ways kind sort part".split())
+
+
+def _keywords(text: str, k: int = 3, topic: Counter | None = None) -> list[str]:
+    """Content words of `text`, ranked by how much they carry the whole video's topic (`topic` = word counts of the full transcript)."""
+    words = [w for w in re.findall(r"[a-zA-Z][a-zA-Z'-]+", text.lower()) if w not in analyze.STOP and w not in _FILLER and len(w) > 3]
     cnt = Counter(words)
-    rank = sorted(cnt, key=lambda w: (-(cnt[w] / (1 + (avoid or Counter())[w] * 0.5)), words.index(w)))
+    topic = topic or Counter()
+    rank = sorted(cnt, key=lambda w: (-(cnt[w] * (1 + topic[w])), words.index(w)))
     return rank[:k]
 
 
@@ -468,8 +475,8 @@ _FALLBACK_LINES = ["First, the focus is on {a} and {b}.", "Next comes {a}, and h
                    "Then the talk turns to {a}, with {b} close behind.", "Finally, it all comes down to {a} and {b}."]
 
 
-def _fallback_section(text: str, n: int, total: int, avoid: Counter) -> tuple[str, str]:
-    kw = _keywords(text, 3, avoid) or ["the main idea", "what follows"]
+def _fallback_section(text: str, n: int, total: int, topic: Counter) -> tuple[str, str]:
+    kw = _keywords(text, 3, topic) or ["the main idea", "what follows"]
     a, b = kw[0], kw[1] if len(kw) > 1 else "the details"
     tmpl = _FALLBACK_LINES[-1] if n == total - 1 and total > 1 else _FALLBACK_LINES[min(n, len(_FALLBACK_LINES) - 2)]
     line = tmpl.format(a=a, b=b)
@@ -532,7 +539,7 @@ def recap_timeline(project, src: str, analysis: dict, target_s: float = 90, lang
     per = -(-len(chosen) // k)
     groups = [chosen[i:i + per] for i in range(0, len(chosen), per)]
     full = " ".join(s["text"] for s in segs)
-    avoid = Counter(w for g in groups for w in set(_keywords(" ".join(s["text"] for s in g), 6)))
+    topic = Counter(re.findall(r"[a-z][a-z'-]+", full.lower()))
     use_llm = options.get("use_llm", True) and _llm_ready()
     plan, planner = [], []
     for n, g in enumerate(groups):
@@ -543,7 +550,7 @@ def recap_timeline(project, src: str, analysis: dict, target_s: float = 90, lang
         if got and narration_overlap(got[1], full) <= RECAP_MAX_OVERLAP and len(got[1].split()) >= 5:
             planner.append("llm")
         else:
-            got = _fallback_section(text, n, len(groups), avoid)
+            got = _fallback_section(text, n, len(groups), topic)
             planner.append("fallback")
         plan.append({"heading": got[0], "narration": got[1], "segs": g, "overlap": narration_overlap(got[1], full)})
     tl = prj.new_timeline(W, H, lang)

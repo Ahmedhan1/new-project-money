@@ -1,7 +1,7 @@
 """Stage 3: scene-to-scene continuity, measured on the rendered file at every cut.
 
 Checks (each failed check names the cut time and a `fix` id the correction loop can act on):
-  a) audio level jump: RMS of up to 1.5 s before vs after a cut; > 6 dB is flagged unless narration starts/stops there
+  a) audio level jump: active level (75th percentile of 100 ms RMS blocks) of up to 1.5 s before vs after a cut; > 6 dB is flagged unless narration starts/stops there
      (a boundary by design), a generated card sits on one side, or the clip is marked `continuity_ok`. At a narration
      boundary with sound on both sides, a jump > 10 dB is still reported (minor): voice and source dialogue mismatch.
   b) brightness jump and c) colour-cast jump: mean luma / mean chroma of the 2 frames before vs the 2 frames after a cut.
@@ -63,7 +63,14 @@ def _decode_audio(path: Path) -> np.ndarray:
 
 
 def _rms_db(x: np.ndarray) -> float:
-    return float(20 * np.log10(np.sqrt(np.mean(x.astype(np.float64) ** 2)) + 1e-9)) if len(x) else -180.0
+    """Active level: the 75th percentile of 100 ms block RMS levels, so pauses between words do not drag a side down."""
+    if not len(x):
+        return -180.0
+    n = AUDIO_SR // 10
+    x = x.astype(np.float64)
+    blocks = x[: len(x) // n * n].reshape(-1, n) if len(x) >= n else x.reshape(1, -1)
+    lv = 10 * np.log10(np.mean(blocks ** 2, axis=1) + 1e-18)
+    return float(np.percentile(lv, 75))
 
 
 def _frames_around(path: Path, t: float, fps: float, n: int = 2, margin: int = 1) -> tuple[np.ndarray | None, np.ndarray | None]:
@@ -168,7 +175,7 @@ def continuity_review(video_path: str | Path, tl: dict, analyses: dict | None = 
                 level_flags += 1
                 checks.append(_c(f"audio level jump at {t:.2f}s", False, f"{lp:.1f} dB -> {la:.1f} dB ({jump:+.1f} dB) across a hard cut",
                                  "major", fix="level-match-cut") | {"t": round(t, 3), "jump_db": round(jump, 1)})
-            elif abs(jump) > VOICE_MISMATCH_DB and nb and min(lp, la) > -35 and not (marked or _is_card(a) or _is_card(b)):
+            elif abs(jump) > VOICE_MISMATCH_DB and nb and min(lp, la) > -30 and not (marked or _is_card(a) or _is_card(b)):
                 level_flags += 1
                 checks.append(_c(f"voice/source level at {t:.2f}s", False, f"{lp:.1f} dB -> {la:.1f} dB ({jump:+.1f} dB) where narration starts/stops "
                                  "over source sound", "minor", fix="level-match-cut") | {"t": round(t, 3), "jump_db": round(jump, 1)})
@@ -247,5 +254,5 @@ def continuity_review(video_path: str | Path, tl: dict, analyses: dict | None = 
             checks.append(_c(f"caption continuity at {t:.2f}s", False, d, "minor", fix="retime-subtitles") | {"t": round(t, 3)})
         if not bad:
             checks.append(_c("caption continuity across cuts", True, f"{len(cues)} cues, usual gap {med:.2f}s"))
-    checks.append(_c("measured", True, f"{len(clips) - 1} cut(s) over {total:.1f}s; audio RMS window 1.5 s, 2 frames each side"))
+    checks.append(_c("measured", True, f"{len(clips) - 1} cut(s) over {total:.1f}s; active-level window 1.5 s, 2 frames each side"))
     return {"stage": STAGE, "checks": checks, "passed": all(c["ok"] or c["severity"] in ("minor", "info") for c in checks)}
