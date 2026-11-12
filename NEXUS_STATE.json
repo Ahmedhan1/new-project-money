@@ -3,14 +3,14 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-12T09:36:13Z",
+ "updated": "2026-11-12T14:28:46Z",
  "git": {
   "branch": "claude/hopeful-allen-luubcy",
-  "commit": "32c9ac6",
-  "subject": "Session 4: eight workstreams integrated (director, renderer/VFX, shorts v2, languages, media engine, platforms, quality score, generation); Demos 1-5 on a real public-domain interview with evidence in docs/results/demos",
-  "dirty_files": 2,
+  "commit": "c69fc56",
+  "subject": "Final report: tests section; release check PASS on 9e9b527",
+  "dirty_files": 0,
   "upstream": "origin/claude/hopeful-allen-luubcy",
-  "unpushed_commits": 0
+  "unpushed_commits": 1
  },
  "current_task": {
   "id": "QLT-1",
@@ -25,13 +25,6 @@
    "title": "Creative quality pass: measured rubric + series writer on the script schema + research/visual relevance",
    "status": "in_progress",
    "next": "1) Series visuals - derive the image query from the bible's location LOOK text (generic nouns), not its fictional name, and allow reuse of an image for a repeated location. 2) Repair off-bible locations instead of only reporting them. 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Scored rubric in the QA report."
-  },
-  {
-   "id": "WIN-1",
-   "priority": 1,
-   "title": "One-click Windows launchers (SETUP/START/STOP/STATUS/DOCTOR/BACKUP/RESTORE/CHECKPOINT/RESUME/UPDATE)",
-   "status": "implemented",
-   "next": "Run NEXUS_SETUP.bat and NEXUS_START.bat on the user's Windows machine; fix whatever fails (likely llama-cpp-python wheel, espeak-ng, Blender path)."
   },
   {
    "id": "AUD-1",
@@ -53,24 +46,30 @@
    "title": "Growth: shorts extractor, retention rubric + auto retention pass, hook/title variants, reference-video style profile",
    "status": "tested",
    "next": "Extended by GRW-2."
+  },
+  {
+   "id": "MED-1",
+   "priority": 1,
+   "title": "Media engine: encoder detection, H.264/H.265/AV1 presets, size-targeted export, proxies, export verification, benchmark",
+   "status": "tested",
+   "next": "Use export.export() for final deliverables in the deliver job (max file size per platform); benchmark on the owner's machine."
   }
  ],
  "tasks": {
-  "total": 48,
+  "total": 52,
   "by_status": {
-   "verified": 13,
-   "tested": 10,
+   "verified": 17,
+   "tested": 12,
    "blocked": 4,
-   "implemented": 1,
    "deferred": 1,
-   "planned": 17,
+   "planned": 16,
    "in_progress": 2
   },
   "registry": "nexus/registry/tasks.yaml"
  },
  "tests": {
   "fast": {
-   "summary": "153 passed, 0 failed, 1 skipped",
+   "summary": "209 passed, 0 failed, 4 skipped",
    "ok": true,
    "date": "2026-11-12",
    "platform": "Linux",
@@ -79,7 +78,8 @@
  },
  "jobs": {
   "counts": {
-   "done": 14
+   "cancelled": 3,
+   "done": 29
   },
   "active": []
  },
