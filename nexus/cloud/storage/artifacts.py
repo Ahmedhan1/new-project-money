@@ -277,6 +277,18 @@ def fetch_local(m: ArtifactManifest, dest: Path) -> Path:
     errors = []
     for lo in m.locations:
         try:
+            if lo.provider == "local":
+                # local refs are relative to NEXUS_HOME; compute outputs live in NEXUS_HOME/compute/artifacts, outside the
+                # LocalProvider root (NEXUS_HOME/storage/local). Read them directly, refusing anything outside NEXUS_HOME.
+                home = config.HOME.resolve()
+                p = (home / lo.ref).resolve()
+                if home in p.parents and p.is_file():
+                    dest.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copyfile(p, dest)
+                    if sha256_file(dest) != m.sha256:
+                        dest.unlink(missing_ok=True)
+                        raise ChecksumMismatch("sha256 differs from manifest")
+                    return dest
             provider(lo.connection_id).download(lo.ref, dest)
             if sha256_file(dest) != m.sha256:
                 dest.unlink(missing_ok=True)

@@ -205,9 +205,11 @@ class KaggleProvider(Provider):
         t0 = time.time()
         while time.time() - t0 < wait_s:
             rc, out, err = self.run(["datasets", "status", ref], None, 60)
-            if "ready" in (out + err).lower():
+            text = (out + err).lower()
+            if "ready" in text:
                 return ref
-            if "error" in (out + err).lower():
+            # a just-created private dataset answers 403/404 until it is visible (seen live): keep waiting
+            if "error" in text and not re.search(r"\b(403|404)\b|not found|forbidden", text):
                 raise ProviderError(f"Kaggle dataset {ref} failed to process: {(out + err)[-300:]}")
             time.sleep(10)
         raise ProviderError(f"Kaggle dataset {ref} not ready after {wait_s:.0f} s")

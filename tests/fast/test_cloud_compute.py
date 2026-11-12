@@ -327,3 +327,19 @@ def test_quota_endpoint_returns_exactly_the_published_contract(home, monkeypatch
         QuotaStatus(**q)
     d = c.get("/api/v1/compute/quota/details").json()
     assert len(d) == len(rows) and all("allowance_source" in x and QuotaStatus(**x["quota"]) for x in d)
+
+
+def test_staged_dataset_waits_through_403_404_until_ready(home, monkeypatch, tmp_path):
+    """Live Drive -> Kaggle -> Drive run: 'kaggle datasets status' answered 403 right after create, which failed the attempt."""
+    from nexus.cloud.compute import kaggle as K
+    seq = iter([(1, "", "404 Client Error: Not Found"),                                   # existence check before create
+                (0, "Dataset creation started", ""),                                      # create
+                (1, "", "403 Client Error: Forbidden for url"), (0, "processing", ""), (0, "ready", "")])
+    calls = []
+    p = K.KaggleProvider()
+    monkeypatch.setattr(p, "run", lambda args, *a, **k: calls.append(args[:2]) or next(seq))
+    monkeypatch.setattr(K.time, "sleep", lambda s: None)
+    src = tmp_path / "in.mp4"
+    src.write_bytes(b"x" * 10)
+    ref = p.stage_dataset("owner", {"sha256": "ab" * 32, "dataset_file": "abab_in.mp4", "_stage_path": str(src)})
+    assert ref == "owner/nexus-in-" + "ab" * 8 and ["datasets", "create"] in calls

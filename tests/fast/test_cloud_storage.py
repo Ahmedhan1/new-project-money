@@ -545,3 +545,25 @@ def test_failover_to_next_allowed_destination_and_opt_in_replication(home, tmp_p
     assert copied == ["bk"]                                         # backup replica requested for a master
     with pytest.raises(OSError):                                    # an explicit destination never fails over silently
         A.store_file(tmp_path / "m.mp4", kind="short", connection_id="p1")
+
+
+def test_fetch_local_reads_compute_outputs_anywhere_inside_nexus_home_but_not_outside(home, tmp_path):
+    """Drive -> Kaggle -> Drive demo: delivery failed because compute outputs (NEXUS_HOME/compute/artifacts) are outside
+    the LocalProvider root. fetch_local now reads any 'local' ref inside NEXUS_HOME, with traversal protection."""
+    import hashlib
+
+    from nexus import config
+    from nexus.cloud.storage import artifacts as A
+    from nexus.contracts import ArtifactLocation, ArtifactManifest
+    out = config.HOME / "compute" / "artifacts" / "rjob_x" / "output.mp4"
+    out.parent.mkdir(parents=True)
+    out.write_bytes(b"render" * 100)
+    sha = hashlib.sha256(out.read_bytes()).hexdigest()
+    loc = ArtifactLocation(provider="local", connection_id="local", ref="compute/artifacts/rjob_x/output.mp4")
+    m = ArtifactManifest(kind="master", name="output.mp4", mime="video/mp4", size=600, sha256=sha, locations=[loc])
+    got = A.fetch_local(m, tmp_path / "d.mp4")
+    assert got.read_bytes() == out.read_bytes()
+    bad = m.model_copy(update={"locations": [loc.model_copy(update={"ref": "../../etc/passwd"})]})
+    from nexus.cloud.storage.base import StorageError
+    with pytest.raises(StorageError):
+        A.fetch_local(bad, tmp_path / "e.bin")
