@@ -150,3 +150,22 @@ def test_contracts_validate():
     pub = {"schema": "nexus.PublishingManifest/1", "id": "p", "project_id": "x", "artifact": {}, "platform": "youtube", "metadata": {},
            "visibility": "public", "approval": "none", "status": "draft", "idempotency_key": "k"}
     assert "approved_by_owner" in " ".join(contracts.validate(pub))                           # no hidden public publishing
+
+
+def test_account3_api_mounted_and_degrades_cleanly(home):
+    from fastapi.testclient import TestClient
+
+    from nexus import api
+    c = TestClient(api.app)
+    js = c.get("/ui/intelligence.js")
+    assert js.status_code == 200 and "MODULES.push" in js.text
+    assert "/ui/intelligence.js" in c.get("/").text
+    r = c.get("/api/a3/ai/routes?privacy=private").json()
+    assert set(r["tasks"]) == set(__import__("nexus.intelligence.model_router.router", fromlist=["x"]).TASKS)
+    assert all("hosted_free" not in str(t["route"]) for t in r["tasks"].values())
+    assert c.get("/api/a3/ai/routes?privacy=secret").status_code == 422
+    models = c.get("/api/a3/ai/providers").json()["models"]
+    assert {m["provider"] for m in models} >= {"local-llamacpp", "groq", "gemini", "cerebras", "openrouter-free"}
+    assert all(not m["available"] for m in models if m["hosting"] == "hosted_free")          # nothing hosted without authorisation
+    r = c.post("/api/a3/ai/try", json={"task": "general", "prompt": "hi", "privacy": "private"})
+    assert r.status_code in (200, 503)                                                         # 503 = no local model in this home, said plainly
