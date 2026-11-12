@@ -165,12 +165,33 @@ def claim(wid: str) -> Job | None:
     return Job(db.query("SELECT * FROM jobs WHERE id=?", (rows[0][0],))[0])
 
 
+def _local_worker_dead(wid: str | None) -> bool:
+    """True when `wid` names a worker process on this machine that no longer exists.
+
+    A fast restart (app killed and started again within STALE_S) leaves a fresh-looking heartbeat behind; checking the
+    worker's process id lets recovery act at once instead of waiting for the heartbeat to age.
+    """
+    if not wid or "-" not in wid:
+        return False
+    head, _, pid = wid.rpartition("-")
+    if not pid.isdigit() or not head.endswith("-" + socket.gethostname()):
+        return False
+    if int(pid) == os.getpid():
+        return False
+    try:
+        import psutil
+        return not psutil.pid_exists(int(pid))
+    except Exception:  # noqa: BLE001 - without psutil fall back to the heartbeat rule
+        return False
+
+
 def recover(stale_after: float = STALE_S, api_worker: str | None = None) -> dict:
-    """Re-queue durable jobs whose worker stopped heartbeating; flag lost in-process jobs. Safe to call any time."""
+    """Re-queue durable jobs whose worker stopped heartbeating (or whose local process is gone); flag lost in-process
+    jobs. Safe to call any time."""
     now = time.time()
     out = {"requeued": [], "failed": [], "interrupted": []}
     for r in db.query("SELECT id,stage,retries,max_retries,heartbeat,worker FROM jobs WHERE status='running' AND durable=1"):
-        if r["heartbeat"] and now - r["heartbeat"] < stale_after:
+        if r["heartbeat"] and now - r["heartbeat"] < stale_after and not _local_worker_dead(r["worker"]):
             continue
         n = (r["retries"] or 0) + 1
         note = f"worker {r['worker']} lost at stage '{r['stage'] or 'start'}'"
@@ -250,12 +271,22 @@ def schedule_backup(now: float | None = None) -> str | None:
 def run_worker(stop: threading.Event | None = None, poll: float = 1.0, once: bool = False, role: str = "worker") -> None:
     from . import workflows  # noqa: F401  (registers the production handlers)
     wid = worker_id(role)
-    last_recover = 0.0
-    while not (stop and stop.is_set()):
-        if time.time() - last_recover > STALE_S:
-            recover()
-            schedule_backup()
-            last_recover = time.time()
+    recover()
+    schedule_backup()
+    # Recovery runs on its own thread: a worker busy with a long render must not delay re-queuing a job whose worker
+    # died (found in the crash-recovery demo, where a killed render stayed 'running' behind a 10-minute dub job).
+    halt = stop or threading.Event()
+
+    def watchdog():
+        while not halt.wait(STALE_S):
+            try:
+                recover()
+                schedule_backup()
+            except Exception:  # noqa: BLE001 - a locked database must not kill the watchdog
+                pass
+
+    threading.Thread(target=watchdog, daemon=True, name=f"nexus-recover-{role}").start()
+    while not halt.is_set():
         job = claim(wid)
         if job is None:
             if once:
