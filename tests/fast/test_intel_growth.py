@@ -181,7 +181,7 @@ def test_patterns_are_associations_with_guards_and_correction():
     feats = {"title_question": lambda r: nz.meta(r, "has_q")}
     pats = L.mine_patterns(recs, feats, "log_views", ("niche",))
     by = {p["segment"]["niche"]: p for p in pats}
-    assert by["science"]["verdict"] == "association" and by["science"]["ci"][0] > 0 and by["science"]["tests_corrected_for"] == 2
+    assert by["science"]["verdict"] == "association" and by["science"]["robust_to_outliers"] and by["science"]["ci"][0] > 0 and by["science"]["tests_corrected_for"] == 2
     assert by["tiny"]["verdict"] == "insufficient_data"                     # 20 vs 20 < MIN_GROUP
     assert not any(p["verdict"] == "winner" for p in pats)                  # observational never "wins"
     recs_out = R.from_patterns(pats, "synthetic fixture")

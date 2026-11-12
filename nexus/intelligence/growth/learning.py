@@ -54,6 +54,8 @@ def mine_patterns(records: list[dict], features: dict[str, Callable[[dict], bool
         if v["verdict"] == "winner":
             v["verdict"] = "association"   # observational: never a "winner"
             v["why"] += "; association only - confounders not controlled"
+        bci = (v.get("bootstrap_median") or {}).get("ci")
+        v["robust_to_outliers"] = bool(bci and (bci[0] > 0 or bci[1] < 0))   # median-difference CI also excludes 0
         final.append(v)
     return final
 

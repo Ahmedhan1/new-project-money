@@ -113,7 +113,11 @@ def from_patterns(patterns: list[dict], dataset_label: str) -> list[dict]:
                 f"{p['ci'][0]:+.3g}..{p['ci'][1]:+.3g}; median diff {p['bootstrap_median']['effect']:+.3g}, CI {ci[0]:+.3g}..{ci[1]:+.3g}; "
                 f"n={p['n'][1]} vs {p['n'][0]}; Holm-adjusted p={p['p_adjusted']:.3g}). Association only - "
                 f"test '{var or p['feature']}' in a controlled experiment before acting.")
-        out.append(_rec("pattern", text, ev, 0.35 if p["kind"] == "observational" else 0.7, target, variable=var,
+        conf = 0.35 if p["kind"] == "observational" else 0.7
+        if not p.get("robust_to_outliers", True):
+            text += " The median-difference CI includes 0, so the mean difference may be driven by a few outliers."
+            conf -= 0.1
+        out.append(_rec("pattern", text, ev, conf, target, variable=var,
                         packaging={"feature": p["feature"]} if target == "account3" else None))
     return out
 
