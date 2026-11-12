@@ -10,7 +10,7 @@
  "runs": {
   "baseline_c1e2d90": {
    "date": "2026-11-12T17:03:45",
-   "git": "c1e2d90",
+   "git": "c1e2d90 (renderer before this work)",
    "timeline": {
     "clips": 16,
     "programme_s": 64.5,
@@ -155,6 +155,675 @@
      "timings": null
     }
    }
+  },
+  "pieces_1": {
+   "date": "2026-11-12T17:36:26",
+   "git": "e814b23 (pre-commit snapshot)",
+   "timeline": {
+    "clips": 16,
+    "programme_s": 64.5,
+    "size": "1280x720",
+    "cues": 24,
+    "crossfades": 3,
+    "cutaways": 4
+   },
+   "load_avg_start": 15.06103515625,
+   "scenarios": {
+    "cold": {
+     "wall_s": 68.21,
+     "programme_s": 64.5,
+     "rtf": 1.057,
+     "cpu_s": 103.4,
+     "cpu_util_of_4": 0.379,
+     "peak_rss_one_ffmpeg_mb": 283.8,
+     "peak_rss_sum_ffmpeg_mb": 506.1,
+     "max_parallel_ffmpeg": 2,
+     "disk_intermediates_mb": 54.1,
+     "segments": 16,
+     "segments_from_cache": 0,
+     "pieces": 19,
+     "pieces_from_cache": 0,
+     "audio_from_cache": false,
+     "cache_hit_rate": 0.0,
+     "stage_s": {
+      "final-audio": 7.45,
+      "final-mux": 0.4,
+      "mix-measure": 3.57,
+      "piece-burn": 46.56,
+      "piece-xfade": 3.54,
+      "programme-audio": 1.42,
+      "render-segment": 65.14
+     },
+     "final_pass_s": 0.4,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": {
+      "segments": 35.91,
+      "pieces_and_audio": 31.89,
+      "final": 0.4
+     }
+    },
+    "warm": {
+     "wall_s": 0.5,
+     "programme_s": 64.5,
+     "rtf": 0.008,
+     "cpu_s": 0.4,
+     "cpu_util_of_4": 0.184,
+     "peak_rss_one_ffmpeg_mb": 55.5,
+     "peak_rss_sum_ffmpeg_mb": 55.5,
+     "max_parallel_ffmpeg": 1,
+     "disk_intermediates_mb": 54.1,
+     "segments": 16,
+     "segments_from_cache": 16,
+     "pieces": 19,
+     "pieces_from_cache": 19,
+     "audio_from_cache": true,
+     "cache_hit_rate": 1.0,
+     "stage_s": {
+      "final-mux": 0.34
+     },
+     "final_pass_s": 0.34,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": {
+      "segments": 0.07,
+      "pieces_and_audio": 0.08,
+      "final": 0.34
+     }
+    },
+    "edit_one_clip": {
+     "wall_s": 19.51,
+     "programme_s": 64.5,
+     "rtf": 0.303,
+     "cpu_s": 16.8,
+     "cpu_util_of_4": 0.215,
+     "peak_rss_one_ffmpeg_mb": 194.2,
+     "peak_rss_sum_ffmpeg_mb": 289.6,
+     "max_parallel_ffmpeg": 2,
+     "disk_intermediates_mb": 58.0,
+     "segments": 16,
+     "segments_from_cache": 15,
+     "pieces": 19,
+     "pieces_from_cache": 18,
+     "audio_from_cache": false,
+     "cache_hit_rate": 0.917,
+     "stage_s": {
+      "final-audio": 5.44,
+      "final-mux": 0.35,
+      "mix-measure": 3.54,
+      "piece-burn": 2.69,
+      "programme-audio": 1.58,
+      "render-segment": 8.29
+     },
+     "final_pass_s": 0.35,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": {
+      "segments": 8.59,
+      "pieces_and_audio": 10.56,
+      "final": 0.35
+     }
+    },
+    "edit_caption": {
+     "wall_s": 4.4,
+     "programme_s": 64.5,
+     "rtf": 0.068,
+     "cpu_s": 5.4,
+     "cpu_util_of_4": 0.304,
+     "peak_rss_one_ffmpeg_mb": 196.7,
+     "peak_rss_sum_ffmpeg_mb": 383.7,
+     "max_parallel_ffmpeg": 2,
+     "disk_intermediates_mb": 60.7,
+     "segments": 16,
+     "segments_from_cache": 16,
+     "pieces": 19,
+     "pieces_from_cache": 17,
+     "audio_from_cache": true,
+     "cache_hit_rate": 0.944,
+     "stage_s": {
+      "final-mux": 0.38,
+      "piece-burn": 7.46
+     },
+     "final_pass_s": 0.38,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": {
+      "segments": 0.1,
+      "pieces_and_audio": 3.92,
+      "final": 0.38
+     }
+    },
+    "draft": {
+     "wall_s": 37.48,
+     "programme_s": 64.5,
+     "rtf": 0.581,
+     "cpu_s": 43.6,
+     "cpu_util_of_4": 0.291,
+     "peak_rss_one_ffmpeg_mb": 166.1,
+     "peak_rss_sum_ffmpeg_mb": 273.2,
+     "max_parallel_ffmpeg": 2,
+     "disk_intermediates_mb": 87.5,
+     "segments": 16,
+     "segments_from_cache": 0,
+     "pieces": 19,
+     "pieces_from_cache": 0,
+     "audio_from_cache": false,
+     "cache_hit_rate": 0.0,
+     "stage_s": {
+      "final-audio": 7.36,
+      "final-mux": 0.15,
+      "mix-measure": 3.49,
+      "piece-burn": 7.9,
+      "piece-xfade": 1.6,
+      "programme-audio": 0.74,
+      "render-segment": 45.08
+     },
+     "final_pass_s": 0.15,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": {
+      "segments": 25.68,
+      "pieces_and_audio": 11.64,
+      "final": 0.15
+     }
+    }
+   }
+  },
+  "pieces_2": {
+   "date": "2026-11-12T17:50:36",
+   "git": "39a9542",
+   "timeline": {
+    "clips": 16,
+    "programme_s": 64.5,
+    "size": "1280x720",
+    "cues": 24,
+    "crossfades": 3,
+    "cutaways": 4
+   },
+   "load_avg_start": 4.12744140625,
+   "scenarios": {
+    "cold": {
+     "wall_s": 33.72,
+     "programme_s": 64.5,
+     "rtf": 0.523,
+     "cpu_s": 102.5,
+     "cpu_util_of_4": 0.76,
+     "peak_rss_one_ffmpeg_mb": 281.9,
+     "peak_rss_sum_ffmpeg_mb": 502.6,
+     "max_parallel_ffmpeg": 2,
+     "disk_intermediates_mb": 54.1,
+     "segments": 16,
+     "segments_from_cache": 0,
+     "pieces": 19,
+     "pieces_from_cache": 0,
+     "audio_from_cache": false,
+     "cache_hit_rate": 0.0,
+     "stage_s": {
+      "final-audio": 5.58,
+      "final-mux": 0.33,
+      "mix-measure": 2.89,
+      "piece-burn": 16.92,
+      "piece-xfade": 1.9,
+      "programme-audio": 0.75,
+      "render-segment": 33.9
+     },
+     "final_pass_s": 0.33,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": {
+      "segments": 18.95,
+      "pieces_and_audio": 14.42,
+      "final": 0.33
+     }
+    },
+    "warm": {
+     "wall_s": 0.37,
+     "programme_s": 64.5,
+     "rtf": 0.006,
+     "cpu_s": 0.4,
+     "cpu_util_of_4": 0.265,
+     "peak_rss_one_ffmpeg_mb": 55.6,
+     "peak_rss_sum_ffmpeg_mb": 55.6,
+     "max_parallel_ffmpeg": 1,
+     "disk_intermediates_mb": 54.1,
+     "segments": 16,
+     "segments_from_cache": 16,
+     "pieces": 19,
+     "pieces_from_cache": 19,
+     "audio_from_cache": true,
+     "cache_hit_rate": 1.0,
+     "stage_s": {
+      "final-mux": 0.3
+     },
+     "final_pass_s": 0.3,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": {
+      "segments": 0.06,
+      "pieces_and_audio": 0.01,
+      "final": 0.3
+     }
+    },
+    "edit_one_clip": {
+     "wall_s": 12.12,
+     "programme_s": 64.5,
+     "rtf": 0.188,
+     "cpu_s": 16.9,
+     "cpu_util_of_4": 0.348,
+     "peak_rss_one_ffmpeg_mb": 194.2,
+     "peak_rss_sum_ffmpeg_mb": 289.7,
+     "max_parallel_ffmpeg": 2,
+     "disk_intermediates_mb": 58.0,
+     "segments": 16,
+     "segments_from_cache": 15,
+     "pieces": 19,
+     "pieces_from_cache": 18,
+     "audio_from_cache": false,
+     "cache_hit_rate": 0.917,
+     "stage_s": {
+      "final-audio": 5.62,
+      "final-mux": 0.38,
+      "mix-measure": 3.02,
+      "piece-burn": 1.02,
+      "programme-audio": 0.71,
+      "render-segment": 2.17
+     },
+     "final_pass_s": 0.38,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": {
+      "segments": 2.38,
+      "pieces_and_audio": 9.35,
+      "final": 0.38
+     }
+    },
+    "edit_caption": {
+     "wall_s": 2.53,
+     "programme_s": 64.5,
+     "rtf": 0.039,
+     "cpu_s": 5.3,
+     "cpu_util_of_4": 0.52,
+     "peak_rss_one_ffmpeg_mb": 196.6,
+     "peak_rss_sum_ffmpeg_mb": 383.6,
+     "max_parallel_ffmpeg": 2,
+     "disk_intermediates_mb": 60.7,
+     "segments": 16,
+     "segments_from_cache": 16,
+     "pieces": 19,
+     "pieces_from_cache": 17,
+     "audio_from_cache": true,
+     "cache_hit_rate": 0.944,
+     "stage_s": {
+      "final-mux": 0.32,
+      "piece-burn": 4.17
+     },
+     "final_pass_s": 0.32,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": {
+      "segments": 0.07,
+      "pieces_and_audio": 2.14,
+      "final": 0.32
+     }
+    },
+    "draft": {
+     "wall_s": 20.13,
+     "programme_s": 64.5,
+     "rtf": 0.312,
+     "cpu_s": 43.4,
+     "cpu_util_of_4": 0.539,
+     "peak_rss_one_ffmpeg_mb": 166.0,
+     "peak_rss_sum_ffmpeg_mb": 278.6,
+     "max_parallel_ffmpeg": 2,
+     "disk_intermediates_mb": 87.5,
+     "segments": 16,
+     "segments_from_cache": 0,
+     "pieces": 19,
+     "pieces_from_cache": 0,
+     "audio_from_cache": false,
+     "cache_hit_rate": 0.0,
+     "stage_s": {
+      "final-audio": 5.43,
+      "final-mux": 0.16,
+      "mix-measure": 2.93,
+      "piece-burn": 3.09,
+      "piece-xfade": 0.57,
+      "programme-audio": 0.45,
+      "render-segment": 18.81
+     },
+     "final_pass_s": 0.16,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": {
+      "segments": 11.16,
+      "pieces_and_audio": 8.81,
+      "final": 0.16
+     }
+    }
+   }
+  },
+  "legacy_rerun": {
+   "date": "2026-11-12T18:11:37",
+   "git": "39a9542 (NEXUS_RENDER_PIPELINE=legacy)",
+   "timeline": {
+    "clips": 16,
+    "programme_s": 64.5,
+    "size": "1280x720",
+    "cues": 24,
+    "crossfades": 3,
+    "cutaways": 4
+   },
+   "load_avg_start": 4.16845703125,
+   "scenarios": {
+    "cold": {
+     "wall_s": 50.92,
+     "programme_s": 64.5,
+     "rtf": 0.789,
+     "cpu_s": 145.3,
+     "cpu_util_of_4": 0.713,
+     "peak_rss_one_ffmpeg_mb": 853.1,
+     "peak_rss_sum_ffmpeg_mb": 853.1,
+     "max_parallel_ffmpeg": 2,
+     "disk_intermediates_mb": 52.3,
+     "segments": 16,
+     "segments_from_cache": 0,
+     "pieces": null,
+     "pieces_from_cache": null,
+     "audio_from_cache": null,
+     "cache_hit_rate": 0.0,
+     "stage_s": {
+      "concat-xfade": 14.54,
+      "final-mix": 12.4,
+      "mix-measure": 2.54,
+      "render-segment": 35.9
+     },
+     "final_pass_s": 26.94,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": null
+    },
+    "warm": {
+     "wall_s": 30.94,
+     "programme_s": 64.5,
+     "rtf": 0.48,
+     "cpu_s": 81.6,
+     "cpu_util_of_4": 0.659,
+     "peak_rss_one_ffmpeg_mb": 854.0,
+     "peak_rss_sum_ffmpeg_mb": 854.0,
+     "max_parallel_ffmpeg": 1,
+     "disk_intermediates_mb": 67.2,
+     "segments": 16,
+     "segments_from_cache": 16,
+     "pieces": null,
+     "pieces_from_cache": null,
+     "audio_from_cache": null,
+     "cache_hit_rate": 1.0,
+     "stage_s": {
+      "concat-xfade": 14.42,
+      "final-mix": 12.86,
+      "mix-measure": 2.46
+     },
+     "final_pass_s": 27.28,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": null
+    },
+    "edit_one_clip": {
+     "wall_s": 35.01,
+     "programme_s": 64.5,
+     "rtf": 0.543,
+     "cpu_s": 91.2,
+     "cpu_util_of_4": 0.652,
+     "peak_rss_one_ffmpeg_mb": 854.2,
+     "peak_rss_sum_ffmpeg_mb": 854.2,
+     "max_parallel_ffmpeg": 1,
+     "disk_intermediates_mb": 83.2,
+     "segments": 16,
+     "segments_from_cache": 15,
+     "pieces": null,
+     "pieces_from_cache": null,
+     "audio_from_cache": null,
+     "cache_hit_rate": 0.938,
+     "stage_s": {
+      "concat-xfade": 15.2,
+      "final-mix": 13.85,
+      "mix-measure": 2.53,
+      "render-segment": 2.19
+     },
+     "final_pass_s": 29.05,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": null
+    },
+    "edit_caption": {
+     "wall_s": 33.56,
+     "programme_s": 64.5,
+     "rtf": 0.52,
+     "cpu_s": 87.1,
+     "cpu_util_of_4": 0.649,
+     "peak_rss_one_ffmpeg_mb": 854.7,
+     "peak_rss_sum_ffmpeg_mb": 854.7,
+     "max_parallel_ffmpeg": 1,
+     "disk_intermediates_mb": 98.1,
+     "segments": 16,
+     "segments_from_cache": 16,
+     "pieces": null,
+     "pieces_from_cache": null,
+     "audio_from_cache": null,
+     "cache_hit_rate": 1.0,
+     "stage_s": {
+      "concat-xfade": 15.64,
+      "final-mix": 14.05,
+      "mix-measure": 2.64
+     },
+     "final_pass_s": 29.69,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": null
+    },
+    "draft": {
+     "wall_s": 29.43,
+     "programme_s": 64.5,
+     "rtf": 0.456,
+     "cpu_s": 55.3,
+     "cpu_util_of_4": 0.469,
+     "peak_rss_one_ffmpeg_mb": 312.6,
+     "peak_rss_sum_ffmpeg_mb": 312.6,
+     "max_parallel_ffmpeg": 2,
+     "disk_intermediates_mb": 123.9,
+     "segments": 16,
+     "segments_from_cache": 0,
+     "pieces": null,
+     "pieces_from_cache": null,
+     "audio_from_cache": null,
+     "cache_hit_rate": 0.0,
+     "stage_s": {
+      "concat-xfade": 5.69,
+      "final-mix": 7.99,
+      "mix-measure": 2.55,
+      "render-segment": 20.59
+     },
+     "final_pass_s": 13.68,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": null
+    }
+   }
+  },
+  "pieces_audio_digest": {
+   "date": "2026-11-12T18:15:21",
+   "git": "118cacd",
+   "timeline": {
+    "clips": 16,
+    "programme_s": 64.5,
+    "size": "1280x720",
+    "cues": 24,
+    "crossfades": 3,
+    "cutaways": 4
+   },
+   "load_avg_start": 3.57763671875,
+   "scenarios": {
+    "cold": {
+     "wall_s": 37.55,
+     "programme_s": 64.5,
+     "rtf": 0.582,
+     "cpu_s": 112.3,
+     "cpu_util_of_4": 0.747,
+     "peak_rss_one_ffmpeg_mb": 284.0,
+     "peak_rss_sum_ffmpeg_mb": 501.3,
+     "max_parallel_ffmpeg": 2,
+     "disk_intermediates_mb": 54.1,
+     "segments": 16,
+     "segments_from_cache": 0,
+     "pieces": 19,
+     "pieces_from_cache": 0,
+     "audio_from_cache": false,
+     "cache_hit_rate": 0.0,
+     "stage_s": {
+      "audio-digest": 1.05,
+      "final-audio": 5.75,
+      "final-mux": 0.32,
+      "mix-measure": 3.08,
+      "piece-burn": 17.71,
+      "piece-xfade": 1.91,
+      "programme-audio": 0.78,
+      "render-segment": 37.88
+     },
+     "final_pass_s": 0.32,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": {
+      "segments": 21.34,
+      "pieces_and_audio": 15.88,
+      "final": 0.32
+     }
+    },
+    "warm": {
+     "wall_s": 0.41,
+     "programme_s": 64.5,
+     "rtf": 0.006,
+     "cpu_s": 0.4,
+     "cpu_util_of_4": 0.262,
+     "peak_rss_one_ffmpeg_mb": 55.5,
+     "peak_rss_sum_ffmpeg_mb": 55.5,
+     "max_parallel_ffmpeg": 1,
+     "disk_intermediates_mb": 54.1,
+     "segments": 16,
+     "segments_from_cache": 16,
+     "pieces": 19,
+     "pieces_from_cache": 19,
+     "audio_from_cache": true,
+     "cache_hit_rate": 1.0,
+     "stage_s": {
+      "final-mux": 0.33
+     },
+     "final_pass_s": 0.33,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": {
+      "segments": 0.06,
+      "pieces_and_audio": 0.01,
+      "final": 0.33
+     }
+    },
+    "edit_one_clip": {
+     "wall_s": 3.92,
+     "programme_s": 64.5,
+     "rtf": 0.061,
+     "cpu_s": 8.8,
+     "cpu_util_of_4": 0.564,
+     "peak_rss_one_ffmpeg_mb": 192.7,
+     "peak_rss_sum_ffmpeg_mb": 192.7,
+     "max_parallel_ffmpeg": 1,
+     "disk_intermediates_mb": 56.5,
+     "segments": 16,
+     "segments_from_cache": 15,
+     "pieces": 19,
+     "pieces_from_cache": 18,
+     "audio_from_cache": true,
+     "cache_hit_rate": 0.944,
+     "stage_s": {
+      "audio-digest": 0.07,
+      "final-mux": 0.33,
+      "piece-burn": 0.96,
+      "render-segment": 2.34
+     },
+     "final_pass_s": 0.33,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": {
+      "segments": 2.55,
+      "pieces_and_audio": 1.03,
+      "final": 0.33
+     }
+    },
+    "edit_caption": {
+     "wall_s": 2.02,
+     "programme_s": 64.5,
+     "rtf": 0.031,
+     "cpu_s": 5.6,
+     "cpu_util_of_4": 0.689,
+     "peak_rss_one_ffmpeg_mb": 196.7,
+     "peak_rss_sum_ffmpeg_mb": 385.7,
+     "max_parallel_ffmpeg": 2,
+     "disk_intermediates_mb": 59.2,
+     "segments": 16,
+     "segments_from_cache": 16,
+     "pieces": 19,
+     "pieces_from_cache": 17,
+     "audio_from_cache": true,
+     "cache_hit_rate": 0.944,
+     "stage_s": {
+      "final-mux": 0.36,
+      "piece-burn": 3.06
+     },
+     "final_pass_s": 0.36,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": {
+      "segments": 0.06,
+      "pieces_and_audio": 1.59,
+      "final": 0.36
+     }
+    },
+    "draft": {
+     "wall_s": 22.5,
+     "programme_s": 64.5,
+     "rtf": 0.349,
+     "cpu_s": 48.5,
+     "cpu_util_of_4": 0.539,
+     "peak_rss_one_ffmpeg_mb": 166.2,
+     "peak_rss_sum_ffmpeg_mb": 278.6,
+     "max_parallel_ffmpeg": 2,
+     "disk_intermediates_mb": 86.0,
+     "segments": 16,
+     "segments_from_cache": 0,
+     "pieces": 19,
+     "pieces_from_cache": 0,
+     "audio_from_cache": false,
+     "cache_hit_rate": 0.0,
+     "stage_s": {
+      "audio-digest": 0.89,
+      "final-audio": 5.88,
+      "final-mux": 0.14,
+      "mix-measure": 3.04,
+      "piece-burn": 3.25,
+      "piece-xfade": 0.57,
+      "programme-audio": 0.45,
+      "render-segment": 20.37
+     },
+     "final_pass_s": 0.14,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": {
+      "segments": 12.08,
+      "pieces_and_audio": 10.27,
+      "final": 0.14
+     }
+    }
+   }
   }
- }
+ },
+ "notes": "Load differed between runs (load average 7-12 during baseline_c1e2d90 and pieces_1, lower for pieces_2/legacy_rerun/pieces_audio_digest); compare runs made close together: legacy_rerun vs pieces_2 / pieces_audio_digest. stage_s sums FFmpeg time per op across parallel workers.",
+ "summary_table_md": "| run | cold s | warm s | one-clip edit s | caption edit s | draft s | cold CPU (of 4) | cold peak RSS MB | cache MB |\n|---|---|---|---|---|---|---|---|---|\n| baseline_c1e2d90 | 111.2 | 79.1 | 67.6 | 74.8 | 55.3 | 0.33 | 852 | 52 |\n| pieces_1 | 68.2 | 0.5 | 19.5 | 4.4 | 37.5 | 0.38 | 506 | 54 |\n| legacy_rerun | 50.9 | 30.9 | 35.0 | 33.6 | 29.4 | 0.71 | 853 | 52 |\n| pieces_2 | 33.7 | 0.4 | 12.1 | 2.5 | 20.1 | 0.76 | 503 | 54 |\n| pieces_audio_digest | 37.5 | 0.4 | 3.9 | 2.0 | 22.5 | 0.75 | 501 | 54 |"
 }

@@ -219,6 +219,22 @@ def main() -> None:
             shutil.rmtree(p, ignore_errors=True)
         _ = keep
 
+    if a.scenarios == "slowmo":  # cost of the slow-motion profiles on a 2 s broll window at 0.5x (4 s of output)
+        from nexus.timeline import ops
+        res = {}
+        for prof in ("none", "blend", "optical_flow"):
+            stl = {**tl, "clips": [ops.video_clip(str(BENCH / "broll" / "source.mp4"), 40.0, 42.0, speed=0.5, mute=True)],
+                   "subtitles": [], "music": None, "slowmo": prof}
+            clear_cache()
+            res[prof] = run_one(prof, stl, outd / f"slowmo_{prof}.mp4", work, False, op_times)
+        doc = json.loads(OUT_JSON.read_text()) if OUT_JSON.exists() else {}
+        doc.setdefault("slowmo", {})[a.label] = {"date": time.strftime("%Y-%m-%dT%H:%M:%S"), "size": f"{W}x{H}",
+                                                 "clip": "broll 40-42 s at speed 0.5 (4 s output)",
+                                                 "wall_s": {k: v["wall_s"] for k, v in res.items()},
+                                                 "cpu_s": {k: v["cpu_s"] for k, v in res.items()}}
+        OUT_JSON.write_text(json.dumps(doc, indent=1) + "\n")
+        print("written", OUT_JSON)
+        return
     print(f"timeline: {len(tl['clips'])} clips, {render.total_duration(tl):.1f} s, {W}x{H}, {len(tl['subtitles'])} cues", flush=True)
     if "cold" in sc:
         clear_cache()
