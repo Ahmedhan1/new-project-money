@@ -8,8 +8,12 @@
     apply(tl, plan) -> (tl, report)         full-frame cutaways (clip["pip"]["full"]) over the speaker's own audio, so the
                                            narrative is unchanged; stills get Ken Burns motion; credits for every asset
 
-No paid API and no key. Relevance is lexical (stemmed keyword overlap with titles/keywords/descriptions): without a local
-vision-language model NEXUS cannot see the pictures, so weak matches are rejected rather than used.
+    local_candidates(path, analysis, ...)  shots of local, lawfully held files (little speech) as candidates
+
+No paid API and no key. With the local SigLIP model (media/visual.py) candidates are ranked by what the picture shows
+(image-text cosine with the spoken text) plus a lexical bonus, with penalties for repeated imagery, for looking like the
+speaker's own shot and for repeating the previous cutaway's shot type/motion. Without it relevance is lexical (stemmed
+keyword overlap with titles/keywords/descriptions), weak matches are rejected, and the plan says `visual: false`.
 """
 from __future__ import annotations
 
@@ -155,10 +159,13 @@ def search_nasa(query: str, n: int = 12) -> list[dict]:
             rights_note = "description mentions third-party rights"
         q = urllib.parse.quote(nid)  # some NASA ids contain spaces
         base = f"https://images-assets.nasa.gov/{kind}/{q}/{q}"
+        links = [x.get("href") for x in it.get("links") or [] if x.get("href")]
+        preview = next((u for u in links if "~medium" in u or "~small" in u), links[0] if links else None)
         out.append({"id": f"nasa:{nid}", "source": "NASA Image and Video Library", "kind": kind, "title": d.get("title") or nid,
                     "description": desc[:600], "keywords": [k.lower() for k in d.get("keywords") or []],
                     "file_url": f"{base}~medium.jpg" if kind == "image" else f"{base}~mobile.mp4",
                     **({"hd_url": f"{base}~medium.mp4"} if kind == "video" else {}),
+                    "preview_url": preview or (f"{base}~medium.jpg" if kind == "image" else None),
                     "page": f"https://images.nasa.gov/details/{nid}", "license": "public domain (NASA media; no endorsement implied)",
                     "credit": f"NASA ({d.get('center') or 'NASA'}) - {d.get('title') or nid}", "rights_note": rights_note,
                     "date": (d.get("date_created") or "")[:10]})
@@ -174,7 +181,7 @@ def search_openverse(query: str, n: int = 8) -> list[dict]:
     except Exception:  # noqa: BLE001 - rate limits etc.: the caller records the source as unavailable
         return []
     return [{"id": r["id"], "source": "Openverse", "kind": "image", "title": r["title"], "description": "", "keywords": [],
-             "file_url": r["file_url"], "page": r["url"], "license": f"CC {r['license'].upper()} {r.get('license_version', '')}".strip(),
+             "file_url": r["file_url"], "preview_url": r["file_url"], "page": r["url"], "license": f"CC {r['license'].upper()} {r.get('license_version', '')}".strip(),
              "credit": f"\"{r['title']}\" by {r.get('creator') or 'unknown'} ({r['license'].upper()})", "rights_note": None}
             for r in res]
 
@@ -206,80 +213,221 @@ def relevance(cand: dict, query_terms: list[str]) -> tuple[float, list[str]]:
     return round(score, 2), hit
 
 
+# ------------------------------------------------------------------ visual relevance (VIS-1 / K-18)
+VIS_MIN = 0.045          # SigLIP cosine(sentence, picture) below which a candidate is not shown (calibrated: docs/results/a2_broll)
+VIS_LEX_RELIEF = 0.015   # a strong lexical match may pass this much below VIS_MIN
+LEX_WEIGHT = 0.012       # lexical relevance points -> cosine units (a 2-point title match is worth +0.024)
+DUP_REJECT = 0.92        # cosine to a picture already used in this edit: same imagery, rejected
+DUP_SOFT = 0.80          # above this a candidate is penalised in proportion (repeated look)
+SELF_REJECT = 0.88       # cosine to the speaker's own shot: the cutaway would look like the shot it covers
+VARIETY_PEN = 0.01       # same shot type and motion level as the previous cutaway
+
+
+def _preview_path(c: dict) -> Path | None:
+    url = c.get("preview_url") or (c.get("file_url") if c.get("kind") == "image" else None)
+    if not url:
+        return None
+    dest = _cache_dir() / f"prev_{hashlib.sha1(url.encode()).hexdigest()[:20]}{Path(url.split('?')[0]).suffix.lower() or '.jpg'}"
+    if not dest.exists() or dest.stat().st_size == 0:
+        if c.get("source", "").startswith("NASA"):
+            costguard.authorize("nasa-media", "download")
+        net.download(url, dest, timeout=60, retries=1)
+    return dest
+
+
+def candidate_embedding(c: dict):
+    """Embedding of a candidate's picture: local shots carry one; remote ones use their preview image (cached)."""
+    if c.get("embedding") is not None:
+        return c["embedding"]
+    from .media import visual
+    if not visual.available():
+        return None
+    if c.get("local_path"):
+        return visual.asset_embedding(c["local_path"])
+    p = _preview_path(c)
+    return visual.asset_embedding(p) if p else None
+
+
+def local_candidates(path: str, analysis: dict, licence: str, credit: str, *, max_speech: float = 0.15, min_len: float = 2.0,
+                     source: str = "local library") -> list[dict]:
+    """Cutaway candidates from a local, lawfully held file: its measured shots with little speech, each carrying the
+    shot embedding, shot type and motion level from media/visual.py (analysis["visual"])."""
+    from .media import visual
+    vis = (analysis or {}).get("visual") or {}
+    embs = visual.shot_embeddings(vis) if vis.get("available") else {}
+    rows = {r["id"]: r for r in vis.get("shots") or []}
+    out = []
+    for sh in analysis.get("shots") or []:
+        r = rows.get(sh.get("id"))
+        if sh.get("speech_share", 0) > max_speech or sh["end"] - sh["start"] < min_len or (sh.get("quality") or 1.0) < 0.5:
+            continue
+        if r and r.get("dup_of") is not None:
+            continue  # a visual repeat of an earlier shot of the same file
+        out.append({"id": f"local:{Path(path).stem}#{sh['id']}", "source": source, "kind": "local_video", "src": str(path),
+                    "in": float(sh["start"]), "out": float(sh["end"]), "title": (r or {}).get("scene", [{}])[0].get("label", "shot"),
+                    "description": "", "keywords": [], "license": licence, "credit": credit, "rights_note": None,
+                    "page": str(path), "embedding": embs.get(sh["id"]), "shot_type": (r or {}).get("shot_type"),
+                    "motion_level": (r or {}).get("motion_level")})
+    return out
+
+
 # ------------------------------------------------------------------ planning
 def plan(tl: dict, *, max_share: float = 0.4, per_cut: float = 4.5, min_cut: float = 2.0, min_score: float = 2.0,
-         sources: tuple = ("nasa", "openverse"), search=None, context: str = "") -> dict:
-    """Choose cutaways for a built timeline. `search(source, query) -> [candidates]` can be injected (tests)."""
+         sources: tuple = ("nasa", "openverse"), search=None, context: str = "", local: list[dict] | None = None,
+         visual_rank: bool | None = None, embed=None, embed_text=None, speaker_embedding=None,
+         vis_min: float = VIS_MIN) -> dict:
+    """Choose cutaways for a built timeline.
+
+    Lexical path (no visual model): stemmed keyword overlap with titles/keywords, strict gates (as before).
+    Visual path (SigLIP available, or `embed`/`embed_text` injected): every licence-clean, on-topic candidate is ranked by
+    cosine(spoken text, picture) + a small lexical bonus, minus penalties for imagery already used in the edit, for
+    looking like the speaker's own shot, and for repeating the previous cutaway's shot type + motion. `local` adds
+    candidates from local files (local_candidates). `search(source, query)` can be injected (tests)."""
     search = search or (lambda src, q: SOURCES[src](q))
     from .timeline.render import total_duration
+    if visual_rank is None:
+        from .media import visual
+        visual_rank = embed is not None or visual.available()
+    if visual_rank:
+        if embed_text is None:
+            from .media import visual
+
+            def embed_text(t):
+                return visual.embed_texts([t])[0]
+        embed = embed or candidate_embedding
     total = total_duration(tl)
     ops = opportunities(tl)
     # the programme's overall subject: candidates must share it, so "humidity" in a cave story does not pull a flu study
     ctx = set(und.content(" ".join(terms(" ".join(s["text"] for s in tl.get("subtitles", [])), k=12)) + " " + (context or "")))
     decisions = [{"clip": o["clip"], "start": o["start"], "action": "skip", "why": o["why"]} for o in ops if not o["use"]]
     used, inserts, covered = set(), [], 0.0
+    used_embs: list = []
+    prev_style = None
     source_errors: dict[str, str] = {}
-    for o in sorted((o for o in ops if o["use"]), key=lambda o: -len(o["terms"])):
+    emb_cache: dict = {}
+
+    def emb_of(c):
+        if c["id"] not in emb_cache:
+            try:
+                emb_cache[c["id"]] = embed(c)
+            except Exception as e:  # noqa: BLE001 - preview not reachable: candidate cannot be judged visually
+                source_errors.setdefault("preview", f"{type(e).__name__}: {str(e)[:120]}")
+                emb_cache[c["id"]] = None
+        return emb_cache[c["id"]]
+
+    order = sorted((o for o in ops if o["use"]), key=lambda o: -len(o["terms"])) if not visual_rank else \
+        [o for o in ops if o["use"]]
+    for o in order:
         if covered >= max_share * total:
             decisions.append({"clip": o["clip"], "start": o["start"], "action": "skip", "why": f"B-roll share reached ({max_share:.0%})"})
             continue
         q_terms = o["terms"][:4]
         best, rejected = None, []
+        pool: list[tuple[dict, str, str]] = [(c, "local", "") for c in (local or [])]
         for src in sources:
-            for q in (" ".join(q_terms[:2]), " ".join(q_terms[:2]) + (f" {context}" if context else ""), q_terms[0]):
+            queries = (" ".join(q_terms[:2]), " ".join(q_terms[:2]) + (f" {context}" if context else ""), q_terms[0])
+            for q in dict.fromkeys(x.strip() for x in queries if x.strip()):
                 try:
-                    cands = search(src, q.strip())
+                    cands = search(src, q)
                 except Exception as e:  # noqa: BLE001 - source down/rate limited: record and continue
                     source_errors[src] = f"{type(e).__name__}: {str(e)[:120]}"
                     cands = []
-                for c in cands:
-                    if c["id"] in used:
-                        continue
-                    if c.get("rights_note"):
-                        rejected.append(f"{c['id']}: {c['rights_note']}")
-                        continue
-                    sc, hit = relevance(c, q_terms)
-                    weak = SOURCE_GENERIC.get(src, set())
-                    hit = [h for h in hit if " " in h or not (set(und.content(h)) <= {w for t in weak for w in und.content(t)})]
-                    sc = round(sc if hit else 0.0, 2)
-                    # one generic shared word is not a match, and the asset's own title/keywords must name the subject
-                    # (a term found only deep in a long description is how 'board, throughout' matched a random photo)
-                    strong = (len(set(hit)) >= 2 or any(" " in h for h in hit)) and bool(head_hits(c, hit))
-                    blob = set(und.content(c["title"] + " " + " ".join(c.get("keywords") or []) + " " + (c.get("description") or "")))
-                    on_topic = not ctx or bool(ctx & blob)
-                    if src in GENERAL_SOURCES and ctx:  # a general index: the title must share the programme's subject too
-                        own = set(und.content(c["title"] + " " + " ".join(c.get("keywords") or [])))
-                        on_topic = bool((ctx - set(und.content(" ".join(q_terms)))) & own)
-                    if not on_topic:
-                        rejected.append(f"{c['id']}: off the programme's subject ({', '.join(sorted(ctx)[:5])})")
-                        continue
-                    if sc < min_score or not strong:
-                        rejected.append(f"{c['id']}: relevance {sc} ({', '.join(hit) or 'no shared terms'})")
-                        continue
-                    if best is None or sc > best[0] or (sc == best[0] and c["kind"] == "video" and best[1]["kind"] != "video"):
-                        best = (sc, c, hit, q)
-                if best and best[0] >= min_score + 1:
-                    break
-            if best:
-                break
+                pool += [(c, src, q) for c in cands]
+        t_emb = embed_text(o["text"]) if visual_rank and o["text"] else None
+        seen_ids: set = set()
+        for c, src, q in pool:
+            if c["id"] in used or c["id"] in seen_ids:
+                continue
+            seen_ids.add(c["id"])
+            if c.get("rights_note") or not c.get("license"):
+                rejected.append(f"{c['id']}: {c.get('rights_note') or 'no licence recorded'}")
+                continue
+            sc, hit = relevance(c, q_terms)
+            weak = SOURCE_GENERIC.get(src, set())
+            hit = [h for h in hit if " " in h or not (set(und.content(h)) <= {w for t in weak for w in und.content(t)})]
+            sc = round(sc if hit else 0.0, 2)
+            strong = (len(set(hit)) >= 2 or any(" " in h for h in hit)) and bool(head_hits(c, hit))
+            if src != "local":
+                blob = set(und.content(c["title"] + " " + " ".join(c.get("keywords") or []) + " " + (c.get("description") or "")))
+                on_topic = not ctx or bool(ctx & blob)
+                if src in GENERAL_SOURCES and ctx:  # a general index: the title must share the programme's subject too
+                    own = set(und.content(c["title"] + " " + " ".join(c.get("keywords") or [])))
+                    on_topic = bool((ctx - set(und.content(" ".join(q_terms)))) & own)
+                if not on_topic:
+                    rejected.append(f"{c['id']}: off the programme's subject ({', '.join(sorted(ctx)[:5])})")
+                    continue
+            if not visual_rank:
+                if src == "local":
+                    continue  # local shots have no words to match without the visual model
+                if sc < min_score or not strong:
+                    rejected.append(f"{c['id']}: relevance {sc} ({', '.join(hit) or 'no shared terms'})")
+                    continue
+                if best is None or sc > best["score"] or (sc == best["score"] and c["kind"] == "video" and best["asset"]["kind"] != "video"):
+                    best = {"score": sc, "asset": c, "matched": hit, "query": q, "reasons": [f"lexical relevance {sc}: {', '.join(hit)}"]}
+                continue
+            e = emb_of(c) if t_emb is not None else None
+            if e is None:
+                rejected.append(f"{c['id']}: picture could not be embedded")
+                continue
+            import numpy as np
+            vis = float(np.dot(t_emb, e))
+            reasons = [f"visual match {vis:.3f} (SigLIP cosine of the spoken text and the picture)"]
+            bar = vis_min - (VIS_LEX_RELIEF if strong else 0.0)
+            if vis < bar:
+                rejected.append(f"{c['id']}: visual match {vis:.3f} < {bar:.3f}")
+                continue
+            score = vis + LEX_WEIGHT * min(sc, 4.0)
+            if sc:
+                reasons.append(f"lexical bonus {LEX_WEIGHT * min(sc, 4.0):+.3f} ({', '.join(hit)})")
+            if used_embs:
+                rep = max(float(np.dot(e, u)) for u in used_embs)
+                if rep >= DUP_REJECT:
+                    rejected.append(f"{c['id']}: repeats imagery already used (cosine {rep:.3f})")
+                    continue
+                if rep > DUP_SOFT:
+                    score -= (rep - DUP_SOFT) * 0.2
+                    reasons.append(f"similar to an earlier cutaway (cosine {rep:.3f}): {-(rep - DUP_SOFT) * 0.2:+.3f}")
+            if speaker_embedding is not None:
+                se = float(np.dot(e, speaker_embedding))
+                if se >= SELF_REJECT:
+                    rejected.append(f"{c['id']}: looks like the speaker's own shot (cosine {se:.3f})")
+                    continue
+            style = (c.get("shot_type"), c.get("motion_level"))
+            if prev_style and style == prev_style and style != (None, None):
+                score -= VARIETY_PEN
+                reasons.append(f"same shot type/motion as the previous cutaway ({style[0]}, {style[1]}): {-VARIETY_PEN:+.3f}")
+            if best is None or score > best["score"]:
+                best = {"score": round(score, 4), "asset": c, "matched": hit, "query": q, "reasons": reasons, "visual": round(vis, 4),
+                        "lexical": sc, "embedding": e}
         if not best:
             decisions.append({"clip": o["clip"], "start": o["start"], "action": "skip",
-                              "why": f"no relevant licensed candidate for '{' '.join(q_terms)}'", "rejected": rejected[:6]})
+                              "why": f"no relevant licensed candidate for '{' '.join(q_terms) or o['text'][:40]}'", "rejected": rejected[:6]})
             continue
-        sc, c, hit, q = best
-        used.add(c["id"])
+        c = best["asset"]
         a = min(1.0, o["duration"] * 0.2)
         length = max(min_cut, min(per_cut, o["duration"] - a - 0.6))
+        if c["kind"] == "local_video":
+            length = min(length, c["out"] - c["in"])
         if length < min_cut:
             decisions.append({"clip": o["clip"], "start": o["start"], "action": "skip", "why": "not enough room after the cut"})
             continue
-        inserts.append({"clip": o["clip"], "local_start": round(a, 3), "local_end": round(a + length, 3), "asset": c,
-                        "score": sc, "matched": hit, "query": q})
+        used.add(c["id"])
+        if best.get("embedding") is not None:
+            used_embs.append(best["embedding"])
+        prev_style = (c.get("shot_type"), c.get("motion_level"))
+        asset = {k: v for k, v in c.items() if k != "embedding"}
+        inserts.append({"clip": o["clip"], "local_start": round(a, 3), "local_end": round(a + length, 3), "asset": asset,
+                        "score": best["score"], "matched": best["matched"], "query": best["query"], "reasons": best["reasons"],
+                        "visual": best.get("visual"), "lexical": best.get("lexical", best["score"]), "text": o["text"][:200],
+                        "provenance": {"source": c.get("source"), "id": c["id"], "license": c.get("license"),
+                                       "credit": c.get("credit"), "page": c.get("page")}})
         covered += length
-        decisions.append({"clip": o["clip"], "start": o["start"], "action": "insert", "asset": c["id"], "score": sc,
-                          "why": f"'{c['title'][:70]}' matches {', '.join(hit)} (relevance {sc}); {c['license']}"})
+        decisions.append({"clip": o["clip"], "start": o["start"], "action": "insert", "asset": c["id"], "score": best["score"],
+                          "why": f"'{c['title'][:70]}': {'; '.join(best['reasons'])}; {c['license']}"})
+    method = ("visual: SigLIP image-text cosine + lexical bonus, duplicate/self/variety penalties (licence + subject gates kept)"
+              if visual_rank else "lexical keyword relevance (no vision model) - flagged: pictures were not looked at")
     return {"inserts": inserts, "decisions": decisions, "share": round(covered / max(total, 0.1), 3),
-            "source_errors": source_errors, "method": "lexical keyword relevance (no vision model)"}
+            "source_errors": source_errors, "method": method, "visual": bool(visual_rank)}
 
 
 def _phash(path: Path) -> str | None:
@@ -337,6 +485,17 @@ def apply(tl: dict, p: dict, size: tuple[int, int] | None = None, fetcher=None) 
     applied, credits = [], []
     for ins in p["inserts"]:
         a = ins["asset"]
+        if a["kind"] == "local_video":  # a shot of a local file: no download, in-point from the shot (middle of it)
+            dur = ins["local_end"] - ins["local_start"]
+            c = by_id[ins["clip"]]
+            src_in = round(a["in"] + max(0.0, (a["out"] - a["in"] - dur) / 2), 3)
+            c["pip"] = {"src": a["src"], "in": src_in, "full": True, "start": ins["local_start"], "end": ins["local_end"],
+                        "provenance": {"kind": "footage", "source": a["source"], "id": a["id"], "title": a["title"],
+                                       "license": a["license"], "page": a["page"], "matched": ins["matched"],
+                                       "visual": ins.get("visual"), "reasons": ins.get("reasons")}}
+            applied.append(ins)
+            credits.append(a["credit"])
+            continue
         try:
             path = fetcher(a)
         except Exception as e:  # noqa: BLE001
@@ -371,7 +530,8 @@ def apply(tl: dict, p: dict, size: tuple[int, int] | None = None, fetcher=None) 
         c["pip"] = {"src": str(src), "in": src_in, "full": True, "start": ins["local_start"], "end": ins["local_end"],
                     "provenance": {"kind": "footage" if a["kind"] == "video" else "animated_still", "source": a["source"],
                                    "id": a["id"], "title": a["title"], "license": a["license"], "page": a["page"],
-                                   "matched": ins["matched"], **({"rendition": rendition} if rendition else {})}}
+                                   "matched": ins["matched"], "visual": ins.get("visual"), "reasons": ins.get("reasons"),
+                                   **({"rendition": rendition} if rendition else {})}}
         applied.append(ins)
         credits.append(a["credit"])
     out["credits"] = sorted(set((out.get("credits") or []) + credits))
