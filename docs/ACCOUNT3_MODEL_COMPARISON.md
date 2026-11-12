@@ -13,8 +13,8 @@ the more private provider. See the live answer with:
 
 | Data class | Who may receive it | Effect today |
 |---|---|---|
-| `private` (user media, unreleased scripts, client data) | in-process only (`local-llamacpp`) | Qwen3-4B for everything it clears; otherwise `NoProviderAvailable` -> queue / human |
-| `internal` | in-process + owner-run servers (`owner-openai-compatible`: local llama.cpp server, Ollama, vLLM/SGLang on the owner's GPU) | Qwen3-0.6B server for light tasks it clears, Qwen3-4B for the rest |
+| `private` (user media, unreleased scripts, client data) | in-process only (`local-llamacpp`) | Qwen3-4B for writing/JSON/summary/translation tasks; the four reasoning-heavy tasks (deep_research, reference_interpretation, quality_review, analytics_interpretation) -> `NoProviderAvailable` (measured reasoning 3.3 < 4) |
+| `internal` | in-process + owner-run servers (`owner-openai-compatible`: local llama.cpp server, Ollama, vLLM/SGLang on the owner's GPU) | Qwen3-0.6B server first for light summarization/JSON/title tasks (faster), Qwen3-4B otherwise and as fallback (demo: server stopped -> 4B answered, fallbacks listed) |
 | `public` | everything above + authorised hosted free tiers | hosted providers only after owner authorisation + key; Cerebras and HF never |
 
 ## 2. Router guarantees (unchanged strictness, plus new gates)
@@ -76,5 +76,9 @@ offline `LLM.generate` over it in one Kaggle job, and the outputs come back as a
 3. UI/api.py: expose `route_explain()` and `health()` at e.g. `GET /api/ai/route?task=&privacy=` and `GET /api/ai/health`.
 4. `scripts/setup.sh`: optional `pip install sse-starlette starlette-context pydantic-settings` (llama.cpp server extras)
    and the 639 MB Qwen3-0.6B GGUF into `NEXUS_HOME/models/hf/qwen3-0.6b-gguf/` for the second local provider.
+6. **Behaviour change to note for all agents**: after the benchmark, the shared `.nexus` DB holds measured reasoning
+   3.33 for Qwen3-4B (n=6, thinking off), so the four reasoning-heavy tasks raise `NoProviderAvailable` locally. Owner
+   decision needed: (a) enable Qwen3 thinking for `light: False` tasks in `nexus/llm.py` (slower) and re-run the bench,
+   (b) lower `min_q` for those tasks, or (c) configure an owner GPU worker / hosted free tier for public data.
 5. Model registry (`nexus/models.py`, not mine): register `llm-qwen3-0.6b` (Qwen/Qwen3-0.6B-GGUF, Apache-2.0, sha256 in
    the benchmarks doc) so `python -m nexus models fetch` can install it.

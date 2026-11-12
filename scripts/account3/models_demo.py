@@ -65,9 +65,9 @@ def main() -> int:
                     "data_extraction", 'Extract JSON {"name": str, "city": str} from: "Amira Nabil moved to Alexandria."',
                     schema={"type": "object", "required": ["name", "city"]}, privacy="private", max_tokens=60, use_cache=False)))
             # server stopped: the same internal request must fall back to the in-process model (or say why not)
-            step("general/internal after the owner server stopped (fallback)", lambda: res(router.complete(
-                "general", "Answer with one word: what colour is the sky on a clear day?", privacy="internal",
-                max_tokens=20, use_cache=False)))
+            step("summarization/internal after the owner server stopped (fallback)", lambda: res(router.complete(
+                "summarization", "Summarise in five words: the bakery on Main Street now opens at six every morning.", privacy="internal",
+                max_tokens=30, use_cache=False)))
         finally:
             llm.unload()
     url_box.clear()
