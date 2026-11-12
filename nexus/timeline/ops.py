@@ -148,3 +148,117 @@ def add_marker(tl: dict, t: float, label: str) -> dict:
     tl = _new(tl)
     tl.setdefault("markers", []).append({"t": t, "label": label})
     return tl
+
+
+# ------------------------------------------------------------------ multi-track (docs/TIMELINE.md "Tracks")
+def track(tl: dict, track_id: str) -> dict:
+    for t in tl.get("tracks") or []:
+        if t.get("id") == track_id:
+            return t
+    raise KeyError(track_id)
+
+
+def add_track(tl: dict, kind: str = "video", track_id: str | None = None, z: float | None = None, **props) -> dict:
+    """New empty layer. Video/text layers default to the top of the stack; ids V2.., A2.., T1.. when not given."""
+    from .tracks import KINDS
+    if kind not in KINDS:
+        raise ValueError(f"track kind must be one of {KINDS}")
+    tl = _new(tl)
+    trs = tl.setdefault("tracks", [])
+    if track_id is None:
+        pre = {"video": "V", "audio": "A", "text": "T"}[kind]
+        n = 2 if kind != "text" else 1
+        ids = {t.get("id") for t in trs}
+        while f"{pre}{n}" in ids:
+            n += 1
+        track_id = f"{pre}{n}"
+    if any(t.get("id") == track_id for t in trs):
+        raise ValueError(f"track {track_id} exists")
+    if z is None:
+        z = max([float(t.get("z", 1)) for t in trs if t.get("kind") != "audio"] + [0.0]) + 1
+    trs.append({"id": track_id, "kind": kind, "z": z, "items": [], **props})
+    return tl
+
+
+def remove_track(tl: dict, track_id: str) -> dict:
+    tl = _new(tl)
+    track(tl, track_id)
+    tl["tracks"] = [t for t in tl["tracks"] if t.get("id") != track_id]
+    return tl
+
+
+def set_track(tl: dict, track_id: str, **props) -> dict:
+    """z, opacity, keyframes, hidden, mute, volume, effects, grade, correct, lut, chroma_key, mask..."""
+    tl = _new(tl)
+    track(tl, track_id).update(props)
+    return tl
+
+
+def find_item(tl: dict, item_id: str) -> tuple[dict, int]:
+    for t in tl.get("tracks") or []:
+        for i, it in enumerate(t.get("items") or []):
+            if it.get("id") == item_id:
+                return t, i
+    raise KeyError(item_id)
+
+
+def add_item(tl: dict, track_id: str, item: dict, start: float | None = None) -> dict:
+    tl = _new(tl)
+    t = track(tl, track_id)
+    it = {"id": item.get("id") or cid(), **copy.deepcopy(item)}
+    if start is not None:
+        it["start"] = round(float(start), 3)
+    t.setdefault("items", []).append(it)
+    t["items"].sort(key=lambda x: float(x.get("start", 0)))
+    return tl
+
+
+def remove_item(tl: dict, item_id: str) -> dict:
+    tl = _new(tl)
+    t, i = find_item(tl, item_id)
+    del t["items"][i]
+    return tl
+
+
+def move_item(tl: dict, item_id: str, start: float | None = None, track_id: str | None = None) -> dict:
+    """Move a layer item in time and/or onto another track of a compatible kind."""
+    tl = _new(tl)
+    t, i = find_item(tl, item_id)
+    dst = track(tl, track_id) if track_id else t
+    if dst.get("kind") != t.get("kind"):
+        raise ValueError(f"cannot move a {t.get('kind')} item onto a {dst.get('kind')} track")
+    it = t["items"].pop(i)
+    if start is not None:
+        it["start"] = round(max(0.0, float(start)), 3)
+    dst.setdefault("items", []).append(it)
+    dst["items"].sort(key=lambda x: float(x.get("start", 0)))
+    return tl
+
+
+def set_item(tl: dict, item_id: str, **props) -> dict:
+    tl = _new(tl)
+    t, i = find_item(tl, item_id)
+    t["items"][i].update(props)
+    return tl
+
+
+def set_keyframes(tl: dict, target_id: str, prop: str, points: list) -> dict:
+    """Keyframes on a main clip, a layer item or a track (prop in fx.effects.KEYFRAME_PROPS). Empty list removes them."""
+    from ..fx.effects import KEYFRAME_PROPS
+    if prop not in KEYFRAME_PROPS:
+        raise ValueError(f"{prop!r} is not keyframable; use one of {KEYFRAME_PROPS}")
+    tl = _new(tl)
+    try:
+        obj = tl["clips"][find(tl, target_id)]
+    except KeyError:
+        try:
+            t, i = find_item(tl, target_id)
+            obj = t["items"][i]
+        except KeyError:
+            obj = track(tl, target_id)
+    kf = obj.setdefault("keyframes", {})
+    if points:
+        kf[prop] = [list(p) for p in points]
+    else:
+        kf.pop(prop, None)
+    return tl

@@ -68,6 +68,21 @@ def kf_expr(points, var: str = "t") -> str | None:
     return f"if(lt({var},{pts[0][0]:.4f}),{pts[0][1]:.5f},{expr})"
 
 
+def clip_opacity_expr(c: dict, var: str = "T") -> str | None:
+    """Opacity of a main-storyline clip (`opacity` x keyframes.opacity over clip-local time), None when opaque."""
+    parts = []
+    try:
+        const = float(c.get("opacity", 1.0))
+    except (TypeError, ValueError):
+        const = 1.0
+    if abs(const - 1.0) > 1e-6:
+        parts.append(f"{max(0.0, min(1.0, const)):.5f}")
+    ke = kf_expr((c.get("keyframes") or {}).get("opacity"), var)
+    if ke:
+        parts.append(f"({ke})")
+    return "*".join(parts) if parts else None
+
+
 def _fit_kf(W: int, H: int, c: dict, focus) -> str:
     """Cover fit whose crop position and zoom follow clip['keyframes'] x/y (0..1 subject position) and scale (>= 1)."""
     kf = c.get("keyframes") or {}
@@ -269,7 +284,7 @@ def render_segment(c: dict, tl: dict, cache: Path, draft: bool = False, threads:
     fc.append(f"{cur}{chain}[v0]")
     last = "v0"
     if fxp.masks(c):
-        margs, mcur = fxp.mask_graph(c, fc, "[v0]", W, H, dur, n_in, scale, "mk")
+        margs, mcur = fxp.mask_graph(c, fc, "[v0]", W, H, dur, n_in, scale, "mk", fps)
         args += margs
         n_in += sum(1 for x in margs if x == "-i")
         last = mcur.strip("[]")
@@ -307,6 +322,15 @@ def render_segment(c: dict, tl: dict, cache: Path, draft: bool = False, threads:
         fc += clines
         n_in += 1
         last = clast.strip("[]")
+    oe = clip_opacity_expr(c, "T")
+    if oe:  # clip opacity on the main storyline: the clip over black
+        from . import tracks as _tracks
+        fc.append(f"color=c=black:s={W}x{H}:r={fps}:d={dur:.4f}[opbg]")
+        fc.append(_tracks.alpha_source(oe, W, H, fps, dur, "[opal]"))
+        fc.append(f"[{last}]format=yuva420p[opfg]")
+        fc.append("[opfg][opal]alphamerge[opfa]")
+        fc.append("[opbg][opfa]overlay=0:0:shortest=1,format=yuv420p[vop]")
+        last = "vop"
     a = []
     if has_audio:
         # speaker level matching first (source time: the segment's audio starts at the clip's in-point), so the
@@ -407,7 +431,16 @@ def _mix_graph(tl: dict, n_narr: int, has_music: bool, dur: float) -> tuple[list
     speech, other = ["[0:a]"], []
     for i, a in enumerate(tl.get("audio", [])):
         ms = int(float(a.get("start", 0)) * 1000)
-        fc.append(f"[{i + 1}:a]aresample={config.AUDIO_RATE},aformat=channel_layouts=stereo,"
+        cut = ""
+        if a.get("in") or a.get("out"):  # audio-track items: a window of the source
+            a_in = float(a.get("in") or 0)
+            cut = f"atrim=start={a_in:.4f}" + (f":end={float(a['out']):.4f}" if a.get("out") else "") + ",asetpts=PTS-STARTPTS,"
+            if a.get("out") and a.get("fade_out"):
+                ilen = float(a["out"]) - a_in
+                cut += f"afade=t=out:st={max(0.0, ilen - float(a['fade_out'])):.4f}:d={float(a['fade_out']):.4f},"
+        if a.get("fade_in"):
+            cut += f"afade=t=in:st=0:d={float(a['fade_in']):.4f},"
+        fc.append(f"[{i + 1}:a]{cut}aresample={config.AUDIO_RATE},aformat=channel_layouts=stereo,"
                   f"volume={a.get('volume', 1.0)},adelay={ms}:all=1[n{i}]")
         (speech if a.get("role") in SPEECH_ROLES else other).append(f"[n{i}]")
     if len(speech) > 1:
@@ -483,29 +516,37 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
     workdir.mkdir(parents=True, exist_ok=True)
     out.parent.mkdir(parents=True, exist_ok=True)
     tl = _jl_cuts(tl, workdir)
+    from . import tracks as trk
+    tl = trk.with_audio(tl)
     cache = config.CACHE / "segments"
     clips = tl["clips"]
-    w, threads = _workers(len(clips), workers)
+    W, H, _ = _size(tl, draft)
+    layers = trk.plan(tl, W, H)
+    jobs = [(c, tl) for c in clips] + [(L["clip"], L["sub_tl"]) for L in layers if L["kind"] == "video"]
+    w, threads = _workers(len(jobs), workers)
     done = [0]
     lock = threading.Lock()
 
-    def one(c):
-        r = render_segment(c, tl, cache, draft, threads)
+    def one(job):
+        r = render_segment(job[0], job[1], cache, draft, threads)
         with lock:
             done[0] += 1
             if on_progress:
-                on_progress(0.7 * done[0] / len(clips))
+                on_progress(0.7 * done[0] / len(jobs))
         return r
 
     if w > 1:
         with ThreadPoolExecutor(max_workers=w) as ex:
-            results = list(ex.map(one, clips))
+            all_results = list(ex.map(one, jobs))
     else:
-        results = [one(c) for c in clips]
+        all_results = [one(j) for j in jobs]
+    results = all_results[: len(clips)]
+    for L, (p, _) in zip([x for x in layers if x["kind"] == "video"], all_results[len(clips):]):
+        L["seg"] = p
     segs = [p for p, _ in results]
-    cached = sum(1 for _, was in results if was)
+    cached = sum(1 for _, was in all_results if was)
     seg_notes = []
-    for s in segs:
+    for s in [p for p, _ in all_results]:
         nf = s.with_suffix(".notes.json")
         if nf.exists():
             seg_notes += json.loads(nf.read_text(encoding="utf-8"))
@@ -515,7 +556,6 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
     # added up to 0.3 s of extra audio over 44 segments in the acceptance edit (QA: A/V stream length mismatch).
     _pp = ff.probe(prog)
     dur = float((_pp.get("video") or {}).get("duration") or _pp["duration"])
-    W, H, _ = _size(tl, draft)
     narr = tl.get("audio", [])
     music = tl.get("music") or {}
     has_music = bool(music.get("src"))
@@ -540,6 +580,16 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
     vmap = ["-map", "0:v"]
     vlast = "0:v"
     vlines: list[str] = []
+    oargs: list = []
+    n_in = 1 + len(narr) + (1 if has_music else 0)
+    if layers:
+        largs, llines, lcur = trk.layer_graph(layers, W, H, tl.get("fps", config.FPS), 0.0, dur, tl.get("lang", "en"), n_in,
+                                              f"[{vlast}]")
+        if llines:
+            oargs += largs
+            vlines += llines
+            n_in += sum(1 for x in largs if x == "-i")
+            vlast = lcur.strip("[]")
     burn = tl.get("burn_subtitles", True) and tl.get("subtitles")
     if burn:
         from ..fx import captions
@@ -548,11 +598,10 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
         esc = str(ass).replace("\\", "/").replace(":", "\\:").replace("'", "\\'")
         vlines.append(f"[{vlast}]ass='{esc}'[vcap]")
         vlast = "vcap"
-    oargs: list = []
     if fxe.overlays_signature(tl):
-        n_in = 1 + len(narr) + (1 if has_music else 0)
-        oargs, olines, olast = fxe.overlay_graph(tl["overlays"], W, H, tl.get("fps", config.FPS), dur, 0.0, dur,
+        xargs, olines, olast = fxe.overlay_graph(tl["overlays"], W, H, tl.get("fps", config.FPS), dur, 0.0, dur,
                                                  tl.get("lang", "en"), n_in, f"[{vlast}]")
+        oargs += xargs
         vlines += olines
         vlast = olast.strip("[]")
     if vlines:
@@ -571,5 +620,5 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
     db.metric("render_rtf", elapsed / max(dur, 0.1), cached=cached, clips=len(segs), draft=draft, workers=w)
     if on_progress:
         on_progress(1.0)
-    return {"output": str(out), "duration": dur, "elapsed": round(elapsed, 2), "segments": len(segs),
+    return {"output": str(out), "duration": dur, "elapsed": round(elapsed, 2), "segments": len(all_results),
             "segments_from_cache": cached, "sidecars": sidecars, "draft": draft, "workers": w, "notes": sorted(set(seg_notes))}
