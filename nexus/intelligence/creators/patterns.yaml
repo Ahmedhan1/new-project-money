@@ -1,0 +1,147 @@
+# Curated pattern library: HIGH-LEVEL archetypes of video formats. Patterns, never copies.
+#
+# Rules for this file
+# * Every claim carries `src` (a key of `sources`) or `src: hypothesis` (editorial hypothesis, unsourced - to be
+#   tested against measured reference profiles, never presented as fact).
+# * No invented numbers. `pacing` ranges are null unless a cited source states a number; the demo/`analyze_reference`
+#   measures real references and fills `measured_examples` in docs/results/account3/creators_profiles.json instead.
+# * `verification`: "first_party" (the creator/organisation's own publication), "reported" (press coverage of a
+#   first-party document; authenticity reported, not independently verified by us), "secondary" (third-party analysis).
+version: 1
+retrieved: "2026-11-12"
+
+sources:
+  mrbeast_memo:
+    title: "How to succeed in MrBeast production (internal onboarding document, 2024; published by Rosanna Pansino, transcribed copies online)"
+    url: "https://www.alexanderjarvis.com/memo-how-to-succeed-in-mrbeast-production/"
+    also: ["https://simonwillison.net/2024/Sep/15/how-to-succeed-in-mrbeast-production/",
+           "https://www.netinfluencer.com/mrbeast-productions-leaked-internal-document-rosanna-pansino/"]
+    verification: reported
+  kurzgesagt_process:
+    title: "Kurzgesagt - Our video process"
+    url: "https://kurzgesagt.org/youtube/"
+    verification: first_party
+  daheeh_auc:
+    title: "AUC Today - Behind the Nerd (on the book about the El Da7ee7 show and its writing team)"
+    url: "https://auctoday.aucegypt.edu/news/behind-nerd"
+    verification: secondary
+  neistat_nofilmschool:
+    title: "No Film School - 7 storytelling techniques you can learn from Casey Neistat (2016)"
+    url: "https://nofilmschool.com/2016/08/7-storytelling-techniques-you-can-learn-filmmaker-youtube-star-casey-neistat"
+    verification: secondary
+  yt_retention_help:
+    title: "YouTube Help - Measure key moments for audience retention"
+    url: "https://support.google.com/youtube/answer/9314415"
+    verification: first_party
+
+archetypes:
+  - id: challenge_high_stakes
+    name: "Challenge / high-stakes format"
+    example_reference: "MrBeast-style challenge videos (structure only; titles, catchphrases, set pieces are never copied)"
+    hook_patterns:
+      - {text: "Open on the thumbnail/title promise and show it will be delivered in the first minute", src: mrbeast_memo,
+         quote: "The first minute of each video is the most important minute of each video."}
+      - {text: "Show, do not announce, what the viewer will watch", src: mrbeast_memo,
+         quote: "Stop telling people what they will be watching and start showing them."}
+    structure:
+      - {text: "Minute 0-1: deliver on the packaging promise", src: mrbeast_memo}
+      - {text: "Minutes 1-3: move fast into action; re-engage before attention drops", src: mrbeast_memo,
+         quote: "It's important to re-engage the viewer around this time because they could get bored of the story and click off."}
+      - {text: "Minutes 3-6: the most exciting yet simple content", src: mrbeast_memo,
+         quote: "This is where you plan out all the most exciting and interesting content that is also very simple."}
+      - {text: "Escalating stakes toward the end", src: mrbeast_memo, quote: "As you get deeper in the video the stakes get higher."}
+    pacing: {cuts_per_min: null, note: "no number in the source; measure references"}
+    editing: [{text: "No dull moments", src: mrbeast_memo, quote: "No dull moments in videos"}]
+    visual: [{text: "Spectacle nobody else can do ('wow factor')", src: mrbeast_memo}]
+    audio: []
+    metrics_named_by_source: [{text: "CTR, AVD and AVP are the metrics the team optimises", src: mrbeast_memo}]
+
+  - id: arabic_edu_explainer
+    name: "Arabic educational explainer (El Daheeh-style)"
+    example_reference: "El Da7ee7 / Al Daheeh (structure only; the persona, catchphrases and set designs are never copied)"
+    hook_patterns:
+      - {text: "Comedic, conversational opening on an everyday question before the research", src: hypothesis}
+    structure:
+      - {text: "Research-dense monologue delivered by one host with a quippy, comedic tone", src: daheeh_auc}
+      - {text: "Topics widened from pure science findings to many fields once a writing team was added", src: daheeh_auc}
+      - {text: "Narrative framing (characters, story arc) around facts", src: daheeh_auc,
+         quote: "entertaining characters and narrative"}
+    pacing: {cuts_per_min: null, note: "no published number; measure references"}
+    editing: [{text: "Frequent inserts of archival images / graphics as visual jokes and evidence", src: hypothesis}]
+    visual: [{text: "Archival graphics and staged sets", src: hypothesis}]
+    audio: [{text: "Colloquial Egyptian Arabic narration", src: daheeh_auc}]
+
+  - id: science_documentary
+    name: "Science documentary / animated explainer"
+    example_reference: "Kurzgesagt-style explainers; NASA/ESA public-domain documentaries"
+    hook_patterns:
+      - {text: "Open on a large-scale question or counter-intuitive fact", src: hypothesis}
+    structure:
+      - {text: "Script built on books and primary sources, reviewed by experts", src: kurzgesagt_process,
+         quote: "We always consult with experts in the field to make sure our facts are straight."}
+      - {text: "Publish a source sheet for every video", src: kurzgesagt_process,
+         quote: "The last step is preparing a sourcesheet for each video to prove our claims and make our process transparent."}
+      - {text: "Many script drafts to cut unnecessary parts", src: kurzgesagt_process}
+    pacing: {cuts_per_min: null, note: "measure references"}
+    editing: []
+    visual: [{text: "2D flat animation combined with 3D elements", src: kurzgesagt_process}]
+    audio:
+      - {text: "One consistent narrator voice", src: kurzgesagt_process}
+      - {text: "Specifically composed soundtrack per video", src: kurzgesagt_process}
+
+  - id: travel_vlog
+    name: "Travel / daily vlog"
+    example_reference: "Casey Neistat-style vlogs (structure only)"
+    hook_patterns: [{text: "Establish place/time fast (time-lapse or establishing shot)", src: neistat_nofilmschool}]
+    structure: [{text: "A story arc (setup, conflict, resolution) inside each vlog", src: neistat_nofilmschool}]
+    pacing: {cuts_per_min: null, note: "measure references"}
+    editing: [{text: "Time-lapses to show passage of time; mix of handheld and locked-off shots", src: neistat_nofilmschool}]
+    visual: [{text: "Establishing shots for location", src: neistat_nofilmschool}]
+    audio: [{text: "Music beds under montage sections", src: hypothesis}]
+
+  - id: interview_podcast
+    name: "Interview / podcast"
+    hook_patterns: [{text: "Cold open with the strongest guest quote before the intro", src: hypothesis}]
+    structure: [{text: "Question-answer blocks; chapters per topic", src: hypothesis}]
+    pacing: {cuts_per_min: null, note: "expected low cut rate and high speech share - verify by measuring references"}
+    editing: [{text: "Cuts between speakers follow the conversation", src: hypothesis}]
+    visual: []
+    audio: [{text: "Speech dominates; little or no music under dialogue", src: hypothesis}]
+
+  - id: investigative
+    name: "Investigative report"
+    hook_patterns: [{text: "Open on the central unanswered question or a document/evidence reveal", src: hypothesis}]
+    structure: [{text: "Question -> evidence trail -> counter-evidence -> conclusion with limits", src: hypothesis}]
+    pacing: {cuts_per_min: null, note: "measure references"}
+    editing: [{text: "On-screen documents, maps and timelines as evidence", src: hypothesis}]
+    visual: []
+    audio: []
+
+  - id: product_review
+    name: "Product review"
+    hook_patterns: [{text: "State the verdict question (is it worth it?) up front", src: hypothesis}]
+    structure: [{text: "Context -> hands-on tests -> pros/cons -> verdict", src: hypothesis}]
+    pacing: {cuts_per_min: null, note: "measure references"}
+    editing: [{text: "Clean product B-roll between talking segments", src: hypothesis}]
+    visual: []
+    audio: []
+
+  - id: premium_ad
+    name: "Premium ad / brand film"
+    hook_patterns: [{text: "Image-first opening with minimal or no speech", src: hypothesis}]
+    structure: [{text: "Mood -> product/brand reveal -> end card", src: hypothesis}]
+    pacing: {cuts_per_min: null, note: "measure references"}
+    editing: [{text: "Cuts on music beats", src: hypothesis}]
+    visual: [{text: "High production value, graded colour", src: hypothesis}]
+    audio: [{text: "Music-led; low speech share", src: hypothesis}]
+
+  - id: short_form_story
+    name: "Short-form story (Shorts / Reels / TikTok)"
+    hook_patterns:
+      - {text: "Retention in the opening seconds is the measured signal the platform exposes; test openings against it", src: yt_retention_help}
+      - {text: "Speech or on-screen text from the first second", src: hypothesis}
+    structure: [{text: "Setup -> turn -> payoff inside one short; ending can loop into the opening", src: hypothesis}]
+    pacing: {cuts_per_min: null, note: "no first-party number found; third-party '1-3 s hook' advice is unverified"}
+    editing: []
+    visual: [{text: "Vertical 9:16 framing", src: hypothesis}]
+    audio: []
