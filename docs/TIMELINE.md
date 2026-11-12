@@ -1,0 +1,58 @@
+# Timeline schema (renderer contract)
+
+A timeline is a JSON dict. It is **non-destructive**: sources are never modified, every automated decision stays editable
+with `nexus/timeline/ops.py`, and unknown keys are ignored by the renderer (but included in segment cache keys, so a new
+pixel-changing key can never be served a stale segment). Renderer: `nexus/timeline/render.py`, tests: `tests/fast/test_fx.py`.
+
+`render.render(tl, out, workdir, on_progress=None, draft=False, workers=None) -> {"output","duration","elapsed","segments",
+"segments_from_cache","sidecars","draft","workers","notes"}`
+
+## Timeline keys
+| Key | Type / default | Meaning |
+|---|---|---|
+| `width`, `height`, `fps` | int, 1920/1080/30 | Output geometry. |
+| `lang` | `"en"` | Caption font/shaping, title text. |
+| `grade` | `"none"` | Creative look for every clip without its own: `none cinematic warm cool bw vivid documentary` + film looks in `fx.post.GRADES` (`teal_orange`, `bleach_bypass`, ...). |
+| `audio_fx` | `"none"` | `none denoise voice` chain on clip audio. |
+| `target_lufs` | -14.0 | Two-pass loudness normalisation target; true peak -1.5 dBTP, limiter after. |
+| `clips` | list | Played in order (see clip keys). |
+| `audio` | list | Extra audio items `{"src","start","volume"=1,"role"}`. `role`: `narration`/`dialogue`/`voice` (or none) key the music ducking; `sfx`, `ambience`, `music` are mixed in after ducking and never count as speech. |
+| `music` | dict or null | `{"src","volume"=0.5,"duck"=true}`; looped, faded in 1 s / out 2 s, sidechain-ducked under speech. |
+| `subtitles` | list | Cues `{"start","end","text","words"?:[{"start","end","word"}]}` in programme seconds. SRT/VTT sidecars are always written. |
+| `burn_subtitles` | true | Burn cues into the picture. |
+| `captions` | dict or absent | Caption style for burn-in: `{"style": classic|boxed|pop|karaoke, "position": bottom|middle|top, "words_per_cue": 2-4, "highlight": "#FFD400", "uppercase": false, "font_scale": 1.0}`. Absent = the legacy look. |
+| `subtitle_style` | dict | Legacy style overrides (used when `captions` is absent). |
+| `overlays` | list | Programme-wide: `{"type":"progress_bar","color","height","position"}`, `{"type":"watermark","text","opacity","position"}`. |
+| `markers`, `chapters`, `director`, `repurpose`, ... | any | Metadata, not rendered. |
+
+## Clip keys
+Types: `video {src,in,out}`, `image {src,duration}`, `color {duration,color}`. All times in seconds.
+
+| Key | Applies to | Meaning |
+|---|---|---|
+| `speed` | video | Constant speed; audio follows with pitch-preserving `atempo`. |
+| `fit`, `focus` | video/image | `cover` (crop at `focus` = [x,y] 0..1), `contain` (pad), `blur` (blurred fill behind). |
+| `mute`, `volume`, `audio_fx` | video | Clip audio. |
+| `fade_in`, `fade_out` | all | Picture + sound fades. |
+| `transition`, `xfade`, `transition_dur` | all but first | `"crossfade"` with any name in `fx.transitions.NAMES` (`fade`, `wipeleft`, `dissolve`, ...). Overlaps the previous clip by `transition_dur`. |
+| `grade` | all | Per-clip creative look. |
+| `correct` | all | Technical colour correction before the grade: `exposure` (stops), `contrast`, `brightness`, `saturation`, `temperature` (K), `vibrance`, `lift`/`gamma`/`gain` (scalar or [r,g,b]), `denoise` 0..1, `sharpen` 0..1. |
+| `effects` | video (most also image/color) | List of `{"type": ...}`: `punch_in {start,end,scale}`, `zoom {from,to}`, `shake {start,end,amount}`, `vignette`, `grain {amount}`, `letterbox {ratio}`, `blur {start,end,amount}`, `flash {at,duration}`, `glitch {start,end}`, `speed_ramp {from,to,start,end}`. Effect times are clip-local output seconds (speed_ramp: pre-ramp clip seconds). Unknown types are ignored. |
+| `stabilize` | video | `true` or `{"smoothing","shakiness","zoom","method": auto|vidstab|deshake}`. vidstab is two-pass and its motion analysis is cached. |
+| `rotate`, `hflip`, `vflip` | video | 90/180/270 lossless; small angles level the horizon (crop-zoomed). Mirroring is for the user's own footage; the repurpose rights gate refuses it on third-party material. |
+| `interpolate` | video | `blend` or `mci` frame synthesis for slow motion (off by default; `mci` is slow on CPU). |
+| `text` | all | Static overlays `[{"text","style": title|lower_third|..., "start","end","lang"}]`. |
+| `titles` | all | Animated titles/lower thirds `[{"text","style","start","end","anim": fade|slide|rise|none,"from": left|right}]`. |
+| `pip` | all | Picture-in-picture / cutaway `{"src","in","x","y","w","h"?,"shape": rect|circle,"start","end"}`; `w`=1, `x`=`y`=0 is a full-frame cutaway over the clip's own audio (how the director inserts B-roll). |
+| `notes`, `label` | all | Metadata (excluded from the cache key). |
+
+## Not wired into the renderer yet
+Builders exist in `nexus/fx/post.py` / `nexus/fx/titles.py` but the renderer does not call them yet: chroma key,
+masks, split screen, freeze frames, credits roll, audio-reactive waveform overlay. J-cuts/L-cuts are planned by the
+director (`clip.notes.cut`) but rendered as hard cuts. Speed ramps change picture timing exactly; their audio follows
+the ramp's average rate only.
+
+## Draft and parallel rendering
+`draft=True` renders at half resolution with a fast preset into separate cache entries (for previews).
+`workers` segments render at once (default `min(4, cpu/2)`); FFmpeg threads are divided between workers.
+Measured numbers: `docs/results/perf_render.json`.

@@ -358,7 +358,7 @@ def overlay_graph(overlays: list[dict], W: int, H: int, fps: int, total: float, 
             continue
         ty = o.get("type")
         if ty == "progress_bar":
-            h = max(2, int(_f(o, "height", 6) * H / 720))
+            h = max(2, int(round(_f(o, "height", 6) * H / 720 / 2)) * 2)  # even: 4:2:0 video cannot place odd rows exactly
             pos = o.get("position") or ("top" if H > W else "bottom")
             y = 0 if pos == "top" else H - h
             col = _hex(o.get("color", "#3EC5FF"))
