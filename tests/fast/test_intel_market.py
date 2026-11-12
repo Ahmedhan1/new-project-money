@@ -114,6 +114,14 @@ def test_ai_claims_are_rechecked_and_fallback():
     assert "deterministic fallback (NoProviderAvailable" in b2["method"][0] and b2["claims"]
 
 
+def test_lone_year_does_not_corroborate_across_languages():
+    ar = {"id": "s2", "lang": "ar", "text": "أُطلق التلسكوب سنة 2021 وقطر مرآته 6.5 متر."}
+    nasa = {"id": "s3", "lang": "en", "text": "Image released in 2021 of a galaxy."}
+    assert brief_mod._supports("The telescope launched in 2021 with a 6.5 metre mirror.", "en", ar)
+    assert not brief_mod._supports("Something happened in 2021 in the field.", "en", {**nasa, "lang": "ar"})
+    assert not brief_mod._supports("The telescope launched in 2021 with a 6.5 metre mirror.", "en", nasa)
+
+
 def test_conflicts_detected_between_sources():
     claims = [{"text": "The Great Pyramid was the tallest structure for 3800 years in history.", "source_ids": ["s1"], "lang": "en"},
               {"text": "The Great Pyramid was the tallest structure for 3871 years in history.", "source_ids": ["s2"], "lang": "en"}]

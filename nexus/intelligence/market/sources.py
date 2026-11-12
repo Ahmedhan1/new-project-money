@@ -57,7 +57,7 @@ class Ctx:
     settings: dict = field(default_factory=lambda: (config.settings().get("market") or {}))
     youtube_key: Callable[[], str | None] = field(default=lambda: _youtube_key())
     calls: list = field(default_factory=list)
-    min_interval: float = 1.0  # polite serial requests (Wikimedia API etiquette); tests set 0
+    min_interval: float = 2.0  # polite serial requests (Wikimedia API etiquette); tests set 0
     rate_limit_wait: float = 45.0  # one patient retry after a 429; never more (we back off, we do not evade limits)
     _last: float = 0.0
 

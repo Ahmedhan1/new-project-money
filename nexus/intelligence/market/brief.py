@@ -55,14 +55,21 @@ def collect_sources(results: list[dict]) -> list[dict]:
     return out
 
 
+YEAR = re.compile(r"^(1[5-9]|20)\d\d$")
+
+
 def _supports(claim: str, claim_lang: str, src: dict) -> bool:
+    """Deterministic support test (numbers + words, not semantics):
+    same language: all significant numbers present and >= 30 % word overlap (>= 60 % when the claim has no numbers);
+    other language: only numbers can match, and a lone year is too common to count - needs >= 2 numbers or a non-year."""
     nums, text = numbers(claim), src["text"]
-    if nums:
-        return nums <= numbers(text)
-    if src.get("lang", "en") != claim_lang:
-        return False  # without numbers we cannot match across languages deterministically
     w = words(claim)
-    return bool(w) and len(w & words(text)) / len(w) >= 0.6
+    overlap = len(w & words(text)) / len(w) if w else 0.0
+    if src.get("lang", "en") == claim_lang:
+        return (nums <= numbers(text) and overlap >= 0.3) if nums else overlap >= 0.6
+    if not nums or not nums <= numbers(text):
+        return False
+    return len(nums) >= 2 or not YEAR.match(next(iter(nums)))
 
 
 def cross_check(claim: dict, sources: list[dict]) -> dict:
