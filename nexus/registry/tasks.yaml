@@ -436,3 +436,45 @@ tasks:
     acceptance: "A two-video-track composite and a moving face blur render and pass pixel tests."
     test: "pytest tests/fast/test_fx.py"
     next: "LUT management and face-following crops are done (a06d3e4); masks are static rectangles today."
+  # ------------------------------------------------------------------ Account 1: cloud platform (work/account-1-cloud-platform, PR #4)
+  - id: ACC1-COMPUTE
+    priority: 1
+    title: "Remote GPU compute: Kaggle provider (one account), dispatcher, checkpoints/resume, pull workers"
+    status: verified
+    acceptance: "A real GPU job completes on Kaggle and its artifact checksum is verified; worker loss and control-plane crash both resume."
+    test: "pytest tests/fast/test_cloud_compute.py; NEXUS_LIVE=1 tests/live/test_kaggle_live.py"
+    evidence: "docs/results/account1/kaggle_probe.json, kaggle_transcode.json, kaggle_resume.json, lead_demos.json"
+    next: "Real quota-exhaustion message; real owner-GPU / Colab pull worker."
+  - id: ACC1-STORAGE
+    priority: 1
+    title: "Multi-account storage (Drive A/B/C), resumable transfers, SSRF-safe ingestion"
+    status: tested
+    acceptance: "Three real Drive accounts connected, upload/checksum/quota verified (Demo B)."
+    test: "pytest tests/fast/test_cloud_storage.py tests/fast/test_ingest.py; NEXUS_LIVE_DRIVE=1 tests/live/test_drive_live.py"
+    evidence: "fake-server tests over real HTTP; storage_resume.json (SIGKILL mid-upload); ingest_live.json, ingest_ssrf_live.json"
+    blocked_by: "Owner's Google OAuth client + consent for three accounts."
+    next: "Owner runs setup_google and connects drive_a/b/c; then the live Drive test and Demo E with Drive legs."
+  - id: ACC1-STUDIO
+    priority: 1
+    title: "NEXUS Remote Studio + scheduler"
+    status: verified
+    acceptance: "Every control performs a real operation; scheduler runs a real daily target with pause/resume and quota pause."
+    test: "pytest tests/fast/test_scheduler.py tests/fast/test_studio_api.py tests/e2e/test_studio_browser.py"
+    evidence: "studio_*.png, studio_e2e.json, lead_demos.json demo_F_scheduler"
+    next: "Permanent host (owner decision); account-connection flows against real Drive."
+  - id: ACC1-SECURITY
+    priority: 1
+    title: "Vault, owner auth, CSRF, headers, audit, worker tokens, route-auth inventory, threat model"
+    status: verified
+    acceptance: "No secrets in Git; every /api/v1 route authenticated; recovery checks pass."
+    test: "pytest tests/fast/test_cloud_security.py tests/fast/test_no_secrets.py tests/fast/test_contracts.py"
+    evidence: "docs/ACCOUNT1_SECURITY_MODEL.md, security_recovery.json (7/7), security_scan.json"
+    next: "Owner rotates the Kaggle tokens pasted in chat; backs up the vault key."
+  - id: ACC1-HOSTING
+    priority: 2
+    title: "Choose and deploy a permanent free host for the control plane"
+    status: blocked
+    blocked_by: "Owner decision (public deployment needs explicit approval); see docs/ACCOUNT1_PROVIDER_COMPARISON.md."
+    acceptance: "Studio reachable over HTTPS with NEXUS_API_TOKEN, no billing enabled."
+    test: "Demo A on the chosen host."
+    next: "Owner picks a host from the comparison."

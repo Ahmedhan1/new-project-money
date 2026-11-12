@@ -58,3 +58,12 @@ output, so the lead did the work sequentially. Every item below was driven by a 
 | Delivery | export verify + size-cap re-encode inside the deliver job; subtitle package with readiness manifest | gap list | `628ca30`, `dc40e8d` |
 | Windows | `windows-e2e.yml`: SETUP → START → API e2e (non-ASCII paths) → STATUS → BACKUP drill → STOP on a clean VM | WIN-1 | `33ac0af`, `3cb50aa` |
 | Release | `scripts/release_check.py`: fresh clone, hygiene, ruff, fast suite | release discipline | `1ed89a0` |
+
+## Account 1 (2026-11-12): cloud platform — branch work/account-1-cloud-platform, PR #4
+Lead verified real Kaggle GPU access first, then built the shared foundation (contracts v1, vault, migration 2, events,
+owner auth). Four sub-agents in separate worktrees: A security/architecture, B compute (Kaggle), C storage/Drive/ingest,
+D Studio/scheduler. Three hit the 5-hour usage limit and were resumed after the reset; all delivered. Lead integration
+found and fixed: CI backup-test regression, Studio CSRF/session mismatch, token-shaped literal in a test, a non-contract
+quota response, unauthenticated legacy routes. Demos C, D (worker loss + control-plane SIGKILL), F, G done for real;
+A done on the dev host; B and the Drive legs of E blocked on the owner's Google OAuth client. Fast suite 392 passed.
+Details: docs/ACCOUNT1_EXECUTION_REPORT.md, docs/ACCOUNT1_ACCEPTANCE_RESULTS.md.

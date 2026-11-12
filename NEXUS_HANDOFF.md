@@ -23,6 +23,13 @@ publishing packages, content factory) with a browser UI on `http://127.0.0.1:876
 - **Blocked:** `STO-3` Needs the user to create/authorise a free account (Backblaze B2 without a card, or Google Drive) and run `rclone config`. Never done by an agent.; `GEN-2` No GPU on the build machine and no authorised free GPU account. compute.SimulatedRemoteGPU is a simulation, not a provider.; `PUB-1` Needs the user's own OAuth client + explicit authorisation for each platform. Today NEXUS produces upload packages only.; `ANA-1` Same OAuth authorisation as PUB-1. The revenue ledger exists but holds only manual entries.
 <!-- /AUTO:STATE -->
 
+## Account 1 cloud platform (branch `work/account-1-cloud-platform`, PR #4)
+Remote GPU on the owner's single Kaggle account (2× T4, verified artifacts, resume after worker loss and after a
+control-plane SIGKILL), Remote Studio at `/studio`, scheduler, encrypted vault, owner auth/CSRF, SSRF-safe ingestion,
+Drive A/B/C adapters (tested against a fake Google server; real Drive needs the owner's OAuth client). Start here:
+`docs/ACCOUNT1_HANDOFF_TO_ACCOUNT2.md`, `docs/ACCOUNT1_ACCEPTANCE_RESULTS.md`, `docs/ACCOUNT1_SETUP_GUIDE.md`.
+**Never** add a second Kaggle account or rotate accounts to get around quotas.
+
 ## What actually works (evidence: `docs/results/demos/acceptance_*.json`, `docs/FEATURE_MATRIX.md`, `docs/FINAL_REPORT.md`)
 Sessions 4-6 (2026-11-12), all on a real 19.4-min public-domain NASA interview (project `prj_2b1a5a2f07`, outside Git):
 - **4-min cinematic edit (demo 1)**: director + licensed NASA/Openverse B-roll (motion-picked, 720p windows) + RNNoise
