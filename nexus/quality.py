@@ -378,7 +378,29 @@ def _sub_style(tl: dict) -> dict:
 
 
 def caption_box(tl: dict, text: str, W: int, H: int) -> dict:
-    """Where the ASS renderer (timeline/subs.write_ass) puts a bottom-centred cue: font size, margins and estimated lines."""
+    """Where the caption renderer puts a cue: font size, margins and estimated lines. Timelines with tl["captions"] use
+    the same layout function as the burner (fx/captions._layout, incl. platform safe-zone margins); others the legacy
+    subs.write_ass style."""
+    try:
+        from .fx import captions as fxc
+        o = fxc.options(tl.get("captions"))
+    except Exception:  # noqa: BLE001
+        o = None
+    if o is not None:
+        L = fxc._layout(W, H, o, o["style"])
+        size, ml, avail = L["size"], L["side"], W - 2 * L["side"]
+        lines = sum(max(1, math.ceil(len(seg) * 0.55 * size / max(avail, 1))) for seg in text.split("\n"))
+        if o["position"] == "bottom":
+            bottom = H - L["mv"]
+            top = max(0, int(bottom - lines * size * 1.2))
+        elif o["position"] == "top":
+            top = L["mv"]
+            bottom = int(top + lines * size * 1.2)
+        else:
+            top = int(H / 2 - lines * size * 0.6)
+            bottom = int(H / 2 + lines * size * 0.6)
+        return {"size": size, "margin_v": H - bottom, "margin_lr": ml, "lines": lines, "top": top, "bottom": bottom,
+                "style": {**SUB_STYLE, "caption_options": o}}  # colours: white text, dark outline (all fx caption styles)
     st = _sub_style(tl)
     size = int(H * st["size"]) if W >= H else int(W * st["size"] * 1.25)
     mv = int(H * st["margin_v"]) if W >= H else int(H * 0.16)
