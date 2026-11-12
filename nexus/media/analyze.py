@@ -186,7 +186,7 @@ def score_segments(segments: list[dict]) -> list[float]:
 
 
 def analyze(path: str | Path, language: str | None = None, transcribe: bool = True, understand: bool = True,
-            faces: bool = True, diarize: bool = True) -> dict:
+            faces: bool = True, diarize: bool = True, visual: bool = True) -> dict:
     info = ff.probe(path)
     out: dict = {"probe": info, "path": str(path), "duration": info["duration"], "scenes": [], "silences": [],
                  "transcript": None, "loudness": None, "black": [], "freeze": [], "quality": None, "repetitions": [], "issues": [],
@@ -248,4 +248,14 @@ def analyze(path: str | Path, language: str | None = None, transcribe: bool = Tr
             und.enrich(out, path)
         except Exception as e:  # noqa: BLE001 - best effort; the base analysis stands
             out["not_available"].append(f"media understanding layer failed: {type(e).__name__}: {e}"[:200])
+    if visual and info["video"]:
+        from . import visual as vis
+        if vis.available():  # never downloads here; without the model shots keep their measured statistics only
+            vis.enrich(out, path)
+            if out["visual"].get("available"):
+                out["not_available"] = [x for x in out["not_available"] if not x.startswith("object")] + [
+                    "object/action recognition (scene labels are zero-shot SigLIP over a fixed generic list)"]
+        else:
+            out["visual"] = {"available": False, "method": "visual model not installed (lexical B-roll fallback)",
+                             "download_mb": vis.DOWNLOAD_MB}
     return out
