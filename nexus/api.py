@@ -263,11 +263,18 @@ def api_op(pid: str, r: OpReq):
             tl = ops.set_global(tl, **r.args)
         elif r.op == "reframe":
             tl = ops.reframe(tl, **r.args)
+        elif r.op == "insert_video":  # from the scene/B-roll browser: a source range as a new clip
+            if r.args.get("src") not in {m["path"] for m in p.data["media"]}:
+                raise HTTPException(400, "only media imported into this project can be inserted")
+            clip = ops.video_clip(r.args["src"], float(r.args["in"]), float(r.args["out"]))
+            tl = ops.insert(tl, clip, r.args.get("index"))
+        elif r.op == "restore":  # bring an earlier version back as the newest one (history is kept)
+            tl = p.timeline(r.branch, vid=r.args["version"])
         else:
             raise HTTPException(400, f"unknown op {r.op}")
     except (KeyError, ValueError, TypeError) as e:
         raise HTTPException(400, str(e))
-    if r.op in ("ripple_delete", "trim", "split", "move") and _analysis(p):
+    if r.op in ("ripple_delete", "trim", "split", "move", "insert_video") and _analysis(p):
         edit.retime_subtitles(tl, _analysis(p))
     p.save_timeline(tl, f"{r.op} {r.clip or ''}".strip(), r.branch)
     return _tl_view(tl)
@@ -507,6 +514,73 @@ def api_channels():
 @app.post("/api/channels")
 def api_channel(r: ChannelReq):
     return publish.create_channel(r.name, r.niche, r.audience, r.languages, r.platforms, r.pillars)
+
+
+# ---------------------------------------------------------------- cinematic workspace (Account 2)
+@app.get("/api/fx/catalog")
+def api_fx_catalog():
+    """Everything the editor's effect/transition/colour/caption panels may offer - read from the renderer itself,
+    so the UI never shows a control the renderer cannot render."""
+    from .fx import captions, effects, lut, post, transitions
+    luts = []
+    try:
+        luts = lut.list_luts()
+    except Exception:  # noqa: BLE001 - a broken LUT folder must not hide the rest of the catalogue
+        pass
+    return {"transitions": sorted(transitions.NAMES), "aliases": getattr(transitions, "ALIASES", {}),
+            "effects": list(effects.KNOWN), "grades": sorted(post.GRADES), "luts": luts, "caption_styles": list(captions.STYLES),
+            "keyframe_props": list(getattr(effects, "KEYFRAME_PROPS", ("x", "y", "scale", "volume"))),
+            "fits": ["cover", "contain", "blur"]}
+
+
+@app.get("/api/export/profiles")
+def api_export_profiles():
+    from . import export
+    return export.profiles()
+
+
+class ExportReq(BaseModel):
+    render: str
+    codec: str = "h264"
+    quality: str = "balanced"
+    width: int | None = None
+    height: int | None = None
+    fps: float | None = None
+    max_mb: float | None = None
+    audio: str | None = "aac"
+
+
+@app.post("/api/projects/{pid}/export")
+def api_export(pid: str, r: ExportReq):
+    _project(pid)
+    q = r.model_dump()
+    q["max_bytes"] = int(q.pop("max_mb") * 1e6) if r.max_mb else None
+    return jobs.submit("export", {"project": pid, **q}, pid)
+
+
+@app.get("/api/projects/{pid}/scenes")
+def api_scenes(pid: str):
+    """Scene browser: every detected shot of every source with a cached thumbnail at its middle."""
+    from .media import ff
+    p = _project(pid)
+    out = []
+    for m in p.data["media"]:
+        an = _analysis(p).get(m["path"])
+        if not an:
+            continue
+        tdir = p.dir / "work" / "thumbs" / m["id"]
+        tdir.mkdir(parents=True, exist_ok=True)
+        for i, (a, b) in enumerate(an.get("scenes") or []):
+            t = (a + b) / 2
+            f = tdir / f"s{i:04d}.jpg"
+            if not f.exists():
+                try:
+                    ff.run(["-ss", f"{t:.3f}", "-i", m["path"], "-frames:v", "1", "-vf", "scale=240:-2", "-q:v", "5", str(f)], op="thumbnail")
+                except Exception:  # noqa: BLE001 - a missing thumbnail must not break the browser
+                    continue
+            out.append({"media": m["id"], "src": m["path"], "index": i, "in": round(a, 3), "out": round(b, 3),
+                        "thumb": str(f.relative_to(p.dir))})
+    return out
 
 
 @app.get("/api/platforms")

@@ -319,3 +319,25 @@ def deliver_(job: jobs.Job) -> dict:
     return job.stage("render-check-package", lambda: publish.deliver(p, tl, a["platforms"], a.get("title") or p.name,
                                                                      a.get("description", ""), a.get("lang") or tl.get("lang", "en"),
                                                                      analysis_by_src=_analysis(p) or None))
+
+
+@jobs.handler("export")
+def export_(job: jobs.Job) -> dict:
+    """Re-encode a rendered file with chosen export settings (codec/quality/size target) and verify the result."""
+    from . import export, project as prj
+    a = job.params
+    p = prj.Project(a["project"])
+    src = (p.dir / a["render"]).resolve()
+    if not str(src).startswith(str(p.dir.resolve())) or not src.is_file():
+        raise ValueError(f"render not found: {a['render']}")
+    ext = {"av1": ".mkv"}.get(a.get("codec", "h264"), ".mp4")
+    out = p.dir / "exports" / f"{src.stem}_{a.get('codec', 'h264')}_{a.get('quality', 'balanced')}{ext}"
+    out.parent.mkdir(parents=True, exist_ok=True)
+
+    def run():
+        rep = export.export(src, out, codec=a.get("codec", "h264"), quality=a.get("quality", "balanced"), width=a.get("width"),
+                            height=a.get("height"), fps=a.get("fps"), max_bytes=a.get("max_bytes"), audio=a.get("audio", "aac"))
+        rep["output"] = str(out.relative_to(p.dir)) if out.exists() else None
+        return rep
+
+    return job.stage("encode-verify", run)
