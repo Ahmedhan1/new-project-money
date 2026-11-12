@@ -343,3 +343,204 @@ def typography(text: str, tag: str) -> str:
     if p["subtitles"].get("numerals") and p["subtitles"]["numerals"] != "latn":
         t = convert_numerals(t, p["subtitles"]["numerals"])
     return t
+
+
+# ------------------------------------------------------------------ dialect adaptation (rule-based, labelled as such)
+_AR_WORD = r"(?<![\u0600-\u06FF]){w}(?![\u0600-\u06FF])"
+
+
+def adapt(text: str, tag: str) -> tuple[str, list[str]]:
+    """Apply a dialect pack's lexicon and patterns to (MSA) machine translation. Returns (text, changes).
+    This is a rule-based adaptation layer: it changes function words and fixed expressions only. Packs that use it
+    carry needs_native_review: true and a quality_statement saying exactly that."""
+    p = pack(tag)
+    d = p.get("dialect") or {}
+    changes: list[str] = []
+    out = text
+    for e in d.get("lexicon") or []:
+        for msa in e.get("msa") or []:
+            pat = _AR_WORD.format(w=re.escape(msa)) if p["script"] == "Arab" else rf"\b{re.escape(msa)}\b"
+            new, n = re.subn(pat, e["dialect"], out)
+            if n:
+                changes.append(f"{msa} -> {e['dialect']} (x{n})")
+                out = new
+    for pt in d.get("patterns") or []:
+        new, n = re.subn(pt["match"], pt["replace"], out)
+        if n:
+            changes.append(f"{pt.get('note', pt['match'])} (x{n})")
+            out = new
+    return out, changes
+
+
+def dialect_density(text: str, tag: str) -> float:
+    """Share of words that are typical forms of the pack's dialect (0 for packs without a dialect profile)."""
+    markers = set((pack(tag).get("dialect") or {}).get("markers") or [])
+    words = [w.strip("،.؟!,?") for w in text.split()]
+    return sum(1 for w in words if w in markers) / max(1, len(words)) if markers else 0.0
+
+
+# ------------------------------------------------------------------ caption segmentation by the pack's rules
+def _units(text: str, mode: str) -> list[str]:
+    if mode == "char":  # CJK: no spaces; a unit is a character, latin runs and numbers stay whole
+        return re.findall(r"[A-Za-z0-9][A-Za-z0-9.'%-]*|\s+|.", text)
+    return text.split()
+
+
+def segment(text: str, start: float, end: float, tag: str) -> list[dict]:
+    """Cues for `text` spoken between start and end, obeying the pack's max chars/line, lines/cue and reading speed
+    (chars per second). Breaks prefer the pack's break_after punctuation; CJK breaks between characters. Cues never
+    overlap; when the text cannot be read in the time available at max_cps the cues say so (`over_cps`)."""
+    r = subtitle_rules(tag)
+    mode = r.get("line_break", "space")
+    cap = int(r["max_chars_per_line"]) * int(r.get("max_lines", 2))
+    joiner = "" if mode == "char" else " "
+    units = [u for u in _units(text.strip(), mode) if u.strip()] if mode == "char" else _units(text.strip(), mode)
+    chunks, cur = [], []
+    brk = r.get("break_after", "")
+    for u in units:
+        cand = joiner.join(cur + [u])
+        if cur and len(cand) > cap:
+            # break after the last punctuation in the chunk when it leaves a reasonable piece, else at the limit
+            k = max((i for i, x in enumerate(cur) if x[-1:] in brk), default=-1)
+            if k >= 0 and len(joiner.join(cur[:k + 1])) >= cap * 0.35:
+                chunks.append(joiner.join(cur[:k + 1]))
+                cur = cur[k + 1:]
+            else:
+                chunks.append(joiner.join(cur))
+                cur = []
+        cur.append(u)
+        if len(joiner.join(cur)) >= cap * 0.6 and u[-1:] in r.get("break_after", ""):
+            chunks.append(joiner.join(cur))
+            cur = []
+    if cur:
+        chunks.append(joiner.join(cur))
+    total = sum(len(c) for c in chunks) or 1
+    span = max(0.1, end - start)
+    cues, t = [], start
+    gap = float(r.get("min_gap", 0.08))
+    for i, c in enumerate(chunks):
+        d = span * len(c) / total
+        a, b = t, t + d - (gap if i < len(chunks) - 1 else 0)
+        lines = _wrap(c, int(r["max_chars_per_line"]), mode)
+        cues.append({"start": round(a, 3), "end": round(max(a + 0.05, b), 3), "text": "\n".join(lines),
+                     "over_cps": len(c) / max(0.05, b - a) > float(r["max_cps"]) + 1e-6})
+        t += d
+    return cues
+
+
+def _wrap(text: str, width: int, mode: str) -> list[str]:
+    if mode == "char":
+        s = text.replace(" ", "") if not re.search(r"[A-Za-z]{2,}", text) else text
+        if len(s) <= width:
+            return [s]
+        mid = len(s) / 2  # two balanced lines, split after the punctuation nearest the middle when there is one
+        cands = [i + 1 for i, ch in enumerate(s[:-1]) if ch in "，。！？；：、,.!?;:" and abs(i + 1 - mid) <= width / 2]
+        k = min(cands, key=lambda i: abs(i - mid)) if cands else int(round(mid))
+        k = max(len(s) - width, min(width, k))
+        return [s[:k], s[k:]]
+    words, lines, cur = text.split(), [], ""
+    for w in words:
+        if cur and len(cur) + 1 + len(w) > width:
+            lines.append(cur)
+            cur = w
+        else:
+            cur = f"{cur} {w}".strip()
+    return lines + ([cur] if cur else [])
+
+
+# ------------------------------------------------------------------ voices (licence-gated)
+def voice_for(tag: str, allow_noncommercial: bool = False) -> dict:
+    """The first voice of the pack whose commercial_use is "yes". Voices marked "no" or "unverified" are only returned
+    with allow_noncommercial=True, and then carry `licence_warning`. Raises LookupError with the reason otherwise."""
+    p = pack(tag)
+    voices = (p.get("tts") or {}).get("voices") or []
+    ok = [v for v in voices if v.get("commercial_use") == "yes"]
+    if ok:
+        return dict(ok[0])
+    if allow_noncommercial and voices:
+        v = dict(voices[0])
+        v["licence_warning"] = f"{v['id']}: commercial use {v.get('commercial_use')} - not cleared for monetised or client work"
+        return v
+    states = ", ".join(f"{v['id']} ({v.get('commercial_use')})" for v in voices) or "none listed"
+    raise LookupError(f"no voice with a verified commercial-use licence for {p['name']} [{states}]: produce subtitles, "
+                      "or import a voice track you have the rights to")
+
+
+# ------------------------------------------------------------------ fonts
+def font_file(tag: str) -> str | None:
+    """First existing font file for the pack (Windows/user/system paths expanded), or None if none is installed."""
+    import os
+    from pathlib import Path
+    sets = font_sets()
+    win = os.environ.get("WINDIR", "C:/Windows") + "/Fonts"
+    user = os.path.expanduser("~/.local/share/fonts")
+    for name in pack(tag).get("fonts") or []:
+        for f in (sets.get(name) or {}).get("files") or []:
+            f = f.replace("{WINFONTS}", win).replace("{USERFONTS}", user)
+            if Path(f).exists():
+                return f
+    return None
+
+
+@functools.lru_cache(maxsize=1)
+def _installed_families() -> frozenset[str]:
+    import subprocess
+    try:
+        out = subprocess.run(["fc-list", ":", "family"], capture_output=True, text=True, timeout=20).stdout
+    except (OSError, subprocess.SubprocessError):
+        return frozenset()  # no fontconfig (e.g. Windows without it): libass falls back on its own
+    return frozenset(f.strip() for line in out.splitlines() for f in line.split(","))
+
+
+def font_family(tag: str) -> str:
+    """fontconfig family name for libass (ASS captions): the first family of the pack's font sets that is installed
+    here; if fontconfig cannot be queried, the first declared family."""
+    sets = font_sets()
+    inst = _installed_families()
+    first = None
+    for name in pack(tag).get("fonts") or []:
+        for fam in (sets.get(name) or {}).get("families") or []:
+            first = first or fam
+            if not inst or fam in inst:
+                return fam
+    return first or "DejaVu Sans"
+
+
+# ------------------------------------------------------------------ language QA for cues
+def qa(cues: list[dict], tag: str, glossary: dict | None = None, source_count: int | None = None) -> dict:
+    """Deterministic checks of target-language cues: script, empty cues, overlap, reading speed, line length, bidi
+    sanity, glossary terms, coverage vs the source cue count, and the pack's review requirements."""
+    p = pack(tag)
+    r = p["subtitles"]
+    checks = []
+
+    def add(cid, ok, detail, severity="major"):
+        checks.append({"id": cid, "ok": bool(ok), "detail": detail, "severity": severity})
+
+    texts = [str(c.get("text", "")) for c in cues]
+    empty = [i for i, t in enumerate(texts) if not t.strip()]
+    add("empty_cues", not empty, f"{len(empty)} empty cue(s)" if empty else "none")
+    wrong = [i for i, t in enumerate(texts) if t.strip() and own_share(t, p["tag"]) < 0.6]
+    add("script", not wrong, f"cues {wrong[:6]} are mostly not in {p['script']} script (untranslated?)" if wrong else f"all in {p['script']}")
+    ov = [i for i in range(1, len(cues)) if cues[i]["start"] < cues[i - 1]["end"] - 1e-3]
+    add("overlap", not ov, f"cues {ov[:6]} overlap the previous one" if ov else "none")
+    fast = [i for i, c in enumerate(cues) if len(texts[i].replace("\n", "")) / max(0.05, c["end"] - c["start"]) > float(r["max_cps"]) * 1.15]
+    add("reading_speed", len(fast) <= max(1, len(cues) // 10), f"{len(fast)} cue(s) above {r['max_cps']} chars/s", "minor")
+    long_lines = [i for i, t in enumerate(texts) if any(len(ln) > int(r["max_chars_per_line"]) + 2 for ln in t.split("\n"))]
+    add("line_length", not long_lines, f"cues {long_lines[:6]} exceed {r['max_chars_per_line']} chars/line" if long_lines else "ok", "minor")
+    if p["direction"] == "rtl":
+        bad = [i for i, t in enumerate(texts) if bidi_problems(t, "rtl")]
+        add("bidi", not bad, f"unbalanced bidi controls in cues {bad[:6]}" if bad else "ok", "minor")
+    if glossary:
+        joined = " ".join(texts)
+        miss = [f"{s} -> {t}" for s, t in glossary.items() if t not in joined]
+        add("glossary", not miss, f"expected terms missing: {miss[:6]}" if miss else "all glossary terms used")
+    if source_count is not None:
+        add("coverage", len(cues) >= 0.7 * source_count, f"{len(cues)} target cues for {source_count} source cues")
+    if p.get("needs_native_review"):
+        add("native_review", False, (p.get("dialect") or {}).get("quality_statement", "native speaker review required"), "minor")
+    voices = (p.get("tts") or {}).get("voices") or []
+    add("voice_licence", any(v.get("commercial_use") == "yes" for v in voices),
+        "a commercially cleared voice exists" if any(v.get("commercial_use") == "yes" for v in voices) else
+        "no voice with a verified commercial licence: subtitles only unless you supply a licensed voice", "minor")
+    return {"tag": p["tag"], "checks": checks, "passed": all(c["ok"] or c["severity"] == "minor" for c in checks)}

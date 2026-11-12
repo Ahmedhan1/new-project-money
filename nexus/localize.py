@@ -6,16 +6,17 @@ import re
 
 from . import llm, qa
 from .media import ff
-from .speech import mt, tts
+from .speech import mt, packs as lp, tts
 from .timeline import subs
 from .timeline.render import clip_duration, clip_starts
 
-LANGS = {
-    "en": {"name": "English", "tts": "en"},
-    "ar": {"name": "Modern Standard Arabic", "tts": "ar"},
-    "ar-EG": {"name": "Egyptian Arabic", "tts": "ar"},
-    "de": {"name": "German", "tts": "de"},
-}
+def _langs() -> dict:
+    """Language table derived from the language packs (nexus/registry/languages.yaml)."""
+    from .speech import packs as _p
+    return {t: {"name": x["name"], "tts": t.split("-")[0]} for t, x in _p.packs().items()}
+
+
+LANGS = _langs()
 
 STOPWORDS = set("that this with from have they their there which would could about than then also been were what when will more most very much many some such into over only just even because while where these those other being does".split())
 PACE = {"ar": 0.85}  # the Arabic voice reads slowly; this brings it to a natural narration pace
@@ -28,15 +29,31 @@ EGYPTIAN_MARKERS = ["ده", "دي", "مش", "عشان", "علشان", "دلوق�
                     "إحنا", "احنا", "كمان", "بقى", "لسه", "عايز", "هي دي", "فيه", "زي", "يعني"]
 
 
+def packs() -> dict:
+    return lp.packs()
+
+
+def pack(tag: str) -> dict:
+    return lp.pack(tag)
+
+
+def qa_cues(cues: list[dict], tag: str, **kw) -> dict:
+    """Language QA of target-language caption cues (speech/packs.qa)."""
+    return lp.qa(cues, tag, **kw)
+
+
 def _instruction(lang: str) -> str:
-    if lang == "ar-EG":
-        return EGYPTIAN_STYLE
+    style = ((lp.get(lang) or {}).get("dialect") or {}).get("llm_style")
+    if style:
+        return style
     extra = " Write numbers the way a narrator would say them." if lang != "en" else ""
     return f"{LANGS[lang]['name']}. Natural, native phrasing for a spoken video narration - adapt, do not translate word for word.{extra}"
 
 
 def foreign_words(text: str, lang: str) -> list[str]:
     """Words written in the wrong script for the target language (code-switching artefacts)."""
+    if lp.get(lang):
+        return lp.foreign_runs(text, lang)
     bad = []
     for w in re.findall(r"[^\W\d_]+", text):
         arabic = sum("\u0600" <= ch <= "\u06ff" or "\ufb50" <= ch <= "\ufefc" for ch in w)
@@ -61,11 +78,25 @@ def translate_lines(lines: list[str], lang: str, context: str = "") -> list[str]
     try:
         out = mt.translate(lines, lang)
     except Exception:  # model missing / not enough RAM -> LLM path
-        return llm_translate_lines(lines, lang, context)
+        out = llm_translate_lines(lines, lang, context)
+        return [_finish_line(x, lang) for x in out]
     for i, (src, got) in enumerate(zip(lines, out)):
         if not got or foreign_words(got, lang) or mt.too_long(src, got, lang):
-            out[i] = llm_translate_lines([src], lang, context)[0]
-    return out
+            try:
+                out[i] = llm_translate_lines([src], lang, context)[0]
+            except Exception:  # no local LLM installed: keep the MT line; language QA reports what is wrong with it
+                pass
+    return [_finish_line(x, lang) for x in out]
+
+
+def _finish_line(text: str, lang: str) -> str:
+    """Dialect adaptation (rule-based, for packs with a dialect profile) and the language's typography."""
+    p = lp.get(lang)
+    if not p:
+        return text
+    if (p.get("dialect") or {}).get("lexicon"):
+        text, _ = lp.adapt(text, lang)
+    return lp.typography(text, lang)
 
 
 def llm_translate_lines(lines: list[str], lang: str, context: str = "") -> list[str]:
@@ -116,6 +147,11 @@ def language_review(source: list[str], target: list[str], lang: str, back: list[
         dens = hits / max(len(words), 1)
         checks.append(qa._c("Egyptian dialect markers", dens >= 0.06,
                             f"{dens:.0%} of words are typical Masri forms" + ("" if dens >= 0.06 else " - reads as MSA, not Egyptian"), "major"))
+    elif (lp.get(lang) or {}).get("dialect"):
+        dens = lp.dialect_density(joined, lang)
+        name = lp.pack(lang)["name"]
+        checks.append(qa._c(f"{name} dialect markers", dens >= 0.04,
+                            f"{dens:.0%} of words are typical {name} forms" + ("" if dens >= 0.04 else " - reads as MSA"), "major"))
     if back is not None:
         sims = [qa.text_similarity(s, b) for s, b in zip(source, back)]
         low = [i + 1 for i, x in enumerate(sims) if x < 0.35]
@@ -151,7 +187,7 @@ def narration_units(tl: dict, analyses: dict | None = None) -> list[dict]:
 
 
 def localize(project, tl: dict, lang: str, analyses: dict | None = None, context: str = "", dub: bool = True,
-             source_lang: str = "en") -> tuple[dict, dict]:
+             source_lang: str = "en", allow_noncommercial: bool = False) -> tuple[dict, dict]:
     """Return (localised timeline, language review). The source timeline is not modified."""
     units = narration_units(tl, analyses)
     out = copy.deepcopy(tl)
@@ -163,26 +199,39 @@ def localize(project, tl: dict, lang: str, analyses: dict | None = None, context
     else:
         lines = translate_lines(src_lines, lang, context)
         olines = translate_lines(overlay_texts, lang, context) if overlay_texts else []
-        back = llm_translate_lines(lines, source_lang, context)  # different model than the translator = independent evidence
+        try:
+            back = llm_translate_lines(lines, source_lang, context)  # different model than the translator = independent evidence
+        except Exception as e:  # noqa: BLE001 - local LLM not installed: no back-translation evidence, said in the review
+            back, back_note = None, f"back-translation not run ({type(e).__name__}: local LLM unavailable) - meaning was not cross-checked"
     k = 0
     for c in out["clips"]:
         for t in c.get("text", []):
             t["text"], t["lang"] = olines[k], lang
             k += 1
     review = language_review(src_lines, lines, lang, back)
+    if lang != source_lang and back is None and "back_note" in locals():
+        review["checks"].append(qa._c(f"back-translation [{lang}]", False, back_note, "minor"))
     review["lines"] = [{"source": s, "target": t} for s, t in zip(src_lines, lines)]
     voice_info = None
+    voice_id = None
+    if dub and lang != source_lang and lp.get(lang):
+        try:
+            voice_id = lp.voice_for(lang, allow_noncommercial)["id"]
+        except LookupError as e:
+            review["checks"].append(qa._c(f"dub [{lang}]", False, f"not produced: {e}", "minor"))
+            dub = False
     if dub and lang != source_lang:
         out["audio"] = []
         adir = project.dir / "audio" / lang
         for u, line in zip(units, lines):
             c = out["clips"][u["clip"]]
             wav = adir / f"u{u['clip']:03d}.wav"
-            voice_info = tts.synthesize(line, wav, LANGS[lang]["tts"], length_scale=PACE.get(LANGS[lang]["tts"], 1.0))
+            voice_info = tts.synthesize(line, wav, LANGS[lang]["tts"], voice=voice_id, length_scale=PACE.get(LANGS[lang]["tts"], 1.0))
             slot = clip_duration(c)
             need = voice_info["duration"] + 0.25
             if need > slot * 1.05:  # 1st: a slightly brisker read
-                voice_info = tts.synthesize(line, wav, LANGS[lang]["tts"], length_scale=PACE.get(LANGS[lang]["tts"], 1.0) * 0.88)
+                voice_info = tts.synthesize(line, wav, LANGS[lang]["tts"], voice=voice_id,
+                                            length_scale=PACE.get(LANGS[lang]["tts"], 1.0) * 0.88)
                 need = voice_info["duration"] + 0.25
             if need > slot:  # 2nd: stretch the picture so the sentence is never chopped
                 if c["type"] == "video":
@@ -202,7 +251,7 @@ def localize(project, tl: dict, lang: str, analyses: dict | None = None, context
             wav = adir / f"u{u['clip']:03d}.wav"
             st = starts[u["clip"]] + 0.1
             out["audio"].append({"src": str(wav), "start": round(st, 3), "clip": out["clips"][u["clip"]]["id"]})
-            cues += subs.cues_from_text(line, st, st + ff.duration(wav))
+            cues += _cues(line, st, st + ff.duration(wav), lang)
         out["subtitles"] = subs.fix_timing(cues)
         review["voice"] = {k2: voice_info[k2] for k2 in ("voice", "license", "commercial", "engine")} if voice_info else None
         if voice_info and not voice_info["commercial"]:
@@ -213,7 +262,17 @@ def localize(project, tl: dict, lang: str, analyses: dict | None = None, context
         cues = []
         for u, line in zip(units, lines):
             c = out["clips"][u["clip"]]
-            cues += subs.cues_from_text(line, starts[u["clip"]] + 0.1, starts[u["clip"]] + clip_duration(c) - 0.1)
+            cues += _cues(line, starts[u["clip"]] + 0.1, starts[u["clip"]] + clip_duration(c) - 0.1, lang)
         out["subtitles"] = subs.fix_timing(cues)
+    if lp.get(lang) and out.get("subtitles"):
+        for c in lp.qa(out["subtitles"], lang)["checks"]:
+            review["checks"].append(qa._c(f"subtitles {c['id']} [{lang}]", c["ok"], c["detail"], c["severity"]))
     review["passed"] = all(c["ok"] or c["severity"] == "minor" for c in review["checks"])
     return out, review
+
+
+def _cues(text: str, start: float, end: float, lang: str) -> list[dict]:
+    """Caption cues by the language pack's rules (reading speed, line length, CJK character breaking)."""
+    if lp.get(lang):
+        return [{k: v for k, v in c.items() if k != "over_cps"} for c in lp.segment(text, start, end, lang)]
+    return subs.cues_from_text(text, start, end)

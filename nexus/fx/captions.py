@@ -131,7 +131,11 @@ def write_ass(cues: list[dict], path: Path, W: int, H: int, lang: str = "en", op
         return subs.write_ass(cues, path, W, H, lang, legacy_style)
     style = o["style"]
     L = _layout(W, H, o, style)
-    font = "Noto Naskh Arabic" if _is_ar(lang) else "DejaVu Sans"
+    try:  # the language pack's font family (fontconfig name), e.g. WenQuanYi Zen Hei for zh, FreeSans for hi
+        from ..speech import packs
+        font = packs.font_family(lang)
+    except Exception:  # noqa: BLE001 - unknown language: previous behaviour
+        font = "Noto Naskh Arabic" if _is_ar(lang) else "DejaVu Sans"
     white, black = "&H00FFFFFF", "&H00101010"
     hi = ass_colour(o["highlight"])
     size = L["size"]

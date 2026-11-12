@@ -17,6 +17,14 @@ _tr = None
 _sp = None
 
 
+def target_tag(lang: str) -> str:
+    """MADLAD target tag: the legacy table, else the language pack's mt.target (packs list only tags MADLAD supports)."""
+    if lang in TAGS:
+        return TAGS[lang]
+    from . import packs
+    return packs.pack(lang)["mt"]["target"]
+
+
 def load():
     global _tr, _sp
     if _tr is None:
@@ -48,7 +56,7 @@ def too_long(src: str, tgt: str, lang: str) -> bool:
 
 
 def _decode(tr, sp, lines: list[str], lang: str, **kw) -> list[str]:
-    toks = [sp.encode(f"<2{TAGS[lang]}> {l}", out_type=str) for l in lines]
+    toks = [sp.encode(f"<2{target_tag(lang)}> {l}", out_type=str) for l in lines]
     res = tr.translate_batch(toks, max_batch_size=4, **kw)
     out = []
     for src, r in zip(lines, res):
