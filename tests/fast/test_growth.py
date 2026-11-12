@@ -77,8 +77,9 @@ def test_build_short_exact_cuts_and_word_timing(home):
     sents = shorts.sentences(an)[m["sentences"][0]:m["sentences"][1] + 1]
     plan = shorts.clip_plan(sents, m["start"], m["end"])
     assert (tl["width"], tl["height"]) == (1080, 1920)
-    assert abs(total_duration(tl) - sum(b - a for a, b in plan)) < 1e-6
-    assert abs(total_duration(tl) - m["tight_duration"]) < 1e-3
+    extra = total_duration(tl) - sum(b - a for a, b in plan)      # the out added by shorts.add_out (pause, never a word)
+    assert -1e-6 <= extra <= shorts.OUT_EXTEND_S + 1e-6 and tl["clips"][-1]["audio_fade_out"] > 0
+    assert -1e-3 <= total_duration(tl) - m["tight_duration"] <= shorts.OUT_EXTEND_S + 1e-3   # + the out (shorts.add_out)
     assert tl["clips"][0]["in"] == m["start"] and tl["clips"][-1]["out"] == m["end"]
     assert len(tl["clips"]) == len(sents)  # 0.5 s pauses > 0.35 s: one jump cut per sentence boundary
     assert all(c["fit"] == "blur" for c in tl["clips"])
@@ -105,7 +106,7 @@ def test_fallback_without_transcript():
     assert ms and all(m["basis"] == "scenes" and "no transcript" in m["note"] for m in ms)
     assert all(18 <= m["duration"] <= 58 for m in ms)
     tl = shorts.build_short("/src/x.mp4", an, ms[0])
-    assert not tl["subtitles"] and tl["growth_notes"] and abs(total_duration(tl) - ms[0]["duration"]) < 1e-6
+    assert not tl["subtitles"] and tl["growth_notes"] and -1e-6 <= total_duration(tl) - ms[0]["duration"] <= shorts.OUT_EXTEND_S + 1e-6
 
 
 def test_make_shorts_branches(home):
