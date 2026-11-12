@@ -136,5 +136,8 @@ def render_tracked_mask(src: str | Path, out: str | Path, track: dict, *, effect
             fx = np.zeros_like(frame)
         m3 = m[..., None]
         return (frame * (1 - m3) + fx * m3 + 0.5).astype(np.uint8)
+    import hashlib
+    import json
+    jk = hashlib.sha256(json.dumps([samples, effect, region, amount, feather]).encode()).hexdigest()[:16]
     return framepipe.process_video(src, out, fn, start=float(track.get("start", 0)),
-                                   duration=len(samples) / float(track["fps"]))
+                                   duration=len(samples) / float(track["fps"]), job_key=jk)

@@ -209,8 +209,9 @@ ENABLE = {
                      "the remote folder - not feasible on this CPU",
     "video_to_video": "a GPU provider (not implemented)", "inpaint": "SD 1.5 inpainting in the generation environment (not wired yet)",
     "outpaint": "SD 1.5 inpainting in the generation environment (not wired yet)",
-    "upscale": "Real-ESRGAN (BSD-3) in the generation environment (not wired yet)",
-    "interpolate": "RIFE (MIT) in the generation environment (not wired yet); FFmpeg minterpolate exists as a non-AI fallback",
+    "upscale": "not a generation task: nexus.enhance.upscale (FFmpeg lanczos always; Real-ESRGAN general-x4v3 on CPU after a "
+               "5 MB consented download) - labelled edited-source",
+    "interpolate": "not a generation task: nexus.enhance.interpolate (FFmpeg minterpolate mci/blend); RIFE is not wired",
 }
 
 

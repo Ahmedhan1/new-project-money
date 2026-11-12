@@ -197,7 +197,8 @@ def _esrgan(src: Path, dest: Path, params: dict, start: float, duration: float |
     def fn(frame, _i):
         y = esrgan.upscale_rgb(frame, wpath, tile=tile)
         return y if (y.shape[1], y.shape[0]) == (ow, oh) else cv2.resize(y, (ow, oh), interpolation=cv2.INTER_AREA)
-    framepipe.process_video(src, dest, fn, out_size=(ow, oh), start=start, duration=duration, chunk_s=float(params.get("chunk_s", 5)))
+    framepipe.process_video(src, dest, fn, out_size=(ow, oh), start=start, duration=duration, chunk_s=float(params.get("chunk_s", 5)),
+                            job_key=f"esrgan:{s}:{tile}")
 
 
 def upscale(src, out=None, scale: int = 2, method: str = "lanczos", **kw) -> dict:

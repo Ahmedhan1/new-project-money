@@ -23,7 +23,7 @@ from ..generate import downloads, metrics
 from ..media import ff
 from . import run
 
-SEG = {"ad": 60.0, "interview": 30.0, "broll": 40.0}
+SEG = {"ad": 62.0, "interview": 30.0, "broll": 40.0}  # starts checked for content (ad 60-61 s is a fade to black)
 
 
 def _src(i: str) -> Path:
@@ -91,7 +91,8 @@ def bench_one(i: str, work: Path, out: Path, esrgan_s: float = 1.0) -> dict:
     hw, hh = W // 4 * 2, H // 4 * 2
     small = _cut(seg1, w / "small.mp4", 0, esrgan_s, f"scale={hw}:{hh}:flags=area")
     naive = _cut(small, w / "rt_bicubic.mp4", 0, esrgan_s, f"scale={W}:{H}:flags=bicubic")
-    rt = {"bicubic": _cmp(seg1, naive)}
+    nearest = _cut(small, w / "rt_nearest.mp4", 0, esrgan_s, f"scale={W}:{H}:flags=neighbor")
+    rt = {"nearest": _cmp(seg1, nearest), "bicubic": _cmp(seg1, naive)}
     lz = _timed("upscale", small, w / "rt_lanczos.mp4", scale=2, method="lanczos", denoise=0.1, sharpen=0.4)
     lz_fix = _cut(Path(lz["path"]), w / "rt_lanczos_fit.mp4", 0, esrgan_s, f"scale={W}:{H}:flags=lanczos")
     rt["lanczos_baseline"] = {**_cmp(seg1, lz_fix), **{k: lz[k] for k in ("seconds", "s_per_frame")}}
@@ -109,7 +110,7 @@ def bench_one(i: str, work: Path, out: Path, esrgan_s: float = 1.0) -> dict:
     if W <= 1280:
         nat = {"lanczos": _timed("upscale", seg1, w / "nat_lanczos.mp4", scale=2, method="lanczos")}
         npaths, nlabels = [Path(nat["lanczos"]["path"])], ["lanczos+denoise+unsharp x2"]
-        if have_esr:
+        if have_esr and W <= 640:  # 4x of a 720p frame is 5120x2880: ~30 s/frame here, skipped
             nat["esrgan"] = _timed("upscale", seg1, w / "nat_esrgan.mp4", scale=2, method="esrgan", tile=256)
             npaths.append(Path(nat["esrgan"]["path"]))
             nlabels.append("Real-ESRGAN x4v3 x2")

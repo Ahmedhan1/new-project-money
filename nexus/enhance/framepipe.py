@@ -47,7 +47,9 @@ def _encoder(out, w, h, fps, alpha, crf):
 def process_video(src: str | Path, out: str | Path, fn: Callable[[np.ndarray, int], np.ndarray], *,
                   out_size: tuple[int, int] | None = None, start: float = 0.0, duration: float | None = None,
                   chunk_s: float = 10.0, checkpoint: str | Path | None = None, audio: bool = True, alpha: bool = False,
-                  fps: float | None = None, crf: int = 16) -> dict:
+                  fps: float | None = None, crf: int = 16, job_key: str | None = None) -> dict:
+    """`job_key` identifies the work (op + params + model); finished chunks are reused only for the same key and the
+    same input file, so a changed input or parameter never picks up stale chunks."""
     costguard.authorize("ffmpeg", "framepipe")
     info = video_info(src)
     v = info["video"]
@@ -58,7 +60,14 @@ def process_video(src: str | Path, out: str | Path, fn: Callable[[np.ndarray, in
     out = Path(out)
     work = out.with_name(out.stem + ".chunks")
     work.mkdir(parents=True, exist_ok=True)
+    from ..generate.cache import key as _key
+    sig = _key("framepipe", {"job": job_key, "start": start, "duration": total, "out": [ow, oh], "alpha": alpha, "fps": fps,
+                             "chunk_s": chunk_s, "crf": crf}, [src])
     ck = Checkpoint(checkpoint or work / "checkpoint.json")
+    if ck.state.get("sig") != sig:  # different job in the same place: start over
+        for old in work.glob("chunk_*"):
+            old.unlink()
+        ck.state = {"done": {}, "sig": sig}
     n_chunks = max(1, int(np.ceil(total / chunk_s - 1e-6)))
     ext = ".mov" if alpha else ".mp4"
     frames_done = 0

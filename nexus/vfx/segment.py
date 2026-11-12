@@ -117,7 +117,7 @@ def replace_background(src: str | Path, out: str | Path | None = None, *, bg="#0
         a3 = a[..., None]
         return (frame.astype(np.float32) * a3 + bgf(frame, i).astype(np.float32) * (1 - a3) + 0.5).astype(np.uint8)
     t0 = time.time()
-    r = framepipe.process_video(src, dest, fn, start=start, duration=duration)
+    r = framepipe.process_video(src, dest, fn, start=start, duration=duration, job_key=k)
     secs = time.time() - t0
     man = classify.manifest("segment", {"kind": "vfx", "method": f"background replacement ({model_id})", "model": model_id,
                                         "params": params}, dest, inputs=[contracts.artifact(src, role="source", hash_it=False)],
@@ -144,4 +144,4 @@ def cutout(src: str | Path, out: str | Path, *, model_id: str = "mediapipe-selfi
         return np.dstack([frame, (a * 255 + 0.5).astype(np.uint8)])
     info = framepipe.video_info(src)["video"]
     return framepipe.process_video(src, out, fn, out_size=(info["width"], info["height"]), alpha=True, start=start,
-                                   duration=duration)
+                                   duration=duration, job_key=f"cutout:{model_id}:{feather}:{smooth}")

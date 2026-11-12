@@ -141,3 +141,24 @@ def test_esrgan_refuses_without_downloaded_weights(home, clip):
     with pytest.raises(downloads.ConsentRequired):
         enhance.upscale(clip, scale=2, method="esrgan")
     assert subprocess.run(["ffprobe", "-v", "error", str(clip)]).returncode == 0
+
+
+def test_framepipe_resumes_chunks_but_never_reuses_stale_ones(home, tmp_path):
+    """Regression: a re-run over a changed input (or with other params) must not pick up chunks of the old job."""
+    from nexus.enhance import framepipe
+    a = write_video(tmp_path / "a.mp4", np.stack([texture(64, 96, 1)] * 20), fps=10)
+    calls = []
+
+    def inv(f, i):
+        calls.append(i)
+        return 255 - f
+    r1 = framepipe.process_video(a, tmp_path / "o.mp4", inv, chunk_s=1.0, job_key="invert")
+    assert r1["frames"] == 20 and r1["chunks"] == 2 and len(calls) == 20
+    calls.clear()
+    framepipe.process_video(a, tmp_path / "o.mp4", inv, chunk_s=1.0, job_key="invert")
+    assert calls == []  # finished chunks are reused (resume)
+    b = write_video(tmp_path / "a.mp4", np.stack([texture(64, 96, 9)] * 20), fps=10)  # same path, new content
+    framepipe.process_video(b, tmp_path / "o.mp4", inv, chunk_s=1.0, job_key="invert")
+    assert len(calls) == 20
+    got = metrics.read_frames(tmp_path / "o.mp4")[5].astype(int)
+    assert np.abs(got - (255 - texture(64, 96, 9).astype(int))).mean() < 6
