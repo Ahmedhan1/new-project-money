@@ -236,17 +236,19 @@ tasks:
   - id: FX-1
     priority: 1
     title: "Effects, transition library, animated word captions, procedural SFX in the renderer"
-    status: implemented
+    status: tested
     acceptance: "clip effects / xfade names / caption styles / overlays from docs/PHASE3_PLAN.md render correctly and are cache-safe."
     test: "pytest tests/fast/test_fx.py"
-    next: "Session 4 audit: nexus/fx/* exists but timeline/render.py never calls it and tests/fast/test_fx.py does not exist. Workstream A wires and tests it."
+    evidence: "Session 4: renderer calls fx effects/xfade/caption styles/titles/PiP/overlays/colour correction/stabilise/rotate; tests/fast/test_fx.py (13 tests on rendered pixels); docs/TIMELINE.md"
+    next: "Wire the remaining builders (chroma key, masks, split screen, freeze frames, credits roll, audio-reactive overlay) and real J/L-cut audio overlaps - task FX-2."
   - id: PERF-1
     priority: 1
     title: "Render efficiency: parallel segments, per-segment caption burn (final pass copies video), draft mode, hw-encoder detection"
-    status: planned
+    status: tested
     acceptance: "Measured before/after on the same timeline in docs/results/perf_render.json; output still passes technical QA."
     test: "pytest tests/fast/test_fx.py -k perf"
-    next: "Session 4 audit: nothing implemented. Workstream A (parallel/draft) + E (encoders)."
+    evidence: "Parallel segments + draft mode + empty-segment guard; real 25-segment master cold cache: 154 s serial vs 133 s with 2 workers (x264 already multi-threaded); docs/results/perf_render.json not yet written"
+    next: "Benchmark on the owner's machine; hardware encoder path untested (no GPU here)."
   - id: GRW-1
     priority: 1
     title: "Growth: shorts extractor, retention rubric + auto retention pass, hook/title variants, reference-video style profile"
@@ -261,8 +263,8 @@ tasks:
     status: tested
     acceptance: "Media without a rights declaration cannot be exported; report states the share of original vs new material."
     test: "pytest tests/fast/test_repurpose.py"
-    evidence: "tests/fast/test_repurpose.py"
-    next: "No API/UI/job yet - lead integrates (INT-4)."
+    evidence: "tests/fast/test_repurpose.py; API /rights endpoints; director refuses detection-evasion instructions"
+    next: "UI page for rights declarations; commentary/recap layouts need real footage review."
   - id: AUD-1
     priority: 1
     title: "Voice mastering chain, ambience/SFX helpers, scene-to-scene continuity QA (level, colour, brightness jumps)"
@@ -282,69 +284,117 @@ tasks:
   - id: LANG-1
     priority: 1
     title: "12+ languages (en, de, fr, ar-EG, ar-Gulf, zh, ru, hi first): translation tags, licensed voices, fonts, per-language QA"
-    status: planned
+    status: tested
     acceptance: "Each listed language either passes translation + dub checks in a real run or is reported as not available with the reason."
     test: "pytest tests/fast/test_languages.py; heavy: pytest tests/test_c_language.py"
-    next: "Session 4 audit: no code existed. Workstream D."
+    evidence: "14 packs; tests/fast/test_languages.py (16 tests); real MADLAD-400 translation of the interview into de/fr/ar-EG/ar-Gulf/zh/ru/hi; QA caught 3 real German MT errors, fixed in speech/mt.py"
+    next: "Demo 3 evidence (8 languages on the real master) - see docs/results/demos/demo3_multilingual.json once written; Arabic/Hindi voices lack verified commercial licences (subtitles only)."
   - id: PLAT-1
     priority: 1
     title: "Platform knowledge base (specs + documented ranking signals with sources) and per-platform timeline tuning"
-    status: planned
+    status: tested
     acceptance: "tune(tl, platform) changes duration/aspect/captions/hook/loudness per platform; every encoded signal cites its source and date."
     test: "pytest tests/fast/test_platforms.py"
-    next: "Session 4 audit: no code existed. Workstream F."
+    evidence: "registry with documented/observed/experimental/unverified per field; tune/check/deliverables/import_metrics; tests/fast/test_platforms.py + deliver test in test_edit_flow.py"
+    next: "Run the deliver job on real footage for all 7 destinations and check each file; re-verify specs every 90 days (platforms.stale)."
   - id: DIR-1
     priority: 1
     title: "Director: long footage -> condensed cinematic master + per-platform cuts + shorts in one job"
-    status: planned
+    status: verified
     deps: [GRW-1, FX-1]
     acceptance: "One call produces a master timeline at a target length plus platform deliverables, each with QA and retention reports."
     test: "pytest tests/fast/test_director.py"
-    next: "Session 4 audit: no code existed. Workstream B."
+    evidence: "Demo 1: real 19.4-min NASA interview -> 87 s directed edit via UI/API/durable jobs; quality 87.5 -> 92.0 after two fixes found on real output; docs/results/demos/demo1_long_form_edit.json; tests/fast/test_director.py + test_edit_flow.py"
+    next: "Speaker diarisation (DIA-1) would enable J/L-cuts on speaker change and named lower thirds; B-roll for single-camera sources (BRL-1)."
 
   # ------------------------------------------------------------------ session 4 (docs/MASTER_ROADMAP.md)
   - id: GRW-2
     priority: 1
     title: "Shorts factory v2: select by time range/topic/speaker, duration options, variants, context check, per-platform batch"
-    status: planned
+    status: verified
     deps: [GRW-1]
     acceptance: "One source -> N ranked shorts x variants x platforms, each with a stated reason, scores and a context check."
     test: "pytest tests/fast/test_shorts_factory.py"
-    next: "Workstream C."
+    evidence: "Demo 2: 4 moments x 2 variants rendered and scored from the real interview through the API job; short 4 92.2 -> 94.2 after caption-safe-zone + level fixes; docs/results/demos/demo2_shorts_factory.json"
+    next: "Calibrate component weights once the owner imports real performance data (growth.calibrate needs >= 12 records)."
   - id: MED-1
     priority: 1
     title: "Media engine: encoder detection, H.264/H.265/AV1 presets, size-targeted export, proxies, export verification, benchmark"
-    status: planned
+    status: tested
     acceptance: "export() hits a max file size, verify() catches a broken file, proxies never touch the original; measured numbers in docs/results/media_bench.json."
     test: "pytest tests/fast/test_media_engine.py"
-    next: "Workstream E."
+    evidence: "detect() proves encoders by test encode; size-targeted H.264/H.265/AV1 exports measured; verify() catches truncation; proxies cached; tests/fast/test_media_engine.py"
+    next: "Use export.export() for final deliverables in the deliver job (max file size per platform); benchmark on the owner's machine."
   - id: QSC-1
     priority: 1
     title: "Weighted quality score (visual, editing, audio, localization) with a reason per failed criterion"
-    status: planned
+    status: verified
     acceptance: "A deliberately bad render (black frames, clipping, frozen frames, unreadable captions) scores low with the right reasons; a completed render is never 'premium' by default."
     test: "pytest tests/fast/test_quality.py"
-    next: "Workstream G."
+    evidence: "Every full render now gets a quality-score stage; on real output it found a +6.7 dB cut jump, a false localization failure, captions over the face/outside the Shorts safe zone - all fixed; tests/fast/test_quality.py"
+    next: "Calibrate thresholds on more real footage; add a human sign-off flow for not-measured criteria in the UI."
   - id: GEN-0
     priority: 1
     title: "Generation provider abstraction, model/licence matrix, honest capability labels and provenance"
-    status: planned
+    status: verified
     acceptance: "capabilities() reports what this machine can really do; every asset carries provenance (generated / animated still / motion graphics / footage / slideshow)."
     test: "pytest tests/fast/test_generate.py"
-    next: "Workstream H. Real video generation stays blocked on GPU access (GEN-2)."
+    evidence: "Demo 4: 4 SD 1.5+LCM stills generated on this CPU (~110-220 s each under load, 31 s unloaded), animated, narrated (CC0 voice); label = 'animated stills (4 AI-generated stills)'; claim guard refused 'AI-generated video'; docs/results/demos/demo4_generation.json"
+    next: "Video generation needs a GPU (GEN-2). Wire inpaint/upscale/depth-parallax providers; add a generation-setup command."
   - id: INT-4
     priority: 1
     title: "Integrate workstreams A-H into API, durable jobs and UI (Edit-my-video flow, destination selector, quality report)"
-    status: planned
+    status: verified
     deps: [FX-1, DIR-1, GRW-2, LANG-1, MED-1, PLAT-1, QSC-1, GEN-0]
     acceptance: "Upload -> direct -> render -> platform deliverables -> quality report through the UI on durable jobs."
     test: "pytest tests/fast + a Playwright smoke run"
-    next: "Lead, after the workstream merges."
+    evidence: "Director panel, decisions table, EDL, draft/full render, quality panel, shorts factory panel, destination selector - driven in Chromium on the real project; API tests in tests/fast/test_edit_flow.py"
+    next: "More UI: multi-track timeline view, captions editor, audio panel (UX-2)."
   - id: DEMO-1
     priority: 1
     title: "Real demonstrations 1-5 (long-form edit, shorts factory, multilingual, generation, interrupted-job recovery) with stored evidence"
-    status: planned
+    status: in_progress
     deps: [INT-4]
     acceptance: "Each demo has an output file, a quality report and a statement of what it does not prove."
     test: "docs/results/demo_*.json"
-    next: "Needs properly licensed long-form source footage with speech; synthetic fixtures prove the pipeline only."
+    evidence: "Demos 1, 2, 4, 5 done with evidence in docs/results/demos/ (source: public-domain NASA interview); Demo 3 running"
+    next: "Demo 3 evidence file; re-run German with the MT fix; Windows run of all demos (WIN-1)."
+  # ------------------------------------------------------------------ follow-ups found by the session 4 demos
+  - id: FX-2
+    priority: 2
+    title: "Wire chroma key, masks, split screen, freeze frames, credits roll, audio-reactive overlay and real J/L-cut audio overlaps"
+    status: planned
+    deps: [FX-1]
+    acceptance: "Each is a timeline key in docs/TIMELINE.md, rendered and asserted on pixels/audio in tests/fast/test_fx.py."
+    test: "pytest tests/fast/test_fx.py"
+    next: "Builders exist in nexus/fx/post.py and fx/titles.py; render_segment does not call them yet."
+  - id: BRL-1
+    priority: 1
+    title: "B-roll for single-camera sources (licensed stock, generated stills, the user's own extra footage) placed by the director"
+    status: planned
+    deps: [DIR-1, GEN-0]
+    acceptance: "On a single-camera interview the quality check 'repeated imagery' improves; every inserted shot carries provenance and licence."
+    test: "Re-run Demo 1 with B-roll; compare visual.repeated_imagery."
+    next: "Director already plans cutaways from low-speech shots and emits clip.pip; add a B-roll source library and topic-matched search."
+  - id: DIA-1
+    priority: 2
+    title: "Speaker diarisation (interviewer vs guest) with a licence suitable for commercial use"
+    status: planned
+    acceptance: "Analysis carries speaker labels; director uses them for J/L-cuts and lower thirds; prompt_like heuristic switches off."
+    test: "Two-speaker fixture with known turns."
+    next: "Evaluate pyannote (model licence + HF gating) vs simple embedding clustering on CPU; record licence evidence."
+  - id: AUD-2
+    priority: 2
+    title: "Stronger dialogue cleanup (noise floor findings in every real render)"
+    status: planned
+    acceptance: "audio.noise_floor passes on the NASA interview edit without audible artefacts."
+    test: "Quality score before/after on Demo 1."
+    next: "Try FFmpeg arnndn with an RNNoise model (BSD) and a gated expander; A/B by ear and by score."
+  - id: LANG-2
+    priority: 2
+    title: "Native review workflow + licensed Arabic and Hindi voices"
+    status: planned
+    deps: [LANG-1]
+    acceptance: "Reviewer can edit/approve each translated line in the UI; at least one Arabic voice with verified commercial licence."
+    test: "UI review of a localised branch."
+    next: "No Arabic Piper voice has a verified commercial licence; evaluate other open TTS (licence first)."

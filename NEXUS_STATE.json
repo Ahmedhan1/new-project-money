@@ -3,14 +3,14 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-12T07:22:00Z",
+ "updated": "2026-11-12T09:33:42Z",
  "git": {
   "branch": "claude/hopeful-allen-luubcy",
-  "commit": "42f02b5",
-  "subject": "Integrate GRW-1: shorts job, retention report/apply and hook endpoints, UI controls; QA treats only narration tracks as narration (WIP snapshot of other packages included)",
-  "dirty_files": 3,
-  "upstream": null,
-  "unpushed_commits": null
+  "commit": "9911a8d",
+  "subject": "MT post-processing: no sentence split after numbers, ellipsis ends a sentence, collapse short decoder loops; demo evidence 1, 2, 4, 5",
+  "dirty_files": 6,
+  "upstream": "origin/claude/hopeful-allen-luubcy",
+  "unpushed_commits": 0
  },
  "current_task": {
   "id": "QLT-1",
@@ -20,18 +20,18 @@
  },
  "next_tasks": [
   {
+   "id": "DEMO-1",
+   "priority": 1,
+   "title": "Real demonstrations 1-5 (long-form edit, shorts factory, multilingual, generation, interrupted-job recovery) with stored evidence",
+   "status": "in_progress",
+   "next": "Demo 3 evidence file; re-run German with the MT fix; Windows run of all demos (WIN-1)."
+  },
+  {
    "id": "QLT-1",
    "priority": 1,
    "title": "Creative quality pass: measured rubric + series writer on the script schema + research/visual relevance",
    "status": "in_progress",
    "next": "1) Series visuals - derive the image query from the bible's location LOOK text (generic nouns), not its fictional name, and allow reuse of an image for a repeated location. 2) Repair off-bible locations instead of only reporting them. 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Scored rubric in the QA report."
-  },
-  {
-   "id": "FX-1",
-   "priority": 1,
-   "title": "Effects, transition library, animated word captions, procedural SFX in the renderer",
-   "status": "implemented",
-   "next": "Session 4 audit: nexus/fx/* exists but timeline/render.py never calls it and tests/fast/test_fx.py does not exist. Workstream A wires and tests it."
   },
   {
    "id": "WIN-1",
@@ -48,29 +48,29 @@
    "next": "A properly licensed Arabic voice is still missing (LANG-1)."
   },
   {
-   "id": "GRW-1",
+   "id": "FX-1",
    "priority": 1,
-   "title": "Growth: shorts extractor, retention rubric + auto retention pass, hook/title variants, reference-video style profile",
+   "title": "Effects, transition library, animated word captions, procedural SFX in the renderer",
    "status": "tested",
-   "next": "Extended by GRW-2."
+   "next": "Wire the remaining builders (chroma key, masks, split screen, freeze frames, credits roll, audio-reactive overlay) and real J/L-cut audio overlaps - task FX-2."
   }
  ],
  "tasks": {
-  "total": 43,
+  "total": 48,
   "by_status": {
-   "verified": 6,
-   "tested": 6,
+   "verified": 11,
+   "tested": 11,
    "blocked": 4,
-   "implemented": 2,
+   "implemented": 1,
    "deferred": 1,
-   "planned": 22,
-   "in_progress": 2
+   "planned": 17,
+   "in_progress": 3
   },
   "registry": "nexus/registry/tasks.yaml"
  },
  "tests": {
   "fast": {
-   "summary": "63 passed, 0 failed, 1 skipped",
+   "summary": "153 passed, 0 failed, 1 skipped",
    "ok": true,
    "date": "2026-11-12",
    "platform": "Linux",
@@ -78,7 +78,9 @@
   }
  },
  "jobs": {
-  "counts": {},
+  "counts": {
+   "done": 13
+  },
   "active": []
  },
  "blockers": [
@@ -104,17 +106,30 @@
   }
  ],
  "backup": {
-  "last": null,
+  "last": {
+   "ts": 1794471742.665457,
+   "ok": true,
+   "copies": 1,
+   "warning": null,
+   "destinations": [
+    {
+     "name": "local",
+     "ok": true,
+     "snapshot": "20261112-082221-a033"
+    }
+   ]
+  },
   "restore_drill": null
  },
  "environment": {
   "models_installed": [
-   "llm-qwen3-4b",
    "mt-madlad400-3b",
-   "voice:ar_JO-kareem-medium",
    "voice:de_DE-thorsten-medium",
    "voice:en_US-joe-medium",
-   "voice:en_US-ljspeech-medium",
+   "voice:es_ES-davefx-medium",
+   "voice:fr_FR-siwis-medium",
+   "voice:ru_RU-denis-medium",
+   "voice:zh_CN-chaowen-medium",
    "whisper-small"
   ],
   "data_home": "NEXUS_HOME (default: ./.nexus, never committed)"
