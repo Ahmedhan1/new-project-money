@@ -59,7 +59,7 @@ let mode=localStorage.getItem("nexus-mode")||"beginner", current=null, sel=null,
 const MODULES=[["Create",[["home","What do you want to create?","live"],["creator","AI Video Creator","live"],["editor","Video Editor","live"],["remix","Video Remix Studio","live"],
  ["animation","Animation & Motion Graphics","live"],["dubbing","Voiceover, Dubbing & Subtitles","live"],["series","Film & Series Studio","live"],["audio","Audio Production","partial"],
  ["enhance","Video Enhancement","planned"],["vfx","VFX Studio","planned"],["documentary","Documentary Studio","partial"]]],
- ["Produce",[["dashboard","Dashboard","live"],["factory","Content Factory","live"],["publishing","Publishing Studio","live"],["channels","Channels & Business","partial"],
+ ["Produce",[["dashboard","Dashboard","live"],["factory","Content Factory","live"],["publishing","Publishing Studio","live"],["review","Review (speakers, translations, cutaways)","live"],["channels","Channels & Business","partial"],
  ["research","Content Research & Trends","planned"],["analytics","Analytics","planned"]]],
  ["System",[["projects","Project History","live"],["qa","Quality Assurance Center","live"],["assets","Asset Library","live"],["resources","Free Resources & Compute","live"],["storage","Storage & Backup","live"],
  ["tools","Deployed Tools & Models","live"],["discovery","GitHub Discovery","live"],["plugins","Plugin Manager","planned"],["settings","Settings","live"]]]];
@@ -213,6 +213,29 @@ async channels(m){const c=await api("/api/channels");m.innerHTML=`<h2 class="pag
  ${table(c,[["Channel",r=>esc(r.name)],["Niche",r=>esc(r.niche)],["Languages",r=>esc(r.languages.join(", "))],["Platforms",r=>esc(r.platforms.join(", "))],["Actual revenue",r=>r.business.actual_revenue],["Estimated",r=>r.business.estimated_revenue],["Spend",r=>"0"]])}
  <div class="note"><b>Not built yet:</b> audience analytics, market-demand research, automatic monetisation eligibility checks.</div>`;
  $("#cadd").onclick=async()=>{await api("/api/channels",{name:$("#cn").value,niche:$("#cni").value,languages:$("#cla").value.split(",").map(s=>s.trim()),platforms:$("#cpl").value.split(",").map(s=>s.trim())});go("channels")}},
+async review(m,pid){const ps=await api("/api/projects");
+ m.innerHTML=`<h2 class="page">Review</h2><p class="lead">The automatic parts a person checks fastest in a list: who is speaking (and their name), each translated line, and each licensed cutaway. Every change is a saved version you can undo.</p>
+ <div class="row"><label>Project<select id="rvp">${ps.map(p=>`<option value="${p.id}" ${p.id===pid?"selected":""}>${esc(p.name)}</option>`).join("")}</select></label>
+ <label>Edit branch<input id="rvb" value="${esc(branch)}"></label><label>Translation branch<input id="rvl" placeholder="e.g. de"></label><button id="rvgo">Open</button></div><div id="rvout"></div>`;
+ const open=async()=>{const id=$("#rvp").value, b=$("#rvb").value||"main", lb=$("#rvl").value.trim(), o=$("#rvout");
+  const sp=await api(`/api/projects/${id}/review/speakers`);
+  let h=`<h3 class="sec">Speakers</h3><p class="lead">Roles are never shown on screen. A name you set appears as a lower third the first time that person speaks.</p>`+
+   table(sp.filter(r=>r.speaker),[["Voice",r=>esc(r.speaker)],["Role",r=>`<select data-sp="${r.speaker}" data-m="${r.media}" class="rvrole">${["interviewer","guest","narrator"].map(x=>`<option ${x===r.role?"selected":""}>${x}</option>`).join("")}</select>`],
+    ["Name",r=>`<input data-sp="${r.speaker}" data-m="${r.media}" class="rvname" value="${esc(r.name||"")}" placeholder="name for lower thirds">`],["Talk share",r=>r.talk_share!=null?Math.round(r.talk_share*100)+"%":""],["Turns",r=>r.turns]])+
+   `<button id="rvnames">Add lower thirds for named speakers</button><span id="rvmsg" class="lead"></span>`;
+  const cw=await api(`/api/projects/${id}/review/cutaways?branch=${encodeURIComponent(b)}`);
+  h+=`<h3 class="sec">Cutaways (${cw.length})</h3>`+table(cw,[["Clip",r=>esc(r.clip)],["Item",r=>r.page?`<a href="${esc(r.page)}" target="_blank" rel="noopener">${esc(r.title)}</a>`:esc(r.title)],["Source / licence",r=>esc(r.source)+"<br><small>"+esc(r.license||"")+"</small>"],["Matched words",r=>esc((r.matched||[]).join(", "))],["",r=>`<button class="rvrej" data-c="${r.clip}">Reject</button>`]]);
+  if(lb){const L=await api(`/api/projects/${id}/review/lines?branch=${encodeURIComponent(lb)}`);
+   h+=`<h3 class="sec">Translated lines: ${L.approved}/${L.total} approved ${L.native_review_done?tag("native review done","ok"):tag("needs review","warn")}</h3>`+
+    table(L.lines,[["#",r=>r.index],["Time",r=>r.start.toFixed(1)+"s"],["Line",r=>`<input class="rvline" data-i="${r.index}" value="${esc(r.text)}" style="width:100%">`+(r.machine_text?`<br><small>machine: ${esc(r.machine_text)}</small>`:"")],
+     ["",r=>`<button class="rvok" data-i="${r.index}">${r.approved?"✓ approved":"Approve"}</button>`]])}
+  o.innerHTML=h;
+  o.querySelectorAll(".rvrole").forEach(e=>e.onchange=async()=>{await api(`/api/projects/${id}/review/speakers`,{media:e.dataset.m,op:"rename",speaker:e.dataset.sp,value:e.value});open()});
+  o.querySelectorAll(".rvname").forEach(e=>e.onchange=async()=>{if(e.value.trim())await api(`/api/projects/${id}/review/speakers`,{media:e.dataset.m,op:"name",speaker:e.dataset.sp,value:e.value});$("#rvmsg").textContent=" saved"});
+  $("#rvnames").onclick=async()=>{const r=await api(`/api/projects/${id}/review/names`,{branch:b});$("#rvmsg").textContent=r.added.length?" added: "+r.added.join(", ")+" (render again to see it)":" no named speakers yet"};
+  o.querySelectorAll(".rvrej").forEach(e=>e.onclick=async()=>{await api(`/api/projects/${id}/review/cutaways/reject`,{branch:b,clip:e.dataset.c,why:"rejected in review"});open()});
+  o.querySelectorAll(".rvok").forEach(e=>e.onclick=async()=>{const t=o.querySelector(`.rvline[data-i="${e.dataset.i}"]`).value;await api(`/api/projects/${id}/review/lines`,{branch:lb,index:+e.dataset.i,text:t,approved:true});open()})};
+ $("#rvgo").onclick=()=>open().catch(e=>$("#rvout").innerHTML=`<div class="note">Error: ${esc(e.message)}</div>`)},
 async qa(m){const p=await api("/api/projects");let rows=[];for(const x of p.slice(0,25)){const d=await api("/api/projects/"+x.id);d.reports.forEach(r=>rows.push({p:x,r}))}
  m.innerHTML=`<h2 class="page">Quality Assurance Center</h2><p class="lead">Every render is reviewed by tools other than the one that produced it. “Passed automated checks” never means approved: a person still has to watch it.</p>`+
  table(rows,[["Project",r=>`<a href="#" onclick="go('editor','${r.p.id}');return false">${esc(r.p.name)}</a>`],["Output",r=>esc(r.r.output)],["Status",r=>statusTag(r.r.status)],["Corrections applied",r=>(r.r.corrections||[]).length],["Known issues",r=>esc((r.r.known_issues||[]).join(" · ")).slice(0,260)],["Human approval",r=>tag("pending","warn")]])},

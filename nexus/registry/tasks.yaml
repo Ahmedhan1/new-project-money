@@ -407,11 +407,12 @@ tasks:
   - id: REV-1
     priority: 1
     title: "Review UI: approve/edit translated lines, speaker names/merge/reassign, cutaway approve/replace"
-    status: planned
+    status: tested
     deps: [LANG-2, DIA-1, BRL-1]
     acceptance: "On the NASA project a reviewer fixes one MT line, names the guest (lower third appears), rejects one cutaway; re-render reflects all three."
     test: "API tests for each edit + a Chromium run of the panel."
-    next: "Backend ops exist (diarize.rename/merge/reassign_turn/set_name; timeline set_props); add API routes and a list UI."
+    evidence: "nexus/review.py + /api/projects/{pid}/review/* (4 API tests); Review page driven in Chromium on a throwaway server: name -> lower third, line corrected+approved (machine text kept), cutaway rejected, no page errors."
+    next: "Use it on the real NASA project (owner: name the guest; native reviewers: approve de/fr/ar-EG/hi lines)."
   - id: BRL-2
     priority: 2
     title: "Visual relevance score for B-roll (image-text model with a commercial-use licence)"
