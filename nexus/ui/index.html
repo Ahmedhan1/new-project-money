@@ -62,7 +62,7 @@ const MODULES=[["Create",[["home","What do you want to create?","live"],["creato
  ["Produce",[["dashboard","Dashboard","live"],["factory","Content Factory","live"],["publishing","Publishing Studio","live"],["review","Review (speakers, translations, cutaways)","live"],["channels","Channels & Business","partial"],
  ["research","Content Research & Trends","planned"],["analytics","Analytics","planned"]]],
  ["System",[["projects","Project History","live"],["qa","Quality Assurance Center","live"],["assets","Asset Library","live"],["resources","Free Resources & Compute","live"],["storage","Storage & Backup","live"],
- ["tools","Deployed Tools & Models","live"],["discovery","GitHub Discovery","live"],["plugins","Plugin Manager","planned"],["settings","Settings","live"]]]];
+ ["tools","Deployed Tools & Models","live"],["models","Generation & Vision Models","live"],["discovery","GitHub Discovery","live"],["plugins","Plugin Manager","planned"],["settings","Settings","live"]]]];
 const PLANNED={enhance:"Upscaling, interpolation and stabilisation controls. FFmpeg's stabiliser is installed but not exposed here yet; Real-ESRGAN/RIFE need a GPU worker.",
  vfx:"Masks, keying and compositing. Not built. Candidates: SAM 2 (GPU) and rembg (CPU).",research:"Trend and competitor research. Not built: needs platform analytics access that you authorise. Wikipedia-based topic research already runs inside the AI Video Creator.",
  analytics:"Performance analytics from YouTube/TikTok/Instagram. Not built: requires your own OAuth authorisation for each platform's official API.",plugins:"Third-party plugin loading. Not built."};
@@ -74,6 +74,9 @@ async function planned(m,_,id){const n=MODULES.flatMap(g=>g[1]).find(x=>x[0]===i
 async function jobsBlock(){const j=await api("/api/jobs");return `<h3 class="sec">Jobs</h3>`+table(j.slice(0,12),[["Job",r=>esc(r.kind)],["Status",r=>statusTag(r.status)+(r.retries?` <span style="color:var(--mute);font-size:12px">resumed ×${r.retries}</span>`:"")],["Stage",r=>(r.stages||[]).map(s=>`<span title="${esc(s.name)}${s.seconds?" · "+s.seconds+" s":""}" style="color:var(--${s.status==="done"?"ok":"mute"})">${s.status==="done"?"●":"○"}</span>`).join(" ")+(r.status==="running"&&r.stage?" "+esc(r.stage):"")],["Project",r=>r.project_id||r.result?.project?`<a href="#" onclick="go('editor','${r.project_id||r.result.project}');return false">${esc(r.project_id||r.result.project)}</a>`:""],
  ["Result",r=>r.error&&r.status!=="done"&&r.status!=="queued"&&r.status!=="running"?`<span style="color:var(--bad)">${esc(r.error.split("\n")[0])}</span>`+(r.recovery?`<div style="color:var(--mute);font-size:12px">${esc(r.recovery)}</div>`:"")+(r.durable?` <button class="sm" onclick="api('/api/jobs/${r.id}/retry',{}).then(()=>go(current))">Resume</button>`:""):r.recovery&&r.status!=="done"?`<span style="color:var(--mute)">${esc(r.recovery)}</span>`:r.result?.status?statusTag(r.result.status)+" "+esc((r.result.issues||[]).length+" issue(s)"):esc(r.result?JSON.stringify(r.result).slice(0,90):"")],
  ["Time",r=>r.finished&&r.started?Math.round(r.finished-r.started)+" s":""]])}
+async function dlModel(id,gb){const p=await api(`/api/models/${id}/plan`);
+ if(!confirm(`Download ${p.name}: ${p.total_gb} GB.\nWeights licence: ${(p.licence&&p.licence.weights_licence)||"see catalogue"}.\nDo you accept the licence and the download?`))return;
+ try{await api(`/api/models/${id}/download`,{accepted_gb:p.total_gb,licence_accepted:true});go("models")}catch(e){alert(e.message)}}
 function poll(el){const t=setInterval(async()=>{if(!document.body.contains(el))return clearInterval(t);el.innerHTML=await jobsBlock()},4000);jobsBlock().then(h=>el.innerHTML=h)}
 const PAGES={
 async home(m){const C=[["creator","Create a video from an idea","Research, script, licensed visuals, narration, music, captions."],["series","Create a cinematic film plan","Logline, characters, scenes and a shot list."],
@@ -270,7 +273,20 @@ async workspace(m,pid){
   <div class="row"><label>Keyframes for<select id="kp">${opt(cat.keyframe_props,Object.keys(kf)[0]||"scale")}</select></label><label style="flex:3">Points "time, value" one per line (clip seconds)<textarea id="kv" style="min-height:52px">${esc((kf[Object.keys(kf)[0]||"scale"]||[]).map(p=>p.slice(0,2).join(", ")).join("\n"))}</textarea></label></div>
   <div class="row"><label style="flex:3">On-screen title<input id="ctx" value="${esc((c.titles&&c.titles[0]&&c.titles[0].text)||(c.text&&c.text[0]&&c.text[0].text)||"")}"></label></div>
   <div class="row"><button class="sm" id="capply">Apply to clip</button><button class="sec sm" id="csplit">Split at middle</button><button class="sec sm" id="cdel">Delete (ripple)</button><button class="sec sm" id="cl">Move earlier</button><button class="sec sm" id="cr">Move later</button></div>
-  <p class="lead">Only this clip is re-rendered on the next render; the others come from the cache.</p></div>`;
+  <p class="lead">Only this clip is re-rendered on the next render; the others come from the cache.</p></div>
+  ${c.type==="video"?`<div class="card" style="margin-top:10px"><h3>Enhance / visual effects (processed copy, undo restores the original)</h3>
+  <div class="row"><label>Operation<select id="pop"></select></label></div><div class="row" id="pparams"></div>
+  <div class="row"><button class="sm" id="pgo">Process this clip</button></div><p class="lead" id="pnote">Upscaling never recovers real detail; it sharpens what is there.</p></div>`:""}`;
+ if(c.type==="video")api("/api/effects").then(fx=>{const ops=[...fx.enhance.effects.map(e=>({...e,op:e.type.split(".")[1]})),
+   ...fx.vfx.effects.filter(e=>["vfx.replace_background","vfx.tracked_mask"].includes(e.type)).map(e=>({...e,op:e.type.split(".")[1]}))];
+  $("#pop").innerHTML=ops.map(o=>`<option value="${o.op}" ${o.available?"":"disabled"}>${o.op.replace("_"," ")}${o.available?"":" (needs a model download - see Models)"}</option>`).join("");
+  const draw=()=>{const o=ops.find(x=>x.op===$("#pop").value)||ops[0];if(!o)return;const ps=Object.entries(o.params||{});
+   $("#pparams").innerHTML=ps.map(([k,v])=>String(v).includes("|")&&!/path|#RRGGBB/.test(v)?`<label>${esc(k)}<select data-p="${k}">${String(v).replace(/^int /,"").split("|").map(x=>`<option>${esc(x)}</option>`).join("")}</select></label>`
+    :`<label>${esc(k)} <small>${esc(v)}</small><input data-p="${k}" ${/^\d|0\.\.|px|fps/.test(v)?'type="number" step="any"':""}></label>`).join("")+(o.op==="tracked_mask"?`<label>Box to track: x,y,w,h in source pixels<input data-p="box" placeholder="400,120,200,220"></label>`:"")};
+  $("#pop").onchange=draw;draw();
+  $("#pgo").onclick=async()=>{const params={};document.querySelectorAll("#pparams [data-p]").forEach(e=>{if(e.value==="")return;const k=e.dataset.p;
+    params[k]=k==="box"?e.value.split(",").map(Number):(e.type==="number"?+e.value:e.value)});
+   try{await api(`/api/projects/${pid}/clips/${c.id}/process`,{op:$("#pop").value,params,branch});poll($("#jobs"));$("#pnote").textContent="Queued. The clip is replaced by its processed copy when the job finishes; reopen the workspace to see it."}catch(e){alert(e.message)}}});
  const i=tl.clips.indexOf(c);
  $("#kp").onchange=e=>{$("#kv").value=(kf[e.target.value]||[]).map(p=>p.slice(0,2).join(", ")).join("\n")};
  $("#capply").onclick=async()=>{
@@ -287,6 +303,11 @@ async workspace(m,pid){
   op("set_props",c.id,props)};
  $("#csplit").onclick=()=>c.type==="video"?op("split",c.id,{at:(+c.in + +c.out)/2}):alert("Only video clips can be split");
  $("#cdel").onclick=()=>op("ripple_delete",c.id);$("#cl").onclick=()=>op("move",c.id,{new_index:Math.max(0,i-1)});$("#cr").onclick=()=>op("move",c.id,{new_index:Math.min(tl.clips.length-1,i+1)})},
+async models(m){const [t,hw]=await Promise.all([api("/api/generation/models"),api("/api/generation/hardware")]);
+ m.innerHTML=`<h2 class="page">Generation & Vision Models</h2><p class="lead">Nothing is downloaded until you accept its size and licence here. Machine: ${esc(hw.tier||"cpu")}${hw.gpus&&hw.gpus.length?" · "+esc(hw.gpus.map(g=>g.name+" "+g.vram_gb+" GB").join(", ")):" · no GPU (video models run only on a GPU worker)"}.</p>
+ <div class="note">Classes: <b>foss</b> = commercial use allowed; <b>restricted</b> = conditions; <b>research</b> = non-commercial, never used for production; <b>excluded</b> = not usable. Video generation on this computer is not feasible without a GPU; those models are prepared for a remote GPU worker and are unverified until run there.</div>`+
+ table(t,[["Model",r=>esc(r.name)],["Task",r=>esc(r.task)],["Licence class",r=>tag(r.class,r.class==="foss"?"ok":r.class==="restricted"?"warn":"bad")],["Runs on CPU",r=>esc(r.cpu)],["Download",r=>r.download_gb!=null?r.download_gb+" GB":"-"],
+  ["Status",r=>esc(r.status||"")],["",r=>r.class==="foss"&&r.download_gb!=null&&r.cpu!=="no"?`<button class="sm sec" onclick="dlModel('${r.id}',${r.download_gb})">Download…</button>`:""]])+`<div id="jobs"></div>`;poll($("#jobs"))},
 async review(m,pid){const ps=await api("/api/projects");
  m.innerHTML=`<h2 class="page">Review</h2><p class="lead">The automatic parts a person checks fastest in a list: who is speaking (and their name), each translated line, and each licensed cutaway. Every change is a saved version you can undo.</p>
  <div class="row"><label>Project<select id="rvp">${ps.map(p=>`<option value="${p.id}" ${p.id===pid?"selected":""}>${esc(p.name)}</option>`).join("")}</select></label>

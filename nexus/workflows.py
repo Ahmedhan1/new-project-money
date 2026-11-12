@@ -341,3 +341,33 @@ def export_(job: jobs.Job) -> dict:
         return rep
 
     return job.stage("encode-verify", run)
+
+
+@jobs.handler("clip-process")
+def clip_process(job: jobs.Job) -> dict:
+    """Enhancement / VFX on one clip (media-to-media, cached): the clip's src is replaced by the processed segment and
+    the original reference kept in `enhanced_from`, so undo restores it. Saved as a new timeline version."""
+    from . import enhance, project as prj, vfx
+    a = job.params
+    p = prj.Project(a["project"])
+    branch = a.get("branch", "main")
+
+    def run():
+        tl = p.timeline(branch)
+        idx = next(i for i, c in enumerate(tl["clips"]) if c["id"] == a["clip"])
+        op = a["op"]
+        fn = vfx.apply if op in {"replace_background", "tracked_mask"} else enhance.apply
+        tl["clips"][idx] = fn(tl["clips"][idx], op, **(a.get("params") or {}))
+        vid = p.save_timeline(tl, f"{op} on {a['clip']}", branch)
+        return {"project": p.id, "version": vid, "src": tl["clips"][idx]["src"], "op": op}
+
+    return job.stage("process", run)
+
+
+@jobs.handler("model-download")
+def model_download(job: jobs.Job) -> dict:
+    """Fetch model weights only with the consent the user gave in the UI (size and licence shown first)."""
+    from .generate import downloads
+    a = job.params
+    c = downloads.consent(a["model"], a["accepted_gb"], a.get("licence_accepted", False), by="ui")
+    return job.stage("download", lambda: downloads.fetch(a["model"], consent=c))

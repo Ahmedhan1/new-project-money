@@ -533,6 +533,72 @@ def api_fx_catalog():
             "fits": ["cover", "contain", "blur"]}
 
 
+@app.get("/api/effects")
+def api_effects():
+    """Media-to-media processors (enhancement + VFX) with availability on this machine and model download sizes."""
+    from . import enhance, vfx
+    return {"enhance": enhance.effect_manifest(), "vfx": vfx.effect_manifest()}
+
+
+@app.get("/api/generation/models")
+def api_gen_models(task: str | None = None):
+    from .generate import catalog
+    return catalog.table(task)
+
+
+@app.get("/api/generation/hardware")
+def api_gen_hardware():
+    from .generate import hardware
+    return hardware.detect()
+
+
+@app.get("/api/models/{model_id}/plan")
+def api_model_plan(model_id: str):
+    from .generate import downloads
+    try:
+        return downloads.plan(model_id)
+    except KeyError:
+        raise HTTPException(404, f"unknown model {model_id}")
+
+
+class DownloadReq(BaseModel):
+    accepted_gb: float
+    licence_accepted: bool = False
+
+
+@app.post("/api/models/{model_id}/download")
+def api_model_download(model_id: str, r: DownloadReq):
+    from .generate import downloads
+    p = downloads.plan(model_id)
+    if not r.licence_accepted or r.accepted_gb < p["total_gb"]:
+        raise HTTPException(400, f"accept the licence and at least {p['total_gb']} GB to download {p['name']}")
+    return jobs.submit("model-download", {"model": model_id, "accepted_gb": r.accepted_gb, "licence_accepted": True})
+
+
+@app.delete("/api/models/{model_id}")
+def api_model_remove(model_id: str):
+    from .generate import downloads
+    return {"removed": downloads.remove(model_id)}
+
+
+class ProcessReq(BaseModel):
+    op: str
+    params: dict = {}
+    branch: str = "main"
+
+
+@app.post("/api/projects/{pid}/clips/{clip_id}/process")
+def api_clip_process(pid: str, clip_id: str, r: ProcessReq):
+    from . import enhance
+    p = _project(pid)
+    if not any(c["id"] == clip_id for c in p.timeline(r.branch)["clips"]):
+        raise HTTPException(404, "clip not found on this branch")
+    known = {e["type"].split(".", 1)[-1] for e in enhance.effect_manifest()["effects"]} | {"replace_background", "tracked_mask"}
+    if r.op not in known:
+        raise HTTPException(400, f"unknown operation {r.op}")
+    return jobs.submit("clip-process", {"project": pid, "clip": clip_id, "op": r.op, "params": r.params, "branch": r.branch}, pid)
+
+
 @app.get("/api/export/profiles")
 def api_export_profiles():
     from . import export
