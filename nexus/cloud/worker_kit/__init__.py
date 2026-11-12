@@ -6,7 +6,7 @@
 
 Job manifest transport (decision): the job bundle is EMBEDDED as base64 JSON in the single script pushed with the
 official `kaggle kernels push` (kernel_type=script). This is the simplest robust official route: one push call, no
-dataset versioning race, nothing public. Inputs up to INLINE_MAX bytes travel inline; larger inputs must be https URLs
+dataset versioning race, nothing public. Inputs up to INLINE_MAX (512 KiB) travel inline; larger inputs must be https URLs
 the worker downloads itself (Kaggle kernels have internet when enable_internet is true). The bundle never holds secrets.
 """
 from __future__ import annotations
@@ -19,7 +19,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 WORKER = HERE / "nexus_worker.py"
 PULL_WORKER = HERE / "pull_worker.py"
-INLINE_MAX = 4 * 2 ** 20  # bytes of inline input per bundle
+INLINE_MAX = 512 * 1024  # bytes of inline input per bundle (Kaggle rejected a ~2.9 MB pushed script with HTTP 400 on 2026-11-12)
 
 
 def worker_version() -> str:
