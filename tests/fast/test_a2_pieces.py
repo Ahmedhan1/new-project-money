@@ -70,6 +70,11 @@ def test_pieces_match_legacy_and_reuse_on_edits(home, media, tmp_path):
     f3 = _all(tmp_path / "n3.mp4")
     changed = np.where(np.abs(f3 - fn).mean(axis=(1, 2)) > 0.5)[0]
     assert len(changed) and changed.min() / 30 >= 3.5 - 0.1 and changed.max() / 30 <= 4.2 + 0.1
+    # picture-only clip edit: one segment re-rendered, the mixed audio is still reused (same audio packets)
+    tl3 = {**tl, "clips": [*tl["clips"][:2], {**tl["clips"][2], "grade": "bw"}, tl["clips"][3]]}
+    g = render.render(tl3, tmp_path / "n4.mp4", tmp_path / "w", workers=2)
+    assert g["segments"] - g["segments_from_cache"] == 1 and g["audio_from_cache"]
+    assert 1 <= g["pieces"] - g["pieces_from_cache"] <= 3
 
 
 def test_cut_only_timeline_without_burn_is_a_stream_copy_of_segments(home, media, tmp_path):

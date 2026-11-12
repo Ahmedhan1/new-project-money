@@ -179,6 +179,27 @@ def programme_audio(segs: list[Path], n: list[int], d: list[int], fps: int, out:
     return out
 
 
+def audio_digest(seg: Path) -> str:
+    """MD5 of a segment's encoded audio packets (stream copy, no decode), cached next to the segment. A picture-only
+    edit (grade, effect, caption...) re-renders a segment with identical audio, so the mixed programme audio stays
+    cached; if the encoder were ever not bit-reproducible this only costs a cache miss."""
+    side = seg.with_suffix(".amd5")
+    try:
+        return side.read_text().strip()
+    except OSError:
+        pass
+    tmp = seg.with_suffix(f".{threading.get_ident()}.tmp.amd5")
+    try:
+        ff.run(["-i", seg, "-map", "0:a", "-c", "copy", "-f", "md5", tmp], op="audio-digest")
+        val = tmp.read_text().strip().removeprefix("MD5=")
+        tmp.replace(side)
+        side.write_text(val)
+        return val
+    except (ff.FFError, OSError):
+        tmp.unlink(missing_ok=True)
+        return seg.stem
+
+
 def audio_key(tl: dict, segs: list[Path], n: list[int], d: list[int], fps: int, src_sig) -> str:
     items = []
     for a in tl.get("audio") or []:
@@ -186,7 +207,7 @@ def audio_key(tl: dict, segs: list[Path], n: list[int], d: list[int], fps: int, 
                if a.get("jl") else src_sig(a["src"]))
         items.append({**{k: v for k, v in a.items() if k != "src"}, "_s": sig})
     music = tl.get("music") or {}
-    sig = {"v": PIECE_VERSION, "segs": [s.stem for s in segs], "n": n, "d": d, "fps": fps, "items": items,
+    sig = {"v": PIECE_VERSION, "segs": [audio_digest(s) for s in segs], "n": n, "d": d, "fps": fps, "items": items,
            "music": {**music, "_s": src_sig(music["src"])} if music.get("src") else None,
            "target": tl.get("target_lufs", -14.0), "acodec": config.ACODEC}
     return hashlib.sha1(json.dumps(sig, sort_keys=True, ensure_ascii=False, default=str).encode()).hexdigest()[:20]
