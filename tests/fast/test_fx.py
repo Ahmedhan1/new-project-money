@@ -254,5 +254,5 @@ def test_j_cut_brings_the_next_clip_audio_under_the_previous_picture(home, media
     st = render.render(_tl([a, b]), tmp_path / "jc.mp4", tmp_path / "w")
     assert abs(st["duration"] - 4.0) < 0.1                       # picture timing unchanged
     assert band(tmp_path / "jc.mp4", 1.5) > band(tmp_path / "jc.mp4", 0.3) + 15
-    st2 = render.render(_tl([ops.video_clip(lo, 0, 2.0), ops.video_clip(hi, 1.0, 3.0)]), tmp_path / "hard.mp4", tmp_path / "w2")
+    render.render(_tl([ops.video_clip(lo, 0, 2.0), ops.video_clip(hi, 1.0, 3.0)]), tmp_path / "hard.mp4", tmp_path / "w2")
     assert band(tmp_path / "hard.mp4", 1.5) < band(tmp_path / "jc.mp4", 1.5) - 15   # without the J-cut: no 2 kHz there
