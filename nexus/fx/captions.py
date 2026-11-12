@@ -98,9 +98,9 @@ def word_times(cue: dict) -> list[tuple[float, float, str]]:
     return out
 
 
-def _layout(W: int, H: int, o: dict, style: str) -> dict:
+def _layout(W: int, H: int, o: dict, style: str, lang: str = "en") -> dict:
     vertical = H > W
-    base = H * 0.048 if not vertical else W * 0.06
+    base = (H * 0.048 if not vertical else W * 0.06) * (1.15 if _is_ar(lang) else 1.0)  # Naskh sets small for its size
     mult = {"classic": 1.0, "boxed": 1.0, "pop": 1.5, "karaoke": 1.1}[style]
     size = max(10, int(base * mult * o["font_scale"]))
     side = int(W * (0.06 if not vertical else 0.09))
@@ -140,7 +140,7 @@ def write_ass(cues: list[dict], path: Path, W: int, H: int, lang: str = "en", op
         from ..timeline import subs
         return subs.write_ass(cues, path, W, H, lang, legacy_style)
     style = o["style"]
-    L = _layout(W, H, o, style)
+    L = _layout(W, H, o, style, lang)
     font = _font_name(lang)
     white, black = "&H00FFFFFF", "&H00101010"
     hi = ass_colour(o["highlight"])

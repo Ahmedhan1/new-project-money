@@ -531,3 +531,43 @@ def api_channel(r: ChannelReq):
 @app.get("/api/platforms")
 def api_platforms():
     return {k: {**v, "auto_publish": publish.AUTO_PUBLISH[k]} for k, v in publish.PLATFORMS.items()}
+
+
+@app.get("/api/platforms/knowledge")
+def api_platform_knowledge():
+    """Specs + the ranking signals each platform has documented, with source and date (unverified ones are labelled)."""
+    from . import platforms
+    return {"platforms": platforms.all_platforms(), "sources": platforms.source_stats()}
+
+
+class TuneReq(BaseModel):
+    branch: str = "main"
+    platform: str
+
+
+@app.post("/api/projects/{pid}/platform/tune")
+def api_tune(pid: str, r: TuneReq):
+    from . import platforms
+    p = _project(pid)
+    try:
+        tl, notes = platforms.tune(p.timeline(r.branch), r.platform, _analysis(p) or None)
+    except KeyError as e:
+        raise HTTPException(400, f"unknown platform {e}")
+    p.save_timeline(tl, f"tuned for {r.platform}", r.platform)
+    return {"branch": r.platform, "notes": notes, "checklist": platforms.checklist(tl, r.platform), "timeline": _tl_view(tl)}
+
+
+class DirectorReq(BaseModel):
+    brief: str = ""
+    target_s: float | None = None
+    platforms: list[str] = ["youtube", "tiktok", "instagram-reels"]
+    langs: list[str] = ["en"]
+    preset: str = "cinematic"
+    render: bool = False
+    use_llm: bool = False
+
+
+@app.post("/api/projects/{pid}/director")
+def api_director(pid: str, r: DirectorReq):
+    _project(pid)
+    return jobs.submit("director", {"project": pid, **r.model_dump()}, project_id=pid)

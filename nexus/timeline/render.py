@@ -156,8 +156,13 @@ def _hw_opt_in() -> bool:
     return bool(config.settings().get("hwenc", False))
 
 
-def encoder(draft: bool = False) -> dict:
-    """Encoder used for every intermediate piece: a working hardware H.264 encoder when opted in, else libx264."""
+MEZZ_CODEC = ["-c:v", "libx264", "-preset", "ultrafast", "-crf", "14", "-pix_fmt", "yuv420p"]
+
+
+def encoder(draft: bool = False, mezzanine: bool = False) -> dict:
+    """Encoder for pieces: a working hardware H.264 encoder when opted in, else libx264.
+    mezzanine=True is for intermediate parts that are always re-encoded later (transition heads/tails, bodies that get
+    captions burned in): near-transparent quality, ~2x faster to encode and ~3x faster to decode than the final settings."""
     if _hw_opt_in():
         for name, ok in hw_encoders().items():
             if ok:
@@ -165,7 +170,7 @@ def encoder(draft: bool = False) -> dict:
     if draft:
         codec = ["-c:v", "libx264", "-preset", "ultrafast", "-crf", "30", "-pix_fmt", "yuv420p"]
     else:
-        codec = list(config.VCODEC)
+        codec = list(MEZZ_CODEC if mezzanine else config.VCODEC)
     return {"name": "libx264", "pre": [], "codec": codec, "suffix": ""}
 
 
@@ -309,10 +314,12 @@ def render_segment(c: dict, tl: dict, cache: Path, draft: bool = False, threads:
     return out, False
 
 
-def _render_parts(c: dict, tl: dict, cache: Path, head: int, tail: int, draft: bool, threads: int | None) -> tuple[dict, bool]:
-    """Render a clip as video-only head / body / tail parts (frame counts) + PCM audio, in one FFmpeg run."""
+def _render_parts(c: dict, tl: dict, cache: Path, head: int, tail: int, draft: bool, threads: int | None,
+                  mezz_body: bool = False) -> tuple[dict, bool]:
+    """Render a clip as video-only head / body / tail parts (frame counts) + PCM audio, in one FFmpeg run.
+    Heads/tails (and the body when `mezz_body`, i.e. it will get captions burned in) use the mezzanine encoder."""
     W, H, scale = _geometry(tl, draft)
-    key = f"{segment_key(c, tl, draft)}_h{head}t{tail}"
+    key = f"{segment_key(c, tl, draft)}_h{head}t{tail}{'m' if mezz_body and not draft else ''}"
     paths = {"body": cache / f"part_{key}_b.mp4", "audio": cache / f"part_{key}_a.wav"}
     if head:
         paths["head"] = cache / f"part_{key}_h.mp4"
@@ -322,6 +329,7 @@ def _render_parts(c: dict, tl: dict, cache: Path, head: int, tail: int, draft: b
         return paths, True
     cache.mkdir(parents=True, exist_ok=True)
     enc = encoder(draft)
+    mezz = encoder(draft, mezzanine=True)
     with _build_lock:
         g = _clip_graph(c, tl, W, H, scale)
     n, fps = g["frames"], g["fps"]
@@ -335,7 +343,8 @@ def _render_parts(c: dict, tl: dict, cache: Path, head: int, tail: int, draft: b
         suf = f",{enc['suffix']}" if enc["suffix"] else ""
         fc.append(f"[s{k}]trim=start_frame={a}:end_frame={b},setpts=PTS-STARTPTS{suf}[o{k}]")
         tmps[name] = paths[name].with_suffix(".tmp.mp4")
-        outs += ["-map", f"[o{k}]", "-an", *_vout(enc, fps, b - a, threads), "-movflags", "+faststart", tmps[name]]
+        e = enc if name == "body" and not mezz_body else mezz
+        outs += ["-map", f"[o{k}]", "-an", *_vout(e, fps, b - a, threads), "-movflags", "+faststart", tmps[name]]
     tmps["audio"] = paths["audio"].with_suffix(".tmp.wav")
     outs += ["-map", "[a]", "-vn", "-c:a", "pcm_s16le", "-ar", config.AUDIO_RATE, "-ac", 2, tmps["audio"]]
     th = ["-filter_complex_threads", threads] if threads else []
@@ -518,6 +527,17 @@ def default_workers(jobs: int | None = None) -> tuple[int, int]:
     return w, max(1, cpu // w)
 
 
+def _measure(ins: list, fc: list[str], chain: str) -> tuple[float | None, float]:
+    """Integrated loudness (LUFS) and true peak (dBTP) of `chain` (a filter chain fed by the mix graph)."""
+    err = ff.run([*ins, "-filter_complex", ";".join(fc + [f"{chain},ebur128=peak=true:framelog=quiet[m]"]), "-map", "[m]", "-vn",
+                  "-f", "null", "-"], op="mix-measure")
+    summ = err[err.rfind("Summary:"):] if "Summary:" in err else err
+    i = re.findall(r"I:\s+(-?[\d.]+|-inf) LUFS", summ)
+    pk = re.findall(r"Peak:\s+(-?[\d.]+|-inf) dBFS", summ)
+    lufs = float(i[-1]) if i and i[-1] != "-inf" else None
+    return lufs, (float(pk[-1]) if pk and pk[-1] != "-inf" else -99.0)
+
+
 def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = False, workers: int | None = None) -> dict:
     """Render the full timeline. Returns stats incl. how many segments were reused from cache."""
     t0 = time.time()
@@ -541,46 +561,67 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
             if on_progress:
                 on_progress(min(0.95, 0.95 * done[0] / n_steps))
 
-    # stage 1: clip parts (parallel; identical clips are rendered once)
-    jobs: dict[str, tuple] = {}
-    for i, c in enumerate(clips):
-        head, tail = d[i], (d[i + 1] if i + 1 < len(clips) else 0)
-        jobs.setdefault(f"{segment_key(c, tl, draft)}_{head}_{tail}", (c, head, tail))
-    with cf.ThreadPoolExecutor(max_workers=nw) as pool:
-        futs = {k: pool.submit(_render_parts, c, tl, cache, h, t, draft, threads) for k, (c, h, t) in jobs.items()}
-        res = {}
-        for k, f in futs.items():
-            res[k] = f.result()
-            tick()
-    parts, cached = [], 0
-    for i, c in enumerate(clips):
-        p, was = res[f"{segment_key(c, tl, draft)}_{d[i]}_{d[i + 1] if i + 1 < len(clips) else 0}"]
-        parts.append(p)
-        cached += was
-    timings["segments"] = round(time.time() - t0, 2)
-
-    # stage 2: pieces in programme order (+ programme audio and its loudness measurement, in parallel)
+    # plan: pieces in programme order, and which of them get captions / overlays burned in
     total_frames = sum(n) - sum(d)
     dur = total_frames / fps
     cues = tl.get("subtitles") or []
     burn_on = bool(tl.get("burn_subtitles", True) and cues)
     cap = fxcap.options(tl.get("captions"))
     ovs = effects.overlays_signature(tl)
-    pieces, off = [], 0
+    plan, off = [], 0
     for i in range(len(clips)):
         if d[i]:
-            pieces.append({"inputs": [str(parts[i - 1]["tail"]), str(parts[i]["head"])], "xfade": names[i], "off": off, "frames": d[i]})
+            plan.append({"clip": i, "kind": "xf", "xfade": names[i], "off": off, "frames": d[i]})
             off += d[i]
         nb = n[i] - d[i] - (d[i + 1] if i + 1 < len(clips) else 0)
-        pieces.append({"inputs": [str(parts[i]["body"])], "off": off, "frames": nb})
+        plan.append({"clip": i, "kind": "body", "off": off, "frames": nb})
         off += nb
+    for pc in plan:
+        pc["cues"] = fxcap.cues_in(cues, pc["off"] / fps, (pc["off"] + pc["frames"]) / fps) if burn_on else []
+        pc["burn"] = bool(pc["cues"] or ovs or pc["kind"] == "xf")
+    mezz_body = {pc["clip"]: pc["burn"] for pc in plan if pc["kind"] == "body"}
+
+    # stage 1: clip parts (parallel; identical clips are rendered once)
+    def jkey(i: int) -> str:
+        return f"{segment_key(clips[i], tl, draft)}_{d[i]}_{d[i + 1] if i + 1 < len(clips) else 0}_{mezz_body[i]}"
+
+    jobs: dict[str, int] = {}
+    for i in range(len(clips)):
+        jobs.setdefault(jkey(i), i)
+    with cf.ThreadPoolExecutor(max_workers=nw) as pool:
+        futs = {k: pool.submit(_render_parts, clips[i], tl, cache, d[i], d[i + 1] if i + 1 < len(clips) else 0, draft, threads,
+                               mezz_body[i]) for k, i in jobs.items()}
+        res = {}
+        for k, f in futs.items():
+            res[k] = f.result()
+            tick()
+    parts, cached = [], 0
+    for i in range(len(clips)):
+        p, was = res[jkey(i)]
+        parts.append(p)
+        cached += was
+    timings["segments"] = round(time.time() - t0, 2)
+
+    # stage 2: transition pieces + burned pieces (+ programme audio and its loudness measurement, in parallel)
+    pieces = []
+    for pc in plan:
+        i = pc["clip"]
+        inputs = [str(parts[i - 1]["tail"]), str(parts[i]["head"])] if pc["kind"] == "xf" else [str(parts[i]["body"])]
+        pieces.append({**pc, "inputs": inputs})
     narr = tl.get("audio", [])
     music = tl.get("music") or {}
     has_music = bool(music.get("src"))
     prog_audio = workdir / f"programme_{out.stem}.wav"
     target = float(tl.get("target_lufs", -14.0))
+    asig = {"parts": [Path(p["audio"]).name for p in parts], "d": d, "fps": fps, "dur": round(dur, 4), "target": target,
+            "audio": [{**a, "_s": _src_sig(a["src"])} for a in narr], "v": FX_VERSION,
+            "music": {**music, "_s": _src_sig(music["src"])} if has_music else None, "codec": config.ACODEC}
+    final_audio = cache / f"audio_{hashlib.sha1(json.dumps(asig, sort_keys=True, default=str).encode()).hexdigest()[:20]}.m4a"
 
     def audio_job():
+        """Programme audio -> mix -> loudness -> AAC, all off the video critical path."""
+        if final_audio.exists() and final_audio.stat().st_size > 0:
+            return True
         _programme_audio(parts, d, fps, prog_audio)
         ins: list = ["-i", prog_audio]
         for a in narr:
@@ -588,9 +629,28 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
         if has_music:
             ins += ["-stream_loop", "-1", "-i", music["src"]]
         fc, pre = _mix_graph(tl, len(narr), has_music, dur)
-        err = ff.run([*ins, "-filter_complex", ";".join(fc + [f"[{pre}]loudnorm=I={target}:TP=-1.5:LRA=11:print_format=json[m]"]),
-                      "-map", "[m]", "-vn", "-f", "null", "-"], op="mix-measure")
-        return ins, fc, pre, err
+        lufs, tp = _measure(ins, fc, f"[{pre}]anull")
+        if lufs is not None and lufs > -60:
+            gain = target - lufs
+            if tp + gain <= -1.5:
+                ln = f"volume={gain:.2f}dB"  # what two-pass linear loudnorm applies, without its 192 kHz analysis
+            else:
+                # loud transients (SFX hits, plosives) would clip at the target gain: catch them with a look-ahead
+                # limiter, which lowers integrated loudness a little, so re-measure and correct
+                lim = "alimiter=limit=0.71:attack=3:release=60:level=disabled"
+                for _ in range(2):
+                    got, _tp = _measure(ins, fc, f"[{pre}]volume={gain:.2f}dB,{lim}")
+                    if got is None or abs(got - target) < 0.3:
+                        break
+                    gain += target - got
+                ln = f"volume={gain:.2f}dB,{lim}"
+        else:
+            ln = "anull"  # silent programme: nothing to normalise
+        fca = fc + [f"[{pre}]{ln},aresample={config.AUDIO_RATE},alimiter=limit=0.79:level=disabled[aout]"]
+        tmp = final_audio.with_suffix(".tmp.m4a")
+        ff.run([*ins, "-filter_complex", ";".join(fca), "-map", "[aout]", "-vn", *config.ACODEC, "-t", f"{dur:.3f}", tmp], op="final-audio")
+        tmp.replace(final_audio)
+        return False
 
     t1 = time.time()
     piece_paths: list[Path] = [Path()] * len(pieces)
@@ -599,52 +659,27 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
         afut = pool.submit(audio_job)
         pf = {}
         for k, pc in enumerate(pieces):
-            a, b = pc["off"] / fps, (pc["off"] + pc["frames"]) / fps
-            pcues = fxcap.cues_in(cues, a, b) if burn_on else []
-            if not pcues and not ovs and not pc.get("xfade"):
+            if not pc["burn"]:
                 piece_paths[k] = Path(pc["inputs"][0])
                 pieces_cached += 1
                 continue
-            burn = {"cues": pcues, "cap": cap, "legacy": tl.get("subtitle_style"), "lang": tl.get("lang", "en"), "overlays": ovs, "total": dur}
+            burn = {"cues": pc["cues"], "cap": cap, "legacy": tl.get("subtitle_style"), "lang": tl.get("lang", "en"), "overlays": ovs,
+                    "total": dur}
             pf[k] = pool.submit(_burn_piece, pc, tl, cache, burn, draft, threads)
         for k, f in pf.items():
             piece_paths[k], was = f.result()
             pieces_cached += was
         for _ in range(len(clips)):
             tick()
-        ins, fc, pre, err = afut.result()
+        audio_cached = afut.result()
     timings["pieces_and_audio"] = round(time.time() - t1, 2)
 
-    # stage 3: final pass: video stream copy, audio mixed + normalised once
+    # stage 3: final pass: stream copy of video pieces and the finished audio (no re-encode at all)
     t2 = time.time()
-    m = re.search(r"\{[^{}]*\"input_i\"[^{}]*\}", err, re.S)
-    meas = json.loads(m.group(0)) if m else None
-    if meas and meas["input_i"] not in ("-inf", "inf") and float(meas["input_i"]) > -60:
-        gain = target - float(meas["input_i"])
-        tp = float(meas["input_tp"]) if meas["input_tp"] not in ("-inf", "inf") else -99.0
-        if tp + gain <= -1.5:
-            ln = (f"loudnorm=I={target}:TP=-1.5:LRA=11:measured_I={meas['input_i']}:measured_TP={meas['input_tp']}:"
-                  f"measured_LRA={meas['input_lra']}:measured_thresh={meas['input_thresh']}:offset={meas['target_offset']}:linear=true")
-        else:
-            # loud transients (SFX hits, plosives) would push loudnorm into its dynamic mode, which undershoots the
-            # target: apply the measured gain and catch the peaks with a look-ahead limiter instead
-            lim = "alimiter=limit=0.71:attack=3:release=60:level=disabled"
-            for _ in range(2):  # limiting lowers integrated loudness: re-measure and correct the gain
-                e2 = ff.run([*ins, "-filter_complex", ";".join(fc + [f"[{pre}]volume={gain:.2f}dB,{lim},ebur128=framelog=quiet[m]"]),
-                             "-map", "[m]", "-vn", "-f", "null", "-"], op="mix-measure")
-                got = re.findall(r"I:\s+(-?[\d.]+) LUFS", e2)
-                if not got or abs(float(got[-1]) - target) < 0.3:
-                    break
-                gain += target - float(got[-1])
-            ln = f"volume={gain:.2f}dB,{lim}"
-    else:
-        ln = "anull"  # silent programme: nothing to normalise
-    fc = fc + [f"[{pre}]{ln},aresample={config.AUDIO_RATE},alimiter=limit=0.79:level=disabled[aout]"]
     lst = workdir / f"pieces_{out.stem}.txt"
     lst.write_text("".join(f"file '{p}'\n" for p in piece_paths))
-    vidx = len(narr) + 1 + int(has_music)
-    ff.run([*ins, "-f", "concat", "-safe", "0", "-i", lst, "-filter_complex", ";".join(fc), "-map", f"{vidx}:v", "-map", "[aout]",
-            "-c:v", "copy", *config.ACODEC, "-t", f"{dur:.3f}", "-movflags", "+faststart", out], op="final-mix")
+    ff.run(["-f", "concat", "-safe", "0", "-i", lst, "-i", final_audio, "-map", "0:v", "-map", "1:a", "-c", "copy",
+            "-t", f"{dur:.3f}", "-movflags", "+faststart", out], op="final-mix")
     timings["final"] = round(time.time() - t2, 2)
     sidecars = {}
     if tl.get("subtitles"):
@@ -656,4 +691,4 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
         on_progress(1.0)
     return {"output": str(out), "duration": dur, "elapsed": round(elapsed, 2), "segments": len(clips),
             "segments_from_cache": cached, "sidecars": sidecars, "draft": draft, "workers": nw,
-            "pieces": len(pieces), "pieces_from_cache": pieces_cached, "timings": timings}
+            "pieces": len(pieces), "pieces_from_cache": pieces_cached, "audio_from_cache": audio_cached, "timings": timings}

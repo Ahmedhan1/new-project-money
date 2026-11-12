@@ -124,13 +124,22 @@ def _delete(tl: dict, i: int) -> None:
     tl.update(new)
 
 
+def renderer_margin_v() -> bool:
+    """True once the caption renderer (nexus.fx.captions, FX-1) honours tl['captions']['margin_v']; until then it is ignored."""
+    try:
+        from .fx import captions as fxcap
+        return "margin_v" in getattr(fxcap, "DEFAULTS", {})
+    except Exception:
+        return False
+
+
 def _caption_box(cap: dict | None, W: int, H: int) -> tuple[float, float] | None:
     """(top, bottom) of the caption band as fractions of the frame height, as the renderer places it."""
     if not cap:
         return None
     vertical = H > W
     pos = cap.get("position", "bottom")
-    mv = cap.get("margin_v")
+    mv = cap.get("margin_v") if renderer_margin_v() else None
     if pos == "bottom":
         m = mv if mv is not None else (0.16 if vertical else 0.07)
         return (1 - m - CAPTION_BAND * 1.6, 1 - m)
@@ -182,6 +191,15 @@ def tune(tl: dict, platform: str, analysis_by_src: dict | None = None) -> tuple[
     if fits:
         _note(notes, f"fit: {', '.join(sorted(fits))} (cover = crop around the clip focus; blur = full picture on a blurred fill)",
               _sig(sp, "format", "lowres", "watermark") if sp["fit"] == "cover" else "spec", sp)
+    if H > W:  # a 2.39 letterbox wastes most of a vertical frame
+        lb = 0
+        for c in tl["clips"]:
+            if c.get("effects"):
+                n0 = len(c["effects"])
+                c["effects"] = [e for e in c["effects"] if e.get("type") != "letterbox"]
+                lb += n0 - len(c["effects"])
+        if lb:
+            _note(notes, f"removed letterbox from {lb} clip(s) for the vertical frame", _sig(sp, "format", "lowres"), sp)
     # 2. title / chapter cards
     mode, cap_s = sp.get("title_card", "keep"), float(sp.get("title_card_max_s", 2.5))
     lead_title = None
@@ -224,7 +242,14 @@ def tune(tl: dict, platform: str, analysis_by_src: dict | None = None) -> tuple[
             style = "boxed"
             _note(notes, "no word timings: captions fall back to boxed sentence cues", "spec", sp)
     caps = {**cur, **want, "style": style}
+    caps.pop("margin_v", None)
     sz = sp.get("safe_zone") or {}
+    pillar = H > W and fits == {"blur"}
+    if pillar and renderer_margin_v():
+        # landscape picture in the middle of a vertical frame: captions go under the picture, above the platform UI
+        caps["position"], caps["margin_v"] = "bottom", round(sz.get("bottom", 0) + 0.03, 3)
+    elif pillar:
+        _note(notes, "captions stay in the middle (over the picture): the renderer does not yet honour captions.margin_v", "spec", sp)
     box = _caption_box(caps, W, H)
     if not _in_safe(box, sz):
         if caps["position"] == "bottom":

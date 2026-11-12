@@ -233,3 +233,24 @@ def repurpose_(job: jobs.Job) -> dict:
                 "rights_issues": [f"{c['check']}: {c['detail']}" for c in rights["checks"] if not c["ok"]]}
 
     return job.stage("build", run)
+
+
+@jobs.handler("director")
+def director_(job: jobs.Job) -> dict:
+    """Long footage -> condensed master + per-platform deliverables (+ optional renders). Analyses are cached in the
+    project's reports folder, so a restarted job does not re-run Whisper."""
+    from . import director, project as prj
+    p = prj.Project(job.params["project"])
+    q = job.params
+
+    def run():
+        paths = q.get("paths") or [m["path"] for m in p.data["media"]]
+        if not paths:
+            raise ValueError("upload at least one video into this project first")
+        out = director.run(p, paths, q.get("brief", p.name), platforms=tuple(q.get("platforms") or ("youtube", "tiktok", "instagram-reels")),
+                           target_s=q.get("target_s"), langs=tuple(q.get("langs") or ("en",)), preset=q.get("preset", "cinematic"),
+                           render=q.get("render", False), use_llm=q.get("use_llm", False))
+        return {"project": p.id, "rows": out["rows"], "branches": out["branches"],
+                "summary": (out.get("plan") or {}).get("summary")}
+
+    return job.stage("plan-build-render", run)

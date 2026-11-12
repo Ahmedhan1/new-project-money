@@ -32,7 +32,7 @@ platforms:
     desc_max: 5000
     hashtags: 3             # YouTube shows up to 3 hashtags above the title
     hashtag_max: 15
-    safe_zone: {top: 0.0, bottom: 0.10, left: 0.0, right: 0.0}
+    safe_zone: {top: 0.0, bottom: 0.05, left: 0.0, right: 0.0}   # player controls only show on hover
     loudness_lufs: -14
     captions: {style: classic, position: bottom}
     captions_required: false
@@ -307,7 +307,7 @@ platforms:
     desc_max: 5000
     hashtags: 2
     hashtag_max: 10
-    safe_zone: {top: 0.0, bottom: 0.10, left: 0.0, right: 0.0}
+    safe_zone: {top: 0.0, bottom: 0.05, left: 0.0, right: 0.0}   # player controls only show on hover
     loudness_lufs: -14
     captions: {style: boxed, position: bottom}
     captions_required: true
@@ -444,7 +444,7 @@ platforms:
     desc_max: 3000
     hashtags: 3
     hashtag_max: 5
-    safe_zone: {top: 0.0, bottom: 0.10, left: 0.0, right: 0.0}
+    safe_zone: {top: 0.0, bottom: 0.05, left: 0.0, right: 0.0}   # player controls only show on hover
     loudness_lufs: -14
     captions: {style: boxed, position: bottom}
     captions_required: true
@@ -489,7 +489,7 @@ platforms:
     desc_max: 280
     hashtags: 2
     hashtag_max: 2
-    safe_zone: {top: 0.0, bottom: 0.10, left: 0.0, right: 0.0}
+    safe_zone: {top: 0.0, bottom: 0.05, left: 0.0, right: 0.0}   # player controls only show on hover
     loudness_lufs: -14
     captions: {style: boxed, position: bottom}
     captions_required: true

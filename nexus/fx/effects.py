@@ -324,7 +324,7 @@ def watermark_png(text: str, W: int, H: int, lang: str = "en", opacity: float = 
     from PIL import Image, ImageDraw
 
     from ..timeline import text as ttext
-    key = hashlib.sha1(f"wm|{text}|{W}x{H}|{lang}|{opacity}|{position}".encode()).hexdigest()[:16]
+    key = hashlib.sha1(f"wm2|{text}|{W}x{H}|{lang}|{opacity}|{position}".encode()).hexdigest()[:16]
     out = config.CACHE / "overlays" / f"wm_{key}.png"
     if out.exists():
         return out
