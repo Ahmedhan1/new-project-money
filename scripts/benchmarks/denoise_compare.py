@@ -84,7 +84,7 @@ def mixtures(tmp: Path) -> dict:
                 ref = sosfiltfilt(butter(4, [120, 4500], "band", fs=SR, output="sos"), s).astype(np.float32)
             g = sp_rms / 10 ** (SNR[kind] / 20)
             mix = ref + (nv * g).astype(np.float32)
-            out[f"{kind}/{voice.split('-')[0].split('_')[1]}"] = (np.stack([mix, mix], 1).astype(np.float32), ref)
+            out[f"{kind}/{voice.split('-')[1]}"] = (np.stack([mix, mix], 1).astype(np.float32), ref)
     return out
 
 
@@ -96,6 +96,7 @@ def main() -> int:
     ap.add_argument("--start", type=float, default=60.0)
     ap.add_argument("--tmp", default="/tmp/a2-c/denoise")
     ap.add_argument("--out", default=str(ROOT / "docs" / "results" / "a2_denoise_compare.json"))
+    ap.add_argument("--skip-real", action="store_true", help="re-run only the synthetic part, keep the stored real rows")
     a = ap.parse_args()
     tmp = Path(a.tmp)
     tmp.mkdir(parents=True, exist_ok=True)
@@ -113,7 +114,9 @@ def main() -> int:
                 rows.append(r)
                 print(name, t, s, r["si_sdr_gain_db"], r["noise_floor_reduction_db"], r["speech_lsd_db"], r["rtf"], flush=True)
         doc["synthetic"][name] = {"snr_db": SNR[name.split("/")[0]], "rows": rows}
-    for i in REAL:
+    if a.skip_real and Path(a.out).exists():
+        doc["real"] = json.loads(Path(a.out).read_text()).get("real", {})
+    for i in ([] if a.skip_real else REAL):
         src = BENCH / i / "source.mp4"
         if not src.exists():
             continue
@@ -144,6 +147,7 @@ def main() -> int:
              for k, v in pooled.items()), key=lambda r: -r["si_sdr_gain_db"])[:5]
     for i, v in doc["real"].items():
         doc["choice"][f"real/{i}"] = v["choice"] | {"class": v["class"]}
+    doc["defaults"] = {k: {"tool": t, "strength": s, "why": "nexus/audio/denoise.py MATERIAL_DEFAULTS comment"} for k, (t, s) in D.MATERIAL_DEFAULTS.items()}
     Path(a.out).write_text(json.dumps(doc, indent=1) + "\n")
     print("wrote", a.out)
     return 0

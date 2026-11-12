@@ -135,7 +135,7 @@ def test_full_chain_meets_targets_and_writes_a_valid_manifest(home, tmp_path):
     assert abs(a["lufs"] + 16.0) <= 0.5
     assert a["true_peak"] <= -1.4
     assert a["noise_rel_lufs_db"] < b["noise_rel_lufs_db"] - 2        # noise lower relative to the speech (afftdn fallback here)
-    assert a["speech_band_snr_db"] > b["speech_band_snr_db"] + 2
+    assert a["speech_band_snr_db"] > b["speech_band_snr_db"] + 1     # gentle afftdn-light fallback (no RNNoise model here)
     assert abs(a["channel_imbalance_db"]) < 0.3
     assert a["digital_silence_frac"] == 0
     steps = {c["step"]: c for c in man["chain"]}
@@ -152,3 +152,22 @@ def test_clean_studio_material_is_not_denoised(clean_src):
     assert D.classify(prof) == "studio"
     y, rep = G.process(x, SR, steps={"denoise", "loudness"}, measure_speakers=False)
     assert not {c["step"]: c for c in rep["chain"]}["denoise"]["applied"]
+
+
+def test_a_denoiser_that_pulls_speech_down_is_replaced(monkeypatch):
+    """The over-processing guard: if the default tool lowers the speech band by > 1.5 dB (RNNoise did 4-8 dB on the
+    documentary and the 1948 ad), the chain falls back to a safer tool. The bad tool is simulated as a -6 dB gain."""
+    from nexus.audio import denoise as D
+    x = M.as2d(speechlike(12) + pink(12 * SR, -45))
+    real_apply = D.apply
+
+    def apply(tool, y, sr, strength="normal", noise_floor_db=None):
+        if tool == "arnndn":
+            return (M.as2d(y) * 10 ** (-6 / 20)).astype(np.float32)
+        return real_apply(tool, y, sr, strength, noise_floor_db)
+    monkeypatch.setattr(D, "apply", apply)
+    monkeypatch.setattr(D, "available", lambda tools=None: ["afftdn", "arnndn"])
+    y, rep = G.process(x, SR, material="outdoor", steps={"denoise"}, measure_speakers=False)
+    dn = {c["step"]: c for c in rep["chain"]}["denoise"]
+    assert dn["tried"][0]["tool"] == "arnndn" and dn["tried"][0]["speech_band_change_db"] < -5
+    assert dn["tool"] == "afftdn" and abs(dn["tried"][-1]["speech_band_change_db"]) <= 1.5

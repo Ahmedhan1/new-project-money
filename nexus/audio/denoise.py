@@ -257,17 +257,33 @@ def run_tool(tool: str, x: np.ndarray, sr: int, strength: str = "normal", clean=
 
 
 # ---------------------------------------------------------------- default per material
-# Chosen from docs/results/a2_denoise_compare.json (see choose()). "none" when the source is already clean:
-# processing a clean recording only adds risk.
+# Chosen from docs/results/a2_denoise_compare.json (2026-11-12), not from choose() alone - choose() rewards the
+# largest floor reduction that passes the no-reference limits, which the reference (SI-SDR) runs do not support:
+#  studio     none: panel floor -55.6 dBFS, 45 dB band SNR; processing a clean recording only adds risk
+#  interview  arnndn light: 4.4 dB floor reduction, speech band -0.07 dB, LSD 0.41 (interview); synthetic room +0.70 to
+#             +0.80 dB SI-SDR (two voices). noisereduce light measured a little better on the synthetic room mixes
+#             (+1.16 to +2.61 dB) at -0.23 dB speech band on the interview, but it is an optional dependency, so the
+#             built-in RNNoise stays the default. anlmdn gains more floor but is 8x slower (RTF 0.2) and triples the
+#             musical-noise index on the synthetic room mix (0.0295 vs 0.0108). At 22 dB SNR no tool gains much.
+#  outdoor    arnndn normal: walktalk 13.4 dB floor reduction, speech band -0.42 dB; synthetic outdoor +5.05 / +6.73 dB
+#             SI-SDR (joe / ljspeech voices); noisereduce normal +4.98 / +4.99, FFmpeg denoisers <= +0.6
+#  documentary noisereduce light: RNNoise pulled the documentary's speech band down 4.2-6.0 dB (narration over
+#             music/effects); noisereduce light 6.9 dB floor reduction at -0.29 dB
+#  archival   noisereduce normal: synthetic optical-track mixes +7.69 / +6.66 dB SI-SDR; on the 1948 ad 10.6 dB floor reduction at
+#             -1.14 dB speech band. RNNoise pulled the ad's speech band down 5.5-8.1 dB: never use it there.
+# When noisereduce is not installed the fallback is afftdn light (ad: 7.8 dB at -0.55 dB).
+# dialogue.process() also checks the result: a tool that moves the speech band by > MAX_SPEECH_CHANGE_DB is replaced
+# by the next safer one (SAFER), whatever this table says.
 MATERIAL_DEFAULTS = {
     "studio": ("none", "normal"),
     "interview": ("arnndn", "light"),
     "panel": ("arnndn", "light"),
     "podcast": ("arnndn", "light"),
     "outdoor": ("arnndn", "normal"),
-    "documentary": ("afftdn", "light"),
-    "archival": ("afftdn", "normal"),
+    "documentary": ("noisereduce", "light"),
+    "archival": ("noisereduce", "normal"),
 }
+SAFER = [("noisereduce", "light"), ("afftdn", "light")]
 
 # acceptance limits for a tool on a material (do not over-process)
 MAX_SPEECH_CHANGE_DB = 1.5
@@ -311,5 +327,5 @@ def default_for(prof: dict) -> tuple[str, str, str]:
     cls = classify(prof)
     tool, strength = MATERIAL_DEFAULTS.get(cls, ("afftdn", "light"))
     if tool not in ("none", *available()):
-        tool, strength = "afftdn", "normal"
+        tool, strength = "afftdn", "light"
     return cls, tool, strength

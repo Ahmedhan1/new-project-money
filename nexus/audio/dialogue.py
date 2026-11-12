@@ -406,7 +406,7 @@ def plan(prof: dict, material: str | None = None) -> dict:
         cls = material
         tool, strength = D.MATERIAL_DEFAULTS.get(material, (tool, strength))
         if tool not in ("none", *D.available()):
-            tool, strength = "afftdn", "normal"
+            tool, strength = "afftdn", "light"
     return {"material": cls, "denoise": (tool, strength)}
 
 
@@ -442,8 +442,18 @@ def process(x: np.ndarray, sr: int, material: str | None = None, target_lufs: fl
         rec("dehum", False, why=f"hum prominence {before.get('hum_prominence_db')} dB")
     tool, strength = pl["denoise"]
     if want("denoise") and tool != "none":
-        y = D.apply(tool, y, sr, strength)
-        rec("denoise", True, tool=tool, strength=strength, material=pl["material"], licence=D.TOOLS[tool]["licence"])
+        sp0 = M.speech_band(y, sr)["speech_db"]
+        tried = []
+        avail = D.available()
+        for cand in [(tool, strength)] + [c for c in D.SAFER if c != (tool, strength) and c[0] in avail]:
+            z = D.apply(cand[0], y, sr, cand[1])
+            delta = round(M.speech_band(z, sr)["speech_db"] - sp0, 2)
+            tried.append({"tool": cand[0], "strength": cand[1], "speech_band_change_db": delta})
+            if abs(delta) <= D.MAX_SPEECH_CHANGE_DB:
+                break
+        y, (tool, strength) = z, cand
+        rec("denoise", True, tool=tool, strength=strength, material=pl["material"], licence=D.TOOLS[tool]["licence"], tried=tried,
+            note="a tool that moved the speech band by more than 1.5 dB was replaced by a safer one" if len(tried) > 1 else "")
     else:
         rec("denoise", False, why=f"material class {pl['material']}: source already clean" if tool == "none" else "disabled")
     if want("dereverb"):
