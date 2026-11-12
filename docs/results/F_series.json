@@ -76,7 +76,7 @@
     "description": "The lighthouse is surrounded by shadows, and the beam cuts through them, revealing a figure in the distance, the old man standing at the edge of the light."
    }
   ],
-  "id": "film_49cb463cdd"
+  "id": "film_64b4cbab18"
  },
  "bible": {
   "title": "Sunken Currents",
@@ -119,7 +119,7 @@
   "style": {
    "grade": "cinematic",
    "mood": "tense",
-   "music_seed": 270,
+   "music_seed": 519,
    "voice": "en_US-joe-medium"
   },
   "season": [
@@ -145,19 +145,19 @@
   "canon": [
    {
     "episode": 1,
-    "event": "The bioluminescent pattern matches the last known locations of missing fish."
+    "event": "The bioluminescent pattern is caused by a unknown contaminant."
    },
    {
     "episode": 1,
-    "event": "The boat's AI reveals a hidden compartment containing evidence of past contamination."
+    "event": "The boat's AI was hidden beneath the hull and only activated during the lunar eclipse."
    },
    {
     "episode": 2,
-    "event": "The bioluminescent pattern is a signal from an unknown submersible deep in the ocean."
+    "event": "The ancient energy source is linked to the bioluminescent contamination."
    },
    {
     "episode": 2,
-    "event": "The energy source beneath the sea is linked to the vanishing fish and the contamination."
+    "event": "The hidden chamber contains organisms that may be the cause of the fish disappearance."
    }
   ]
  },
@@ -167,30 +167,30 @@
   "scenes": [
    {
     "location": "Seabrook Bay",
-    "narration": "Eli and Hark work side by side on the rusty research boat, repairing its solar panels and checking for structural damage. Mira watches from a distance, noting the strange glow in the water.",
+    "narration": "Eli and Hark inspect the rusting research boat, their hands moving with precision as they prepare to restore it. Mira watches from a distance, noting the strange glow in the water.",
     "on_screen_text": ""
    },
    {
     "location": "Lunar Reef",
-    "narration": "Mira collects samples from the water, trying to determine the source of the strange glow. Eli and Hark inspect the boat's hull, searching for signs of contamination.",
+    "narration": "Mira analyzes a sample of the glowing water, her lab coat stained with faint green hues. Eli and Hark stand by, wary of the town's rules about electronic devices.",
     "on_screen_text": ""
    },
    {
     "location": "Seabrook Bay",
-    "narration": "The town council approaches the duo, demanding they stop their investigation without permission. Hark refuses, insisting they need to find the truth.",
+    "narration": "The boat's AI is reactivated during the lunar eclipse, revealing a hidden chamber beneath the hull. Hark grunts in approval as the system comes online.",
     "on_screen_text": ""
    },
    {
     "location": "Lunar Reef",
-    "narration": "As the lunar eclipse begins, Eli activates the boat's AI system, revealing a hidden compartment. Mira and Hark discover a series of bioluminescent patterns in the water, suggesting a deeper mystery.",
+    "narration": "Mira confirms the bioluminescent pattern is not natural, hinting at a deeper mystery. Eli and Hark exchange a glance, understanding the weight of what they\u2019ve uncovered.",
     "on_screen_text": ""
    }
   ],
-  "cliffhanger": "The AI reveals a pattern that matches the missing fish's last known locations.",
-  "summary": "Eli and Hark restore the research boat while Mira investigates the vanishing fish. They discover a strange bioluminescent pattern in the water.",
+  "cliffhanger": "The AI reveals a secret about the town\u2019s fish disappearance that challenges everything they thought they knew.",
+  "summary": "Eli and Hark restore the research boat while Mira investigates the vanishing fish. They discover a mysterious bioluminescent pattern in the water.",
   "events": [
-   "The bioluminescent pattern matches the last known locations of missing fish.",
-   "The boat's AI reveals a hidden compartment containing evidence of past contamination."
+   "The bioluminescent pattern is caused by a unknown contaminant.",
+   "The boat's AI was hidden beneath the hull and only activated during the lunar eclipse."
   ]
  },
  "episode_2": {
@@ -199,33 +199,34 @@
   "scenes": [
    {
     "location": "Lunar Reef",
-    "narration": "Eli, Hark, and Mira stand near the boat's hull as the lunar eclipse begins",
-    "on_screen_text": "AI activation sequence"
+    "narration": "As the lunar eclipse begins, the boat's AI reveals a mysterious energy source beneath the sea. Mira's tests show the contamination is spreading rapidly.",
+    "on_screen_text": "Bioluminescent patterns intensify as the AI's voice echoes through the cabin."
    },
    {
     "location": "Lunar Reef",
-    "narration": "The AI's holographic interface flickers to life, revealing a deep blue energy source beneath the seabed",
-    "on_screen_text": "bioluminescent readings spike"
+    "narration": "Eli and Hark examine the AI's data, realizing the contamination is linked to an ancient underwater structure. Mira's hands tremble as she confirms the spread of the bioluminescent contaminant.",
+    "on_screen_text": "Data streams flicker with urgency."
    },
    {
     "location": "Lunar Reef",
-    "narration": "Mira's lab coat is soaked with saltwater as she runs tests on the water sample, her fingers trembling",
-    "on_screen_text": "contamination levels are rising"
+    "narration": "Hark confronts the AI, demanding answers about the structure's origin. Eli tries to reason with the captain, warning him of the potential consequences. Mira watches, her curiosity battling with fear.",
+    "on_screen_text": "The AI's response is cold and clinical."
    },
    {
     "location": "Lunar Reef",
-    "narration": "Hark clenches his weathered coat as he watches the eclipse progress, his stoic expression hardening",
-    "on_screen_text": "the energy source is a new threat"
+    "narration": "Mira discovers a hidden chamber beneath the structure, filled with strange, glowing organisms. Eli and Hark are stunned by the discovery, while Mira is both excited and terrified.",
+    "on_screen_text": "The chamber pulses with an otherworldly light."
    }
   ],
-  "cliffhanger": "The AI reveals the bioluminescent pattern is a signal from an unknown submersible deep in the ocean.",
-  "summary": "During the lunar eclipse, the boat's AI reveals a mysterious energy source beneath the sea, and Mira's tests show the contamination is spreading rapidly.",
+  "cliffhanger": "The energy source is a forgotten ancient technology that could be the key to solving the fish disappearance.",
+  "summary": "During the lunar eclipse, the AI reveals an ancient energy source beneath the sea, and Mira discovers a hidden chamber filled with glowing organisms. The contamination's spread is confirmed, and the team faces a new mystery.",
   "events": [
-   "The bioluminescent pattern is a signal from an unknown submersible deep in the ocean.",
-   "The energy source beneath the sea is linked to the vanishing fish and the contamination."
+   "The ancient energy source is linked to the bioluminescent contamination.",
+   "The hidden chamber contains organisms that may be the cause of the fish disappearance."
   ]
  },
  "continuity_ep2": [
+  "PASS scene depth: every scene carries at least 12 words of narration",
   "PASS recurring characters appear: ['Eli', 'Hark', 'Mira'] of ['Eli', 'Hark', 'Mira']",
   "PASS no unestablished named characters: all recurring names are in the bible",
   "FAIL locations from the bible: scenes set in ['Lunar Reef']; not in bible: ['Lunar Reef', 'Lunar Reef', 'Lunar Reef', 'Lunar Reef']",
@@ -236,12 +237,12 @@
  "renders": {
   "ep1": {
    "status": "PASSED_AUTOMATED_CHECKS",
-   "duration": 49.866667,
+   "duration": 50.333333,
    "issues": []
   },
   "ep2": {
    "status": "PASSED_AUTOMATED_CHECKS",
-   "duration": 41.778,
+   "duration": 65.918,
    "issues": [
     "[minor] locations from the bible: scenes set in ['Lunar Reef']; not in bible: ['Lunar Reef', 'Lunar Reef', 'Lunar Reef', 'Lunar Reef']"
    ]

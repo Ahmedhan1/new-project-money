@@ -68,7 +68,7 @@ def plan_season(b: dict, n: int) -> list[dict]:
 
 
 # ------------------------------------------------------------------ episodes
-def write_episode(b: dict, number: int, scenes: int = 4) -> dict:
+def write_episode(b: dict, number: int, scenes: int = 4, feedback: str = "") -> dict:
     outline = next((e for e in b["season"] if e["number"] == number), {"title": f"Episode {number}", "summary": "", "cliffhanger": ""})
     prev = b["episodes"][-1] if b["episodes"] else None
     prev_txt = (f"PREVIOUS EPISODE ({prev['title']}) ended like this: {prev['cliffhanger']}\nPrevious summary: {prev['summary']}\n"
@@ -76,7 +76,9 @@ def write_episode(b: dict, number: int, scenes: int = 4) -> dict:
     raw = llm.chat(
         f"{_bible_text(b)}\n\n{prev_txt}Write episode {number}: \"{outline['title']}\". Outline: {outline['summary']}\n"
         f"Use ONLY the characters and locations above (no new named characters). Respect the world rules and canonical events.\n"
-        f"Write exactly {scenes} scenes as third-person narration, then the ending.\nFormat:\n"
+        f"Write exactly {scenes} scenes as third-person narration, then the ending. Every scene's narration is 2 full sentences "
+        "(at least 18 words): what happens, and how a character reacts.\n"
+        + (f"Your previous draft was rejected. Fix exactly these problems:\n{feedback}\n" if feedback else "") + "Format:\n"
         "SCENE: <location name> | <2 sentences of narration naming the characters involved> | <on-screen caption, max 5 words>\n"
         "SCENE: ...\nCLIFFHANGER: <one sentence>\nSUMMARY: <2-sentence summary of this episode>\n"
         "EVENT: <a new canonical fact established in this episode>\nEVENT: <another>",
@@ -93,6 +95,9 @@ def write_episode(b: dict, number: int, scenes: int = 4) -> dict:
 def continuity_review(b: dict, ep: dict) -> dict:
     """Deterministic continuity checks + an independent reviewer prompt (different instructions, low temperature)."""
     checks = []
+    thin = [(i + 1, len(s["narration"].split())) for i, s in enumerate(ep["scenes"]) if len(s["narration"].split()) < 12]
+    checks.append(qa._c("scene depth", not thin, "every scene carries at least 12 words of narration" if not thin
+                        else f"scenes too thin to hold a shot (scene, words): {thin} - each needs 2 full sentences", "major", fix="rewrite"))
     text = " ".join(s["narration"] for s in ep["scenes"]) + " " + ep["cliffhanger"]
     names = {c["name"].split()[0] for c in b["characters"]}
     present = {n for n in names if re.search(rf"\b{re.escape(n)}\b", text)}
@@ -125,11 +130,13 @@ def next_episode(series_id: str, scenes: int = 4, rounds: int = 3) -> tuple[dict
     """Write the next episode with continuity gates; commit it to the bible only after review."""
     b = db.get_doc("series", series_id)
     number = len(b["episodes"]) + 1
-    best = None
+    best, feedback = None, ""
     for attempt in range(rounds):
-        ep = write_episode(b, number, scenes)
+        ep = write_episode(b, number, scenes, feedback)
         review = continuity_review(b, ep)
-        fails = sum(not c["ok"] and c["severity"] != "minor" for c in review["checks"])
+        failed = [c for c in review["checks"] if not c["ok"]]  # minor findings (e.g. off-bible locations) are fed back too
+        feedback = "\n".join(f"- {c['check']}: {c['detail']}" for c in failed)
+        fails = sum(c["severity"] != "minor" for c in failed)
         if best is None or fails < best[2]:
             best = (ep, review, fails)
         if fails == 0:
@@ -149,10 +156,12 @@ def produce_episode(b: dict, ep: dict, review: dict, size=(1280, 720)) -> dict:
     if ep["number"] > 1:  # recap generated from the stored summary of the previous episode
         prev = next(e for e in b["episodes"] if e["number"] == ep["number"] - 1)
         scenes.append({"narration": f"Previously on {b['title']}. {prev['summary']}", "on_screen_text": "Previously", "visual_query": ""})
-    scenes += [{"narration": s["narration"], "on_screen_text": s["on_screen_text"] or s["location"], "visual_query": ""} for s in ep["scenes"]]
+    # Fiction has no photos of its characters, but its places exist: each scene gets a licensed establishing image of
+    # its location (people-free search terms), instead of a gradient title card.
+    scenes += [{"narration": s["narration"], "on_screen_text": s["on_screen_text"] or s["location"], "visual_query": s["location"]} for s in ep["scenes"]]
     scenes.append({"narration": ep["cliffhanger"], "on_screen_text": "To be continued", "visual_query": ""})
     script = {"title": f"{b['title']}: {ep['title']}", "topic": b["logline"], "scenes": scenes}
-    tl = create.produce(p, script, size=size, style=b["style"], use_stock=False)
+    tl = create.produce(p, script, size=size, style=b["style"], use_stock=True)
     p.save_timeline(tl, f"episode {ep['number']}")
     stats, report = qa.render_with_qa(p, tl, f"episode_{ep['number']:02d}", extra_stages=[review], extra={"series": b["id"]})
     return {"project": p.id, "output": stats["output"], "render": stats, "report": report, "style": p.data["style"]}

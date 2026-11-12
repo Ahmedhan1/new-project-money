@@ -3,12 +3,12 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-11T22:25:21Z",
+ "updated": "2026-11-12T05:34:11Z",
  "git": {
   "branch": "claude/intelligent-faraday-y28cx1",
-  "commit": "e491f3a",
-  "subject": "Run every API job on the durable ledger; remove the in-memory queue",
-  "dirty_files": 16,
+  "commit": "c39c8c9",
+  "subject": "Record Tests D and F passing, automatic backups, updated task registry and reports",
+  "dirty_files": 8,
   "upstream": "origin/claude/intelligent-faraday-y28cx1",
   "unpushed_commits": 0
  },
@@ -16,7 +16,7 @@
   "id": "QLT-1",
   "title": "Creative quality pass: measured rubric + series writer on the script schema + research/visual relevance",
   "status": "in_progress",
-  "next": "1) series.py - use llm.chat_json(schema=...) and the scene-depth gate (episode 2 had one-clause scenes). 2) Give series episodes stock visuals (they are title cards only). 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Score visual relevance from query terms vs image title."
+  "next": "1) Series visuals - derive the image query from the bible's location LOOK text (generic nouns), not its fictional name, and allow reuse of an image for a repeated location. 2) Repair off-bible locations instead of only reporting them. 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Scored rubric in the QA report."
  },
  "next_tasks": [
   {
@@ -24,7 +24,7 @@
    "priority": 1,
    "title": "Creative quality pass: measured rubric + series writer on the script schema + research/visual relevance",
    "status": "in_progress",
-   "next": "1) series.py - use llm.chat_json(schema=...) and the scene-depth gate (episode 2 had one-clause scenes). 2) Give series episodes stock visuals (they are title cards only). 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Score visual relevance from query terms vs image title."
+   "next": "1) Series visuals - derive the image query from the bible's location LOOK text (generic nouns), not its fictional name, and allow reuse of an image for a repeated location. 2) Repair off-bible locations instead of only reporting them. 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Scored rubric in the QA report."
   },
   {
    "id": "WIN-1",
@@ -72,7 +72,7 @@
   "fast": {
    "summary": "32 passed, 0 failed, 0 skipped",
    "ok": true,
-   "date": "2026-11-11",
+   "date": "2026-11-12",
    "platform": "Linux",
    "python": "3.13.18"
   }

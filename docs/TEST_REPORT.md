@@ -53,10 +53,15 @@ Currents": bible with 3 characters, 3-episode season; episodes 1 and 2 written, 
 (49.9 s and 41.8 s, both `PASSED_AUTOMATED_CHECKS`); all 3 characters recur; episode 2 opens with a recap and picks up
 the cliffhanger; same look/sound identity; continuation metadata present.
 
-**Honest quality reading:** the continuity checker correctly flagged that episode 2 is set in a location ("Lunar Reef")
-that is not in the bible (reported as a minor issue, not fixed). Episode visuals are title cards with narration — no
-characters are ever shown, so "character consistency" is textual only. Episode 2's scene lines are single short clauses
-(the series writer does not yet use the schema/depth gate that fixed Test D → task `QLT-1`).
+**Second run after fixes (441 s): PASS.** The series writer now gets the reviewer's findings back and a scene-depth
+gate: scenes went from single clauses to 24-31 words each; episode 2 is 65.9 s. Scenes now ask for a licensed
+establishing image of their location instead of a gradient card.
+
+**Honest quality reading:** only 3 of 8 story scenes actually got an image; the rest are still title cards (the same
+location is reused and candidates run out). Location names are fictional ("Seabrook Bay", "Lunar Reef"), so a match is a
+real place that happens to share the name - plausible scenery, not the story's world. Characters are never shown, so
+"character consistency" is textual only. The continuity checker still flags "Lunar Reef" as not in the bible in episode 2
+(reported as minor, fed back to the writer, not repaired). This is a working pipeline, not a premium series.
 
 ## Not covered by any test yet
 Real Windows `.bat` run · any real cloud storage remote · analyze/remix/package job handlers with real models ·

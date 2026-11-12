@@ -123,8 +123,8 @@ tasks:
     deps: [TST-D]
     acceptance: "A reviewer rubric (hook, story arc, visual relevance per scene, no repeated visuals, audio balance) is scored in the QA report and gates approval; series episodes meet the same scene-depth gate as create-from-idea; no scene falls back to a title card when a relevant image exists."
     test: "Render 3 topics + 1 series episode; rubric scores recorded in docs/results; a human watches them."
-    evidence: "Done so far - script schema, scene-depth gate, reviewer feedback loop, stock query ladder, sentence-aware subtitles (Test D run 4)."
-    next: "1) series.py - use llm.chat_json(schema=...) and the scene-depth gate (episode 2 had one-clause scenes). 2) Give series episodes stock visuals (they are title cards only). 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Score visual relevance from query terms vs image title."
+    evidence: "Done so far - script schema, scene-depth gate, reviewer feedback loop, stock query ladder, sentence-aware subtitles (Test D run 4); series writer gets reviewer feedback + depth gate, episodes request location images (Test F run 2 - scenes 24-31 words, 3 of 8 scenes with images)."
+    next: "1) Series visuals - derive the image query from the bible's location LOOK text (generic nouns), not its fictional name, and allow reuse of an image for a repeated location. 2) Repair off-bible locations instead of only reporting them. 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Scored rubric in the QA report."
   - id: QLT-2
     priority: 2
     title: "Production presets (cinematic, documentary, educational, scientific, commercial, product-ad, storytelling, social, explainer, film/series)"
