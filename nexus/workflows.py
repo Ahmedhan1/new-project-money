@@ -52,9 +52,9 @@ def _quality(p, tl: dict, output: str, platform: str | None = None) -> dict:
     """Weighted quality score of a finished render, stored next to the QA report (nexus/quality.py)."""
     import json
     from . import quality
-    an = _analysis(p)
-    rep = quality.score(p.dir / output, tl=tl, analysis=next(iter(an.values())) if len(an) == 1 else None,
-                        lang=tl.get("lang"), platform=platform)
+    # The source analysis describes the SOURCE, not this programme: an edit is meant to cover only part of it, so it is
+    # not passed (it would turn every condensed edit into a "missing dialogue" localization failure).
+    rep = quality.score(p.dir / output, tl=tl, analysis=None, lang=tl.get("lang"), platform=platform)
     (p.dir / "reports" / f"{Path(output).stem}.quality.json").write_text(json.dumps(rep, ensure_ascii=False, default=str), encoding="utf-8")
     return quality.summary(rep)
 

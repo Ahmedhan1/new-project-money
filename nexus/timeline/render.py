@@ -34,6 +34,9 @@ AUDIO_FX = {
     "denoise": "highpass=f=80,afftdn=nr=12:nf=-30",
     "voice": "highpass=f=80,afftdn=nr=10:nf=-30,acompressor=threshold=-20dB:ratio=3:attack=10:release=150:makeup=2,"
              "equalizer=f=3200:t=q:w=1.2:g=2.5",
+    # speech edits: as `voice`, plus dynamic level matching so passages recorded at different levels meet at the cut
+    "voice_level": "highpass=f=80,afftdn=nr=10:nf=-30,dynaudnorm=f=250:g=15:p=0.9:m=8:s=6,"
+                   "acompressor=threshold=-20dB:ratio=3:attack=10:release=150:makeup=2,equalizer=f=3200:t=q:w=1.2:g=2.5",
 }
 SPEECH_ROLES = (None, "", "narration", "dialogue", "voice", "voiceover")  # these key the music ducking; sfx/ambience never do
 DRAFT_SCALE = 0.5
