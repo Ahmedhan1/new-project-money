@@ -32,14 +32,49 @@ def font(size: int, lang: str = "en", text: str = "") -> ImageFont.FreeTypeFont:
     return ImageFont.truetype(path, size, **kw)
 
 
+_FONTS: dict = {}
+_RUN_LANG = {"arabic": ("rtl", "ar"), "devanagari": ("ltr", "hi"), "cjk": ("ltr", "zh"), "latin": ("ltr", None)}
+
+
+def _face(path: str, size: int) -> ImageFont.FreeTypeFont:
+    k = (path, size)
+    if k not in _FONTS:
+        kw = {"layout_engine": ImageFont.Layout.RAQM} if _RAQM else {}
+        _FONTS[k] = ImageFont.truetype(path, size, **kw)
+    return _FONTS[k]
+
+
+def _run_kw(script: str) -> dict:
+    if not _RAQM:
+        return {}
+    d, lang = _RUN_LANG.get(script, ("ltr", None))
+    return {"direction": d, **({"language": lang} if lang else {})}
+
+
+def line_runs(line: str, size: int, preferred: str | None = None) -> list[tuple[str, ImageFont.FreeTypeFont, dict]]:
+    """Visual-order runs of one line, each with a font that really contains its glyphs (see timeline/fonts.py)."""
+    from . import fonts
+    out = []
+    for t, path, script in fonts.visual_runs(line, preferred):
+        if not _RAQM and script == "arabic":
+            import arabic_reshaper
+            from bidi.algorithm import get_display
+            t = get_display(arabic_reshaper.reshape(t))
+        out.append((t, _face(path, size), _run_kw(script)))
+    return out
+
+
+def runs_width(draw: ImageDraw.ImageDraw, rs) -> float:
+    return sum(draw.textlength(t, font=f, **kw) for t, f, kw in rs)
+
+
 def wrap(draw: ImageDraw.ImageDraw, text: str, fnt, max_w: int) -> list[str]:
     lines: list[str] = []
     for para in text.split("\n"):
         cur = ""
         for word in para.split():
             trial = f"{cur} {word}".strip()
-            t, kw = _prep(trial)
-            if draw.textlength(t, font=fnt, **kw) <= max_w or not cur:
+            if runs_width(draw, line_runs(trial, fnt.size, getattr(fnt, "path", None))) <= max_w or not cur:
                 cur = trial
             else:
                 lines.append(cur)
@@ -70,8 +105,9 @@ def draw_text_block(img: Image.Image, text: str, style: str = "title", lang: str
     lh = int((asc + desc) * 1.18)
     total_h = lh * len(lines)
     y = int(H * y_anchor - total_h / 2)
-    prepped = [_prep(l) for l in lines]
-    widths = [draw.textlength(t, font=fnt, **kw) for t, kw in prepped]
+    pref = getattr(fnt, "path", None)
+    prepped = [line_runs(line, fnt.size, pref) for line in lines]
+    widths = [runs_width(draw, rs) for rs in prepped]
     bw = int(max(widths)) if widths else 0
     pad = int(lh * 0.35)
     rtl = is_rtl(text)
@@ -85,14 +121,16 @@ def draw_text_block(img: Image.Image, text: str, style: str = "title", lang: str
     if bar:
         bx = x0 + bw + pad if rtl else x0 - pad - 8
         draw.rectangle([bx, y - pad, bx + 8, y + total_h + pad], fill=accent)
-    for (t, kw), w in zip(prepped, widths):
+    for rs, w in zip(prepped, widths):
         if left_aligned:
             x = x0 + (bw - w if rtl else 0)
         else:
             x = (W - w) / 2
-        if not box:  # soft shadow for legibility over footage
-            draw.text((x + 3, y + 3), t, font=fnt, fill=(0, 0, 0, 170), **kw)
-        draw.text((x, y), t, font=fnt, fill=colour, **kw)
+        for t, f, kw in rs:  # each run in its own font, drawn left to right in visual order
+            if not box:  # soft shadow for legibility over footage
+                draw.text((x + 3, y + 3), t, font=f, fill=(0, 0, 0, 170), **kw)
+            draw.text((x, y), t, font=f, fill=colour, **kw)
+            x += draw.textlength(t, font=f, **kw)
         y += lh
 
 
