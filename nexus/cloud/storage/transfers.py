@@ -67,5 +67,12 @@ def public(t: dict) -> dict:
             "result_ref": t.get("result_ref"), "created": t["created"], "updated": t["updated"]}
 
 
+def recover_after_restart() -> int:
+    """Call once at process start: an upload still marked 'running' was cut by a crash/restart. Mark it
+    'interrupted' so the Studio offers Resume (the provider session and acknowledged bytes are kept)."""
+    return db.execute("UPDATE transfers SET status='interrupted', error=COALESCE(error,'process restarted'), updated=? "
+                      "WHERE status='running'", (time.time(),)).rowcount
+
+
 def resumable() -> list[dict]:
     return [t for t in list_all() if t["status"] in ("running", "interrupted", "pending") and t["direction"] == "upload"]

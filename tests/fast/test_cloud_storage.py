@@ -97,6 +97,8 @@ def test_local_resumable_crash_and_resume(home, tmp_path):
         p.upload(src, "NEXUS/OriginalMedia/big.bin", chunk_size=CHUNK, transfer_id="xfer_local1", on_chunk=boom)
     t = transfers.get("xfer_local1")
     assert t["status"] == "interrupted" and t["sent"] == 3 * CHUNK and t["session_uri"]
+    transfers.update("xfer_local1", status="running")  # what a SIGKILL leaves behind
+    assert transfers.recover_after_restart() == 1 and transfers.get("xfer_local1")["status"] == "interrupted"
     f = LocalProvider().resume("xfer_local1")
     assert f.sha256 == hashlib.sha256(src.read_bytes()).hexdigest()
     assert transfers.get("xfer_local1")["status"] == "done"
