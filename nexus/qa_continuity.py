@@ -2,10 +2,13 @@
 
 Checks (each failed check names the cut time and a `fix` id the correction loop can act on):
   a) audio level jump: RMS of up to 1.5 s before vs after a cut; > 6 dB is flagged unless narration starts/stops there
-     (a boundary by design), a generated card sits on one side, or the clip is marked `continuity_ok`.
+     (a boundary by design), a generated card sits on one side, or the clip is marked `continuity_ok`. At a narration
+     boundary with sound on both sides, a jump > 10 dB is still reported (minor): voice and source dialogue mismatch.
   b) brightness jump and c) colour-cast jump: mean luma / mean chroma of the 2 frames before vs the 2 frames after a cut.
-     A hard cut between two clips of the SAME source with the SAME grade that jumps is flagged (that looks like a mistake);
-     any other large jump is reported as information (different sources are expected to look different).
+     A hard cut between two clips of the SAME source, SAME grade and SAME shot that jumps is flagged (that looks like a
+     mistake). Same shot = inside one detected scene when `analyses` carry scenes for the source, otherwise a source gap
+     under 1 s (a jump cut inside one take). Any other large jump is information: different shots/slides/sources are
+     expected to look different. Composited freeze frames (picture-in-picture) are designed to differ.
   d) flash frames: a clip shorter than 3 frames.
   e) narration clipped by a cut: a narration item running > 0.3 s past its clip into a different scene, unless marked
      `spans_cuts` on the audio item.
@@ -32,6 +35,9 @@ LUMA_JUMP = 40.0       # mean luma difference on a 0-255 scale
 CHROMA_JUMP = 18.0     # distance of mean (U, V) offsets on a 0-255 scale
 FLASH_FRAMES = 3
 NARRATION_OVERRUN_S = 0.3
+VOICE_MISMATCH_DB = 10.0
+SAME_TAKE_GAP_S = 1.0
+CAPTION_GAP_S = 1.5
 AUDIO_SR = 8000
 FRAME_W, FRAME_H = 64, 36
 
@@ -84,7 +90,17 @@ def _is_card(c: dict) -> bool:
 
 
 def _source_of(c: dict) -> str | None:
-    return c.get("src") if c["type"] == "video" else c.get("derived_from")
+    return c.get("src") if c["type"] == "video" else None if c.get("composited") else c.get("derived_from")
+
+
+def _same_shot(a: dict, b: dict, analyses: dict | None) -> bool:
+    if a["type"] != "video" or b["type"] != "video":
+        return False
+    scenes = ((analyses or {}).get(a["src"]) or {}).get("scenes")
+    if scenes:
+        sc = lambda t: next((i for i, (s, e) in enumerate(scenes) if s - 1e-3 <= t < e), -1)
+        return sc(max(a["in"], a["out"] - 0.1)) == sc(b["in"] + 0.05)
+    return abs(b["in"] - a["out"]) < SAME_TAKE_GAP_S
 
 
 def _narration(tl: dict) -> list[tuple[float, float, dict]]:
@@ -107,7 +123,9 @@ def _narration(tl: dict) -> list[tuple[float, float, dict]]:
     return out
 
 
-def continuity_review(video_path: str | Path, tl: dict) -> dict:
+def continuity_review(video_path: str | Path, tl: dict, analyses: dict | None = None) -> dict:
+    """`analyses` (optional, {media path: analysis}) supplies detected scenes so cuts between different shots of one
+    source are not mistaken for grading errors."""
     video_path = Path(video_path)
     checks: list[dict] = []
     clips = tl.get("clips", [])
@@ -150,6 +168,10 @@ def continuity_review(video_path: str | Path, tl: dict) -> dict:
                 level_flags += 1
                 checks.append(_c(f"audio level jump at {t:.2f}s", False, f"{lp:.1f} dB -> {la:.1f} dB ({jump:+.1f} dB) across a hard cut",
                                  "major", fix="level-match-cut") | {"t": round(t, 3), "jump_db": round(jump, 1)})
+            elif abs(jump) > VOICE_MISMATCH_DB and nb and min(lp, la) > -35 and not (marked or _is_card(a) or _is_card(b)):
+                level_flags += 1
+                checks.append(_c(f"voice/source level at {t:.2f}s", False, f"{lp:.1f} dB -> {la:.1f} dB ({jump:+.1f} dB) where narration starts/stops "
+                                 "over source sound", "minor", fix="level-match-cut") | {"t": round(t, 3), "jump_db": round(jump, 1)})
             elif abs(jump) > LEVEL_JUMP_DB:
                 info_jumps.append(f"{t:.1f}s {jump:+.0f} dB (by design)")
         # b, c) brightness / colour cast -------------------------------------------------
@@ -161,17 +183,17 @@ def continuity_review(video_path: str | Path, tl: dict) -> dict:
         dl = float(yb[0] - ya[0])
         dc = float(np.hypot(yb[1] - ya[1], yb[2] - ya[2]))
         same = (_source_of(a) and _source_of(a) == _source_of(b) and (a.get("grade") or tl.get("grade", "none")) == (b.get("grade") or tl.get("grade", "none"))
-                and not a.get("effects") and not b.get("effects"))
+                and not a.get("effects") and not b.get("effects") and _same_shot(a, b, analyses))
         for kind, val, lim, fix in (("brightness", dl, LUMA_JUMP, "match-grade"), ("colour cast", dc, CHROMA_JUMP, "match-grade")):
             if abs(val) <= lim:
                 continue
             if same and not marked:
                 vis_flags += 1
                 checks.append(_c(f"{kind} jump at {t:.2f}s", False,
-                                 f"{'luma' if kind == 'brightness' else 'chroma'} {val:+.0f} on a hard cut within the same source and grade",
+                                 f"{'luma' if kind == 'brightness' else 'chroma'} {val:+.0f} on a hard cut within one shot of the same source and grade",
                                  "major", fix=fix) | {"t": round(t, 3), "delta": round(val, 1)})
             else:
-                info_jumps.append(f"{t:.1f}s {kind} {val:+.0f} (different shots/sources)")
+                info_jumps.append(f"{t:.1f}s {kind} {val:+.0f} (different shots/sources or designed)")
     if not level_flags:
         checks.append(_c("audio level across cuts", True, f"no unplanned jump > {LEVEL_JUMP_DB:.0f} dB at {len(clips) - 1} cut(s)"))
     if not vis_flags:
@@ -206,15 +228,20 @@ def continuity_review(video_path: str | Path, tl: dict) -> dict:
         pos = sorted(g for g, _, _ in gaps if g >= 0)
         med = pos[len(pos) // 2] if pos else 0.0
         bad = []
-        for t in starts[1:]:
-            before = [q for q in cues if q["end"] <= t + 0.3 and q["end"] > t - 2.0]
-            after = [q for q in cues if q["start"] >= t - 0.3 and q["start"] < t + 2.0]
+        for i in range(1, len(clips)):
+            t, ca, cb = starts[i], clips[i - 1], clips[i]
             straddle = [q for q in cues if q["start"] < t - 0.3 and q["end"] > t + 0.3]
-            if straddle and not any(s < t < e for s, e, _ in narr):
-                bad.append((t, f"cue \"{straddle[0]['text'][:30]}\" runs across the cut"))
-            elif before and after:
-                g = min(after, key=lambda q: q["start"])["start"] - max(before, key=lambda q: q["end"])["end"]
-                if g > max(1.0, 4 * med):
+            if straddle:
+                if ca["type"] == "video" and not ca.get("mute") and not any(s < t < e for s, e, _ in narr):
+                    bad.append((t, f"cue \"{straddle[0]['text'][:30]}\" of source speech runs across the cut"))
+                continue
+            if _is_card(ca) or _is_card(cb) or any(q["start"] <= t + 0.3 and q["end"] >= t - 0.3 for q in cues):
+                continue  # cards are silent by design; a cue touching the cut means no gap
+            prev = [q["end"] for q in cues if q["end"] <= t and q["end"] > t - 2.0]
+            nxt = [q["start"] for q in cues if q["start"] >= t and q["start"] < t + 2.0]
+            if prev and nxt:
+                g = min(nxt) - max(prev)
+                if g > max(CAPTION_GAP_S, 4 * med):
                     bad.append((t, f"caption gap {g:.2f}s at the cut vs usual {med:.2f}s"))
         for t, d in bad[:6]:
             checks.append(_c(f"caption continuity at {t:.2f}s", False, d, "minor", fix="retime-subtitles") | {"t": round(t, 3)})

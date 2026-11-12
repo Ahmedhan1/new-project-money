@@ -347,6 +347,58 @@ def api_presets():
     return presets.names()
 
 
+# ---------------------------------------------------------------- growth: shorts, retention, hooks
+class ShortsReq(BaseModel):
+    n: int = 3
+    min_s: float = 18
+    max_s: float = 58
+
+
+@app.post("/api/projects/{pid}/shorts")
+def api_shorts(pid: str, r: ShortsReq):
+    _project(pid)
+    return jobs.submit("shorts", {"project": pid, "n": r.n, "min_s": r.min_s, "max_s": r.max_s}, project_id=pid)
+
+
+@app.get("/api/projects/{pid}/retention")
+def api_retention(pid: str, branch: str = "main", platform: str = "shorts"):
+    """Scored attention rubric for a timeline. Values are editorial rules of thumb, not platform data."""
+    from . import growth
+    p = _project(pid)
+    rep = growth.retention_report(p.timeline(branch), _analysis(p) or None, platform)
+    return {k: rep[k] for k in ("platform", "score", "checks", "auto_fixes", "manual_fixes", "metrics", "note") if k in rep}
+
+
+class RetentionReq(BaseModel):
+    branch: str = "main"
+    platform: str = "shorts"
+
+
+@app.post("/api/projects/{pid}/retention/apply")
+def api_retention_apply(pid: str, r: RetentionReq):
+    from . import growth
+    p = _project(pid)
+    an = _analysis(p) or None
+    tl = p.timeline(r.branch)
+    before = growth.retention_report(tl, an, r.platform)
+    new = growth.apply_retention_pass(tl, before, an)
+    after = growth.retention_report(new, an, r.platform)
+    p.save_timeline(new, f"retention pass ({r.platform}): {before['score']} -> {after['score']}", r.branch)
+    return {"score_before": before["score"], "score_after": after["score"], "applied": new.get("retention_pass", {}).get("applied", []),
+            "manual": after.get("manual_fixes", []), "timeline": _tl_view(new)}
+
+
+class HooksReq(BaseModel):
+    text: str
+    n: int = 6
+
+
+@app.post("/api/hooks")
+def api_hooks(r: HooksReq):
+    from . import growth
+    return growth.hook_variants(r.text, r.n)
+
+
 class RemixReq(BaseModel):
     project_id: str
     brief: str

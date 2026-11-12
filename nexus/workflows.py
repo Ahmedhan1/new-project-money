@@ -181,3 +181,22 @@ def animate_(job: jobs.Job) -> dict:
 def evolution_check(job: jobs.Job) -> dict:
     from . import tools
     return job.stage("check", tools.evolution_check)
+
+
+@jobs.handler("shorts")
+def shorts_(job: jobs.Job) -> dict:
+    """Long video -> ranked vertical shorts, each saved on its own branch (short-1..n). Rendering is a separate job."""
+    from . import project as prj, shorts
+    p = prj.Project(job.params["project"])
+
+    def run():
+        lib = _analysis(p)
+        if not lib:
+            raise ValueError("this project has no analysed video yet")
+        path = job.params.get("media") or next(iter(lib))
+        media = next(m for m in p.data["media"] if m["path"] == path)
+        rows = shorts.make_shorts(p, media, lib[path], n=job.params.get("n", 3), min_s=job.params.get("min_s", 18),
+                                  max_s=job.params.get("max_s", 58), sfx=True)
+        return {"project": p.id, "shorts": rows}
+
+    return job.stage("find-and-build", run)

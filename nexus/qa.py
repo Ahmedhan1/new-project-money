@@ -123,14 +123,17 @@ def editing_review(tl: dict) -> dict:
     checks.append(_c("cut length", not short, "no flash cuts" if not short else f"clips under 0.5s: {short}", "major"))
     longest = max(durs) if durs else 0
     checks.append(_c("pacing", longest <= 45 or len(durs) == 1, f"{len(durs)} shots, mean {total / max(len(durs), 1):.1f}s, longest {longest:.1f}s", "minor"))
+    narration = [a for a in tl.get("audio", []) if a.get("role", "narration") == "narration"]  # sfx/ambience may overlap freely
     for a in tl.get("audio", []):
         if not Path(a["src"]).exists():
-            checks.append(_c("narration media", False, f"missing {a['src']}"))
+            checks.append(_c("audio media", False, f"missing {a['src']}"))
+    for a in narration:
+        if not Path(a["src"]).exists():
             continue
         end = a.get("start", 0) + ff.duration(a["src"])
         checks.append(_c(f"narration fits ({Path(a['src']).name})", end <= total + 0.3, f"ends {end:.2f}s / programme {total:.2f}s", fix="extend-scene"))
-    if tl.get("audio"):
-        spans = sorted((a.get("start", 0), a.get("start", 0) + ff.duration(a["src"])) for a in tl["audio"] if Path(a["src"]).exists())
+    if narration:
+        spans = sorted((a.get("start", 0), a.get("start", 0) + ff.duration(a["src"])) for a in narration if Path(a["src"]).exists())
         clash = [1 for x, y in zip(spans, spans[1:]) if y[0] < x[1] - 0.05]
         checks.append(_c("narration overlap", not clash, "no overlapping narration" if not clash else f"{len(clash)} overlaps"))
     cues = tl.get("subtitles", [])

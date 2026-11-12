@@ -382,6 +382,14 @@ def _finish(tl: dict, narr_cues: list[dict]) -> dict:
     return tl
 
 
+def _match_gain(analysis: dict | None) -> float:
+    """Linear gain that brings a source's dialogue to the narration loudness (measured LUFS from the analysis)."""
+    lufs = ((analysis or {}).get("loudness") or {}).get("lufs")
+    if lufs is None or lufs < -60:
+        return 1.0
+    return round(10 ** (max(-12.0, min(12.0, tts.MASTER_LUFS - lufs)) / 20), 3)
+
+
 def _size(analysis: dict | None, options: dict) -> tuple[int, int]:
     v = (analysis or {}).get("probe", {}).get("video") or {}
     return int(options.get("width") or v.get("width") or 1280), int(options.get("height") or v.get("height") or 720)
@@ -425,10 +433,12 @@ def commentary_timeline(project, src: str, analysis: dict, comments: list[dict],
         start = max(prev, nxt - 0.1) if nxt is not None else start
         if end - start >= 1.0:
             c = ops.video_clip(path, start, end, label=f"excerpt {k + 1}")
+            if (g := _match_gain(analysis)) != 1.0:
+                c["volume"] = g  # source dialogue at the same loudness as the commentary voice
             tl["clips"].append(c)
             tl["repurpose"]["used"].append({"media_id": m["id"], "src": path, "in": c["in"], "out": c["out"], "clip": c["id"], "audio": "kept"})
         png = _freeze(project, m, max(0.0, end - 1.0 / tl["fps"]), W, H)
-        f = ops.image_clip(str(png), round(r["duration"] + 0.6, 3), kenburns="none", derived_from=path, composited=True,
+        f = ops.image_clip(str(png), round(r["duration"] + 0.6, 3), kenburns="none", derived_from=path, composited=True, at=round(end, 3),
                            provenance={"license": (_decl(m) or {}).get("basis", "undeclared"), "source": f"frame of {m['name']} at {end:.2f}s"},
                            text=[{"text": label, "style": "lower_third"}])
         tl["clips"].append(f)
@@ -542,7 +552,7 @@ def recap_timeline(project, src: str, analysis: dict, target_s: float = 90, lang
                        "planner": "local LLM" if set(planner) == {"llm"} else "deterministic fallback" if set(planner) == {"fallback"} else "mixed",
                        "sections": [{"heading": p["heading"], "planner": pl} for p, pl in zip(plan, planner)]}
     title = options.get("title") or f"Recap: {Path(m['name']).stem.replace('_', ' ').title()}"
-    intro = options.get("intro") or f"The short version, in {len(plan)} part{'s' if len(plan) > 1 else ''}."
+    intro = options.get("intro") or (f"The short version, in {len(plan)} parts." if len(plan) > 1 else "The short version, in one minute or less.")
     narr_items, cues = [], []
     r = _tts(project, intro, lang)
     tl["clips"].append(ops.color_clip(round(r["duration"] + 0.8, 3), "0x0b1020", text=[{"text": title, "style": "title"}], fade_in=0.4))
@@ -612,6 +622,8 @@ def compilation_timeline(project, items: list[dict], title: str, lang: str = "en
         if it.get("note"):
             narr_items.append((len(tl["clips"]) - 1, 0.25, rn, it["note"]))
         c = ops.video_clip(m["path"], float(it["in"]), float(it["out"]))
+        if (g := _match_gain((options.get("analyses") or {}).get(m["path"]))) != 1.0:
+            c["volume"] = g
         c["text"] = [{"text": label, "style": "lower_third", "start": 0.3, "end": min(3.0, clip_duration(c))}]
         tl["clips"].append(c)
         tl["repurpose"]["used"].append({"media_id": m["id"], "src": m["path"], "in": c["in"], "out": c["out"], "clip": c["id"], "audio": "kept"})

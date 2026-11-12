@@ -2,8 +2,6 @@
 import subprocess
 import wave
 
-import numpy as np
-
 from nexus import project as prj
 from nexus.audio import master
 from nexus.media import ff
@@ -82,13 +80,19 @@ def _tl(clips):
 
 def test_continuity_flags_level_and_brightness_jump(home, tmp_path):
     src = _src(tmp_path / "src.mp4")
-    bad = _tl([ops.video_clip(src, 0.5, 3.5), ops.video_clip(src, 4.5, 7.5, volume=4.0)])  # +12 dB and dark -> bright
+    # a jump cut inside one take (source gap 0.7 s): +12 dB and dark -> bright
+    bad = _tl([ops.video_clip(src, 0.5, 3.5), ops.video_clip(src, 4.2, 7.2, volume=4.0)])
     render.render(bad, tmp_path / "bad.mp4", tmp_path / "w")
     rv = continuity_review(tmp_path / "bad.mp4", bad)
     assert rv["stage"] == "3-scene-continuity" and not rv["passed"]
     failed = {c["fix"]: c for c in rv["checks"] if not c["ok"]}
     assert "level-match-cut" in failed and failed["level-match-cut"]["jump_db"] > 9
     assert "match-grade" in failed and abs(failed["match-grade"]["t"] - 3.0) < 0.05
+
+    # with scene data saying 0-4 s and 4-8 s are different shots, the same picture jump is information, not a defect
+    rs = continuity_review(tmp_path / "bad.mp4", bad, {src: {"scenes": [(0.0, 4.0), (4.0, 8.0)]}})
+    assert not any(c["fix"] == "match-grade" for c in rs["checks"] if not c["ok"])
+    assert any("expected jumps" in c["check"] for c in rs["checks"])
 
     clean = _tl([ops.video_clip(src, 0.5, 2.0), ops.video_clip(src, 2.0, 3.5)])
     render.render(clean, tmp_path / "clean.mp4", tmp_path / "w")
