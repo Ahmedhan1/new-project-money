@@ -394,61 +394,37 @@
      "condensed.ass": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.de.condensed.ass"
     },
     "qa_full": {
-     "cues": 12,
+     "cues": 11,
      "findings": [
-      {
-       "cue": 1,
-       "check": "min_duration",
-       "severity": "minor",
-       "detail": "0.51s < 5/6 s"
-      },
       {
        "cue": 7,
        "check": "reading_speed",
        "severity": "major",
-       "detail": "19.5 cps > 17"
+       "detail": "19.6 cps > 17"
       },
       {
        "cue": 8,
        "check": "reading_speed",
        "severity": "major",
-       "detail": "19.4 cps > 17"
-      },
-      {
-       "cue": 9,
-       "check": "reading_speed",
-       "severity": "major",
-       "detail": "17.0 cps > 17"
+       "detail": "19.0 cps > 17"
       }
      ],
      "passed": false
     },
     "qa_condensed": {
-     "cues": 12,
+     "cues": 11,
      "findings": [
-      {
-       "cue": 1,
-       "check": "min_duration",
-       "severity": "minor",
-       "detail": "0.51s < 5/6 s"
-      },
       {
        "cue": 7,
        "check": "reading_speed",
        "severity": "major",
-       "detail": "19.5 cps > 17"
+       "detail": "19.6 cps > 17"
       },
       {
        "cue": 8,
        "check": "reading_speed",
        "severity": "major",
-       "detail": "19.4 cps > 17"
-      },
-      {
-       "cue": 9,
-       "check": "reading_speed",
-       "severity": "major",
-       "detail": "17.0 cps > 17"
+       "detail": "19.0 cps > 17"
       }
      ],
      "passed": false
@@ -456,13 +432,13 @@
     "condense_todo": [
      {
       "cue": 0,
-      "text": "Der Aswan-Hochbehinderung auf dem Nile in Ägypten wurde zwischen 1960 und 1970",
+      "text": "Der Aswan-Hochbehinderung auf dem Nile in Ägypten",
       "cps": 14.0,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 1,
-      "text": "gebaut.",
+      "text": "wurde zwischen 1960 und 1970 gebaut.",
       "cps": 13.8,
       "reason": "needs condensing to one line / slower read"
      },
@@ -492,36 +468,30 @@
      },
      {
       "cue": 7,
-      "text": "Zwischen 1964 und 1968 wurden die Tempel im Rahmen einer internationalen",
-      "cps": 19.8,
+      "text": "Zwischen 1964 und 1968 wurden die Tempel im Rahmen einer",
+      "cps": 19.9,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 8,
-      "text": "UNESCO-Kampagne in höhere Lagen verlegt.",
+      "text": "internationalen UNESCO-Kampagne in höhere Lagen verlegt.",
       "cps": 19.4,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 9,
       "text": "Heute schützt der Damm Landwirtschaftsbetriebe vor",
-      "cps": 17.4,
+      "cps": 17.3,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 10,
-      "text": "Überschwemmungen,",
-      "cps": 16.6,
-      "reason": "needs condensing to one line / slower read"
-     },
-     {
-      "cue": 11,
-      "text": "fängt aber auch den Schlamm ein, der einst das Niltal düngte.",
+      "text": "Überschwemmungen, fängt aber auch den Schlamm ein, der einst das Niltal düngte.",
       "cps": 16.7,
       "reason": "needs condensing to one line / slower read"
      }
     ],
-    "srt_full": "1\n00:00:00,500 --> 00:00:06,082\nDer Aswan-Hochbehinderung auf dem Nile in\nÄgypten wurde zwischen 1960 und 1970\n\n2\n00:00:06,162 --> 00:00:06,670\ngebaut.\n\n3\n00:00:06,970 --> 00:00:11,220\nEr ist 111 Meter hoch, ca.\n\n4\n00:00:11,520 --> 00:00:17,300\nHinter ihm liegt der Nassersee, der etwa\n132 Kubikkilometer Wasser aufnehmen kann.\n\n5\n00:00:17,600 --> 00:00:22,230\nSeine 12 Turbinen können bis zu 2.100\nMegawatt Strom erzeugen.\n\n6\n00:00:22,530 --> 00:00:27,550\nIngenieure aus der Sowjetunion halfen bei\nder Planung und dem Bau des Staudamms mit.\n\n7\n00:00:27,850 --> 00:00:33,250\nDas steigende Wasser bedrohte die für\nRamses II.\n\n8\n00:00:33,550 --> 00:00:37,186\nZwischen 1964 und 1968 wurden die Tempel\nim Rahmen einer internationalen\n\n9\n00:00:37,266 --> 00:00:39,330\nUNESCO-Kampagne in höhere Lagen verlegt.\n\n10\n00:00:39,630 --> 00:00:42,508\nHeute schützt der Damm\nLandwirtschaftsbetriebe vor\n\n11\n00:00:42,588 --> 00:00:43,614\nÜberschwemmungen,\n\n12\n00:00:43,694 --> 00:00:47,340\nfängt aber auch den Schlamm ein, der einst\ndas Niltal düngte.\n",
+    "srt_full": "1\n00:00:00,500 --> 00:00:03,988\nDer Aswan-Hochbehinderung\nauf dem Nile in Ägypten\n\n2\n00:00:04,068 --> 00:00:06,670\nwurde zwischen 1960 und\n1970 gebaut.\n\n3\n00:00:06,970 --> 00:00:11,220\nEr ist 111 Meter hoch, ca.\n\n4\n00:00:11,520 --> 00:00:17,300\nHinter ihm liegt der Nassersee, der etwa\n132 Kubikkilometer Wasser aufnehmen kann.\n\n5\n00:00:17,600 --> 00:00:22,230\nSeine 12 Turbinen können bis zu\n2.100 Megawatt Strom erzeugen.\n\n6\n00:00:22,530 --> 00:00:27,550\nIngenieure aus der Sowjetunion halfen bei\nder Planung und dem Bau des Staudamms mit.\n\n7\n00:00:27,850 --> 00:00:33,250\nDas steigende Wasser\nbedrohte die für Ramses II.\n\n8\n00:00:33,550 --> 00:00:36,360\nZwischen 1964 und 1968 wurden\ndie Tempel im Rahmen einer\n\n9\n00:00:36,440 --> 00:00:39,330\ninternationalen UNESCO-Kampagne\nin höhere Lagen verlegt.\n\n10\n00:00:39,630 --> 00:00:42,525\nHeute schützt der Damm\nLandwirtschaftsbetriebe vor\n\n11\n00:00:42,605 --> 00:00:47,340\nÜberschwemmungen, fängt aber auch den\nSchlamm ein, der einst das Niltal düngte.\n",
     "ass_style": [
      "Style: Default,DejaVu Sans,54,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,2,153,153,64,1"
     ]
@@ -659,7 +629,7 @@
     "cached": true
    },
    "seconds": 585.3,
-   "qa_recomputed": "2026-11-12T18:11:39"
+   "qa_recomputed": "2026-11-12T18:12:49"
   },
   "fr": {
    "lang": "fr",
@@ -932,7 +902,7 @@
      "condensed.ass": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.fr.condensed.ass"
     },
     "qa_full": {
-     "cues": 14,
+     "cues": 12,
      "findings": [
       {
        "cue": 5,
@@ -944,40 +914,28 @@
        "cue": 6,
        "check": "reading_speed",
        "severity": "major",
-       "detail": "19.5 cps > 17"
+       "detail": "19.1 cps > 17"
       },
       {
-       "cue": 9,
+       "cue": 8,
        "check": "reading_speed",
        "severity": "major",
        "detail": "19.3 cps > 17"
       },
       {
-       "cue": 10,
+       "cue": 9,
        "check": "reading_speed",
        "severity": "major",
-       "detail": "18.9 cps > 17"
+       "detail": "18.7 cps > 17"
       },
       {
        "cue": 10,
-       "check": "min_duration",
-       "severity": "minor",
-       "detail": "0.37s < 5/6 s"
-      },
-      {
-       "cue": 11,
-       "check": "reading_speed",
-       "severity": "major",
-       "detail": "19.0 cps > 17"
-      },
-      {
-       "cue": 12,
        "check": "reading_speed",
        "severity": "major",
        "detail": "20.0 cps > 17"
       },
       {
-       "cue": 13,
+       "cue": 11,
        "check": "reading_speed",
        "severity": "major",
        "detail": "19.6 cps > 17"
@@ -986,7 +944,7 @@
      "passed": false
     },
     "qa_condensed": {
-     "cues": 14,
+     "cues": 12,
      "findings": [
       {
        "cue": 5,
@@ -998,40 +956,28 @@
        "cue": 6,
        "check": "reading_speed",
        "severity": "major",
-       "detail": "19.5 cps > 17"
+       "detail": "19.1 cps > 17"
       },
       {
-       "cue": 9,
+       "cue": 8,
        "check": "reading_speed",
        "severity": "major",
        "detail": "19.3 cps > 17"
       },
       {
-       "cue": 10,
+       "cue": 9,
        "check": "reading_speed",
        "severity": "major",
-       "detail": "18.9 cps > 17"
+       "detail": "18.7 cps > 17"
       },
       {
        "cue": 10,
-       "check": "min_duration",
-       "severity": "minor",
-       "detail": "0.37s < 5/6 s"
-      },
-      {
-       "cue": 11,
-       "check": "reading_speed",
-       "severity": "major",
-       "detail": "19.0 cps > 17"
-      },
-      {
-       "cue": 12,
        "check": "reading_speed",
        "severity": "major",
        "detail": "20.0 cps > 17"
       },
       {
-       "cue": 13,
+       "cue": 11,
        "check": "reading_speed",
        "severity": "major",
        "detail": "19.6 cps > 17"
@@ -1054,13 +1000,13 @@
      },
      {
       "cue": 2,
-      "text": "Derrière lui se trouve le lac Nasser,",
-      "cps": 16.1,
+      "text": "Derrière lui se trouve le lac Nasser, qui peut",
+      "cps": 16.0,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 3,
-      "text": "qui peut contenir environ 132 kilomètres cubes d'eau.",
+      "text": "contenir environ 132 kilomètres cubes d'eau.",
       "cps": 15.6,
       "reason": "needs condensing to one line / slower read"
      },
@@ -1072,60 +1018,48 @@
      },
      {
       "cue": 5,
-      "text": "Des ingénieurs de l'Union soviétique ont participé à la conception et à la",
-      "cps": 19.9,
+      "text": "Des ingénieurs de l'Union soviétique ont participé",
+      "cps": 20.1,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 6,
-      "text": "construction du barrage.",
+      "text": "à la conception et à la construction du barrage.",
       "cps": 19.5,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 7,
-      "text": "La montée des eaux menaçait les temples d'Abou Simbel,",
-      "cps": 15.1,
+      "text": "La montée des eaux menaçait les temples d'Abou Simbel, construits pour Ramsès II.",
+      "cps": 15.0,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 8,
-      "text": "construits pour Ramsès II.",
-      "cps": 14.8,
+      "text": "Entre 1964 et 1968, une campagne internationale de",
+      "cps": 19.7,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 9,
-      "text": "Entre 1964 et 1968, une campagne internationale de l'UNESCO a déplacé les",
-      "cps": 19.6,
-      "reason": "needs condensing to one line / slower read"
-     },
-     {
-      "cue": 10,
-      "text": "temples",
-      "cps": 18.9,
-      "reason": "needs condensing to one line / slower read"
-     },
-     {
-      "cue": 11,
-      "text": "sur des terrains plus élevés.",
+      "text": "l'UNESCO a déplacé les temples sur des terrains plus élevés.",
       "cps": 19.0,
       "reason": "needs condensing to one line / slower read"
      },
      {
-      "cue": 12,
+      "cue": 10,
       "text": "Aujourd'hui, le barrage protège les exploitations agricoles des inondations,",
       "cps": 20.3,
       "reason": "needs condensing to one line / slower read"
      },
      {
-      "cue": 13,
+      "cue": 11,
       "text": "mais il retient également la vase qui fertilisait autrefois la vallée du Nil.",
       "cps": 19.8,
       "reason": "needs condensing to one line / slower read"
      }
     ],
-    "srt_full": "1\n00:00:00,500 --> 00:00:06,670\nL'ouvrage de l'Aswan a été construit entre\n1960 et 1970.\n\n2\n00:00:06,970 --> 00:00:11,220\nIl mesure 111 mètres de haut et environ\n3830 mètres de long.\n\n3\n00:00:11,520 --> 00:00:13,816\nDerrière lui se trouve le lac Nasser,\n\n4\n00:00:13,896 --> 00:00:17,300\nqui peut contenir environ 132 kilomètres\ncubes d'eau.\n\n5\n00:00:17,600 --> 00:00:22,230\nSes 12 turbines peuvent générer jusqu'à 2\n100 mégawatts d'électricité.\n\n6\n00:00:22,530 --> 00:00:26,241\nDes ingénieurs de l'Union soviétique ont\nparticipé à la conception et à la\n\n7\n00:00:26,321 --> 00:00:27,550\nconstruction du barrage.\n\n8\n00:00:27,850 --> 00:00:31,415\nLa montée des eaux menaçait les temples\nd'Abou Simbel,\n\n9\n00:00:31,495 --> 00:00:33,250\nconstruits pour Ramsès II.\n\n10\n00:00:33,550 --> 00:00:37,276\nEntre 1964 et 1968, une campagne\ninternationale de l'UNESCO a déplacé les\n\n11\n00:00:37,356 --> 00:00:37,726\ntemples\n\n12\n00:00:37,806 --> 00:00:39,330\nsur des terrains plus élevés.\n\n13\n00:00:39,630 --> 00:00:43,380\nAujourd'hui, le barrage protège les\nexploitations agricoles des inondations,\n\n14\n00:00:43,460 --> 00:00:47,340\nmais il retient également la vase qui\nfertilisait autrefois la vallée du Nil.\n",
+    "srt_full": "1\n00:00:00,500 --> 00:00:06,670\nL'ouvrage de l'Aswan a été\nconstruit entre 1960 et 1970.\n\n2\n00:00:06,970 --> 00:00:11,220\nIl mesure 111 mètres de haut et\nenviron 3830 mètres de long.\n\n3\n00:00:11,520 --> 00:00:14,396\nDerrière lui se trouve\nle lac Nasser, qui peut\n\n4\n00:00:14,476 --> 00:00:17,300\ncontenir environ 132\nkilomètres cubes d'eau.\n\n5\n00:00:17,600 --> 00:00:22,230\nSes 12 turbines peuvent générer\njusqu'à 2 100 mégawatts d'électricité.\n\n6\n00:00:22,530 --> 00:00:25,012\nDes ingénieurs de l'Union\nsoviétique ont participé\n\n7\n00:00:25,092 --> 00:00:27,550\nà la conception et à la\nconstruction du barrage.\n\n8\n00:00:27,850 --> 00:00:33,250\nLa montée des eaux menaçait les temples\nd'Abou Simbel, construits pour Ramsès II.\n\n9\n00:00:33,550 --> 00:00:36,092\nEntre 1964 et 1968, une\ncampagne internationale de\n\n10\n00:00:36,172 --> 00:00:39,330\nl'UNESCO a déplacé les temples\nsur des terrains plus élevés.\n\n11\n00:00:39,630 --> 00:00:43,379\nAujourd'hui, le barrage protège les\nexploitations agricoles des inondations,\n\n12\n00:00:43,459 --> 00:00:47,340\nmais il retient également la vase qui\nfertilisait autrefois la vallée du Nil.\n",
     "ass_style": [
      "Style: Default,DejaVu Sans,54,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,2,153,153,64,1"
     ]
@@ -1266,7 +1200,7 @@
     "cached": false
    },
    "seconds": 171.8,
-   "qa_recomputed": "2026-11-12T18:11:39"
+   "qa_recomputed": "2026-11-12T18:12:49"
   },
   "ar-EG": {
    "lang": "ar-EG",
@@ -1956,12 +1890,12 @@
      "condensed.ass": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.ar-EG.condensed.ass"
     },
     "qa_full": {
-     "cues": 10,
+     "cues": 9,
      "findings": [],
      "passed": true
     },
     "qa_condensed": {
-     "cues": 10,
+     "cues": 9,
      "findings": [],
      "passed": true
     },
@@ -1992,30 +1926,30 @@
      },
      {
       "cue": 4,
-      "text": "ساعد مهندسين من الاتحاد السوفياتي في تصميم السد وبنائه،",
-      "cps": 15.1,
+      "text": "ساعد مهندسين من الاتحاد السوفياتي في تصميم السد وبنائه، وساعدوا على إنجازه.",
+      "cps": 14.9,
       "reason": "needs condensing to one line / slower read"
      },
      {
-      "cue": 6,
+      "cue": 5,
       "text": "هددت المية اللي بترتفع معابد أبو سمبل، اللي بنيت لرامسس التاني.",
       "cps": 11.7,
       "reason": "needs condensing to one line / slower read"
      },
      {
-      "cue": 7,
+      "cue": 6,
       "text": "بين سنة ١٩٦٤ وسنة ١٩٦٨، حملة دولية من اليونسكو نقلت المعابد لأرض أعلى.",
       "cps": 12.1,
       "reason": "needs condensing to one line / slower read"
      },
      {
-      "cue": 9,
-      "text": "بس هو بيسجن كمان الطمي اللي سبق وخصب وادي النيل.",
-      "cps": 11.2,
+      "cue": 7,
+      "text": "اليوم السد بيحمي المزارع من الفيضانات، بس هو",
+      "cps": 11.4,
       "reason": "needs condensing to one line / slower read"
      }
     ],
-    "srt_full": "1\n00:00:00,500 --> 00:00:06,670\n‏تم بناء سد أسوان العالي على نهر النيل في\n‏مصر بين عامي ١٩٦٠ و ١٩٧٠.\n\n2\n00:00:06,970 --> 00:00:11,220\n‏ده بيبلغ ارتفاعه ١١١ متر و طوله حوالي ٣٨٣٠\n‏متر.\n\n3\n00:00:11,520 --> 00:00:17,300\n‏وخلفها بحيرة ناصر، اللي بتقدر تحمل حوالي\n‏١٣٢ كيلومتر مكعب من المية.\n\n4\n00:00:17,600 --> 00:00:22,230\n‏بيقدر توربيناته الـ ١٢ توليد كهرباء تصل لـ\n‏٢١٠٠ ميغاواط.\n\n5\n00:00:22,530 --> 00:00:26,181\n‏ساعد مهندسين من الاتحاد السوفياتي في تصميم\n‏السد وبنائه،\n\n6\n00:00:26,261 --> 00:00:27,550\n‏وساعدوا على إنجازه.\n\n7\n00:00:27,850 --> 00:00:33,250\n‏هددت المية اللي بترتفع معابد أبو سمبل،\n‏اللي بنيت لرامسس التاني.\n\n8\n00:00:33,550 --> 00:00:39,330\n‏بين سنة ١٩٦٤ وسنة ١٩٦٨، حملة دولية من\n‏اليونسكو نقلت المعابد لأرض أعلى.\n\n9\n00:00:39,630 --> 00:00:42,957\n‏اليوم السد بيحمي المزارع من الفيضانات،\n\n10\n00:00:43,037 --> 00:00:47,340\n‏بس هو بيسجن كمان الطمي اللي سبق وخصب وادي\n‏النيل.\n",
+    "srt_full": "1\n00:00:00,500 --> 00:00:06,670\n‏تم بناء سد أسوان العالي على نهر\n‏النيل في مصر بين عامي ١٩٦٠ و ١٩٧٠.\n\n2\n00:00:06,970 --> 00:00:11,220\n‏ده بيبلغ ارتفاعه ١١١ متر\n‏و طوله حوالي ٣٨٣٠ متر.\n\n3\n00:00:11,520 --> 00:00:17,300\n‏وخلفها بحيرة ناصر، اللي بتقدر تحمل\n‏حوالي ١٣٢ كيلومتر مكعب من المية.\n\n4\n00:00:17,600 --> 00:00:22,230\n‏بيقدر توربيناته الـ ١٢ توليد\n‏كهرباء تصل لـ ٢١٠٠ ميغاواط.\n\n5\n00:00:22,530 --> 00:00:27,550\n‏ساعد مهندسين من الاتحاد السوفياتي في\n‏تصميم السد وبنائه، وساعدوا على إنجازه.\n\n6\n00:00:27,850 --> 00:00:33,250\n‏هددت المية اللي بترتفع معابد أبو\n‏سمبل، اللي بنيت لرامسس التاني.\n\n7\n00:00:33,550 --> 00:00:39,330\n‏بين سنة ١٩٦٤ وسنة ١٩٦٨، حملة دولية\n‏من اليونسكو نقلت المعابد لأرض أعلى.\n\n8\n00:00:39,630 --> 00:00:43,497\n‏اليوم السد بيحمي المزارع\n‏من الفيضانات، بس هو\n\n9\n00:00:43,577 --> 00:00:47,340\n‏بيسجن كمان الطمي اللي\n‏سبق وخصب وادي النيل.\n",
     "ass_style": [
      "Style: Default,Noto Naskh Arabic,54,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,2,153,153,64,178"
     ]
@@ -2136,7 +2070,7 @@
     "skipped": "no commercially cleared voice for ar-EG [ar_JO-kareem-medium (unverified)] - deliver subtitles, or supply a voice you hold the rights to"
    },
    "seconds": 65.1,
-   "qa_recomputed": "2026-11-12T18:11:39"
+   "qa_recomputed": "2026-11-12T18:12:49"
   },
   "ar-Gulf": {
    "lang": "ar-Gulf",
@@ -2911,13 +2845,13 @@
     "condense_todo": [
      {
       "cue": 0,
-      "text": "تم بناء سد أسوان العالي على نهر النيل في مصر بين عامي ١٩٦٠ و ١٩٧٠،",
-      "cps": 16.5,
+      "text": "تم بناء سد أسوان العالي على نهر النيل في مصر بين عامي",
+      "cps": 16.6,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 1,
-      "text": "وتم الانتهاء من بنائه في عام ٢٠٠٥.",
+      "text": "١٩٦٠ و ١٩٧٠، وتم الانتهاء من بنائه في عام ٢٠٠٥.",
       "cps": 16.2,
       "reason": "needs condensing to one line / slower read"
      },
@@ -2958,13 +2892,13 @@
       "reason": "needs condensing to one line / slower read"
      },
      {
-      "cue": 9,
-      "text": "بس هو يحبس أيضا الطين اللي كان يخصب وادي النيل قبل.",
-      "cps": 11.5,
+      "cue": 8,
+      "text": "واليوم يحمي السد المزارع من الفيضانات، بس هو يحبس",
+      "cps": 11.7,
       "reason": "needs condensing to one line / slower read"
      }
     ],
-    "srt_full": "1\n00:00:00,500 --> 00:00:04,492\n‏تم بناء سد أسوان العالي على نهر النيل في\n‏مصر بين عامي ١٩٦٠ و ١٩٧٠،\n\n2\n00:00:04,572 --> 00:00:06,670\n‏وتم الانتهاء من بنائه في عام ٢٠٠٥.\n\n3\n00:00:06,970 --> 00:00:11,220\n‏ويبلغ ارتفاعه ١١١ مترا وطوله حوالي ٨٣٠ ٣\n‏مترا.\n\n4\n00:00:11,520 --> 00:00:17,300\n‏وخلفها تقع بحيرة ناصر، اللي ممكن تحتفظ\n‏بنحو ١٣٢ كيلومترا مكعبا من الماي.\n\n5\n00:00:17,600 --> 00:00:22,230\n‏وتستطيع توربيناتها الـ ١٢ توليد ما يصل إلى\n‏١٠٠ ٢ ميغاواط من الكهربا.\n\n6\n00:00:22,530 --> 00:00:27,550\n‏وقد ساعد مهندسون من الاتحاد السوفياتي في\n‏تصميم السد وبنائه.\n\n7\n00:00:27,850 --> 00:00:33,250\n‏وهددت الماي المرتفعة معابد أبو سمبل، اللي\n‏بنيت لرامسس الثاني.\n\n8\n00:00:33,550 --> 00:00:39,330\n‏وفيما بين عامي ١٩٦٤ و١٩٦٨، قامت اليونسكو\n‏بحملة دولية لنقل المعابد إلى أماكن أعلى.\n\n9\n00:00:39,630 --> 00:00:42,842\n‏واليوم يحمي السد المزارع من الفيضانات،\n\n10\n00:00:42,922 --> 00:00:47,340\n‏بس هو يحبس أيضا الطين اللي كان يخصب وادي\n‏النيل قبل.\n",
+    "srt_full": "1\n00:00:00,500 --> 00:00:03,694\n‏تم بناء سد أسوان العالي على\n‏نهر النيل في مصر بين عامي\n\n2\n00:00:03,774 --> 00:00:06,670\n‏١٩٦٠ و ١٩٧٠، وتم الانتهاء\n‏من بنائه في عام ٢٠٠٥.\n\n3\n00:00:06,970 --> 00:00:11,220\n‏ويبلغ ارتفاعه ١١١ مترا\n‏وطوله حوالي ٨٣٠ ٣ مترا.\n\n4\n00:00:11,520 --> 00:00:17,300\n‏وخلفها تقع بحيرة ناصر، اللي ممكن تحتفظ\n‏بنحو ١٣٢ كيلومترا مكعبا من الماي.\n\n5\n00:00:17,600 --> 00:00:22,230\n‏وتستطيع توربيناتها الـ ١٢ توليد ما\n‏يصل إلى ١٠٠ ٢ ميغاواط من الكهربا.\n\n6\n00:00:22,530 --> 00:00:27,550\n‏وقد ساعد مهندسون من الاتحاد\n‏السوفياتي في تصميم السد وبنائه.\n\n7\n00:00:27,850 --> 00:00:33,250\n‏وهددت الماي المرتفعة معابد أبو\n‏سمبل، اللي بنيت لرامسس الثاني.\n\n8\n00:00:33,550 --> 00:00:39,330\n‏وفيما بين عامي ١٩٦٤ و١٩٦٨، قامت اليونسكو\n‏بحملة دولية لنقل المعابد إلى أماكن أعلى.\n\n9\n00:00:39,630 --> 00:00:43,804\n‏واليوم يحمي السد المزارع\n‏من الفيضانات، بس هو يحبس\n\n10\n00:00:43,884 --> 00:00:47,340\n‏أيضا الطين اللي كان يخصب\n‏وادي النيل قبل.\n",
     "ass_style": [
      "Style: Default,Noto Naskh Arabic,54,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,2,153,153,64,178"
     ]
@@ -3087,7 +3021,7 @@
     "skipped": "no commercially cleared voice for ar-Gulf [ar_JO-kareem-medium (unverified)] - deliver subtitles, or supply a voice you hold the rights to"
    },
    "seconds": 137.5,
-   "qa_recomputed": "2026-11-12T18:11:39"
+   "qa_recomputed": "2026-11-12T18:12:49"
   },
   "zh": {
    "lang": "zh",
@@ -3528,7 +3462,7 @@
     "error": "Error: # channels not specified"
    },
    "seconds": 242.3,
-   "qa_recomputed": "2026-11-12T18:11:39"
+   "qa_recomputed": "2026-11-12T18:12:49"
   },
   "ru": {
    "lang": "ru",
@@ -3726,12 +3660,6 @@
      "cues": 11,
      "findings": [
       {
-       "cue": 3,
-       "check": "min_duration",
-       "severity": "minor",
-       "detail": "0.34s < 5/6 s"
-      },
-      {
        "cue": 7,
        "check": "reading_speed",
        "severity": "major",
@@ -3741,7 +3669,7 @@
        "cue": 8,
        "check": "reading_speed",
        "severity": "major",
-       "detail": "18.7 cps > 17"
+       "detail": "18.3 cps > 17"
       }
      ],
      "passed": false
@@ -3750,12 +3678,6 @@
      "cues": 11,
      "findings": [
       {
-       "cue": 3,
-       "check": "min_duration",
-       "severity": "minor",
-       "detail": "0.34s < 5/6 s"
-      },
-      {
        "cue": 7,
        "check": "reading_speed",
        "severity": "major",
@@ -3765,7 +3687,7 @@
        "cue": 8,
        "check": "reading_speed",
        "severity": "major",
-       "detail": "18.7 cps > 17"
+       "detail": "18.3 cps > 17"
       }
      ],
      "passed": false
@@ -3785,14 +3707,14 @@
      },
      {
       "cue": 2,
-      "text": "За ним лежит озеро Насер, которое может вместить около 132 кубических километров",
-      "cps": 14.9,
+      "text": "За ним лежит озеро Насер, которое может вместить",
+      "cps": 15.0,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 3,
-      "text": "воды.",
-      "cps": 14.7,
+      "text": "около 132 кубических километров воды.",
+      "cps": 14.8,
       "reason": "needs condensing to one line / slower read"
      },
      {
@@ -3815,30 +3737,30 @@
      },
      {
       "cue": 7,
-      "text": "Между 1964 и 1968 годами в рамках международной кампании ЮНЕСКО храмы были",
-      "cps": 19.1,
+      "text": "Между 1964 и 1968 годами в рамках международной кампании",
+      "cps": 19.2,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 8,
-      "text": "перенесены на более высокую точку.",
+      "text": "ЮНЕСКО храмы были перенесены на более высокую точку.",
       "cps": 18.7,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 9,
-      "text": "Сегодня плотина защищает фермы от наводнений, но она также удерживает ила,",
-      "cps": 14.6,
+      "text": "Сегодня плотина защищает фермы от наводнений, но она",
+      "cps": 14.7,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 10,
-      "text": "который когда-то удобрял долину Нила.",
+      "text": "также удерживает ила, который когда-то удобрял долину Нила.",
       "cps": 14.4,
       "reason": "needs condensing to one line / slower read"
      }
     ],
-    "srt_full": "1\n00:00:00,500 --> 00:00:06,670\nАсуанская высокая плотина на Ниле в Египте\nбыла построена между 1960 и 1970 годами.\n\n2\n00:00:06,970 --> 00:00:11,220\nЕго высота составляет 111 метров, а длина\n— около 3830 метров.\n\n3\n00:00:11,520 --> 00:00:16,880\nЗа ним лежит озеро Насер, которое может\nвместить около 132 кубических километров\n\n4\n00:00:16,960 --> 00:00:17,300\nводы.\n\n5\n00:00:17,600 --> 00:00:22,230\nЕе 12 турбин могут вырабатывать до 2100\nмегаватт электроэнергии.\n\n6\n00:00:22,530 --> 00:00:27,550\nИнженеры из Советского Союза помогли\nспроектировать и построить плотину.\n\n7\n00:00:27,850 --> 00:00:33,250\nВоды, поднимавшиеся, угрожали храмам Абу\nСимбели, построенным для Рамесеса II.\n\n8\n00:00:33,550 --> 00:00:37,430\nМежду 1964 и 1968 годами в рамках\nмеждународной кампании ЮНЕСКО храмы были\n\n9\n00:00:37,510 --> 00:00:39,330\nперенесены на более высокую точку.\n\n10\n00:00:39,630 --> 00:00:44,690\nСегодня плотина защищает фермы от\nнаводнений, но она также удерживает ила,\n\n11\n00:00:44,770 --> 00:00:47,340\nкоторый когда-то удобрял долину Нила.\n",
+    "srt_full": "1\n00:00:00,500 --> 00:00:06,670\nАсуанская высокая плотина на Ниле в Египте\nбыла построена между 1960 и 1970 годами.\n\n2\n00:00:06,970 --> 00:00:11,220\nЕго высота составляет 111 метров,\nа длина — около 3830 метров.\n\n3\n00:00:11,520 --> 00:00:14,713\nЗа ним лежит озеро Насер,\nкоторое может вместить\n\n4\n00:00:14,793 --> 00:00:17,300\nоколо 132 кубических\nкилометров воды.\n\n5\n00:00:17,600 --> 00:00:22,230\nЕе 12 турбин могут вырабатывать\nдо 2100 мегаватт электроэнергии.\n\n6\n00:00:22,530 --> 00:00:27,550\nИнженеры из Советского Союза помогли\nспроектировать и построить плотину.\n\n7\n00:00:27,850 --> 00:00:33,250\nВоды, поднимавшиеся, угрожали храмам Абу\nСимбели, построенным для Рамесеса II.\n\n8\n00:00:33,550 --> 00:00:36,469\nМежду 1964 и 1968 годами в\nрамках международной кампании\n\n9\n00:00:36,549 --> 00:00:39,330\nЮНЕСКО храмы были перенесены\nна более высокую точку.\n\n10\n00:00:39,630 --> 00:00:43,157\nСегодня плотина защищает\nфермы от наводнений, но она\n\n11\n00:00:43,237 --> 00:00:47,340\nтакже удерживает ила, который\nкогда-то удобрял долину Нила.\n",
     "ass_style": [
      "Style: Default,DejaVu Sans,54,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,2,153,153,64,1"
     ]
@@ -3976,7 +3898,7 @@
     "cached": false
    },
    "seconds": 255.9,
-   "qa_recomputed": "2026-11-12T18:11:39"
+   "qa_recomputed": "2026-11-12T18:12:49"
   },
   "hi": {
    "lang": "hi",
@@ -4278,36 +4200,42 @@
      },
      {
       "cue": 5,
-      "text": "बढ़ते पानी ने अबू सिम्बेल के मंदिरों को खतरा पैदा कर दिया,",
+      "text": "बढ़ते पानी ने अबू सिम्बेल के मंदिरों को खतरा पैदा कर",
       "cps": 18.0,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 6,
-      "text": "जो रामेसेस द्वितीय के लिए बनाए गए थे।",
+      "text": "दिया, जो रामेसेस द्वितीय के लिए बनाए गए थे।",
       "cps": 17.6,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 7,
-      "text": "1964 और 1968 के बीच, एक अंतर्राष्ट्रीय यूनेस्को अभियान ने मंदिरों को उच्च भूमि पर",
-      "cps": 17.8,
+      "text": "1964 और 1968 के बीच, एक अंतर्राष्ट्रीय यूनेस्को",
+      "cps": 18.0,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 8,
-      "text": "स्थानांतरित कर दिया।",
+      "text": "अभियान ने मंदिरों को उच्च भूमि पर स्थानांतरित कर दिया।",
       "cps": 17.5,
       "reason": "needs condensing to one line / slower read"
      },
      {
+      "cue": 9,
+      "text": "आज बांध बाढ़ से खेतों की रक्षा करता है, लेकिन यह एक समय नील",
+      "cps": 15.5,
+      "reason": "needs condensing to one line / slower read"
+     },
+     {
       "cue": 10,
-      "text": "लेकिन यह एक समय नील घाटी को उर्वरक प्रदान करने वाली मिट्टी को भी पकड़ लेता है।",
+      "text": "घाटी को उर्वरक प्रदान करने वाली मिट्टी को भी पकड़ लेता है।",
       "cps": 15.2,
       "reason": "needs condensing to one line / slower read"
      }
     ],
-    "srt_full": "1\n00:00:00,500 --> 00:00:06,670\nमिस्र में नील नदी पर असवान हाई बांध का\nनिर्माण १९६० और १९७० के बीच किया गया था।\n\n2\n00:00:06,970 --> 00:00:11,220\nयह 111 मीटर ऊँचा और लगभग 3,830 मीटर लंबा\nहै।\n\n3\n00:00:11,520 --> 00:00:17,300\nइसके पीछे नासर झील है, जो लगभग 132 घन\nकिलोमीटर पानी रख सकती है।\n\n4\n00:00:17,600 --> 00:00:22,230\nइसके 12 टर्बाइन 2,100 मेगावाट तक बिजली\nउत्पन्न कर सकते हैं।\n\n5\n00:00:22,530 --> 00:00:27,550\nसोवियत संघ के इंजीनियरों ने बांध के डिजाइन\nऔर निर्माण में मदद की।\n\n6\n00:00:27,850 --> 00:00:31,067\nबढ़ते पानी ने अबू सिम्बेल के मंदिरों को\nखतरा पैदा कर दिया,\n\n7\n00:00:31,147 --> 00:00:33,250\nजो रामेसेस द्वितीय के लिए बनाए गए थे।\n\n8\n00:00:33,550 --> 00:00:38,105\n1964 और 1968 के बीच, एक अंतर्राष्ट्रीय\nयूनेस्को अभियान ने मंदिरों को उच्च भूमि पर\n\n9\n00:00:38,185 --> 00:00:39,330\nस्थानांतरित कर दिया।\n\n10\n00:00:39,630 --> 00:00:42,120\nआज बांध बाढ़ से खेतों की रक्षा करता है,\n\n11\n00:00:42,200 --> 00:00:47,340\nलेकिन यह एक समय नील घाटी को उर्वरक प्रदान\nकरने वाली मिट्टी को भी पकड़ लेता है।\n",
+    "srt_full": "1\n00:00:00,500 --> 00:00:06,670\nमिस्र में नील नदी पर असवान हाई बांध का\nनिर्माण १९६० और १९७० के बीच किया गया था।\n\n2\n00:00:06,970 --> 00:00:11,220\nयह 111 मीटर ऊँचा और लगभग\n3,830 मीटर लंबा है।\n\n3\n00:00:11,520 --> 00:00:17,300\nइसके पीछे नासर झील है, जो लगभग\n132 घन किलोमीटर पानी रख सकती है।\n\n4\n00:00:17,600 --> 00:00:22,230\nइसके 12 टर्बाइन 2,100 मेगावाट\nतक बिजली उत्पन्न कर सकते हैं।\n\n5\n00:00:22,530 --> 00:00:27,550\nसोवियत संघ के इंजीनियरों ने बांध\nके डिजाइन और निर्माण में मदद की।\n\n6\n00:00:27,850 --> 00:00:30,731\nबढ़ते पानी ने अबू सिम्बेल\nके मंदिरों को खतरा पैदा कर\n\n7\n00:00:30,811 --> 00:00:33,250\nदिया, जो रामेसेस द्वितीय\nके लिए बनाए गए थे।\n\n8\n00:00:33,550 --> 00:00:36,156\n1964 और 1968 के बीच, एक\nअंतर्राष्ट्रीय यूनेस्को\n\n9\n00:00:36,236 --> 00:00:39,330\nअभियान ने मंदिरों को उच्च\nभूमि पर स्थानांतरित कर दिया।\n\n10\n00:00:39,630 --> 00:00:43,439\nआज बांध बाढ़ से खेतों की रक्षा\nकरता है, लेकिन यह एक समय नील\n\n11\n00:00:43,519 --> 00:00:47,340\nघाटी को उर्वरक प्रदान करने वाली\nमिट्टी को भी पकड़ लेता है।\n",
     "ass_style": [
      "Style: Default,Noto Sans Devanagari,54,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,2,153,153,64,1"
     ]
@@ -4438,7 +4366,7 @@
     "skipped": "voice engine kokoro-82m not integrated"
    },
    "seconds": 86.3,
-   "qa_recomputed": "2026-11-12T18:11:39"
+   "qa_recomputed": "2026-11-12T18:12:49"
   },
   "es": {
    "lang": "es",
@@ -4726,109 +4654,61 @@
      "condensed.ass": "/home/user/new-project-money/.nexus/projects/account3_language_demo/aswan.es.condensed.ass"
     },
     "qa_full": {
-     "cues": 15,
+     "cues": 14,
      "findings": [
-      {
-       "cue": 1,
-       "check": "min_duration",
-       "severity": "minor",
-       "detail": "0.72s < 5/6 s"
-      },
-      {
-       "cue": 3,
-       "check": "reading_speed",
-       "severity": "major",
-       "detail": "17.2 cps > 17"
-      },
       {
        "cue": 6,
        "check": "reading_speed",
        "severity": "major",
-       "detail": "20.5 cps > 17"
+       "detail": "20.6 cps > 17"
       },
       {
        "cue": 7,
        "check": "reading_speed",
        "severity": "major",
-       "detail": "20.3 cps > 17"
+       "detail": "19.9 cps > 17"
       },
       {
        "cue": 10,
        "check": "reading_speed",
        "severity": "major",
-       "detail": "17.9 cps > 17"
+       "detail": "17.8 cps > 17"
       },
       {
        "cue": 11,
        "check": "reading_speed",
        "severity": "major",
-       "detail": "17.5 cps > 17"
-      },
-      {
-       "cue": 11,
-       "check": "min_duration",
-       "severity": "minor",
-       "detail": "0.51s < 5/6 s"
-      },
-      {
-       "cue": 12,
-       "check": "reading_speed",
-       "severity": "major",
-       "detail": "17.6 cps > 17"
+       "detail": "17.3 cps > 17"
       }
      ],
      "passed": false
     },
     "qa_condensed": {
-     "cues": 15,
+     "cues": 14,
      "findings": [
-      {
-       "cue": 1,
-       "check": "min_duration",
-       "severity": "minor",
-       "detail": "0.72s < 5/6 s"
-      },
-      {
-       "cue": 3,
-       "check": "reading_speed",
-       "severity": "major",
-       "detail": "17.2 cps > 17"
-      },
       {
        "cue": 6,
        "check": "reading_speed",
        "severity": "major",
-       "detail": "20.5 cps > 17"
+       "detail": "20.6 cps > 17"
       },
       {
        "cue": 7,
        "check": "reading_speed",
        "severity": "major",
-       "detail": "20.3 cps > 17"
+       "detail": "19.9 cps > 17"
       },
       {
        "cue": 10,
        "check": "reading_speed",
        "severity": "major",
-       "detail": "17.9 cps > 17"
+       "detail": "17.8 cps > 17"
       },
       {
        "cue": 11,
        "check": "reading_speed",
        "severity": "major",
-       "detail": "17.5 cps > 17"
-      },
-      {
-       "cue": 11,
-       "check": "min_duration",
-       "severity": "minor",
-       "detail": "0.51s < 5/6 s"
-      },
-      {
-       "cue": 12,
-       "check": "reading_speed",
-       "severity": "major",
-       "detail": "17.6 cps > 17"
+       "detail": "17.3 cps > 17"
       }
      ],
      "passed": false
@@ -4836,13 +4716,13 @@
     "condense_todo": [
      {
       "cue": 0,
-      "text": "La presa de Asuán se construyó entre los años 1960 y 1970 sobre el río Nilo,",
-      "cps": 14.1,
+      "text": "La presa de Asuán se construyó entre los",
+      "cps": 14.4,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 1,
-      "text": "en Egipto.",
+      "text": "años 1960 y 1970 sobre el río Nilo, en Egipto.",
       "cps": 13.9,
       "reason": "needs condensing to one line / slower read"
      },
@@ -4854,13 +4734,13 @@
      },
      {
       "cue": 3,
-      "text": "Detrás de él se encuentra el lago Nasser,",
-      "cps": 17.2,
+      "text": "Detrás de él se encuentra el lago Nasser, que puede",
+      "cps": 17.0,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 4,
-      "text": "que puede contener unos 132 kilómetros cúbicos de agua.",
+      "text": "contener unos 132 kilómetros cúbicos de agua.",
       "cps": 16.6,
       "reason": "needs condensing to one line / slower read"
      },
@@ -4872,60 +4752,54 @@
      },
      {
       "cue": 6,
-      "text": "Ingenieros de la Unión Soviética ayudaron a diseñar y construir la represa,",
-      "cps": 20.8,
+      "text": "Ingenieros de la Unión Soviética ayudaron a diseñar",
+      "cps": 21.0,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 7,
-      "text": "que fue inaugurada en 1960.",
+      "text": "y construir la represa, que fue inaugurada en 1960.",
       "cps": 20.3,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 8,
-      "text": "El aumento de las aguas amenazó los templos de Abu Simbel,",
-      "cps": 16.1,
+      "text": "El aumento de las aguas amenazó los templos de",
+      "cps": 16.2,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 9,
-      "text": "construidos para Ramsés II.",
-      "cps": 15.7,
+      "text": "Abu Simbel, construidos para Ramsés II.",
+      "cps": 15.8,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 10,
-      "text": "Entre 1964 y 1968, una campaña internacional de la UNESCO trasladó los",
-      "cps": 18.1,
+      "text": "Entre 1964 y 1968, una campaña internacional de la",
+      "cps": 18.2,
       "reason": "needs condensing to one line / slower read"
      },
      {
       "cue": 11,
-      "text": "templos a",
-      "cps": 17.5,
-      "reason": "needs condensing to one line / slower read"
-     },
-     {
-      "cue": 12,
-      "text": "terrenos más elevados.",
+      "text": "UNESCO trasladó los templos a terrenos más elevados.",
       "cps": 17.6,
       "reason": "needs condensing to one line / slower read"
      },
      {
-      "cue": 13,
-      "text": "Hoy en día la presa protege las granjas de las inundaciones,",
-      "cps": 17.0,
+      "cue": 12,
+      "text": "Hoy en día la presa protege las granjas de las inundaciones, pero",
+      "cps": 16.9,
       "reason": "needs condensing to one line / slower read"
      },
      {
-      "cue": 14,
-      "text": "pero también atrapa el limo que una vez fertilizó el valle del Nilo.",
+      "cue": 13,
+      "text": "también atrapa el limo que una vez fertilizó el valle del Nilo.",
       "cps": 16.6,
       "reason": "needs condensing to one line / slower read"
      }
     ],
-    "srt_full": "1\n00:00:00,500 --> 00:00:05,873\nLa presa de Asuán se construyó entre los\naños 1960 y 1970 sobre el río Nilo,\n\n2\n00:00:05,953 --> 00:00:06,670\nen Egipto.\n\n3\n00:00:06,970 --> 00:00:11,220\nTiene 111 metros de altura, 3.830 metros\nde largo y 111 de ancho.\n\n4\n00:00:11,520 --> 00:00:13,909\nDetrás de él se encuentra el lago Nasser,\n\n5\n00:00:13,989 --> 00:00:17,300\nque puede contener unos 132 kilómetros\ncúbicos de agua.\n\n6\n00:00:17,600 --> 00:00:22,230\nSus 12 turbinas pueden generar hasta 2.100\nmegavatios de energía eléctrica.\n\n7\n00:00:22,530 --> 00:00:26,141\nIngenieros de la Unión Soviética ayudaron\na diseñar y construir la represa,\n\n8\n00:00:26,221 --> 00:00:27,550\nque fue inaugurada en 1960.\n\n9\n00:00:27,850 --> 00:00:31,455\nEl aumento de las aguas amenazó los\ntemplos de Abu Simbel,\n\n10\n00:00:31,535 --> 00:00:33,250\nconstruidos para Ramsés II.\n\n11\n00:00:33,550 --> 00:00:37,409\nEntre 1964 y 1968, una campaña\ninternacional de la UNESCO trasladó los\n\n12\n00:00:37,489 --> 00:00:38,003\ntemplos a\n\n13\n00:00:38,083 --> 00:00:39,330\nterrenos más elevados.\n\n14\n00:00:39,630 --> 00:00:43,164\nHoy en día la presa protege las granjas de\nlas inundaciones,\n\n15\n00:00:43,244 --> 00:00:47,340\npero también atrapa el limo que una vez\nfertilizó el valle del Nilo.\n",
+    "srt_full": "1\n00:00:00,500 --> 00:00:03,285\nLa presa de Asuán se\nconstruyó entre los\n\n2\n00:00:03,365 --> 00:00:06,670\naños 1960 y 1970 sobre\nel río Nilo, en Egipto.\n\n3\n00:00:06,970 --> 00:00:11,220\nTiene 111 metros de altura, 3.830\nmetros de largo y 111 de ancho.\n\n4\n00:00:11,520 --> 00:00:14,514\nDetrás de él se encuentra\nel lago Nasser, que puede\n\n5\n00:00:14,594 --> 00:00:17,300\ncontener unos 132\nkilómetros cúbicos de agua.\n\n6\n00:00:17,600 --> 00:00:22,230\nSus 12 turbinas pueden generar hasta\n2.100 megavatios de energía eléctrica.\n\n7\n00:00:22,530 --> 00:00:24,960\nIngenieros de la Unión\nSoviética ayudaron a diseñar\n\n8\n00:00:25,040 --> 00:00:27,550\ny construir la represa, que\nfue inaugurada en 1960.\n\n9\n00:00:27,850 --> 00:00:30,698\nEl aumento de las aguas\namenazó los templos de\n\n10\n00:00:30,778 --> 00:00:33,250\nAbu Simbel, construidos\npara Ramsés II.\n\n11\n00:00:33,550 --> 00:00:36,302\nEntre 1964 y 1968, una\ncampaña internacional de la\n\n12\n00:00:36,382 --> 00:00:39,330\nUNESCO trasladó los templos\na terrenos más elevados.\n\n13\n00:00:39,630 --> 00:00:43,466\nHoy en día la presa protege las\ngranjas de las inundaciones, pero\n\n14\n00:00:43,546 --> 00:00:47,340\ntambién atrapa el limo que una\nvez fertilizó el valle del Nilo.\n",
     "ass_style": [
      "Style: Default,DejaVu Sans,54,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,2,153,153,64,1"
     ]
@@ -5064,7 +4938,7 @@
     "cached": false
    },
    "seconds": 113.4,
-   "qa_recomputed": "2026-11-12T18:11:39"
+   "qa_recomputed": "2026-11-12T18:12:49"
   }
  },
  "summary": {
@@ -5084,7 +4958,7 @@
    "mean_confidence": 0.741,
    "back_translation": "local-llamacpp/qwen3-4b-q4km",
    "subtitles_full_passed": false,
-   "subtitle_findings": 4,
+   "subtitle_findings": 2,
    "voice": "de_DE-thorsten-medium",
    "voice_blocked": null,
    "voiceover_line": {
@@ -5104,7 +4978,7 @@
    "mean_confidence": 0.813,
    "back_translation": "local-llamacpp/qwen3-4b-q4km",
    "subtitles_full_passed": false,
-   "subtitle_findings": 8,
+   "subtitle_findings": 6,
    "voice": "fr_FR-siwis-medium",
    "voice_blocked": null,
    "voiceover_line": {
@@ -5251,7 +5125,7 @@
    "mean_confidence": 0.881,
    "back_translation": "local-llamacpp/qwen3-4b-q4km",
    "subtitles_full_passed": false,
-   "subtitle_findings": 3,
+   "subtitle_findings": 2,
    "voice": "ru_RU-denis-medium",
    "voice_blocked": null,
    "voiceover_line": {
@@ -5294,7 +5168,7 @@
    "mean_confidence": 0.766,
    "back_translation": "local-llamacpp/qwen3-4b-q4km",
    "subtitles_full_passed": false,
-   "subtitle_findings": 8,
+   "subtitle_findings": 4,
    "voice": "es_ES-davefx-medium",
    "voice_blocked": null,
    "voiceover_line": {

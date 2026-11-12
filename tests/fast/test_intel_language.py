@@ -305,3 +305,10 @@ def test_router_question_word_swap_is_rejected(monkeypatch):
     monkeypatch.setattr(model_router, "complete", lambda *a, **k: model_router.Result(text="", data={"lines": [bad]}, provider="s", model="s"))
     r = dialect.adapt_lines(src, "ar-Gulf")[0]
     assert r["method"] == "lexical" and "question" in r["router_rejected"]["reason"]
+
+
+def test_no_one_word_orphan_cue():
+    # real German demo line: pack segmentation left "gebaut." alone in a 0.5 s cue
+    cues = subtitles.build_cues([{"text": "Der Aswan-Hochbehinderung auf dem Nile in Ägypten wurde zwischen 1960 und 1970 gebaut.",
+                                  "start": 0.5, "end": 6.67}], "de")
+    assert all(len(c["text"].split()) >= 3 for c in cues) and all(c["end"] - c["start"] >= 5 / 6 for c in cues)

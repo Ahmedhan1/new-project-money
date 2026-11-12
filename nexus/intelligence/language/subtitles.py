@@ -46,6 +46,10 @@ def _wrap(text: str, tag: str) -> list[str]:
                 cur = ""
             cur += ch
         return out + ([cur] if cur else [])
+    return _greedy(text, tag, cap)
+
+
+def _greedy(text: str, tag: str, cap: float) -> list[str]:
     out, cur = [], ""
     for w in text.split():
         if cur and width(cur + " " + w, tag) > cap:
@@ -56,24 +60,42 @@ def _wrap(text: str, tag: str) -> list[str]:
     return out + ([cur] if cur else [])
 
 
+def _balanced(text: str, tag: str) -> list[str]:
+    """Wrap so that lines are evenly filled (no one-word orphan such as 'gebaut.' in its own cue): find the narrowest
+    width that still needs no more lines than plain greedy wrapping at the limit."""
+    r = _rules(tag)
+    cap = r["max_chars_per_line"]
+    if r["segmentation"] == "char":
+        return _wrap(text, tag)
+    need = len(_greedy(text, tag, cap))
+    per = int(r.get("max_lines", 2))
+    need = -(-need // per) * per if need > per else need  # fill whole cues
+    lo = max(1, int(width(text, tag) / max(1, need)))
+    for w in range(lo, cap + 1):
+        lines = _greedy(text, tag, w)
+        if len(lines) <= need:
+            return lines
+    return _greedy(text, tag, cap)
+
+
 def build_cues(lines: list[dict], tag: str) -> list[dict]:
     """lines = [{text, start, end}] -> cues obeying chars/line, lines/cue and reading speed (split by share of text)."""
     from ...speech import packs as lp
     cues: list[dict] = []
     for ln in lines:
-        if lp.get(tag):
-            # packs.segment knows break punctuation and CJK breaking; then re-wrap to the matrix (guide) limits
-            sep = " " if _rules(tag)["segmentation"] == "space" else ""
+        if lp.get(tag) and _rules(tag)["segmentation"] == "char":
+            # CJK: packs.segment breaks at CJK punctuation first; then re-wrap to the matrix (guide) limits
             for sp in lp.segment(ln["text"], ln["start"], ln["end"], tag):
-                cues += _fit(sp["text"].replace("\n", sep), sp["start"], sp["end"], tag)
+                cues += _fit(sp["text"].replace("\n", ""), sp["start"], sp["end"], tag)
         else:
+            # spaced scripts: balanced wrapping over the whole line (packs.segment left one-word orphans: "gebaut.")
             cues += _fit(ln["text"], ln["start"], ln["end"], tag)
     return cues
 
 
 def _fit(text: str, start: float, end: float, tag: str) -> list[dict]:
     r = _rules(tag)
-    wrapped = _wrap(text, tag)
+    wrapped = _balanced(text, tag)
     per = int(r.get("max_lines", 2))
     chunks = [wrapped[i:i + per] for i in range(0, len(wrapped), per)] or [[""]]
     total = sum(width("".join(c), tag) for c in chunks) or 1

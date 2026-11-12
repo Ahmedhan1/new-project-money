@@ -93,17 +93,26 @@ def run_lang(lang: str, work: Path) -> dict:
             llm.unload()
             mt.unload()
     rec["qa"] = tq.check_lines(SOURCE, final, lang, GLOSSARY[lang], back)
+    rec["subtitles"] = subtitle_block(final, lang, work)
+    tm = timings()
+    man = dubbing.build_manifest([{"text": t, **tm[i]} for i, t in enumerate(final)], lang, commercial=True, project_id="account3_language_demo")
+    rec["dubbing"] = {k: man[k] for k in ("voice", "blocked", "needs_shortening", "estimate_note")}
+    rec["dubbing"]["lines"] = [{k: x[k] for k in ("idx", "voice", "licence", "timing_target", "estimated_s", "speed_needed", "action")} for x in man["lines"]]
+    return _voice(rec, man, final, lang, work, t0)
+
+
+def subtitle_block(final: list[str], lang: str, work: Path) -> dict:
     tm = timings()
     cues = subtitles.build_cues([{"text": t, **tm[i]} for i, t in enumerate(final)], lang)
     exp = subtitles.export_all(cues, lang, work, "aswan")
-    rec["subtitles"] = {"paths": exp["paths"], "qa_full": {k: exp["qa_full"][k] for k in ("cues", "findings", "passed")},
+    return {"paths": exp["paths"], "qa_full": {k: exp["qa_full"][k] for k in ("cues", "findings", "passed")},
                         "qa_condensed": {k: exp["qa_condensed"][k] for k in ("cues", "findings", "passed")},
                         "condense_todo": exp["condense_todo"],
                         "srt_full": Path(exp["paths"]["full.srt"]).read_text(encoding="utf-8"),
                         "ass_style": [x for x in Path(exp["paths"]["full.ass"]).read_text(encoding="utf-8").splitlines() if x.startswith("Style:")]}
-    man = dubbing.build_manifest([{"text": t, **tm[i]} for i, t in enumerate(final)], lang, commercial=True, project_id="account3_language_demo")
-    rec["dubbing"] = {k: man[k] for k in ("voice", "blocked", "needs_shortening", "estimate_note")}
-    rec["dubbing"]["lines"] = [{k: x[k] for k in ("idx", "voice", "licence", "timing_target", "estimated_s", "speed_needed", "action")} for x in man["lines"]]
+
+
+def _voice(rec: dict, man: dict, final: list[str], lang: str, work: Path, t0: float) -> dict:
     if man["voice"] and man["voice"].get("engine") == "piper":
         with jobs.heavy_lock():
             try:
@@ -128,11 +137,13 @@ def main() -> None:
     doc.update({"schema": "nexus.Account3LanguageDemo/1", "source": SOURCE, "source_note": SOURCE_NOTE, "glossary": GLOSSARY,
                 "timings": timings(), "machine": "4 CPU / 15 GB shared; MADLAD-400 3B int8 (CTranslate2), Qwen3-4B Q4_K_M via model router"})
     doc.setdefault("languages", {})
-    if a.reqa:  # recompute the deterministic QA from the stored translations + back-translations (no models)
+    if a.reqa:
+        work = config.HOME / "projects" / "account3_language_demo"  # recompute the deterministic QA from the stored translations + back-translations (no models)
         for lang, r in doc["languages"].items():
             if "final" in r:
                 r["qa"] = tq.check_lines(SOURCE, r["final"], lang, GLOSSARY[lang], (r.get("back_translation") or {}).get("lines"))
                 r["qa_recomputed"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+                r["subtitles"] = subtitle_block(r["final"], lang, work)
         if "ar-Gulf" in doc["languages"] and "mt_output" in doc["languages"]["ar-Gulf"]:
             doc["dialect_contrast"] = dialect_contrast(doc["languages"]["ar-Gulf"]["mt_output"])
         doc["summary"] = summary(doc)
