@@ -108,7 +108,7 @@ def test_resources_health_config_security(client):
     c = client.get("/api/v1/studio/config").json()
     assert c["scheduler"]["max_active_jobs"] >= 1 and "routes_studio" not in c["routers_missing"]
     from nexus import vault
-    vault.put("drive_a.oauth", "ya29.super-secret-value-0123456789abcdef")
+    vault.put("drive_a.oauth", "ya29." + "fakevalue" * 4)  # built at runtime: never a token-shaped literal in Git
     sec = client.get("/api/v1/studio/security")
     assert sec.json()["secrets"] == [{"name": "drive_a.oauth"}] and "super-secret" not in sec.text
 

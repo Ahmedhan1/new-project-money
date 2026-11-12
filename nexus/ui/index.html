@@ -49,7 +49,7 @@ main a{color:var(--acc)}
 <script>
 const $=(s,e=document)=>e.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const api=async(p,body)=>{const r=await fetch(p,body===undefined?{}:{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+const api=async(p,body)=>{const r=await fetch(p,body===undefined?{credentials:"same-origin"}:{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json","X-NEXUS-CSRF":"1"},body:JSON.stringify(body)});
   const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.detail||r.statusText);return j};
 const tag=(t,c="")=>`<span class="tag ${c}">${esc(t)}</span>`;
 const statusTag=s=>tag(s,/PASSED|VERIFIED|done|deployed|true|scheduled/i.test(s)?"ok":/BLOCK|fail|REJECT/i.test(s)?"bad":"warn");

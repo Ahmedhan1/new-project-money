@@ -118,7 +118,7 @@ def redact(text: str) -> str:
 # ---------------------------------------------------------------- no-secret-in-Git scan
 TOKEN_RE = re.compile(r"(KGAT_[0-9a-f]{20,}|ya29\.[0-9A-Za-z_\-]{20,}|1//0[0-9A-Za-z_\-]{30,}|GOCSPX-[0-9A-Za-z_\-]{20,}|"
                       r"ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9]{32,}|"
-                      r"-----BEGIN (?:RSA |EC )?PRIVATE KEY-----|xox[bp]-[A-Za-z0-9-]{20,})")
+                      r"-----BEGIN (?:RSA |EC )?PRIVATE KEY-----|xox[bp]-[A-Za-z0-9-]{20,}|nxw_[A-Za-z0-9_-]{40,})")
 
 
 def scan_repo(root: str | Path, history: bool = False) -> list[dict]:

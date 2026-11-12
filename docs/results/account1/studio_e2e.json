@@ -6,7 +6,7 @@
    "errors": [],
    "notes": [],
    "buttons": 6,
-   "ms": 60
+   "ms": 70
   },
   "accounts": {
    "title": "Connected accounts",
@@ -16,21 +16,21 @@
     "Compute service (remote workers: Kaggle, Colab handoff, user GPU) is not installed in this build: /api/v1/compute is not mounted."
    ],
    "buttons": 1,
-   "ms": 652
+   "ms": 653
   },
   "notifications": {
    "title": "Notifications",
    "errors": [],
    "notes": [],
    "buttons": 3,
-   "ms": 84
+   "ms": 71
   },
   "scheduler": {
    "title": "Scheduler",
    "errors": [],
    "notes": [],
    "buttons": 8,
-   "ms": 75
+   "ms": 68
   },
   "jobs": {
    "title": "Job queue",
@@ -39,7 +39,7 @@
     "Compute service (remote workers: Kaggle, Colab handoff, user GPU) is not installed in this build: /api/v1/compute is not mounted. The list below is read from th"
    ],
    "buttons": 0,
-   "ms": 71
+   "ms": 59
   },
   "library": {
    "title": "Media library",
@@ -53,7 +53,7 @@
    "errors": [],
    "notes": [],
    "buttons": 1,
-   "ms": 41
+   "ms": 40
   },
   "compute": {
    "title": "Compute providers",
@@ -78,14 +78,14 @@
    "errors": [],
    "notes": [],
    "buttons": 0,
-   "ms": 68
+   "ms": 67
   },
   "resources": {
    "title": "Resource monitor",
    "errors": [],
    "notes": [],
    "buttons": 0,
-   "ms": 250
+   "ms": 251
   },
   "logs": {
    "title": "Logs",
@@ -99,7 +99,7 @@
    "errors": [],
    "notes": [],
    "buttons": 0,
-   "ms": 67
+   "ms": 66
   },
   "security": {
    "title": "Security",
@@ -110,14 +110,14 @@
     "Disconnect a storage account from Connected accounts; that revokes and deletes its stored token."
    ],
    "buttons": 1,
-   "ms": 69
+   "ms": 67
   },
   "config": {
    "title": "System configuration",
    "errors": [],
    "notes": [],
    "buttons": 1,
-   "ms": 65
+   "ms": 67
   }
  },
  "page_errors": [],
@@ -156,11 +156,11 @@
  "screenshots": [
   {
    "file": "studio_scheduler.png",
-   "bytes": 152376
+   "bytes": 152429
   },
   {
    "file": "studio_library.png",
-   "bytes": 97464
+   "bytes": 97596
   },
   {
    "file": "studio_dashboard.png",
@@ -174,7 +174,7 @@
  "cookie": {
   "httpOnly": true,
   "sameSite": "Strict",
-  "secure": true
+  "secure": false
  },
  "token_visible_to_js": false,
  "after_start": "running \u00b7 masters 0/2 \u00b7 shorts 0/4",
@@ -201,7 +201,7 @@
   "bg": "rgb(245, 247, 251)"
  },
  "after_logout_status": 401,
- "seconds": 4.5,
+ "seconds": 3.8,
  "server_tracebacks": 0,
  "fixtures": "remote_jobs rows with provider 'fixture', two checkpoints, one failed-job event, one info notification, and a local ffmpeg-made thumbnail + 2 s master; everything else is live server state",
  "date": "2026-11-12"

@@ -79,7 +79,7 @@ class AuthError extends Error{}
 class Missing extends Error{}
 // api(): same-origin fetch with the session cookie. 401 -> login screen. 404 on another service's router -> Missing.
 async function api(path,{method="GET",body,form}={}){
-  const o={method,credentials:"same-origin",headers:{}};
+  const o={method,credentials:"same-origin",headers:method==="GET"?{}:{"X-NEXUS-CSRF":"1"}};
   if(form){o.body=form}else if(body!==undefined){o.headers["Content-Type"]="application/json";o.body=JSON.stringify(body)}
   const r=await fetch(path,o);
   let j=null;try{j=await r.json()}catch(e){j=null}
@@ -335,7 +335,7 @@ async function act(fn,okMsg){try{const r=await fn();if(okMsg)toast(typeof okMsg=
 const ACT={
   theme(){const cur=document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");const nxt=cur==="light"?"dark":"light";
     document.documentElement.dataset.theme=nxt;try{localStorage.setItem("nexus-studio-theme",nxt)}catch(e){}},
-  async logout(){await fetch("/api/v1/studio/logout",{method:"POST",credentials:"same-origin"});showLogin()},
+  async logout(){await fetch("/api/v1/studio/logout",{method:"POST",credentials:"same-origin",headers:{"X-NEXUS-CSRF":"1"}});showLogin()},
   async ghrefresh(){await act(()=>api("/api/v1/studio/github?refresh=true"));render()},
   async kverify(b){b.disabled=true;await act(()=>post(SVC.compute+"/providers/kaggle/verify"),r=>"Kaggle: "+(r.status||r.detail||"verified"));render()},
   async jsubmit(){let params;try{params=JSON.parse($("#jparams").value||"{}")}catch(e){return toast("Params is not valid JSON",true)}

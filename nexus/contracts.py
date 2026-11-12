@@ -8,7 +8,8 @@ localization, publishing, analytics) use to submit work and receive artifacts. R
 * Secrets never appear in any contract: providers are referenced by `connection_id`, never by token.
 * Times are UNIX seconds (float, UTC). Sizes are bytes. Checksums are lowercase hex SHA-256.
 
-Export: `python -m nexus contracts` writes docs/contracts/*.schema.json (JSON Schema for non-Python clients).
+Export: `contracts.export_schemas("docs/contracts")` writes docs/contracts/*.schema.json (JSON Schema for non-Python
+clients); tests/fast/test_contracts.py fails if a contract changes without re-exporting (and versioning) it.
 """
 from __future__ import annotations
 

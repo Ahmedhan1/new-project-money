@@ -1,7 +1,7 @@
 """/api/v1 core: contract schemas, events, notifications, owner session (lead)."""
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, Request, Response
 from pydantic import BaseModel
 
 from .. import contracts
@@ -21,16 +21,10 @@ class SessionReq(BaseModel):
 
 
 @router.post("/session")
-def open_session(r: SessionReq, response: Response):
-    """Exchange the owner token for an HttpOnly, SameSite=Strict cookie so the browser UI never stores the token in JS."""
-    tok = security.api_token()
-    if tok is None:
-        return {"mode": "loopback", "detail": "no NEXUS_API_TOKEN configured: only local clients are accepted"}
-    import hmac
-    if not hmac.compare_digest(r.token.encode(), tok.encode()):
-        raise HTTPException(401, "wrong token")
-    response.set_cookie("nexus_session", tok, httponly=True, secure=True, samesite="strict", max_age=12 * 3600)
-    return {"mode": "token", "ok": True}
+def open_session(r: SessionReq, request: Request, response: Response):
+    """Exchange the owner token for a signed, HttpOnly, SameSite=Strict session cookie (the token never reaches the
+    browser; rate limited and audited in security.open_session)."""
+    return security.open_session(request, response, r.token)
 
 
 @router.get("/events", dependencies=[Depends(security.require_owner)])

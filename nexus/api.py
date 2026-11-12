@@ -19,6 +19,25 @@ from .timeline import ops
 from .timeline.render import clip_duration, clip_starts, total_duration
 
 app = FastAPI(title="NEXUS Video AI", version="0.1.0")
+
+# Account 1 security: response headers (CSP, nosniff, frame-ancestors none, no-store for API) and an owner guard on the
+# legacy /api/* routes and the main page, which previously relied only on binding to 127.0.0.1.
+from fastapi.responses import JSONResponse as _JSONResponse  # noqa: E402
+
+from .cloud import security as _security  # noqa: E402
+
+_security.install(app)
+
+
+@app.middleware("http")
+async def _owner_guard(request, call_next):
+    p = request.url.path
+    if (p == "/" or p.startswith("/api/")) and not p.startswith("/api/v1"):
+        try:
+            _security.check(request)
+        except HTTPException as e:
+            return _JSONResponse({"detail": e.detail}, status_code=e.status_code)
+    return await call_next(request)
 UI = Path(__file__).resolve().parent / "ui" / "index.html"
 _q: "queue.Queue[tuple[str, callable]]" = queue.Queue()
 _analyses: dict[str, dict] = {}

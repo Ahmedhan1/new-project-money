@@ -57,17 +57,19 @@ def auth_state(request: Request):
     import hmac
     tok = security.api_token()
     if tok is None:
-        ok = (request.client.host if request.client else "") in security.LOOPBACK
+        ok = security.is_direct_loopback(request)
     else:
         auth = request.headers.get("authorization", "")
-        given = (auth[7:].strip() if auth.lower().startswith("bearer ") else "") or request.cookies.get("nexus_session", "")
-        ok = bool(given) and hmac.compare_digest(given.encode(), tok.encode())
+        bearer = auth[7:].strip() if auth.lower().startswith("bearer ") else ""
+        # the session cookie is a signed value (security.session_valid), never the raw token
+        ok = (bool(bearer) and hmac.compare_digest(bearer.encode(), tok.encode())) or \
+            security.session_valid(request.cookies.get(security.COOKIE, ""), tok)
     return {"token_mode": security.api_token() is not None, "authenticated": ok}
 
 
 @router.post(P + "/logout")
 def logout(response: Response):
-    response.delete_cookie("nexus_session", httponly=True, secure=True, samesite="strict")
+    security.close_session(response)
     return {"ok": True}
 
 
