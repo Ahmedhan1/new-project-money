@@ -276,6 +276,8 @@ def api_op(pid: str, r: OpReq):
 class RenderReq(BaseModel):
     branch: str = "main"
     name: str | None = None
+    draft: bool = False
+    platform: str | None = None
 
 
 @app.post("/api/projects/{pid}/render")
@@ -286,7 +288,8 @@ def api_render(pid: str, r: RenderReq):
     except KeyError:
         raise HTTPException(409, f"project has no timeline on branch '{r.branch}' yet")
 
-    return jobs.submit("render", {"project": pid, "branch": r.branch, "name": r.name or f"{r.branch}_{int(time.time()) % 100000}"}, pid)
+    name = r.name or f"{r.branch}{'_draft' if r.draft else ''}_{int(time.time()) % 100000}"
+    return jobs.submit("render", {"project": pid, "branch": r.branch, "name": name, "draft": r.draft, "platform": r.platform}, pid)
 
 
 class LocalizeReq(BaseModel):
@@ -483,3 +486,155 @@ def api_channel(r: ChannelReq):
 @app.get("/api/platforms")
 def api_platforms():
     return {k: {**v, "auto_publish": publish.AUTO_PUBLISH[k]} for k, v in publish.PLATFORMS.items()}
+
+
+# ---------------------------------------------------------------- rights (repurpose gate)
+class RightsReq(BaseModel):
+    media: str
+    basis: str  # owned | licensed | public-domain | commentary
+    evidence: str = ""
+    holder: str = ""
+
+
+@app.post("/api/projects/{pid}/rights")
+def api_rights_declare(pid: str, r: RightsReq):
+    """The user's own declaration of the right to use an uploaded source. Exports of reworked footage need one."""
+    from . import repurpose
+    try:
+        return repurpose.declare_rights(_project(pid), r.media, r.basis, r.evidence, r.holder)
+    except (ValueError, KeyError, LookupError) as e:
+        raise HTTPException(400, str(e))
+
+
+@app.get("/api/projects/{pid}/rights")
+def api_rights_review(pid: str, branch: str = "main"):
+    from . import repurpose
+    p = _project(pid)
+    try:
+        tl = p.timeline(branch)
+    except KeyError:
+        return {"passed": False, "checks": [], "media": [{"id": m["id"], "name": m["name"], "rights": m.get("rights")} for m in p.data["media"]]}
+    rv = repurpose.rights_review(p, tl, _analysis(p) or None)
+    return {"passed": rv["passed"], "checks": rv["checks"], "transformation": rv["report"].get("text"),
+            "media": [{"id": m["id"], "name": m["name"], "rights": m.get("rights")} for m in p.data["media"]]}
+
+
+# ---------------------------------------------------------------- director (Edit my video) + quality
+@app.get("/api/director/profiles")
+def api_director_profiles():
+    """Creative-direction profiles with the parameters each one sets (editorial profiles, not claims about any studio)."""
+    from . import director
+    keep = ("description", "shot_length", "pause_tolerance", "filler_removal", "opening", "ending", "grade", "music", "captions")
+    return {k: {x: v.get(x) for x in keep if x in v} for k, v in director.profiles().items()}
+
+
+class DirectReq(BaseModel):
+    profile: str = "documentary"
+    target_seconds: float | None = None
+    instructions: str = ""
+    title: str | None = None
+    size: str = "1920x1080"
+    branch: str = "main"
+    platforms: list[str] = []
+    languages: list[str] = []
+    shorts: int = 0
+
+
+@app.post("/api/projects/{pid}/direct")
+def api_direct(pid: str, r: DirectReq):
+    from . import director, repurpose
+    _project(pid)
+    if r.profile not in director.profiles():
+        raise HTTPException(400, f"unknown profile '{r.profile}'")
+    try:
+        repurpose.check_request(r.instructions)
+    except repurpose.RepurposeRefused as e:
+        raise HTTPException(422, str(e))
+    try:
+        w, h = (int(x) for x in r.size.lower().split("x"))
+    except ValueError:
+        raise HTTPException(400, "size must look like 1920x1080")
+    params = {"project": pid, "profile": r.profile, "target_seconds": r.target_seconds, "instructions": r.instructions or None,
+              "title": r.title or None, "size": [w, h], "branch": r.branch, "platforms": r.platforms or None,
+              "languages": r.languages or None, "shorts": r.shorts or None}
+    return jobs.submit("direct", params, pid)
+
+
+@app.get("/api/projects/{pid}/plan")
+def api_plan(pid: str, limit: int = 400):
+    """The director's plan: every kept and dropped span with its reason and score (explainable edit)."""
+    p = _project(pid)
+    f = p.dir / "reports" / "director_plan.json"
+    if not f.exists():
+        raise HTTPException(404, "no director plan yet")
+    plan = json.loads(f.read_text(encoding="utf-8"))
+    dec = plan.get("decisions", [])
+    return {"profile": plan.get("profile"), "summary": plan.get("summary"), "notes": plan.get("notes"),
+            "chapters": plan.get("chapters"), "decisions": [{k: d.get(k) for k in ("start", "end", "action", "kind", "reason", "score", "text")}
+                                                            for d in dec[:limit]], "decisions_total": len(dec)}
+
+
+@app.get("/api/projects/{pid}/edl")
+def api_edl(pid: str, branch: str = "main", fmt: str = "cmx3600"):
+    from fastapi.responses import PlainTextResponse
+    from . import director
+    p = _project(pid)
+    if fmt not in ("cmx3600", "json"):
+        raise HTTPException(400, "fmt must be cmx3600 or json")
+    return PlainTextResponse(director.edl(p.timeline(branch), fmt, title=p.name[:60]))
+
+
+@app.get("/api/projects/{pid}/quality")
+def api_quality(pid: str):
+    """Weighted quality reports of this project's finished renders (newest first)."""
+    from . import quality
+    p = _project(pid)
+    out = []
+    for f in sorted((p.dir / "reports").glob("*.quality.json"), key=lambda x: x.stat().st_mtime, reverse=True):
+        rep = json.loads(f.read_text(encoding="utf-8"))
+        out.append({"render": f.name.replace(".quality.json", ""), **quality.summary(rep),
+                    "checks": [{k: c.get(k) for k in ("id", "category", "ok", "level", "severity", "detail")} for c in rep.get("checks", [])]})
+    return out
+
+
+# ---------------------------------------------------------------- destination selector
+@app.get("/api/platforms/profiles")
+def api_platform_profiles():
+    """Every destination with its key values and how each is known (documented / observed / experimental / unverified)."""
+    from . import platforms
+    keys = ("aspect_recommended", "resolution_recommended", "duration_max_s", "max_file_bytes", "safe_zone", "loudness_target_lufs",
+            "title_max_chars", "hook_window_s")
+    out = {}
+    for n in platforms.names():
+        prof = platforms.get(n)
+        out[n] = {"display": prof["display"], "reviewed_on": prof.get("reviewed_on"),
+                  "fields": {k: {x: prof["fields"].get(k, {}).get(x) for x in ("value", "kind", "source", "read_on")} for k in keys}}
+    return {"profiles": out, "stale": platforms.stale()}
+
+
+class DeliverReq(BaseModel):
+    platforms: list[str]
+    branch: str = "main"
+    title: str | None = None
+    description: str = ""
+    lang: str | None = None
+
+
+@app.post("/api/projects/{pid}/deliver")
+def api_deliver(pid: str, r: DeliverReq):
+    from . import platforms
+    p = _project(pid)
+    if not r.platforms:
+        raise HTTPException(400, "choose at least one destination")
+    try:
+        names = [platforms.get(n)["name"] for n in r.platforms]
+    except KeyError as e:
+        raise HTTPException(400, str(e))
+    try:
+        tl = p.timeline(r.branch)
+    except KeyError:
+        raise HTTPException(409, f"project has no timeline on branch '{r.branch}' yet")
+    plan = platforms.deliverables(names, duration=total_duration(tl), fps=int(tl.get("fps", 30)))
+    job = jobs.submit("deliver", {"project": pid, "platforms": names, "branch": r.branch, "title": r.title or p.name,
+                                  "description": r.description, "lang": r.lang}, pid)
+    return {**job, "renders_planned": len(plan), "groups": plan}
