@@ -1,0 +1,234 @@
+# Account 3 language matrix (agent D). Machine-readable twin of docs/ACCOUNT3_LANGUAGE_MATRIX.md.
+#
+# Rules
+#   commercial_use is a QUOTED string: "yes" | "no" | "unverified". "yes" only with first-party evidence for the whole
+#   chain (model weights AND training data AND base model). Unknown = "unverified". Never upgraded by assumption.
+#   Facts below were read on `verified` from the URL in `source`. Rows copied from nexus/registry/languages.yaml carry
+#   that file's 2026-11-12 reading (same day, same first-party MODEL_CARDs) and say so.
+schema: nexus.LanguageMatrix/1
+verified: "2026-11-12"
+
+engines:
+  asr:
+    whisper-small:
+      kind: asr
+      licence: MIT
+      commercial_use: "yes"
+      installed: true
+      source: "https://github.com/openai/whisper (MIT); weights Systran/faster-whisper-small (MIT) - per languages.yaml sources, 2026-11-12"
+      note: "one 'ar' code for every Arabic variety: Egyptian/Gulf speech is transcribed without a dialect label"
+  mt:
+    madlad400-3b:
+      kind: mt
+      licence: Apache-2.0
+      commercial_use: "yes"
+      installed: true
+      source: "https://huggingface.co/google/madlad400-3b-mt (Apache-2.0; card: research models not assessed for production use)"
+      targets_checked_in_vocab: [en, de, fr, ar, arz, ary, zh, ru, hi, es, pt, tr, ja, ko, it]
+      targets_absent: [afb, acm, ars, apc]
+      note: "vocabulary of the installed CT2 model checked locally on 2026-11-12 for <2xx> tokens; no Gulf Arabic target"
+    nllb-200:
+      kind: mt
+      licence: CC-BY-NC-4.0
+      commercial_use: "no"
+      installed: false
+      source: "https://huggingface.co/facebook/nllb-200-distilled-600M - metadata 'cc-by-nc-4.0'; 'NLLB-200 is a research model and is not released for production deployment' (read 2026-11-12)"
+      note: "NOT usable for commercial output; listed only so nobody adds it by mistake"
+    router-llm:
+      kind: llm_translation
+      licence: "per routed model (local qwen3-4b-q4km: Apache-2.0 per capability_registry/providers.yaml)"
+      commercial_use: "yes"
+      installed: true
+      source: "nexus/intelligence/capability_registry/providers.yaml"
+      note: "task 'translation' via nexus.intelligence.model_router.complete; privacy class chosen by the caller; hosted-free providers only when the owner authorised them"
+  tts:
+    piper:
+      kind: tts_engine
+      licence: "MIT (repo rhasspy/piper-voices); each voice is limited by its DATASET + base model licence"
+      installed: true
+      source: "https://huggingface.co/rhasspy/piper-voices"
+    kokoro-82m:
+      kind: tts_model
+      licence: Apache-2.0
+      commercial_use: "yes"
+      installed: false
+      languages: [en-US, en-GB, ja, zh, es, fr, hi, it, pt-BR]
+      not_supported: [ar, de, ru, ko, tr]
+      source: "https://huggingface.co/hexgrad/Kokoro-82M ('Apache-licensed weights ... deployed anywhere from production environments to personal projects'); https://huggingface.co/hexgrad/Kokoro-82M/blob/main/VOICES.md (read 2026-11-12)"
+      restrictions: "card says training data includes 'synthetic audio from closed TTS models from large providers' - weights licence is Apache-2.0, but record this for clients with strict provenance rules. VOICES.md grades: zh all D, hi/it C, ja C+..C-"
+      note: "not installed; candidate for it/hi/ja voices after a listening test. Needs Account 2 integration."
+    mms-tts:
+      kind: tts_model
+      licence: CC-BY-NC-4.0
+      commercial_use: "no"
+      installed: false
+      source: "https://huggingface.co/facebook/mms-tts-ara - 'The model is licensed as CC-BY-NC 4.0.' (read 2026-11-12)"
+    xtts-v2:
+      kind: tts_model_voice_cloning
+      licence: "Coqui Public Model License (CPML)"
+      commercial_use: "no"
+      installed: false
+      languages: [en, es, fr, de, it, pt, pl, tr, ru, nl, cs, ar, zh-cn, ja, hu, ko, hi]
+      source: "https://huggingface.co/coqui/XTTS-v2 ('licensed under Coqui Public Model License', link coqui.ai/cpml - that link returned HTTP 404 on 2026-11-12, licence text not re-read)"
+      note: "CPML is a non-commercial licence per its name and common description; the first-party text could not be re-read today, so treat as not usable commercially"
+    openvoice-v2:
+      kind: voice_cloning
+      licence: MIT
+      commercial_use: "yes"
+      installed: false
+      languages: [en, es, fr, zh, ja, ko]
+      source: "https://github.com/myshell-ai/OpenVoice README: 'OpenVoice V1 and V2 are MIT Licensed. Free for both commercial and research use.' (read 2026-11-12)"
+      restrictions: "cloning a real person's voice requires that person's recorded consent (dubbing.require_consent); the base speaker TTS (MeloTTS) licence must be checked separately (not read)"
+
+subtitle_sources:
+  netflix_ar: "https://partnerhelp.netflixstudios.com/hc/en-us/articles/215517947 (Arabic: 42 chars/line, 20 cps adult)"
+  netflix_zh_hans: "https://partnerhelp.netflixstudios.com/hc/en-us/articles/215986007 (Simplified Chinese: 16 chars/line, 9 cps adult)"
+  netflix_ja: "https://partnerhelp.netflixstudios.com/hc/en-us/articles/215767517 (Japanese: 13 full-width chars/line horizontal, 4 cps)"
+  netflix_ko: "https://partnerhelp.netflixstudios.com/hc/en-us/articles/216001127 (Korean: 16 chars/line, Latin/space/punct = 0.5, 12 cps adult)"
+  netflix_hi: "https://partnerhelp.netflixstudios.com/hc/en-us/articles/115003196707 (Hindi: 42 chars/line, 22 cps adult)"
+  netflix_ru: "https://partnerhelp.netflixstudios.com/hc/en-us/articles/215346638 (Russian: 42 chars/line, 17 cps adult)"
+  netflix_it: "https://partnerhelp.netflixstudios.com/hc/en-us/articles/215349898 (Italian: 42 chars/line, 17 cps adult)"
+  netflix_de: "https://backlothelp.netflix.com/hc/en-us/articles/217351587 (German: 42 chars/line, 17 cps adult - from search result excerpt, page not opened)"
+  netflix_general: "https://partnerhelp.netflixstudios.com/hc/en-us/articles/215758617 (2 lines max, min 5/6 s, max 7 s per event)"
+  default: "42 chars x 2 lines, 17 cps: editorial default, NOT verified for this language"
+
+# per language: asr / mt (ordered options) / voices / subtitles. `voices` lists every candidate we know of, cleared or not.
+languages:
+  en:
+    name: English
+    asr: whisper-small
+    mt: []
+    voices:
+      - {id: en_US-joe-medium, engine: piper, licence: "dataset CC0; base rdh CC0", commercial_use: "yes", attribution: null, source: "languages.yaml (MODEL_CARD 2026-11-12)", installed: true}
+      - {id: en_US-ljspeech-medium, engine: piper, licence: "LJ Speech public domain", commercial_use: "yes", attribution: null, source: "languages.yaml (MODEL_CARD 2026-11-12)", installed: true}
+      - {id: kokoro:af_heart, engine: kokoro-82m, licence: Apache-2.0, commercial_use: "yes", source: "Kokoro VOICES.md", installed: false}
+    subtitles: {max_chars_per_line: 42, max_lines: 2, max_cps: 17, direction: ltr, segmentation: space, font: latin, source: default}
+  de:
+    name: German
+    asr: whisper-small
+    mt: [madlad400-3b, router-llm]
+    voices:
+      - {id: de_DE-thorsten-medium, engine: piper, licence: "dataset CC0 (Thorsten-Voice); base rdh CC0", commercial_use: "yes", source: "languages.yaml (MODEL_CARD 2026-11-12)", installed: true}
+      - {id: de_DE-kerstin-medium, engine: piper, licence: "dataset CC0; base Hi-Fi TTS CC BY 4.0", commercial_use: "yes", attribution: "Hi-Fi TTS (CC BY 4.0)", source: "languages.yaml (MODEL_CARD 2026-11-12)", installed: false}
+    subtitles: {max_chars_per_line: 42, max_lines: 2, max_cps: 17, direction: ltr, segmentation: space, font: latin, source: netflix_de}
+  fr:
+    name: French
+    asr: whisper-small
+    mt: [madlad400-3b, router-llm]
+    voices:
+      - {id: fr_FR-siwis-medium, engine: piper, licence: "dataset SIWIS CC BY 4.0; base Hi-Fi TTS CC BY 4.0", commercial_use: "yes", attribution: "SIWIS database (CC BY 4.0); Hi-Fi TTS (CC BY 4.0)", source: "languages.yaml (MODEL_CARD 2026-11-12)", installed: false}
+      - {id: fr_FR-mls-medium, engine: piper, licence: "Multilingual LibriSpeech CC BY 4.0", commercial_use: "yes", attribution: "Multilingual LibriSpeech (CC BY 4.0)", source: "languages.yaml", installed: false}
+      - {id: fr_FR-upmc-medium, engine: piper, licence: "CC BY-SA 4.0; base lessac (research licence)", commercial_use: "unverified", source: "languages.yaml", installed: false}
+      - {id: fr_FR-tom-medium, engine: piper, licence: "AGPLv3 on a voice model", commercial_use: "unverified", source: "languages.yaml", installed: false}
+    subtitles: {max_chars_per_line: 42, max_lines: 2, max_cps: 17, direction: ltr, segmentation: space, font: latin, source: default}
+  ar:
+    name: Modern Standard Arabic
+    asr: whisper-small
+    mt: [madlad400-3b, router-llm]
+    voices:
+      - {id: ar_JO-kareem-medium, engine: piper, licence: "card 'See URL'; dataset repo has no licence; base lessac", commercial_use: "unverified", source: "languages.yaml (MODEL_CARD 2026-11-12)", installed: true}
+      - {id: mms-tts-ara, engine: mms-tts, licence: CC-BY-NC-4.0, commercial_use: "no", source: "https://huggingface.co/facebook/mms-tts-ara", installed: false}
+    subtitles: {max_chars_per_line: 42, max_lines: 2, max_cps: 20, direction: rtl, segmentation: space, font: arabic, source: netflix_ar, note: "Netflix's Arabic guide asks to avoid dialect: dialect subtitles are a deliberate product choice here"}
+  ar-EG:
+    name: Egyptian Arabic
+    asr: whisper-small
+    mt: [madlad400-3b, router-llm]
+    mt_note: "MADLAD target <2arz> exists; output still often MSA -> dialect pass (nexus.intelligence.language.dialect)"
+    voices:
+      - {id: ar_JO-kareem-medium, engine: piper, licence: "see ar", commercial_use: "unverified", source: "languages.yaml", installed: true, note: "Jordanian/MSA-sounding, not Egyptian"}
+    subtitles: {max_chars_per_line: 42, max_lines: 2, max_cps: 20, direction: rtl, segmentation: space, font: arabic, source: netflix_ar}
+  ar-Gulf:
+    name: Gulf Arabic
+    asr: whisper-small
+    mt: [madlad400-3b, router-llm]
+    mt_note: "no Gulf MT target (afb/acm/ars absent) -> MSA + dialect pass"
+    voices:
+      - {id: ar_JO-kareem-medium, engine: piper, licence: "see ar", commercial_use: "unverified", source: "languages.yaml", installed: true, note: "not a Gulf voice"}
+    subtitles: {max_chars_per_line: 42, max_lines: 2, max_cps: 20, direction: rtl, segmentation: space, font: arabic, source: netflix_ar}
+  zh:
+    name: Chinese (Simplified)
+    asr: whisper-small
+    mt: [madlad400-3b, router-llm]
+    voices:
+      - {id: zh_CN-chaowen-medium, engine: piper, licence: "dataset CC0; base Hi-Fi TTS CC BY 4.0; needs Piper >= 1.5 + g2pW", commercial_use: "yes", attribution: "Hi-Fi TTS (CC BY 4.0)", source: "languages.yaml (MODEL_CARD 2026-11-12)", installed: false}
+      - {id: zh_CN-huayan-medium, engine: piper, licence: "card 'Unknown'", commercial_use: "unverified", source: "languages.yaml", installed: false}
+      - {id: zh_CN-xiao_ya-medium, engine: piper, licence: "Data Baker BZNSYP non-commercial", commercial_use: "no", source: "languages.yaml", installed: false}
+    subtitles: {max_chars_per_line: 16, max_lines: 2, max_cps: 9, direction: ltr, segmentation: char, font: cjk_sc, source: netflix_zh_hans}
+  ru:
+    name: Russian
+    asr: whisper-small
+    mt: [madlad400-3b, router-llm]
+    voices:
+      - {id: ru_RU-denis-medium, engine: piper, licence: "dataset CC0; base rdh CC0", commercial_use: "yes", source: "languages.yaml (MODEL_CARD 2026-11-12)", installed: false}
+      - {id: ru_RU-dmitri-medium, engine: piper, licence: "CC0; base lessac", commercial_use: "unverified", source: "languages.yaml", installed: false}
+      - {id: ru_RU-irina-medium, engine: piper, licence: "card 'Unknown'", commercial_use: "unverified", source: "languages.yaml", installed: false}
+      - {id: ru_RU-ruslan-medium, engine: piper, licence: "CC BY-NC-SA 4.0", commercial_use: "no", source: "languages.yaml", installed: false}
+    subtitles: {max_chars_per_line: 42, max_lines: 2, max_cps: 17, direction: ltr, segmentation: space, font: latin, source: netflix_ru}
+  hi:
+    name: Hindi
+    asr: whisper-small
+    mt: [madlad400-3b, router-llm]
+    voices:
+      - {id: hi_IN-rohan-medium, engine: piper, licence: "IIT Madras IndicTTS custom licence (PDF timed out 2026-11-12, unread); base lessac", commercial_use: "unverified", source: "languages.yaml", installed: false}
+      - {id: hi_IN-pratham-medium, engine: piper, licence: "CC BY-NC-SA 4.0", commercial_use: "no", source: "languages.yaml", installed: false}
+      - {id: hi_IN-priyamvada-medium, engine: piper, licence: "CC BY-NC-SA 4.0", commercial_use: "no", source: "languages.yaml", installed: false}
+      - {id: "kokoro:hi (one of 4 voices in VOICES.md)", engine: kokoro-82m, licence: Apache-2.0, commercial_use: "yes", source: "Kokoro VOICES.md (grade C)", installed: false}
+    subtitles: {max_chars_per_line: 42, max_lines: 2, max_cps: 22, direction: ltr, segmentation: space, font: devanagari, source: netflix_hi}
+  es:
+    name: Spanish
+    asr: whisper-small
+    mt: [madlad400-3b, router-llm]
+    voices:
+      - {id: es_ES-davefx-medium, engine: piper, licence: "dataset CC0; base rdh CC0", commercial_use: "yes", source: "languages.yaml (MODEL_CARD 2026-11-12)", installed: false}
+      - {id: es_ES-sharvard-medium, engine: piper, licence: "Sharvard CC BY 3.0; base Hi-Fi TTS CC BY 4.0", commercial_use: "yes", attribution: "Sharvard corpus (CC BY 3.0); Hi-Fi TTS (CC BY 4.0)", source: "languages.yaml", installed: false}
+    subtitles: {max_chars_per_line: 42, max_lines: 2, max_cps: 17, direction: ltr, segmentation: space, font: latin, source: default}
+  pt:
+    name: Portuguese (Brazil)
+    asr: whisper-small
+    mt: [madlad400-3b, router-llm]
+    voices:
+      - {id: pt_BR-cadu-medium, engine: piper, licence: "dataset CC0; base rdh CC0", commercial_use: "yes", source: "languages.yaml (MODEL_CARD 2026-11-12)", installed: false}
+      - {id: pt_BR-faber-medium, engine: piper, licence: "CC0; base lessac", commercial_use: "unverified", source: "languages.yaml", installed: false}
+    subtitles: {max_chars_per_line: 42, max_lines: 2, max_cps: 17, direction: ltr, segmentation: space, font: latin, source: default}
+  tr:
+    name: Turkish
+    asr: whisper-small
+    mt: [madlad400-3b, router-llm]
+    voices:
+      - {id: tr_TR-dfki-medium, engine: piper, licence: "DFKI CC BY-NC-SA 4.0", commercial_use: "no", source: "languages.yaml (MODEL_CARD 2026-11-12)", installed: false}
+    subtitles: {max_chars_per_line: 42, max_lines: 2, max_cps: 17, direction: ltr, segmentation: space, font: latin, source: default}
+  ja:
+    name: Japanese
+    asr: whisper-small
+    mt: [madlad400-3b, router-llm]
+    voices:
+      - {id: ja_JP-hi_fi_captain-medium, engine: piper, licence: "NICT Hi-Fi-CAPTAIN CC BY-NC-SA 4.0", commercial_use: "no", source: "languages.yaml", installed: false}
+      - {id: kokoro:jf_alpha, engine: kokoro-82m, licence: Apache-2.0, commercial_use: "yes", source: "Kokoro VOICES.md (grade C+)", installed: false}
+    subtitles: {max_chars_per_line: 13, max_lines: 2, max_cps: 4, direction: ltr, segmentation: char, font: cjk_ja, source: netflix_ja}
+  ko:
+    name: Korean
+    asr: whisper-small
+    mt: [madlad400-3b, router-llm]
+    mt_note: "<2ko> present in the installed MADLAD vocabulary (checked 2026-11-12); no language pack in languages.yaml yet"
+    voices:
+      - {id: ko_KR-kss-medium, engine: piper, licence: "KSS dataset CC BY-NC-SA 4.0 (card links creativecommons.org/licenses/by-nc-sa/4.0)", commercial_use: "no", source: "https://huggingface.co/rhasspy/piper-voices/resolve/main/ko/ko_KR/kss/medium/MODEL_CARD (read 2026-11-12)", installed: false}
+    subtitles: {max_chars_per_line: 16, max_lines: 2, max_cps: 12, direction: ltr, segmentation: space, font: cjk_kr, latin_weight: 0.5, source: netflix_ko, note: "Korean uses spaces between words; Latin/space/punctuation count 0.5"}
+  it:
+    name: Italian
+    asr: whisper-small
+    mt: [madlad400-3b, router-llm]
+    mt_note: "<2it> present in the installed MADLAD vocabulary; no language pack yet"
+    voices:
+      - {id: it_IT-paola-medium, engine: piper, licence: "dataset CC0 (HF paolapersico1/Voice-Dataset-Italian); fine-tuned from lessac (research licence)", commercial_use: "unverified", source: "MODEL_CARD it/it_IT/paola/medium (read 2026-11-12)", installed: false}
+      - {id: it_IT-serena-medium, engine: piper, licence: "dataset CC BY 4.0, 27 h SYNTHETIC audio generated with Qwen3-TTS; dataset author has 'not independently verified the provenance or consent status' of Qwen3-TTS training voices", commercial_use: "unverified", attribution: "committa/serena-synthetic-it-27h (CC BY 4.0)", source: "MODEL_CARD it/it_IT/serena/medium + https://huggingface.co/datasets/committa/serena-synthetic-it-27h (read 2026-11-12)", installed: false}
+      - {id: it_IT-riccardo-x_low, engine: piper, licence: "M-AILABS dataset, card 'See URL' (www.caito.de unreachable from this session)", commercial_use: "unverified", source: "MODEL_CARD it/it_IT/riccardo/x_low (read 2026-11-12)", installed: false}
+      - {id: "kokoro:it (one of 2 voices in VOICES.md)", engine: kokoro-82m, licence: Apache-2.0, commercial_use: "yes", source: "Kokoro VOICES.md (grade C)", installed: false}
+    subtitles: {max_chars_per_line: 42, max_lines: 2, max_cps: 17, direction: ltr, segmentation: space, font: latin, source: netflix_it}
+
+fonts:
+  latin: "DejaVu Sans / Noto Sans"
+  arabic: "Noto Naskh Arabic (needs OpenType shaping; DejaVu Sans has basic Arabic)"
+  cjk_sc: "Noto Sans CJK SC / WenQuanYi Zen Hei"
+  cjk_ja: "Noto Sans CJK JP / IPAGothic"
+  cjk_kr: "Noto Sans CJK KR / NanumGothic (no font set in languages.yaml yet)"
+  devanagari: "Noto Sans Devanagari / Lohit Devanagari"
