@@ -203,6 +203,25 @@ def reference_compare(r: IdsReq):
     return _mod("creators").compare(_profiles(r.ids))
 
 
+class BlendReq(BaseModel):
+    ids: list[str]
+    weights: list[float] | None = None
+    name: str = "blended reference style"
+    frames: bool = False  # measure on-screen text / colour / motion from the local file (slower)
+
+
+@router.post("/references/blend")
+def reference_blend(r: BlendReq):
+    """Creator intelligence V2: 14 dimensions per reference and a weighted blend with conflicts surfaced."""
+    from .creators import style_v2
+    profs = _profiles(r.ids)
+    dims = [style_v2.dimensions(p, (p.get("source") or {}).get("local_path") if r.frames else None) for p in profs]
+    try:
+        return {"references": dims, "blend": style_v2.combine(dims, r.weights, r.name)}
+    except ValueError as e:
+        raise HTTPException(422, str(e))
+
+
 @router.post("/styles")
 def style_create(r: IdsReq):
     from .. import db
