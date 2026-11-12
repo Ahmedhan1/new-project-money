@@ -358,11 +358,17 @@ def digital_silence_gaps(x: np.ndarray, sr: int, min_s: float = 0.03, thr: float
     return [(round(i / sr, 4), round(j / sr, 4)) for i, j in zip(s, e) if (j - i) / sr >= min_s]
 
 
-def fill_gaps(x: np.ndarray, sr: int, gaps: list[tuple[float, float]] | None = None, xfade: float = 0.01) -> tuple[np.ndarray, list]:
-    """Fill gaps (default: digital-silence runs >= 30 ms) with the source's own room tone; the signal length and every
-    pause duration stay unchanged (the gap is filled, not closed)."""
+MAX_FILL_S = 3.0
+
+
+def fill_gaps(x: np.ndarray, sr: int, gaps: list[tuple[float, float]] | None = None, xfade: float = 0.01,
+              max_s: float = MAX_FILL_S) -> tuple[np.ndarray, list]:
+    """Fill gaps (default: digital-silence runs of 30 ms .. max_s) with the source's own room tone; the signal length
+    and every pause duration stay unchanged (the gap is filled, not closed). Longer digital silence is left alone: it
+    is a deliberate silent section or a dead source, not an edit gap (walktalk: 50 % of the file)."""
     x = M.as2d(x).copy()
     gaps = digital_silence_gaps(x, sr) if gaps is None else gaps
+    gaps = [(s, e) for s, e in gaps if e - s <= max_s]
     if not gaps:
         return x, []
     total = sum(e - s for s, e in gaps) + 0.2
@@ -371,13 +377,14 @@ def fill_gaps(x: np.ndarray, sr: int, gaps: list[tuple[float, float]] | None = N
     r = int(xfade * sr)
     for s, e in gaps:
         a, b = int(s * sr), int(e * sr)
+        b = min(b, len(x))
         seg = tone[pos:pos + (b - a)].copy()
         pos += b - a
         if r and len(seg) > 2 * r:
             ramp = np.linspace(0, 1, r)[:, None]
             seg[:r] *= ramp
             seg[-r:] *= ramp[::-1]
-        x[a:a + len(seg)] += seg
+        x[a:a + len(seg)] += seg[: len(x) - a]
     return x, gaps
 
 

@@ -1,0 +1,1369 @@
+{
+ "what": "Agent C audio acceptance: dialogue chain v2, sound design, audio QA on real benchmark media",
+ "date": "2026-11-12",
+ "machine": "shared 4-vCPU container, no GPU",
+ "human_listening": "REQUIRED - nobody listened; every number here is an objective measurement",
+ "media_location": "/tmp/a2-c/accept (not committed)",
+ "dialogue": {
+  "interview": {
+   "seconds": 300.0,
+   "processing_s": 63.6,
+   "rtf": 0.212,
+   "material": "interview",
+   "before": {
+    "lufs": -27.21,
+    "lra": 4.48,
+    "true_peak": -7.94,
+    "noise_floor_db": -53.34,
+    "noise_rel_lufs_db": -26.13,
+    "speech_band_snr_db": 27.84,
+    "clipped_samples": 0,
+    "dc_offset_db": -108.0,
+    "channel_imbalance_db": 0.0,
+    "speaker_spread_db": 1.1,
+    "hum_prominence_db": 6.7,
+    "bandwidth_hz": 11950
+   },
+   "after": {
+    "lufs": -16.05,
+    "lra": 3.82,
+    "true_peak": -1.93,
+    "noise_floor_db": -48.24,
+    "noise_rel_lufs_db": -32.19,
+    "speech_band_snr_db": 32.97,
+    "clipped_samples": 0,
+    "dc_offset_db": -86.9,
+    "channel_imbalance_db": 0.0,
+    "speaker_spread_db": 1.46,
+    "hum_prominence_db": 3.7,
+    "bandwidth_hz": 11927
+   },
+   "steps_applied": [
+    "dc_highpass",
+    "denoise",
+    "breaths",
+    "eq",
+    "compress",
+    "roomtone",
+    "loudness"
+   ],
+   "manifest": {
+    "schema": "nexus.AudioMasterManifest/1",
+    "input": {
+     "uri": "file:///home/user/new-project-money/.nexus/benchmarks/interview/source.mp4",
+     "role": "source",
+     "bytes": 89068085
+    },
+    "output": {
+     "uri": "file:///tmp/a2-c/accept/interview_full_after.wav",
+     "role": "dialogue-master",
+     "bytes": 86403174,
+     "sha256": "8a82d5501a134493392de437fe48a6f34d6b9f68a4e971e3b68f2d8dec278caa"
+    },
+    "chain": [
+     {
+      "step": "dc_highpass",
+      "applied": true,
+      "dc_before": [
+       4e-06,
+       4e-06
+      ],
+      "label": "mean subtraction + 70 Hz high-pass"
+     },
+     {
+      "step": "channels",
+      "applied": false,
+      "dual_mono": true
+     },
+     {
+      "step": "declip",
+      "applied": false,
+      "why": "0 clipped run(s)"
+     },
+     {
+      "step": "dehum",
+      "applied": false,
+      "why": "hum prominence 6.7 dB"
+     },
+     {
+      "step": "denoise",
+      "applied": true,
+      "tool": "arnndn",
+      "strength": "light",
+      "material": "interview",
+      "licence": "BSD-3-Clause (RNNoise); model: not copyrightable per its author",
+      "tried": [
+       {
+        "tool": "arnndn",
+        "strength": "light",
+        "speech_band_change_db": -0.35
+       }
+      ],
+      "note": ""
+     },
+     {
+      "step": "dereverb",
+      "applied": false,
+      "rt60_est": 0.12,
+      "why": "no measurable reverberation tail (estimate <= 0.5 s or too few decays)"
+     },
+     {
+      "step": "breaths",
+      "applied": true,
+      "events": 1,
+      "attenuation_db": -6.0,
+      "first": [
+       {
+        "start": 167.86,
+        "end": 168.06,
+        "level_db": -43.0
+       }
+      ],
+      "note": "attenuated, never removed: timing and pauses unchanged"
+     },
+     {
+      "step": "deess",
+      "applied": false,
+      "sibilance_db": -40.7,
+      "why": "95th-percentile 5-9 kHz/300-3400 Hz ratio <= -6 dB"
+     },
+     {
+      "step": "eq",
+      "applied": true,
+      "bands": [
+       {
+        "f": 4000,
+        "gain_db": 3.2,
+        "measured_db": -20.33,
+        "target_db": -14.0
+       }
+      ],
+      "label": "gentle tilt towards an LTASS-like curve"
+     },
+     {
+      "step": "speakers",
+      "applied": false,
+      "method": "silence-separated segments clustered by voice (WeSpeaker ResNet34 embeddings, 2 cluster(s), silhouette 0.74)",
+      "levels": {
+       "V1": {
+        "db": -31.62,
+        "seconds": 52.9
+       },
+       "V2": {
+        "db": -30.17,
+        "seconds": 183.9
+       }
+      },
+      "gains_db": {},
+      "spread_before_db": 1.45
+     },
+     {
+      "step": "compress",
+      "applied": true,
+      "label": "acompressor 2:1 @ -24 dB"
+     },
+     {
+      "step": "roomtone",
+      "applied": true,
+      "gaps": 1,
+      "seconds": 0.036
+     },
+     {
+      "step": "loudness",
+      "applied": true,
+      "target_lufs": -16.0,
+      "tp_limit": -1.5,
+      "gain_db": 12.57,
+      "limiter_ceiling_dbfs": -2.0,
+      "lufs": -16.05,
+      "true_peak": -1.93
+     }
+    ],
+    "before": {
+     "lufs": -27.21,
+     "lra": 4.48,
+     "true_peak": -7.94,
+     "noise_floor_db": -53.34,
+     "noise_rel_lufs_db": -26.13,
+     "speech_band_snr_db": 27.84,
+     "clipped_samples": 0,
+     "dc_offset_db": -108.0,
+     "channel_imbalance_db": 0.0,
+     "speaker_spread_db": 1.1,
+     "digital_silence_frac": 0.0
+    },
+    "after": {
+     "lufs": -16.05,
+     "lra": 3.82,
+     "true_peak": -1.93,
+     "noise_floor_db": -48.24,
+     "noise_rel_lufs_db": -32.19,
+     "speech_band_snr_db": 32.97,
+     "clipped_samples": 0,
+     "dc_offset_db": -86.9,
+     "channel_imbalance_db": 0.0,
+     "speaker_spread_db": 1.46,
+     "digital_silence_frac": 0.0
+    },
+    "target_lufs": -16.0,
+    "material": "interview",
+    "rtf": 0.212,
+    "human_listening": "required: these are objective measurements only"
+   },
+   "excerpt": {
+    "start": 60.0,
+    "seconds": 30.0,
+    "files": [
+     "/tmp/a2-c/accept/interview_before.wav",
+     "/tmp/a2-c/accept/interview_after.wav",
+     "/tmp/a2-c/accept/interview_before.mp4",
+     "/tmp/a2-c/accept/interview_after.mp4"
+    ]
+   },
+   "spectrograms": [
+    "docs/results/a2_audio/interview_before.png",
+    "docs/results/a2_audio/interview_after.png"
+   ]
+  },
+  "panel": {
+   "seconds": 360.0,
+   "processing_s": 99.4,
+   "rtf": 0.276,
+   "material": "studio",
+   "before": {
+    "lufs": -21.38,
+    "lra": 6.45,
+    "true_peak": -3.53,
+    "noise_floor_db": -56.3,
+    "noise_rel_lufs_db": -34.92,
+    "speech_band_snr_db": 43.62,
+    "clipped_samples": 0,
+    "dc_offset_db": -104.4,
+    "channel_imbalance_db": -0.0,
+    "speaker_spread_db": 1.71,
+    "hum_prominence_db": 10.9,
+    "bandwidth_hz": 16072
+   },
+   "after": {
+    "lufs": -16.0,
+    "lra": 3.43,
+    "true_peak": -1.88,
+    "noise_floor_db": -51.59,
+    "noise_rel_lufs_db": -35.59,
+    "speech_band_snr_db": 40.76,
+    "clipped_samples": 0,
+    "dc_offset_db": -79.2,
+    "channel_imbalance_db": -0.0,
+    "speaker_spread_db": 0.31,
+    "hum_prominence_db": 2.7,
+    "bandwidth_hz": 16081
+   },
+   "steps_applied": [
+    "dc_highpass",
+    "dehum",
+    "breaths",
+    "eq",
+    "speakers",
+    "compress",
+    "roomtone",
+    "loudness"
+   ],
+   "manifest": {
+    "schema": "nexus.AudioMasterManifest/1",
+    "input": {
+     "uri": "file:///home/user/new-project-money/.nexus/benchmarks/panel/source.mp4",
+     "role": "source",
+     "bytes": 109664802
+    },
+    "output": {
+     "uri": "file:///tmp/a2-c/accept/panel_full_after.wav",
+     "role": "dialogue-master",
+     "bytes": 103680102,
+     "sha256": "30ffcfbd352f832e38f3fc167abe4974f2fcdbd8cdac7f09c96f3d6c58751121"
+    },
+    "chain": [
+     {
+      "step": "dc_highpass",
+      "applied": true,
+      "dc_before": [
+       -6e-06,
+       -6e-06
+      ],
+      "label": "mean subtraction + 70 Hz high-pass"
+     },
+     {
+      "step": "channels",
+      "applied": false,
+      "dual_mono": true
+     },
+     {
+      "step": "declip",
+      "applied": false,
+      "why": "0 clipped run(s)"
+     },
+     {
+      "step": "dehum",
+      "applied": true,
+      "hz": 60.0,
+      "prominence_db": 10.9
+     },
+     {
+      "step": "denoise",
+      "applied": false,
+      "why": "material class studio: source already clean"
+     },
+     {
+      "step": "dereverb",
+      "applied": false,
+      "rt60_est": 0.3,
+      "why": "no measurable reverberation tail (estimate <= 0.5 s or too few decays)"
+     },
+     {
+      "step": "breaths",
+      "applied": true,
+      "events": 3,
+      "attenuation_db": -6.0,
+      "first": [
+       {
+        "start": 73.5,
+        "end": 73.62,
+        "level_db": -33.3
+       },
+       {
+        "start": 292.16,
+        "end": 292.28,
+        "level_db": -40.1
+       },
+       {
+        "start": 296.46,
+        "end": 296.6,
+        "level_db": -36.7
+       }
+      ],
+      "note": "attenuated, never removed: timing and pauses unchanged"
+     },
+     {
+      "step": "deess",
+      "applied": false,
+      "sibilance_db": -24.82,
+      "why": "95th-percentile 5-9 kHz/300-3400 Hz ratio <= -6 dB"
+     },
+     {
+      "step": "eq",
+      "applied": true,
+      "bands": [
+       {
+        "f": 250,
+        "gain_db": 1.8,
+        "measured_db": -3.53,
+        "target_db": 0.0
+       },
+       {
+        "f": 2000,
+        "gain_db": -2.0,
+        "measured_db": -5.1,
+        "target_db": -9.0
+       }
+      ],
+      "label": "gentle tilt towards an LTASS-like curve"
+     },
+     {
+      "step": "speakers",
+      "applied": true,
+      "method": "silence-separated segments clustered by voice (WeSpeaker ResNet34 embeddings, 2 cluster(s), silhouette 0.59)",
+      "levels": {
+       "V1": {
+        "db": -25.44,
+        "seconds": 199.8
+       },
+       "V2": {
+        "db": -27.02,
+        "seconds": 85.9
+       }
+      },
+      "gains_db": {
+       "V2": 1.58
+      },
+      "spread_before_db": 1.58
+     },
+     {
+      "step": "compress",
+      "applied": true,
+      "label": "acompressor 2:1 @ -24 dB"
+     },
+     {
+      "step": "roomtone",
+      "applied": true,
+      "gaps": 2,
+      "seconds": 0.466
+     },
+     {
+      "step": "loudness",
+      "applied": true,
+      "target_lufs": -16.0,
+      "tp_limit": -1.5,
+      "gain_db": 8.81,
+      "limiter_ceiling_dbfs": -2.0,
+      "lufs": -16.0,
+      "true_peak": -1.88
+     }
+    ],
+    "before": {
+     "lufs": -21.38,
+     "lra": 6.45,
+     "true_peak": -3.53,
+     "noise_floor_db": -56.3,
+     "noise_rel_lufs_db": -34.92,
+     "speech_band_snr_db": 43.62,
+     "clipped_samples": 0,
+     "dc_offset_db": -104.4,
+     "channel_imbalance_db": -0.0,
+     "speaker_spread_db": 1.71,
+     "digital_silence_frac": 0.0025
+    },
+    "after": {
+     "lufs": -16.0,
+     "lra": 3.43,
+     "true_peak": -1.88,
+     "noise_floor_db": -51.59,
+     "noise_rel_lufs_db": -35.59,
+     "speech_band_snr_db": 40.76,
+     "clipped_samples": 0,
+     "dc_offset_db": -79.2,
+     "channel_imbalance_db": -0.0,
+     "speaker_spread_db": 0.31,
+     "digital_silence_frac": 0.0
+    },
+    "target_lufs": -16.0,
+    "material": "studio",
+    "rtf": 0.276,
+    "human_listening": "required: these are objective measurements only"
+   },
+   "excerpt": {
+    "start": 60.0,
+    "seconds": 30.0,
+    "files": [
+     "/tmp/a2-c/accept/panel_before.wav",
+     "/tmp/a2-c/accept/panel_after.wav",
+     "/tmp/a2-c/accept/panel_before.mp4",
+     "/tmp/a2-c/accept/panel_after.mp4"
+    ]
+   },
+   "spectrograms": [
+    "docs/results/a2_audio/panel_before.png",
+    "docs/results/a2_audio/panel_after.png"
+   ]
+  },
+  "podcast": {
+   "seconds": 360.0,
+   "processing_s": 101.7,
+   "rtf": 0.283,
+   "material": "interview",
+   "before": {
+    "lufs": -22.18,
+    "lra": 3.29,
+    "true_peak": -11.68,
+    "noise_floor_db": -51.31,
+    "noise_rel_lufs_db": -29.13,
+    "speech_band_snr_db": 37.52,
+    "clipped_samples": 0,
+    "dc_offset_db": -95.9,
+    "channel_imbalance_db": -0.0,
+    "speaker_spread_db": 1.67,
+    "hum_prominence_db": 11.7,
+    "bandwidth_hz": 9404
+   },
+   "after": {
+    "lufs": -16.0,
+    "lra": 2.48,
+    "true_peak": -1.88,
+    "noise_floor_db": -46.39,
+    "noise_rel_lufs_db": -30.39,
+    "speech_band_snr_db": 36.01,
+    "clipped_samples": 0,
+    "dc_offset_db": -73.3,
+    "channel_imbalance_db": 0.0,
+    "speaker_spread_db": 0.51,
+    "hum_prominence_db": 4.4,
+    "bandwidth_hz": 9398
+   },
+   "steps_applied": [
+    "dc_highpass",
+    "dehum",
+    "denoise",
+    "eq",
+    "speakers",
+    "compress",
+    "loudness"
+   ],
+   "manifest": {
+    "schema": "nexus.AudioMasterManifest/1",
+    "input": {
+     "uri": "file:///home/user/new-project-money/.nexus/benchmarks/podcast/source.mp4",
+     "role": "source",
+     "bytes": 106844765
+    },
+    "output": {
+     "uri": "file:///tmp/a2-c/accept/podcast_full_after.wav",
+     "role": "dialogue-master",
+     "bytes": 103683174,
+     "sha256": "fdd0fe127a84104709375feffb9bb665e782e6417c8f46550f2a9ded72ebd3d0"
+    },
+    "chain": [
+     {
+      "step": "dc_highpass",
+      "applied": true,
+      "dc_before": [
+       -1.6e-05,
+       -1.6e-05
+      ],
+      "label": "mean subtraction + 70 Hz high-pass"
+     },
+     {
+      "step": "channels",
+      "applied": false,
+      "dual_mono": true
+     },
+     {
+      "step": "declip",
+      "applied": false,
+      "why": "0 clipped run(s)"
+     },
+     {
+      "step": "dehum",
+      "applied": true,
+      "hz": 60.0,
+      "prominence_db": 11.7
+     },
+     {
+      "step": "denoise",
+      "applied": true,
+      "tool": "arnndn",
+      "strength": "light",
+      "material": "interview",
+      "licence": "BSD-3-Clause (RNNoise); model: not copyrightable per its author",
+      "tried": [
+       {
+        "tool": "arnndn",
+        "strength": "light",
+        "speech_band_change_db": -0.21
+       }
+      ],
+      "note": ""
+     },
+     {
+      "step": "dereverb",
+      "applied": false,
+      "rt60_est": 0.21,
+      "why": "no measurable reverberation tail (estimate <= 0.5 s or too few decays)"
+     },
+     {
+      "step": "breaths",
+      "applied": false,
+      "events": 0,
+      "attenuation_db": -6.0,
+      "first": [],
+      "note": "attenuated, never removed: timing and pauses unchanged"
+     },
+     {
+      "step": "deess",
+      "applied": false,
+      "sibilance_db": -34.57,
+      "why": "95th-percentile 5-9 kHz/300-3400 Hz ratio <= -6 dB"
+     },
+     {
+      "step": "eq",
+      "applied": true,
+      "bands": [
+       {
+        "f": 250,
+        "gain_db": 1.8,
+        "measured_db": -3.6,
+        "target_db": 0.0
+       },
+       {
+        "f": 1000,
+        "gain_db": 1.9,
+        "measured_db": -7.76,
+        "target_db": -4.0
+       },
+       {
+        "f": 2000,
+        "gain_db": 1.9,
+        "measured_db": -12.79,
+        "target_db": -9.0
+       },
+       {
+        "f": 4000,
+        "gain_db": 4.0,
+        "measured_db": -22.04,
+        "target_db": -14.0
+       }
+      ],
+      "label": "gentle tilt towards an LTASS-like curve"
+     },
+     {
+      "step": "speakers",
+      "applied": true,
+      "method": "silence-separated segments clustered by voice (WeSpeaker ResNet34 embeddings, 3 cluster(s), silhouette 0.60)",
+      "levels": {
+       "V1": {
+        "db": -23.58,
+        "seconds": 163.8
+       },
+       "V2": {
+        "db": -24.66,
+        "seconds": 54.2
+       },
+       "V3": {
+        "db": -25.57,
+        "seconds": 76.2
+       }
+      },
+      "gains_db": {
+       "V3": 1.99
+      },
+      "spread_before_db": 1.99
+     },
+     {
+      "step": "compress",
+      "applied": true,
+      "label": "acompressor 2:1 @ -24 dB"
+     },
+     {
+      "step": "roomtone",
+      "applied": false,
+      "gaps": 0,
+      "seconds": 0
+     },
+     {
+      "step": "loudness",
+      "applied": true,
+      "target_lufs": -16.0,
+      "tp_limit": -1.5,
+      "gain_db": 8.8,
+      "limiter_ceiling_dbfs": -2.0,
+      "lufs": -16.0,
+      "true_peak": -1.88
+     }
+    ],
+    "before": {
+     "lufs": -22.18,
+     "lra": 3.29,
+     "true_peak": -11.68,
+     "noise_floor_db": -51.31,
+     "noise_rel_lufs_db": -29.13,
+     "speech_band_snr_db": 37.52,
+     "clipped_samples": 0,
+     "dc_offset_db": -95.9,
+     "channel_imbalance_db": -0.0,
+     "speaker_spread_db": 1.67,
+     "digital_silence_frac": 0.0
+    },
+    "after": {
+     "lufs": -16.0,
+     "lra": 2.48,
+     "true_peak": -1.88,
+     "noise_floor_db": -46.39,
+     "noise_rel_lufs_db": -30.39,
+     "speech_band_snr_db": 36.01,
+     "clipped_samples": 0,
+     "dc_offset_db": -73.3,
+     "channel_imbalance_db": 0.0,
+     "speaker_spread_db": 0.51,
+     "digital_silence_frac": 0.0
+    },
+    "target_lufs": -16.0,
+    "material": "interview",
+    "rtf": 0.283,
+    "human_listening": "required: these are objective measurements only"
+   },
+   "excerpt": {
+    "start": 60.0,
+    "seconds": 30.0,
+    "files": [
+     "/tmp/a2-c/accept/podcast_before.wav",
+     "/tmp/a2-c/accept/podcast_after.wav",
+     "/tmp/a2-c/accept/podcast_before.mp4",
+     "/tmp/a2-c/accept/podcast_after.mp4"
+    ]
+   },
+   "spectrograms": [
+    "docs/results/a2_audio/podcast_before.png",
+    "docs/results/a2_audio/podcast_after.png"
+   ]
+  },
+  "walktalk": {
+   "seconds": 243.1,
+   "processing_s": 77.9,
+   "rtf": 0.32,
+   "material": "outdoor",
+   "before": {
+    "lufs": -31.3,
+    "lra": 8.83,
+    "true_peak": -10.77,
+    "noise_floor_db": -51.96,
+    "noise_rel_lufs_db": -20.66,
+    "speech_band_snr_db": 21.98,
+    "clipped_samples": 0,
+    "dc_offset_db": -240.0,
+    "channel_imbalance_db": 0.0,
+    "speaker_spread_db": 0.0,
+    "hum_prominence_db": 7.4,
+    "bandwidth_hz": 16087
+   },
+   "after": {
+    "lufs": -16.08,
+    "lra": 7.15,
+    "true_peak": -1.91,
+    "noise_floor_db": -48.49,
+    "noise_rel_lufs_db": -32.41,
+    "speech_band_snr_db": 34.0,
+    "clipped_samples": 0,
+    "dc_offset_db": -100.0,
+    "channel_imbalance_db": 0.0,
+    "speaker_spread_db": 0.0,
+    "hum_prominence_db": 4.5,
+    "bandwidth_hz": 16090
+   },
+   "steps_applied": [
+    "dc_highpass",
+    "denoise",
+    "breaths",
+    "deess",
+    "eq",
+    "compress",
+    "loudness"
+   ],
+   "manifest": {
+    "schema": "nexus.AudioMasterManifest/1",
+    "input": {
+     "uri": "file:///home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+     "role": "source",
+     "bytes": 75862223
+    },
+    "output": {
+     "uri": "file:///tmp/a2-c/accept/walktalk_full_after.wav",
+     "role": "dialogue-master",
+     "bytes": 69998694,
+     "sha256": "43775475de57e7623ff2a845b2fef47a9e2a12c9cbf1de46b68c257fd6c1a173"
+    },
+    "chain": [
+     {
+      "step": "dc_highpass",
+      "applied": true,
+      "dc_before": [
+       0.0,
+       0.0
+      ],
+      "label": "mean subtraction + 70 Hz high-pass"
+     },
+     {
+      "step": "channels",
+      "applied": false,
+      "dual_mono": true
+     },
+     {
+      "step": "declip",
+      "applied": false,
+      "why": "0 clipped run(s)"
+     },
+     {
+      "step": "dehum",
+      "applied": false,
+      "why": "hum prominence 7.4 dB"
+     },
+     {
+      "step": "denoise",
+      "applied": true,
+      "tool": "arnndn",
+      "strength": "normal",
+      "material": "outdoor",
+      "licence": "BSD-3-Clause (RNNoise); model: not copyrightable per its author",
+      "tried": [
+       {
+        "tool": "arnndn",
+        "strength": "normal",
+        "speech_band_change_db": -0.27
+       }
+      ],
+      "note": ""
+     },
+     {
+      "step": "dereverb",
+      "applied": false,
+      "rt60_est": 0.225,
+      "why": "no measurable reverberation tail (estimate <= 0.5 s or too few decays)"
+     },
+     {
+      "step": "breaths",
+      "applied": true,
+      "events": 3,
+      "attenuation_db": -6.0,
+      "first": [
+       {
+        "start": 68.2,
+        "end": 68.34,
+        "level_db": -47.4
+       },
+       {
+        "start": 85.06,
+        "end": 85.3,
+        "level_db": -51.4
+       },
+       {
+        "start": 129.3,
+        "end": 129.44,
+        "level_db": -53.3
+       }
+      ],
+      "note": "attenuated, never removed: timing and pauses unchanged"
+     },
+     {
+      "step": "deess",
+      "applied": true,
+      "sibilance_before_db": 15.16,
+      "sibilance_after_db": 15.16
+     },
+     {
+      "step": "eq",
+      "applied": true,
+      "bands": [
+       {
+        "f": 250,
+        "gain_db": 2.7,
+        "measured_db": -5.4,
+        "target_db": 0.0
+       },
+       {
+        "f": 1000,
+        "gain_db": 1.4,
+        "measured_db": -6.89,
+        "target_db": -4.0
+       },
+       {
+        "f": 2000,
+        "gain_db": 3.4,
+        "measured_db": -15.71,
+        "target_db": -9.0
+       },
+       {
+        "f": 4000,
+        "gain_db": 3.5,
+        "measured_db": -21.04,
+        "target_db": -14.0
+       },
+       {
+        "f": 8000,
+        "gain_db": -1.5,
+        "measured_db": -17.98,
+        "target_db": -21.0
+       }
+      ],
+      "label": "gentle tilt towards an LTASS-like curve"
+     },
+     {
+      "step": "speakers",
+      "applied": false,
+      "method": "silence-separated segments clustered by voice (WeSpeaker ResNet34 embeddings, 1 cluster(s), silhouette 0.00)",
+      "levels": {
+       "V1": {
+        "db": -36.17,
+        "seconds": 84.5
+       }
+      },
+      "gains_db": {},
+      "spread_before_db": 0.0
+     },
+     {
+      "step": "compress",
+      "applied": true,
+      "label": "acompressor 2:1 @ -24 dB"
+     },
+     {
+      "step": "roomtone",
+      "applied": false,
+      "gaps": 0,
+      "seconds": 0
+     },
+     {
+      "step": "loudness",
+      "applied": true,
+      "target_lufs": -16.0,
+      "tp_limit": -1.5,
+      "gain_db": 15.3,
+      "limiter_ceiling_dbfs": -2.0,
+      "lufs": -16.08,
+      "true_peak": -1.91
+     }
+    ],
+    "before": {
+     "lufs": -31.3,
+     "lra": 8.83,
+     "true_peak": -10.77,
+     "noise_floor_db": -51.96,
+     "noise_rel_lufs_db": -20.66,
+     "speech_band_snr_db": 21.98,
+     "clipped_samples": 0,
+     "dc_offset_db": -240.0,
+     "channel_imbalance_db": 0.0,
+     "speaker_spread_db": 0.0,
+     "digital_silence_frac": 0.5007
+    },
+    "after": {
+     "lufs": -16.08,
+     "lra": 7.15,
+     "true_peak": -1.91,
+     "noise_floor_db": -48.49,
+     "noise_rel_lufs_db": -32.41,
+     "speech_band_snr_db": 34.0,
+     "clipped_samples": 0,
+     "dc_offset_db": -100.0,
+     "channel_imbalance_db": 0.0,
+     "speaker_spread_db": 0.0,
+     "digital_silence_frac": 0.5007
+    },
+    "target_lufs": -16.0,
+    "material": "outdoor",
+    "rtf": 0.32,
+    "human_listening": "required: these are objective measurements only"
+   },
+   "excerpt": {
+    "start": 60.0,
+    "seconds": 30.0,
+    "files": [
+     "/tmp/a2-c/accept/walktalk_before.wav",
+     "/tmp/a2-c/accept/walktalk_after.wav",
+     "/tmp/a2-c/accept/walktalk_before.mp4",
+     "/tmp/a2-c/accept/walktalk_after.mp4"
+    ]
+   },
+   "spectrograms": [
+    "docs/results/a2_audio/walktalk_before.png",
+    "docs/results/a2_audio/walktalk_after.png"
+   ]
+  },
+  "ad": {
+   "seconds": 240.0,
+   "processing_s": 57.0,
+   "rtf": 0.238,
+   "material": "archival",
+   "before": {
+    "lufs": -18.96,
+    "lra": 3.82,
+    "true_peak": -4.91,
+    "noise_floor_db": -40.58,
+    "noise_rel_lufs_db": -21.62,
+    "speech_band_snr_db": 22.52,
+    "clipped_samples": 0,
+    "dc_offset_db": -87.5,
+    "channel_imbalance_db": 0.0,
+    "speaker_spread_db": 1.06,
+    "hum_prominence_db": 11.5,
+    "bandwidth_hz": 5745
+   },
+   "after": {
+    "lufs": -16.0,
+    "lra": 3.16,
+    "true_peak": -1.97,
+    "noise_floor_db": -43.61,
+    "noise_rel_lufs_db": -27.61,
+    "speech_band_snr_db": 29.65,
+    "clipped_samples": 0,
+    "dc_offset_db": -106.0,
+    "channel_imbalance_db": 0.0,
+    "speaker_spread_db": 0.64,
+    "hum_prominence_db": 1.9,
+    "bandwidth_hz": 5687
+   },
+   "steps_applied": [
+    "dc_highpass",
+    "dehum",
+    "denoise",
+    "eq",
+    "speakers",
+    "compress",
+    "loudness"
+   ],
+   "manifest": {
+    "schema": "nexus.AudioMasterManifest/1",
+    "input": {
+     "uri": "file:///home/user/new-project-money/.nexus/benchmarks/ad/source.mp4",
+     "role": "source",
+     "bytes": 16402649
+    },
+    "output": {
+     "uri": "file:///tmp/a2-c/accept/ad_full_after.wav",
+     "role": "dialogue-master",
+     "bytes": 69113838,
+     "sha256": "1727fd5595235cac962de33e4e81e9df811ddad939f324814c7ba092a07c0502"
+    },
+    "chain": [
+     {
+      "step": "dc_highpass",
+      "applied": true,
+      "dc_before": [
+       -4.2e-05,
+       -4.2e-05
+      ],
+      "label": "mean subtraction + 70 Hz high-pass"
+     },
+     {
+      "step": "channels",
+      "applied": false,
+      "dual_mono": true
+     },
+     {
+      "step": "declip",
+      "applied": false,
+      "why": "0 clipped run(s)"
+     },
+     {
+      "step": "dehum",
+      "applied": true,
+      "hz": 60.0,
+      "prominence_db": 11.5
+     },
+     {
+      "step": "denoise",
+      "applied": true,
+      "tool": "noisereduce",
+      "strength": "normal",
+      "material": "archival",
+      "licence": "MIT (noisereduce 3.0.3)",
+      "tried": [
+       {
+        "tool": "noisereduce",
+        "strength": "normal",
+        "speech_band_change_db": -0.99
+       }
+      ],
+      "note": ""
+     },
+     {
+      "step": "dereverb",
+      "applied": false,
+      "rt60_est": 0.21,
+      "why": "no measurable reverberation tail (estimate <= 0.5 s or too few decays)"
+     },
+     {
+      "step": "breaths",
+      "applied": false,
+      "events": 0,
+      "attenuation_db": -6.0,
+      "first": [],
+      "note": "attenuated, never removed: timing and pauses unchanged"
+     },
+     {
+      "step": "deess",
+      "applied": false,
+      "sibilance_db": -46.58,
+      "why": "95th-percentile 5-9 kHz/300-3400 Hz ratio <= -6 dB"
+     },
+     {
+      "step": "eq",
+      "applied": true,
+      "bands": [
+       {
+        "f": 1000,
+        "gain_db": -2.0,
+        "measured_db": 0.02,
+        "target_db": -4.0
+       },
+       {
+        "f": 2000,
+        "gain_db": -2.4,
+        "measured_db": -4.22,
+        "target_db": -9.0
+       }
+      ],
+      "label": "gentle tilt towards an LTASS-like curve"
+     },
+     {
+      "step": "speakers",
+      "applied": true,
+      "method": "silence-separated segments clustered by voice (WeSpeaker ResNet34 embeddings, 2 cluster(s), silhouette 0.36)",
+      "levels": {
+       "V1": {
+        "db": -25.22,
+        "seconds": 136.7
+       },
+       "V2": {
+        "db": -23.29,
+        "seconds": 75.5
+       }
+      },
+      "gains_db": {
+       "V2": -1.93
+      },
+      "spread_before_db": 1.93
+     },
+     {
+      "step": "compress",
+      "applied": true,
+      "label": "acompressor 2:1 @ -24 dB"
+     },
+     {
+      "step": "roomtone",
+      "applied": false,
+      "gaps": 0,
+      "seconds": 0
+     },
+     {
+      "step": "loudness",
+      "applied": true,
+      "target_lufs": -16.0,
+      "tp_limit": -1.5,
+      "gain_db": 8.88,
+      "limiter_ceiling_dbfs": -2.0,
+      "lufs": -16.0,
+      "true_peak": -1.97
+     }
+    ],
+    "before": {
+     "lufs": -18.96,
+     "lra": 3.82,
+     "true_peak": -4.91,
+     "noise_floor_db": -40.58,
+     "noise_rel_lufs_db": -21.62,
+     "speech_band_snr_db": 22.52,
+     "clipped_samples": 0,
+     "dc_offset_db": -87.5,
+     "channel_imbalance_db": 0.0,
+     "speaker_spread_db": 1.06,
+     "digital_silence_frac": 0.0
+    },
+    "after": {
+     "lufs": -16.0,
+     "lra": 3.16,
+     "true_peak": -1.97,
+     "noise_floor_db": -43.61,
+     "noise_rel_lufs_db": -27.61,
+     "speech_band_snr_db": 29.65,
+     "clipped_samples": 0,
+     "dc_offset_db": -106.0,
+     "channel_imbalance_db": 0.0,
+     "speaker_spread_db": 0.64,
+     "digital_silence_frac": 0.0
+    },
+    "target_lufs": -16.0,
+    "material": "archival",
+    "rtf": 0.238,
+    "human_listening": "required: these are objective measurements only"
+   },
+   "excerpt": {
+    "start": 60.0,
+    "seconds": 30.0,
+    "files": [
+     "/tmp/a2-c/accept/ad_before.wav",
+     "/tmp/a2-c/accept/ad_after.wav",
+     "/tmp/a2-c/accept/ad_before.mp4",
+     "/tmp/a2-c/accept/ad_after.mp4"
+    ]
+   },
+   "spectrograms": [
+    "docs/results/a2_audio/ad_before.png",
+    "docs/results/a2_audio/ad_after.png"
+   ]
+  }
+ },
+ "design": {
+  "music_bed": "procedural 'inspiring' (84 BPM pulse)",
+  "beat_grid": {
+   "bpm": 83.97,
+   "confidence": 0.86
+  },
+  "cut_to_beat": [
+   {
+    "cut": 4.1,
+    "beat": 3.997,
+    "offset_s": -0.103,
+    "snap": true
+   },
+   {
+    "cut": 9.7,
+    "beat": 9.713,
+    "offset_s": 0.013,
+    "snap": false
+   },
+   {
+    "cut": 15.2,
+    "beat": 15.43,
+    "offset_s": 0.23,
+    "snap": false
+   },
+   {
+    "cut": 21.9,
+    "beat": 21.86,
+    "offset_s": -0.04,
+    "snap": false
+   }
+  ],
+  "speech_density": 0.838,
+  "duck": {
+   "depth_db": -14.0,
+   "attack_s": 0.12,
+   "release_s": 0.8,
+   "hold_s": 0.6,
+   "spans": 1
+  },
+  "music_level_under_speech_db": -42.27,
+  "music_level_in_pauses_db": -42.49,
+  "sfx_plan": {
+   "cap": 1,
+   "placed": [
+    {
+     "src": null,
+     "sfx": "pop",
+     "start": 1.0,
+     "volume": 0.3,
+     "role": "sfx",
+     "pan": 0.25,
+     "event": "title",
+     "event_t": 1.0,
+     "under_speech": false
+    }
+   ],
+   "dropped": [
+    {
+     "t": 4.1,
+     "kind": "transition",
+     "why": "density cap 3/min reached"
+    },
+    {
+     "t": 9.7,
+     "kind": "transition",
+     "why": "density cap 3/min reached"
+    },
+    {
+     "t": 15.2,
+     "kind": "transition",
+     "why": "density cap 3/min reached"
+    },
+    {
+     "t": 21.9,
+     "kind": "transition",
+     "why": "density cap 3/min reached"
+    }
+   ]
+  },
+  "sfx_quality_pass": {
+   "whoosh": true,
+   "impact": true,
+   "riser": true,
+   "pop": true,
+   "click": true,
+   "swell": true
+  },
+  "mix_file": "/tmp/a2-c/accept/interview_design_mix.wav"
+ },
+ "qa": {
+  "render_s": 6.62,
+  "clips": 4,
+  "checks": [
+   {
+    "check": "audio/video sync at 15.50s",
+    "ok": false,
+    "detail": "clip c59ea365f: audio +100.0 ms vs its source (target one frame = 33.3 ms; detectable beyond +125/-45 ms; correlation 0.99)",
+    "severity": "minor",
+    "fix": "resync-audio",
+    "t": 15.5
+   },
+   {
+    "check": "audio/video sync at 11.00s",
+    "ok": false,
+    "detail": "clip c705bc41c: audio +77.3 ms vs its source (target one frame = 33.3 ms; detectable beyond +125/-45 ms; correlation 0.99)",
+    "severity": "minor",
+    "fix": "resync-audio",
+    "t": 11.0
+   },
+   {
+    "check": "audio/video sync at 5.00s",
+    "ok": false,
+    "detail": "clip c473b4dbf: audio +40.0 ms vs its source (target one frame = 33.3 ms; detectable beyond +125/-45 ms; correlation 0.99)",
+    "severity": "minor",
+    "fix": "resync-audio",
+    "t": 5.0
+   },
+   {
+    "check": "programme loudness",
+    "ok": true,
+    "detail": "-14.2 LUFS (target -14.0)",
+    "severity": "info",
+    "fix": "renormalise"
+   },
+   {
+    "check": "true peak",
+    "ok": true,
+    "detail": "-1.9 dBTP (limit -1.0)",
+    "severity": "info",
+    "fix": "renormalise"
+   },
+   {
+    "check": "clipping",
+    "ok": true,
+    "detail": "0 clipped sample(s) in 0 run(s)",
+    "severity": "info",
+    "fix": "renormalise"
+   },
+   {
+    "check": "speaker/level jumps",
+    "ok": true,
+    "detail": "no adjacent speech segments differ by > 6 dB",
+    "severity": "info",
+    "fix": "level-match-cut"
+   },
+   {
+    "check": "silence gaps",
+    "ok": true,
+    "detail": "no digital-silence gap > 0.25 s inside the programme",
+    "severity": "info",
+    "fix": "room-tone-fill"
+   },
+   {
+    "check": "measured (audio)",
+    "ok": true,
+    "detail": "objective measurements only - human listening still required",
+    "severity": "info",
+    "fix": null
+   }
+  ],
+  "sync": [
+   {
+    "clip": "ca9e86804",
+    "t": 0.0,
+    "offset_ms": 5.3,
+    "corr": 0.993,
+    "distinct": 0.71
+   },
+   {
+    "clip": "c473b4dbf",
+    "t": 5.0,
+    "offset_ms": 40.0,
+    "corr": 0.992,
+    "distinct": 0.665
+   },
+   {
+    "clip": "c705bc41c",
+    "t": 11.0,
+    "offset_ms": 77.3,
+    "corr": 0.995,
+    "distinct": 0.747
+   },
+   {
+    "clip": "c59ea365f",
+    "t": 15.5,
+    "offset_ms": 100.0,
+    "corr": 0.993,
+    "distinct": 0.452
+   }
+  ],
+  "loudness": {
+   "lufs": -14.17,
+   "lra": 2.29,
+   "true_peak": -1.87
+  },
+  "passed": true,
+  "output": "/tmp/a2-c/accept/qa_render.mp4"
+ }
+}
