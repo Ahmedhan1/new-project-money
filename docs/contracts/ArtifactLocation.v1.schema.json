@@ -1,0 +1,44 @@
+{
+ "additionalProperties": false,
+ "description": "Where one copy of an artifact lives. `provider` is a StorageProvider id; `connection_id` names the authorised\naccount (e.g. drive_a) - never a credential.",
+ "properties": {
+  "provider": {
+   "title": "Provider",
+   "type": "string"
+  },
+  "connection_id": {
+   "title": "Connection Id",
+   "type": "string"
+  },
+  "ref": {
+   "description": "provider-native id or key (Drive file id, object key, local relative path)",
+   "title": "Ref",
+   "type": "string"
+  },
+  "path": {
+   "default": "",
+   "description": "human-readable path, e.g. NEXUS/Masters/prj_x/master.mp4",
+   "title": "Path",
+   "type": "string"
+  },
+  "verified_at": {
+   "anyOf": [
+    {
+     "type": "number"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Verified At"
+  }
+ },
+ "required": [
+  "provider",
+  "connection_id",
+  "ref"
+ ],
+ "title": "ArtifactLocation",
+ "type": "object"
+}

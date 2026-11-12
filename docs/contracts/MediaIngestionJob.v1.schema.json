@@ -1,0 +1,356 @@
+{
+ "$defs": {
+  "ArtifactLocation": {
+   "additionalProperties": false,
+   "description": "Where one copy of an artifact lives. `provider` is a StorageProvider id; `connection_id` names the authorised\naccount (e.g. drive_a) - never a credential.",
+   "properties": {
+    "provider": {
+     "title": "Provider",
+     "type": "string"
+    },
+    "connection_id": {
+     "title": "Connection Id",
+     "type": "string"
+    },
+    "ref": {
+     "description": "provider-native id or key (Drive file id, object key, local relative path)",
+     "title": "Ref",
+     "type": "string"
+    },
+    "path": {
+     "default": "",
+     "description": "human-readable path, e.g. NEXUS/Masters/prj_x/master.mp4",
+     "title": "Path",
+     "type": "string"
+    },
+    "verified_at": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Verified At"
+    }
+   },
+   "required": [
+    "provider",
+    "connection_id",
+    "ref"
+   ],
+   "title": "ArtifactLocation",
+   "type": "object"
+  },
+  "ArtifactManifest": {
+   "additionalProperties": false,
+   "properties": {
+    "contract": {
+     "const": "ArtifactManifest/v1",
+     "default": "ArtifactManifest/v1",
+     "title": "Contract",
+     "type": "string"
+    },
+    "artifact_id": {
+     "title": "Artifact Id",
+     "type": "string"
+    },
+    "kind": {
+     "enum": [
+      "source",
+      "proxy",
+      "analysis",
+      "master",
+      "short",
+      "localized",
+      "thumbnail",
+      "audio",
+      "subtitle",
+      "project_file",
+      "archive",
+      "log",
+      "checkpoint",
+      "other"
+     ],
+     "title": "Kind",
+     "type": "string"
+    },
+    "name": {
+     "title": "Name",
+     "type": "string"
+    },
+    "mime": {
+     "title": "Mime",
+     "type": "string"
+    },
+    "size": {
+     "minimum": 0,
+     "title": "Size",
+     "type": "integer"
+    },
+    "sha256": {
+     "pattern": "^[0-9a-f]{64}$",
+     "title": "Sha256",
+     "type": "string"
+    },
+    "project_id": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Project Id"
+    },
+    "produced_by_job": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Produced By Job"
+    },
+    "locations": {
+     "items": {
+      "$ref": "#/$defs/ArtifactLocation"
+     },
+     "title": "Locations",
+     "type": "array"
+    },
+    "provenance": {
+     "additionalProperties": true,
+     "description": "licence, source URL, generator, model...",
+     "title": "Provenance",
+     "type": "object"
+    },
+    "retention": {
+     "default": "keep",
+     "enum": [
+      "keep",
+      "temporary",
+      "archive"
+     ],
+     "title": "Retention",
+     "type": "string"
+    },
+    "expires_at": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Expires At"
+    },
+    "created_at": {
+     "title": "Created At",
+     "type": "number"
+    }
+   },
+   "required": [
+    "kind",
+    "name",
+    "mime",
+    "size",
+    "sha256"
+   ],
+   "title": "ArtifactManifest",
+   "type": "object"
+  },
+  "MediaSource": {
+   "additionalProperties": false,
+   "properties": {
+    "contract": {
+     "const": "MediaSource/v1",
+     "default": "MediaSource/v1",
+     "title": "Contract",
+     "type": "string"
+    },
+    "kind": {
+     "enum": [
+      "upload",
+      "http_url",
+      "drive_file",
+      "provider_api",
+      "artifact"
+     ],
+     "title": "Kind",
+     "type": "string"
+    },
+    "ref": {
+     "description": "URL, Drive file id, provider item id, or artifact id",
+     "title": "Ref",
+     "type": "string"
+    },
+    "connection_id": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Connection Id"
+    },
+    "rights": {
+     "default": "unknown",
+     "enum": [
+      "owned",
+      "licensed",
+      "public_domain",
+      "authorised",
+      "unknown"
+     ],
+     "title": "Rights",
+     "type": "string"
+    },
+    "licence": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Licence"
+    },
+    "attribution": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Attribution"
+    },
+    "declared_by": {
+     "default": "owner",
+     "description": "who asserted the rights (recorded with the import)",
+     "title": "Declared By",
+     "type": "string"
+    }
+   },
+   "required": [
+    "kind",
+    "ref"
+   ],
+   "title": "MediaSource",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "properties": {
+  "contract": {
+   "const": "MediaIngestionJob/v1",
+   "default": "MediaIngestionJob/v1",
+   "title": "Contract",
+   "type": "string"
+  },
+  "ingestion_id": {
+   "title": "Ingestion Id",
+   "type": "string"
+  },
+  "source": {
+   "$ref": "#/$defs/MediaSource"
+  },
+  "project_id": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Project Id"
+  },
+  "destination": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "description": "connection_id of the storage that keeps the original",
+   "title": "Destination"
+  },
+  "max_bytes": {
+   "default": 4294967296,
+   "minimum": 1,
+   "title": "Max Bytes",
+   "type": "integer"
+  },
+  "allowed_mime": {
+   "items": {
+    "type": "string"
+   },
+   "title": "Allowed Mime",
+   "type": "array"
+  },
+  "status": {
+   "default": "queued",
+   "enum": [
+    "queued",
+    "validating",
+    "downloading",
+    "verifying",
+    "stored",
+    "rejected",
+    "failed"
+   ],
+   "title": "Status",
+   "type": "string"
+  },
+  "reason": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Reason"
+  },
+  "artifact": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/ArtifactManifest"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
+  }
+ },
+ "required": [
+  "source"
+ ],
+ "title": "MediaIngestionJob",
+ "type": "object"
+}

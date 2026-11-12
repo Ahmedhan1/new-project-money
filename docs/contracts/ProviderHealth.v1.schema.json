@@ -1,0 +1,208 @@
+{
+ "$defs": {
+  "QuotaStatus": {
+   "additionalProperties": false,
+   "properties": {
+    "contract": {
+     "const": "QuotaStatus/v1",
+     "default": "QuotaStatus/v1",
+     "title": "Contract",
+     "type": "string"
+    },
+    "provider": {
+     "title": "Provider",
+     "type": "string"
+    },
+    "connection_id": {
+     "title": "Connection Id",
+     "type": "string"
+    },
+    "resource": {
+     "enum": [
+      "storage_bytes",
+      "gpu_seconds_week",
+      "runtime_seconds",
+      "api_requests",
+      "egress_bytes",
+      "other"
+     ],
+     "title": "Resource",
+     "type": "string"
+    },
+    "limit": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "None = not exposed by the provider (never guessed)",
+     "title": "Limit"
+    },
+    "used": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Used"
+    },
+    "remaining": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Remaining"
+    },
+    "period": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "e.g. 'weekly', 'per-session'; None = not periodic",
+     "title": "Period"
+    },
+    "source": {
+     "enum": [
+      "provider_api",
+      "measured",
+      "documented",
+      "unknown"
+     ],
+     "title": "Source",
+     "type": "string"
+    },
+    "measured_at": {
+     "title": "Measured At",
+     "type": "number"
+    },
+    "exhausted": {
+     "default": false,
+     "title": "Exhausted",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "provider",
+    "connection_id",
+    "resource",
+    "source"
+   ],
+   "title": "QuotaStatus",
+   "type": "object"
+  }
+ },
+ "additionalProperties": false,
+ "properties": {
+  "contract": {
+   "const": "ProviderHealth/v1",
+   "default": "ProviderHealth/v1",
+   "title": "Contract",
+   "type": "string"
+  },
+  "provider": {
+   "title": "Provider",
+   "type": "string"
+  },
+  "connection_id": {
+   "title": "Connection Id",
+   "type": "string"
+  },
+  "status": {
+   "enum": [
+    "ok",
+    "degraded",
+    "unavailable",
+    "unauthorized",
+    "quota_exhausted",
+    "not_configured"
+   ],
+   "title": "Status",
+   "type": "string"
+  },
+  "detail": {
+   "default": "",
+   "title": "Detail",
+   "type": "string"
+  },
+  "identity": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "description": "authorised account e-mail/username, shown to the owner only",
+   "title": "Identity"
+  },
+  "scopes": {
+   "items": {
+    "type": "string"
+   },
+   "title": "Scopes",
+   "type": "array"
+  },
+  "last_success": {
+   "anyOf": [
+    {
+     "type": "number"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Last Success"
+  },
+  "last_error": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Last Error"
+  },
+  "checked_at": {
+   "title": "Checked At",
+   "type": "number"
+  },
+  "quotas": {
+   "items": {
+    "$ref": "#/$defs/QuotaStatus"
+   },
+   "title": "Quotas",
+   "type": "array"
+  }
+ },
+ "required": [
+  "provider",
+  "connection_id",
+  "status"
+ ],
+ "title": "ProviderHealth",
+ "type": "object"
+}

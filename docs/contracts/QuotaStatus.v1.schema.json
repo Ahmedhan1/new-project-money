@@ -1,0 +1,108 @@
+{
+ "additionalProperties": false,
+ "properties": {
+  "contract": {
+   "const": "QuotaStatus/v1",
+   "default": "QuotaStatus/v1",
+   "title": "Contract",
+   "type": "string"
+  },
+  "provider": {
+   "title": "Provider",
+   "type": "string"
+  },
+  "connection_id": {
+   "title": "Connection Id",
+   "type": "string"
+  },
+  "resource": {
+   "enum": [
+    "storage_bytes",
+    "gpu_seconds_week",
+    "runtime_seconds",
+    "api_requests",
+    "egress_bytes",
+    "other"
+   ],
+   "title": "Resource",
+   "type": "string"
+  },
+  "limit": {
+   "anyOf": [
+    {
+     "type": "number"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "description": "None = not exposed by the provider (never guessed)",
+   "title": "Limit"
+  },
+  "used": {
+   "anyOf": [
+    {
+     "type": "number"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Used"
+  },
+  "remaining": {
+   "anyOf": [
+    {
+     "type": "number"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Remaining"
+  },
+  "period": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "description": "e.g. 'weekly', 'per-session'; None = not periodic",
+   "title": "Period"
+  },
+  "source": {
+   "enum": [
+    "provider_api",
+    "measured",
+    "documented",
+    "unknown"
+   ],
+   "title": "Source",
+   "type": "string"
+  },
+  "measured_at": {
+   "title": "Measured At",
+   "type": "number"
+  },
+  "exhausted": {
+   "default": false,
+   "title": "Exhausted",
+   "type": "boolean"
+  }
+ },
+ "required": [
+  "provider",
+  "connection_id",
+  "resource",
+  "source"
+ ],
+ "title": "QuotaStatus",
+ "type": "object"
+}
