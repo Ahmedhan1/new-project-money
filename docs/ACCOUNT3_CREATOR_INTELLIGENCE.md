@@ -111,3 +111,29 @@ explainer (no CC El Daheeh-style item; the show is copyrighted and was not downl
 4. `contracts.make(name, **fields)` cannot build `CreativeStyleProfile` (its `name` field collides with the positional
    parameter); `style_from` builds the dict and calls `check()`. Suggest renaming the parameter to `_contract`.
 5. Optional OCR (on-screen text) and a music/speech classifier would turn two `not_measured` fields into measurements.
+
+
+## V2 — 14 measurable style dimensions and multi-reference blends (`creators/style_v2.py`)
+Every dimension is a number with a unit and a method; frame dimensions are measured from the file (ffmpeg + numpy +
+Tesseract) and are `null` with a reason when a tool or the file is missing - never guessed.
+
+1 hook speech onset (s) · 2 cuts in first 5 s · 3 cuts/min · 4 shot-rhythm CV · 5 escalation (slope of the pacing curve)
+· 6 speaking wpm · 7 speech share · 8 questions/min · 9 numbers per 100 words · 10 stakes words/min · 11 loudness range
+(LU) · 12 non-speech audio share (upper bound) · 13 on-screen text share (OCR, 1 frame / 2 s) · 14 colour (saturation,
+brightness); motion energy is reported alongside.
+
+Real run on the 4 public-domain references (`docs/results/account3/creators_v2.json`):
+
+| Reference | cuts/min | rhythm CV | escalation | wpm | numbers/100w | text share | sat/bright | motion | coverage |
+|---|---|---|---|---|---|---|---|---|---|
+| NASA/JPL-Caltech / science_documentary | 1.31 | 0.81 | -0.606 | 166.5 | 6.838 | 0.464 | 0.345/0.171 | 0.053 | 14/14 |
+| NASA JSC / interview_podcast | 0.0 | 0.0 | 0.0 | 58.6 | 2.91 | 0.0 | 0.66/0.569 | 0.016 | 14/14 |
+| NASA KSC / event_highlights | 7.55 | 0.733 | -1.036 | 121.6 | 6.198 | 0.0 | 0.259/0.335 | 0.144 | 14/14 |
+| NASA HQ / premium_ad | 13.35 | 0.56 | -0.925 | 164.5 | 0.0 | 0.419 | 0.357/0.481 | 0.207 | 14/14 |
+
+Blends (`combine(refs, weights)`): weighted mean per dimension, min/max, agreement and **conflict** when references are
+more than one typical spread apart. Science explainer + interview (2:1): conflicts ['wpm_speaking', 'fact_density_per_100w'], confidence
+0.361. All four: conflicts ['wpm_speaking', 'fact_density_per_100w', 'colour'] → verdict "incoherent on ['wpm_speaking', 'fact_density_per_100w', 'colour']: choose one reference's value or re-weight". A blend of incompatible formats is
+reported as incoherent instead of being averaged into a style nobody makes. API: `POST /api/a3/references/blend`.
+Limits: shot-rhythm CV uses a range/mean proxy for V1 profiles (per-shot lengths not stored); stakes words are a fixed
+English list; on-screen text share counts frames with >= 2 OCR words (conf >= 60) and can miss stylised type.

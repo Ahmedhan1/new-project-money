@@ -197,3 +197,13 @@ key not leaked, Trends disabled, niche DB + custom niches, score/confidence arit
    `trend_monitor(watchlist(...))`; `POST /api/market/produce` -> `jobs.submit("create-from-idea", to_production_brief(...))`.
    Long runs (AI brief) should go through the job ledger as a `market-research` stage (needs `nexus/workflows.py`).
 6. **tasks.yaml**: register "MKT-1 market intelligence (agent C)" as implemented + tested.
+
+
+## V2 assessment (`market/assess_v2.py`, `GET /api/a3/research/{id}/assessment`)
+Evidence-quality layer over a report: publisher credibility tiers, cross-publisher verification (pages of one site
+count once), recency from publication dates only (Wikipedia retrieval dates excluded), geography (ISO countries of the
+topic and its claims), language demand per Wikipedia edition, competition and saturation (unknown until YouTube supply
+is measured - never guessed), evidence coverage (share of score weight with measured evidence) and an uncertainty
+interval (score with every unknown factor at its worst and best). Real reports (`market_v2_assessments.json`):
+JWST 63.0 in [50.1, 70.6], 22/22 claims single-publisher → "indicative only"; AI (ar) 57.8 in [45.9, 66.5].
+The geography step exposed a resolver false positive (Kourou → Guinea), fixed and regression-tested.

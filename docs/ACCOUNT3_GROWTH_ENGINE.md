@@ -85,3 +85,15 @@ Part 2 - **synthetic fixtures**: 3 vs 5 clicks out of 10 impressions -> `insuffi
   statistics and a few video ids are committed. Attribution: changes = derived title features and views/day.
 - Kaggle "Trending YouTube Video Statistics" (datasnaek) was considered; its CC0 status was only seen in a
   secondary source and download needs a Kaggle login, so it was not used.
+
+
+## First-party analytics ledger (`growth/ledger.py`)
+Platform analytics know a video id and numbers; NEXUS knows, first hand, how the video was made and published.
+`enrich(records)` joins each analytics row whose video id NEXUS uploaded to: project, script features (title length and
+number, question/number hook, scene count, fact-graphic and title-card share, language, preset, verbatim script) and the
+experiment arm recorded in the publishing manifest's metadata (`{"experiment": {"id", "arm"}}`). `experiments.evaluate`
+reads that arm, so an experiment is evaluated on what was actually published. Rows NEXUS did not publish are kept and
+marked `first_party: false`. No third-party tracking; nothing leaves the machine. Test: `tests/fast/test_intel_ledger.py`.
+
+Status: implemented and tested with the real publishing engine; **no owner analytics exist yet** (the first private
+upload is blocked on the owner's OAuth client), so no learning result is claimed for the owner's channel.

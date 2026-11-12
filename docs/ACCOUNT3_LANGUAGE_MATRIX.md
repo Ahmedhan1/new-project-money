@@ -320,3 +320,42 @@ to subtitles.
 - XTTS-v2 CPML text (404), M-AILABS licence (host unreachable), IndicTTS licence PDF (timed out): kept unverified/no.
 - Kokoro and OpenVoice are not installed; no Kokoro/OpenVoice output was produced or listened to.
 - No native-speaker review of any line; glossary spellings were chosen by the agent, not a linguist.
+
+
+## Readiness per language (`language/readiness.py`, `GET /api/a3/language/readiness`)
+Eight dimensions with weights {'transcription': 10, 'translation': 15, 'subtitle_rendering': 15, 'human_reviewed': 15, 'tts': 10, 'commercial_dubbing_licensed': 10, 'lip_sync': 5, 'end_to_end_validated': 20}; states verified (measured here and passed) / available (licensed, not
+validated end to end) / partial / unavailable / n/a. No language is "publishable" without native-speaker review
+(>= 20 reviewed lines at >= 90 % acceptance). Run of 2026-11-12T22:49:58 (`docs/results/account3/language_readiness.json`):
+
+| Lang | Score | Level | transcription | translation | subtitle_rendering | human_reviewed | tts | commercial_dubbing_licensed | lip_sync | end_to_end_validated |
+|---|---|---|---|---|---|---|---|---|---|---|
+| en | 87.0 | subtitles_publishable | available | n/a | verified | n/a | available | verified | unavailable | verified |
+| de | 56.0 | draft_needs_native_review | available | available | verified | unavailable | verified | verified | unavailable | partial |
+| fr | 56.0 | draft_needs_native_review | available | available | verified | unavailable | verified | verified | unavailable | partial |
+| ar | 33.0 | draft_needs_native_review | available | available | verified | unavailable | partial | unavailable | unavailable | unavailable |
+| ar-EG | 36.0 | draft_needs_native_review | partial | available | verified | unavailable | partial | unavailable | unavailable | partial |
+| ar-Gulf | 31.5 | draft_needs_native_review | partial | partial | verified | unavailable | partial | unavailable | unavailable | partial |
+| zh | 49.0 | draft_needs_native_review | available | available | verified | unavailable | partial | verified | unavailable | partial |
+| ru | 56.0 | draft_needs_native_review | available | available | verified | unavailable | verified | verified | unavailable | partial |
+| hi | 49.0 | draft_needs_native_review | available | available | verified | unavailable | partial | verified | unavailable | partial |
+| es | 56.0 | draft_needs_native_review | available | available | verified | unavailable | verified | verified | unavailable | partial |
+| pt | 43.0 | draft_needs_native_review | available | available | verified | unavailable | partial | verified | unavailable | unavailable |
+| tr | 33.0 | draft_needs_native_review | available | available | verified | unavailable | partial | unavailable | unavailable | unavailable |
+| ja | 37.0 | draft_needs_native_review | available | available | available | unavailable | partial | verified | unavailable | unavailable |
+| ko | 27.0 | draft_needs_native_review | available | available | available | unavailable | partial | unavailable | unavailable | unavailable |
+| it | 43.0 | draft_needs_native_review | available | available | verified | unavailable | partial | verified | unavailable | unavailable |
+
+Notes: subtitle rendering is *verified* only by an OCR read-back of the rendered line (ja/ko have no Tesseract pack here,
+so they stay *available*); zh TTS is *partial* because the cleared voice failed to render in the real run; ar-Gulf
+translation is *partial* (output still classifies as MSA, K-15); lip-sync has no cleared model anywhere.
+
+### Gulf Arabic
+Still not distinct in generation. What changed: the readiness score, the dubbing gate and the Demo 10 evidence all
+report it as a blocker; the Kaggle benchmark adds Gulf/Egyptian items so the router can pick the model that writes it
+best (see ACCOUNT3_MODEL_BENCHMARKS.md); and the native-review workflow is the acceptance path.
+
+### Terminology memory and native review
+`language/terminology.py`: approved renderings per language with origin (native_review > owner > glossary > machine);
+a machine suggestion can never overwrite a reviewer's term; `/language/check` applies the memory automatically.
+`language/review.py` + `/api/a3/language/review`: queue lines with their QA findings, record approve / correct / reject
+with a reviewer label, corrected terms flow into the memory, stats feed the readiness score. Nothing leaves the machine.
