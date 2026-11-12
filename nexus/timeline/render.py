@@ -395,7 +395,19 @@ def _concat(segs: list[Path], tl: dict, out: Path, draft: bool = False) -> None:
     if not any(i and c.get("transition") == "crossfade" for i, c in enumerate(clips)):
         lst = out.with_suffix(".txt")
         lst.write_text("".join(f"file '{s}'\n" for s in segs), encoding="utf-8")  # FFmpeg reads concat lists as UTF-8
-        ff.run(["-f", "concat", "-safe", "0", "-i", lst, "-c", "copy", "-movflags", "+faststart", out], op="concat")
+        # Video: stream copy. Audio: decoded and held to each segment's picture, sample exact - a stream copy of the
+        # AAC packets carried every segment's encoder priming/padding along and drifted ~24 ms per clip
+        # (tests/fast/test_a2_av_sync.py).
+        from . import pieces as pz
+        fps = tl.get("fps", config.FPS)
+        vtmp, wav = out.with_suffix(".v.mp4"), out.with_suffix(".a.wav")
+        ff.run(["-f", "concat", "-safe", "0", "-i", lst, "-map", "0:v", "-c", "copy", vtmp], op="concat")
+        n = [max(1, round(float((ff.probe(s).get("video") or {}).get("duration") or 0) * fps)) for s in segs]
+        pz.programme_audio(segs, n, [0] * len(segs), fps, wav)
+        ff.run(["-i", vtmp, "-i", wav, "-map", "0:v", "-map", "1:a", "-c:v", "copy", *config.ACODEC,
+                "-movflags", "+faststart", out], op="concat-mux")
+        vtmp.unlink(missing_ok=True)
+        wav.unlink(missing_ok=True)
         return
     args: list = []
     for s in segs:
