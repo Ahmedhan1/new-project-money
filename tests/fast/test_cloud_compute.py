@@ -343,3 +343,18 @@ def test_staged_dataset_waits_through_403_404_until_ready(home, monkeypatch, tmp
     src.write_bytes(b"x" * 10)
     ref = p.stage_dataset("owner", {"sha256": "ab" * 32, "dataset_file": "abab_in.mp4", "_stage_path": str(src)})
     assert ref == "owner/nexus-in-" + "ab" * 8 and ["datasets", "create"] in calls
+
+
+def test_safe_production_mode_gpu_jobs_wait_queued_without_an_authorised_gpu_worker(home):
+    """Part 9: with no authorised GPU provider, GPU-required work queues (no attempt is spent, nothing paid is used) and
+    the reason names how to authorise one."""
+    from nexus.cloud.compute import dispatcher as D
+    from nexus.contracts import ProductionJobManifest
+    jid = D.submit(ProductionJobManifest(task="probe", requires={"gpu": True}, providers=None) if False else
+                   ProductionJobManifest(task="probe", requires={"gpu": True, "providers": ["kaggle", "user_gpu", "colab"]}))["job"]["id"]
+    d = D.get()
+    for _ in range(3):
+        d.tick()
+    s = D.status(jid)
+    assert s["status"] == "queued" and s["attempts"] == 0
+    assert "kaggle" in s["error"] and "workers/register" in s["error"]

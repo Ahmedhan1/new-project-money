@@ -53,6 +53,8 @@ if os.environ.get("NEXUS_EMBEDDED_WORKER", "1") != "0":  # `nexus start` runs th
     from .cloud.compute import poller as _remote_poller
     _remote_poller.start()
     # storage: uploads left "running" by a crash become "interrupted" and can be resumed from the provider's offset
+    from .cloud import alerts as _alerts
+    _alerts.start()
     try:
         from .cloud.storage import transfers as _transfers
         _transfers.recover_after_restart()

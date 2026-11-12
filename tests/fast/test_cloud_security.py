@@ -469,3 +469,19 @@ if __name__ == "__main__":  # evidence run
                                 "checks": res}, indent=1) + "\n", encoding="utf-8")
     print(dest, all(v["ok"] for v in res.values()))
     sys.exit(0 if all(v["ok"] for v in res.values()) else 1)
+
+
+def test_alerts_fire_once_per_condition_and_label_estimates(home, monkeypatch):
+    """Part 8: a storage threshold or quota warning notifies once (not on every check), and an estimated quota is never
+    presented as provider-reported."""
+    from nexus.cloud import alerts, events
+    from nexus.contracts import QuotaStatus
+    q = QuotaStatus(provider="kaggle", connection_id="kaggle_primary", resource="gpu_seconds_week", limit=1000, used=900,
+                    remaining=100, source="measured")
+    import nexus.cloud.compute.dispatcher as d
+    monkeypatch.setattr(d, "quota_status", lambda: [q])
+    first = alerts.check(now=1_000_000.0)
+    assert any("kaggle" in a["title"] and "estimate" in a["body"] for a in first)
+    assert alerts.check(now=1_000_100.0) == []                       # same condition: no second notification
+    assert any(n["title"].startswith("kaggle") for n in events.notifications())
+    assert alerts.check(now=1_000_000.0 + alerts.REPEAT_S + 1)        # repeats after the quiet period while it lasts

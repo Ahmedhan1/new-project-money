@@ -32,6 +32,15 @@ def list_events(job_id: str | None = None, since: float = 0.0, limit: int = 200)
     return events.events(job_id, since, min(limit, 1000))
 
 
+@router.get("/alerts", dependencies=[Depends(security.require_owner)])
+def list_alerts(check: bool = False):
+    """Operational alerts (storage thresholds, reauth, failed transfers, repeated failures, lost workers, quota).
+    check=true runs the checks now; otherwise the alerts raised in the last few hours are returned."""
+    from . import alerts
+    fired = alerts.check() if check else []
+    return {"fired_now": fired, "active": alerts.active()}
+
+
 @router.get("/notifications", dependencies=[Depends(security.require_owner)])
 def list_notifications(unread: bool = False):
     return events.notifications(unread)
