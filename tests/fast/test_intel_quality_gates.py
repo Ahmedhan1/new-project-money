@@ -110,3 +110,11 @@ def test_flag_or_emblem_is_not_scene_footage():
     assert not r["ok"] and any(f["check"] == "emblem" for f in r["findings"])
     flag_ctx = vc.scene_context("Flags of Egypt", "The flag of Aswan Governorate shows the dam.", "flag")
     assert vc.check({"title": "Flag of Aswan Governorate", "description": "Aswan Governorate, Egypt"}, flag_ctx)["ok"]
+
+
+def test_subject_must_match_when_the_visual_names_a_structure():
+    # Demo 10 run 3: Philae temple (Aswan) illustrated a scene whose visual asked for the Aswan High Dam
+    ctx = {**vc.scene_context("Aswan High Dam", "The Aswan High Dam, located in southern Egypt.", "Aswan High Dam"), "subject": "Aswan High Dam"}
+    r = vc.check({"title": "Philae, Trajan's Kiosk, Aswan, Egypt, Oct 2004", "description": "Aswan, Egypt"}, ctx)
+    assert not r["ok"] and any(f["check"] == "subject_unverified" for f in r["findings"])
+    assert vc.check({"title": "High Dam Burg, Aswan, Egypt, Oct 2004", "description": "Aswan, Egypt"}, ctx)["ok"]

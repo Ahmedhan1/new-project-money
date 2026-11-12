@@ -25,6 +25,12 @@ from ... import config
 MODERN_FROM = 1900
 MAP_WORDS = re.compile(r"\b(map|maps|karte|carte|mapa|kaart|atlas|cartograph\w*|خريطة|карта)\b", re.I)
 HISTORIC_WORDS = re.compile(r"\b(engraving|lithograph|woodcut|etching|antique|ancient|medieval|historic(al)?|governorate of the russian empire)\b", re.I)
+# Structure kinds: when the requested visual names one, the image's own metadata must name the same kind (Demo 10 run 3:
+# Philae temple illustrated "The Aswan High Dam ..." - right city, wrong subject).
+SUBJECTS = {"dam": r"\b(dam|dams|barrage|سد)\b", "temple": r"\b(temple|temples|kiosk|معبد)\b", "bridge": r"\b(bridge|bridges|footbridge)\b",
+            "pyramid": r"\bpyramids?\b", "mosque": r"\bmosques?\b", "church": r"\b(church|cathedral)\b", "tower": r"\btowers?\b",
+            "telescope": r"\btelescopes?\b", "airport": r"\bairports?\b", "museum": r"\bmuseums?\b", "reservoir": r"\b(reservoir|lake)\b",
+            "power station": r"\b(power station|power plant|turbines?|hydroelectric)\b", "rocket": r"\b(rocket|launch)\b"}
 EMBLEM_WORDS = re.compile(r"\b(flag|flags|coat of arms|emblem|seal of|logo|insignia|banner of|علم|شعار)\b", re.I)
 STOP = {"The", "A", "An", "In", "On", "At", "Of", "And", "This", "That", "It", "Its", "From", "To", "By", "With", "For", "As", "File",
         "Did", "What", "Why", "How", "When", "Where", "Who", "Today", "Built", "Designed", "Even", "Source", "Image", "Photo"}
@@ -201,6 +207,11 @@ def check(asset: dict, ctx: dict, online: bool = False, classify: bool = False, 
                          "detail": f"asset dated {max(a['years'])}, scene is modern ({ctx['years'] or 'present day'})"})
     if a["is_map"] and (a["years"] and max(a["years"]) < MODERN_FROM or a["historic_words"]) and not ctx["about_maps"]:
         findings.append({"check": "old_map", "blocking": True, "detail": "historical map used for a scene that is not about maps or history"})
+    want = ctx.get("subject") or ""
+    kinds = [k for k, rx in SUBJECTS.items() if re.search(rx, want, re.I)]
+    if kinds and not any(re.search(SUBJECTS[k], a["meta"], re.I) for k in kinds):
+        findings.append({"check": "subject_unverified", "blocking": True,
+                         "detail": f"the scene asks for {kinds} ('{want[:50]}'); nothing in the asset's metadata shows one"})
     if a["is_emblem"] and not EMBLEM_WORDS.search(ctx["text"]):
         findings.append({"check": "emblem", "blocking": True,
                          "detail": "flag / coat of arms / logo used as scene footage for a scene that is not about it"})
