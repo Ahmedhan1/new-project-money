@@ -498,7 +498,7 @@ class Scheduler:
             try:
                 jid = self.adapter.submit_fn(m)
             except ComputeUnavailable as e:
-                st["blocked"] = st["last_error"] = str(e)
+                st["blocked"] = str(e)
                 return
             except Exception as e:  # noqa: BLE001
                 st["last_error"] = f"submit {key}: {e}"

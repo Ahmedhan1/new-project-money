@@ -14,9 +14,9 @@ body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-ap
 nav{width:224px;flex:none;background:var(--panel);border-right:1px solid var(--line);padding:14px 10px;overflow-y:auto;height:100vh;position:sticky;top:0}
 nav h1{font-size:16px;margin:4px 8px 0;letter-spacing:.06em} nav .sub{margin:0 8px 10px;color:var(--mute);font-size:12px}
 nav h2{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin:12px 8px 4px}
-nav a{display:flex;justify-content:space-between;gap:6px;padding:6px 8px;border-radius:6px;color:var(--text);text-decoration:none;cursor:pointer}
-nav a:hover{background:var(--panel2)} nav a.on{background:var(--panel2);color:var(--acc)}
-nav a .badge{background:var(--bad);color:#fff;border-radius:99px;font-size:10px;padding:0 6px;align-self:center}
+nav a[data-nav]{display:flex;justify-content:space-between;gap:6px;padding:6px 8px;border-radius:6px;color:var(--text);text-decoration:none;cursor:pointer}
+nav a[data-nav]:hover{background:var(--panel2)} nav a.on{background:var(--panel2);color:var(--acc)}
+nav a[data-nav] .badge{background:var(--bad);color:#fff;border-radius:99px;font-size:10px;padding:0 6px;align-self:center}
 nav .foot{margin:14px 8px 0;display:flex;gap:6px;flex-wrap:wrap}
 main{flex:1;min-width:0;padding:22px 28px 60px;max-width:1280px}
 h2.page{font-size:22px;margin:0 0 4px} p.lead{color:var(--mute);margin:0 0 16px;max-width:80ch}
@@ -50,7 +50,7 @@ main a{color:var(--acc)}
 .login{max-width:380px;margin:12vh auto;padding:0 16px} .login .card{padding:22px}
 .login input{width:100%}
 @media(max-width:820px){body{flex-direction:column}nav{width:100%;height:auto;position:static;display:flex;flex-wrap:wrap;gap:2px;padding:10px}
- nav h1,nav .sub{width:100%} nav h2{display:none} nav a{padding:5px 8px;font-size:13px;background:var(--panel2)} main{padding:16px}
+ nav h1,nav .sub{width:100%} nav h2{display:none} nav a[data-nav]{padding:5px 8px;font-size:13px;background:var(--panel2)} main{padding:16px}
  .row>label{min-width:100%}}
 </style>
 </head>
@@ -102,7 +102,7 @@ const SECTIONS=[["Overview",[["dash","Dashboard"],["accounts","Connected account
  ["Settings",[["security","Security"],["config","System configuration"]]]];
 let current=null, unread=0, timer=null, authMode=null;
 function nav(){const n=$("#nav");n.hidden=false;
-  n.innerHTML=`<h1>NEXUS REMOTE STUDIO</h1><div class="sub">cloud control plane · <a href="/" style="color:var(--acc)">local app</a></div>`+
+  n.innerHTML=`<h1>NEXUS REMOTE STUDIO</h1><div class="sub">cloud control plane · <a href="/" style="color:var(--acc)">open local app</a></div>`+
   SECTIONS.map(([g,items])=>`<h2>${g}</h2>`+items.map(([id,name])=>`<a data-nav="${id}" class="${id===current?"on":""}" href="#${id}">${esc(name)}${id==="notifications"&&unread?`<span class="badge">${unread}</span>`:""}</a>`).join("")).join("")+
   `<div class="foot"><button class="sec sm" data-act="theme">Theme</button>${authMode==="token"?`<button class="sec sm" data-act="logout">Sign out</button>`:""}</div>`}
 function go(id){if(!PAGES[id])id="dash";current=id;if(location.hash!=="#"+id)history.replaceState(null,"","#"+id);nav();render()}
@@ -136,7 +136,7 @@ PAGES.dash=async()=>{const s=await api("/api/v1/studio/summary");unread=s.notifi
   <div class="grid">${statCard(s.jobs.running,"jobs running")}${statCard(s.jobs.queued,"jobs queued")}${statCard(s.jobs.failed_today,"failed today",s.jobs.failed_today?"badv":"")}
   ${statCard(s.jobs.succeeded_today,"succeeded today")}${statCard(s.notifications_unread,"unread notifications")}${statCard(fmtB(s.storage.artifact_bytes),s.storage.artifacts+" artifacts stored")}</div>
   <h3 class="sec">Scheduler</h3><div class="card"><div>${schedLine(sc)}</div><div class="small mute">ETA: ${esc(etaText(sc.eta))} · GPU today ${sc.gpu_seconds_today}s · last tick ${ago(sc.last_tick)}${sc.blocked?" · "+esc(sc.blocked):""}</div>
-  ${sc.last_error?`<div class="note bad">${esc(sc.last_error)}</div>`:""}<div class="row">${schedButtons(sc.status)}</div></div>
+  ${sc.last_error&&sc.last_error!==sc.blocked?`<div class="note bad">${esc(sc.last_error)}</div>`:""}<div class="row">${schedButtons(sc.status)}</div></div>
   <h3 class="sec">Services and providers</h3><div class="grid">
   <div class="card"><h3>Compute ${st(s.services.compute?"mounted":"missing")}</h3><p>${s.services.compute?"/api/v1/compute available":esc(NOT_INSTALLED.compute)}</p></div>
   <div class="card"><h3>Storage ${st(s.services.storage?"mounted":"missing")}</h3><p>${s.services.storage?"/api/v1/storage available":esc(NOT_INSTALLED.storage)}</p></div>
@@ -249,7 +249,7 @@ PAGES.scheduler=async()=>{const s=await api("/api/v1/studio/scheduler");const c=
   const num=(id,label,v,extra="")=>`<label>${label}<input id="${id}" type="number" value="${v??""}" ${extra}></label>`;
   return `<h2 class="page">Scheduler</h2><p class="lead">Autonomous daily production. Targets become remote jobs; quota or storage exhaustion pauses with a notification and waits for you. State survives restarts. Day boundary: UTC.</p>
   <div class="card"><h3>Status <span id="schstat">${schedLine(s)}</span></h3><div class="small mute">started ${fmtT(s.started_at)} · last tick ${ago(s.last_tick)} · loop ${s.thread_alive?"running":"not running"} · items done since start ${s.items_done} · GPU today ${s.gpu_seconds_today}s</div>
-  ${s.blocked?`<div class="note">${esc(s.blocked)}</div>`:""}${s.last_error?`<div class="note bad">${esc(s.last_error)}</div>`:""}
+  ${s.blocked?`<div class="note">${esc(s.blocked)}</div>`:""}${s.last_error&&s.last_error!==s.blocked?`<div class="note bad">${esc(s.last_error)}</div>`:""}
   <div class="row">${schedButtons(s.status)}</div></div>
   <h3 class="sec">ETA (from measured history)</h3><div class="card"><b>${esc(etaText(e))}</b>${table(Object.entries(e.tasks).map(([t,v])=>({t,...v})),[["Task",r=>esc(r.t)],["Remaining",r=>r.remaining],["Median",r=>r.median_s==null?"no history yet":dur(r.median_s)],["Samples",r=>r.samples]],"Nothing remaining today.")}</div>
   <h3 class="sec">Today's work</h3>${table(s.slots,[["Slot",r=>`<span class="mono small">${esc(r.key)}</span>`],["Kind",r=>esc(r.kind)],["Lang",r=>esc(r.lang)],["Status",r=>st(r.status)],["Step",r=>esc((r.tasks||[])[r.step]||"-")+` (${Math.min(r.step+1,(r.tasks||[]).length)}/${(r.tasks||[]).length})`],["Job",r=>r.job_id?`<a href="#jobs" data-job="${esc(r.job_id)}" class="mono">${esc(r.job_id)}</a>`:"-"],["Attempt",r=>r.attempt+1+(r.retry_at?" · retry "+fmtT(r.retry_at):"")]],"Nothing planned yet: start the scheduler.")}
