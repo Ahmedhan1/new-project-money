@@ -98,10 +98,22 @@ def _wikidata_country(name: str) -> set[str]:
     return out
 
 
+def _place_words(places: dict) -> set[str]:
+    """Distinctive words of the sub-country places ("Aswan High" -> {"aswan"}; countries and generic words dropped), so
+    "High Dam Burg, Aswan" matches a scene about the "Aswan High Dam" (Demo 10 run 2 refused that real photo)."""
+    out = set()
+    for p in places:
+        if _is_country(p):
+            continue
+        out |= {w for w in re.findall(r"[^\W\d_]+", _fold(p)) if w not in GENERIC and len(w) > 2 and not _is_country(w)}
+    return out
+
+
 @functools.lru_cache(maxsize=4096)
 def _is_country(name: str) -> bool:
     """A country (or a river/region spanning countries) - too broad to confirm what an image shows."""
     import pycountry
+    name = re.sub(r"['’]s$", "", name)
     if _fold(name) in {"nile", "sahara", "middle east", "arabia", "europe", "africa", "asia"}:
         return True
     try:
@@ -177,8 +189,7 @@ def check(asset: dict, ctx: dict, online: bool = False, classify: bool = False, 
             findings.append({"check": "geo_unverified", "blocking": True,
                              "detail": f"scene is about {', '.join(ctx['places'])}; nothing in the asset's title/description/categories places it there"})
     # Same country, different named place: the Giza pyramids for a scene about the Aswan High Dam (Demo 10 frames).
-    scene_sub = {_fold(p) for p in ctx["places"] if not _is_country(p)}
-    asset_sub = {_fold(p) for p in a["places"] if not _is_country(p)}
+    scene_sub, asset_sub = _place_words(ctx["places"]), _place_words(a["places"])
     if scene_sub and asset_sub and not (scene_sub & asset_sub) and not any(x in _fold(a["meta"]) for x in scene_sub) \
             and not any(f["check"].startswith("geo_") for f in findings):
         findings.append({"check": "place_mismatch", "blocking": True,

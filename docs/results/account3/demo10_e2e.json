@@ -62,6 +62,67 @@
      "llm-local"
     ]
    }
+  },
+  "render": {
+   "seconds": 149.1,
+   "output": "/home/user/new-project-money/.nexus/projects/prj_65eac612a8/renders/master.mp4",
+   "status": "PASSED_AUTOMATED_CHECKS",
+   "stages": {
+    "1-pre-production": {
+     "passed": true,
+     "failed": [
+      "hook: opening: \"The Aswan High Dam, located in southern Egypt, is a monumental structu\""
+     ]
+    },
+    "2b-visual-plan": {
+     "passed": true,
+     "failed": []
+    },
+    "2c-typography": {
+     "passed": true,
+     "failed": []
+    },
+    "2-assets": {
+     "passed": true,
+     "failed": []
+    },
+    "4-editing": {
+     "passed": true,
+     "failed": []
+    },
+    "5-technical": {
+     "passed": true,
+     "failed": []
+    }
+   },
+   "visual_plan": [
+    {
+     "scene": 0,
+     "kind": "title_card_fallback",
+     "reason": "no licensed image passed the context gate and no fact graphic fits - needs another visual source or explicit approval",
+     "rejected": 8
+    },
+    {
+     "scene": 1,
+     "kind": "fact_graphic",
+     "reason": "no licensed image passed the context gate; scene states '1960–1970'",
+     "rejected": 0
+    },
+    {
+     "scene": 2,
+     "kind": "fact_graphic",
+     "reason": "no licensed image passed the context gate; scene states '200 years'",
+     "rejected": 9
+    },
+    {
+     "scene": 3,
+     "kind": "licensed_photo",
+     "reason": null,
+     "rejected": 2
+    }
+   ],
+   "narration_verbatim": true,
+   "frames": "docs/results/account3/demo10_frames.jpg"
   }
  },
  "gates": {
@@ -199,5 +260,6 @@
    "visibility": "private",
    "status": "draft"
   }
- }
+ },
+ "finished": "2026-11-12T23:27:35"
 }

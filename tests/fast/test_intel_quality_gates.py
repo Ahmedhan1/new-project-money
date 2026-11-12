@@ -94,3 +94,10 @@ def test_same_country_different_place_is_refused():
     r = vc.check({"title": "File:All Gizah Pyramids.jpg", "description": "The pyramids of Giza, Egypt", "categories": "Giza pyramid complex"}, ctx)
     assert not r["ok"] and r["findings"][0]["check"] == "place_mismatch"
     assert vc.check({"title": "File:Aswan High Dam.jpg", "description": "The High Dam at Aswan, Egypt"}, ctx)["ok"]
+
+
+def test_same_place_with_different_wording_is_accepted():
+    # Demo 10 run 2 refused a real photo "High Dam Burg, Aswan, Egypt" for a scene about the "Aswan High Dam" in "Egypt's" south
+    ctx = vc.scene_context("Aswan High Dam", "The Aswan High Dam, located in southern Egypt, shaped Egypt's history.", "Aswan High Dam")
+    assert vc.check({"title": "High Dam Burg, Aswan, Egypt, Oct 2004", "description": "Aswan, Egypt"}, ctx)["ok"]
+    assert not vc.check({"title": "Alexandria in Egypt (2011)", "description": "Alexandria, Egypt"}, ctx)["ok"]
