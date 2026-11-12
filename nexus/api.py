@@ -52,6 +52,12 @@ if os.environ.get("NEXUS_EMBEDDED_WORKER", "1") != "0":  # `nexus start` runs th
     # remote compute (Account 1): poll/dispatch Kaggle and pull-worker jobs while any are active
     from .cloud.compute import poller as _remote_poller
     _remote_poller.start()
+    # storage: uploads left "running" by a crash become "interrupted" and can be resumed from the provider's offset
+    try:
+        from .cloud.storage import transfers as _transfers
+        _transfers.recover_after_restart()
+    except Exception:  # noqa: BLE001 - never block startup on transfer bookkeeping
+        pass
 
 
 # Account 1 cloud platform routers (/api/v1). Each owner module exposes `router`; a module that is not present in
