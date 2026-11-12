@@ -1,5 +1,14 @@
 """Fast tests: no models, no network, no GPU. They run in CI on Linux and Windows in seconds."""
+import os
+
 import pytest
+
+# No background threads in the test process: importing nexus.api would otherwise start the embedded job worker (and the
+# scheduler loop), which then claims jobs that a test hands to its own worker subprocess. That made
+# test_worker_killed_mid_job_resumes_without_repeating_stages fail on CI, depending on test order. Tests that need a
+# worker start one explicitly.
+os.environ.setdefault("NEXUS_EMBEDDED_WORKER", "0")
+os.environ.setdefault("NEXUS_SCHEDULER_THREAD", "0")
 
 from nexus import config, db
 
