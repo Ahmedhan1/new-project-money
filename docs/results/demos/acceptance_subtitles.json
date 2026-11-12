@@ -1,0 +1,226 @@
+{
+ "collected_utc": "2026-11-12T11:46:24Z",
+ "demo": 4,
+ "what": "multilingual subtitle package with readiness manifest",
+ "project": "prj_2b1a5a2f07",
+ "branch": "main",
+ "languages": 7,
+ "subtitle_ready": [
+  "ar-EG",
+  "de",
+  "fr",
+  "hi"
+ ],
+ "manifest": {
+  "project": "prj_2b1a5a2f07",
+  "branch": "main",
+  "source_lang": "en",
+  "built": "2026-11-12T11:46:24",
+  "languages": [
+   {
+    "lang": "ar-EG",
+    "name": "Egyptian Arabic",
+    "direction": "rtl",
+    "files": {
+     "srt": {
+      "file": "ar-EG.srt",
+      "sha256": "376dd13ad51db52cd2748de9c1e8f0fc5d78ed72f4b8877d3a07608a04e58ed9"
+     },
+     "vtt": {
+      "file": "ar-EG.vtt",
+      "sha256": "06c78cb6569df2ab10bfbc931d09b5ac149df687bb31a7704b3c15631b7966bd"
+     }
+    },
+    "subtitle_ready": true,
+    "qa_status": "PASSED_AUTOMATED_CHECKS",
+    "qa_issues": [
+     "[minor] native-speaker review [ar-EG]: REQUIRED before publishing - machine translation can still miss nuance and tone",
+     "[minor] back-translation [ar-EG]: back-translation not run (ModuleNotFoundError: local LLM unavailable) - meaning was not cross-checked",
+     "[minor] subtitles native_review [ar-EG]: Rule-based adaptation layer: MADLAD-400 output (arz, else MSA) followed by word/phrase substitutions for common function words and expressions. It produces recognisably Egyptian function words, not native-quality Egyptian writing: verb morphology, word order, idiom and register are mostly left as the MT produced them. A native Egyptian reviewer must approve every line before publishing.",
+     "[minor] subtitles voice_licence [ar-EG]: no voice with a verified commercial licence: subtitles only unless you supply a licensed voice"
+    ],
+    "native_review_required": true,
+    "weak_mt_profile": true,
+    "native_review_done": false,
+    "dub_ready_voice": null,
+    "dub_note": "no voice with a verified commercial licence - subtitles only"
+   },
+   {
+    "lang": "ar-Gulf",
+    "name": "Gulf Arabic",
+    "direction": "rtl",
+    "files": {
+     "srt": {
+      "file": "ar-Gulf.srt",
+      "sha256": "79d467847132b8a4e131c62c77fee6705ea5bf0279b890b1cf54452e489ede9b"
+     },
+     "vtt": {
+      "file": "ar-Gulf.vtt",
+      "sha256": "7f3335d4d1337765cf6902269ef767daf68abfe8553810963baa47fda4bfd975"
+     }
+    },
+    "subtitle_ready": false,
+    "qa_status": "NEEDS_FIXES",
+    "qa_issues": [
+     "[major] no added/dropped content [ar-Gulf]: lines [8] are much longer/shorter than the source - possible invented or missing content",
+     "[major] Gulf Arabic dialect markers: 2% of words are typical Gulf Arabic forms - reads as MSA",
+     "[minor] native-speaker review [ar-Gulf]: REQUIRED before publishing - machine translation can still miss nuance and tone",
+     "[minor] back-translation [ar-Gulf]: back-translation not run (ModuleNotFoundError: local LLM unavailable) - meaning was not cross-checked",
+     "[minor] subtitles reading_speed [ar-Gulf]: 3 cue(s) above 17 chars/s",
+     "[minor] subtitles native_review [ar-Gulf]: Rule-based adaptation layer over MSA machine translation (no Gulf Arabic MT model exists in the stack). It swaps common function words and expressions for Gulf forms; grammar, verb morphology, idiom and register remain MSA-like, and Gulf varieties differ between countries. This is not native-quality Gulf writing. A native Gulf reviewer must approve every line before publishing.",
+     "[minor] subtitles voice_licence [ar-Gulf]: no voice with a verified commercial licence: subtitles only unless you supply a licensed voice",
+     "[minor] subtitle reading speed: 2 cues above 25 chars/s"
+    ],
+    "native_review_required": true,
+    "weak_mt_profile": true,
+    "native_review_done": false,
+    "dub_ready_voice": null,
+    "dub_note": "no voice with a verified commercial licence - subtitles only"
+   },
+   {
+    "lang": "de",
+    "name": "German",
+    "direction": "ltr",
+    "files": {
+     "srt": {
+      "file": "de.srt",
+      "sha256": "f386423048734c153869460fdd25ba6b90034e9a86a9ade9b7ceb61620c6b344"
+     },
+     "vtt": {
+      "file": "de.vtt",
+      "sha256": "cd70cdc820a914c4bcc618c6efe7b1d7449b33e68cc6d47f944b070201c87801"
+     }
+    },
+    "subtitle_ready": true,
+    "qa_status": "PASSED_AUTOMATED_CHECKS",
+    "qa_issues": [
+     "[minor] native-speaker review [de]: REQUIRED before publishing - machine translation can still miss nuance and tone",
+     "[minor] back-translation [de]: back-translation not run (ModuleNotFoundError: local LLM unavailable) - meaning was not cross-checked",
+     "[minor] subtitles reading_speed [de]: 5 cue(s) above 17 chars/s",
+     "[minor] subtitle reading speed: 2 cues above 25 chars/s"
+    ],
+    "native_review_required": true,
+    "weak_mt_profile": false,
+    "native_review_done": false,
+    "dub_ready_voice": "de_DE-thorsten-medium",
+    "dub_note": null
+   },
+   {
+    "lang": "fr",
+    "name": "French",
+    "direction": "ltr",
+    "files": {
+     "srt": {
+      "file": "fr.srt",
+      "sha256": "4ca28f508c84bddd1248504b4b403014919b61fb2eea5cd049cec5b546eb8bbe"
+     },
+     "vtt": {
+      "file": "fr.vtt",
+      "sha256": "293c9651dd8701abcfd3907ad3ea2b203008a6273551199835eff2a912cb1a9b"
+     }
+    },
+    "subtitle_ready": true,
+    "qa_status": "PASSED_AUTOMATED_CHECKS",
+    "qa_issues": [
+     "[minor] numbers preserved [fr]: numbers missing/changed in lines [(4, ['24'])] (may be spelled out - verify)",
+     "[minor] native-speaker review [fr]: REQUIRED before publishing - machine translation can still miss nuance and tone",
+     "[minor] back-translation [fr]: back-translation not run (ModuleNotFoundError: local LLM unavailable) - meaning was not cross-checked",
+     "[minor] subtitles reading_speed [fr]: 7 cue(s) above 17 chars/s",
+     "[minor] subtitle reading speed: 3 cues above 25 chars/s"
+    ],
+    "native_review_required": true,
+    "weak_mt_profile": false,
+    "native_review_done": false,
+    "dub_ready_voice": "fr_FR-siwis-medium",
+    "dub_note": null
+   },
+   {
+    "lang": "hi",
+    "name": "Hindi",
+    "direction": "ltr",
+    "files": {
+     "srt": {
+      "file": "hi.srt",
+      "sha256": "08d7e2da0d0d1395c801189ffbc8b24710910c040745eb9be9d6129509089db6"
+     },
+     "vtt": {
+      "file": "hi.vtt",
+      "sha256": "1e8608c8685c25bf366dfcda178e8aca0dda1c4c505ba9a2633eb10451789a7d"
+     }
+    },
+    "subtitle_ready": true,
+    "qa_status": "PASSED_AUTOMATED_CHECKS",
+    "qa_issues": [
+     "[minor] native-speaker review [hi]: REQUIRED before publishing - machine translation can still miss nuance and tone",
+     "[minor] back-translation [hi]: back-translation not run (ModuleNotFoundError: local LLM unavailable) - meaning was not cross-checked",
+     "[minor] subtitles voice_licence [hi]: no voice with a verified commercial licence: subtitles only unless you supply a licensed voice"
+    ],
+    "native_review_required": true,
+    "weak_mt_profile": false,
+    "native_review_done": false,
+    "dub_ready_voice": null,
+    "dub_note": "no voice with a verified commercial licence - subtitles only"
+   },
+   {
+    "lang": "ru",
+    "name": "Russian",
+    "direction": "ltr",
+    "files": {
+     "srt": {
+      "file": "ru.srt",
+      "sha256": "b6a3c4e68671a11cc6a8ee5c066b752177f88602b58954b03dd3ef9d83ce84fb"
+     },
+     "vtt": {
+      "file": "ru.vtt",
+      "sha256": "89b121280b8dfc82a06e47039e8ed65ee1b230e2f3523604b545944de38b9527"
+     }
+    },
+    "subtitle_ready": false,
+    "qa_status": "NEEDS_FIXES",
+    "qa_issues": [
+     "[major] no code-switching [ru]: wrong-script words after retries: {10: ['SpaceX', 'Boeing']}",
+     "[minor] native-speaker review [ru]: REQUIRED before publishing - machine translation can still miss nuance and tone",
+     "[minor] back-translation [ru]: back-translation not run (ModuleNotFoundError: local LLM unavailable) - meaning was not cross-checked",
+     "[minor] subtitles reading_speed [ru]: 5 cue(s) above 17 chars/s"
+    ],
+    "native_review_required": true,
+    "weak_mt_profile": false,
+    "native_review_done": false,
+    "dub_ready_voice": "ru_RU-denis-medium",
+    "dub_note": null
+   },
+   {
+    "lang": "zh",
+    "name": "Chinese (Simplified, Mandarin)",
+    "direction": "ltr",
+    "files": {
+     "srt": {
+      "file": "zh.srt",
+      "sha256": "2dc8016c59dd9456258c52a555b3462cf33dd9b03e88f98c6972f1a65b053273"
+     },
+     "vtt": {
+      "file": "zh.vtt",
+      "sha256": "d673a206d750f705d46142f908591a0e5595bd1a70c79056d71d7bf9e7b9b83e"
+     }
+    },
+    "subtitle_ready": false,
+    "qa_status": "NEEDS_FIXES",
+    "qa_issues": [
+     "[major] no code-switching [zh]: wrong-script words after retries: {10: ['SpaceX']}",
+     "[major] no added/dropped content [zh]: lines [1, 2, 3, 4, 5, 6, 9, 10, 11, 12] are much longer/shorter than the source - possible invented or missing content",
+     "[minor] numbers preserved [zh]: numbers missing/changed in lines [(4, ['24'])] (may be spelled out - verify)",
+     "[minor] native-speaker review [zh]: REQUIRED before publishing - machine translation can still miss nuance and tone",
+     "[minor] back-translation [zh]: back-translation not run (ModuleNotFoundError: local LLM unavailable) - meaning was not cross-checked"
+    ],
+    "native_review_required": true,
+    "weak_mt_profile": false,
+    "native_review_done": false,
+    "dub_ready_voice": "zh_CN-chaowen-medium",
+    "dub_note": null
+   }
+  ],
+  "commercially_ready": [],
+  "note": "No translation has had native review yet: none is labelled commercially ready. subtitle_ready = automated checks passed, not a quality guarantee."
+ },
+ "zip": "main.zip"
+}

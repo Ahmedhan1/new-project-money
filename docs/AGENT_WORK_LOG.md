@@ -36,3 +36,25 @@ committed on their worktree branches (`worktree-agent-*`, local only) and finish
   sign-off endings, level jumps at cuts, false localization failure, captions over the face / outside the Shorts safe zone,
   quality checker's caption model, three German MT errors, Chinese mid-word caption breaks.
 - Open follow-ups registered: FX-2, BRL-1, DIA-1, AUD-2, LANG-2 (+ WIN-1, GEN-2, PUB-1, ANA-1, STO-3 blocked on the owner).
+
+## Session 5 (2026-11-12) — final quality gap closure
+
+Agents: the second batch of seven parallel agents all stopped at the account usage limit within ~10 minutes with no
+output, so the lead did the work sequentially. Every item below was driven by a defect found on the real NASA interview.
+
+| Area | What changed | Found by | Commit |
+|---|---|---|---|
+| Renderer FX-2 | freeze, split screen, chroma key, masks, credits roll, keyframes (pos/scale/volume), J/L-cut audio; 20 pixel/audio tests | gap list | `7e02171`, `8943723` |
+| B-roll BRL-1 | NASA Image & Video Library + Openverse, licence/credit/provenance, subject gate, phash dedupe, Ken Burns | single-camera repetition | `34ebbe2`, `519b90d` |
+| B-roll | footage in-point from a motion profile; only that window fetched at 1280x720 | QA: 2.3 s frozen launch pad; 320x180 upscale | `c9dfcf7` |
+| Audio AUD-2 | RNNoise + gate before the leveller | noise floor on every render | `fbd7689` |
+| Diarisation DIA-1 | WeSpeaker ONNX + clustering, roles, manual correction; split segments where the voice changes | merged Q+A segments | `9a11fd5`, `bd690b8` |
+| Faces | YuNet face track; shorts and platform delivery crop on it | blur-fill on 9:16 delivery | `6c57574` |
+| Director | lower thirds only from names a person set | "guest"/"interviewer" on screen | `6c57574` |
+| Renderer | segment audio held to its picture in the join | QA: audio 0.3 s longer than video | `aaf6412` |
+| Jobs | dead local worker recovered at once (also zombie); recovery on a watchdog thread | killed render stuck 'running' after fast restart | `d0349b8`, `ee6f4cc` |
+| Shorts | ≤ 5 hashtags from entities/repeated words; never open on the interviewer | 39 tags incl. #Absolutely | `0f1a991`, `1acf0c0` |
+| Localize | units = words heard in the clip, whole sentences ≤ 28 words, short output retranslated | MT inventing endings for fragments | `fb243a4` |
+| Delivery | export verify + size-cap re-encode inside the deliver job; subtitle package with readiness manifest | gap list | `628ca30`, `dc40e8d` |
+| Windows | `windows-e2e.yml`: SETUP → START → API e2e (non-ASCII paths) → STATUS → BACKUP drill → STOP on a clean VM | WIN-1 | `33ac0af`, `3cb50aa` |
+| Release | `scripts/release_check.py`: fresh clone, hygiene, ruff, fast suite | release discipline | `1ed89a0` |

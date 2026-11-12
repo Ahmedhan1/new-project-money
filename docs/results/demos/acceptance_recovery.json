@@ -1,0 +1,28 @@
+{
+ "collected_utc": "2026-11-12T11:28:32Z",
+ "demo": 7,
+ "what": "hard-kill (SIGKILL) the app during real production jobs, restart, verify resume",
+ "jobs": [
+  {
+   "job": "job_bd870edda6",
+   "kind": "render",
+   "status": "done",
+   "retries": 1,
+   "recovery": "worker embedded-vm-12609 lost at stage 'render-qa'; resumed from last checkpoint",
+   "stages": {
+    "render-qa": {
+     "status": "done",
+     "seconds": 272.68,
+     "runs": 2
+    },
+    "quality-score": {
+     "status": "done",
+     "seconds": 139.225,
+     "runs": 1
+    }
+   },
+   "segments": 44,
+   "segments_from_cache": 41
+  }
+ ]
+}

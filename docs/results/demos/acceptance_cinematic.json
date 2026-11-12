@@ -1,0 +1,98 @@
+{
+ "collected_utc": "2026-11-12T11:42:10Z",
+ "demo": 1,
+ "what": "3-5 minute cinematic edit from licensed source footage (director + B-roll + post)",
+ "job": "job_cc28f57412",
+ "status": "done",
+ "stages": {
+  "render-qa": {
+   "status": "done",
+   "seconds": 317.222,
+   "runs": 2
+  },
+  "quality-score": {
+   "status": "done",
+   "seconds": 149.715,
+   "runs": 1
+  }
+ },
+ "retries": 1,
+ "recovery": "worker embedded-vm-18617 lost at stage 'render-qa'; resumed from last checkpoint",
+ "file": {
+  "video": "h264 1920x1080",
+  "video_s": 244.666667,
+  "audio": "aac",
+  "audio_s": 244.667,
+  "bytes": 72275701
+ },
+ "sha256": "1ba615eba475ca147b1830a40895754bc7994a47877db954b9b8ca81d9313f18",
+ "segments": 44,
+ "segments_from_cache": 44,
+ "qa_status": "PASSED_AUTOMATED_CHECKS",
+ "qa_issues": [],
+ "quality": {
+  "score": 91.2,
+  "verdict": "pass",
+  "categories": {
+   "visual": 87.5,
+   "editing": 94.2,
+   "audio": 88.0,
+   "localization": 100.0
+  },
+  "not_measured": [
+   {
+    "id": "audio.speech_music_balance",
+    "why": "music present but no narration/dialogue item to compare (source-clip speech has no role)",
+    "critical": false
+   },
+   {
+    "id": "editing.subtitle_sync",
+    "why": "no transcript/analysis to align cues with speech",
+    "critical": false
+   },
+   {
+    "id": "localization.coverage",
+    "why": "no source transcript to compare cue coverage against",
+    "critical": false
+   },
+   {
+    "id": "localization.ext",
+    "why": "localize.qa raised: 'module' object is not callable",
+    "critical": false
+   },
+   {
+    "id": "visual.subject_consistency",
+    "why": "face/subject identity across shots needs a face or subject-embedding model",
+    "critical": false
+   },
+   {
+    "id": "visual.generative_artifacts",
+    "why": "artefacts of generative video/image models need a learned detector or a human",
+    "critical": false
+   },
+   {
+    "id": "visual.content_relevance",
+    "why": "whether the picture matches what is said needs a vision-language model or a human",
+    "critical": false
+   },
+   {
+    "id": "localization.translation_accuracy",
+    "why": "meaning-level translation accuracy needs a bilingual reviewer (or a model-based metric)",
+    "critical": false
+   },
+   {
+    "id": "audio.voice_naturalness",
+    "why": "naturalness of synthetic voices needs listening tests (MOS) or a learned predictor",
+    "critical": false
+   },
+   {
+    "id": "editing.storytelling",
+    "why": "story, argument and emotional arc are creative judgements for a human",
+    "critical": false
+   }
+  ],
+  "note": "Automated measurements of technical and editorial craft. Not a prediction of audience performance; creative quality still needs a human."
+ },
+ "contact_sheet": "docs/results/demos/acceptance_cinematic_contact.jpg",
+ "licences": "source: NASA interview (public domain, NASA media guidelines); B-roll: per-item credits in the timeline (NASA Image and Video Library / Openverse CC licences); music: none"
+}
