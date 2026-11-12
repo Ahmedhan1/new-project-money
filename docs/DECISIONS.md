@@ -46,3 +46,17 @@ past a privacy class to reach the bar.
 Hugging Face Inference Providers (no free credits on free accounts) are excluded by the router's zero-spend gate even if
 authorised. Second local provider: llama.cpp's OpenAI-compatible server with Qwen3-0.6B (Apache-2.0) - proves
 multi-provider routing and failover with no hosted API. Details: `docs/ACCOUNT3_MODEL_COMPARISON.md`.
+
+**D-13 (Account 3) Shared contracts layout.** `nexus.contracts` is a package owned jointly: Account 1 in `cloud.py`
+(pydantic, `contract: "Name/v1"`), Account 2 in `media.py` (dict schemas, `schema: "nexus.Name/1"`), Account 3 in
+`nexus.intelligence.contracts`; the package `__init__` re-exports both original APIs and offers `registry()` +
+`validate_any()`. Chosen over renaming because neither owner's imports change and the collision becomes testable.
+
+**D-14 (Account 3) Visual context gate is metadata-first.** Images are accepted only when their own Commons metadata
+places them (country, then named place), dates them compatibly, is not a map/emblem out of context, and — when the
+scene asks for a structure — names that structure. Found necessary by inspecting four real renders (Demo 4, Demo 10
+runs 1-3). Image classification (SigLIP) is optional evidence, never downloaded during a render.
+
+**D-15 (Account 3) Benchmarked remote models are batch-only.** Kaggle T4 runs measured 10 open-weight models; valid ones
+are recorded as `availability: batch_only` profiles. Interactive routing stays local. Critical tasks below their
+quality bar return `requires_human_review`; dialect output is always reviewed (best measured 0.52).

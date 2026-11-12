@@ -167,3 +167,13 @@ Next, in order:
    `docs/ACCOUNT3_LANGUAGE_MATRIX.md` (digit groups, sentence truncation, ko/it packs).
 4. Account 2: accept an approved ContentScript verbatim; human review step for hook framing and visual suggestions.
 5. Owner-supplied references for challenge / Arabic educational / vlog formats; OCR + music detection for profiles.
+
+## 11. Account 3 V2 (2026-11-12) — done and next
+Done (tested, evidence in `docs/results/account3/`): visual context gate (geography, period, maps, emblems, subject),
+glyph-coverage fonts + OCR read-back, scene visual plan, factual framing gate, Strategy Handoff with verbatim script,
+shared contracts package (verified on a three-account merge), language readiness + terminology memory + native review,
+creator V2 (14 dimensions, blends), market V2 (credibility, cross-source, uncertainty), first-party analytics ledger,
+open-weight benchmark on Kaggle with task routing and mandatory human review for critical tasks.
+Next, in order: (1) owner OAuth → first private upload + analytics import; (2) owner approves the merge order
+A1 → A2 → A3 → contracts restructure; (3) Account 1 `batch_llm`; (4) larger benchmark item set and the Nemotron/Qwen
+re-run; (5) native reviewers for ar-EG/ar-Gulf/hi/zh; (6) asset ranking by subject (A2-2).

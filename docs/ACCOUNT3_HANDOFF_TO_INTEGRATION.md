@@ -65,3 +65,31 @@ All six work streams are merged into `work/account-3-intelligence-growth`. Featu
 | 2 | Render `LocalizationManifest` dubbing lines (voices are licence/consent-gated on our side) | dubbing |
 | 2 | Image relevance gate in create/assets (Demo 4: "Belgorod governorate 1745" map shown for the Aswan Governorate) | wrong visuals pass QA |
 | 2 | Mixed-script text in overlays/credits: pick a font per run, not per line (Demo 4: credits rendered as tofu) | unreadable credits |
+
+## V2 integration (2026-11-12, session "Intelligence V2")
+
+### Contract collision — resolved by design, verified on a three-account merge
+One package `nexus.contracts`: `cloud.py` (Account 1, moved unchanged), `media.py` (Account 2, moved unchanged),
+`__init__` re-exporting both APIs + `registry()` (fails on a duplicate tag) + `validate_any()`; Account 3 stays in
+`nexus.intelligence.contracts`. Details: `docs/SHARED_CONTRACTS_ARCHITECTURE.md`. Apply after merging Accounts 1 and 2:
+`bash integration/contracts_v1/apply.sh`. Result of the local three-account merge: `integration/contracts_v1/RESULT.md`.
+This supersedes request 1 in the table above (no module is renamed; both import forms keep working).
+
+### Strategy Handoff → Account 2 (`nexus/intelligence/handoff.py`, `nexus.StrategyHandoff/1`)
+- `editorial_plan`: Account 2's `nexus.EditorialPlan/1` — one *insert* decision per scene with reason, claim ids, sources,
+  visual and visual query; validated by **Account 2's own validator** on the merged tree.
+- `render_job`: Account 2's `nexus.RenderJobManifest/1` — requirements for Account 1's scheduler.
+- `create_params.script`: used **verbatim** by `create.create_video(script=...)` (request 2 above: done in
+  `nexus/create.py`, a 20-line opt-in path; without `script` Account 2's own writer runs as before).
+- Refused when originality, grounding or framing fails (`handoff.submit`).
+
+### Requests that remain
+| # | To | Request |
+|---|---|---|
+| A1-1 | Account 1 | `tests/fast/test_cloud_compute.py:353` reads `["job"]["id"]`; `dispatcher.submit` returns `job_id` |
+| A1-2 | Account 1 | `test_cookie_session_and_csrf`: `c.cookies.clear()` before setting the forged cookie (httpx 0.28 keeps both; server behaviour is correct) |
+| A1-3 | Account 1 | `batch_llm` job kind: run `bench_v2`-style prompts on the Kaggle worker (Kaggle forbids persistent serving) so the measured batch-only models in `providers.yaml` become usable for non-interactive tasks |
+| A1-4 | Account 1 | Declare `www.wikidata.org` (place-resolution fallback) and keep `api.gdeltproject.org` reachable from the owner's PC |
+| A2-1 | Account 2 | Fact graphics: label + figure from `scene_plan.key_fact` (fixed here); please keep the figure as the headline in `mograph.kinetic_text` |
+| A2-2 | Account 2 | Asset ranking: prefer a candidate whose title names the scene's subject (the gate now refuses wrong-subject images; ranking first would avoid fallbacks) |
+| OWNER | owner | Google OAuth client + consent → first private upload (PUB-1) and analytics import (ANA-1); native reviewers for ar-EG/ar-Gulf/hi/zh |
