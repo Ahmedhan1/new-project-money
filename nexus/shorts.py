@@ -433,7 +433,7 @@ def build_short(src_path: str, analysis: dict, moment: dict, size: tuple[int, in
     lang = (analysis.get("transcript") or {}).get("language", "en")
     tl = prj.new_timeline(W, H, lang)
     tl["platform"] = "shorts"
-    tl["audio_fx"] = "voice_level" if analysis["probe"].get("audio") else "none"
+    tl["audio_fx"] = "clean_speech" if analysis["probe"].get("audio") else "none"
     landscape = v["width"] > v["height"]
     fit = "blur" if landscape and H > W else "cover"
     all_s = usable_sentences(analysis)
@@ -1222,7 +1222,7 @@ def compose(src: str, analysis: dict, moment: dict, *, variant: dict | str | Non
     W, H = size or ASPECTS.get(aspect) or ASPECTS["9:16"]
     src_lang = (an.get("transcript") or {}).get("language", "en")
     tl = prj.new_timeline(W, H, src_lang)
-    tl["audio_fx"] = "voice_level" if an["probe"].get("audio") else "none"
+    tl["audio_fx"] = "clean_speech" if an["probe"].get("audio") else "none"
     notes: list[str] = []
     all_s = usable_sentences(an)
     sl = moment.get("sentences") or [None, None]

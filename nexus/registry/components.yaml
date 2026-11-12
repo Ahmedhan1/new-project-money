@@ -199,6 +199,21 @@ components:
     hardware: none
     network_hosts: [images-api.nasa.gov, images-assets.nasa.gov]
     status: deployed
+  - id: rnnoise-models
+    name: RNNoise models for FFmpeg arnndn (GregorR/rnnoise-models, 'somnolent-hogwash')
+    kind: model
+    capability: [denoise]
+    source_url: https://github.com/GregorR/rnnoise-models
+    license: "author: models 'are not creative and thus not subject to copyright'; RNNoise BSD-3-Clause"
+    free_tier: "static file download, no key"
+    quotas: "none (one 300 KB download, cached)"
+    commercial_use: "yes (no copyright claimed on the model files)"
+    usage_restrictions: "none stated"
+    data_retention: "none - runs locally inside FFmpeg"
+    availability: "local after one download; falls back to afftdn"
+    hardware: cpu
+    network_hosts: [raw.githubusercontent.com]
+    status: deployed
   - id: wikimedia-commons
     name: Wikimedia Commons (asset downloads + licence metadata)
     kind: media-source

@@ -99,6 +99,9 @@ def segment_key(c: dict, tl: dict, draft: bool = False) -> str:
     payload["_g"] = [tl["width"], tl["height"], tl.get("fps", config.FPS), tl.get("grade", "none"), tl.get("lang", "en")]
     if tl.get("audio_fx", "none") != "none":
         payload["_afx"] = tl["audio_fx"]  # was missing before: changing the global audio chain must re-render
+        if "clean_speech" in (tl.get("audio_fx"), c.get("audio_fx")):
+            from ..audio import post as apost
+            payload["_afx_model"] = apost.chain_name_in_use()  # model installed or not changes the sound
     if draft:
         payload["_draft"] = DRAFT_SCALE
     for k in ("src",):
@@ -229,7 +232,12 @@ def render_segment(c: dict, tl: dict, cache: Path, draft: bool = False, threads:
             a += fxe.atempo_chain((c["out"] - c["in"]) / max(dur, 1e-3))
         else:
             a += fxe.atempo_chain(float(c.get("speed", 1.0)))
-        afx = AUDIO_FX.get(c.get("audio_fx") or tl.get("audio_fx", "none"), "")
+        afx_name = c.get("audio_fx") or tl.get("audio_fx", "none")
+        if afx_name == "clean_speech":
+            from ..audio import post as apost
+            afx = apost.segment_chain("clean_speech")
+        else:
+            afx = AUDIO_FX.get(afx_name, "")
         if afx:
             a.append(afx)
         if c.get("volume", 1.0) != 1.0:

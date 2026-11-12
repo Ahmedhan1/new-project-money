@@ -799,7 +799,7 @@ def _finish(brief, prof, ins, target, tol, items, est, decisions, notes, srcs, c
                         "hook": hook["text"][:140] if hook else None, "cold_open": lifted},
             "grade": prof["grade"], "music": dict(prof["music"]), "captions": prof.get("captions"),
             "captions_enabled": prof.get("captions_enabled", True), "look": prof.get("look") or [],
-            "audio_fx": "voice_level" if any(S["sents"] for S in srcs.values()) else "none", "lang": langs[0] if langs else "en",
+            "audio_fx": "clean_speech" if any(S["sents"] for S in srcs.values()) else "none", "lang": langs[0] if langs else "en",
             "notes": notes}
 
 

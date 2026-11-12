@@ -1,0 +1,46 @@
+{
+ "date": "2026-11-12",
+ "source": "NASA interview iss061m2627771232, 540-630 s (90 s), mono 48 kHz",
+ "method": "50 ms block RMS: noise floor = 10th percentile, speech = 90th percentile; pumping = share of >12 dB block-to-block jumps",
+ "chains": {
+  "raw": {
+   "floor_dbfs": -48.4,
+   "speech_dbfs": -24.4,
+   "snr_proxy_db": 24.1,
+   "jumps": 0.112
+  },
+  "voice_level (previous default)": {
+   "floor_dbfs": -39.9,
+   "speech_dbfs": -14.6,
+   "snr_proxy_db": 25.3,
+   "jumps": 0.137
+  },
+  "rnnoise only + leveller": {
+   "floor_dbfs": -36.1,
+   "speech_dbfs": -14.7,
+   "snr_proxy_db": 21.4
+  },
+  "clean_speech (rnnoise + gate before leveller)": {
+   "floor_dbfs": -43.8,
+   "speech_dbfs": -14.7,
+   "snr_proxy_db": 29.1,
+   "jumps": 0.127
+  },
+  "gate after compressor": {
+   "floor_dbfs": -39.4,
+   "snr_proxy_db": 23.6,
+   "jumps": 0.13
+  },
+  "afftdn + gate (fallback candidate)": {
+   "floor_dbfs": -36.7,
+   "snr_proxy_db": 22.1,
+   "jumps": 0.101
+  }
+ },
+ "finding": "the leveller (dynaudnorm) lifted room noise in pauses by ~8.5 dB; gating before it keeps pauses quiet",
+ "not_done": [
+  "source separation (music vs dialogue)",
+  "de-reverb",
+  "listening test by a person"
+ ]
+}
