@@ -1,0 +1,160 @@
+{
+ "description": "Renderer benchmark (scripts/benchmarks/render_bench.py) on licensed benchmark media: interview + explainer + broll, B-roll cutaways (full-frame + PiP), crossfades, animated titles, lower third, burned boxed captions, ducked music bed.",
+ "machine": {
+  "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "os_cpu_count": 4,
+  "platform": "Linux-6.18.44-fc-v378-x86_64-with-glibc2.39",
+  "ffmpeg": "ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers",
+  "note": "noisy shared 4-vCPU cloud container (5 agents share it; heavy jobs serialised with flock, but tests of other agents still run); repeat runs vary by 10-40 %"
+ },
+ "runs": {
+  "baseline_c1e2d90": {
+   "date": "2026-11-12T17:03:45",
+   "git": "c1e2d90",
+   "timeline": {
+    "clips": 16,
+    "programme_s": 64.5,
+    "size": "1280x720",
+    "cues": 24,
+    "crossfades": 3,
+    "cutaways": 4
+   },
+   "load_avg_start": 8.86083984375,
+   "scenarios": {
+    "cold": {
+     "wall_s": 111.21,
+     "programme_s": 64.5,
+     "rtf": 1.724,
+     "cpu_s": 146.7,
+     "cpu_util_of_4": 0.33,
+     "peak_rss_one_ffmpeg_mb": 852.2,
+     "peak_rss_sum_ffmpeg_mb": 852.2,
+     "max_parallel_ffmpeg": 2,
+     "disk_intermediates_mb": 52.3,
+     "segments": 16,
+     "segments_from_cache": 0,
+     "pieces": null,
+     "pieces_from_cache": null,
+     "audio_from_cache": null,
+     "cache_hit_rate": 0.0,
+     "stage_s": {
+      "concat-xfade": 33.44,
+      "final-mix": 30.75,
+      "mix-measure": 3.32,
+      "render-segment": 76.16
+     },
+     "final_pass_s": 64.19,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": null
+    },
+    "warm": {
+     "wall_s": 79.12,
+     "programme_s": 64.5,
+     "rtf": 1.227,
+     "cpu_s": 89.3,
+     "cpu_util_of_4": 0.282,
+     "peak_rss_one_ffmpeg_mb": 852.2,
+     "peak_rss_sum_ffmpeg_mb": 852.2,
+     "max_parallel_ffmpeg": 1,
+     "disk_intermediates_mb": 67.2,
+     "segments": 16,
+     "segments_from_cache": 16,
+     "pieces": null,
+     "pieces_from_cache": null,
+     "audio_from_cache": null,
+     "cache_hit_rate": 1.0,
+     "stage_s": {
+      "concat-xfade": 39.86,
+      "final-mix": 34.79,
+      "mix-measure": 2.84
+     },
+     "final_pass_s": 74.65,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": null
+    },
+    "edit_one_clip": {
+     "wall_s": 67.57,
+     "programme_s": 64.5,
+     "rtf": 1.048,
+     "cpu_s": 92.1,
+     "cpu_util_of_4": 0.341,
+     "peak_rss_one_ffmpeg_mb": 854.5,
+     "peak_rss_sum_ffmpeg_mb": 854.5,
+     "max_parallel_ffmpeg": 1,
+     "disk_intermediates_mb": 83.2,
+     "segments": 16,
+     "segments_from_cache": 15,
+     "pieces": null,
+     "pieces_from_cache": null,
+     "audio_from_cache": null,
+     "cache_hit_rate": 0.938,
+     "stage_s": {
+      "concat-xfade": 31.71,
+      "final-mix": 26.29,
+      "mix-measure": 2.7,
+      "render-segment": 5.36
+     },
+     "final_pass_s": 58.0,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": null
+    },
+    "edit_caption": {
+     "wall_s": 74.82,
+     "programme_s": 64.5,
+     "rtf": 1.16,
+     "cpu_s": 89.3,
+     "cpu_util_of_4": 0.298,
+     "peak_rss_one_ffmpeg_mb": 854.1,
+     "peak_rss_sum_ffmpeg_mb": 854.1,
+     "max_parallel_ffmpeg": 1,
+     "disk_intermediates_mb": 98.1,
+     "segments": 16,
+     "segments_from_cache": 16,
+     "pieces": null,
+     "pieces_from_cache": null,
+     "audio_from_cache": null,
+     "cache_hit_rate": 1.0,
+     "stage_s": {
+      "concat-xfade": 37.5,
+      "final-mix": 33.0,
+      "mix-measure": 3.04
+     },
+     "final_pass_s": 70.5,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": null
+    },
+    "draft": {
+     "wall_s": 55.33,
+     "programme_s": 64.5,
+     "rtf": 0.858,
+     "cpu_s": 59.3,
+     "cpu_util_of_4": 0.268,
+     "peak_rss_one_ffmpeg_mb": 313.1,
+     "peak_rss_sum_ffmpeg_mb": 313.1,
+     "max_parallel_ffmpeg": 2,
+     "disk_intermediates_mb": 123.9,
+     "segments": 16,
+     "segments_from_cache": 0,
+     "pieces": null,
+     "pieces_from_cache": null,
+     "audio_from_cache": null,
+     "cache_hit_rate": 0.0,
+     "stage_s": {
+      "concat-xfade": 9.4,
+      "final-mix": 9.38,
+      "mix-measure": 2.88,
+      "render-segment": 54.54
+     },
+     "final_pass_s": 18.78,
+     "av_delta_s": 0.0,
+     "lufs": -14.26,
+     "timings": null
+    }
+   }
+  }
+ }
+}
