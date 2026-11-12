@@ -1,0 +1,120 @@
+# Account 3 AI provider + model catalogue (seed; agent B extends and verifies it).
+# hosting:   in_process (this machine) | owner_worker (an endpoint the owner runs: Ollama/vLLM/SGLang/llama.cpp server,
+#            local or on Account 1's authorised remote GPU) | hosted_free (third-party API used only on its free tier)
+# privacy:   max data class the provider may receive: private (user media / unreleased work), internal, public
+# quality:   0-10 per capability; `source: measured` only after model_router.bench ran here, else `estimate`
+# A hosted_free provider is used only when ALL hold: owner authorised it in settings.json ("ai_providers":{"<id>":{"authorized":true}}),
+# its API key is present (env NEXUS_KEY_<ID> or the vault), the model is on the free tier, and today's quota is not spent.
+checked: "2026-11-12"
+providers:
+  - id: local-llamacpp
+    name: llama.cpp in-process (llama-cpp-python)
+    kind: llamacpp_inprocess
+    hosting: in_process
+    privacy: private
+    licence_runtime: MIT
+    commercial_use: "yes"
+    payment_method_required: false
+    quotas: {}
+    verified: "2026-11-12 (runs here: Qwen3-4B Q4_K_M, ~5 tok/s on 4 CPU threads)"
+    models:
+      - model: qwen3-4b-q4km
+        family: Qwen3
+        version: "3"
+        weights: Qwen/Qwen3-4B-GGUF
+        licence: Apache-2.0
+        context: 8192
+        ram_gb: 4
+        vram_gb: 0
+        inputs: [text]
+        outputs: [text, json]
+        languages: [en, de, fr, ar, zh, ru, hi, es, pt, tr, ja, ko, it]
+        quality: {reasoning: 4, writing: 4, json: 6, translation: 4, arabic: 3, summarization: 5, source: estimate}
+        speed: slow
+  - id: owner-openai-compatible
+    name: Owner-run OpenAI-compatible server (Ollama / vLLM / SGLang / llama.cpp server)
+    kind: openai_compatible
+    hosting: owner_worker
+    privacy: internal
+    base_url_setting: "ai_providers.owner-openai-compatible.base_url"
+    licence_runtime: "MIT (Ollama, llama.cpp) / Apache-2.0 (vLLM, SGLang)"
+    commercial_use: "per model"
+    payment_method_required: false
+    quotas: {}
+    verified: "2026-11-12 (protocol tested against llama.cpp's OpenAI-compatible server)"
+    models: []          # discovered from GET /v1/models at runtime; licence per model must be declared in settings
+  - id: groq
+    name: Groq API (free tier)
+    kind: openai_compatible
+    hosting: hosted_free
+    base_url: https://api.groq.com/openai/v1
+    host: api.groq.com
+    privacy: public
+    commercial_use: "per model"
+    payment_method_required: false
+    quotas: {rpm: 30, rpd: 1000, source: "documented, varies per model - console.groq.com/docs/rate-limits"}
+    verified: unverified
+    models:
+      - model: llama-3.3-70b-versatile
+        family: Llama 3.3
+        licence: Llama 3.3 Community License
+        context: 131072
+        quality: {reasoning: 7, writing: 7, json: 7, translation: 6, arabic: 5, summarization: 7, source: estimate}
+        speed: fast
+  - id: cerebras
+    name: Cerebras Inference (free tier)
+    kind: openai_compatible
+    hosting: hosted_free
+    base_url: https://api.cerebras.ai/v1
+    host: api.cerebras.ai
+    privacy: public
+    commercial_use: "per model"
+    payment_method_required: false
+    quotas: {rpm: 30, rpd: 14400, source: "documented, varies per model - inference-docs.cerebras.ai"}
+    verified: unverified
+    models:
+      - model: qwen-3-32b
+        family: Qwen3
+        licence: Apache-2.0
+        context: 32768
+        quality: {reasoning: 7, writing: 7, json: 7, translation: 7, arabic: 6, summarization: 7, source: estimate}
+        speed: fast
+  - id: gemini
+    name: Google Gemini API (free tier)
+    kind: openai_compatible
+    hosting: hosted_free
+    base_url: https://generativelanguage.googleapis.com/v1beta/openai
+    host: generativelanguage.googleapis.com
+    privacy: public
+    privacy_note: "free-tier prompts may be used to improve Google products - never send private data"
+    commercial_use: "yes (API terms)"
+    payment_method_required: false
+    quotas: {rpm: 10, rpd: 250, source: "documented, varies per model - ai.google.dev/gemini-api/docs/rate-limits"}
+    verified: unverified
+    models:
+      - model: gemini-2.5-flash
+        family: Gemini 2.5
+        licence: proprietary API
+        context: 1000000
+        quality: {reasoning: 8, writing: 8, json: 8, translation: 8, arabic: 7, summarization: 8, source: estimate}
+        speed: fast
+  - id: openrouter-free
+    name: OpenRouter (only ':free' model variants)
+    kind: openai_compatible
+    hosting: hosted_free
+    base_url: https://openrouter.ai/api/v1
+    host: openrouter.ai
+    privacy: public
+    privacy_note: "free variants may log prompts on the upstream provider"
+    commercial_use: "per model"
+    payment_method_required: false
+    free_model_suffix: ":free"
+    quotas: {rpm: 20, rpd: 50, source: "documented for accounts without credits - openrouter.ai/docs/api-reference/limits"}
+    verified: unverified
+    models:
+      - model: qwen/qwen3-235b-a22b:free
+        family: Qwen3
+        licence: Apache-2.0
+        context: 40960
+        quality: {reasoning: 8, writing: 7, json: 7, translation: 7, arabic: 6, summarization: 7, source: estimate}
+        speed: medium

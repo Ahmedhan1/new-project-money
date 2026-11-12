@@ -1,0 +1,2844 @@
+diff --git a/NEXUS_BACKUP.bat b/NEXUS_BACKUP.bat
+index 3a759c1..27f8d7b 100644
+--- a/NEXUS_BACKUP.bat
++++ b/NEXUS_BACKUP.bat
+@@ -1,12 +1,18 @@
+ @echo off
+ title NEXUS VIDEO AI - Backup
+ call "%~dp0scripts\windows\_env.bat"
+-if errorlevel 1 (pause & exit /b 1)
++if errorlevel 1 (call :hold & exit /b 1)
+ "%NEXUS_PY%" -m nexus backup --drill %*
+ if errorlevel 1 (
+   echo.
+   echo  BACKUP FAILED or could not be verified. Your local files are untouched.
+-  pause
++  call :hold
+   exit /b 1
+ )
+-pause
++call :hold
++exit /b 0
++
++:hold
++rem Keep the window open so the message can be read; automation sets NEXUS_NO_PAUSE=1.
++if not defined NEXUS_NO_PAUSE pause
++exit /b 0
+diff --git a/NEXUS_CHECKPOINT.bat b/NEXUS_CHECKPOINT.bat
+index 7915cad..988699e 100644
+--- a/NEXUS_CHECKPOINT.bat
++++ b/NEXUS_CHECKPOINT.bat
+@@ -1,12 +1,18 @@
+ @echo off
+ title NEXUS VIDEO AI - Checkpoint
+ call "%~dp0scripts\windows\_env.bat"
+-if errorlevel 1 (pause & exit /b 1)
++if errorlevel 1 (call :hold & exit /b 1)
+ "%NEXUS_PY%" -m nexus checkpoint %*
+ if errorlevel 1 (
+   echo.
+   echo  Checkpoint was blocked or could not be pushed - see above. Nothing was lost.
+-  pause
++  call :hold
+   exit /b 1
+ )
+-pause
++call :hold
++exit /b 0
++
++:hold
++rem Keep the window open so the message can be read; automation sets NEXUS_NO_PAUSE=1.
++if not defined NEXUS_NO_PAUSE pause
++exit /b 0
+diff --git a/NEXUS_DOCTOR.bat b/NEXUS_DOCTOR.bat
+index 53f2a91..1443a6f 100644
+--- a/NEXUS_DOCTOR.bat
++++ b/NEXUS_DOCTOR.bat
+@@ -1,12 +1,18 @@
+ @echo off
+ title NEXUS VIDEO AI - Doctor
+ call "%~dp0scripts\windows\_env.bat"
+-if errorlevel 1 (pause & exit /b 1)
++if errorlevel 1 (call :hold & exit /b 1)
+ "%NEXUS_PY%" -m nexus doctor %*
+ if errorlevel 1 (
+   echo.
+   echo  Doctor found problems - see the lines marked BAD above.
+-  pause
++  call :hold
+   exit /b 1
+ )
+-pause
++call :hold
++exit /b 0
++
++:hold
++rem Keep the window open so the message can be read; automation sets NEXUS_NO_PAUSE=1.
++if not defined NEXUS_NO_PAUSE pause
++exit /b 0
+diff --git a/NEXUS_RESTORE.bat b/NEXUS_RESTORE.bat
+index 138fd00..8ad56eb 100644
+--- a/NEXUS_RESTORE.bat
++++ b/NEXUS_RESTORE.bat
+@@ -1,7 +1,7 @@
+ @echo off
+ title NEXUS VIDEO AI - Restore
+ call "%~dp0scripts\windows\_env.bat"
+-if errorlevel 1 (pause & exit /b 1)
++if errorlevel 1 (call :hold & exit /b 1)
+ echo  This restores the latest verified backup into a NEW folder.
+ echo  Your current data folder is never overwritten.
+ echo.
+@@ -12,7 +12,7 @@ if not "%TARGET_IN%"=="" set "TARGET=%TARGET_IN%"
+ if errorlevel 1 (
+   echo.
+   echo  RESTORE FAILED or is incomplete - see above. Your current data was not changed.
+-  pause
++  call :hold
+   exit /b 1
+ )
+ echo.
+@@ -20,4 +20,10 @@ echo  Restored and verified. To use it:
+ echo    1. Run NEXUS_STOP.bat
+ echo    2. Rename the folder ".nexus" to ".nexus-old" and rename "%TARGET%" to ".nexus"
+ echo    3. Run NEXUS_START.bat
+-pause
++call :hold
++exit /b 0
++
++:hold
++rem Keep the window open so the message can be read; automation sets NEXUS_NO_PAUSE=1.
++if not defined NEXUS_NO_PAUSE pause
++exit /b 0
+diff --git a/NEXUS_RESUME.bat b/NEXUS_RESUME.bat
+index d0e3306..c355726 100644
+--- a/NEXUS_RESUME.bat
++++ b/NEXUS_RESUME.bat
+@@ -1,12 +1,18 @@
+ @echo off
+ title NEXUS VIDEO AI - Resume
+ call "%~dp0scripts\windows\_env.bat"
+-if errorlevel 1 (pause & exit /b 1)
++if errorlevel 1 (call :hold & exit /b 1)
+ "%NEXUS_PY%" -m nexus resume %*
+ if errorlevel 1 (
+   echo.
+   echo  The command reported a problem. Read the messages above.
+-  pause
++  call :hold
+   exit /b 1
+ )
+-pause
++call :hold
++exit /b 0
++
++:hold
++rem Keep the window open so the message can be read; automation sets NEXUS_NO_PAUSE=1.
++if not defined NEXUS_NO_PAUSE pause
++exit /b 0
+diff --git a/NEXUS_SETUP.bat b/NEXUS_SETUP.bat
+index b84766c..240e0db 100644
+--- a/NEXUS_SETUP.bat
++++ b/NEXUS_SETUP.bat
+@@ -5,9 +5,15 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\windows\setup.
+ if errorlevel 1 (
+   echo.
+   echo  Setup did not finish. Fix the problem printed above and run NEXUS_SETUP.bat again - it is safe to re-run.
+-  pause
++  call :hold
+   exit /b 1
+ )
+ echo.
+ echo  Setup finished. Double-click NEXUS_START.bat to open NEXUS.
+-pause
++call :hold
++exit /b 0
++
++:hold
++rem Keep the window open so the message can be read; automation sets NEXUS_NO_PAUSE=1.
++if not defined NEXUS_NO_PAUSE pause
++exit /b 0
+diff --git a/NEXUS_START.bat b/NEXUS_START.bat
+index 1855c22..9314771 100644
+--- a/NEXUS_START.bat
++++ b/NEXUS_START.bat
+@@ -1,11 +1,17 @@
+ @echo off
+ title NEXUS VIDEO AI - Start
+ call "%~dp0scripts\windows\_env.bat"
+-if errorlevel 1 (pause & exit /b 1)
++if errorlevel 1 (call :hold & exit /b 1)
+ "%NEXUS_PY%" -m nexus start %*
+ if errorlevel 1 (
+   echo.
+   echo  NEXUS did not start. The reason and the fix are printed above.
+-  pause
++  call :hold
+   exit /b 1
+ )
++exit /b 0
++
++:hold
++rem Keep the window open so the message can be read; automation sets NEXUS_NO_PAUSE=1.
++if not defined NEXUS_NO_PAUSE pause
++exit /b 0
+diff --git a/NEXUS_STATUS.bat b/NEXUS_STATUS.bat
+index 3252a8e..4ad4907 100644
+--- a/NEXUS_STATUS.bat
++++ b/NEXUS_STATUS.bat
+@@ -1,12 +1,18 @@
+ @echo off
+ title NEXUS VIDEO AI - Status
+ call "%~dp0scripts\windows\_env.bat"
+-if errorlevel 1 (pause & exit /b 1)
++if errorlevel 1 (call :hold & exit /b 1)
+ "%NEXUS_PY%" -m nexus status %*
+ if errorlevel 1 (
+   echo.
+   echo  The command reported a problem. Read the messages above.
+-  pause
++  call :hold
+   exit /b 1
+ )
+-pause
++call :hold
++exit /b 0
++
++:hold
++rem Keep the window open so the message can be read; automation sets NEXUS_NO_PAUSE=1.
++if not defined NEXUS_NO_PAUSE pause
++exit /b 0
+diff --git a/NEXUS_STOP.bat b/NEXUS_STOP.bat
+index f855789..370afc2 100644
+--- a/NEXUS_STOP.bat
++++ b/NEXUS_STOP.bat
+@@ -1,11 +1,17 @@
+ @echo off
+ title NEXUS VIDEO AI - Stop
+ call "%~dp0scripts\windows\_env.bat"
+-if errorlevel 1 (pause & exit /b 1)
++if errorlevel 1 (call :hold & exit /b 1)
+ "%NEXUS_PY%" -m nexus stop %*
+ if errorlevel 1 (
+   echo.
+   echo  The command reported a problem. Read the messages above.
+-  pause
++  call :hold
+   exit /b 1
+ )
++exit /b 0
++
++:hold
++rem Keep the window open so the message can be read; automation sets NEXUS_NO_PAUSE=1.
++if not defined NEXUS_NO_PAUSE pause
++exit /b 0
+diff --git a/NEXUS_UPDATE.bat b/NEXUS_UPDATE.bat
+index e50aa6c..69c403a 100644
+--- a/NEXUS_UPDATE.bat
++++ b/NEXUS_UPDATE.bat
+@@ -1,21 +1,21 @@
+ @echo off
+ title NEXUS VIDEO AI - Update
+ call "%~dp0scripts\windows\_env.bat"
+-if errorlevel 1 (pause & exit /b 1)
++if errorlevel 1 (call :hold & exit /b 1)
+ echo [1/5] Stopping NEXUS (running jobs resume from their checkpoint afterwards)...
+ "%NEXUS_PY%" -m nexus stop
+ echo [2/5] Safety backup of the database and project metadata...
+ "%NEXUS_PY%" -m nexus backup --tiers state,metadata
+ if errorlevel 1 (
+   echo  The safety backup failed, so the update was NOT started. Nothing was changed.
+-  pause
++  call :hold
+   exit /b 1
+ )
+ echo [3/5] Downloading the latest version from GitHub (fast-forward only, never overwrites local changes)...
+ git pull --ff-only
+ if errorlevel 1 (
+   echo  Could not update automatically: you have local changes or no network. Nothing was changed.
+-  pause
++  call :hold
+   exit /b 1
+ )
+ echo [4/5] Updating Python packages...
+@@ -24,4 +24,10 @@ echo [5/5] Checking the installation...
+ "%NEXUS_PY%" -m nexus doctor
+ echo.
+ echo  Update finished. Your projects, models and settings were not touched. Start with NEXUS_START.bat.
+-pause
++call :hold
++exit /b 0
++
++:hold
++rem Keep the window open so the message can be read; automation sets NEXUS_NO_PAUSE=1.
++if not defined NEXUS_NO_PAUSE pause
++exit /b 0
+diff --git a/docs/BACKUP_RECOVERY.md b/docs/BACKUP_RECOVERY.md
+index 57423d8..a09fd4e 100644
+--- a/docs/BACKUP_RECOVERY.md
++++ b/docs/BACKUP_RECOVERY.md
+@@ -45,6 +45,13 @@ AES-256-GCM, key derived from `NEXUS_BACKUP_PASSPHRASE` with scrypt; chunk order
+ Mandatory for remote destinations; optional for local ones (`"encrypt": true`). The snapshot manifest (file names) is
+ encrypted too. **There is no passphrase recovery.**
+ 
++## Off-machine copy without a new account
++The `git-private-branch` destination pushes the encrypted `state` + `metadata` tiers to a branch of a private Git
++repository (see `docs/STORAGE.md`). After a machine loss: clone the code, put the same destination entry in
++`.nexus/storage.json`, set the passphrase, `python -m nexus restore .nexus-restored --from offsite`. You get back every
++project, timeline, script and QA report; media comes from a media-capable destination (external drive / B2 / Drive) and
++anything it cannot find is listed under `references.missing` — never silently skipped.
++
+ ## Known limits
+ - A backup is queued automatically every 24 h while the app runs (`"backup_every_hours"` in `settings.json`, 0 = off). Old snapshots are not pruned automatically yet (`nexus` has `backup.prune`; task STO-4).
+ - Content hashes are visible to the storage provider as object names (they reveal nothing but equality of files).
+diff --git a/docs/STORAGE.md b/docs/STORAGE.md
+index 0564b72..172fd85 100644
+--- a/docs/STORAGE.md
++++ b/docs/STORAGE.md
+@@ -21,6 +21,8 @@ Releases are deliberately not used for backups (small shared allowance; Releases
+ | `LocalBackend` | another disk, external drive, NAS share | atomic writes; default destination |
+ | `RcloneBackend` | Backblaze B2, any S3-compatible store, Google Drive, OneDrive, SFTP, WebDAV… (70+ rclone backends) | multipart upload, resume and retries come from rclone; credentials stay in rclone's own config, never in NEXUS or Git |
+ 
++| `GitBackend` | a dedicated branch of a **private Git repository** (e.g. this project's GitHub repo) | small **encrypted** recovery data only (database snapshot, timelines, reports); files > 50 MB refused; uses the Git credentials you already have — no new account |
++
+ Adding a provider = a profile in `nexus/registry/storage.yaml` (cost facts) — no application code changes.
+ 
+ ## Zero-spend rules (enforced in `storage.eligibility` / `open_destination` / `backup_to`)
+@@ -32,6 +34,7 @@ Adding a provider = a profile in `nexus/registry/storage.yaml` (cost facts) —
+ | Provider | Free allowance | Card needed | Can bill | Verdict |
+ |---|---|---|---|---|
+ | Local / external drive / NAS | your disk | no | no | **Default.** A second physical disk is the best first backup |
++| **Private Git branch** (this GitHub repo) | self-capped at 0.5 GB of history | no | no (oversized pushes are rejected, not billed) | **Eligible, recommended first off-machine copy** for state + metadata — no sign-up needed |
+ | Backblaze B2 | 10 GB storage; free egress up to 3× stored/month | no (per Backblaze; a third-party tracker disagrees — check at sign-up) | not without a card | **Eligible** — best free S3-compatible option |
+ | Google Drive | 15 GB (shared with Gmail/Photos), hard quota | no | no | **Eligible** |
+ | OneDrive | 5 GB, hard quota | no | no | **Eligible** (metadata-sized backups) |
+@@ -60,6 +63,27 @@ built-in engine is ~400 lines, has no extra dependency beyond `cryptography`, an
+ Without this file there is one destination: `NEXUS_HOME/backups` — same disk, so it protects against mistakes, **not**
+ against losing the disk. `nexus status` and the UI say so.
+ 
++### Recommended external backup strategy (zero accounts to create)
++| Copy | Destination | Holds | Why |
++|---|---|---|---|
++| 1 | `local` (same disk) | everything | instant undo of mistakes |
++| 2 | **`offsite` Git branch `nexus-backup`** of this private repo, encrypted | database, timelines, reports, settings | survives loss of the machine; uses credentials you already have |
++| 3 | external drive / NAS (`local` provider, another path) **or** Backblaze B2 / Google Drive via rclone | originals, narration, licensed assets | media is too large for Git |
++
++Enable copy 2 by adding this to `.nexus/storage.json` and setting `NEXUS_BACKUP_PASSPHRASE`:
++```json
++{"name": "offsite", "provider": "git-private-branch", "url": "https://github.com/<you>/<private-repo>.git",
++ "branch": "nexus-backup", "authorized": true, "enabled": true}
++```
++`"authorized": true` is your consent to push encrypted project data to that branch. Then `NEXUS_BACKUP.bat` — it pushes,
++re-reads the remote branch, compares checksums and runs a restore drill. Restoring on a new machine needs only the repo
++URL and the passphrase. **Status:** proven end to end against a separate Git remote in
++`tests/fast/test_storage_backup.py::test_offsite_git_backup_restores_on_a_fresh_machine`; **not yet run against
++github.com**, because pushing a new branch with your data needs your go-ahead (task `STO-3`).
++
++Limits: Git keeps every old database snapshot in history, so NEXUS caps this destination at 0.45 GB and reports when it
++is full (then: start a fresh branch name). It never stores media there.
++
+ ### Add a remote destination (user action — an agent must never create accounts)
+ 1. Create the free account **without adding a payment method**. For B2: create a private bucket and an application key limited to it.
+ 2. `rclone config` → new remote (e.g. `nexusb2`). Credentials are stored by rclone, outside the repository.
+diff --git a/nexus/__main__.py b/nexus/__main__.py
+index a4973ea..fb469d3 100644
+--- a/nexus/__main__.py
++++ b/nexus/__main__.py
+@@ -177,7 +177,58 @@ def _profile(a):
+         print(f"{r['name'][14:]:<44} n={r['n']:<3} avg {r['avg']:8.1f}s  min {r['mn']:8.1f}s  max {r['mx']:8.1f}s")
+ 
+ 
+-_OPS = {"start": _start, "stop": _stop, "status": _status, "worker": _worker, "jobs": _jobs, "backup": _backup, "verify": _verify,
++def _regress(a):
++    from . import bench
++    if a.action == "measure":
++        if not a.target:
++            print("give a project id or a video file")
++            return 2
++        _p(bench.measure_project(a.target) if a.target.startswith("prj_") else bench.measure(a.target, voice=False))
++        return 0
++    if a.action == "accept":
++        cur = bench.accept(a.note)
++        print(f"baseline updated ({', '.join(cur['cases'])}) -> {bench.BASELINE}")
++        return 0
++    if a.action == "run":
++        bench.run(a.case)
++    cur_f = bench.RESULTS / "current.json"
++    if not cur_f.exists():
++        print("no results yet - `nexus regress run` first")
++        return 2
++    cur = json.loads(cur_f.read_text(encoding="utf-8"))
++    if not bench.BASELINE.exists():
++        print("no baseline yet. Review the renders, then `nexus regress accept` to save these results as the baseline.")
++        _p(cur["cases"])
++        return 0
++    res = bench.compare(cur, json.loads(bench.BASELINE.read_text(encoding="utf-8")))
++    for case, r in res["cases"].items():
++        print(f"[{'FAIL' if r['regressions'] else 'OK  '}] {case}: {r['status']}")
++        for x in r["regressions"]:
++            print(f"       REGRESSION  {x['metric']:<34} {x['baseline']} -> {x['current']}   rule: {x['rule']}")
++        for x in r["improvements"]:
++            print(f"       improved    {x['metric']:<34} {x['baseline']} -> {x['current']}")
++    print("quality regression:", "PASSED" if res["ok"] else "FAILED - fix, or `nexus regress accept --note why` if the change is intended")
++    return 0 if res["ok"] else 1
++
++
++def _genmodels(a):
++    from .generate import select
++    rep = select.report()
++    if a.json:
++        _p(rep)
++        return 0
++    hw = rep[0]["hardware"]
++    print(f"Hardware: {hw['threads']} CPU threads, {hw['ram_gb']} GB RAM, GPU VRAM {hw['vram_gb'] or 'none'} GB | compute tiers: {', '.join(rep[0]['tiers'])}")
++    names = {"image": "Image generation", "t2v": "Text-to-video", "ti2v": "Image-to-video", "i2v-camera": "Camera move from a still"}
++    for r in rep:
++        print(f"\n{names[r['kind']]}: " + (f"{r['model']} on {r['where']} (quality {r['quality']}/5)\n    {r['reason']}" if r["runnable"] else f"NOT AVAILABLE - {r['reason']}"))
++        for b in r["better_with"][:4]:
++            print(f"    better: {b['model']:<18} quality {b['quality']}/5, needs {b['needs']}, could run on: {', '.join(b['could_run_on'])}; {b['blocked_by']}")
++        for x in r["rejected"]:
++            print(f"    not selectable: {x['id']} - {x['why'][:110]}")
++
++
++_OPS = {"regress": _regress, "genmodels": _genmodels, "start": _start, "stop": _stop, "status": _status, "worker": _worker, "jobs": _jobs, "backup": _backup, "verify": _verify,
+         "restore": _restore, "storage": _storage, "checkpoint": _checkpoint, "resume": _resume, "tasks": _tasks, "profile": _profile}
+ 
+ 
+@@ -214,6 +265,13 @@ def main() -> None:
+     t = sub.add_parser("tasks", help="development task registry")
+     t.add_argument("--all", action="store_true")
+     sub.add_parser("profile", help="measured time per production stage")
++    rg = sub.add_parser("regress", help="quality regression: render the fixed benchmark productions and compare with the baseline")
++    rg.add_argument("action", choices=["run", "compare", "accept", "measure"], nargs="?", default="run")
++    rg.add_argument("target", nargs="?", help="measure: a project id or a video file")
++    rg.add_argument("--case", action="append", help="only this case (repeatable)")
++    rg.add_argument("--note", default="")
++    gm = sub.add_parser("genmodels", help="which image/video generation model this machine will use, and what better hardware would unlock")
++    gm.add_argument("--json", action="store_true")
+     sub.add_parser("doctor", help="check installed tools, models, hardware and the zero-spend manifest")
+     m = sub.add_parser("models", help="model cache")
+     m.add_argument("action", choices=["fetch", "list"])
+diff --git a/nexus/api.py b/nexus/api.py
+index 731cf27..04877db 100644
+--- a/nexus/api.py
++++ b/nexus/api.py
+@@ -18,7 +18,7 @@ from . import assets, compute, config, costguard, db, edit, factory, jobs, proje
+ from .timeline import ops
+ from .timeline.render import clip_duration, clip_starts, total_duration
+ 
+-app = FastAPI(title="NEXUS Video AI", version="0.1.0")
++app = FastAPI(title="NEXUS Video AI", version=config.VERSION)
+ UI = Path(__file__).resolve().parent / "ui" / "index.html"
+ _q: "queue.Queue[tuple[str, callable]]" = queue.Queue()
+ _analyses: dict[str, dict] = {}
+@@ -332,12 +332,16 @@ class CreateReq(BaseModel):
+     lang: str = "en"
+     notes: str | None = None
+     vertical: bool = False
++    preset: str | None = None      # cinematic | documentary | educational | scientific | commercial | storytelling | social | explainer | film
++    visuals: str = "auto"          # auto | generated | stills
++    motion_shots: int = 1
+ 
+ 
+ @app.post("/api/create")
+ def api_create(r: CreateReq):
+     return jobs.submit("create-from-idea", {"topic": r.topic, "scenes": r.scenes, "lang": r.lang, "notes": r.notes,
+-                                            "size": [720, 1280] if r.vertical else [1280, 720]})
++                                            "size": [720, 1280] if r.vertical else [1280, 720], "preset": r.preset, "visuals": r.visuals,
++                                            "motion_shots": r.motion_shots})
+ 
+ 
+ class RemixReq(BaseModel):
+diff --git a/nexus/assets.py b/nexus/assets.py
+index 881f247..4417ea6 100644
+--- a/nexus/assets.py
++++ b/nexus/assets.py
+@@ -128,7 +128,16 @@ def query_ladder(query: str, fallbacks: tuple[str, ...] = ()) -> list[str]:
+     return out[:6]
+ 
+ 
+-def find_image(query: str, project_id: str | None = None, exclude: set[str] | None = None, fallbacks: tuple[str, ...] = ()) -> dict | None:
++def relevance(title: str, query: str) -> float:
++    """Share of the query's key words that also appear in the image's title (stem match). 0 = the picture is about something else."""
++    stem = lambda w: w.lower()[:5]
++    q = {stem(w) for w in re.findall(r"[^\W\d_]{3,}", query) if w.lower() not in _QSTOP}
++    t = {stem(w) for w in re.findall(r"[^\W\d_]{3,}", title)}
++    return len(q & t) / len(q) if q else 0.0
++
++
++def find_image(query: str, project_id: str | None = None, exclude: set[str] | None = None, fallbacks: tuple[str, ...] = (),
++               min_relevance: float = 0.0) -> dict | None:
+     """Best usable image for a query (downloads it). None when nothing suitable/reachable is found.
+     The row carries `matched_query` so reviews can see how far the search had to be simplified."""
+     down: set[str] = set()
+@@ -147,11 +156,15 @@ def find_image(query: str, project_id: str | None = None, exclude: set[str] | No
+         for c in cands:
+             if exclude and c["id"] in exclude:
+                 continue
++            # judged against what the scene asked for, not against the simplified search term that happened to match
++            rel = max([relevance(c["title"], x) for x in (query, *fallbacks) if x] or [0.0])
++            if rel < min_relevance:
++                continue
+             row = acquire(c)
+             if row and _usable_image(row["path"]):
+                 if project_id:
+                     record_use(row["id"], project_id)
+-                return {**row, "matched_query": q}
++                return {**row, "matched_query": q, "relevance": round(rel, 2)}
+         if len(down) == 2:
+             break
+     return None
+diff --git a/nexus/backup.py b/nexus/backup.py
+index 853d986..34033a1 100644
+--- a/nexus/backup.py
++++ b/nexus/backup.py
+@@ -238,6 +238,7 @@ def backup_to(b: StorageBackend, tiers: list[str], cap_bytes: int | None = None,
+             _encrypt_file(mf, tmp / "manifest.enc", key)
+             mf = tmp / "manifest.enc"
+         b.put(f"snapshots/{sid}.json", mf)
++        b.flush()  # backends that batch writes (Git) publish everything now, before verification re-reads the destination
+     v = verify(b, sid, pw, deep_all=False, new_blobs={f["blob"] for f in files if known[f["sha256"]]["new"]})
+     return {"destination": b.name, "snapshot": sid, "ok": v["ok"], "files": len(files), "bytes": sum(f["size"] for f in files),
+             "new_blobs": new_blobs, "uploaded_bytes": uploaded, "skipped_over_cap": skipped_cap, "verify": v,
+@@ -476,4 +477,5 @@ def prune(b: StorageBackend, keep: int = 10, pw: str | None = None) -> dict:
+         if o["key"] not in live:
+             b.delete(o["key"])
+             gone += 1
++    b.flush()
+     return {"snapshots_removed": len(drop), "snapshots_kept": len(kept), "blobs_removed": gone}
+diff --git a/nexus/config.py b/nexus/config.py
+index cb29dc3..e411309 100644
+--- a/nexus/config.py
++++ b/nexus/config.py
+@@ -5,7 +5,7 @@ import os
+ from pathlib import Path
+ 
+ ROOT = Path(__file__).resolve().parent.parent
+-VERSION = "0.2.0"
++VERSION = "0.3.0"
+ HOME = Path(os.environ.get("NEXUS_HOME", ROOT / ".nexus"))
+ MODELS = HOME / "models"
+ PROJECTS = HOME / "projects"
+diff --git a/nexus/create.py b/nexus/create.py
+index 8764fa6..fc153c0 100644
+--- a/nexus/create.py
++++ b/nexus/create.py
+@@ -48,9 +48,9 @@ def _script_schema(scenes: int) -> dict:
+     return {"type": "object", "required": ["title", "scenes"], "properties": {
+         "title": {"type": "string"},
+         "scenes": {"type": "array", "minItems": scenes, "maxItems": scenes, "items": {
+-            "type": "object", "required": ["narration", "on_screen_text", "visual_query"], "properties": {
++            "type": "object", "required": ["narration", "on_screen_text", "visual_query", "visual_prompt"], "properties": {
+                 "narration": {"type": "array", "minItems": 2, "maxItems": 3, "items": {"type": "string"}},
+-                "on_screen_text": {"type": "string"}, "visual_query": {"type": "string"}}}}}}
++                "on_screen_text": {"type": "string"}, "visual_query": {"type": "string"}, "visual_prompt": {"type": "string"}}}}}}
+ 
+ 
+ def write_script(topic: str, res: dict, scenes: int = 5, audience: str = "a curious general audience", style: str = "clear, vivid explainer",
+@@ -68,14 +68,16 @@ def write_script(topic: str, res: dict, scenes: int = 5, audience: str = "a curi
+         "Visuals must show the real subject of the scene, never a metaphor.\n"
+         + (f"Your previous draft was rejected. Fix exactly these problems:\n{feedback}\n" if feedback else "") +
+         'Return JSON: {"title": "max 7 words", "scenes": [{"narration": ["first spoken sentence", "second spoken sentence"], '
+-        '"on_screen_text": "max 5 words", "visual_query": "2-3 word photo search phrase, concrete nouns"}]}',
++        '"on_screen_text": "max 5 words", "visual_query": "2-3 word photo search phrase, concrete nouns", '
++        '"visual_prompt": "one sentence describing a single concrete picture for this scene: the main subject, what it is doing, the setting"}]}',
+         require="scenes", schema=_script_schema(scenes),
+         max_tokens=1700, temperature=0.6)
+     for s in r.get("scenes", []):  # narration arrives as a list of sentences (the schema forces 2-3 of them)
+         if isinstance(s.get("narration"), list):
+             s["narration"] = " ".join(x.strip() if x.strip()[-1:] in ".!?" else x.strip() + "." for x in map(str, s["narration"]) if x.strip())
+     sc = [{"narration": re.sub(r"\s+", " ", str(s.get("narration", ""))).strip(), "on_screen_text": str(s.get("on_screen_text", ""))[:48],
+-           "visual_query": str(s.get("visual_query", topic))[:60]} for s in r.get("scenes", []) if s.get("narration")]
++           "visual_query": str(s.get("visual_query", topic))[:60], "visual_prompt": re.sub(r"\s+", " ", str(s.get("visual_prompt", ""))).strip()[:220]}
++          for s in r.get("scenes", []) if s.get("narration")]
+     return {"title": str(r.get("title", topic))[:70], "topic": topic, "scenes": sc}
+ 
+ 
+@@ -184,7 +186,7 @@ def storyboard_sheet(frames: list[tuple[Path, str]], out: Path, cols: int = 3) -
+ 
+ # ------------------------------------------------------------------ production
+ def produce(project, script: dict, *, lang: str = "en", size=(1280, 720), style: dict | None = None, use_stock: bool = True,
+-            extra_clips: dict[int, str] | None = None) -> dict:
++            extra_clips: dict[int, str] | None = None, visual_fn=None, title_image: str | None = None) -> dict:
+     """Script -> timeline. `style` (grade, mood, music_seed, voice) is stored on the project for later continuation.
+     `extra_clips` maps scene index -> path of a pre-rendered animation to use instead of a still."""
+     style = {"grade": "cinematic", "mood": "inspiring", "music_seed": 7, "voice": None, **(style or {})}
+@@ -192,14 +194,26 @@ def produce(project, script: dict, *, lang: str = "en", size=(1280, 720), style:
+     tl = prj.new_timeline(W, H, lang)
+     tl["grade"] = "none"
+     gen, used, frames = project.data.setdefault("generated", {}), set(), []
+-    tl["clips"].append(ops.color_clip(2.4, text=[{"text": script["title"], "style": "title"}], fade_in=0.5))
++    if title_image:  # opening over key art instead of a flat colour card
++        gen[title_image] = {"license": "generated by NEXUS (original output)", "source": "series key art"}
++        tl["clips"].append(ops.image_clip(title_image, 3.2, kenburns="in", grade=style["grade"], provenance=gen[title_image],
++                                          text=[{"text": script["title"], "style": "title"}], fade_in=0.5))
++    else:
++        tl["clips"].append(ops.color_clip(2.4, text=[{"text": script["title"], "style": "title"}], fade_in=0.5))
+     narr = []
+     for i, s in enumerate(script["scenes"]):
+         wav = project.dir / "audio" / lang / f"scene{i:02d}.wav"
+         v = tts.synthesize(s["narration"], wav, lang, style["voice"])
+         dur = round(v["duration"] + 0.7, 3)
+         overlay = [{"text": s["on_screen_text"], "style": "lower_third", "start": 0.4, "end": min(dur - 0.3, 5.0)}] if s.get("on_screen_text") else []
+-        if extra_clips and i in extra_clips:
++        vis = visual_fn(i, s, dur, used) if visual_fn else None
++        if vis:  # directed shots: generated/stock images with real camera movement, rendered to exactly this scene's length
++            clip = ops.video_clip(vis["video"], 0, dur, mute=True, fit="cover", provenance=vis["provenance"], shots=vis["shots"], motion=vis["motion"])
++            gen[vis["video"]] = vis["provenance"]
++            frames += [(Path(f), (s["on_screen_text"] or s["narration"][:40]) + (f" - shot {k + 1}" if len(vis["frames"]) > 1 else ""))
++                       for k, f in enumerate(vis["frames"])]
++            clip["text"] = overlay
++        elif extra_clips and i in extra_clips:
+             from .media import ff
+             ad = ff.duration(extra_clips[i])
+             clip = ops.video_clip(extra_clips[i], 0, min(ad, dur), mute=True, fit="contain", speed=round(min(1.0, min(ad, dur) / dur), 3))
+@@ -262,7 +276,8 @@ def _timed_stage(name: str, fn):
+ 
+ 
+ def create_video(topic: str, *, scenes: int = 5, lang: str = "en", size=(1280, 720), notes: str | None = None, style: dict | None = None,
+-                 name: str | None = None, stage=None, on_project=None) -> dict:
++                 name: str | None = None, stage=None, on_project=None, preset: str | None = None, visuals: str = "auto",
++                 motion_shots: int = 1) -> dict:
+     """The whole from-zero workflow. Returns paths + the approval report.
+ 
+     Runs as named stages. When called from a durable job, `stage` is `Job.stage`: each finished stage is
+@@ -283,7 +298,14 @@ def create_video(topic: str, *, scenes: int = 5, lang: str = "en", size=(1280, 7
+ 
+     def _assemble():
+         project = prj.Project(pid)
+-        tl = produce(project, script, lang=lang, size=tuple(size), style=style)
++        from .generate import shots
++        st = {**({"grade": shots.style(preset)["grade"], "mood": shots.style(preset)["mood"]} if preset else {}), **(style or {})}
++        # visuals: "auto" = directed shots (stock or generated image + camera move, optional generated motion) when the
++        # image model is installed; "generated" = never use stock; "stills" = the old still-image slideshow.
++        vfn = None
++        if visuals != "stills" and shots.available():
++            vfn = shots.director(project, preset, "generated" if visuals == "generated" else "auto", tuple(size), motion_shots=motion_shots)
++        tl = produce(project, script, lang=lang, size=tuple(size), style=st or None, visual_fn=vfn)
+         return {"timeline": project.save_timeline(tl, "first assembly")}
+ 
+     vid = stage("assemble", _assemble)["timeline"]
+diff --git a/nexus/registry/components.yaml b/nexus/registry/components.yaml
+index ece4384..e4960fd 100644
+--- a/nexus/registry/components.yaml
++++ b/nexus/registry/components.yaml
+@@ -92,6 +92,20 @@ components:
+     network_hosts: [huggingface.co]
+     version_py: llama_cpp
+     status: deployed
++  - id: diffusers-local
++    name: Diffusers + PyTorch (local image / video generation)
++    kind: model
++    capability: [image-generation, video-generation, character-sheets]
++    source_url: https://github.com/huggingface/diffusers
++    license: "Apache-2.0 (diffusers), BSD-3-Clause (PyTorch)"
++    weights_license: "per model - see registry/genmodels.yaml (only models whose licence allows commercial use are selectable)"
++    commercial_use: "yes for the selectable models; OpenRAIL licences carry use-based restrictions (no illegal/harmful content)"
++    usage_restrictions: "CPU generation is slow (measured in docs/GENERATION.md); outputs need human review for artefacts"
++    hardware: "CPU 8+ GB RAM, or any CUDA GPU"
++    install: "pip install torch --index-url https://download.pytorch.org/whl/cpu; pip install diffusers transformers accelerate peft; weights from huggingface.co"
++    network_hosts: [huggingface.co]
++    version_py: diffusers
++    status: deployed
+   - id: madlad-mt
+     name: MADLAD-400 3B MT (CTranslate2 int8)
+     kind: model
+diff --git a/nexus/registry/storage.yaml b/nexus/registry/storage.yaml
+index fdaa5a5..4f9de07 100644
+--- a/nexus/registry/storage.yaml
++++ b/nexus/registry/storage.yaml
+@@ -13,6 +13,18 @@ providers:
+     private: true
+     allowed_content: [state, metadata, production, assets, originals, exports]
+     notes: Default. A second physical disk or NAS path is the recommended first backup copy.
++  git-private-branch:
++    name: Dedicated branch of a private Git repository (e.g. this project's GitHub repo)
++    kind: git
++    free_gb: 0.5             # self-imposed: GitHub asks repositories to stay small (recommended under 1 GB)
++    payment_method_required: false
++    billing_risk: none        # a private repository on the Free plan cannot be billed for size; pushes are rejected instead
++    private: true
++    allowed_content: [state, metadata]
++    notes: >
++      Off-machine copy of the small, irreplaceable recovery data (database snapshot, timelines, QA reports) using the
++      Git credentials the user already has - no new account. Always encrypted. Not for media: files over 50 MB are refused.
++    verify: ["the repository is PRIVATE", "the Git credential on this machine may push to it"]
+   backblaze-b2:
+     name: Backblaze B2 (S3-compatible)
+     kind: rclone
+diff --git a/nexus/registry/tasks.yaml b/nexus/registry/tasks.yaml
+index e67817d..e68d819 100644
+--- a/nexus/registry/tasks.yaml
++++ b/nexus/registry/tasks.yaml
+@@ -48,14 +48,15 @@ tasks:
+     evidence: "Acceptance tests D (storage recovery) and E (provider failure) in docs/TEST_REPORT.md"
+     next: "Schedule automatic daily backups from the worker (STO-4)."
+   - id: STO-3
+-    priority: 2
+-    title: "First real off-machine backup destination"
++    priority: 1
++    title: "First real off-machine backup: encrypted Git branch of the private repo (no new account) + media destination"
+     status: blocked
+     deps: [STO-1, STO-2]
+-    blocked_by: "Needs the user to create/authorise a free account (Backblaze B2 without a card, or Google Drive) and run `rclone config`. Never done by an agent."
+-    acceptance: "`nexus backup --drill` passes against the remote; usage stays under the free cap."
+-    test: "nexus backup --to <remote> --drill"
+-    next: "Ask the user which provider they authorise; follow docs/STORAGE.md \"Add a remote destination\"."
++    blocked_by: "The Git-branch backend is built and proven against a separate Git remote, but pushing a new branch with (encrypted) project data to github.com needs the user's explicit go-ahead; agents must not push to other branches on their own. Media copy still needs an external drive path or a B2/Drive account from the user."
++    acceptance: "`nexus backup --to offsite --drill` passes against github.com; restore on a second machine reopens the projects."
++    test: "nexus backup --to offsite --drill"
++    evidence: "tests/fast/test_storage_backup.py::test_offsite_git_backup_restores_on_a_fresh_machine (separate bare remote, machine-loss simulation)."
++    next: "User adds the `offsite` entry from docs/STORAGE.md to .nexus/storage.json, sets NEXUS_BACKUP_PASSPHRASE and runs NEXUS_BACKUP.bat - or tells the agent it may push branch `nexus-backup`."
+   - id: STO-4
+     priority: 3
+     title: "Scheduled automatic backups (done) + snapshot pruning policy (open)"
+@@ -67,12 +68,12 @@ tasks:
+     next: "Call backup.prune(keep=N) after a successful scheduled backup; expose keep-count in settings.json; watch one real overnight run."
+   - id: WIN-1
+     priority: 1
+-    title: "One-click Windows launchers (SETUP/START/STOP/STATUS/DOCTOR/BACKUP/RESTORE/CHECKPOINT/RESUME/UPDATE)"
++    title: "One-click Windows launchers verified on real Windows"
+     status: implemented
+     acceptance: "On a clean Windows 10/11 machine, double-clicking NEXUS_SETUP then NEXUS_START opens the app; a previous project opens after a reboot."
+-    test: "Manual on Windows (acceptance test F). The Python launcher under the .bat files is tested on Linux and in CI on windows-latest."
+-    evidence: "tests/fast/test_launcher.py (start -> health -> previous project -> stop with the real API) passes on Linux and on the windows-latest CI runner; the .bat/.ps1 wrappers themselves have NOT been run on real Windows."
+-    next: "Run NEXUS_SETUP.bat and NEXUS_START.bat on the user's Windows machine; fix whatever fails (likely llama-cpp-python wheel, espeak-ng, Blender path)."
++    test: ".github/workflows/windows-launchers.yml runs NEXUS_SETUP/START/STATUS/BACKUP/STOP .bat on a windows-latest runner; final check on the user's own PC."
++    evidence: "see docs/TEST_REPORT.md (Windows launchers workflow)"
++    next: "User runs NEXUS_SETUP.bat + NEXUS_START.bat on their PC (GPU drivers, winget, antivirus and path-with-spaces cases are not covered by the runner); send setup.log if anything fails."
+   - id: WIN-2
+     priority: 3
+     title: "Packaged Windows app (evaluate Tauri shell vs PyInstaller vs portable Python)"
+@@ -109,12 +110,13 @@ tasks:
+     next: "Re-run after any change to series.py."
+   - id: TST-R
+     priority: 2
+-    title: "Quality regression baselines for tests A-I (compare new renders to stored metrics)"
+-    status: planned
++    title: "Quality regression command with fixed productions and saved baselines"
++    status: tested
+     deps: [TST-D, TST-F]
+-    acceptance: "A `nexus regress` command re-renders the fixtures and fails if duration/LUFS/QA status drift from docs/results baselines."
+-    test: "Run twice; second run must pass unchanged."
+-    next: "Build from the JSON already in docs/results (durations, LUFS, QA checks are stored there)."
++    acceptance: "`nexus regress run` renders the fixed cases, measures 9 areas, compares with docs/results/bench/baseline.json and exits 1 on a ruled regression."
++    test: "pytest tests/fast/test_bench.py; python -m nexus regress run"
++    evidence: "nexus/bench.py; baseline in docs/results/bench/ (see docs/TEST_REPORT.md)."
++    next: "Add cases: edit (Test A fixture), remix, series episode, Arabic localisation. Add a human-rating field per case."
+   # ------------------------------------------------------------------ output quality (the product's real weakness)
+   - id: QLT-1
+     priority: 1
+@@ -127,11 +129,12 @@ tasks:
+     next: "1) Series visuals - derive the image query from the bible's location LOOK text (generic nouns), not its fictional name, and allow reuse of an image for a repeated location. 2) Repair off-bible locations instead of only reporting them. 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Scored rubric in the QA report."
+   - id: QLT-2
+     priority: 2
+-    title: "Production presets (cinematic, documentary, educational, scientific, commercial, product-ad, storytelling, social, explainer, film/series)"
+-    status: planned
++    title: "Production presets (cinematic, documentary, educational, scientific, commercial, storytelling, social, explainer, film)"
++    status: implemented
+     acceptance: "A preset sets script style, pacing, grade, music mood, caption style and aspect; selectable in UI and API; each renders a distinct result."
+-    test: "Render one topic with 3 presets; compare timelines."
+-    next: "create.produce already takes a `style` dict (grade/mood/music_seed/voice) - extend it into a preset table in registry/presets.yaml."
++    test: "Render one topic with 3 presets; compare timelines and frames."
++    evidence: "generate/shots.py STYLES drive prompt language, camera moves, grade and music mood; exposed in /api/create and the creator page. Only 'documentary' has been rendered end to end."
++    next: "Make presets also set script tone/pacing and caption style; render the 3-preset comparison."
+   - id: QLT-3
+     priority: 2
+     title: "Targeted scene regeneration (replace one scene's visual/narration without re-rendering the rest)"
+@@ -156,19 +159,44 @@ tasks:
+   # ------------------------------------------------------------------ generation capabilities that do not exist yet
+   - id: GEN-1
+     priority: 2
+-    title: "Local image generation for scene visuals (currently - licensed stock photos or gradient title cards only)"
+-    status: planned
+-    acceptance: "A scene with no good stock match gets a generated image with provenance; works on CPU within a stated time budget or is routed to a free GPU worker."
+-    test: "Generate 4 images offline; record seconds/image."
+-    next: "Benchmark a small distilled diffusion model on 4 CPU cores (expect minutes per image); if too slow, route via compute.KaggleWorker."
++    title: "Local image generation for scene visuals"
++    status: verified
++    acceptance: "A scene with no relevant stock photo gets a generated image with provenance; measured time budget on CPU; selected by the model/compute selector."
++    test: "python scripts/bench_generation.py image; pytest tests/test_d_create.py"
++    evidence: "docs/results/gen_bench_image.json (32.7 s per 768x432 image, 6.3 GB RAM, 4 CPU threads); Test D uses generated shots with model/prompt/seed provenance; images inspected by eye (docs/GENERATION.md)."
++    next: "Benchmark ssd1b-lcm at 1024 px (sharper stills); vertical 9:16 generation size (today 16:9 is cover-cropped)."
+   - id: GEN-2
+-    priority: 3
+-    title: "AI video generation (text/image-to-video clips)"
++    priority: 1
++    title: "GPU video generation adapter (Wan 2.2 TI2V-5B first) on an authorised free GPU"
+     status: blocked
+-    blocked_by: "No GPU on the build machine and no authorised free GPU account. compute.SimulatedRemoteGPU is a simulation, not a provider."
+-    acceptance: "A 3-5 s generated clip is produced on an authorised free GPU worker and inserted into a timeline with provenance."
+-    test: "End-to-end on a real Kaggle session."
+-    next: "Needs the user's Kaggle account (free, phone-verified) - then implement the real job hand-off in compute.KaggleWorker."
++    blocked_by: "Needs the user's free Kaggle account (phone-verified) and their OK to run notebooks there. No GPU on the build machine. CPU text-to-video (AnimateDiff-Lightning, 2 s at 512x288) and depth-parallax camera moves are the working stop-gap."
++    acceptance: "A 5 s 720p text-to-video and image-to-video clip generated on a free GPU, pulled back, inserted into a timeline with provenance, measured in docs/results/gen_bench_video.json."
++    test: "End-to-end on a real Kaggle session; then set benchmarked: true + local/remote adapter flag in registry/genmodels.yaml."
++    next: "1) User authorises Kaggle (settings.json compute.kaggle=true + API token via the kaggle CLI). 2) Write the notebook job (diffusers WanPipeline, bf16/quantised, offloading) behind compute.KaggleWorker. 3) Measure, inspect, then let select.choose() route t2v/ti2v there."
++  - id: GEN-4
++    priority: 1
++    title: "Model + compute selection system and generation registry"
++    status: tested
++    acceptance: "Licence gates, hardware fit, benchmarked-only defaults, honest 'better with' list; all models the brief named are registered with licence and requirements."
++    test: "pytest tests/fast/test_generate_select.py; python -m nexus genmodels"
++    evidence: "nexus/registry/genmodels.yaml (19 models, licences from model cards 2026-11-12), nexus/generate/select.py, 4 tests."
++    next: "Re-read licences when a model is first enabled; add measured GPU numbers once GEN-2 runs."
++  - id: GEN-5
++    priority: 1
++    title: "Directed shots: multi-shot scenes, depth-parallax camera moves, generated motion opening, style presets"
++    status: verified
++    acceptance: "create-from-idea renders scenes as shot lists with real camera movement; first scene can open with generated motion; stock photos only when relevant; presets selectable in API/UI."
++    test: "pytest tests/test_d_create.py; python -m nexus regress run"
++    evidence: "Test D 2026-11-12: 4 scenes, 9 shots (1 generated-video, 3 relevant stock, 5 generated), all scenes real pictures; frames inspected (docs/TEST_REPORT.md)."
++    next: "Crossfades between shots; per-shot regenerate action in the UI (QLT-3)."
++  - id: GEN-6
++    priority: 1
++    title: "Series visual production: character reference sheets, recurring location images, key art, shot-by-shot storyboard, visible characters"
++    status: implemented
++    acceptance: "Every story scene of an episode shows its location and its characters; the same character reference and location images are reused across episodes; storyboard + reference sheet are produced; consistency is measured."
++    test: "pytest tests/test_f_series.py"
++    evidence: "see docs/TEST_REPORT.md Test F (session 3)"
++    next: "Identity-preserving characters (IP-Adapter / reference-image model) and a measured consistency score - today consistency relies on fixed descriptions + seeds and is approximate."
+   - id: GEN-3
+     priority: 3
+     title: "VFX basics (background removal/keying, masks, compositing) and enhancement (stabilise, upscale, interpolate)"
+diff --git a/nexus/series.py b/nexus/series.py
+index 37acebb..e3eec05 100644
+--- a/nexus/series.py
++++ b/nexus/series.py
+@@ -2,6 +2,7 @@
+ from __future__ import annotations
+ 
+ import re
++from pathlib import Path
+ 
+ from . import create, db, llm, project as prj, qa
+ 
+@@ -88,10 +89,25 @@ def write_episode(b: dict, number: int, scenes: int = 4, feedback: str = "") ->
+     sc = [s for s in sc if len(s["narration"]) > 20]
+     if len(sc) < 2:
+         raise ValueError(f"episode generation failed: {raw[:300]}")
++    for i, s_ in enumerate(sc):  # recurring locations: a scene set somewhere the bible does not know is moved to the closest known place
++        s_["location"] = canonical_location(b, s_["location"], i)
+     return {"number": number, "title": outline["title"], "scenes": sc, "cliffhanger": (f.get("CLIFFHANGER") or [outline["cliffhanger"]])[0],
+             "summary": (f.get("SUMMARY") or [outline["summary"]])[0], "events": f.get("EVENT", [])[:3]}
+ 
+ 
++def canonical_location(b: dict, name: str, i: int = 0) -> str:
++    locs = [l["name"] for l in b["locations"]]
++    if not locs:
++        return name
++    low = name.lower()
++    for l in locs:
++        if l.lower() in low or low in l.lower():
++            return l
++    words = set(re.findall(r"[a-z]{4,}", low))
++    best = max(locs, key=lambda l: len(words & set(re.findall(r"[a-z]{4,}", l.lower()))))
++    return best if words & set(re.findall(r"[a-z]{4,}", best.lower())) else locs[i % len(locs)]
++
++
+ def continuity_review(b: dict, ep: dict) -> dict:
+     """Deterministic continuity checks + an independent reviewer prompt (different instructions, low temperature)."""
+     checks = []
+@@ -149,22 +165,126 @@ def next_episode(series_id: str, scenes: int = 4, rounds: int = 3) -> tuple[dict
+     return b, ep, review
+ 
+ 
+-def produce_episode(b: dict, ep: dict, review: dict, size=(1280, 720)) -> dict:
+-    """Render an episode with the series' fixed production identity (grade, voice, music, opening)."""
++# ------------------------------------------------------------------ visual identity: characters, locations, key art
++def _seed(*parts) -> int:
++    import hashlib
++    return int(hashlib.sha256("|".join(map(str, parts)).encode()).hexdigest()[:7], 16)
++
++
++def _look(b: dict) -> str:
++    return (b.get("visual_identity") or "").strip().rstrip(".")[:90]
++
++
++def character_prompt(c: dict) -> str:
++    """The fixed description that is repeated verbatim in every shot the character appears in."""
++    return f"{c['appearance'].strip().rstrip('.')}, {c['role'].strip().rstrip('.')}"
++
++
++def ensure_visuals(b: dict) -> dict:
++    """Generate (once) and store the series' visual canon: a reference image per character, an establishing image per
++    location and the key art. Everything is seeded from the series id, so it is reproducible and identical in every episode."""
++    from . import config
++    from .generate import image as gi, shots
++    d = config.ASSETS / "series" / b["id"]
++    changed = False
++    for c in b["characters"]:
++        if not c.get("sheet") or not Path(c["sheet"]).exists():
++            # head-and-shoulders, face visible, 16:9 like every other frame (a square sheet gets its head cropped in the contact sheet)
++            g = gi.generate(f"head and shoulders portrait of {character_prompt(c)}, face clearly visible, looking at camera, character reference, "
++                            f"{_look(b)}, {shots.style('film')['suffix']}",
++                            d / f"character_{re.sub(r'[^A-Za-z0-9]+', '_', c['name'])}.jpg", width=768, height=432, seed=_seed(b["id"], c["name"]))
++            c["sheet"], c["sheet_prompt"], changed = g["path"], g["prompt"], True
++    for l in b["locations"]:
++        if not l.get("image") or not Path(l["image"]).exists():
++            g = gi.generate(shots.prompt_for(f"{l['name']}, {l['look']}", "wide", "film", _look(b)),
++                            d / f"location_{re.sub(r'[^A-Za-z0-9]+', '_', l['name'])}.jpg", width=768, height=432, seed=_seed(b["id"], l["name"]))
++            l["image"], l["image_prompt"], changed = g["path"], g["prompt"], True
++    if not b.get("key_art") or not Path(b["key_art"]).exists():
++        g = gi.generate(shots.prompt_for(f"{b['logline']}", "wide", "film", f"title key art, epic, {_look(b)}"), d / "key_art.jpg",
++                        width=768, height=432, seed=_seed(b["id"], "key art"))
++        b["key_art"], changed = g["path"], True
++    if changed or not b.get("reference_sheet"):
++        frames = [(Path(c["sheet"]), f"{c['name']} - {c['role']}"[:44]) for c in b["characters"]] + \
++                 [(Path(l["image"]), f"Location: {l['name']}"[:44]) for l in b["locations"]]
++        b["reference_sheet"] = str(create.storyboard_sheet(frames, d / "reference_sheet.png"))
++        db.put_doc("series", b, b["id"])
++    return b
++
++
++def plan_shots(b: dict, ep: dict) -> list[dict]:
++    """Shot-by-shot plan for an episode: per scene an establishing shot of its (recurring) location, then a shot that
++    shows the characters named in the scene, described with their fixed bible appearance."""
++    from .generate import shots
++    out = []
++    by_loc = {l["name"]: l for l in b["locations"]}
++    for i, sc in enumerate(ep["scenes"]):
++        loc = by_loc.get(sc["location"]) or (b["locations"][i % len(b["locations"])] if b["locations"] else {"name": sc["location"], "look": ""})
++        present = [c for c in b["characters"] if re.search(rf"\b{re.escape(c['name'].split()[0])}\b", sc["narration"])] or b["characters"][:1]
++        who = " and ".join(character_prompt(c) for c in present[:2])
++        out.append({"scene": i + 1, "shot": "A", "size": "wide", "kind": "location", "location": loc["name"], "characters": [], "image": loc.get("image"),
++                    "prompt": loc.get("image_prompt", "")})
++        out.append({"scene": i + 1, "shot": "B", "size": "medium" if len(present) > 1 else "close", "kind": "characters", "location": loc["name"],
++                    "characters": [c["name"] for c in present[:2]],
++                    "prompt": shots.prompt_for(who, "medium" if len(present) > 1 else "close", "film", f"at {loc['name']}, {loc.get('look', '')}, {_look(b)}"),
++                    "seed": _seed(b["id"], ep["number"], i)})
++    return out
++
++
++def produce_episode(b: dict, ep: dict, review: dict, size=(1280, 720), visuals: str = "auto") -> dict:
++    """Render an episode with the series' fixed production identity (look, voice, music, opening).
++
++    visuals: "generated" - characters and locations are shown (local image model + camera moves);
++             "cards"     - the old title-card episode (no image model needed);
++             "auto"      - generated when the image model is installed."""
++    from .generate import shots
++    generated = visuals == "generated" or (visuals == "auto" and shots.available())
+     p = prj.Project.create(f"{b['title']} - E{ep['number']:02d} {ep['title']}", "series", series=b["id"], episode=ep["number"])
+-    scenes = []
+-    if ep["number"] > 1:  # recap generated from the stored summary of the previous episode
+-        prev = next(e for e in b["episodes"] if e["number"] == ep["number"] - 1)
++    scenes, plans = [], []
++    prev = next((e for e in b["episodes"] if e["number"] == ep["number"] - 1), None)
++    if prev:  # recap generated from the stored summary of the previous episode, over that episode's own images
+         scenes.append({"narration": f"Previously on {b['title']}. {prev['summary']}", "on_screen_text": "Previously", "visual_query": ""})
+-    # Fiction has no photos of its characters, but its places exist: each scene gets a licensed establishing image of
+-    # its location (people-free search terms), instead of a gradient title card.
+-    scenes += [{"narration": s["narration"], "on_screen_text": s["on_screen_text"] or s["location"], "visual_query": s["location"]} for s in ep["scenes"]]
++        plans.append([{"image": x} for x in (prev.get("shot_images") or [])[-2:] if Path(x).exists()])
++    title_image = None
++    if generated:
++        from .generate import image as gi
++        b = ensure_visuals(b)
++        title_image = b["key_art"]
++        ep["shots"] = plan_shots(b, ep)
++        for i, sc in enumerate(ep["scenes"]):
++            a, bb = ep["shots"][2 * i], ep["shots"][2 * i + 1]
++            g = gi.generate(bb["prompt"], p.dir / "work" / "shots" / f"e{ep['number']:02d}_s{i + 1}_b.jpg", width=768, height=432, seed=bb["seed"])
++            bb["image"] = g["path"]
++            plans.append([{"image": a["image"]}, {"image": bb["image"]}] if a.get("image") else [{"image": bb["image"]}])
++        ep["shot_images"] = [s["image"] for s in ep["shots"] if s.get("image")]
++    scenes += [{"narration": s["narration"], "on_screen_text": s["on_screen_text"] or s["location"], "visual_query": "" if generated else s["location"]}
++               for s in ep["scenes"]]
+     scenes.append({"narration": ep["cliffhanger"], "on_screen_text": "To be continued", "visual_query": ""})
++    if generated:  # the ending holds on the last character shot instead of a blank card
++        plans += [[]] * (len(scenes) - 1 - len(plans)) + [[{"image": ep["shot_images"][-1]}]]
+     script = {"title": f"{b['title']}: {ep['title']}", "topic": b["logline"], "scenes": scenes}
+-    tl = create.produce(p, script, size=size, style=b["style"], use_stock=True)
++    moves = shots.style("film")["moves"]
++
++    def visual(i, scene, dur, used):
++        plan = plans[i] if generated and i < len(plans) else []
++        if not plan:
++            return None
++        sh = [{"image": x["image"], "move": moves[(i + k) % len(moves)], "kind": "generated"} for k, x in enumerate(plan)]
++        info = shots.render_scene(sh, p.dir / "work" / "shots" / f"scene{i:02d}.mp4", dur, tuple(size))
++        return {"video": info["path"], "frames": [x["image"] for x in sh], "shots": sh, "motion": info["motion"],
++                "provenance": {"license": "generated by NEXUS (original output)", "source": "series visual canon + local image model, depth-parallax camera move"}}
++
++    tl = create.produce(p, script, size=size, style=b["style"], use_stock=not generated, visual_fn=visual if generated else None, title_image=title_image)
+     p.save_timeline(tl, f"episode {ep['number']}")
+     stats, report = qa.render_with_qa(p, tl, f"episode_{ep['number']:02d}", extra_stages=[review], extra={"series": b["id"]})
+-    return {"project": p.id, "output": stats["output"], "render": stats, "report": report, "style": p.data["style"]}
++    if generated:  # keep the shot list + images with the bible so the next episode can recap them and stay consistent
++        for e in b["episodes"]:
++            if e["number"] == ep["number"]:
++                e["shots"], e["shot_images"] = ep["shots"], ep["shot_images"]
++        db.put_doc("series", b, b["id"])
++    shown = sum(1 for c in tl["clips"] if c.get("shots"))
++    return {"project": p.id, "output": stats["output"], "render": stats, "report": report, "style": p.data["style"],
++            "visuals": {"mode": "generated" if generated else "cards", "scenes_with_shots": shown, "scenes": len(scenes),
++                        "reference_sheet": b.get("reference_sheet"), "storyboard": p.data.get("storyboard")}}
+ 
+ 
+ # ------------------------------------------------------------------ short film
+diff --git a/nexus/storage/__init__.py b/nexus/storage/__init__.py
+index 5de3f70..12a5b2b 100644
+--- a/nexus/storage/__init__.py
++++ b/nexus/storage/__init__.py
+@@ -59,6 +59,9 @@ class StorageBackend(ABC):
+     def exists(self, key: str) -> bool:
+         return self.size(key) is not None
+ 
++    def flush(self) -> None:
++        """Make everything written so far durable at the destination (backends that batch writes override this)."""
++
+     def sha256(self, key: str) -> str:
+         """Checksum of the stored object. Default: download and hash (always correct, any backend)."""
+         with tempfile.TemporaryDirectory() as d:
+@@ -193,6 +196,109 @@ class RcloneBackend(StorageBackend):
+         return {"used_bytes": used, "free_bytes": free}
+ 
+ 
++class GitBackend(StorageBackend):
++    """A dedicated branch of a private Git repository (e.g. the project's own GitHub repo) as an off-machine store
++    for SMALL, ENCRYPTED recovery data: database snapshot, timelines, reports. Never media or model weights.
++
++    Uses the user's existing Git credentials - no new account, no payment method. Writes are staged locally and
++    pushed as one commit by flush(); pushes are plain fast-forwards (never forced)."""
++    MAX_FILE = 50 * 1024 * 1024  # GitHub rejects files over 100 MB; stay far below
++
++    def __init__(self, url: str, branch: str = "nexus-backup", name: str = "git", workdir: str | Path | None = None):
++        self.url, self.branch, self.name = url, branch, name
++        self.dir = Path(workdir) if workdir else config.HOME / "run" / "gitstore" / hashlib.sha256(f"{url}#{branch}".encode()).hexdigest()[:12]
++        self._dirty = False
++        self._synced = False
++
++    def _git(self, *args: str, check: bool = True, timeout: int = 600) -> str:
++        r = subprocess.run(["git", "-C", str(self.dir), "-c", "user.name=NEXUS backup", "-c", "user.email=nexus-backup@localhost",
++                            "-c", "commit.gpgsign=false", "-c", "core.autocrlf=false", *args], capture_output=True, text=True, timeout=timeout)
++        if check and r.returncode != 0:
++            raise StorageError(f"{self.name}: git {args[0]} failed: {(r.stderr or r.stdout).strip()[-300:]}")
++        return r.stdout.strip()
++
++    def _sync(self) -> None:
++        if self._synced:
++            return
++        if not shutil.which("git"):
++            raise StorageError("git is not installed")
++        if not (self.dir / ".git").exists():
++            self.dir.mkdir(parents=True, exist_ok=True)
++            self._git("init", "-q")
++            self._git("remote", "add", "origin", self.url)
++        if self._git("ls-remote", "--heads", "origin", self.branch, timeout=120):
++            self._git("fetch", "-q", "origin", self.branch, timeout=1800)
++            self._git("checkout", "-q", "-B", self.branch, "FETCH_HEAD")
++        else:  # first use: an orphan branch that shares no history with the code
++            self._git("checkout", "-q", "--orphan", self.branch, check=False)
++        self._synced = True
++
++    def _p(self, key: str) -> Path:
++        p = (self.dir / key).resolve()
++        if self.dir.resolve() not in p.parents or ".git" in Path(key).parts:
++            raise StorageError(f"key escapes the storage root: {key}")
++        return p
++
++    def put(self, key: str, src: Path) -> None:
++        self._sync()
++        if Path(src).stat().st_size > self.MAX_FILE:
++            raise StorageError(f"{self.name}: {key} is {Path(src).stat().st_size / 1e6:.0f} MB - too large for a Git store (media belongs in object storage)")
++        dest = self._p(key)
++        dest.parent.mkdir(parents=True, exist_ok=True)
++        shutil.copyfile(src, dest)
++        self._dirty = True
++
++    def flush(self) -> None:
++        if not self._dirty:
++            return
++        self._git("add", "-A")
++        if self._git("status", "--porcelain"):
++            self._git("commit", "-q", "-m", "NEXUS backup")
++        self._git("push", "-q", "origin", f"HEAD:refs/heads/{self.branch}", timeout=1800)  # fast-forward only; a rejected push raises
++        self._dirty = False
++
++    def get(self, key: str, dest: Path) -> None:
++        self._sync()
++        src = self._p(key)
++        if not src.is_file():
++            raise StorageError(f"{self.name}: missing object {key}")
++        Path(dest).parent.mkdir(parents=True, exist_ok=True)
++        shutil.copyfile(src, dest)
++
++    def size(self, key: str) -> int | None:
++        self._sync()
++        p = self._p(key)
++        return p.stat().st_size if p.is_file() else None
++
++    def sha256(self, key: str) -> str:
++        """Checksum of what the REMOTE branch holds (re-fetched), not of the local working copy."""
++        self.flush()
++        self._git("fetch", "-q", "origin", self.branch, timeout=1800)
++        r = subprocess.run(["git", "-C", str(self.dir), "cat-file", "blob", f"FETCH_HEAD:{key}"], capture_output=True, timeout=600)
++        if r.returncode != 0:
++            raise StorageError(f"{self.name}: {key} is not on the remote branch")
++        return hashlib.sha256(r.stdout).hexdigest()
++
++    def list(self, prefix: str = "") -> list[dict]:
++        self._sync()
++        base = self.dir / prefix
++        if not base.exists():
++            return []
++        return [{"key": f.relative_to(self.dir).as_posix(), "size": f.stat().st_size}
++                for f in sorted(base.rglob("*")) if f.is_file() and ".git" not in f.relative_to(self.dir).parts]
++
++    def delete(self, key: str) -> None:
++        self._sync()
++        self._p(key).unlink(missing_ok=True)
++        self._dirty = True
++
++    def usage(self) -> dict:
++        self._sync()
++        # history keeps every old object, so the repository's packed size is what counts against the provider's limit
++        used = sum(f.stat().st_size for f in (self.dir / ".git").rglob("*") if f.is_file())
++        return {"used_bytes": used, "free_bytes": None}
++
++
+ # ----------------------------------------------------------------- destinations + zero-spend policy
+ @functools.lru_cache(maxsize=1)
+ def providers() -> dict[str, dict]:
+@@ -237,6 +343,11 @@ def open_destination(d: dict) -> StorageBackend:
+     p = providers()[d["provider"]]
+     if p["kind"] == "local":
+         return LocalBackend(d["root"], d["name"])
++    if p["kind"] == "git":
++        if not d.get("authorized"):
++            raise StorageBlocked(f"destination '{d['name']}' is remote: set \"authorized\": true in storage.json to allow pushing "
++                                 f"encrypted recovery data to the Git branch '{d.get('branch', 'nexus-backup')}'")
++        return GitBackend(d["url"], d.get("branch", "nexus-backup"), d["name"])
+     if not d.get("authorized"):
+         raise StorageBlocked(f"destination '{d['name']}' is remote: set \"authorized\": true in storage.json to allow "
+                              f"uploading private project data to {p['name']}")
+diff --git a/nexus/tools.py b/nexus/tools.py
+index 776276c..646dd02 100644
+--- a/nexus/tools.py
++++ b/nexus/tools.py
+@@ -27,7 +27,7 @@ def health() -> list[dict]:
+             elif c.get("version_py"):
+                 importlib.import_module(c["version_py"])
+                 dist = {"faster_whisper": "faster-whisper", "scenedetect": "scenedetect", "piper": "piper-tts", "llama_cpp": "llama-cpp-python",
+-                        "PIL": "pillow", "ctranslate2": "ctranslate2", "manim": "manim", "numpy": "numpy"}[c["version_py"]]
++                        "PIL": "pillow", "diffusers": "diffusers", "ctranslate2": "ctranslate2", "manim": "manim", "numpy": "numpy"}[c["version_py"]]
+                 row["version"] = importlib.metadata.version(dist)
+                 row["healthy"] = True
+             elif c["status"] == "adapter":
+diff --git a/nexus/ui/index.html b/nexus/ui/index.html
+index e6beb4e..bd7e528 100644
+--- a/nexus/ui/index.html
++++ b/nexus/ui/index.html
+@@ -89,12 +89,15 @@ async dashboard(m){const d=await api("/api/dashboard");const hw=d.hardware;const
+  ${st(Math.round(d.qa.first_pass_rate*100)+"%","passed automated QA")}${st(d.cpu_seconds_in_ffmpeg+" s","CPU time in FFmpeg")}${st("0 s","GPU time used")}${st(hw.ram_free_gb+" / "+hw.ram_gb+" GB","RAM free")}${st(hw.disk_free_gb+" GB","disk free")}</div>
+  <h3 class="sec">Hardware</h3><p>${esc(hw.cpu)} · ${hw.threads} threads · GPU: ${hw.gpu?esc(hw.gpu.name):"none"} · acceleration: ${esc(hw.acceleration)}</p>
+  <h3 class="sec">Measured throughput</h3>${table(Object.entries(d.throughput),[["Metric",r=>esc(r[0])],["Value",r=>r[1].value],["Source",r=>r[1].measured?tag("measured","ok"):tag("default, not measured","warn")]])}<div id="jobs"></div>`;poll($("#jobs"))},
+-async creator(m){m.innerHTML=`<h2 class="page">AI Video Creator</h2><p class="lead">From a topic to a finished, reviewed video. Research comes from Wikipedia (cited), visuals from Wikimedia Commons with licence records, narration from Piper, script from a local LLM. Takes roughly 5–10 minutes.</p>
++async creator(m){m.innerHTML=`<h2 class="page">AI Video Creator</h2><p class="lead">From a topic to a finished, reviewed video. Research comes from Wikipedia (cited). Each scene is directed as shots: a licensed photo when one truly matches, otherwise a picture generated on this computer, every shot with a real camera move; the opening can be a generated moving clip. Narration from Piper, script from a local LLM. Takes roughly 8–12 minutes on a 4-core PC.</p>
+  <div class="row"><label>Topic or idea<input id="topic" placeholder="How vaccines train the immune system"></label><label style="max-width:110px">Scenes<input id="scenes" type="number" value="5" min="3" max="10"></label>
+  <label style="max-width:150px">Format<select id="vert"><option value="">16:9 landscape</option><option value="1">9:16 vertical</option></select></label></div>
++ <div class="row"><label style="max-width:190px">Look<select id="preset">${["cinematic","documentary","educational","scientific","commercial","storytelling","social","explainer","film"].map(x=>`<option${x==="documentary"?" selected":""}>${x}</option>`).join("")}</select></label>
++ <label style="max-width:300px">Visuals<select id="visuals"><option value="auto">Directed shots: matching photo or generated</option><option value="generated">Directed shots: always generated</option><option value="stills">Simple stills (fastest)</option></select></label>
++ <label style="max-width:240px">Opening<select id="motion"><option value="1">Generated moving clip (+2 min)</option><option value="0">Camera move only</option></select></label></div>
+  ${mode!=="beginner"?`<label style="color:var(--mute);font-size:12px">Your own research notes (optional; used as the fact source)<textarea id="notes"></textarea></label>`:""}
+  <div class="row"><button id="go">Create video</button></div><div class="note">The script is checked against the research text (numbers and claims must be traceable). You still need to watch the result before publishing.</div><div id="jobs"></div>`;
+- $("#go").onclick=async()=>{if(!$("#topic").value.trim())return;await api("/api/create",{topic:$("#topic").value,scenes:+$("#scenes").value,vertical:!!$("#vert").value,notes:$("#notes")?.value||null});poll($("#jobs"))};poll($("#jobs"))},
++ $("#go").onclick=async()=>{if(!$("#topic").value.trim())return;await api("/api/create",{topic:$("#topic").value,scenes:+$("#scenes").value,vertical:!!$("#vert").value,notes:$("#notes")?.value||null,preset:$("#preset").value,visuals:$("#visuals").value,motion_shots:+$("#motion").value});poll($("#jobs"))};poll($("#jobs"))},
+ async projects(m){const p=await api("/api/projects");m.innerHTML=`<h2 class="page">Project History</h2><p class="lead">Originals are never modified. Every edit is a saved version you can return to.</p>`+table(p,[["Project",r=>`<a href="#" onclick="go('editor','${r.id}');return false">${esc(r.name)}</a>`],["Type",r=>tag(r.kind)],["Created",r=>new Date(r.created*1000).toLocaleString()]])},
+ async editor(m,pid){ if(!pid){m.innerHTML=`<h2 class="page">Video Editor</h2><p class="lead">Upload a video you own or are authorised to use. NEXUS analyses it and proposes an edit before changing anything.</p>
+   <div class="row"><input type="file" id="f" accept="video/*,audio/*"><button id="up">Upload and analyse</button></div><div id="jobs"></div><h3 class="sec">Or open a project</h3><div id="pl"></div>`;
+diff --git a/nexus/workflows.py b/nexus/workflows.py
+index eafb412..74b8540 100644
+--- a/nexus/workflows.py
++++ b/nexus/workflows.py
+@@ -12,7 +12,8 @@ def create_from_idea(job: jobs.Job) -> dict:
+     from . import create
+     p = job.params
+     out = create.create_video(p["topic"], scenes=p.get("scenes", 5), lang=p.get("lang", "en"), notes=p.get("notes"),
+-                              size=tuple(p.get("size", (1280, 720))), name=p.get("name"), stage=job.stage, on_project=job.set_project)
++                              size=tuple(p.get("size", (1280, 720))), name=p.get("name"), stage=job.stage, on_project=job.set_project,
++                              preset=p.get("preset"), visuals=p.get("visuals", "auto"), motion_shots=p.get("motion_shots", 1))
+     return {"project": out["project"], "status": out["report"]["status"], "issues": out["report"]["known_issues"],
+             "title": out["script"]["title"], "output": out["output"]}
+ 
+diff --git a/scripts/setup.sh b/scripts/setup.sh
+index bf1315c..3e87ad4 100755
+--- a/scripts/setup.sh
++++ b/scripts/setup.sh
+@@ -13,6 +13,8 @@ echo "== python environment"
+ python3 -m venv .venv
+ .venv/bin/pip install -q -U pip
+ .venv/bin/pip install -q -r requirements.txt      # exact tested versions: requirements.lock
++echo "== generated visuals (optional: local image + video models, CPU PyTorch)"
++.venv/bin/pip install -q -r requirements-gen.txt || echo "   skipped - NEXUS works without generated visuals (stock photos + title cards)"
+ if [ -z "${NEXUS_SKIP_MODELS:-}" ]; then
+   echo "== models (Whisper small, Qwen3-4B, MADLAD-400 3B, Piper voices) - checks free disk space first"
+   .venv/bin/python -m nexus models fetch
+diff --git a/scripts/windows/setup.ps1 b/scripts/windows/setup.ps1
+index bbd3d41..6adfb32 100644
+--- a/scripts/windows/setup.ps1
++++ b/scripts/windows/setup.ps1
+@@ -5,6 +5,8 @@
+ param([switch]$SkipModels)
+ $ErrorActionPreference = "Stop"
+ Set-Location (Join-Path $PSScriptRoot "..\..")
++# Everything this script prints is also saved to setup.log - send that file when asking for help.
++try { Start-Transcript -Path "setup.log" -Force | Out-Null } catch {}
+ function Step($m) { Write-Host "`n== $m" -ForegroundColor Cyan }
+ function Fail($m) { Write-Host "`nSETUP STOPPED: $m" -ForegroundColor Red; exit 1 }
+ function Have($c) { [bool](Get-Command $c -ErrorAction SilentlyContinue) }
+@@ -60,6 +62,10 @@ Write-Host "   installing packages (first run takes several minutes)..."
+ & $vpy -m pip install -q --prefer-binary --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu -r requirements.txt
+ if ($LASTEXITCODE -ne 0) { Fail "a Python package failed to install - the error is printed above." }
+ 
++Step "Generated visuals (local image + video models; optional - without it NEXUS uses stock photos and title cards)"
++& $vpy -m pip install -q --prefer-binary -r requirements-gen.txt
++if ($LASTEXITCODE -ne 0) { Write-Host "   could not install the image/video generation packages; NEXUS still works without generated visuals." -ForegroundColor Yellow }
++
+ if (-not $SkipModels) {
+   Step "Models (speech recognition, language model, translation, voices) - resumable download"
+   & $vpy -m nexus models fetch
+@@ -69,4 +75,5 @@ if (-not $SkipModels) {
+ Step "Doctor"
+ & $vpy -m nexus doctor
+ Write-Host "`n(Lines marked BAD above name what is missing. Optional tools may be BAD without blocking NEXUS_START.)"
++try { Stop-Transcript | Out-Null } catch {}
+ exit 0
+diff --git a/tests/fast/test_quality_guards.py b/tests/fast/test_quality_guards.py
+index ba1d7bd..a8ab388 100644
+--- a/tests/fast/test_quality_guards.py
++++ b/tests/fast/test_quality_guards.py
+@@ -69,3 +69,20 @@ def test_subtitle_cues_break_at_sentence_and_clause_boundaries():
+     assert any(t.endswith("designed for?") for t in texts) and texts[-1].endswith("immunology.")
+     assert cues[0]["start"] == 0.0 and abs(cues[-1]["end"] - 12.0) < 0.01 and all(a["end"] <= b["start"] + 1e-6 for a, b in zip(cues, cues[1:]))
+     assert [c["text"] for c in subs.cues_from_text("Short line.", 0, 2)] == ["Short line."]
++
++
++def test_stock_photo_must_be_about_the_scene(home, monkeypatch):
++    assert assets.relevance("Human hip implant components", "Human immune system cells") < 0.5
++    assert assets.relevance("Vaccination at an immunization clinic", "vaccine clinic") >= 0.5
++    assert assets.relevance("Solar panels on a roof", "solar panel roof") == 1.0
++
++    def commons(q, n=5, min_width=1000):
++        return [{"id": "commons:9", "title": "Human hip implant components"}]
++
++    commons.__name__ = "search_commons"
++    monkeypatch.setattr(assets, "search_commons", commons)
++    monkeypatch.setattr(assets, "search_images", lambda q, **k: [])
++    monkeypatch.setattr(assets, "acquire", lambda c: {"id": c["id"], "path": "x.jpg", "license": "CC0"})
++    monkeypatch.setattr(assets, "_usable_image", lambda p: True)
++    assert assets.find_image("Human immune system cells", min_relevance=0.5) is None      # rejected -> the scene gets a generated picture
++    assert assets.find_image("Human immune system cells")["relevance"] < 0.5              # old behaviour still available, and labelled
+diff --git a/tests/fast/test_storage_backup.py b/tests/fast/test_storage_backup.py
+index d17405e..0be8952 100644
+--- a/tests/fast/test_storage_backup.py
++++ b/tests/fast/test_storage_backup.py
+@@ -204,3 +204,73 @@ def test_prune_keeps_recent_snapshots_restorable(home, tmp_path):
+     out = backup.prune(b, keep=1)
+     assert out["snapshots_removed"] == 2 and len(backup.list_snapshots(b)) == 1
+     assert backup.verify(b)["ok"] and backup.restore(b, tmp_path / "after-prune")["ok"]
++
++
++def _bare(tmp_path):
++    import subprocess
++    remote = tmp_path / "offsite.git"
++    subprocess.run(["git", "init", "-q", "--bare", str(remote)], check=True)
++    return remote
++
++
++def test_git_branch_backend_contract_and_remote_checksum(tmp_path, home):
++    remote = _bare(tmp_path)
++    b = storage.GitBackend(str(remote), "nexus-backup", workdir=tmp_path / "wc")
++    f = tmp_path / "a.bin"
++    f.write_bytes(os.urandom(30_000))
++    assert b.size("x/a.bin") is None and b.list("x") == []
++    b.put("x/a.bin", f)
++    b.flush()
++    assert b.size("x/a.bin") == 30_000 and b.sha256("x/a.bin") == storage.sha256_file(f)      # hashed from the REMOTE branch
++    # a second machine sees the object after cloning the branch
++    other = storage.GitBackend(str(remote), "nexus-backup", workdir=tmp_path / "wc2")
++    other.get("x/a.bin", tmp_path / "back.bin")
++    assert (tmp_path / "back.bin").read_bytes() == f.read_bytes() and [o["key"] for o in other.list()] == ["x/a.bin"]
++    big = tmp_path / "big.bin"
++    with open(big, "wb") as fh:
++        fh.truncate(storage.GitBackend.MAX_FILE + 1)
++    with pytest.raises(storage.StorageError, match="too large"):                               # media never goes into Git
++        b.put("x/big.bin", big)
++    with pytest.raises(storage.StorageError):
++        b.put("../escape", f)
++    b.delete("x/a.bin")
++    b.flush()
++    assert storage.GitBackend(str(remote), "nexus-backup", workdir=tmp_path / "wc3").size("x/a.bin") is None
++
++
++def test_offsite_git_backup_restores_on_a_fresh_machine(home, tmp_path, monkeypatch):
++    """External backup strategy: encrypted state + metadata pushed to a Git branch; the laptop dies; restore from the remote alone."""
++    p, m = _project(home, tmp_path)
++    remote = _bare(tmp_path)
++    dest = {"name": "offsite", "provider": "git-private-branch", "url": str(remote), "enabled": True}
++    storage.save_destinations([dest])
++    out = backup.run_backup()
++    assert not out["ok"] and "authorized" in out["results"][0]["error"]                        # needs the user's explicit consent
++    storage.save_destinations([{**dest, "authorized": True}])
++    assert "NEXUS_BACKUP_PASSPHRASE" in backup.run_backup()["results"][0]["error"]             # and never leaves the machine unencrypted
++    monkeypatch.setenv("NEXUS_BACKUP_PASSPHRASE", "correct horse battery staple")
++    out = backup.run_backup()
++    r = out["results"][0]
++    assert out["ok"] and r["encrypted"] and r["verify"]["ok"] and r["verify"]["checksums_compared"] > 0
++    import subprocess
++    tree = subprocess.run(["git", "-C", str(remote), "ls-tree", "-r", "--name-only", "nexus-backup"], capture_output=True, text=True).stdout
++    assert "repo.json" in tree and "snapshots/" in tree and "blobs/" in tree
++    raw = subprocess.run(["git", "-C", str(remote), "grep", "-c", "-e", "Holiday film", "nexus-backup"], capture_output=True, text=True).stdout
++    assert raw == ""                                                                           # nothing readable on the remote
++    snap = backup.load_snapshot(storage.open_destination(storage.destinations()[0]), r["snapshot"], backup._key("correct horse battery staple",
++                                __import__("base64").b64decode(json.loads(subprocess.run(["git", "-C", str(remote), "show", "nexus-backup:repo.json"],
++                                                                                           capture_output=True, text=True).stdout)["salt"])))
++    assert {f["tier"] for f in snap["files"]} == {"state", "metadata"}                         # originals/media are NOT pushed to Git
++    # the machine is lost: only the remote and the passphrase survive
++    db.reset_for_tests()
++    home.rename(tmp_path / "dead-laptop")
++    new_home = tmp_path / "new-laptop" / ".nexus"
++    config.set_home(new_home)
++    config.ensure_dirs()
++    storage.save_destinations([{**dest, "authorized": True}])
++    res = backup.restore(storage.open_destination(storage.destinations()[0]), tmp_path / "restored", pw="correct horse battery staple")
++    assert res["files_restored"] == res["files_expected"] > 0 and not res["problems"]
++    config.set_home(tmp_path / "restored")
++    q = prj.Project(p.id)
++    assert q.name == "Holiday film" and q.timeline()["clips"][0]["type"] == "video"            # project, history and timeline are back
++    assert res["references"]["missing"] and all("media" in x or "audio" in x for x in res["references"]["missing"])   # media must come from a media-capable destination: reported, not hidden
+diff --git a/.github/workflows/windows-launchers.yml b/.github/workflows/windows-launchers.yml
+new file mode 100644
+index 0000000..daba608
+--- /dev/null
++++ b/.github/workflows/windows-launchers.yml
+@@ -0,0 +1,70 @@
++name: Windows launchers
++# Runs the real NEXUS_*.bat files on a real Windows machine: full setup (without the 7 GB of models), one-click start,
++# health check, status, backup + restore drill, stop. Heavier than CI, so it only runs when the launchers, the setup
++# script or the dependency lists change - or on demand.
++on:
++  workflow_dispatch:
++  pull_request:
++    paths: ["NEXUS_*.bat", "scripts/windows/**", "requirements.txt", "requirements-gen.txt", "nexus/launcher.py", ".github/workflows/windows-launchers.yml"]
++concurrency:
++  group: winlaunch-${{ github.ref }}
++  cancel-in-progress: true
++permissions:
++  contents: read
++jobs:
++  double-click:
++    runs-on: windows-latest
++    timeout-minutes: 40
++    env:
++      NEXUS_NO_PAUSE: "1"
++      PYTHONUTF8: "1"
++    steps:
++      - uses: actions/checkout@v4
++      - uses: actions/setup-python@v5
++        with:
++          python-version: "3.12"
++      - name: FFmpeg (the setup script would install it with winget on a normal PC)
++        run: choco install ffmpeg -y --no-progress
++      - name: NEXUS_SETUP.bat (no models)
++        shell: cmd
++        run: NEXUS_SETUP.bat -SkipModels
++      - name: Setup log
++        if: always()
++        shell: cmd
++        run: if exist setup.log type setup.log
++      - name: NEXUS_START.bat
++        shell: cmd
++        run: NEXUS_START.bat --no-browser
++      - name: App answers on http://127.0.0.1:8765
++        shell: pwsh
++        run: |
++          $h = Invoke-RestMethod http://127.0.0.1:8765/api/health
++          $h | ConvertTo-Json
++          if (-not $h.ok) { exit 1 }
++          (Invoke-WebRequest http://127.0.0.1:8765/).Content.Substring(0, 200)
++      - name: A real job through the worker (motion-graphics render)
++        shell: pwsh
++        run: |
++          Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8765/api/animate -ContentType application/json -Body '{"kind":"kinetic","title":"t","data":["Windows","works"]}'
++          foreach ($i in 1..60) { $j = (Invoke-RestMethod http://127.0.0.1:8765/api/jobs)[0]; if ($j.status -in "done","failed") { break }; Start-Sleep 2 }
++          $j | ConvertTo-Json -Depth 5
++          if ($j.status -ne "done") { exit 1 }
++      - name: NEXUS_STATUS.bat
++        shell: cmd
++        run: NEXUS_STATUS.bat
++      - name: NEXUS_BACKUP.bat (backup + restore drill)
++        shell: cmd
++        run: NEXUS_BACKUP.bat
++      - name: NEXUS_DOCTOR.bat (informational - optional tools such as Blender are not installed on the runner)
++        shell: cmd
++        continue-on-error: true
++        run: NEXUS_DOCTOR.bat
++      - name: NEXUS_STOP.bat
++        shell: cmd
++        run: NEXUS_STOP.bat
++      - name: Logs
++        if: always()
++        shell: cmd
++        run: |
++          if exist .nexus\logs\api.log type .nexus\logs\api.log
++          if exist .nexus\logs\worker.log type .nexus\logs\worker.log
+diff --git a/docs/GENERATION.md b/docs/GENERATION.md
+new file mode 100644
+index 0000000..baddc99
+--- /dev/null
++++ b/docs/GENERATION.md
+@@ -0,0 +1,83 @@
++# Image & Video Generation — research, benchmarks, selection (2026-11-12)
++
++**Bottom line.** On the build machine (4 CPU threads, 15.6 GB RAM, **no GPU**) NEXUS now generates real images, real
++camera movement and short real text-to-video clips, all with commercially usable open weights. That lifts
++"create from zero" from a slideshow to directed, generated shots. It is **not cinematic video generation**: the strong
++video models (Wan, LTX, HunyuanVideo, CogVideoX) need a GPU that this machine does not have, and none of them was run
++here. They are registered, licence-checked and ranked so that the moment a free GPU is authorised the selector routes to
++them — but their adapter is not written yet (task `GEN-2`).
++
++Reproduce every number: `python scripts/bench_generation.py image|video` → `docs/results/gen_bench_*.json`.
++What this machine will use: `python -m nexus genmodels`.
++
++## 1. Measured on this machine
++### Images
++| Candidate | Licence (model card) | Size | Steps | s / image | Peak RAM | Verdict |
++|---|---|---|---|---|---|---|
++| `sd15-dreamshaper-lcm` (Lykon/dreamshaper-8 + LCM-LoRA) | CreativeML OpenRAIL-M + OpenRAIL++ | 512×288 | 5 | **13.8** | 5.5 GB | fast preview |
++| same | | 768×432 | 5 | **32.7** | 6.3 GB | **default** — clean compositions, convincing portraits and scenes |
++| `tiny-sd-lcm` (segmind/tiny-sd) | CreativeML OpenRAIL-M | — | — | failed | — | **rejected**: pruned UNet cannot load the LCM-LoRA (shape mismatch) |
++| `ssd1b-lcm` (segmind/SSD-1B, 1024 px) | Apache-2.0 + OpenRAIL++ | — | — | not run | — | registered; not a default until measured |
++
++Inspected by eye (harbour scene, sea-captain portrait, virus illustration): coherent, well lit, usable as shots. Weaknesses:
++soft when upscaled to 720p (measured sharpness about half of a 1920 px stock photo), garbled text, occasional anatomy errors.
++
++### Video
++| Technique | Licence | Output | Time | Peak RAM | What it really is |
++|---|---|---|---|---|---|
++| `animatediff-lightning-4step` text-to-video | CreativeML OpenRAIL-M | 16 frames 384×216 (2 s @ 8 fps) | **71.5 s** | 12.9 GB | real generated motion |
++| same, 512×288, no memory slicing | | — | — | **out of memory** (process killed) | |
++| same, 512×288, VAE + attention slicing | | 16 frames (2 s) | **115 s** | 11.0 GB | **default** for the opening "motion shot" |
++| `depth-parallax` camera move (Depth Anything V2 Small) | Apache-2.0 | 120 frames 1280×720 (4 s @ 30 fps) | **1.5 s** (+4 s first load) | < 2 GB | real camera movement with depth parallax over a still; subjects do not move |
++
++Inspected by eye: the AnimateDiff clip is coherent motion (a boat drifting, mist moving) but short, soft and loop-like —
++a stop-gap. The parallax shots show true foreground/background separation and are cheap enough for every scene.
++
++## 2. Candidates that need a GPU (NOT run here — licences read from the model cards, hardware figures as reported upstream)
++| Model | Kind | Licence | Commercial | Reported VRAM | Native output | Selector status |
++|---|---|---|---|---|---|---|
++| **Wan 2.2 TI2V-5B** | text + image → video | Apache-2.0 | yes | ~8 GB quantised/offloaded; upstream README says 24 GB unquantised | 720p, 5 s @ 24 fps | **first choice** for a free 16 GB GPU |
++| **Wan 2.1 T2V-1.3B** | text → video | Apache-2.0 | yes | ~8.2 GB | 480p, 5 s @ 16 fps | fallback on 8 GB |
++| CogVideoX-2b | text → video | Apache-2.0 | yes | ~8 GB | 720×480, 6 s @ 8 fps | older fallback |
++| Mochi 1 | text → video | Apache-2.0 | yes | 20 GB+ | 480p | too large for free GPUs |
++| **LTX-2** (and 2.3/2.5) | text + image → video + audio, multi-shot | LTX-2 Community License | **conditional**: free under USD 10 M annual revenue, use restrictions | 16 GB+ (one source: 32 GB) | up to 4K | strongest per public reports; needs opt-in |
++| LTX-Video 0.9.x | text + image → video | custom ("other") | conditional | ~8 GB | 768×512 | opt-in |
++| CogVideoX-5b | text → video | CogVideoX licence | conditional | ~12 GB | 720×480 | opt-in |
++| HunyuanVideo 1.5 | text + image → video | Tencent Hunyuan Community | **conditional + territory**: licence does not apply in the EU, UK, South Korea | ~14 GB with offloading | 720p | never selected without explicit territory opt-in |
++| Stable Video Diffusion | image → video | Stability community | conditional | ~10 GB | 576×1024, 2–4 s | superseded |
++| Z-Image-Turbo / FLUX.2 klein 4B / Qwen-Image | image | Apache-2.0 | yes | 8 / 12 / 16 GB+ | 1024 px+ | GPU image upgrades |
++| SDXL-Turbo | image | Stability **non-commercial** | **no** | — | — | rejected |
++
++Why not judge by popularity: HunyuanVideo and LTX-2 are among the best-looking open models, yet one is unusable for a
++creator in the EU/UK/Korea and the other is conditionally licensed — so the automatic first choice is Wan 2.2 5B, whose
++licence is unconditional. Why nothing bigger runs locally: Wan's text encoder alone (UMT5-XXL, ~5.7 B parameters) needs
++more memory than this machine can give it at a usable speed.
++
++## 3. Model + compute selection (`nexus/generate/select.py`, registry `nexus/registry/genmodels.yaml`)
++Order: licence eligible → fits a free compute tier → higher quality → measured here. Rules enforced in code and tests:
++- non-commercial licences are never selectable; conditional licences need the model id in `accepted_conditional_licenses`
++  (settings.json); territory-restricted licences need a separate explicit opt-in;
++- a model becomes a default only after it has been **benchmarked on real hardware**;
++- a model is "runnable" only where NEXUS has a working adapter — GPU models are listed under *better with* together
++  with what they need and where they could run, never claimed to work;
++- remote free compute (Kaggle: ~30 GPU-hours/week, 16 GB T4) is considered only after `"compute": {"kaggle": true}`.
++
++On this machine today: image → `sd15-dreamshaper-lcm` (CPU); text-to-video → `animatediff-lightning-4step` (CPU);
++camera move → `depth-parallax`; image-to-video → **not available** (no eligible model fits a CPU).
++
++## 4. How generation is used in productions (`nexus/generate/shots.py`)
++- Each scene gets a **shot list**, not one still: scenes longer than 9 s get a wide and a closer shot; the first scene
++  opens with a generated moving clip when the machine has ≥ 14 GB RAM.
++- Every shot gets a camera move with depth parallax (push-in, pull-out, pan, rise, orbit), chosen by the style preset.
++- Factual content prefers a licensed photo **only if its title is really about the scene** (relevance ≥ 0.5); otherwise
++  the picture is generated from the script's `visual_prompt` (a full-sentence description written with the narration).
++- Nine style presets (cinematic, documentary, educational, scientific, commercial, storytelling, social, explainer, film)
++  set prompt language, camera moves, grade and music mood.
++- Every generated shot records model, licence, prompt and seed; results are cached, so re-rendering or regenerating
++  one scene costs nothing for the others.
++
++## 5. What is still missing for "cinematic"
++1. A GPU adapter + a real free GPU (Kaggle) run of Wan 2.2 TI2V-5B: text-to-video and image-to-video at 720p (`GEN-2`, blocked on the user's account).
++2. Identity-preserving character generation (IP-Adapter or reference-image editing models); today consistency comes from fixed descriptions + seeds and is only approximate.
++3. Sharper stills: SSD-1B/SDXL at 1024 px on CPU is unmeasured; a GPU image model (Z-Image-Turbo, FLUX.2 klein) is the real fix.
++4. VFX/compositing, upscaling and frame interpolation models (`GEN-3`).
+diff --git a/nexus/bench.py b/nexus/bench.py
+new file mode 100644
+index 0000000..9256127
+--- /dev/null
++++ b/nexus/bench.py
+@@ -0,0 +1,260 @@
++"""Quality benchmark + regression: fixed production examples, measured the same way every time, compared with a
++saved baseline. `python -m nexus regress run` fails (exit 1) when a meaningful metric gets worse.
++
++What is measured (all from the rendered file, the timeline and the script - nothing is self-reported by a model):
++  visual      sharpness, colourfulness, share of scenes with a real picture (not a title card)
++  motion      mean frame-to-frame change, share of the programme that is a frozen picture, generated-motion shots, shots per scene
++  story       words per scene, sentence count, hook present, source grounding / QA gates passed
++  continuity  cuts per minute, repeated visuals
++  voice       Whisper hears the narration back (share of script words recovered)
++  translation back-translation similarity + language QA checks (localised case)
++  audio       integrated loudness, true peak, dead air
++  subtitles   cues, longest cue, reading speed, cues that straddle a sentence boundary
++  technical   codec/resolution/fps, decode errors, black/frozen sections, duration vs timeline
++
++These are proxies. They catch regressions and prove direction (e.g. "no longer a slideshow"); they do not replace
++a person watching the result."""
++from __future__ import annotations
++
++import json
++import re
++import subprocess
++import time
++from pathlib import Path
++
++from . import config
++
++RESULTS = config.ROOT / "docs" / "results" / "bench"
++BASELINE = RESULTS / "baseline.json"
++
++# metric -> (direction, tolerance). "up": must not fall by more than tol (relative); "down": must not rise by more than
++# tol (relative, with a small absolute floor); "eq": must match exactly; "near": absolute distance to baseline <= tol.
++RULES: dict[str, tuple[str, float]] = {
++    "visual.sharpness": ("up", 0.35), "visual.colorfulness": ("up", 0.40), "visual.real_picture_ratio": ("up", 0.15),
++    "motion.mean_change": ("up", 0.35), "motion.frozen_ratio": ("down", 0.25), "motion.generated_motion_shots": ("up", 0.0),
++    "motion.shots_per_scene": ("up", 0.25),
++    "story.min_words_per_scene": ("up", 0.35), "story.gates_passed_ratio": ("up", 0.10), "story.hook": ("up", 0.0),
++    "continuity.repeated_visuals": ("down", 0.0),
++    "voice.heard_back": ("up", 0.12), "translation.back_similarity": ("up", 0.15), "translation.checks_passed_ratio": ("up", 0.15),
++    "audio.lufs": ("near", 1.5), "audio.true_peak": ("down", 0.0), "audio.dead_air_s": ("down", 0.5),
++    "subtitles.straddling_cues": ("down", 0.0), "subtitles.max_chars": ("down", 0.10), "subtitles.max_cps": ("down", 0.25),
++    "technical.decode_errors": ("eq", 0), "technical.black_s": ("down", 0.5), "technical.width": ("eq", 0), "technical.height": ("eq", 0),
++    "technical.fps": ("eq", 0), "technical.qa_passed": ("up", 0.0),
++}
++
++
++# ----------------------------------------------------------------- measuring one programme
++def _frames(path: str | Path, fps: float = 2.0, w: int = 320, h: int = 180):
++    import numpy as np
++    r = subprocess.run(["ffmpeg", "-loglevel", "error", "-i", str(path), "-vf", f"fps={fps},scale={w}:{h}", "-pix_fmt", "rgb24", "-f", "rawvideo", "-"],
++                       capture_output=True)
++    a = np.frombuffer(r.stdout, dtype=np.uint8)
++    n = len(a) // (w * h * 3)
++    return a[: n * w * h * 3].reshape(n, h, w, 3).astype("float32") if n else np.zeros((0, h, w, 3), dtype="float32")
++
++
++def picture_metrics(path: str | Path) -> dict:
++    import numpy as np
++    f = _frames(path)
++    if len(f) < 2:
++        return {"sharpness": 0.0, "colorfulness": 0.0, "mean_change": 0.0, "frozen_ratio": 1.0}
++    g = f.mean(axis=3)
++    lap = g[:, 1:-1, 1:-1] * 4 - g[:, :-2, 1:-1] - g[:, 2:, 1:-1] - g[:, 1:-1, :-2] - g[:, 1:-1, 2:]
++    rg, yb = f[..., 0] - f[..., 1], 0.5 * (f[..., 0] + f[..., 1]) - f[..., 2]
++    color = np.sqrt(rg.std(axis=(1, 2)) ** 2 + yb.std(axis=(1, 2)) ** 2) + 0.3 * np.sqrt(rg.mean(axis=(1, 2)) ** 2 + yb.mean(axis=(1, 2)) ** 2)
++    diff = np.abs(g[1:] - g[:-1]).mean(axis=(1, 2))
++    return {"sharpness": round(float(np.median(lap.var(axis=(1, 2)))), 1), "colorfulness": round(float(np.median(color)), 1),
++            # half-second steps whose picture barely changes = a still on screen (subtitle changes alone stay under 0.25)
++            "mean_change": round(float(diff.mean()), 3), "frozen_ratio": round(float((diff < 0.25).mean()), 3)}
++
++
++def timeline_metrics(tl: dict) -> dict:
++    scenes = [c for c in tl["clips"] if c.get("narration")]
++    real = [c for c in scenes if c.get("shots") or (c["type"] in ("image", "video") and "title-card" not in str((c.get("provenance") or {}).get("source", "")))]
++    shots = sum(len(c.get("shots") or [1]) for c in scenes)
++    gen_motion = sum(1 for c in scenes for s in c.get("shots") or [] if s.get("kind") == "generated-video")
++    imgs = [s.get("image") for c in scenes for s in (c.get("shots") or []) if s.get("image")] + [c["src"] for c in scenes if c["type"] == "image"]
++    return {"scenes": len(scenes), "real_picture_ratio": round(len(real) / max(1, len(scenes)), 3), "shots_per_scene": round(shots / max(1, len(scenes)), 2),
++            "generated_motion_shots": gen_motion, "repeated_visuals": len(imgs) - len(set(imgs)),
++            "cuts_per_minute": round(60 * max(0, shots + 1) / max(1.0, sum(float(c.get("duration") or (c.get("out", 0) - c.get("in", 0))) for c in tl["clips"])), 1)}
++
++
++def subtitle_metrics(tl: dict) -> dict:
++    cues = tl.get("subtitles") or []
++    if not cues:
++        return {"cues": 0, "max_chars": 0, "max_cps": 0.0, "straddling_cues": 0}
++    return {"cues": len(cues), "max_chars": max(len(c["text"]) for c in cues),
++            "max_cps": round(max(len(c["text"]) / max(0.3, c["end"] - c["start"]) for c in cues), 1),
++            "straddling_cues": sum(1 for c in cues if re.search(r"[.!?]\s+\S", c["text"]))}
++
++
++def story_metrics(script: dict, report: dict | None) -> dict:
++    sc = script.get("scenes", [])
++    words = [len(s["narration"].split()) for s in sc] or [0]
++    hook = sc[0]["narration"] if sc else ""
++    pre = next((s for s in (report or {}).get("stages", []) if s["stage"] == "1-pre-production"), None)
++    checks = pre["checks"] if pre else []
++    return {"scenes": len(sc), "words": sum(words), "min_words_per_scene": min(words),
++            "sentences_per_scene": round(sum(len(re.findall(r"[.!?](?:\s|$)", s["narration"])) for s in sc) / max(1, len(sc)), 2),
++            "hook": int("?" in hook or bool(re.search(r"\d|never|every|most|only|imagine|did you", hook, re.I))),
++            "gates_passed_ratio": round(sum(c["ok"] for c in checks) / len(checks), 3) if checks else 0.0}
++
++
++def voice_metric(video: str | Path, script: dict, lang: str = "en") -> dict:
++    """Transcribe the finished programme's audio and compare with the script: is the narration intelligible in the mix?"""
++    from . import qa
++    from .media import ff
++    from .speech import asr
++    wav = Path(video).with_suffix(".bench.wav")
++    ff.extract_audio(video, wav)
++    heard = asr.transcribe(wav, language=lang.split("-")[0], words=False)["text"]
++    wav.unlink(missing_ok=True)
++    return {"heard_back": round(qa.text_similarity(" ".join(s["narration"] for s in script["scenes"]), heard), 3)}
++
++
++def measure(video: str | Path, tl: dict | None = None, script: dict | None = None, report: dict | None = None, voice: bool = True, lang: str = "en") -> dict:
++    from .media import ff
++    info = ff.probe(video)
++    loud = ff.loudness(video)
++    silences = ff.detect_silence(video, min_dur=2.5)
++    tech = next((s for s in (report or {}).get("stages", []) if s["stage"] == "5-technical"), None)
++    pm = picture_metrics(video)
++    m: dict = {
++        "visual": {"sharpness": pm["sharpness"], "colorfulness": pm["colorfulness"]},
++        "motion": {"mean_change": pm["mean_change"], "frozen_ratio": pm["frozen_ratio"]},
++        "audio": {"lufs": round(float(loud.get("input_i", loud.get("lufs", 0))), 2), "true_peak": round(float(loud.get("input_tp", loud.get("true_peak", 0))), 2),
++                  "dead_air_s": round(sum(b - a for a, b in silences), 2)},
++        "technical": {"duration": round(info["duration"], 2), "width": info["video"]["width"], "height": info["video"]["height"], "fps": info["video"]["fps"],
++                      "decode_errors": len(ff.decode_check(video)), "black_s": round(sum(b - a for a, b in ff.detect_black(video)), 2),
++                      "qa_passed": int(bool(tech and tech["passed"])) if report else 0},
++    }
++    if tl:
++        t = timeline_metrics(tl)
++        m["visual"]["real_picture_ratio"] = t["real_picture_ratio"]
++        m["motion"].update(generated_motion_shots=t["generated_motion_shots"], shots_per_scene=t["shots_per_scene"])
++        m["continuity"] = {"repeated_visuals": t["repeated_visuals"], "cuts_per_minute": t["cuts_per_minute"], "scenes": t["scenes"]}
++        m["subtitles"] = subtitle_metrics(tl)
++    if script:
++        m["story"] = story_metrics(script, report)
++        if voice:
++            m["voice"] = voice_metric(video, script, lang)
++    return m
++
++
++def measure_project(pid: str, render: str = "master", branch: str = "main", voice: bool = True) -> dict:
++    from . import project as prj
++    p = prj.Project(pid)
++    rep = p.dir / "reports" / f"{render}.qa.json"
++    return measure(p.dir / "renders" / f"{render}.mp4", p.timeline(branch), p.data.get("script"), json.loads(rep.read_text()) if rep.exists() else None, voice,
++                   p.timeline(branch).get("lang", "en"))
++
++
++# ----------------------------------------------------------------- fixed cases
++NOTES_SOLAR = ("Solar panels convert sunlight directly into electricity using photovoltaic cells made of silicon. When light hits a cell it knocks electrons loose, "
++               "and the cell's electric field pushes them into a current. In the last decade the price of solar electricity fell by almost 90 percent, which made "
++               "it the cheapest source of new electricity in most countries. The main challenge is storage, because the sun does not shine at night. Batteries "
++               "store surplus daytime power and release it in the evening, and their cost is falling quickly as well.")
++
++
++def case_explainer(stage=None) -> dict:
++    """Fixed create-from-idea production: same topic, same notes, same scene count, same preset."""
++    from . import create
++    t0 = time.time()
++    r = create.create_video("How solar panels make electricity", scenes=3, notes=NOTES_SOLAR, name="BENCH explainer-solar", preset="documentary",
++                            visuals="auto", motion_shots=1, stage=stage)
++    m = measure_project(r["project"])
++    m["performance"] = {"total_s": round(time.time() - t0, 1), "render_s": r["render"]["elapsed"]}
++    return {"case": "explainer-solar", "project": r["project"], "output": r["output"], "metrics": m}
++
++
++def case_localized(source_project: str, lang: str = "de") -> dict:
++    """Fixed localisation of the explainer: translation fidelity, dubbed voice intelligibility, translated subtitles."""
++    from . import localize, project as prj, qa
++    t0 = time.time()
++    p = prj.Project(source_project)
++    ltl, review = localize.localize(p, p.timeline("main"), lang, None, context=p.name, dub=True)
++    p.save_timeline(ltl, f"{lang} version", branch=lang)
++    stats, report = qa.render_with_qa(p, ltl, f"bench_{lang}", extra_stages=[review], extra={"language": lang})
++    script = {"scenes": [{"narration": c["narration"]} for c in ltl["clips"] if c.get("narration")]}
++    m = measure(stats["output"], ltl, script, report, voice=True, lang=lang)
++    m.pop("story", None)
++    back = next((c for c in review["checks"] if c["check"].startswith("back-translation")), None)
++    sims = re.findall(r"(\d+)%", back["detail"]) if back else []
++    automatic = [c for c in review["checks"] if not c["check"].startswith("native-speaker")]
++    m["translation"] = {"checks_passed_ratio": round(sum(c["ok"] for c in automatic) / max(1, len(automatic)), 3),
++                        "back_similarity": round(int(sims[0]) / 100, 2) if sims else (1.0 if back and back["ok"] else 0.0),  # mean overlap
++                        "lines": len(review.get("lines", [])), "native_review": "required - not automated"}
++    m["performance"] = {"total_s": round(time.time() - t0, 1)}
++    return {"case": f"localized-{lang}", "project": source_project, "output": stats["output"], "metrics": m}
++
++
++CASES = ("explainer-solar", "localized-de")
++
++
++def run(cases: list[str] | None = None) -> dict:
++    out, src = {}, None
++    for name in cases or CASES:
++        if name == "explainer-solar":
++            r = case_explainer()
++            src = r["project"]
++        elif name.startswith("localized-"):
++            if src is None:
++                src = case_explainer()["project"] if "explainer-solar" not in out else out["explainer-solar"]["project"]
++            r = case_localized(src, name.split("-", 1)[1])
++        else:
++            raise KeyError(f"unknown benchmark case {name}")
++        out[r["case"]] = r
++    RESULTS.mkdir(parents=True, exist_ok=True)
++    cur = {"date": time.strftime("%Y-%m-%d"), "nexus_version": config.VERSION, "cases": {k: v["metrics"] for k, v in out.items()}}
++    (RESULTS / "current.json").write_text(json.dumps(cur, indent=1) + "\n", encoding="utf-8")
++    return {"current": cur, "outputs": {k: v["output"] for k, v in out.items()}}
++
++
++# ----------------------------------------------------------------- comparing with the baseline
++def flatten(m: dict) -> dict[str, float]:
++    return {f"{g}.{k}": v for g, d in m.items() if isinstance(d, dict) for k, v in d.items() if isinstance(v, (int, float))}
++
++
++def compare(current: dict, baseline: dict) -> dict:
++    """Per case: regressions (rule violated), improvements, unchanged. Only metrics with a rule can fail the run."""
++    res = {"ok": True, "cases": {}}
++    for case, cm in current["cases"].items():
++        bm = baseline.get("cases", {}).get(case)
++        if bm is None:
++            res["cases"][case] = {"status": "new (no baseline)", "regressions": [], "improvements": []}
++            continue
++        c, b = flatten(cm), flatten(bm)
++        reg, imp = [], []
++        for key, (direction, tol) in RULES.items():
++            if key not in c or key not in b:
++                continue
++            cv, bv = c[key], b[key]
++            if direction == "eq":
++                bad, good = cv != bv, False
++            elif direction == "near":
++                bad, good = abs(cv - bv) > tol, False
++            elif direction == "up":
++                bad, good = cv < bv - abs(bv) * tol - 1e-9, cv > bv + abs(bv) * max(tol, 0.1) + 1e-9
++            else:  # down
++                floor = max(abs(bv) * tol, tol if abs(bv) < 1 else 0.0)
++                bad, good = cv > bv + floor + 1e-9, cv < bv - max(abs(bv) * max(tol, 0.1), 1e-9)
++            if bad:
++                reg.append({"metric": key, "baseline": bv, "current": cv, "rule": f"{direction} (tolerance {tol})"})
++            elif good:
++                imp.append({"metric": key, "baseline": bv, "current": cv})
++        res["cases"][case] = {"status": "REGRESSED" if reg else "ok", "regressions": reg, "improvements": imp}
++        res["ok"] &= not reg
++    return res
++
++
++def accept(note: str = "") -> dict:
++    """Promote the current results to be the baseline (the previous baseline is kept in history)."""
++    cur = json.loads((RESULTS / "current.json").read_text(encoding="utf-8"))
++    hist = RESULTS / "history.json"
++    h = json.loads(hist.read_text(encoding="utf-8")) if hist.exists() else []
++    if BASELINE.exists():
++        h.append(json.loads(BASELINE.read_text(encoding="utf-8")))
++    hist.write_text(json.dumps(h[-20:], indent=1) + "\n", encoding="utf-8")
++    cur["note"] = note
++    BASELINE.write_text(json.dumps(cur, indent=1) + "\n", encoding="utf-8")
++    return cur
+diff --git a/nexus/generate/__init__.py b/nexus/generate/__init__.py
+new file mode 100644
+index 0000000..380c198
+--- /dev/null
++++ b/nexus/generate/__init__.py
+@@ -0,0 +1 @@
++"""Generative visuals: local image generation, local video generation, and the model/compute selector."""
+diff --git a/nexus/generate/image.py b/nexus/generate/image.py
+new file mode 100644
+index 0000000..9d6dcf3
+--- /dev/null
++++ b/nexus/generate/image.py
+@@ -0,0 +1,101 @@
++"""Local text-to-image on CPU (and GPU when present) with open-weight models whose licences allow commercial use.
++
++Candidates are the ones benchmarked on the build machine (scripts/bench_generation.py -> docs/results/gen_bench_image.json).
++The default is chosen by nexus.generate.select from registry/genmodels.yaml and the detected hardware."""
++from __future__ import annotations
++
++import hashlib
++import threading
++import time
++from pathlib import Path
++
++from .. import config, costguard, db
++
++# steps/guidance are the distilled (LCM) settings: 4-6 steps instead of 25-50.
++CANDIDATES: dict[str, dict] = {
++    "sd15-dreamshaper-lcm": {"repo": "Lykon/dreamshaper-8", "lora": "latent-consistency/lcm-lora-sdv1-5", "license": "CreativeML OpenRAIL-M + OpenRAIL++ (LCM-LoRA)",
++                             "steps": 5, "guidance": 1.5, "variant": "fp16", "cls": "sd", "bench_sizes": [(512, 288), (768, 432)]},
++    "ssd1b-lcm": {"repo": "segmind/SSD-1B", "lora": "latent-consistency/lcm-lora-ssd-1b", "license": "Apache-2.0 + OpenRAIL++ (LCM-LoRA)",
++                  "steps": 5, "guidance": 1.2, "variant": "fp16", "cls": "sdxl", "bench_sizes": [(1024, 576)]},
++}
++_lock = threading.Lock()
++_loaded: dict = {}
++
++
++def hf_cache() -> Path:
++    d = config.MODELS / "hf"
++    d.mkdir(parents=True, exist_ok=True)
++    return d
++
++
++def device() -> str:
++    import torch
++    return "cuda" if torch.cuda.is_available() else "cpu"
++
++
++def load(name: str):
++    """Build the pipeline (downloads weights on first use: free, public, no account)."""
++    costguard.authorize("diffusers-local", f"load {name}")
++    import torch
++    from diffusers import AutoPipelineForText2Image, LCMScheduler
++    spec = CANDIDATES[name]
++    dev = device()
++    kw = {"cache_dir": hf_cache(), "torch_dtype": torch.float16 if dev == "cuda" else torch.float32, "safety_checker": None}
++    if spec["variant"]:
++        kw["variant"] = spec["variant"]
++    if spec["cls"] == "sdxl":
++        kw.pop("safety_checker")
++    pipe = AutoPipelineForText2Image.from_pretrained(spec["repo"], **kw)
++    pipe.scheduler = LCMScheduler.from_config(pipe.scheduler.config)
++    pipe.load_lora_weights(spec["lora"], cache_dir=hf_cache())
++    pipe.fuse_lora()
++    pipe.to(dev)
++    pipe.set_progress_bar_config(disable=True)
++    if dev == "cpu":
++        torch.set_num_threads(max(1, torch.get_num_threads()))
++    return pipe
++
++
++def run(pipe, name: str, prompt: str, negative: str, width: int, height: int, seed: int = 0):
++    import torch
++    spec = CANDIDATES[name]
++    g = torch.Generator("cpu").manual_seed(seed)
++    with torch.inference_mode():
++        return pipe(prompt=prompt, negative_prompt=negative if spec["guidance"] > 1 else None, width=width, height=height,
++                    num_inference_steps=spec["steps"], guidance_scale=spec["guidance"], generator=g).images[0]
++
++
++def unload() -> None:
++    import gc
++    with _lock:
++        _loaded.clear()
++    gc.collect()
++
++
++NEGATIVE = "blurry, low quality, deformed, disfigured, extra limbs, extra fingers, text, caption, watermark, logo, frame"
++
++
++def generate(prompt: str, out: Path, *, name: str | None = None, width: int = 768, height: int = 432, seed: int = 0, negative: str = NEGATIVE) -> dict:
++    """Generate one image to `out`. Cached by (model, prompt, size, seed): asking again costs nothing.
++    Returns a provenance record that goes into the project's asset ledger."""
++    if name is None:
++        from . import select
++        name = select.choose("image")["model"]
++    key = hashlib.sha256(f"{name}|{prompt}|{negative}|{width}x{height}|{seed}".encode()).hexdigest()[:20]
++    cache = config.CACHE / "genimg" / f"{key}.jpg"
++    out = Path(out)
++    out.parent.mkdir(parents=True, exist_ok=True)
++    t0 = time.time()
++    if not cache.exists():
++        with _lock:
++            if name not in _loaded:
++                _loaded.clear()
++                _loaded[name] = load(name)
++            img = run(_loaded[name], name, prompt, negative, width, height, seed)
++        cache.parent.mkdir(parents=True, exist_ok=True)
++        img.save(cache, quality=93)
++        db.metric("genimg_seconds", round(time.time() - t0, 2), model=name, size=f"{width}x{height}")
++    out.write_bytes(cache.read_bytes())
++    spec = CANDIDATES[name]
++    return {"path": str(out), "license": "generated by NEXUS (original output)", "source": f"local image model {name}", "model": spec["repo"],
++            "model_license": spec["license"], "prompt": prompt, "seed": seed, "seconds": round(time.time() - t0, 2), "cached": time.time() - t0 < 0.5}
+diff --git a/nexus/generate/select.py b/nexus/generate/select.py
+new file mode 100644
+index 0000000..f41a240
+--- /dev/null
++++ b/nexus/generate/select.py
+@@ -0,0 +1,89 @@
++"""Model + compute selection: pick the strongest model that is (1) licensed for the user's use, (2) able to run on
++hardware that is actually available for free, and say plainly when nothing better can run.
++
++    choose("image") / choose("t2v") / choose("ti2v") / choose("i2v-camera")
++
++Order of preference: eligible licence -> fits a free compute tier -> higher quality -> already benchmarked here.
++A GPU model is only *recommended*, never claimed to work, until its adapter exists and it has been measured."""
++from __future__ import annotations
++
++import functools
++
++import yaml
++
++from .. import config
++
++KINDS = ("image", "t2v", "i2v", "ti2v", "i2v-camera")
++VIDEO_FOR = {"t2v": ("t2v", "ti2v"), "i2v": ("i2v", "ti2v"), "ti2v": ("ti2v",), "image": ("image",), "i2v-camera": ("i2v-camera",)}
++
++
++@functools.lru_cache(maxsize=1)
++def registry() -> dict:
++    return yaml.safe_load((config.REGISTRY_DIR / "genmodels.yaml").read_text(encoding="utf-8"))
++
++
++def hardware() -> dict:
++    from .. import compute
++    hw = compute.detect_hardware()
++    return {"ram_gb": hw["ram_gb"], "vram_gb": (hw["gpu"] or {}).get("vram_gb", 0), "threads": hw["threads"]}
++
++
++def license_ok(m: dict, settings: dict) -> tuple[bool, str]:
++    if m["commercial"] == "no":
++        return False, "non-commercial licence"
++    if m.get("territory_restricted") and not settings.get("accept_territory_restricted_models"):
++        return False, f"licence excludes some territories ({m['conditions']}) - opt in with \"accept_territory_restricted_models\" only if it applies to you"
++    if m["commercial"] == "conditional" and m["id"] not in settings.get("accepted_conditional_licenses", []):
++        return False, f"conditional licence - {m['conditions']} Add \"{m['id']}\" to \"accepted_conditional_licenses\" in settings.json after reading it"
++    return True, "ok"
++
++
++def fits(m: dict, tier: dict) -> bool:
++    if tier.get("vram_gb", 0) >= m.get("min_vram_gb", 1e9) and tier.get("ram_gb", 0) >= m.get("min_ram_gb", 0):
++        return True
++    return bool(m.get("cpu_ok")) and tier.get("ram_gb", 0) >= m.get("min_ram_gb", 0)
++
++
++def choose(kind: str, hw: dict | None = None, settings: dict | None = None) -> dict:
++    """Returns {model, where, runnable, reason, better_with: [...], rejected: [...]}."""
++    if kind not in KINDS:
++        raise ValueError(f"unknown generation kind {kind}")
++    settings = config.settings() if settings is None else settings
++    hw = hardware() if hw is None else hw
++    tiers = [{"id": "local", **hw}]
++    for c in registry()["compute"]:
++        if c["id"] != "local" and (settings.get("compute") or {}).get(c["id"]):
++            tiers.append({"id": c["id"], "vram_gb": c["vram_gb"], "ram_gb": c["ram_gb"]})
++    all_remote = [c for c in registry()["compute"] if c["id"] != "local"]
++    cands = [m for m in registry()["models"] if m["kind"] in VIDEO_FOR[kind]]
++    rejected, ok = [], []
++    for m in cands:
++        good, why = license_ok(m, settings)
++        (ok if good else rejected).append(m if good else {"id": m["id"], "why": why})
++    ranked = sorted(ok, key=lambda m: (-m["quality"], not m.get("benchmarked"), m["id"]))
++    pick = None
++    for m in ranked:
++        for t in tiers:  # local first: never send work away that this machine can do
++            # a model is runnable only where NEXUS has a working adapter for it: today that is the local diffusers path
++            # ... and only a model measured on real hardware may become a default (benchmarked: true)
++            if fits(m, t) and m.get("local") and m.get("benchmarked") and t["id"] == "local":
++                pick = {"model": m["id"], "where": "local-gpu" if t.get("vram_gb", 0) >= m.get("min_vram_gb", 1e9) else "local-cpu", "runnable": True,
++                        "quality": m["quality"], "license": m["license"], "reason": m["notes"]}
++                break
++        if pick:
++            break
++    better = []
++    for m in ranked:
++        if pick and m["quality"] <= pick["quality"]:
++            continue
++        where = [t["id"] for t in tiers if fits(m, t)] or [c["id"] + " (not authorised)" for c in all_remote if fits(m, c)]
++        better.append({"model": m["id"], "quality": m["quality"], "needs": f"{m.get('min_vram_gb', '?')} GB VRAM", "could_run_on": where or ["no free tier - too large"],
++                       "blocked_by": "no GPU adapter implemented yet (task GEN-2)" if not m.get("local") else "hardware"})
++    if pick is None:
++        pick = {"model": None, "where": None, "runnable": False, "quality": 0,
++                "reason": "no eligible model fits the available free hardware"}
++    return {"kind": kind, **pick, "better_with": better, "rejected": rejected, "hardware": hw, "tiers": [t["id"] for t in tiers]}
++
++
++def report(hw: dict | None = None) -> list[dict]:
++    return [choose(k, hw) for k in ("image", "t2v", "ti2v", "i2v-camera")]
+diff --git a/nexus/generate/shots.py b/nexus/generate/shots.py
+new file mode 100644
+index 0000000..8933d4b
+--- /dev/null
++++ b/nexus/generate/shots.py
+@@ -0,0 +1,150 @@
++"""Visual direction: turn a scene into one or more SHOTS (image + camera move) and render them as a scene video.
++
++A scene is no longer one still with a zoom. It gets a shot list - e.g. a wide establishing shot that pushes in, then a
++closer shot that pans - each rendered with real depth parallax. Images come from licensed stock (factual content,
++when a match exists) or the local image model; every shot keeps a provenance record."""
++from __future__ import annotations
++
++import subprocess
++from pathlib import Path
++
++from .. import config
++
++# Look presets: how prompts are finished, which camera moves are used, grade and music mood.
++STYLES: dict[str, dict] = {
++    "cinematic": {"suffix": "cinematic film still, dramatic lighting, shallow depth of field, anamorphic, highly detailed", "moves": ["push_in", "pan_right", "orbit", "pull_out"],
++                  "grade": "cinematic", "mood": "tense"},
++    "documentary": {"suffix": "documentary photograph, natural light, realistic, 35mm, detailed", "moves": ["pan_right", "push_in", "pan_left", "rise"],
++                    "grade": "documentary", "mood": "documentary"},
++    "educational": {"suffix": "clean editorial illustration, bright even lighting, clear subject, detailed", "moves": ["push_in", "pan_right", "pull_out", "pan_left"],
++                    "grade": "none", "mood": "inspiring"},
++    "scientific": {"suffix": "scientific visualization, macro photography, precise, detailed, dark background, vivid", "moves": ["push_in", "orbit", "pull_out", "rise"],
++                   "grade": "cinematic", "mood": "calm"},
++    "commercial": {"suffix": "premium product photography, studio lighting, glossy, clean background, sharp", "moves": ["orbit", "push_in", "pan_left", "pull_out"],
++                   "grade": "vivid", "mood": "upbeat"},
++    "storytelling": {"suffix": "storybook concept art, painterly, warm light, atmospheric, detailed", "moves": ["push_in", "pan_left", "rise", "pull_out"],
++                     "grade": "warm", "mood": "calm"},
++    "social": {"suffix": "bold vibrant photograph, high contrast, eye-catching, sharp", "moves": ["push_in", "orbit", "pan_right", "push_in"],
++               "grade": "vivid", "mood": "upbeat"},
++    "explainer": {"suffix": "modern flat illustration, simple shapes, soft gradient background, clear subject", "moves": ["push_in", "pan_right", "pull_out", "pan_left"],
++                  "grade": "none", "mood": "inspiring"},
++    "film": {"suffix": "cinematic film still, moody lighting, shallow depth of field, 35mm film grain, highly detailed", "moves": ["push_in", "pan_left", "orbit", "pull_out"],
++             "grade": "cinematic", "mood": "tense"},
++}
++SHOT_SIZES = {"wide": "wide establishing shot of", "medium": "medium shot of", "close": "close-up of", "detail": "macro detail shot of"}
++GEN_SIZE = (768, 432)  # measured on 4 CPU threads: ~33 s per image (docs/results/gen_bench_image.json)
++
++
++def available() -> bool:
++    """Generated visuals need torch + diffusers; without them NEXUS falls back to stock stills."""
++    try:
++        import cv2  # noqa: F401
++        import diffusers  # noqa: F401
++        import torch  # noqa: F401
++        return True
++    except ImportError:
++        return False
++
++
++def style(name: str | None) -> dict:
++    return STYLES.get(name or "cinematic", STYLES["cinematic"])
++
++
++def prompt_for(subject: str, shot: str = "wide", style_name: str | None = None, extra: str = "") -> str:
++    parts = [f"{SHOT_SIZES.get(shot, shot)} {subject.strip().rstrip('.')}", extra.strip(), style(style_name)["suffix"]]
++    return ", ".join(p for p in parts if p)
++
++
++def render_scene(shots: list[dict], out: Path, duration: float, size: tuple[int, int] = (1280, 720), fps: int = config.FPS) -> dict:
++    """shots: [{"image": path, "move": str}] -> one video of exactly `duration` seconds, hard cuts between shots."""
++    from . import video
++    out = Path(out)
++    out.parent.mkdir(parents=True, exist_ok=True)
++    if len(shots) == 1 and not shots[0].get("video"):
++        return video.parallax(shots[0]["image"], out, move=shots[0]["move"], seconds=duration, size=size, fps=fps)
++    # a shot that is already a generated moving clip keeps its own length; the camera-move shots share the rest
++    fixed = sum(s["seconds"] for s in shots if s.get("video"))
++    per = max(1.5, (duration - fixed) / max(1, sum(1 for s in shots if not s.get("video"))))
++    parts, keep = [], []
++    for i, s in enumerate(shots):
++        if s.get("video"):
++            parts.append(Path(s["video"]))
++            keep.append(Path(s["video"]))
++            continue
++        part = out.with_name(f"{out.stem}_shot{i}.mp4")
++        video.parallax(s["image"], part, move=s["move"], seconds=per, size=size, fps=fps)
++        parts.append(part)
++    lst = out.with_suffix(".txt")
++    lst.write_text("".join(f"file '{p.as_posix()}'\n" for p in parts))
++    r = subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(lst), "-c", "copy", str(out)], capture_output=True, text=True)
++    if r.returncode != 0:
++        raise RuntimeError(f"could not join shots: {r.stderr[-300:]}")
++    for p in [*parts, lst]:
++        if p not in keep:
++            p.unlink(missing_ok=True)
++    return {"path": str(out), "shots": len(shots), "seconds": duration, "motion": video.motion_score(out)}
++
++
++def can_generate_motion() -> bool:
++    """Text-to-video on CPU peaks at ~11 GB of RAM (measured); do not attempt it on a smaller machine."""
++    import psutil
++    return psutil.virtual_memory().total / 2 ** 30 >= 14
++
++
++def director(project, style_name: str | None = None, mode: str = "auto", size: tuple[int, int] = (1280, 720), seed: int = 7, motion_shots: int = 0):
++    """Returns visual_fn(i, scene, dur, used) for create.produce.
++
++    mode: "auto"      licensed stock photo when one matches the scene (factual content), generated image otherwise
++          "generated" always the local image model
++    Long scenes (> 9 s of narration) get two shots: the main image, then a generated closer shot of the same subject.
++    motion_shots: the first N scenes open with a real generated moving clip (text-to-video, ~2 s) before the camera-move shots."""
++    from .. import assets
++    from . import image as gi
++    st = style(style_name)
++    wdir = project.dir / "work" / "shots"
++
++    def visual(i: int, scene: dict, dur: float, used: set) -> dict | None:
++        subject = scene.get("visual_prompt") or scene.get("visual_query") or scene.get("on_screen_text")
++        close_subject = scene.get("visual_query") or subject
++        if not subject:
++            return None
++        shots, provs = [], []
++        if i < motion_shots and can_generate_motion():
++            from .. import llm
++            from . import video
++            llm.unload()  # the video model needs the RAM the language model is holding
++            gi.unload()
++            v = video.generate(prompt_for(subject, "wide", style_name) + ", bright, clear subject, slow camera movement, gentle motion", wdir / f"scene{i:02d}_motion.mp4",
++                               seed=seed + 500 + i, out_size=size)
++            video.unload()
++            shots.append({"video": v["path"], "seconds": v["clip_seconds"], "kind": "generated-video", "move": "generated motion", "image": None})
++            provs.append(v)
++        row = None
++        if mode == "auto" and scene.get("visual_query"):
++            # a photo is used only when its title is really about the scene; otherwise a generated picture is more relevant
++            row = assets.find_image(scene["visual_query"], project.id, used, fallbacks=(scene.get("on_screen_text", ""),), min_relevance=0.5)
++        if row:
++            used.add(row["id"])
++            shots.append({"image": row["path"], "kind": "stock"})
++            provs.append({"license": row["license"], "source": row["source"], "attribution": row["attribution"], "matched_query": row.get("matched_query"),
++                          "relevance": row.get("relevance")})
++        else:
++            g = gi.generate(prompt_for(subject, "wide", style_name), wdir / f"scene{i:02d}_a.jpg", width=GEN_SIZE[0], height=GEN_SIZE[1], seed=seed + i)
++            shots.append({"image": g["path"], "kind": "generated"})
++            provs.append(g)
++        if dur > 9.0:  # second shot: closer, same subject, different seed -> visual variety inside the scene
++            # the second shot is a detail of the SAME subject ("close-up" alone makes the model draw a face)
++            g = gi.generate(prompt_for(subject, "detail", style_name, f"focus on {close_subject}"), wdir / f"scene{i:02d}_b.jpg", width=GEN_SIZE[0], height=GEN_SIZE[1], seed=seed + 100 + i)
++            shots.append({"image": g["path"], "kind": "generated"})
++            provs.append(g)
++        for k, s in enumerate(shots):
++            s.setdefault("move", st["moves"][(i * 2 + k) % len(st["moves"])])
++        out = wdir / f"scene{i:02d}.mp4"
++        info = render_scene(shots, out, dur, size)
++        kinds = sorted({s["kind"] for s in shots})
++        return {"video": str(out), "frames": [s["image"] for s in shots if s.get("image")], "shots": shots, "motion": info["motion"],
++                "provenance": {"license": "; ".join(sorted({p["license"] for p in provs})), "source": " + ".join(kinds) + " image(s), depth-parallax camera move",
++                               "shots": [{"kind": s["kind"], "move": s["move"], **{k: v for k, v in p.items() if k in ("attribution", "model", "prompt", "seed", "matched_query", "relevance")}}
++                                         for s, p in zip(shots, provs)]}}
++
++    return visual
+diff --git a/nexus/generate/video.py b/nexus/generate/video.py
+new file mode 100644
+index 0000000..7b28358
+--- /dev/null
++++ b/nexus/generate/video.py
+@@ -0,0 +1,197 @@
++"""Local video generation that really runs on a CPU-only machine.
++
++Two different things, named honestly:
++  * `generate()`  - text-to-video with a distilled AnimateDiff motion model (few steps). Real generated motion,
++                    short (2 s) and low resolution on CPU; upscaled + frame-interpolated for the timeline.
++  * `parallax()`  - a 2.5D camera move (push-in / pan / orbit) from ONE still using a monocular depth map.
++                    Real camera movement with depth parallax, not generated subject motion.
++
++Large text/image-to-video models (Wan, LTX, CogVideoX, HunyuanVideo) need a GPU: they are described in
++registry/genmodels.yaml and routed by nexus.generate.select to a GPU worker when one is authorised."""
++from __future__ import annotations
++
++import hashlib
++import subprocess
++import time
++from pathlib import Path
++
++from .. import config, costguard, db
++from . import image as gi
++
++CANDIDATES: dict[str, dict] = {
++    "animatediff-lightning-4step": {"repo": "ByteDance/AnimateDiff-Lightning", "file": "animatediff_lightning_4step_diffusers.safetensors",
++                                    "base": "Lykon/dreamshaper-8", "license": "CreativeML OpenRAIL-M (motion model + base)", "steps": 4,
++                                    "frames": 16, "fps": 8, "bench_sizes": [(384, 216), (512, 288)]},
++}
++_pipe: dict = {}
++
++
++def _load(name: str):
++    costguard.authorize("diffusers-local", f"load {name}")
++    import torch
++    from diffusers import AnimateDiffPipeline, EulerDiscreteScheduler, MotionAdapter
++    from huggingface_hub import hf_hub_download
++    from safetensors.torch import load_file
++    spec = CANDIDATES[name]
++    dev = gi.device()
++    dtype = torch.float16 if dev == "cuda" else torch.float32
++    adapter = MotionAdapter().to(dev, dtype)
++    adapter.load_state_dict(load_file(hf_hub_download(spec["repo"], spec["file"], cache_dir=gi.hf_cache()), device=dev))
++    pipe = AnimateDiffPipeline.from_pretrained(spec["base"], motion_adapter=adapter, torch_dtype=dtype, variant="fp16", cache_dir=gi.hf_cache())
++    pipe.scheduler = EulerDiscreteScheduler.from_config(pipe.scheduler.config, timestep_spacing="trailing", beta_schedule="linear")
++    pipe.to(dev)
++    pipe.set_progress_bar_config(disable=True)
++    if dev == "cpu":  # 16 frames of temporal attention in float32: without slicing, 512x288 exceeds 16 GB of RAM
++        for obj, meth, arg in ((pipe.vae, "enable_slicing", ()), (pipe, "enable_attention_slicing", ("max",))):
++            if hasattr(obj, meth):  # names moved between diffusers releases
++                getattr(obj, meth)(*arg)
++    return pipe
++
++
++def _encode(frames, out: Path, src_fps: int, size: tuple[int, int] | None, fps: int = config.FPS) -> None:
++    """PIL frames -> H.264. Low-fps model output is motion-interpolated to the timeline frame rate."""
++    w, h = frames[0].size
++    vf = [f"minterpolate=fps={fps}:mi_mode=mci:mc_mode=aobmc:vsbmc=1"] if src_fps < fps else []
++    if size and size != (w, h):
++        vf.append(f"scale={size[0]}:{size[1]}:flags=lanczos")
++    cmd = ["ffmpeg", "-loglevel", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{w}x{h}", "-r", str(src_fps), "-i", "-",
++           *(["-vf", ",".join(vf)] if vf else []), "-r", str(fps), *config.VCODEC, "-an", str(out)]
++    p = subprocess.Popen(cmd, stdin=subprocess.PIPE)
++    for f in frames:
++        p.stdin.write(f.convert("RGB").tobytes())
++    p.stdin.close()
++    if p.wait() != 0:
++        raise RuntimeError("ffmpeg failed while encoding generated frames")
++
++
++def motion_score(path: str | Path, samples: int = 12) -> float:
++    """Mean absolute luma difference between consecutive sampled frames (0 = frozen picture)."""
++    import numpy as np
++    r = subprocess.run(["ffmpeg", "-loglevel", "error", "-i", str(path), "-vf", f"fps={samples}/2,scale=160:90,format=gray", "-t", "2",
++                        "-f", "rawvideo", "-"], capture_output=True)
++    a = np.frombuffer(r.stdout, dtype=np.uint8)
++    n = len(a) // (160 * 90)
++    if n < 2:
++        return 0.0
++    f = a[: n * 160 * 90].reshape(n, 90, 160).astype("float32")
++    return round(float(np.abs(f[1:] - f[:-1]).mean()), 2)
++
++
++def generate(prompt: str, out: Path, *, name: str = "animatediff-lightning-4step", width: int = 512, height: int = 288, seed: int = 0,
++             out_size: tuple[int, int] | None = (1280, 720), negative: str = gi.NEGATIVE) -> dict:
++    """Text-to-video clip. Cached by (model, prompt, size, seed)."""
++    import torch
++    spec = CANDIDATES[name]
++    out = Path(out)
++    out.parent.mkdir(parents=True, exist_ok=True)
++    key = hashlib.sha256(f"{name}|{prompt}|{width}x{height}|{seed}|{out_size}".encode()).hexdigest()[:20]
++    cache = config.CACHE / "genvid" / f"{key}.mp4"
++    t0 = time.time()
++    gen_s = None
++    if not cache.exists():
++        if name not in _pipe:
++            gi.unload()
++            _pipe.clear()
++            _pipe[name] = _load(name)
++        load_s = round(time.time() - t0, 1)
++        t1 = time.time()
++        with torch.inference_mode():
++            frames = _pipe[name](prompt=prompt, guidance_scale=1.0, num_inference_steps=spec["steps"], num_frames=spec["frames"], width=width,
++                                 height=height, generator=torch.Generator("cpu").manual_seed(seed)).frames[0]
++        gen_s = round(time.time() - t1, 1)
++        cache.parent.mkdir(parents=True, exist_ok=True)
++        _encode(frames, cache, spec["fps"], out_size)
++        db.metric("genvid_seconds", gen_s, model=name, size=f"{width}x{height}", frames=spec["frames"], load=load_s)
++    out.write_bytes(cache.read_bytes())
++    return {"path": str(out), "license": "generated by NEXUS (original output)", "source": f"local video model {name}", "model": spec["repo"],
++            "model_license": spec["license"], "prompt": prompt, "seed": seed, "frames": spec["frames"], "native_fps": spec["fps"],
++            "clip_seconds": round(spec["frames"] / spec["fps"], 2), "generate_s": gen_s, "motion": motion_score(out)}
++
++
++def unload() -> None:
++    import gc
++    _pipe.clear()
++    _depth.clear()
++    gc.collect()
++
++
++# ----------------------------------------------------------------- 2.5D camera move from a still
++_depth: dict = {}
++MOVES = ("push_in", "pull_out", "pan_left", "pan_right", "rise", "orbit")
++
++
++def depth_map(img):
++    """Relative depth (1 = near, 0 = far) from Depth Anything V2 Small (Apache-2.0, ~25 M parameters, CPU-friendly)."""
++    costguard.authorize("diffusers-local", "depth")
++    import numpy as np
++    if "p" not in _depth:
++        from transformers import pipeline
++        _depth["p"] = pipeline("depth-estimation", model="depth-anything/Depth-Anything-V2-Small-hf", model_kwargs={"cache_dir": gi.hf_cache()})
++    d = np.asarray(_depth["p"](img)["depth"].resize(img.size), dtype="float32")
++    d = (d - d.min()) / max(float(d.max() - d.min()), 1e-6)
++    return d
++
++
++def parallax(image_path: str | Path, out: Path, *, move: str = "push_in", seconds: float = 4.0, size: tuple[int, int] = (1280, 720),
++             strength: float = 1.0, fps: int = config.FPS) -> dict:
++    """Render a camera move over a still. Near pixels travel further than far ones, so the shot has real parallax
++    instead of the flat zoom of a Ken Burns effect."""
++    import cv2
++    import numpy as np
++    from PIL import Image
++    t0 = time.time()
++    W, H = size
++    with Image.open(image_path) as im:
++        im = im.convert("RGB")
++        s = max(W / im.width, H / im.height) * 1.12  # overscan so warped edges never show
++        im = im.resize((int(im.width * s) + 1, int(im.height * s) + 1), Image.LANCZOS)
++        l, t = (im.width - int(W * 1.12)) // 2, (im.height - int(H * 1.12)) // 2
++        im = im.crop((l, t, l + int(W * 1.12), t + int(H * 1.12)))
++    src = np.asarray(im)
++    # generated images are upscaled from 768 px: restore edge contrast once, before any frame is warped
++    src = cv2.addWeighted(src, 1.45, cv2.GaussianBlur(src, (0, 0), 1.6), -0.45, 0)
++    h, w = src.shape[:2]
++    depth = cv2.GaussianBlur(depth_map(im.resize((w // 2, h // 2))), (0, 0), 3)
++    depth = cv2.resize(depth, (w, h), interpolation=cv2.INTER_LINEAR) - 0.5  # centred: mid-distance stays put
++    yy, xx = np.mgrid[0:h, 0:w].astype("float32")
++    cx, cy = w / 2, h / 2
++    n = max(2, int(seconds * fps))
++    amp = 0.03 * w * strength
++    out = Path(out)
++    out.parent.mkdir(parents=True, exist_ok=True)
++    p = subprocess.Popen(["ffmpeg", "-loglevel", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(fps), "-i", "-",
++                          *config.VCODEC, "-an", str(out)], stdin=subprocess.PIPE)
++    for i in range(n):
++        u = i / (n - 1)
++        e = u * u * (3 - 2 * u)  # ease in/out
++        a = e - 0.5
++        dx = dy = 0.0
++        zoom = 1.0
++        if move == "push_in":
++            zoom = 1.0 + 0.14 * e * strength
++        elif move == "pull_out":
++            zoom = 1.0 + 0.14 * (1 - e) * strength
++        elif move == "pan_left":
++            dx = 2 * a * amp
++        elif move == "pan_right":
++            dx = -2 * a * amp
++        elif move == "rise":
++            dy = 2 * a * amp * 0.7
++        elif move == "orbit":
++            dx, zoom = 2.4 * a * amp, 1.0 + 0.05 * float(np.sin(np.pi * u)) * strength
++        else:
++            raise ValueError(f"unknown camera move {move}")
++        # zoom is depth-dependent too: near objects grow faster than the background during a push-in
++        z = zoom + (zoom - 1.0) * 1.6 * depth
++        mx = cx + (xx - cx) / z + dx * depth * 2
++        my = cy + (yy - cy) / z + dy * depth * 2
++        frame = cv2.remap(src, mx.astype("float32"), my.astype("float32"), cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT)
++        y0, x0 = (h - H) // 2, (w - W) // 2
++        p.stdin.write(frame[y0:y0 + H, x0:x0 + W].tobytes())
++    p.stdin.close()
++    if p.wait() != 0:
++        raise RuntimeError("ffmpeg failed while encoding the camera move")
++    el = round(time.time() - t0, 2)
++    db.metric("parallax_seconds", el, move=move, seconds=seconds)
++    return {"path": str(out), "move": move, "seconds": seconds, "render_s": el, "motion": motion_score(out),
++            "technique": "2.5D depth parallax (Depth Anything V2 Small, Apache-2.0)"}
+diff --git a/nexus/registry/genmodels.yaml b/nexus/registry/genmodels.yaml
+new file mode 100644
+index 0000000..e13222d
+--- /dev/null
++++ b/nexus/registry/genmodels.yaml
+@@ -0,0 +1,262 @@
++# Generative model registry for the NEXUS model + compute selector (nexus/generate/select.py).
++# Licences were read from each model's Hugging Face card on 2026-11-12 (the `license` field of the card).
++# VRAM figures for GPU models are REPORTED by upstream/community sources and were NOT measured here (no GPU on the
++# build machine); `benchmarked: true` means scripts/bench_generation.py ran it on the build machine.
++# commercial: yes | conditional (allowed under stated conditions) | no (never selected)
++# quality: 1-5, relative rank inside its kind, from public reports - used only to order eligible candidates.
++checked: "2026-11-12"
++models:
++  # ------------------------------------------------------------------ image
++  - id: sd15-dreamshaper-lcm
++    kind: image
++    repo: Lykon/dreamshaper-8 + latent-consistency/lcm-lora-sdv1-5
++    license: CreativeML OpenRAIL-M + OpenRAIL++
++    commercial: "yes"
++    params_b: 1.0
++    cpu_ok: true
++    min_ram_gb: 6
++    min_vram_gb: 4
++    native: 512-768 px
++    quality: 2
++    benchmarked: true
++    local: true
++    notes: 5-step LCM. The only class that is practical on 4 CPU threads. Weak hands/faces at small sizes; no legible text.
++  - id: tiny-sd-lcm
++    kind: image
++    repo: segmind/tiny-sd + latent-consistency/lcm-lora-sdv1-5
++    license: CreativeML OpenRAIL-M + OpenRAIL++
++    commercial: "yes"
++    params_b: 0.5
++    cpu_ok: true
++    min_ram_gb: 4
++    min_vram_gb: 2
++    native: 512 px
++    quality: 1
++    benchmarked: false
++    local: false
++    notes: REJECTED after testing - its pruned UNet cannot load the LCM-LoRA (shape mismatch), so it would need 25+ steps and lose its speed advantage.
++  - id: ssd1b-lcm
++    kind: image
++    repo: segmind/SSD-1B + latent-consistency/lcm-lora-ssd-1b
++    license: Apache-2.0 + OpenRAIL++
++    commercial: "yes"
++    params_b: 1.3
++    cpu_ok: true
++    min_ram_gb: 12
++    min_vram_gb: 6
++    native: 1024 px
++    quality: 3
++    benchmarked: false
++    local: true
++    notes: Distilled SDXL. 1024 px native; several times slower than SD1.5 on CPU.
++  - id: z-image-turbo
++    kind: image
++    repo: Tongyi-MAI/Z-Image-Turbo
++    license: Apache-2.0
++    commercial: "yes"
++    params_b: 6
++    cpu_ok: false
++    min_vram_gb: 8
++    native: 1024 px
++    quality: 4
++    benchmarked: false
++    local: false
++    notes: Few-step, reported to run on 8 GB VRAM. Needs a GPU adapter (not implemented).
++  - id: flux2-klein-4b
++    kind: image
++    repo: black-forest-labs/FLUX.2-klein-4B
++    license: Apache-2.0
++    commercial: "yes"
++    params_b: 4
++    cpu_ok: false
++    min_vram_gb: 12
++    native: 1024 px
++    quality: 5
++    benchmarked: false
++    local: false
++    notes: Supports reference-image editing (useful for character consistency). GPU adapter not implemented.
++  - id: qwen-image
++    kind: image
++    repo: Qwen/Qwen-Image
++    license: Apache-2.0
++    commercial: "yes"
++    params_b: 20
++    cpu_ok: false
++    min_vram_gb: 16
++    native: 1328 px
++    quality: 5
++    benchmarked: false
++    local: false
++    notes: Best in-image text. Too large for the free 16 GB T4 without heavy quantisation.
++  - id: sdxl-turbo
++    kind: image
++    repo: stabilityai/sdxl-turbo
++    license: Stability AI Non-Commercial Community (sai-nc-community)
++    commercial: "no"
++    params_b: 2.6
++    cpu_ok: true
++    min_ram_gb: 12
++    quality: 3
++    benchmarked: false
++    local: false
++    notes: REJECTED - non-commercial licence. Listed so nobody re-evaluates it by mistake.
++  # ------------------------------------------------------------------ video
++  - id: animatediff-lightning-4step
++    kind: t2v
++    repo: ByteDance/AnimateDiff-Lightning (base Lykon/dreamshaper-8)
++    license: CreativeML OpenRAIL-M
++    commercial: "yes"
++    params_b: 1.5
++    cpu_ok: true
++    min_ram_gb: 8
++    min_vram_gb: 6
++    native: 512x288, 16 frames @ 8 fps (2 s)
++    quality: 1
++    benchmarked: true
++    local: true
++    notes: The only text-to-video that runs on this CPU in minutes. Short, soft, loop-like motion. A stop-gap, not cinematic.
++  - id: depth-parallax
++    kind: i2v-camera
++    repo: depth-anything/Depth-Anything-V2-Small-hf
++    license: Apache-2.0
++    commercial: "yes"
++    params_b: 0.025
++    cpu_ok: true
++    min_ram_gb: 2
++    native: any (rendered at timeline size)
++    quality: 2
++    benchmarked: true
++    local: true
++    notes: 2.5D camera move from one still (push-in, pan, orbit). Camera motion only - subjects do not move.
++  - id: wan21-t2v-1.3b
++    kind: t2v
++    repo: Wan-AI/Wan2.1-T2V-1.3B-Diffusers
++    license: Apache-2.0
++    commercial: "yes"
++    params_b: 1.3
++    cpu_ok: false
++    min_vram_gb: 8
++    min_ram_gb: 16
++    native: 832x480, 81 frames @ 16 fps (5 s)
++    quality: 3
++    benchmarked: false
++    local: false
++    notes: Smallest serious T2V. ~8.2 GB VRAM reported. Its UMT5-XXL text encoder (~5.7 B parameters) alone exceeds what a 16 GB CPU machine can run usefully.
++  - id: wan22-ti2v-5b
++    kind: ti2v
++    repo: Wan-AI/Wan2.2-TI2V-5B-Diffusers
++    license: Apache-2.0
++    commercial: "yes"
++    params_b: 5
++    cpu_ok: false
++    min_vram_gb: 12
++    min_ram_gb: 24
++    native: 1280x704, 121 frames @ 24 fps (5 s)
++    quality: 4
++    benchmarked: false
++    local: false
++    notes: Text AND image-to-video in one model, 720p. 8 GB reported only with quantisation + offloading; upstream README says 24 GB unquantised. First choice for a free 16 GB T4 (to be measured there).
++  - id: cogvideox-2b
++    kind: t2v
++    repo: zai-org/CogVideoX-2b
++    license: Apache-2.0
++    commercial: "yes"
++    params_b: 2
++    cpu_ok: false
++    min_vram_gb: 8
++    min_ram_gb: 16
++    native: 720x480, 49 frames @ 8 fps (6 s)
++    quality: 2
++    benchmarked: false
++    local: false
++    notes: Clean licence, older and slower than Wan 2.1 1.3B for similar quality. Fallback only.
++  - id: cogvideox-5b
++    kind: t2v
++    repo: zai-org/CogVideoX-5b
++    license: CogVideoX licence (custom, "other")
++    commercial: "conditional"
++    conditions: Custom licence with registration/usage conditions - read the LICENSE file before any commercial use.
++    params_b: 5
++    cpu_ok: false
++    min_vram_gb: 12
++    quality: 3
++    benchmarked: false
++    local: false
++    notes: Not selected automatically - Wan 2.2 5B has a cleaner licence and newer architecture.
++  - id: ltx-2
++    kind: ti2v
++    repo: Lightricks/LTX-2
++    license: LTX-2 Community License (custom)
++    commercial: "conditional"
++    conditions: Free for organisations under USD 10 M annual revenue; larger ones need a paid licence. Has use restrictions - read the licence.
++    params_b: 19
++    cpu_ok: false
++    min_vram_gb: 16
++    quality: 5
++    benchmarked: false
++    local: false
++    notes: Video + synchronised audio; newer versions add native multi-shot. Strongest open-weight option per public reports, but needs opt-in (conditional licence) and a large GPU.
++  - id: ltx-video-0.9
++    kind: ti2v
++    repo: Lightricks/LTX-Video
++    license: LTX-Video open weights licence (custom, "other")
++    commercial: "conditional"
++    conditions: Custom licence - verify the terms of the exact checkpoint used.
++    params_b: 2
++    cpu_ok: false
++    min_vram_gb: 8
++    quality: 3
++    benchmarked: false
++    local: false
++    notes: Fastest of the GPU models (near real-time on a high-end GPU). Good candidate for a free T4 after licence review.
++  - id: hunyuanvideo-1.5
++    kind: ti2v
++    repo: tencent/HunyuanVideo-1.5
++    license: Tencent Hunyuan Community License
++    commercial: "conditional"
++    conditions: Licence does NOT apply in the European Union, the United Kingdom and South Korea; scale limits apply.
++    territory_restricted: true
++    params_b: 8.3
++    cpu_ok: false
++    min_vram_gb: 14
++    quality: 4
++    benchmarked: false
++    local: false
++    notes: Never selected unless the user confirms they are outside the excluded territories.
++  - id: mochi-1
++    kind: t2v
++    repo: genmo/mochi-1-preview
++    license: Apache-2.0
++    commercial: "yes"
++    params_b: 10
++    cpu_ok: false
++    min_vram_gb: 20
++    quality: 3
++    benchmarked: false
++    local: false
++    notes: Clean licence but too large for free GPUs.
++  - id: stable-video-diffusion
++    kind: i2v
++    repo: stabilityai/stable-video-diffusion-img2vid-xt
++    license: Stable Video Diffusion Community (custom)
++    commercial: "conditional"
++    conditions: Stability community licence - free under a revenue threshold; verify current terms.
++    params_b: 1.5
++    cpu_ok: false
++    min_vram_gb: 10
++    quality: 2
++    benchmarked: false
++    local: false
++    notes: Superseded by Wan 2.2 TI2V for image-to-video.
++# Free compute tiers the selector knows about. `authorized` is set by the user in NEXUS_HOME/settings.json
++# ("compute": {"kaggle": true}); nothing remote is used without it.
++compute:
++  - id: local
++    vram_gb: detected
++  - id: kaggle
++    name: Kaggle Notebooks (free)
++    vram_gb: 15
++    ram_gb: 29
++    quota: "about 30 GPU hours per week (floating; shown in account settings), sessions up to ~9-12 h"
++    payment_method_required: false
++    needs: free Kaggle account with phone verification, created and authorised by the user
+diff --git a/requirements-gen.txt b/requirements-gen.txt
+new file mode 100644
+index 0000000..4dd2138
+--- /dev/null
++++ b/requirements-gen.txt
+@@ -0,0 +1,8 @@
++# Optional: local image + video generation (docs/GENERATION.md). CPU build of PyTorch - no GPU or CUDA needed.
++--extra-index-url https://download.pytorch.org/whl/cpu
++torch
++diffusers
++transformers
++accelerate
++safetensors
++peft
+diff --git a/scripts/bench_generation.py b/scripts/bench_generation.py
+new file mode 100644
+index 0000000..eb9a214
+--- /dev/null
++++ b/scripts/bench_generation.py
+@@ -0,0 +1,106 @@
++"""Reproducible generation benchmark on THIS machine. Writes docs/results/gen_bench_<kind>.json + sample frames.
++
++    python scripts/bench_generation.py image [candidate ...]
++    python scripts/bench_generation.py video [candidate ...]
++
++Every number in docs/GENERATION.md comes from this script; nothing is copied from model cards."""
++from __future__ import annotations
++
++import gc
++import json
++import platform
++import resource
++import sys
++import time
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parent.parent
++sys.path.insert(0, str(ROOT))
++from nexus import config  # noqa: E402
++
++OUT = ROOT / "docs" / "results"
++SAMPLES = config.HOME / "bench" / "generation"
++PROMPTS = {
++    "scene": "cinematic wide shot of a small solar-powered research boat in a foggy harbor at dawn, volumetric light, film still, 35mm",
++    "character": "portrait of a weathered retired sea captain, grey beard, navy wool sweater, harbor background, cinematic lighting, film still",
++    "concept": "microscopic view of immune cells attacking a virus, scientific illustration, vivid, detailed, dramatic lighting",
++}
++NEG = "blurry, low quality, deformed, text, watermark, extra fingers"
++
++
++def rss_gb() -> float:
++    return round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / (1024 ** 2 if platform.system() != "Darwin" else 1024 ** 3), 2)
++
++
++def sharpness(img) -> float:
++    import numpy as np
++    g = np.asarray(img.convert("L"), dtype="float32")
++    lap = g[1:-1, 1:-1] * 4 - g[:-2, 1:-1] - g[2:, 1:-1] - g[1:-1, :-2] - g[1:-1, 2:]
++    return round(float(lap.var()), 1)
++
++
++def bench_image(names: list[str]) -> None:
++    from nexus.generate import image as gi
++    rows = []
++    for name in names or list(gi.CANDIDATES):
++        spec = gi.CANDIDATES[name]
++        t0 = time.time()
++        try:
++            pipe = gi.load(name)
++        except Exception as e:
++            rows.append({"candidate": name, "error": f"{type(e).__name__}: {str(e)[:200]}"})
++            continue
++        load_s = round(time.time() - t0, 1)
++        for res in spec["bench_sizes"]:
++            times, sharp = [], []
++            for key, prompt in PROMPTS.items():
++                t = time.time()
++                img = gi.run(pipe, name, prompt, NEG, res[0], res[1], seed=7)
++                times.append(round(time.time() - t, 1))
++                sharp.append(sharpness(img))
++                d = SAMPLES / "image"
++                d.mkdir(parents=True, exist_ok=True)
++                img.save(d / f"{name}_{res[0]}x{res[1]}_{key}.jpg", quality=90)
++            rows.append({"candidate": name, "repo": spec["repo"], "license": spec["license"], "size": f"{res[0]}x{res[1]}", "steps": spec["steps"],
++                         "load_s": load_s, "seconds_per_image": times, "mean_s": round(sum(times) / len(times), 1),
++                         "sharpness": sharp, "peak_rss_gb": rss_gb()})
++            print(rows[-1], flush=True)
++        del pipe
++        gc.collect()
++    _save("image", rows)
++
++
++def bench_video(names: list[str]) -> None:
++    from nexus.generate import video as gv
++    rows = []
++    for name in names or list(gv.CANDIDATES):
++        spec = gv.CANDIDATES[name]
++        for res in spec["bench_sizes"]:
++            t0 = time.time()
++            try:
++                d = SAMPLES / "video"
++                d.mkdir(parents=True, exist_ok=True)
++                out = d / f"{name}_{res[0]}x{res[1]}.mp4"
++                info = gv.generate(PROMPTS["scene"] + ", slow camera push in, gentle waves", out, name=name, width=res[0], height=res[1], seed=7)
++                rows.append({"candidate": name, "repo": spec["repo"], "license": spec["license"], "size": f"{res[0]}x{res[1]}", **info,
++                             "total_s": round(time.time() - t0, 1), "peak_rss_gb": rss_gb()})
++            except Exception as e:
++                rows.append({"candidate": name, "size": f"{res[0]}x{res[1]}", "error": f"{type(e).__name__}: {str(e)[:300]}", "peak_rss_gb": rss_gb()})
++            print(rows[-1], flush=True)
++            gc.collect()
++    _save("video", rows)
++
++
++def _save(kind: str, rows: list[dict]) -> None:
++    import psutil
++    import torch
++    f = OUT / f"gen_bench_{kind}.json"
++    old = json.loads(f.read_text())["results"] if f.exists() else []
++    keep = [r for r in old if (r["candidate"], r.get("size")) not in {(x["candidate"], x.get("size")) for x in rows}]
++    f.write_text(json.dumps({"machine": {"cpu_threads": psutil.cpu_count(), "ram_gb": round(psutil.virtual_memory().total / 2 ** 30, 1), "gpu": None,
++                                         "torch": torch.__version__, "os": platform.system()},
++                             "date": time.strftime("%Y-%m-%d"), "prompts": PROMPTS, "results": keep + rows}, indent=1) + "\n")
++
++
++if __name__ == "__main__":
++    {"image": bench_image, "video": bench_video}[sys.argv[1]](sys.argv[2:])
+diff --git a/tests/fast/test_bench.py b/tests/fast/test_bench.py
+new file mode 100644
+index 0000000..6c3b7d8
+--- /dev/null
++++ b/tests/fast/test_bench.py
+@@ -0,0 +1,80 @@
++"""Quality regression machinery: the measurements separate a slideshow from moving pictures, and the comparison
++fails only when a ruled metric really gets worse."""
++import shutil
++import subprocess
++
++import pytest
++
++from nexus import bench
++
++ff = pytest.mark.skipif(not shutil.which("ffmpeg"), reason="ffmpeg not installed")
++
++
++def _video(path, source):
++    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi", "-i", source, "-t", "4", "-pix_fmt", "yuv420p", str(path)], check=True)
++    return path
++
++
++@ff
++def test_picture_metrics_tell_a_still_from_motion(tmp_path):
++    still = bench.picture_metrics(_video(tmp_path / "still.mp4", "color=c=0x224466:s=320x180:r=30"))
++    moving = bench.picture_metrics(_video(tmp_path / "moving.mp4", "testsrc2=s=320x180:r=30"))
++    assert still["frozen_ratio"] == 1.0 and still["mean_change"] < 0.05 and still["sharpness"] < 1
++    assert moving["frozen_ratio"] < 0.2 and moving["mean_change"] > 1 and moving["sharpness"] > still["sharpness"] + 50
++    assert moving["colorfulness"] > still["colorfulness"]
++
++
++def test_timeline_and_subtitle_metrics():
++    tl = {"clips": [
++        {"type": "color", "duration": 2.4},
++        {"type": "video", "in": 0, "out": 10, "narration": "a", "shots": [{"kind": "generated-video", "image": None}, {"kind": "generated", "image": "a.jpg"}, {"kind": "generated", "image": "b.jpg"}]},
++        {"type": "image", "src": "c.jpg", "duration": 6, "narration": "b", "provenance": {"source": "wikimedia-commons"}},
++        {"type": "image", "src": "card.jpg", "duration": 6, "narration": "c", "provenance": {"source": "title-card generator"}}],
++        "subtitles": [{"start": 0, "end": 2, "text": "It ends here. And a new"}, {"start": 2, "end": 4, "text": "sentence continues cleanly."}]}
++    t = bench.timeline_metrics(tl)
++    assert t["scenes"] == 3 and t["real_picture_ratio"] == round(2 / 3, 3) and t["generated_motion_shots"] == 1 and t["shots_per_scene"] == round(5 / 3, 2)
++    s = bench.subtitle_metrics(tl)
++    assert s["cues"] == 2 and s["straddling_cues"] == 1 and s["max_chars"] == 27
++
++
++def test_story_metrics_use_the_qa_report():
++    script = {"scenes": [{"narration": "Did you know panels make power? They use light."}, {"narration": "Batteries store it. Costs fall."}]}
++    rep = {"stages": [{"stage": "1-pre-production", "checks": [{"ok": True}, {"ok": True}, {"ok": False}, {"ok": True}]}]}
++    m = bench.story_metrics(script, rep)
++    assert m == {"scenes": 2, "words": 14, "min_words_per_scene": 5, "sentences_per_scene": 2.0, "hook": 1, "gates_passed_ratio": 0.75}
++
++
++def _m(**over):
++    base = {"visual": {"sharpness": 100.0, "real_picture_ratio": 1.0}, "motion": {"mean_change": 2.0, "frozen_ratio": 0.1, "generated_motion_shots": 1},
++            "audio": {"lufs": -14.2, "true_peak": -1.5}, "voice": {"heard_back": 0.9}, "subtitles": {"straddling_cues": 0},
++            "technical": {"decode_errors": 0, "width": 1280, "height": 720, "fps": 30.0, "qa_passed": 1}}
++    for k, v in over.items():
++        g, key = k.split("__")
++        base[g][key] = v
++    return base
++
++
++def test_compare_flags_real_regressions_only():
++    base = {"cases": {"x": _m()}}
++    same = bench.compare({"cases": {"x": _m(visual__sharpness=92.0, audio__lufs=-13.6, voice__heard_back=0.86)}}, base)
++    assert same["ok"] and same["cases"]["x"]["regressions"] == []                       # normal run-to-run variation passes
++    worse = bench.compare({"cases": {"x": _m(motion__frozen_ratio=0.8, motion__generated_motion_shots=0, visual__real_picture_ratio=0.5,
++                                             audio__lufs=-19.0, technical__width=640, subtitles__straddling_cues=2, technical__qa_passed=0)}}, base)
++    bad = {r["metric"] for r in worse["cases"]["x"]["regressions"]}
++    assert not worse["ok"] and bad == {"motion.frozen_ratio", "motion.generated_motion_shots", "visual.real_picture_ratio", "audio.lufs",
++                                       "technical.width", "subtitles.straddling_cues", "technical.qa_passed"}
++    better = bench.compare({"cases": {"x": _m(visual__sharpness=160.0, motion__frozen_ratio=0.0)}}, base)
++    assert better["ok"] and {r["metric"] for r in better["cases"]["x"]["improvements"]} == {"visual.sharpness", "motion.frozen_ratio"}
++    assert bench.compare({"cases": {"new-case": _m()}}, base)["cases"]["new-case"]["status"].startswith("new")
++
++
++def test_accept_keeps_history(tmp_path, monkeypatch):
++    import json
++    monkeypatch.setattr(bench, "RESULTS", tmp_path)
++    monkeypatch.setattr(bench, "BASELINE", tmp_path / "baseline.json")
++    (tmp_path / "current.json").write_text(json.dumps({"date": "d1", "cases": {"x": _m()}}))
++    bench.accept("first")
++    (tmp_path / "current.json").write_text(json.dumps({"date": "d2", "cases": {"x": _m(visual__sharpness=150.0)}}))
++    cur = bench.accept("better visuals")
++    assert cur["note"] == "better visuals" and json.loads((tmp_path / "baseline.json").read_text())["date"] == "d2"
++    assert [h["date"] for h in json.loads((tmp_path / "history.json").read_text())] == ["d1"]
+diff --git a/tests/fast/test_generate_select.py b/tests/fast/test_generate_select.py
+new file mode 100644
+index 0000000..50d9b4e
+--- /dev/null
++++ b/tests/fast/test_generate_select.py
+@@ -0,0 +1,50 @@
++"""Model + compute selection: licence first, then what can really run for free, and honest about what cannot."""
++from nexus.generate import select
++
++CPU = {"ram_gb": 15.6, "vram_gb": 0, "threads": 4}
++GPU8 = {"ram_gb": 32, "vram_gb": 8, "threads": 8}
++
++
++def test_registry_declares_licence_and_requirements_for_every_model():
++    ids = set()
++    for m in select.registry()["models"]:
++        assert {"id", "kind", "repo", "license", "commercial", "quality", "benchmarked", "local", "notes"} <= set(m), m["id"]
++        assert m["commercial"] in ("yes", "conditional", "no") and m["kind"] in select.KINDS
++        assert m["commercial"] != "conditional" or m.get("conditions"), m["id"]
++        assert m.get("cpu_ok") or m.get("min_vram_gb"), m["id"]
++        assert m["id"] not in ids
++        ids.add(m["id"])
++    for needed in ("wan21-t2v-1.3b", "wan22-ti2v-5b", "ltx-2", "hunyuanvideo-1.5", "cogvideox-2b"):   # the models the brief asked to evaluate
++        assert needed in ids
++
++
++def test_cpu_only_machine_gets_models_that_actually_run_and_is_told_what_is_better():
++    img = select.choose("image", CPU, {})
++    assert img["runnable"] and img["where"] == "local-cpu" and img["model"] == "sd15-dreamshaper-lcm"   # ssd1b needs 12 GB + is unbenchmarked... but higher quality
++    vid = select.choose("t2v", CPU, {})
++    assert vid["runnable"] and vid["model"] == "animatediff-lightning-4step" and vid["where"] == "local-cpu"
++    better = {b["model"]: b for b in vid["better_with"]}
++    assert "wan21-t2v-1.3b" in better and better["wan21-t2v-1.3b"]["could_run_on"] == ["kaggle (not authorised)"]
++    assert "GEN-2" in better["wan22-ti2v-5b"]["blocked_by"]                      # recommended, never claimed to work
++    assert select.choose("i2v-camera", CPU, {})["model"] == "depth-parallax"
++    assert select.choose("ti2v", CPU, {})["runnable"] is False                   # no image-to-video model fits a CPU: said plainly
++
++
++def test_licence_gates():
++    r = select.choose("t2v", CPU, {})
++    rejected = {x["id"]: x["why"] for x in r["rejected"]}
++    assert "territories" in rejected["hunyuanvideo-1.5"] and "conditional" in rejected["ltx-2"] and "conditional" in rejected["cogvideox-5b"]
++    assert {x["id"] for x in select.choose("image", CPU, {})["rejected"]} == {"sdxl-turbo"}             # non-commercial: never selectable
++    opted = select.choose("ti2v", GPU8, {"accepted_conditional_licenses": ["ltx-2"]})
++    assert "ltx-2" not in {x["id"] for x in opted["rejected"]}
++    assert "hunyuanvideo-1.5" in {x["id"] for x in opted["rejected"]}             # territory opt-in is separate
++    both = select.choose("ti2v", GPU8, {"accept_territory_restricted_models": True, "accepted_conditional_licenses": ["hunyuanvideo-1.5"]})
++    assert "hunyuanvideo-1.5" not in {x["id"] for x in both["rejected"]}
++
++
++def test_authorised_free_gpu_changes_where_better_models_could_run():
++    r = select.choose("t2v", CPU, {"compute": {"kaggle": True}})
++    assert "kaggle" in r["tiers"]
++    better = {b["model"]: b["could_run_on"] for b in r["better_with"]}
++    assert better["wan22-ti2v-5b"] == ["kaggle"] and better["mochi-1"] == ["no free tier - too large"]
++    assert r["model"] == "animatediff-lightning-4step"                           # still the only one with a working adapter

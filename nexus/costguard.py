@@ -118,9 +118,22 @@ def run_with_fallback(component: str, capabilities: list[str], runners: dict):
         raise
 
 
-def check_host(url: str) -> str:
+# Hosted AI APIs that bill by usage but also have a free tier that cannot charge an account without a payment method.
+# They stay blocked like any paid host unless the Account 3 router vouches for the specific call (owner-authorised
+# provider, key present, free model, quota left) by passing `free_tier_provider`. Every such call is logged.
+FREE_TIER_HOSTS = {"api.groq.com": "groq", "api.cerebras.ai": "cerebras", "generativelanguage.googleapis.com": "gemini",
+                   "openrouter.ai": "openrouter-free", "api.mistral.ai": "mistral-free", "router.huggingface.co": "huggingface-free"}
+
+
+def check_host(url: str, free_tier_provider: str | None = None) -> str:
     """Refuse network egress to anything that is not a declared zero-cost host."""
     host = (urlparse(url).hostname or "").lower()
+    if free_tier_provider is not None:
+        if FREE_TIER_HOSTS.get(host) != free_tier_provider:
+            _log(host, "http", "block", f"free-tier exception claimed by '{free_tier_provider}' for a host it does not own")
+            raise CostGuardError(f"BLOCKED {host}: not the free-tier endpoint of {free_tier_provider}")
+        _log(free_tier_provider, "http-free-tier", "allow", f"{host}: owner-authorised free-tier call (router checked key, model, quota)")
+        return free_tier_provider
     if host in PAID_HOSTS:
         _log(host, "http", "block", "known paid endpoint")
         raise CostGuardError(f"BLOCKED network call to paid endpoint {host}")
