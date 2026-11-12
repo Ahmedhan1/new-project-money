@@ -121,9 +121,9 @@ class LocalDiffusers(Provider):
     name, kind, tasks = "local-diffusers", "generated", ("image",)
     model_id = "sd15-lcm"
 
-    def status(self, det: dict) -> tuple[bool, str]:
+    def status(self, det: dict, model_id: str | None = None) -> tuple[bool, str]:
         env = det["env"]
-        m = model(self.model_id)
+        m = model(model_id or self.model_id)
         if env.get("error") or not env.get("torch"):
             return False, "torch is not importable in the generation environment"
         if not env.get("diffusers"):
@@ -135,10 +135,10 @@ class LocalDiffusers(Provider):
         dev = "CUDA GPU" if env.get("cuda") else "CPU"
         return True, f"{m['name']} on {dev} (torch {env['torch']})"
 
-    def generate(self, prompts: list[dict], workdir: Path, allow_download: bool = False) -> dict:
+    def generate(self, prompts: list[dict], workdir: Path, allow_download: bool = False, model_id: str | None = None) -> dict:
         s = _settings()
         workdir.mkdir(parents=True, exist_ok=True)
-        spec = {"model": model(self.model_id), "hf_home": s["hf_home"], "allow_download": allow_download,
+        spec = {"model": model(model_id or self.model_id), "hf_home": s["hf_home"], "allow_download": allow_download,
                 "images": prompts, "result": str(workdir / f"result_{int(time.time() * 1000)}.json")}
         sp = workdir / f"spec_{int(time.time() * 1000)}.json"
         sp.write_text(json.dumps(spec), encoding="utf-8")
@@ -209,8 +209,9 @@ ENABLE = {
                      "the remote folder - not feasible on this CPU",
     "video_to_video": "a GPU provider (not implemented)", "inpaint": "SD 1.5 inpainting in the generation environment (not wired yet)",
     "outpaint": "SD 1.5 inpainting in the generation environment (not wired yet)",
-    "upscale": "Real-ESRGAN (BSD-3) in the generation environment (not wired yet)",
-    "interpolate": "RIFE (MIT) in the generation environment (not wired yet); FFmpeg minterpolate exists as a non-AI fallback",
+    "upscale": "not a generation task: nexus.enhance.upscale (FFmpeg lanczos always; Real-ESRGAN general-x4v3 on CPU after a "
+               "5 MB consented download) - labelled edited-source",
+    "interpolate": "not a generation task: nexus.enhance.interpolate (FFmpeg minterpolate mci/blend); RIFE is not wired",
 }
 
 
@@ -242,14 +243,16 @@ def image(prompt: str, out: str | Path, *, size: tuple[int, int] = (512, 512), s
     _licence_gate(m, allow_noncommercial)
     det = detect()
     prov = PROVIDERS["local-diffusers"]
-    ok, why = prov.status(det)
+    if not m.get("diffusers"):
+        raise Unavailable(f"{m['name']} has no diffusers pipeline in the registry", "choose sd15-lcm or bk-sdm-tiny")
+    ok, why = prov.status(det, model_id)
     if not ok and not allow_download:
         raise Unavailable(why, ENABLE["image"])
     out = Path(out)
     w, h = (int(x) // 8 * 8 for x in size)
     res = prov.generate([{"prompt": prompt, "negative": negative, "seed": seed, "w": w, "h": h,
                           "steps": steps or (m.get("diffusers") or {}).get("steps", 4), "out": str(out)}],
-                        config.CACHE / "generate", allow_download=allow_download)
+                        config.CACHE / "generate", allow_download=allow_download, model_id=model_id)
     r = res["images"][0]
     return {"path": str(out), "provenance": {"kind": "generated", "model": m["id"], "model_name": m["name"],
                                              "licence": m["weights_licence"], "commercial_use": m["commercial_use"],

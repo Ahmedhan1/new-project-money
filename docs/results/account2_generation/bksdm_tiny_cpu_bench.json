@@ -1,0 +1,67 @@
+{
+ "model": "nota-ai/bk-sdm-tiny",
+ "licence": "creativeml-openrail-m",
+ "download_seconds": 17.9,
+ "download_bytes": 1061882831,
+ "load_seconds": 3.3,
+ "torch": "2.15.0+cpu",
+ "threads": 4,
+ "runs": [
+  {
+   "config": "dpm",
+   "steps": 4,
+   "guidance": 7.5,
+   "prompt": "a lighthouse on a rocky coast at sunset, photograph, detailed",
+   "seconds": 238.19,
+   "file": "dpm_4st_0.png",
+   "peak_rss_gb": 3.64
+  },
+  {
+   "config": "dpm",
+   "steps": 8,
+   "guidance": 7.5,
+   "prompt": "a lighthouse on a rocky coast at sunset, photograph, detailed",
+   "seconds": 114.4,
+   "file": "dpm_8st_0.png",
+   "peak_rss_gb": 3.64
+  },
+  {
+   "config": "dpm",
+   "steps": 8,
+   "guidance": 7.5,
+   "prompt": "a red vintage bicycle leaning against a brick wall, photograph",
+   "seconds": 29.02,
+   "file": "dpm_8st_1.png",
+   "peak_rss_gb": 3.64
+  },
+  {
+   "config": "dpm",
+   "steps": 8,
+   "guidance": 7.5,
+   "prompt": "a bowl of fresh oranges on a wooden kitchen table, soft window light, photograph",
+   "seconds": 32.53,
+   "file": "dpm_8st_2.png",
+   "peak_rss_gb": 3.64
+  },
+  {
+   "config": "dpm",
+   "steps": 20,
+   "guidance": 7.5,
+   "prompt": "a lighthouse on a rocky coast at sunset, photograph, detailed",
+   "seconds": 71.86,
+   "file": "dpm_20st_0.png",
+   "peak_rss_gb": 3.64
+  },
+  {
+   "config": "dpm",
+   "steps": 20,
+   "guidance": 7.5,
+   "prompt": "a red vintage bicycle leaning against a brick wall, photograph",
+   "seconds": 209.97,
+   "file": "dpm_20st_1.png",
+   "peak_rss_gb": 3.64
+  }
+ ],
+ "lcm_lora": "failed: RuntimeError: Error(s) in loading state_dict for UNet2DConditionModel:\n\tsize mismatch for up_blocks.0.resnets.1.conv1.lora_A.default_0.weight: copying a param with shape torch.Size([64, 2560, 3, 3]) from checkpoint, the shape in current model is torch.Size([64, 1920, 3, 3]).\n\tsize mismatch for up_blocks.0.resnets",
+ "peak_rss_gb": 3.64
+}

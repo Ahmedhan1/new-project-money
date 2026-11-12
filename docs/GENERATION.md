@@ -48,7 +48,22 @@ a separate folder or venv and point NEXUS at it (`settings.json` → `"generatio
 "hf_home": ...}` or env `NEXUS_GEN_PYTHONPATH` / `NEXUS_GEN_HF_HOME`). Weights (2.3 GB) are fetched once with
 `allow_download=True`. `generate.capabilities()` then reports `image: available` from a real probe of that environment.
 
+## Architecture (Account 2, Agent D)
+| Module | Job |
+|---|---|
+| `nexus/generate/__init__.py` | providers, `image()`, `animate_still()`, `label()` / `guard_claim()` (GEN-0, unchanged API) |
+| `nexus/generate/catalog.py` | licence class per model (`foss` / `restricted` / `research` / `excluded`), `requirements(model, task)` → `{gpu, vram_gb, ram_gb, disk_gb, models}`, `choose(task, hw)` from the registry tiers |
+| `nexus/generate/hardware.py` | runtime detection: CPU/RAM/disk, NVIDIA GPUs via `nvidia-smi` (no torch needed), Vulkan devices (CPU Vulkan flagged), tier; `satisfies(requirements, hw)` |
+| `nexus/generate/downloads.py` | opt-in downloads only: `plan()` shows files, bytes, licence, disk; `fetch()` refuses without a `consent()` naming the model, the accepted size and the licence; per-model cap (default 1.5 GB, `settings.generation.max_download_gb`); pinned revision + sha256 from huggingface.co |
+| `nexus/generate/cache.py` | content-addressed media cache (op + params + input identity + model) with LRU `prune(max_gb)`; `Checkpoint` for resumable multi-item jobs |
+| `nexus/generate/remote.py` | `job_manifest()` → `RenderJobManifest` with `requirements`; `execute()` runs locally when the requirements are met, otherwise returns `deferred` (`RESOURCE_EXHAUSTED`, retryable); `consume()` turns a `RenderExecutionResult` into `GeneratedMediaManifest`s or a retry manifest carrying the checkpoint. Worker entry: `python -m nexus.generate.remote request.json` (CPU kinds) / `python scripts/gpu_video_bench.py --request request.json` (video kinds, GPU) |
+| `nexus/generate/classify.py` | the classification guard: `generated-video` only for a registry video model's output whose frames are **not** one still under a global zoom/pan (`metrics.still_motion`); provenance from a still always gives `animated-still`; missing model / simulated provenance / unseen frames are refused |
+| `nexus/generate/metrics.py` | PSNR, SSIM, frame-to-frame SSIM, Farneback warp error, flicker, still-motion fit |
+| `scripts/gpu_video_bench.py` | GPU protocol: T2V (Wan 2.1 1.3B, Wan 2.2 5B, CogVideoX-2B), I2V (Wan 2.2 5B), V2V (Wan 2.1); time, VRAM, resolution, temporal metrics, CLIP score (LAION, optional); `--request` executes a `RenderExecutionRequest`; `--metrics-only` scores any clip on CPU. **GPU side UNVERIFIED** (never run here) |
+
+Media-to-media processors (`nexus/enhance`, `nexus/vfx`) use the same cache, downloads and manifests; see
+`docs/ACCOUNT2_MODEL_BENCHMARKS.md` for what was measured and `docs/ACCOUNT2_MEDIA_TOOL_CATALOG.md` for the research.
+
 ## Not built yet
-Inpainting/outpainting, upscaling (Real-ESRGAN), AI frame interpolation (RIFE), depth parallax, character/reference
-consistency (IP-Adapter): models are in the registry with licences; providers are not wired. Character consistency across
-scenes is therefore not available; a fixed seed and a shared style prompt are the only consistency NEXUS applies today.
+Inpainting/outpainting and character/reference consistency (IP-Adapter): models are in the registry with licences;
+providers are not wired. A fixed seed and a shared style prompt are the only consistency NEXUS applies today.
