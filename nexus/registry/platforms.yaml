@@ -1,0 +1,330 @@
+# Platform knowledge base (WS F, PLAT-1). Read by nexus/platforms.py; documented in docs/PLATFORMS.md.
+#
+# Every field is {value, kind, source, read_on, note?}:
+#   documented    stated by the platform itself on the `source` page, read on `read_on` (https source required)
+#   observed      not confirmed on an official page this session; widely reported by third parties (one is cited)
+#   experimental  an editorial choice or rule of thumb made by NEXUS (source "editorial: ..."), never platform data
+#   unverified    value is null: nothing reliable was found; the note says what is missing
+# Specs change. `reviewed_on` (global and per profile) drives platforms.stale(days=90). To update a field: re-read the
+# source page, change value/kind/read_on, bump the profile's reviewed_on, run `pytest tests/fast/test_platforms.py`.
+# Ranking systems are not public. Nothing here encodes an algorithm rule; reach-related notes quote the platform.
+
+schema_version: 1
+reviewed_on: "2026-11-12"
+
+sources:
+  yt_encoding: &yt_encoding https://support.google.com/youtube/answer/1722171
+  yt_upload_long: &yt_upload_long https://support.google.com/youtube/answer/71673
+  yt_thumbnails: &yt_thumbnails https://support.google.com/youtube/answer/72431
+  yt_shorts: &yt_shorts https://support.google.com/youtube/answer/10059070
+  yt_shorts_3min: &yt_shorts_3min https://support.google.com/youtube/answer/15424877
+  yt_subtitles: &yt_subtitles https://support.google.com/youtube/answer/2734698
+  yt_resolution: &yt_resolution https://support.google.com/youtube/answer/6375112
+  yt_hashtags: &yt_hashtags https://support.google.com/youtube/answer/6390658
+  yt_api_insert: &yt_api_insert https://developers.google.com/youtube/v3/docs/videos/insert
+  yt_api_videos: &yt_api_videos https://developers.google.com/youtube/v3/docs/videos
+  yt_api_quota: &yt_api_quota https://developers.google.com/youtube/v3/getting-started
+  yt_analytics: &yt_analytics https://developers.google.com/youtube/analytics
+  yt_safe_obs: &yt_safe_obs https://adkit.so/tools/safe-zones/youtube
+  tt_media: &tt_media https://developers.tiktok.com/doc/content-posting-api-media-transfer-guide
+  tt_start: &tt_start https://developers.tiktok.com/doc/content-posting-api-get-started
+  tt_direct: &tt_direct https://developers.tiktok.com/doc/content-posting-api-reference-direct-post
+  tt_video_obj: &tt_video_obj https://developers.tiktok.com/doc/tiktok-api-v2-video-object
+  tt_ads_specs: &tt_ads_specs https://ads.tiktok.com/help/article/video-ads-specifications?lang=en
+  tt_cml: &tt_cml https://ads.tiktok.com/help/article/commercial-music-library?lang=en
+  tt_length_obs: &tt_length_obs https://techcrunch.com/2024/05/16/tiktok-upload-60-minute-videos
+  short_safe_obs: &short_safe_obs https://reap.video/blog/short-form-video-safe-zones
+  short_res_obs: &short_res_obs https://www.socialpilot.co/instagram-marketing/instagram-video-size
+  ig_media: &ig_media https://developers.facebook.com/docs/instagram-platform/instagram-graph-api/reference/ig-user/media
+  ig_publishing: &ig_publishing https://developers.facebook.com/docs/instagram-platform/content-publishing
+  ig_insights: &ig_insights https://developers.facebook.com/docs/instagram-platform/reference/instagram-media/insights
+  ig_reels_about: &ig_reels_about https://about.instagram.com/features/reels
+  ig_creators_faq: &ig_creators_faq https://creators.instagram.com/faq?locale=en_US
+  meta_safe_obs: &meta_safe_obs https://houseofmarketers.com/guide-to-safe-zones-tiktok-facebook-instagram-stories-reels/
+  meta_sound_obs: &meta_sound_obs https://www.facebook.com/sound/collection/terms
+  fb_reels_api: &fb_reels_api https://developers.facebook.com/docs/video-api/guides/reels-publishing
+  fb_video_api: &fb_video_api https://developers.facebook.com/docs/video-api/guides/publishing
+  fb_formats: &fb_formats https://www.facebook.com/help/218673814818907
+  fb_all_reels_obs: &fb_all_reels_obs https://techcrunch.com/2025/06/17/facebook-announces-that-all-videos-on-its-platform-will-soon-be-shared-as-reels
+  fb_page_upload_obs: &fb_page_upload_obs https://www.facebook.com/business/help/163131210928551
+  sc_creators: &sc_creators https://creators.snapchat.com/learn-shine-in-the-spotlight-how-to-submit-to-spotlight
+  sc_post: &sc_post https://help.snapchat.com/hc/en-us/articles/7012288096532-How-do-I-post-Snaps-to-Spotlight
+  sc_web: &sc_web https://help.snapchat.com/hc/en-us/articles/7012293789972-How-do-I-submit-a-Snap-to-Spotlight-from-the-web
+  sc_mystory_web: &sc_mystory_web https://help.snapchat.com/hc/en-us/articles/7012310003348-How-to-Post-a-Snap-to-My-Story-from-the-Web
+  sc_quality: &sc_quality https://values.snap.com/policy/content-guidelines-recommendation-eligibility/recommendation-eligibility/quality
+  sc_length_obs: &sc_length_obs https://www.kapwing.com/resources/snapchat-spotlight-what-you-should-know/
+  sc_length_new_obs: &sc_length_new_obs https://www.socialmediatoday.com/news/snapchat-adds-generative-ai-lenses-longer-video-uploads/711706/
+
+# Value conventions
+#   aspect_accepted   {min, max} as width/height ratios, or {any: true}
+#   resolution_*      {width, height} | {short_side} | {long_side} | {width} (max columns)
+#   fps               {min, max} or {list: [...]}
+#   sizes in bytes, durations in seconds, loudness in LUFS integrated
+#   safe_zone         fractions of the frame covered by platform UI: {top, bottom, left, right}
+
+platforms:
+
+  # ------------------------------------------------------------------ YouTube (long-form)
+  youtube:
+    display: "YouTube (long-form video)"
+    family: youtube
+    reviewed_on: "2026-11-12"
+    fields:
+      aspect_accepted: {value: {any: true}, kind: documented, source: *yt_encoding, read_on: "2026-11-12", note: "16:9 is standard on computers; vertical and square are supported and the player adapts"}
+      aspect_recommended: {value: "16:9", kind: documented, source: *yt_resolution, read_on: "2026-11-12", note: "do not add padding or black bars to the video; the player pads non-16:9 itself"}
+      resolution_min: {value: null, kind: unverified, note: "no minimum stated; the recommended table goes down to 426x240"}
+      resolution_recommended: {value: {width: 1920, height: 1080}, kind: documented, source: *yt_resolution, read_on: "2026-11-12", note: "1080p is one of the listed 16:9 resolutions (240p to 4320p); NEXUS renders 1080p"}
+      resolution_max: {value: {width: 7680, height: 4320}, kind: documented, source: *yt_resolution, read_on: "2026-11-12"}
+      fps: {value: {list: [24, 25, 30, 48, 50, 60]}, kind: documented, source: *yt_encoding, read_on: "2026-11-12", note: "upload at the frame rate it was recorded; deinterlace interlaced material"}
+      duration_min_s: {value: null, kind: unverified, note: "no minimum stated on the pages read"}
+      duration_max_s: {value: 43200, kind: documented, source: *yt_upload_long, read_on: "2026-11-12", note: "256 GB or 12 hours, whichever is less"}
+      duration_default_max_s: {value: 900, kind: documented, source: *yt_upload_long, read_on: "2026-11-12", note: "by default uploads are limited to 15 minutes; verified accounts can upload longer (account-dependent)"}
+      max_file_bytes: {value: 256000000000, kind: documented, source: *yt_upload_long, read_on: "2026-11-12"}
+      container: {value: [mp4], kind: documented, source: *yt_encoding, read_on: "2026-11-12", note: "MP4, no edit lists, moov atom at the front (fast start). The page frames these as recommended settings"}
+      video_codec: {value: [h264], kind: documented, source: *yt_encoding, read_on: "2026-11-12", note: "H.264 High profile, progressive, CABAC, VBR (recommended, not the only accepted codec)"}
+      audio_codec: {value: [aac, opus], kind: documented, source: *yt_encoding, read_on: "2026-11-12", note: "AAC-LC, Opus or Eclipsa Audio"}
+      audio_sample_rate: {value: 48000, kind: documented, source: *yt_encoding, read_on: "2026-11-12"}
+      audio_bitrate_kbps: {value: 384, kind: documented, source: *yt_encoding, read_on: "2026-11-12", note: "stereo; mono 128, 5.1 512"}
+      video_bitrate_mbps: {value: {"1080p_30": 8, "1080p_60": 12, "2160p_30": 35, "2160p_60": 53}, kind: documented, source: *yt_encoding, read_on: "2026-11-12", note: "SDR recommendations; 4K values are the lower ends of 35-45 / 53-68"}
+      loudness_documented: {value: null, kind: unverified, note: "YouTube does not publish an upload loudness target on any page read"}
+      loudness_target_lufs: {value: -14.0, kind: experimental, source: "editorial: NEXUS default (render.py target_lufs)", read_on: "2026-11-12", note: "editorial default, not a platform requirement"}
+      caption_files: {value: [srt, vtt, sbv, ttml, dfxp, sami, rt, mpsub, lrc, cap], kind: documented, source: *yt_subtitles, read_on: "2026-11-12", note: "SRT and SBV must be plain UTF-8; WebVTT supports positioning"}
+      title_max_chars: {value: 100, kind: documented, source: *yt_api_videos, read_on: "2026-11-12", note: "may not contain < or >"}
+      description_max_bytes: {value: 5000, kind: documented, source: *yt_api_videos, read_on: "2026-11-12", note: "5000 BYTES of UTF-8, not characters; may not contain < or >"}
+      tags_max_chars: {value: 500, kind: documented, source: *yt_api_videos, read_on: "2026-11-12", note: "whole tag list; commas count; tags with spaces count their quotes"}
+      hashtags_max: {value: 60, kind: documented, source: *yt_hashtags, read_on: "2026-11-12", note: "with more than 60 hashtags ALL are ignored; up to 3 are shown near the title"}
+      thumbnail: {value: {width: 3840, height: 2160, min_width: 640, aspect: "16:9", formats: [jpg, png], max_bytes: 2000000, max_bytes_desktop: 50000000, needs_verified_account: true}, kind: documented, source: *yt_thumbnails, read_on: "2026-11-12", note: "2 MB limit applies on mobile, 50 MB on desktop; NEXUS writes a 1920x1080 JPEG under 2 MB"}
+      safe_zone: {value: null, kind: unverified, note: "no official overlay zones for long-form; player controls auto-hide"}
+      hook_window_s: {value: 5.0, kind: experimental, source: "editorial: growth.PLATFORM_NORMS youtube first_speech_max", read_on: "2026-11-12", note: "rule of thumb, not platform data"}
+      music_policy: {value: "Use music you own or have licensed. Tracks from the YouTube Audio Library do not receive Content ID claims.", kind: documented, source: *yt_shorts_3min, read_on: "2026-11-12"}
+      upload_api: {value: {api: "YouTube Data API v3 videos.insert", auth: "OAuth 2.0 consent of the channel owner via the owner's own Google Cloud project", quota: "default 100 videos.insert calls/day; 10,000 units/day for other endpoints; more via the quota extension form", paid_tier: "no price stated on the pages read", review: "quota extension request form for more quota"}, kind: documented, source: *yt_api_quota, read_on: "2026-11-12", note: "videos.insert page (also read) states 256 GB max and that unverified-project uploads are not restricted to private"}
+      analytics_api: {value: {api: "YouTube Analytics API / Reporting API", auth: "OAuth authorisation by the channel owner"}, kind: documented, source: *yt_analytics, read_on: "2026-11-12", note: "metric names (e.g. averageViewDuration) are on linked metric pages not read this session; use the manual CSV import"}
+      manual_upload: {value: ["Open https://studio.youtube.com and sign in to the channel.", "Click Create > Upload videos and choose video.mp4 from this folder.", "Paste the title (title.txt) and description (description.txt).", "Thumbnail: upload thumbnail.jpg (custom thumbnails need a verified account).", "Audience: answer the 'made for kids' question truthfully.", "Video elements: add subtitles: Upload file > With timing > captions.srt.", "Checks: wait for the copyright check to finish before publishing.", "Visibility: choose Private or Unlisted first, review the processed video, then publish."], kind: experimental, source: "editorial: NEXUS checklist built from the documented limits above", read_on: "2026-11-12", note: "Studio menu names can change; the limits it relies on are documented above"}
+
+  # ------------------------------------------------------------------ YouTube Shorts
+  youtube_shorts:
+    display: "YouTube Shorts"
+    family: youtube
+    reviewed_on: "2026-11-12"
+    fields:
+      aspect_accepted: {value: {min: 0.0, max: 1.0}, kind: documented, source: *yt_shorts_3min, read_on: "2026-11-12", note: "square or vertical uploads up to 3 minutes are classified as Shorts; 16:9 stays long-form"}
+      aspect_recommended: {value: "9:16", kind: observed, source: *yt_safe_obs, read_on: "2026-11-12", note: "the help pages say 'vertical'; 9:16 is the universal reading and matches the documented 9:16 Shorts thumbnail"}
+      resolution_min: {value: null, kind: unverified, note: "no minimum stated"}
+      resolution_recommended: {value: {width: 1080, height: 1920}, kind: observed, source: *yt_safe_obs, read_on: "2026-11-12"}
+      resolution_max: {value: {width: 1080, height: 1920}, kind: documented, source: *yt_shorts, read_on: "2026-11-12", note: "uploaded Shorts can have a maximum resolution of 1080p"}
+      fps: {value: {list: [24, 25, 30, 48, 50, 60]}, kind: documented, source: *yt_encoding, read_on: "2026-11-12", note: "general YouTube encoding guidance"}
+      duration_min_s: {value: null, kind: unverified, note: "no minimum stated"}
+      duration_max_s: {value: 180, kind: documented, source: *yt_shorts_3min, read_on: "2026-11-12", note: "up to three minutes; longer square/vertical uploads are long-form videos"}
+      max_file_bytes: {value: 256000000000, kind: documented, source: *yt_upload_long, read_on: "2026-11-12"}
+      container: {value: [mp4], kind: documented, source: *yt_encoding, read_on: "2026-11-12"}
+      video_codec: {value: [h264], kind: documented, source: *yt_encoding, read_on: "2026-11-12"}
+      audio_codec: {value: [aac, opus], kind: documented, source: *yt_encoding, read_on: "2026-11-12"}
+      audio_sample_rate: {value: 48000, kind: documented, source: *yt_encoding, read_on: "2026-11-12"}
+      audio_bitrate_kbps: {value: 384, kind: documented, source: *yt_encoding, read_on: "2026-11-12"}
+      loudness_documented: {value: null, kind: unverified, note: "no loudness target published"}
+      loudness_target_lufs: {value: -14.0, kind: experimental, source: "editorial: NEXUS default", read_on: "2026-11-12", note: "editorial default, not a platform requirement"}
+      caption_files: {value: [srt, vtt, sbv, ttml], kind: documented, source: *yt_subtitles, read_on: "2026-11-12", note: "the subtitle page is generic to YouTube videos; NEXUS also burns captions in for sound-off viewing"}
+      title_max_chars: {value: 100, kind: documented, source: *yt_api_videos, read_on: "2026-11-12"}
+      description_max_bytes: {value: 5000, kind: documented, source: *yt_api_videos, read_on: "2026-11-12"}
+      hashtags_max: {value: 60, kind: documented, source: *yt_hashtags, read_on: "2026-11-12"}
+      thumbnail: {value: {width: 2160, height: 3840, min_height: 640, aspect: "9:16", formats: [jpg, png], max_bytes: 2000000, needs_verified_account: true, desktop_only: true}, kind: documented, source: *yt_thumbnails, read_on: "2026-11-12", note: "custom Shorts thumbnails: verified account, YouTube Studio on a computer"}
+      safe_zone: {value: {top: 0.15, bottom: 0.35, left: 0.044, right: 0.178}, kind: observed, source: *yt_safe_obs, read_on: "2026-11-12", note: "figures attributed to Google Ads guidance for vertical video ads; no official organic Shorts safe zone was found"}
+      hook_window_s: {value: 1.5, kind: experimental, source: "editorial: growth.PLATFORM_NORMS shorts first_speech_max", read_on: "2026-11-12", note: "rule of thumb, not platform data"}
+      music_policy: {value: "A Short longer than 1 minute with ANY active copyright claim is blocked globally (not playable, recommended or monetised) until the claim is resolved. Most Shorts Audio Library songs can be used for up to 90 s (some 60 or 30 s).", kind: documented, source: *yt_shorts_3min, read_on: "2026-11-12"}
+      upload_api: {value: {api: "YouTube Data API v3 videos.insert (same as long-form)", auth: "OAuth 2.0 consent of the channel owner", quota: "default 100 videos.insert calls/day", paid_tier: "no price stated on the pages read", review: "quota extension form"}, kind: documented, source: *yt_api_quota, read_on: "2026-11-12"}
+      analytics_api: {value: {api: "YouTube Analytics API", auth: "OAuth authorisation by the channel owner"}, kind: documented, source: *yt_analytics, read_on: "2026-11-12"}
+      manual_upload: {value: ["Open https://studio.youtube.com (or the YouTube app) on the channel.", "Create > Upload videos > video.mp4 (vertical, at most 3 minutes, so it is classified as a Short).", "Paste the title and description; hashtags go in the description.", "Optional: custom thumbnail thumbnail.jpg from Studio on a computer (verified account only).", "Upload captions.srt under Subtitles if you want a selectable caption track.", "If the Short is over 1 minute, make sure no third-party music or clip can trigger a copyright claim (it would be blocked globally).", "Publish as Private/Unlisted first, check it on a phone, then make it Public."], kind: experimental, source: "editorial: NEXUS checklist built from the documented limits above", read_on: "2026-11-12"}
+
+  # ------------------------------------------------------------------ TikTok
+  tiktok:
+    display: "TikTok"
+    family: tiktok
+    reviewed_on: "2026-11-12"
+    fields:
+      aspect_accepted: {value: null, kind: unverified, note: "the developer upload spec limits pixel sizes (360-4096 px per side) but states no aspect-ratio range"}
+      aspect_recommended: {value: "9:16", kind: documented, source: *tt_ads_specs, read_on: "2026-11-12", note: "stated on TikTok's In-Feed ads spec page (9:16 recommended); used for organic posts as the best official guidance"}
+      resolution_min: {value: {short_side: 360}, kind: documented, source: *tt_media, read_on: "2026-11-12", note: "Content Posting API: minimum 360 px for both height and width"}
+      resolution_recommended: {value: {width: 1080, height: 1920}, kind: observed, source: *short_safe_obs, read_on: "2026-11-12", note: "ads page states 540x960 or larger for 9:16; 1080x1920 is the common creator target"}
+      resolution_max: {value: {long_side: 4096}, kind: documented, source: *tt_media, read_on: "2026-11-12"}
+      fps: {value: {min: 23, max: 60}, kind: documented, source: *tt_media, read_on: "2026-11-12"}
+      duration_min_s: {value: null, kind: unverified, note: "no minimum stated"}
+      duration_max_s: {value: 600, kind: documented, source: *tt_media, read_on: "2026-11-12", note: "longest video a developer can send via the upload endpoint is 10 minutes. In-app limits are account-dependent (60-minute uploads tested for some users, observed: see tt_length_obs); a creator's own limit is returned as max_video_post_duration_sec by the creator-info query"}
+      max_file_bytes: {value: 4000000000, kind: documented, source: *tt_media, read_on: "2026-11-12"}
+      container: {value: [mp4, webm, mov], kind: documented, source: *tt_media, read_on: "2026-11-12", note: "MP4 recommended"}
+      video_codec: {value: [h264, hevc, vp8, vp9], kind: documented, source: *tt_media, read_on: "2026-11-12", note: "H.264 recommended"}
+      audio_codec: {value: null, kind: unverified, note: "no audio codec stated on the developer page; NEXUS uses AAC 48 kHz"}
+      audio_sample_rate: {value: null, kind: unverified, note: "not stated"}
+      loudness_documented: {value: null, kind: unverified, note: "no loudness target published"}
+      loudness_target_lufs: {value: -14.0, kind: experimental, source: "editorial: NEXUS default", read_on: "2026-11-12", note: "editorial default, not a platform requirement"}
+      caption_files: {value: null, kind: unverified, note: "no caption-file upload documented on the pages read; NEXUS burns captions into the picture"}
+      title_max_chars: {value: null, kind: unverified, note: "TikTok has no separate title: the post caption (post_info.title) is the text field"}
+      caption_max_utf16: {value: 2200, kind: documented, source: *tt_direct, read_on: "2026-11-12", note: "max 2200 UTF-16 runes; hashtags and mentions are matched in the caption"}
+      hashtags_max: {value: null, kind: unverified, note: "no hashtag count limit stated"}
+      thumbnail: {value: null, kind: unverified, note: "cover is chosen from a frame in the app; no cover-image spec read this session. NEXUS writes cover.jpg as a frame suggestion"}
+      safe_zone: {value: {top: 0.15, bottom: 0.30, left: 0.10, right: 0.15}, kind: observed, source: *short_safe_obs, read_on: "2026-11-12", note: "TikTok's ads page says the safe zone depends on dimensions and caption length and offers template files only (no numbers)"}
+      hook_window_s: {value: 1.0, kind: experimental, source: "editorial: growth.PLATFORM_NORMS tiktok first_speech_max", read_on: "2026-11-12", note: "rule of thumb, not platform data"}
+      music_policy: {value: "Businesses cannot use the general music library for commercial use; business accounts must use the Commercial Music Library for organic posts, ads and branded content.", kind: documented, source: *tt_cml, read_on: "2026-11-12"}
+      upload_api: {value: {api: "Content Posting API (Direct Post)", auth: "registered developer app with the Content Posting API product; app approved for the video.publish scope; the user authorises via Login Kit", review: "until the API client passes TikTok's audit ALL posts are restricted to private viewing", paid_tier: "no price stated on the pages read"}, kind: documented, source: *tt_start, read_on: "2026-11-12"}
+      analytics_api: {value: {api: "Display API video object", fields: [view_count, like_count, comment_count, share_count], retention: "no watch-time or retention fields documented"}, kind: documented, source: *tt_video_obj, read_on: "2026-11-12", note: "retention data only via the manual TikTok Studio export"}
+      manual_upload: {value: ["Open the TikTok app or https://www.tiktok.com/upload (TikTok Studio) on the account.", "Upload video.mp4 (vertical 9:16; captions are burned in).", "Paste caption.txt (title + description + hashtags, at most 2200 characters).", "Choose a cover frame; cover.jpg in this folder shows the suggested moment.", "Business accounts: only Commercial Music Library sounds may be added.", "Check the preview with the on-screen buttons: nothing important should sit under them.", "Post (or save as private first and review on a phone)."], kind: experimental, source: "editorial: NEXUS checklist built from the documented limits above", read_on: "2026-11-12"}
+
+  # ------------------------------------------------------------------ Instagram Reels
+  instagram_reels:
+    display: "Instagram Reels"
+    family: meta
+    reviewed_on: "2026-11-12"
+    fields:
+      aspect_accepted: {value: {min: 0.01, max: 10.0}, kind: documented, source: *ig_media, read_on: "2026-11-12", note: "API publishing spec; 9:16 recommended to avoid cropping or blank space"}
+      aspect_recommended: {value: "9:16", kind: documented, source: *ig_media, read_on: "2026-11-12"}
+      resolution_min: {value: null, kind: unverified, note: "no minimum stated for Reels video"}
+      resolution_recommended: {value: {width: 1080, height: 1920}, kind: observed, source: *short_res_obs, read_on: "2026-11-12"}
+      resolution_max: {value: {width: 1920}, kind: documented, source: *ig_media, read_on: "2026-11-12", note: "maximum 1920 horizontal pixels (columns)"}
+      fps: {value: {min: 23, max: 60}, kind: documented, source: *ig_media, read_on: "2026-11-12"}
+      duration_min_s: {value: 3, kind: documented, source: *ig_media, read_on: "2026-11-12"}
+      duration_max_s: {value: 900, kind: documented, source: *ig_media, read_on: "2026-11-12", note: "API: 15 minutes. The app records and edits reels up to 20 minutes (ig_reels_about)"}
+      duration_reach_max_s: {value: 180, kind: documented, source: *ig_reels_about, read_on: "2026-11-12", note: "'Reels over 3 minutes won't be recommended to new audiences' (also in the creators FAQ). NEXUS trims to this by default"}
+      max_file_bytes: {value: 300000000, kind: documented, source: *ig_media, read_on: "2026-11-12", note: "300 MB for API publishing"}
+      container: {value: [mp4, mov], kind: documented, source: *ig_media, read_on: "2026-11-12", note: "no edit lists, moov atom at the front"}
+      video_codec: {value: [h264, hevc], kind: documented, source: *ig_media, read_on: "2026-11-12", note: "progressive, closed GOP, 4:2:0"}
+      video_bitrate_mbps: {value: {max: 25}, kind: documented, source: *ig_media, read_on: "2026-11-12", note: "VBR"}
+      audio_codec: {value: [aac], kind: documented, source: *ig_media, read_on: "2026-11-12", note: "mono or stereo"}
+      audio_sample_rate: {value: 48000, kind: documented, source: *ig_media, read_on: "2026-11-12", note: "up to 48 kHz"}
+      audio_bitrate_kbps: {value: 128, kind: documented, source: *ig_media, read_on: "2026-11-12"}
+      loudness_documented: {value: null, kind: unverified, note: "no loudness target published"}
+      loudness_target_lufs: {value: -14.0, kind: experimental, source: "editorial: NEXUS default", read_on: "2026-11-12", note: "editorial default, not a platform requirement"}
+      caption_files: {value: null, kind: unverified, note: "no caption-file upload documented; NEXUS burns captions in"}
+      title_max_chars: {value: null, kind: unverified, note: "no title field; the first caption line acts as the title"}
+      caption_max_chars: {value: 2200, kind: documented, source: *ig_media, read_on: "2026-11-12"}
+      hashtags_max: {value: 30, kind: documented, source: *ig_media, read_on: "2026-11-12", note: "also max 20 @mentions"}
+      thumbnail: {value: {aspect: "9:16", formats: [jpg], max_bytes: 8000000, color_space: sRGB, feed_crop: "centre 1:1 when shared to the feed grid"}, kind: documented, source: *ig_media, read_on: "2026-11-12", note: "non-9:16 covers are cropped to the middle 9:16"}
+      safe_zone: {value: {top: 0.14, bottom: 0.35, left: 0.06, right: 0.06}, kind: observed, source: *meta_safe_obs, read_on: "2026-11-12", note: "Meta's own pages read give no organic numbers; these are widely repeated Reels ad margins"}
+      hook_window_s: {value: 1.5, kind: experimental, source: "editorial: growth.PLATFORM_NORMS reels first_speech_max", read_on: "2026-11-12", note: "rule of thumb, not platform data"}
+      content_policy: {value: "A third-party watermark on a reel may reduce its reach; original content gets the best distribution. Licensed audio must be attributed.", kind: documented, source: *ig_creators_faq, read_on: "2026-11-12"}
+      music_policy: {value: "Business/professional accounts may only have part of the music library; Meta Sound Collection tracks are royalty-free for use on Meta products only.", kind: observed, source: *meta_sound_obs, read_on: "2026-11-12", note: "the music-library help page did not render for verification"}
+      upload_api: {value: {api: "Instagram Graph API content publishing (media_type REELS)", auth: "Instagram professional account; instagram_business_content_publish (Instagram Login) or instagram_content_publish (+ pages_read_engagement with Facebook Login)", limits: "100 API-published posts per 24 h (a carousel section of the same page says 50); 400 containers per 24 h", review: "Advanced/Standard access levels are listed; app review details are not on the page read", paid_tier: "no price stated"}, kind: documented, source: *ig_publishing, read_on: "2026-11-12"}
+      analytics_api: {value: {api: "Instagram media insights", metrics: [views, reach, ig_reels_avg_watch_time, reels_skip_rate, likes, comments, shares, saved, total_interactions], auth: "instagram_manage_insights (or instagram_business_manage_insights)"}, kind: documented, source: *ig_insights, read_on: "2026-11-12"}
+      manual_upload: {value: ["Open the Instagram app (or https://www.instagram.com on a computer) on the professional account.", "+ > Reel > select video.mp4.", "Paste caption.txt (at most 2200 characters, at most 30 hashtags).", "Edit cover: pick the frame shown in cover.jpg or upload cover.jpg (keep the subject in the centre square for the grid).", "Leave 'Also share to feed' on if you want it in the grid.", "Do not add a third-party watermark; keep the reel at or under 3 minutes if you want it recommended to new audiences.", "Share."], kind: experimental, source: "editorial: NEXUS checklist built from the documented limits above", read_on: "2026-11-12"}
+
+  # ------------------------------------------------------------------ Instagram feed (video post, shown as a reel)
+  instagram_feed:
+    display: "Instagram feed (4:5 video)"
+    family: meta
+    reviewed_on: "2026-11-12"
+    fields:
+      aspect_accepted: {value: {min: 0.01, max: 10.0}, kind: documented, source: *ig_media, read_on: "2026-11-12", note: "videos are published through the Reels spec; the feed IMAGE range is 4:5 to 1.91:1"}
+      aspect_recommended: {value: "4:5", kind: observed, source: *short_res_obs, read_on: "2026-11-12", note: "4:5 is the documented narrowest feed image ratio; for video it is the common feed choice"}
+      resolution_min: {value: null, kind: unverified, note: "feed images: min width 320 px; no video minimum stated"}
+      resolution_recommended: {value: {width: 1080, height: 1350}, kind: observed, source: *short_res_obs, read_on: "2026-11-12"}
+      resolution_max: {value: {width: 1920}, kind: documented, source: *ig_media, read_on: "2026-11-12"}
+      fps: {value: {min: 23, max: 60}, kind: documented, source: *ig_media, read_on: "2026-11-12"}
+      duration_min_s: {value: 3, kind: documented, source: *ig_media, read_on: "2026-11-12"}
+      duration_max_s: {value: 900, kind: documented, source: *ig_media, read_on: "2026-11-12"}
+      duration_reach_max_s: {value: 180, kind: documented, source: *ig_reels_about, read_on: "2026-11-12", note: "videos are shown as reels; over 3 minutes they are not recommended to new audiences"}
+      max_file_bytes: {value: 300000000, kind: documented, source: *ig_media, read_on: "2026-11-12"}
+      container: {value: [mp4, mov], kind: documented, source: *ig_media, read_on: "2026-11-12"}
+      video_codec: {value: [h264, hevc], kind: documented, source: *ig_media, read_on: "2026-11-12"}
+      audio_codec: {value: [aac], kind: documented, source: *ig_media, read_on: "2026-11-12"}
+      audio_sample_rate: {value: 48000, kind: documented, source: *ig_media, read_on: "2026-11-12"}
+      loudness_documented: {value: null, kind: unverified, note: "no loudness target published"}
+      loudness_target_lufs: {value: -14.0, kind: experimental, source: "editorial: NEXUS default", read_on: "2026-11-12", note: "editorial default, not a platform requirement"}
+      caption_files: {value: null, kind: unverified, note: "no caption-file upload documented; captions are burned in"}
+      title_max_chars: {value: null, kind: unverified, note: "no title field"}
+      caption_max_chars: {value: 2200, kind: documented, source: *ig_media, read_on: "2026-11-12"}
+      hashtags_max: {value: 30, kind: documented, source: *ig_media, read_on: "2026-11-12"}
+      thumbnail: {value: {formats: [jpg], max_bytes: 8000000, color_space: sRGB, feed_crop: "centre 1:1 in the grid"}, kind: documented, source: *ig_media, read_on: "2026-11-12"}
+      safe_zone: {value: {top: 0.10, bottom: 0.10, left: 0.0, right: 0.0}, kind: experimental, source: "editorial: keep text inside the centre 1:1 square that the grid shows (documented crop, ig_media)", read_on: "2026-11-12", note: "derived from the documented 1:1 grid crop of a 4:5 frame; not a UI overlay measurement"}
+      hook_window_s: {value: 1.5, kind: experimental, source: "editorial: growth.PLATFORM_NORMS reels first_speech_max", read_on: "2026-11-12", note: "rule of thumb"}
+      content_policy: {value: "A third-party watermark may reduce reach; original content gets the best distribution.", kind: documented, source: *ig_creators_faq, read_on: "2026-11-12"}
+      upload_api: {value: {api: "Instagram Graph API content publishing (videos go through REELS with share_to_feed)", auth: "Instagram professional account + instagram_business_content_publish", limits: "100 API-published posts per 24 h", paid_tier: "no price stated"}, kind: documented, source: *ig_publishing, read_on: "2026-11-12"}
+      analytics_api: {value: {api: "Instagram media insights", auth: "instagram_manage_insights"}, kind: documented, source: *ig_insights, read_on: "2026-11-12"}
+      manual_upload: {value: ["Open Instagram on the account.", "+ > Post (or Reel) > select video.mp4 (4:5).", "Keep the 4:5 framing; do not let the app crop to 1:1.", "Paste caption.txt (at most 2200 characters, 30 hashtags).", "Pick the cover frame shown in cover.jpg.", "Share."], kind: experimental, source: "editorial: NEXUS checklist", read_on: "2026-11-12"}
+
+  # ------------------------------------------------------------------ Facebook (feed video + Reels sub-profile)
+  facebook:
+    display: "Facebook (feed video)"
+    family: meta
+    reviewed_on: "2026-11-12"
+    fields:
+      aspect_accepted: {value: {any: true}, kind: observed, source: *fb_all_reels_obs, read_on: "2026-11-12", note: "Meta announced (June 2025) that all new Facebook videos are shared as reels with no length or format restriction; not confirmed on an official spec page"}
+      aspect_recommended: {value: "16:9", kind: experimental, source: "editorial: keep the long-form master's frame so YouTube and Facebook share one render", read_on: "2026-11-12", note: "use the facebook/reels sub-profile for vertical"}
+      resolution_min: {value: null, kind: unverified, note: "not stated on pages read"}
+      resolution_recommended: {value: {width: 1920, height: 1080}, kind: experimental, source: "editorial: same as the YouTube render", read_on: "2026-11-12"}
+      resolution_max: {value: null, kind: unverified, note: "not stated on pages read"}
+      fps: {value: {min: 24, max: 60}, kind: observed, source: *fb_reels_api, read_on: "2026-11-12", note: "documented for Reels (fb_reels_api); feed videos are now reels"}
+      duration_min_s: {value: null, kind: unverified, note: "not stated"}
+      duration_max_s: {value: 14400, kind: observed, source: *fb_page_upload_obs, read_on: "2026-11-12", note: "240 minutes for Page uploads as quoted in search excerpts of this Meta page, which did not render for verification"}
+      max_file_bytes: {value: 10000000000, kind: observed, source: *fb_page_upload_obs, read_on: "2026-11-12", note: "10 GB as quoted in search excerpts; not verified"}
+      container: {value: [mp4, mov], kind: documented, source: *fb_formats, read_on: "2026-11-12", note: "MP4 or MOV recommended; ~30 other extensions accepted; the Video API lists only video/mp4"}
+      video_codec: {value: [h264, hevc], kind: observed, source: *fb_reels_api, read_on: "2026-11-12", note: "documented for Reels"}
+      audio_codec: {value: [aac], kind: observed, source: *fb_reels_api, read_on: "2026-11-12", note: "documented for Reels"}
+      audio_sample_rate: {value: 48000, kind: observed, source: *fb_reels_api, read_on: "2026-11-12"}
+      loudness_documented: {value: null, kind: unverified, note: "no loudness target published"}
+      loudness_target_lufs: {value: -14.0, kind: experimental, source: "editorial: NEXUS default", read_on: "2026-11-12", note: "editorial default, not a platform requirement"}
+      caption_files: {value: null, kind: unverified, note: "SRT upload via Meta Business Suite is widely described but was not confirmed on an official page this session; the package includes captions.srt"}
+      title_max_chars: {value: 255, kind: experimental, source: "editorial: previous publish.PLATFORMS value", read_on: "2026-11-12", note: "the Video API accepts title and description but the page read states no length limits"}
+      description_max_chars: {value: 5000, kind: experimental, source: "editorial: previous publish.PLATFORMS value", read_on: "2026-11-12", note: "no limit stated on the page read"}
+      hashtags_max: {value: null, kind: unverified, note: "not stated"}
+      thumbnail: {value: null, kind: unverified, note: "no thumbnail spec read; NEXUS writes a 16:9 JPEG"}
+      safe_zone: {value: null, kind: unverified, note: "no overlay zones documented for feed video"}
+      hook_window_s: {value: 3.0, kind: experimental, source: "editorial: rule of thumb for feed video", read_on: "2026-11-12", note: "rule of thumb"}
+      music_policy: {value: "Meta Sound Collection tracks are royalty-free on Meta products only; other commercial music needs your own licence.", kind: observed, source: *meta_sound_obs, read_on: "2026-11-12"}
+      upload_api: {value: {api: "Facebook Video API (POST /{page_id}/videos)", auth: "Page access token; pages_show_list, pages_read_engagement, pages_manage_posts; user with CREATE_CONTENT on the Page", review: "Meta app review for these permissions (process not described on the page read)", paid_tier: "no price stated"}, kind: documented, source: *fb_video_api, read_on: "2026-11-12", note: "Pages only"}
+      analytics_api: {value: null, kind: unverified, note: "video insights endpoints not read this session; use the Meta Business Suite export and the manual import"}
+      manual_upload: {value: ["Open https://business.facebook.com (Meta Business Suite) or the Page.", "Create post > Add video > video.mp4.", "Title: title.txt; description: description.txt.", "Captions: upload captions.srt in the video's subtitle settings if offered.", "Thumbnail: choose thumbnail.jpg.", "Music: only your own, licensed or Sound Collection tracks.", "Publish or schedule."], kind: experimental, source: "editorial: NEXUS checklist", read_on: "2026-11-12"}
+    sub_profiles:
+      reels:
+        display: "Facebook Reels"
+        fields:
+          aspect_accepted: {value: {min: 0.5625, max: 0.5625}, kind: documented, source: *fb_reels_api, read_on: "2026-11-12", note: "spec table says 9x16; the error table says 'between 16x9 and 9x16'. The stricter reading is used"}
+          aspect_recommended: {value: "9:16", kind: documented, source: *fb_reels_api, read_on: "2026-11-12"}
+          resolution_min: {value: {width: 540, height: 960}, kind: documented, source: *fb_reels_api, read_on: "2026-11-12"}
+          resolution_recommended: {value: {width: 1080, height: 1920}, kind: documented, source: *fb_reels_api, read_on: "2026-11-12"}
+          resolution_max: {value: null, kind: unverified, note: "not stated"}
+          fps: {value: {min: 24, max: 60}, kind: documented, source: *fb_reels_api, read_on: "2026-11-12", note: "fixed frame rate"}
+          duration_min_s: {value: 3, kind: documented, source: *fb_reels_api, read_on: "2026-11-12"}
+          duration_max_s: {value: 90, kind: documented, source: *fb_reels_api, read_on: "2026-11-12", note: "API-published Reels: 3-90 s (60 s as Page stories). In the app, Meta announced no length limit for reels (observed, fb_all_reels_obs)"}
+          max_file_bytes: {value: null, kind: unverified, note: "not stated"}
+          container: {value: [mp4], kind: documented, source: *fb_reels_api, read_on: "2026-11-12"}
+          video_codec: {value: [h264, hevc, vp9, av1], kind: documented, source: *fb_reels_api, read_on: "2026-11-12"}
+          audio_codec: {value: [aac], kind: documented, source: *fb_reels_api, read_on: "2026-11-12", note: "AAC-LC, stereo"}
+          audio_sample_rate: {value: 48000, kind: documented, source: *fb_reels_api, read_on: "2026-11-12"}
+          audio_bitrate_kbps: {value: 128, kind: documented, source: *fb_reels_api, read_on: "2026-11-12", note: "128 kbps or more"}
+          title_max_chars: {value: null, kind: unverified, note: "reels carry a description only"}
+          description_max_chars: {value: 2200, kind: experimental, source: "editorial: previous publish.PLATFORMS value", read_on: "2026-11-12"}
+          thumbnail: {value: {aspect: "9:16"}, kind: experimental, source: "editorial", read_on: "2026-11-12"}
+          safe_zone: {value: {top: 0.14, bottom: 0.35, left: 0.06, right: 0.06}, kind: observed, source: *meta_safe_obs, read_on: "2026-11-12"}
+          hook_window_s: {value: 1.5, kind: experimental, source: "editorial: growth.PLATFORM_NORMS reels", read_on: "2026-11-12", note: "rule of thumb"}
+          upload_api: {value: {api: "Facebook Reels publishing (POST /{page_id}/video_reels)", auth: "Page access token; pages_show_list, pages_read_engagement, pages_manage_posts", limits: "30 API-published reels per Page per 24 h", review: "Meta app review for the permissions", paid_tier: "no price stated"}, kind: documented, source: *fb_reels_api, read_on: "2026-11-12", note: "Pages only, public only"}
+          manual_upload: {value: ["Open the Facebook app or Meta Business Suite on the Page.", "Create > Reel > video.mp4 (9:16).", "Paste caption.txt.", "Choose the cover frame shown in cover.jpg.", "Music: only licensed or Sound Collection tracks.", "Share."], kind: experimental, source: "editorial: NEXUS checklist", read_on: "2026-11-12"}
+
+  # ------------------------------------------------------------------ Snapchat Spotlight
+  snapchat_spotlight:
+    display: "Snapchat Spotlight"
+    family: snap
+    reviewed_on: "2026-11-12"
+    fields:
+      aspect_accepted: {value: {min: 0.0, max: 0.99}, kind: documented, source: *sc_creators, read_on: "2026-11-12", note: "Snaps should be vertical videos with sound; horizontal Snaps won't show up in Spotlight. Letterboxed videos are not eligible for recommendation (sc_quality)"}
+      aspect_recommended: {value: "9:16", kind: documented, source: *sc_mystory_web, read_on: "2026-11-12", note: "stated in the web-posting article under the Spotlight help section: Snapchat content is 9:16 and is cropped automatically"}
+      resolution_min: {value: {width: 540, height: 960}, kind: documented, source: *sc_mystory_web, read_on: "2026-11-12", note: "stated for web posting to My Story; applied to Spotlight as the best official figure"}
+      resolution_recommended: {value: {width: 1080, height: 1920}, kind: observed, source: *sc_length_obs, read_on: "2026-11-12"}
+      resolution_max: {value: null, kind: unverified, note: "not stated"}
+      fps: {value: null, kind: unverified, note: "not stated; NEXUS uses 30 fps"}
+      duration_min_s: {value: 5, kind: documented, source: *sc_post, read_on: "2026-11-12"}
+      duration_max_s: {value: 60, kind: observed, source: *sc_length_obs, read_on: "2026-11-12", note: "60 s is the long-standing reported limit (the web My Story article also says 5-60 s). Social Media Today reports up to 3 min (5 min uploads); unconfirmed, so the conservative 60 s is used"}
+      max_file_bytes: {value: null, kind: unverified, note: "not stated"}
+      container: {value: null, kind: unverified, note: "not stated; MP4/H.264/AAC is what NEXUS produces"}
+      video_codec: {value: null, kind: unverified, note: "not stated"}
+      audio_codec: {value: null, kind: unverified, note: "not stated; Snaps must have sound (documented, sc_creators)"}
+      loudness_documented: {value: null, kind: unverified, note: "no loudness target published; missing audio is not eligible (sc_quality)"}
+      loudness_target_lufs: {value: -14.0, kind: experimental, source: "editorial: NEXUS default", read_on: "2026-11-12", note: "editorial default"}
+      caption_files: {value: null, kind: unverified, note: "no caption-file upload; Snap recommends captions for sound-off viewers (sc_creators), so they are burned in"}
+      title_max_chars: {value: null, kind: unverified, note: "no title field"}
+      description_max_chars: {value: 160, kind: experimental, source: "editorial: previous publish.PLATFORMS value", read_on: "2026-11-12", note: "no limit stated on the pages read"}
+      hashtags_max: {value: 3, kind: experimental, source: "editorial: a few #Topics", read_on: "2026-11-12", note: "Snap documents adding #Topics but no count limit"}
+      thumbnail: {value: null, kind: unverified, note: "no cover spec"}
+      safe_zone: {value: {top: 0.15, bottom: 0.30, left: 0.10, right: 0.15}, kind: experimental, source: "editorial: generic vertical-video margins (short_safe_obs) applied to Snapchat", read_on: "2026-11-12", note: "no Snapchat-specific numbers found"}
+      hook_window_s: {value: 1.0, kind: experimental, source: "editorial: rule of thumb", read_on: "2026-11-12", note: "rule of thumb"}
+      content_policy: {value: "Vertical with sound; still images, horizontal, blurry, text-only and letterboxed Snaps are not shown/recommended. Licensed song clips must follow Snap's Sounds guidelines.", kind: documented, source: *sc_creators, read_on: "2026-11-12"}
+      upload_api: {value: null, kind: unverified, note: "no public Spotlight upload API found. Web upload at profile.snapchat.com is documented (sc_web)"}
+      analytics_api: {value: null, kind: unverified, note: "no public analytics API found; use in-app Insights and the manual import"}
+      manual_upload: {value: ["Open https://profile.snapchat.com on a computer (or the Snapchat app) and sign in.", "Upload video.mp4 (vertical, with sound, 5-60 s).", "Under 'Send to' tick 'Spotlight Snaps'.", "Add the description and #Topics from caption.txt.", "Agree to the Creator Terms and post."], kind: documented, source: *sc_web, read_on: "2026-11-12", note: "steps from Snap's 'submit a Snap to Spotlight from the web' article"}

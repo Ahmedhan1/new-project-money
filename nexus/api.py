@@ -595,3 +595,46 @@ def api_quality(pid: str):
         out.append({"render": f.name.replace(".quality.json", ""), **quality.summary(rep),
                     "checks": [{k: c.get(k) for k in ("id", "category", "ok", "level", "severity", "detail")} for c in rep.get("checks", [])]})
     return out
+
+
+# ---------------------------------------------------------------- destination selector
+@app.get("/api/platforms/profiles")
+def api_platform_profiles():
+    """Every destination with its key values and how each is known (documented / observed / experimental / unverified)."""
+    from . import platforms
+    keys = ("aspect_recommended", "resolution_recommended", "duration_max_s", "max_file_bytes", "safe_zone", "loudness_target_lufs",
+            "title_max_chars", "hook_window_s")
+    out = {}
+    for n in platforms.names():
+        prof = platforms.get(n)
+        out[n] = {"display": prof["display"], "reviewed_on": prof.get("reviewed_on"),
+                  "fields": {k: {x: prof["fields"].get(k, {}).get(x) for x in ("value", "kind", "source", "read_on")} for k in keys}}
+    return {"profiles": out, "stale": platforms.stale()}
+
+
+class DeliverReq(BaseModel):
+    platforms: list[str]
+    branch: str = "main"
+    title: str | None = None
+    description: str = ""
+    lang: str | None = None
+
+
+@app.post("/api/projects/{pid}/deliver")
+def api_deliver(pid: str, r: DeliverReq):
+    from . import platforms
+    p = _project(pid)
+    if not r.platforms:
+        raise HTTPException(400, "choose at least one destination")
+    try:
+        names = [platforms.get(n)["name"] for n in r.platforms]
+    except KeyError as e:
+        raise HTTPException(400, str(e))
+    try:
+        tl = p.timeline(r.branch)
+    except KeyError:
+        raise HTTPException(409, f"project has no timeline on branch '{r.branch}' yet")
+    plan = platforms.deliverables(names, duration=total_duration(tl), fps=int(tl.get("fps", 30)))
+    job = jobs.submit("deliver", {"project": pid, "platforms": names, "branch": r.branch, "title": r.title or p.name,
+                                  "description": r.description, "lang": r.lang}, pid)
+    return {**job, "renders_planned": len(plan), "groups": plan}

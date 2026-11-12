@@ -247,3 +247,14 @@ def shorts_(job: jobs.Job) -> dict:
         return {"project": p.id, "shorts": rows}
 
     return job.stage("find-and-build", run)
+
+
+@jobs.handler("deliver")
+def deliver_(job: jobs.Job) -> dict:
+    """Destination selector: one master -> tuned, checked, packaged versions for every selected platform."""
+    from . import project as prj, publish
+    a = job.params
+    p = prj.Project(a["project"])
+    tl = p.timeline(a.get("branch", "main"))
+    return job.stage("render-check-package", lambda: publish.deliver(p, tl, a["platforms"], a.get("title") or p.name,
+                                                                     a.get("description", ""), a.get("lang") or tl.get("lang", "en")))

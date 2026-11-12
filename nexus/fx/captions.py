@@ -94,8 +94,12 @@ def _layout(W: int, H: int, o: dict, style: str) -> dict:
     align = {"bottom": 2, "middle": 5, "top": 8}[pos]
     if pos == "bottom":
         mv = int(H * (0.07 if not vertical else 0.16))  # keep clear of vertical-platform UI
+        if isinstance(o.get("safe_bottom"), (int, float)):  # set by platforms.tune from the destination's safe zone
+            mv = max(mv, int(H * (float(o["safe_bottom"]) + 0.02)))
     elif pos == "top":
         mv = int(H * (0.06 if not vertical else 0.12))
+        if isinstance(o.get("safe_top"), (int, float)):
+            mv = max(mv, int(H * (float(o["safe_top"]) + 0.02)))
     else:
         mv = 0
     return {"size": size, "side": side, "align": align, "mv": mv}
