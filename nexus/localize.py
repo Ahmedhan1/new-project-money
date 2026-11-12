@@ -21,6 +21,8 @@ LANGS = _langs()
 STOPWORDS = set("that this with from have they their there which would could about than then also been were what when will more most very much many some such into over only just even because while where these those other being does".split())
 PACE = {"ar": 0.85}
 VOICEOVER_ORIGINAL_GAIN = 0.2   # original speech under a voice-over: about -14 dB, audible but not competing
+VOICEOVER_SPILL = 0.5           # a voice-over line may run this far past its cut (never into the next line's start)
+VOICEOVER_MIN_SPEED = 0.85      # slowest the real speaker's picture may be played under a voice-over
 VOICEOVER_DELAY = 0.6           # the voice-over starts a beat after the original, as in broadcast voice-over  # the Arabic voice reads slowly; this brings it to a natural narration pace
 
 EGYPTIAN_STYLE = """Egyptian colloquial Arabic (Masri) as spoken in Cairo, written in Arabic script only.
@@ -301,6 +303,7 @@ def localize(project, tl: dict, lang: str, analyses: dict | None = None, context
             dub = False
     if dub and lang != source_lang:
         out["audio"] = []
+        vo_delay: dict = {}
         adir = project.dir / "audio" / lang
         for u, line in zip(units, lines):
             c = out["clips"][u["clip"]]
@@ -312,6 +315,25 @@ def localize(project, tl: dict, lang: str, analyses: dict | None = None, context
                 voice_info = tts.synthesize(line, wav, LANGS[lang]["tts"], voice=voice_id,
                                             length_scale=PACE.get(LANGS[lang]["tts"], 1.0) * 0.88)
                 need = voice_info["duration"] + 0.25
+            if mode == "voiceover":
+                # The picture belongs to the real speaker: never put them in slow motion. Order: brisker read (1.25x),
+                # shorter delay for this line, up to VOICEOVER_SPILL s carried over the cut (an L-cut), and only then a
+                # gentle slow-down (>= VOICEOVER_MIN_SPEED) with a review flag. (The first German voice-over slowed
+                # 19 of 39 clips, down to 0.6x.)
+                if voice_info["duration"] + 0.1 > slot:
+                    voice_info = tts.synthesize(line, wav, LANGS[lang]["tts"], voice=voice_id,
+                                                length_scale=PACE.get(LANGS[lang]["tts"], 1.0) * 0.8)
+                d = voice_info["duration"]
+                vo_delay[u["clip"]] = round(min(VOICEOVER_DELAY, max(0.0, slot - d - 0.1)), 3)
+                over = d + 0.1 + vo_delay[u["clip"]] - slot - VOICEOVER_SPILL
+                if over > 0 and c["type"] == "video":
+                    sp = max(VOICEOVER_MIN_SPEED, slot / (slot + over))
+                    c["speed"] = round(float(c.get("speed", 1.0)) * sp, 3)
+                    if slot / (slot + over) < VOICEOVER_MIN_SPEED:
+                        review["checks"].append(qa._c(f"voice-over fit [{lang}] scene {u['clip']}", False,
+                                                      f"translation is {over:.1f}s too long even at 1.25x read and {VOICEOVER_MIN_SPEED}x "
+                                                      "picture - shorten this line in review", "major", fix="shorten-line"))
+                need = 0.0
             if need > slot:  # 2nd: stretch the picture so the sentence is never chopped
                 if c["type"] == "video":
                     c["speed"] = round(float(c.get("speed", 1.0)) * slot / need, 3)
@@ -332,7 +354,7 @@ def localize(project, tl: dict, lang: str, analyses: dict | None = None, context
         for u, line in zip(units, lines):
             wav = adir / f"u{u['clip']:03d}.wav"
             st = starts[u["clip"]] + 0.1
-            out["audio"].append({"src": str(wav), "start": round(st + (VOICEOVER_DELAY if mode == "voiceover" else 0.0), 3),
+            out["audio"].append({"src": str(wav), "start": round(st + (vo_delay.get(u["clip"], VOICEOVER_DELAY) if mode == "voiceover" else 0.0), 3),
                                  "clip": out["clips"][u["clip"]]["id"], "role": "narration", "synthetic": True, "lang": lang})
             cues += _cues(line, st, st + ff.duration(wav), lang)
         out["subtitles"] = subs.fix_timing(cues)

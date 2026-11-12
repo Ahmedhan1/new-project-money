@@ -184,3 +184,35 @@ def test_merged_sentence_that_comes_back_short_is_retranslated_line_by_line(monk
     out = L.translate_sentences(src, "de")
     assert all(len(o.split()) == len(s.split()) for o, s in zip(out, src))
     assert [len(g) for g in L.sentence_groups(["a " * 20, "b " * 20 + "."])] == [1, 1]   # never past GROUP_MAX_WORDS
+
+
+@pytest.mark.parametrize("voice_s,expect_speed,flagged", [(3.2, 1.0, False), (5.0, 0.85, True)])
+def test_voiceover_never_puts_the_speaker_in_slow_motion(home, monkeypatch, tmp_path, voice_s, expect_speed, flagged):
+    """First German voice-over slowed 19 of 39 clips (down to 0.6x). Now: faster read, shorter delay, 0.5 s spill,
+    then at most 0.85x with a review flag."""
+    import subprocess
+
+    from nexus import project as prj
+    from nexus.timeline import ops
+    wav = tmp_path / "v.wav"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "sine=f=500:d=3:r=48000", str(wav)], check=True)
+    monkeypatch.setattr(localize.mt, "translate", lambda lines, lang: ["Solarenergie ist sauber und günstig."] * len(lines))
+    monkeypatch.setattr(localize, "llm_translate_lines", lambda lines, lang, context="": lines)
+    monkeypatch.setattr(localize.qa, "dub_review", lambda *a, **k: {"check": "dub", "ok": True, "severity": "minor", "detail": "stub"})
+    scales = []
+
+    def fake_tts(text, out, lang, voice=None, length_scale=1.0, **k):
+        import shutil
+        from pathlib import Path
+        Path(out).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(wav, out)
+        scales.append(length_scale)
+        return {"duration": voice_s * length_scale / scales[0], "voice": voice, "license": "CC0", "commercial": True, "engine": "stub"}
+    monkeypatch.setattr(localize.tts, "synthesize", fake_tts)
+    p = prj.Project.create("vo2", "edit")
+    clip = ops.video_clip(str(wav), 0, 3.0, narration="Solar power is clean and cheap.")
+    tl = {"width": 320, "height": 180, "fps": 30, "lang": "en", "clips": [clip], "audio": [], "subtitles": [], "music": None, "markers": []}
+    out, review = localize.localize(p, tl, "de", dub=True, mode="voiceover")
+    assert abs(float(out["clips"][0].get("speed", 1.0)) - expect_speed) < 0.01
+    assert any(c["check"].startswith("voice-over fit") and not c["ok"] for c in review["checks"]) == flagged
+    assert out["audio"][0]["start"] < 0.1 + localize.VOICEOVER_DELAY + 1e-6

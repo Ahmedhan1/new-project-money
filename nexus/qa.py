@@ -160,8 +160,11 @@ def dub_review(audio_path: str | Path, intended_text: str, lang: str, threshold:
     from .speech import asr
     t = asr.transcribe(audio_path, language=lang.split("-")[0], words=False)
     sim = text_similarity(intended_text, t["text"])
+    # On a line of a few words one misheard name decides the ratio ("Für Boeing" heard as "Für Boehling" = 50%):
+    # short lines are reported as minor so a listener checks them, not counted as a failed dub.
+    sev = "major" if len(intended_text.split()) >= 4 else "minor"
     return _c(f"dub intelligibility [{lang}]", sim >= threshold,
-              f"Whisper heard {sim:.0%} of the script words back" + ("" if sim >= threshold else f": \"{t['text'][:90]}\""), "major",
+              f"Whisper heard {sim:.0%} of the script words back" + ("" if sim >= threshold else f": \"{t['text'][:90]}\""), sev,
               fix="resynthesize") | {"similarity": sim, "heard": t["text"]}
 
 
