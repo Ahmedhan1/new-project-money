@@ -77,3 +77,27 @@ def test_a_title_on_a_near_black_card_is_an_intended_still():
                     {"id": "b", "type": "color", "duration": 2.0, "color": "black"}]}
     spans = quality._intended_spans(tl, ("card",))
     assert spans == [(0.0, 3.0)]                     # the titled card is by design; a bare black clip is not
+
+
+def _speechy(path, gain_change: bool):
+    """Amplitude-modulated noise in 1.6 s 'phrases' with 0.5 s pauses; optionally the second half 14 dB quieter
+    in the middle of a phrase (a real level jump)."""
+    import subprocess
+    expr = "1.5*sin(2*PI*5*t)*sin(2*PI*5*t)*lt(mod(t,2.1),1.6)"
+    if gain_change:
+        expr = f"({expr})*if(lt(t,5.0),1,0.25)"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "color=c=gray:s=160x90:r=10:d=10",
+                    "-f", "lavfi", "-i", f"anoisesrc=d=10:c=pink:a=0.5:r=48000",
+                    "-filter_complex", f"[1:a]volume='{expr}':eval=frame[a]", "-map", "0:v", "-map", "[a]",
+                    "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", str(path)], check=True)
+    return path
+
+
+def test_pauses_between_phrases_are_not_level_jumps_but_a_gain_change_is(tmp_path):
+    from nexus import quality
+    def jumps(p):
+        r = quality.score(p)
+        c = next((x for x in r.get("failed", []) if x["id"] == "audio.level_jumps"), None)
+        return c
+    assert jumps(_speechy(tmp_path / "a.mp4", False)) is None
+    assert jumps(_speechy(tmp_path / "b.mp4", True)) is not None

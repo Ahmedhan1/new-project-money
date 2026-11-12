@@ -484,6 +484,9 @@ def _programme_analysis(tl: dict | None, analysis: dict | None) -> tuple[list[li
         return [], []
 
 
+PAUSE_DB = 22.0  # a 400 ms window this far below the speech level is a pause, not programme sound
+
+
 def _intended_spans(tl: dict | None, kinds: tuple[str, ...]) -> list[tuple[float, float]]:
     """Programme spans where black/static picture is by design: colour cards, marked stills, fades."""
     if not tl:
@@ -689,7 +692,7 @@ def _visual(run: _Run, path: Path, v: dict, dur: float, tl: dict | None, lp: dic
     allowed_static = _intended_spans(tl, ("card",)) + [(s, e) for s, e in long_black]
     fz = [(s, e, _uncovered((s, e), allowed_static)) for s, e in frozen]
     worst = max((u for _, _, u in fz), default=0.0)
-    run.lvl("visual.frozen_frames", worst, f"longest unintended freeze {worst:.2f}s" + (f"; frozen spans {[(round(s, 2), round(e, 2)) for s, e, _ in fz[:3]]}" if fz else ""),
+    run.lvl("visual.frozen_frames", worst, f"longest unintended freeze {worst:.2f}s" + (f"; unintended frozen spans {[(round(s, 2), round(e, 2)) for s, e, u in fz if u > 0.05][:3]}" if worst > 0.05 else ""),
             spans=[[round(s, 3), round(e, 3)] for s, e, u in fz if u >= 1.0])
 
     # continuity across cuts (scene-to-scene) - needs the timeline
@@ -784,8 +787,16 @@ def _audio(run: _Run, path: Path, info: dict, raw: dict, dur: float, tl: dict | 
                 bounds += [s0, s0 + float(a.get("duration") or 0)]
         elif lp is not None:
             bounds += [f / (lp["fps"] or 30) for f in _cuts_from_luma(lp)]
+        # A pause between phrases is not a level jump: both windows must carry sound near the programme's speech
+        # level (within PAUSE_DB). Counting pauses flagged 30 natural phrase breaks on the acceptance edit.
+        pause = db < speech_lvl - PAUSE_DB          # fine blocks: real pauses between phrases
+
+        def near_pause(t: float) -> bool:
+            a, b = max(0, int((t - 0.45) / BLOCK_S)), min(nb, int((t + 0.45) / BLOCK_S) + 1)
+            return bool(pause[a:b].any())
+
         jumps = [i * 0.4 for i in range(1, k) if abs(mdb[i] - mdb[i - 1]) > 10 and min(mdb[i], mdb[i - 1]) > -40
-                 and not any(abs(i * 0.4 - b) < 0.6 for b in bounds)]
+                 and not any(abs(i * 0.4 - b) < 0.6 for b in bounds) and not near_pause(i * 0.4)]
         run.lvl("audio.level_jumps", len(jumps), f"{len(jumps)} unexplained >10 dB jump(s)" + (f" at {[round(t, 1) for t in jumps[:4]]}s" if jumps else ""))
     # noise floor in pauses (blocks >= 25 dB below the speech level)
     gap = db[(db < speech_lvl - 25) & (db > -120)]
