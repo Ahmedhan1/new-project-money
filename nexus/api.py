@@ -764,6 +764,29 @@ def api_review_cutaway_reject(pid: str, r: CutawayReq):
     return {"rejected": r.clip, "remaining": len(review.cutaways(tl))}
 
 
+@app.get("/api/projects/{pid}/review/shorts")
+def api_review_shorts(pid: str):
+    from . import review
+    return review.shorts_titles(_project(pid))
+
+
+class ShortTitleReq(BaseModel):
+    branch: str
+    title: str
+
+
+@app.post("/api/projects/{pid}/review/shorts")
+def api_review_short_title(pid: str, r: ShortTitleReq):
+    from . import review
+    p = _project(pid)
+    try:
+        tl = review.set_short_title(p.timeline(r.branch), r.title)
+    except (KeyError, ValueError) as e:
+        raise HTTPException(400, str(e))
+    p.save_timeline(tl, "title edited in review", r.branch)
+    return {"branch": r.branch, "title": r.title}
+
+
 @app.post("/api/projects/{pid}/subtitle-package")
 def api_subtitle_package(pid: str, branch: str = "main"):
     """All localised subtitle files of a branch + a readiness manifest (subtitle vs dub readiness, native review)."""

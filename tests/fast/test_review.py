@@ -91,3 +91,18 @@ def test_rejected_cutaway_is_removed_with_its_credit_and_remembered(client, tmp_
     tl = prj.Project(p.id).timeline("main")
     assert "pip" not in tl["clips"][1] and tl["credits"] == [] and tl["broll_rejected"][0]["why"] == "not the same cave"
     assert client.post(f"/api/projects/{p.id}/review/cutaways/reject", json={"clip": "c2"}).status_code == 400
+
+
+def test_shorts_titles_can_be_rewritten_and_the_machine_title_is_kept(client, tmp_path):
+    p, m = _project(tmp_path)
+    from nexus import project as prj
+    tl = prj.Project(p.id).timeline("main")
+    tl["clips"][0]["text"] = [{"text": "Even yesterday out flying", "style": "callout", "start": 0, "end": 2}]
+    tl["source_moment"] = {"start": 10.0, "end": 40.0}
+    prj.Project(p.id).save_timeline(tl, "short", "short-1-natural")
+    rows = client.get(f"/api/projects/{p.id}/review/shorts").json()
+    assert rows == [{"branch": "short-1-natural", "title": "Even yesterday out flying", "start": 10.0, "end": 40.0, "edited": False}]
+    assert client.post(f"/api/projects/{p.id}/review/shorts", json={"branch": "short-1-natural", "title": "Flying T-38s to Syracuse"}).status_code == 200
+    t2 = prj.Project(p.id).timeline("short-1-natural")
+    assert t2["clips"][0]["text"][0]["text"] == "Flying T-38s to Syracuse" and t2["review"]["title"]["machine_text"] == "Even yesterday out flying"
+    assert client.post(f"/api/projects/{p.id}/review/shorts", json={"branch": "short-1-natural", "title": " "}).status_code == 400

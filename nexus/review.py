@@ -174,3 +174,38 @@ def reject_cutaway(tl: dict, clip_id: str, why: str = "", who: str = "reviewer")
     if pv.get("source") and pv["source"] not in used:  # no other cutaway from that library: drop its credit line
         out["credits"] = [x for x in out.get("credits") or [] if pv["source"].split()[0] not in x]
     return out
+
+
+# ---------------------------------------------------------------- shorts titles (K-23: verbatim titles are often fragments)
+def shorts_titles(project) -> list[dict]:
+    rows = []
+    for b in sorted(project.data["branches"]):
+        if not b.startswith("short-"):
+            continue
+        tl = project.timeline(b)
+        c0 = tl["clips"][0] if tl.get("clips") else {}
+        t = next((x for x in c0.get("text", []) if x.get("style") not in ("lower_third",)), None)
+        sm = tl.get("source_moment") or {}
+        rows.append({"branch": b, "title": t["text"] if t else "", "start": sm.get("start"), "end": sm.get("end"),
+                     "edited": bool((tl.get("review") or {}).get("title"))})
+    return rows
+
+
+def set_short_title(tl: dict, title: str, who: str = "reviewer") -> dict:
+    title = (title or "").strip()
+    if not title:
+        raise ValueError("a title is required")
+    out = copy.deepcopy(tl)
+    if not out.get("clips"):
+        raise ValueError("this branch has no clips")
+    c0 = out["clips"][0]
+    texts = c0.get("text", [])
+    k = next((i for i, x in enumerate(texts) if x.get("style") != "lower_third"), None)
+    old = texts[k]["text"] if k is not None else ""
+    if k is None:
+        texts.append({"text": title, "style": "callout", "start": 0.0, "end": round(min(2.5, clip_duration(c0)), 3)})
+    else:
+        texts[k] = {**texts[k], "text": title}
+    c0["text"] = texts
+    out.setdefault("review", {})["title"] = {"machine_text": old, "by": who, "at": time.strftime("%Y-%m-%dT%H:%M:%S")}
+    return out

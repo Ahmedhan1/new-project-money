@@ -225,6 +225,9 @@ async review(m,pid){const ps=await api("/api/projects");
    `<button id="rvnames">Add lower thirds for named speakers</button><span id="rvmsg" class="lead"></span>`;
   const cw=await api(`/api/projects/${id}/review/cutaways?branch=${encodeURIComponent(b)}`);
   h+=`<h3 class="sec">Cutaways (${cw.length})</h3>`+table(cw,[["Clip",r=>esc(r.clip)],["Item",r=>r.page?`<a href="${esc(r.page)}" target="_blank" rel="noopener">${esc(r.title)}</a>`:esc(r.title)],["Source / licence",r=>esc(r.source)+"<br><small>"+esc(r.license||"")+"</small>"],["Matched words",r=>esc((r.matched||[]).join(", "))],["",r=>`<button class="rvrej" data-c="${r.clip}">Reject</button>`]]);
+  const SH=await api(`/api/projects/${id}/review/shorts`);
+  if(SH.length)h+=`<h3 class="sec">Shorts titles (${SH.length})</h3><p class="lead">Titles start as the clip's own opening words and are often fragments: rewrite them here (shown on screen for the first seconds).</p>`+
+   table(SH,[["Short",r=>esc(r.branch)],["Source",r=>r.start!=null?`${Math.round(r.start)}–${Math.round(r.end)} s`:""],["Title",r=>`<input class="rvst" data-b="${esc(r.branch)}" value="${esc(r.title)}" style="width:100%">`],["",r=>r.edited?tag("edited","ok"):""]]);
   if(lb){const L=await api(`/api/projects/${id}/review/lines?branch=${encodeURIComponent(lb)}`);
    h+=`<h3 class="sec">Translated lines: ${L.approved}/${L.total} approved ${L.native_review_done?tag("native review done","ok"):tag("needs review","warn")}</h3>`+
     table(L.lines,[["#",r=>r.index],["Time",r=>r.start.toFixed(1)+"s"],["Line",r=>`<input class="rvline" data-i="${r.index}" value="${esc(r.text)}" style="width:100%">`+(r.machine_text?`<br><small>machine: ${esc(r.machine_text)}</small>`:"")],
@@ -233,6 +236,7 @@ async review(m,pid){const ps=await api("/api/projects");
   o.querySelectorAll(".rvrole").forEach(e=>e.onchange=async()=>{await api(`/api/projects/${id}/review/speakers`,{media:e.dataset.m,op:"rename",speaker:e.dataset.sp,value:e.value});open()});
   o.querySelectorAll(".rvname").forEach(e=>e.onchange=async()=>{if(e.value.trim())await api(`/api/projects/${id}/review/speakers`,{media:e.dataset.m,op:"name",speaker:e.dataset.sp,value:e.value});$("#rvmsg").textContent=" saved"});
   $("#rvnames").onclick=async()=>{const r=await api(`/api/projects/${id}/review/names`,{branch:b});$("#rvmsg").textContent=r.added.length?" added: "+r.added.join(", ")+" (render again to see it)":" no named speakers yet"};
+  o.querySelectorAll(".rvst").forEach(e=>e.onchange=async()=>{await api(`/api/projects/${id}/review/shorts`,{branch:e.dataset.b,title:e.value});open()});
   o.querySelectorAll(".rvrej").forEach(e=>e.onclick=async()=>{await api(`/api/projects/${id}/review/cutaways/reject`,{branch:b,clip:e.dataset.c,why:"rejected in review"});open()});
   o.querySelectorAll(".rvok").forEach(e=>e.onclick=async()=>{const t=o.querySelector(`.rvline[data-i="${e.dataset.i}"]`).value;await api(`/api/projects/${id}/review/lines`,{branch:lb,index:+e.dataset.i,text:t,approved:true});open()})};
  $("#rvgo").onclick=()=>open().catch(e=>$("#rvout").innerHTML=`<div class="note">Error: ${esc(e.message)}</div>`)},
