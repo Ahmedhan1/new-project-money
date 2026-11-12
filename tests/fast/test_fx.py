@@ -278,3 +278,50 @@ def test_j_cut_brings_the_next_clip_audio_under_the_previous_picture(home, media
     assert band(tmp_path / "jc.mp4", 1.5) > band(tmp_path / "jc.mp4", 0.3) + 15
     render.render(_tl([ops.video_clip(lo, 0, 2.0), ops.video_clip(hi, 1.0, 3.0)]), tmp_path / "hard.mp4", tmp_path / "w2")
     assert band(tmp_path / "hard.mp4", 1.5) < band(tmp_path / "jc.mp4", 1.5) - 15   # without the J-cut: no 2 kHz there
+
+
+def test_lut_files_are_validated_and_applied_on_pixels(home, media, tmp_path):
+    from nexus.fx import lut
+    assert lut.validate(lut.builtin("identity"))["ok"] and lut.validate(lut.builtin("identity"))["size"] == 17
+    bad = tmp_path / "bad.cube"
+    bad.write_text("LUT_3D_SIZE 4\n0 0 0\n")
+    assert not lut.validate(bad)["ok"] and "expected 64 rows" in lut.validate(bad)["why"]
+    with pytest.raises(ValueError):
+        lut.install(bad)
+    def frame(v):
+        c = ops.video_clip(media["gray"], 0, 1.0, lut=v) if v else ops.video_clip(media["gray"], 0, 1.0)
+        out = tmp_path / f"l_{str(v).replace('/', '_')[:20]}.mp4"
+        render.render(_tl([c]), out, tmp_path / "w", workers=1)
+        raw = subprocess.run(["ffmpeg", "-v", "error", "-ss", "0.5", "-i", str(out), "-frames:v", "1", "-f", "rawvideo",
+                              "-pix_fmt", "rgb24", "-"], capture_output=True, check=True).stdout
+        return np.frombuffer(raw[: W * H * 3], dtype=np.uint8).reshape(-1, 3).astype(float).mean(0)
+    base, ident, warm = frame(None), frame("identity"), frame("warm_film")
+    half = frame({"name": "warm_film", "intensity": 0.5})
+    assert np.abs(ident - base).max() < 2.0                          # identity LUT: picture unchanged
+    assert warm[0] - warm[2] > base[0] - base[2] + 15                # warm: red up, blue down on mid-grey
+    assert 0.3 < (half[0] - half[2] - (base[0] - base[2])) / (warm[0] - warm[2] - (base[0] - base[2])) < 0.7
+    mine = lut.install(lut.builtin("teal_orange"), "my_look", source="test")
+    assert mine["ok"] and any(x["name"] == "my_look" and x["source"] == "test" for x in lut.list_luts())
+
+
+def test_vertical_crop_follows_a_moving_subject(home, tmp_path):
+    from nexus.media import faces
+    src = tmp_path / "move.mp4"
+    # a 40x40 white square sliding from x=20 to x=260 (centre 40 -> 280 of 320) over 4 s on black
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "color=c=black:s=320x180:r=25:d=4", "-f", "lavfi",
+                    "-i", "color=c=white:s=40x40:r=25:d=4", "-filter_complex", "[0:v][1:v]overlay=x='20+60*t':y=70",
+                    "-pix_fmt", "yuv420p", str(src)], check=True)
+    samples = [{"t": round(k * 0.25, 2), "x": (40 + 60 * k * 0.25) / 320, "y": 0.5} for k in range(17)]
+    an = {"faces": {"available": True, "tracks": [{"id": "subject", "samples": samples}], "focus": []}}
+    c = ops.video_clip(str(src), 0.0, 4.0)
+    kf = faces.follow_keyframes(an, c, 100, 180, 320, 180)
+    assert kf and len(kf["x"]) >= 3
+    c.update(keyframes=kf, fit="cover")
+    out = tmp_path / "v.mp4"
+    render.render({**_tl([c]), "width": 100, "height": 180}, out, tmp_path / "w", workers=1)
+    for t in (0.3, 2.0, 3.6):
+        f = _frame(out, t, (100, 180)).astype(float)
+        cols = np.where(f[60:120].mean(0) > 128)[0]
+        assert len(cols) and abs(cols.mean() - 50) < 14, (t, cols.mean() if len(cols) else None)
+    assert faces.follow_keyframes({"faces": {"available": True, "tracks": [{"samples": [
+        {"t": k * 0.5, "x": 0.5 + 0.005 * (k % 2), "y": 0.4} for k in range(8)]}]}}, c, 100, 180, 320, 180) is None  # still

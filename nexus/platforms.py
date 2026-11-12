@@ -155,7 +155,7 @@ def tune(tl: dict, name: str, analysis_by_src: dict | None = None) -> tuple[dict
     if (W, H) != (tl["width"], tl["height"]):
         src_ar, dst_ar = tl["width"] / tl["height"], W / H
         out = ops.reframe(out, W, H, "cover")
-        changed = tracked = 0
+        changed = tracked = followed = 0
         from .media import faces as _faces
         for c in out["clips"]:
             if c["type"] != "video":
@@ -167,12 +167,19 @@ def tune(tl: dict, name: str, analysis_by_src: dict | None = None) -> tuple[dict
                 if f:  # measured subject (face track) for exactly this source span
                     c["focus"] = [f[0], f[1]]
                     tracked += 1
+                    pv = (an.get("probe") or {}).get("video") or {}
+                    kf = _faces.follow_keyframes(an, c, W, H, int(pv.get("width") or 0), int(pv.get("height") or 0)) \
+                        if pv.get("width") and not (c.get("keyframes") or {}).get("x") else None
+                    if kf:  # the subject moves inside this clip: the crop follows it
+                        c["keyframes"] = {**(c.get("keyframes") or {}), **kf}
+                        followed += 1
             has_focus = isinstance(c.get("focus"), (list, tuple)) and tuple(round(float(x), 3) for x in c["focus"]) != (0.5, 0.5)
             if abs(src_ar - dst_ar) > 0.3 and not has_focus and not c.get("fit_override"):
                 c["fit"] = "blur"  # no measured subject position: keep the whole picture over a blurred fill
                 changed += 1
         notes.append(f"reframed {tl['width']}x{tl['height']} -> {W}x{H} [{_cite(prof, 'resolution_recommended')}]" +
                      (f"; {tracked} clip(s) cropped on the tracked face" if tracked else "") +
+                     (f" ({followed} follow the subject as it moves)" if followed else "") +
                      (f"; {changed} clip(s) without a measured subject position use blur-fill instead of a blind centre crop"
                       if changed else "; clips keep their subject focus"))
     limit = v.get("duration_max_s")

@@ -127,3 +127,42 @@ def focus_at(analysis: dict, t0: float, t1: float) -> tuple[float, float] | None
             acc += ov * np.array([s["x"], s["y"]])
             wsum += ov
     return (round(float(acc[0] / wsum), 4), round(float(acc[1] / wsum), 4)) if wsum else None
+
+
+def crop_fraction(subject: float, src_len: float, out_len: float) -> float:
+    """Crop offset in 0..1 (the renderer's cover-crop convention) that centres a subject at `subject` (0..1 of the
+    source) in an output window `out_len` long cut from a scaled source `src_len` long."""
+    if src_len <= out_len + 1e-6:
+        return 0.5
+    return min(1.0, max(0.0, (subject * src_len - out_len / 2) / (src_len - out_len)))
+
+
+def follow_keyframes(analysis: dict, c: dict, out_w: int, out_h: int, src_w: int, src_h: int,
+                     dead_zone: float = 0.03, step: float = 0.5) -> dict | None:
+    """Keyframes x/y (clip-local time) that keep the tracked subject centred in a cover crop, or None when the
+    subject stays put (a static focus is then enough) or there is no track. Small moves inside `dead_zone` (of the
+    source) are ignored so the frame does not drift with every head movement."""
+    f = (analysis or {}).get("faces") or {}
+    tr = (f.get("tracks") or [{}])[0].get("samples") or []
+    t0, t1 = float(c.get("in", 0)), float(c.get("out", 0))
+    pts = [s for s in tr if t0 - 0.25 <= s["t"] <= t1 + 0.25]
+    if not f.get("available") or len(pts) < 3:
+        return None
+    xs = [p["x"] for p in pts]
+    ys = [p["y"] for p in pts]
+    if max(xs) - min(xs) < 2 * dead_zone and max(ys) - min(ys) < 2 * dead_zone:
+        return None
+    sc = max(out_w / src_w, out_h / src_h)                 # cover scale
+    iw, ih = src_w * sc, src_h * sc
+    sp = float(c.get("speed", 1.0)) or 1.0
+    kx, ky, last, lt = [], [], None, -1e9
+    for p in pts:
+        if p["t"] - lt < step and p is not pts[-1]:
+            continue
+        if last and abs(p["x"] - last[0]) < dead_zone and abs(p["y"] - last[1]) < dead_zone and p is not pts[-1]:
+            continue
+        tt = round(max(0.0, (p["t"] - t0) / sp), 3)
+        kx.append([tt, round(crop_fraction(p["x"], iw, out_w), 4), "ease"])
+        ky.append([tt, round(crop_fraction(p["y"], ih, out_h), 4), "ease"])
+        last, lt = (p["x"], p["y"]), p["t"]
+    return {"x": kx, "y": ky} if len(kx) >= 2 else None

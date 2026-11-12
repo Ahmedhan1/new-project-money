@@ -87,7 +87,7 @@ def _speechy(path, gain_change: bool):
     if gain_change:
         expr = f"({expr})*if(lt(t,5.2),1,0.2)"
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "color=c=gray:s=160x90:r=10:d=10",
-                    "-f", "lavfi", "-i", f"anoisesrc=d=10:c=pink:a=0.5:r=48000:seed=7",
+                    "-f", "lavfi", "-i", "anoisesrc=d=10:c=pink:a=0.5:r=48000:seed=7",
                     "-filter_complex", f"[1:a]volume='{expr}':eval=frame[a]", "-map", "0:v", "-map", "[a]",
                     "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", str(path)], check=True)
     return path

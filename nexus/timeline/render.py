@@ -133,6 +133,12 @@ def segment_key(c: dict, tl: dict, draft: bool = False) -> str:
         if "clean_speech" in (tl.get("audio_fx"), c.get("audio_fx")):
             from ..audio import post as apost
             payload["_afx_model"] = apost.chain_signature()  # model installed or not, and the exact filters, change the sound
+    if c.get("lut") or tl.get("lut"):
+        from ..fx import lut as fxlut
+        try:
+            payload["_lut"] = fxlut.signature(c.get("lut") or tl.get("lut"))  # the file's content, not just its name
+        except (ValueError, KeyError) as e:
+            payload["_lut"] = f"invalid:{e}"
     if draft:
         payload["_draft"] = DRAFT_SCALE
     for k in ("src",):
@@ -224,7 +230,15 @@ def render_segment(c: dict, tl: dict, cache: Path, draft: bool = False, threads:
         a_src = "[0:a]"
     geo, look = fxe.video_filters(c, W, H, fps, dur, scale)
     correct = fxp.correct_filters(c.get("correct"), notes)
-    chain = ",".join([*geo, *correct, *([grade] if grade else []), *look, "format=yuv420p", "setsar=1"])
+    lut_val = c.get("lut") or tl.get("lut")
+    lutf = []
+    if lut_val:
+        from ..fx import lut as fxlut
+        try:
+            lutf = [fxlut.filter_for(lut_val)]
+        except (ValueError, KeyError) as e:
+            notes.append(f"LUT skipped: {e}")
+    chain = ",".join([*geo, *correct, *([grade] if grade else []), *lutf, *look, "format=yuv420p", "setsar=1"])
     fi, fo = float(c.get("fade_in", 0)), float(c.get("fade_out", 0))
     if fi:
         chain += f",fade=t=in:st=0:d={fi}"
