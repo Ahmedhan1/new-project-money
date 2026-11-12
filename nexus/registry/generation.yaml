@@ -480,15 +480,24 @@ models:
     read_on: "2026-11-12"
     params_b: 0.5
     repo_gb: 10.0
+    download_gb: 0.99
     min_vram_gb: unverified
-    cpu: {feasible: unmeasured, speed: "unmeasured; smaller UNet than SD1.5 so faster, lower quality", source: unmeasured}
+    min_ram_gb: 4
+    cpu: {feasible: "yes", speed: "measured here (shared 4 vCPU, torch 2.15 CPU fp32, DPM-Solver++, CFG 7.5): 29-33 s per 512x512 image at 8 steps, ~72 s at 20 steps uncontended; 3.6 GB peak RSS. SD 1.5 LCM-LoRA does NOT load (pruned UNet shapes differ)", source: docs/results/account2_generation/bksdm_tiny_cpu_bench.json, seconds_per_output: 31}
     resolution: "512 px"
     runtimes: [diffusers, sdcpp]
     windows: "yes"
     install: low
-    quality: "Lower quality than SD 1.5."
+    quality: "Inspected: 8 steps gives coherent photos (lighthouse on cliff, bicycle on brick wall, bowl of oranges); 4 steps loses the subject; 20 steps duplicated the lighthouse. Below SD 1.5 detail; fine for backgrounds."
     status: candidate
     tier: [cpu]
+    # weight sha256 (HF LFS, rev 0364108e): unet b844aff8..., text_encoder 77795e20..., vae 4fbcf0eb...
+    fetch:
+      - repo: nota-ai/bk-sdm-tiny
+        allow_patterns: [model_index.json, scheduler/scheduler_config.json, "tokenizer/*", text_encoder/config.json,
+                         text_encoder/model.fp16.safetensors, unet/config.json, unet/diffusion_pytorch_model.fp16.safetensors,
+                         vae/config.json, vae/diffusion_pytorch_model.fp16.safetensors]
+    diffusers: {pipeline: StableDiffusionPipeline, variant: fp16, scheduler: DPMSolverMultistepScheduler, steps: 8, guidance: 7.5, native: [512, 512]}
 
   # ------------------------------------------------------------------ inpaint / reference conditioning helpers
   - id: sdxl-inpaint

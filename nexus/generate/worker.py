@@ -28,6 +28,9 @@ def main(spec_path: str) -> None:
                                                    feature_extractor=None, requires_safety_checker=False)
     if d.get("scheduler") == "LCMScheduler":
         pipe.scheduler = LCMScheduler.from_config(pipe.scheduler.config)
+    elif d.get("scheduler") == "DPMSolverMultistepScheduler":  # bk-sdm-tiny: 8 steps (measured, registry)
+        from diffusers import DPMSolverMultistepScheduler
+        pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
     if d.get("lora") and len(paths) > 1:
         pipe.load_lora_weights(paths[1])
         pipe.fuse_lora()

@@ -49,7 +49,7 @@ def test_fake_provider_full_success_path_records_provenance(home, monkeypatch):
     monkeypatch.setattr(generate, "_probe_env", lambda python, pp: {"torch": "2.x+cpu", "diffusers": True, "cuda": False})
     monkeypatch.setattr(generate, "_weights_present", lambda m, h: True)
 
-    def fake_generate(self, prompts, workdir, allow_download=False):
+    def fake_generate(self, prompts, workdir, allow_download=False, model_id=None):
         from PIL import Image
         for p in prompts:
             Image.new("RGB", (p["w"], p["h"]), (90, 120, 160)).save(p["out"])
