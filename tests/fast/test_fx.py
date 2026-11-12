@@ -65,6 +65,28 @@ def test_xfade_transition_shortens_programme_by_its_duration(home, media, tmp_pa
     assert abs(st["duration"] - 3.5) < 0.1 and abs(render.total_duration(tl) - 3.5) < 1e-6
 
 
+def test_concat_holds_each_segments_audio_to_its_picture(home, media, tmp_path):
+    # Regression (acceptance edit): segments whose audio ran a little past their picture (AAC padding) made the joined
+    # programme's audio 0.3 s longer than the video over 44 clips, drifting sync towards the end.
+    segs, clips = [], []
+    for k in range(8):
+        seg = tmp_path / f"s{k}.mp4"
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", f"testsrc2=s={W}x{H}:r=30:d=0.6",
+                        "-f", "lavfi", "-i", "sine=f=440:d=0.68", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac",
+                        "-ar", "48000", "-ac", "2", str(seg)], check=True)
+        segs.append(seg)
+        c = ops.video_clip(media["a"], 0, 0.6)
+        if k == 4:
+            c.update(transition="crossfade", xfade="fade", transition_dur=0.2)
+        clips.append(c)
+    out = tmp_path / "joined.mp4"
+    render._concat(segs, _tl(clips), out)
+    got = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "stream=codec_type,duration", "-of", "csv=p=0",
+                          str(out)], capture_output=True, text=True).stdout.split()
+    d = {x.split(",")[0]: float(x.split(",")[1]) for x in got}
+    assert abs(d["audio"] - d["video"]) < 0.05, d
+
+
 def test_parallel_matches_serial_and_reuses_cache(home, media, tmp_path):
     clips = [ops.video_clip(media["a"], k * 0.8, k * 0.8 + 0.8, grade=g) for k, g in enumerate(["none", "warm", "cool", "bw"])]
     s1 = render.render(_tl(clips), tmp_path / "s.mp4", tmp_path / "w1", workers=1)

@@ -349,9 +349,16 @@ def _concat(segs: list[Path], tl: dict, out: Path, draft: bool = False) -> None:
     args: list = []
     for s in segs:
         args += ["-i", s]
+    # Offsets come from the frame-rounded lengths actually rendered, and every segment's audio is held to its picture
+    # (pad/trim): planned durations drifted 0.3 s against the picture over a 44-clip edit with crossfades.
+    vd = []
+    for s, c in zip(segs, clips):
+        pv = ff.probe(s).get("video") or {}
+        vd.append(float(pv.get("duration") or clip_duration(c)))
     # xfade needs identical timebases on both inputs
     fc = [f"[{i}:v]settb=AVTB,setpts=PTS-STARTPTS[pv{i}]" for i in range(len(segs))]
-    vlast, alast, t = "pv0", "0:a", clip_duration(clips[0])
+    fc += [f"[{i}:a]apad,atrim=0:{vd[i]:.6f},asetpts=PTS-STARTPTS[pa{i}]" for i in range(len(segs))]
+    vlast, alast, t = "pv0", "pa0", vd[0]
     for i in range(1, len(segs)):
         c = clips[i]
         if c.get("transition") == "crossfade":
@@ -363,12 +370,12 @@ def _concat(segs: list[Path], tl: dict, out: Path, draft: bool = False) -> None:
             except Exception:  # noqa: BLE001
                 pass
             fc.append(f"[{vlast}][pv{i}]xfade=transition={name}:duration={d}:offset={t - d:.3f},settb=AVTB[xv{i}]")
-            fc.append(f"[{alast}][{i}:a]acrossfade=d={d}[xa{i}]")
-            t += clip_duration(c) - d
+            fc.append(f"[{alast}][pa{i}]acrossfade=d={d}[xa{i}]")
+            t += vd[i] - d
         else:
             fc.append(f"[{vlast}][pv{i}]concat=n=2:v=1:a=0,settb=AVTB[xv{i}]")
-            fc.append(f"[{alast}][{i}:a]concat=n=2:v=0:a=1[xa{i}]")
-            t += clip_duration(c)
+            fc.append(f"[{alast}][pa{i}]concat=n=2:v=0:a=1[xa{i}]")
+            t += vd[i]
         vlast, alast = f"xv{i}", f"xa{i}"
     ff.run([*args, "-filter_complex", ";".join(fc), "-map", f"[{vlast}]", "-map", f"[{alast}]", "-r", tl.get("fps", config.FPS),
             *_vcodec(draft, None), *config.ACODEC, "-movflags", "+faststart", out], op="concat-xfade")
@@ -485,7 +492,10 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
             seg_notes += json.loads(nf.read_text(encoding="utf-8"))
     prog = workdir / f"programme_{out.stem}.mp4"
     _concat(segs, tl, prog, draft)
-    dur = ff.duration(prog)
+    # The picture defines the programme length: each concatenated segment carries a few ms of AAC priming/padding, which
+    # added up to 0.3 s of extra audio over 44 segments in the acceptance edit (QA: A/V stream length mismatch).
+    _pp = ff.probe(prog)
+    dur = float((_pp.get("video") or {}).get("duration") or _pp["duration"])
     W, H, _ = _size(tl, draft)
     narr = tl.get("audio", [])
     music = tl.get("music") or {}
