@@ -25,17 +25,40 @@ def validate_asset(candidate: dict, ctx: dict) -> dict:
     return visual_context.check(candidate, ctx)
 
 
-FIGURE = re.compile(r"(\d[\d,.]*\s*(?:%|percent|per cent|km²|square kilometres|square kilometers|km|m|metres|meters|years|million|billion|kWh|MW|GW)?)", re.I)
+FIGURE = re.compile(r"(\d[\d,.]*\s*(?:%|percent\b|per cent\b|km²|square kilomet(?:re|er)s\b|kilomet(?:re|er)s\b|met(?:re|er)s\b|km\b|m\b|"
+                    r"years\b|million\b|billion\b|kWh\b|MW\b|GW\b|megawatts\b|cubic kilomet(?:re|er)s\b)?)", re.I)
+
+
+def _clause(sent: str, limit: int = 64) -> str:
+    """The sentence cut at a word boundary (never mid-word), trailing connector words dropped."""
+    sent = re.sub(r"\s+", " ", sent).strip().rstrip(".!?,;:")
+    if len(sent) <= limit:
+        return sent
+    cut = sent[:limit].rsplit(" ", 1)[0]
+    cut = re.split(r"[,;:]\s", cut)[0] if len(re.split(r"[,;:]\s", cut)[0]) >= 25 else cut
+    return re.sub(r"\s+(and|or|but|the|a|an|of|to|with|which|that|it|will)$", "", cut, flags=re.I).rstrip(",;: ") + "…"
 
 
 def key_fact(narration: str) -> tuple[str, str] | None:
-    """The scene's most specific figure and a short label from the same sentence (for a fact graphic)."""
+    """The scene's most specific figure (a measurement beats a bare year; two years become a range) and a readable label:
+    the same sentence, intact, cut at a word boundary. Demo 10 frames showed "Constructed between 1960 and the dam was"
+    (figure cut out of the sentence) and "it will func" (cut mid-word)."""
     for sent in re.split(r"(?<=[.!?])\s+", narration or ""):
-        nums = [m.group(1).strip() for m in FIGURE.finditer(sent) if len(re.sub(r"\D", "", m.group(1))) >= 2]
-        if nums:
+        nums = [m.group(1).strip().rstrip(",.;:") for m in FIGURE.finditer(sent) if len(re.sub(r"\D", "", m.group(1))) >= 2]
+        if not nums:
+            continue
+        yrs = [n for n in nums if re.fullmatch(r"(1[5-9]|20)\d\d", n)]
+        units = [n for n in nums if n not in yrs and re.search(r"[^\d,.\s]", n)]
+        if units:
+            fig = max(units, key=len)
+        elif len(yrs) >= 2:
+            fig = f"{min(yrs)}–{max(yrs)}"
+        else:
             fig = max(nums, key=len)
-            label = re.sub(r"\s+", " ", sent.replace(fig, "").strip(" ,.;:-"))
-            return fig, label[:70]
+        parts = re.split(r"(?<=[,;:])\s+", sent)
+        first = re.split(r"[–-]", fig)[0].split()[0]
+        part = next((x for x in parts if first in x), sent)  # the clause that carries the figure
+        return fig, _clause(part if len(part) >= 20 else sent)
     return None
 
 

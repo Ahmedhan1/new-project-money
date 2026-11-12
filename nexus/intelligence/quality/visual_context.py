@@ -98,6 +98,19 @@ def _wikidata_country(name: str) -> set[str]:
     return out
 
 
+@functools.lru_cache(maxsize=4096)
+def _is_country(name: str) -> bool:
+    """A country (or a river/region spanning countries) - too broad to confirm what an image shows."""
+    import pycountry
+    if _fold(name) in {"nile", "sahara", "middle east", "arabia", "europe", "africa", "asia"}:
+        return True
+    try:
+        pycountry.countries.lookup(name)
+        return True
+    except LookupError:
+        return _fold(name) in {_fold(n) for n in ("Egypt", "Russia", "Sudan", "Kuwait")}
+
+
 def candidates(text: str) -> list[str]:
     """Proper-noun phrases: runs of capitalised words (keeps 'Aswan High Dam', 'Lake Nasser', 'Belgorod')."""
     out = []
@@ -163,6 +176,13 @@ def check(asset: dict, ctx: dict, online: bool = False, classify: bool = False, 
         if not named:
             findings.append({"check": "geo_unverified", "blocking": True,
                              "detail": f"scene is about {', '.join(ctx['places'])}; nothing in the asset's title/description/categories places it there"})
+    # Same country, different named place: the Giza pyramids for a scene about the Aswan High Dam (Demo 10 frames).
+    scene_sub = {_fold(p) for p in ctx["places"] if not _is_country(p)}
+    asset_sub = {_fold(p) for p in a["places"] if not _is_country(p)}
+    if scene_sub and asset_sub and not (scene_sub & asset_sub) and not any(x in _fold(a["meta"]) for x in scene_sub) \
+            and not any(f["check"].startswith("geo_") for f in findings):
+        findings.append({"check": "place_mismatch", "blocking": True,
+                         "detail": f"scene names {sorted(ctx['places'])}; asset shows {sorted(a['places'])} - same country, different place"})
     if ctx["modern"] and a["years"] and max(a["years"]) < MODERN_FROM - 50 and not (ctx["years"] and min(ctx["years"]) < MODERN_FROM):
         findings.append({"check": "historical_in_modern", "blocking": True,
                          "detail": f"asset dated {max(a['years'])}, scene is modern ({ctx['years'] or 'present day'})"})

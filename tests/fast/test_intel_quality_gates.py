@@ -76,3 +76,21 @@ def test_create_review_rejects_sensational_framing():
                                                                    "on_screen_text": "x", "visual_query": "dam"}]}
     chk = {c["check"]: c for c in create.review_script(sc, res, 1)["checks"]}
     assert not chk["framing supported by research"]["ok"] and chk["framing supported by research"]["severity"] == "major"
+
+
+def test_fact_graphic_label_is_intact_and_figure_specific():
+    # regressions from the Demo 10 frames: "Constructed between 1960 and the dam was" / "it will func"
+    from nexus.intelligence.quality import scene_plan
+    assert scene_plan.key_fact("Constructed between 1960 and 1970, the dam was designed to control flooding.") == \
+        ("1960–1970", "Constructed between 1960 and 1970")
+    fig, label = scene_plan.key_fact("Despite concerns about sediment buildup, experts estimate it will function for another 200 years.")
+    assert fig == "200 years" and label.endswith("200 years") and "func " not in label + " "
+    assert scene_plan.key_fact("It is 111 metres high and 3,830 metres long.")[0] == "3,830 metres"
+
+
+def test_same_country_different_place_is_refused():
+    # Demo 10 frames: the Giza pyramids illustrated a sentence about the Aswan High Dam (both "Egypt")
+    ctx = vc.scene_context("Aswan High Dam", "The Aswan High Dam stands as a testament to Egypt's history and the Nile.", "Aswan High Dam")
+    r = vc.check({"title": "File:All Gizah Pyramids.jpg", "description": "The pyramids of Giza, Egypt", "categories": "Giza pyramid complex"}, ctx)
+    assert not r["ok"] and r["findings"][0]["check"] == "place_mismatch"
+    assert vc.check({"title": "File:Aswan High Dam.jpg", "description": "The High Dam at Aswan, Egypt"}, ctx)["ok"]

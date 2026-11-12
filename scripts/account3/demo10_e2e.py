@@ -95,10 +95,17 @@ def main() -> None:
     ctx = visual_context.scene_context(a.topic, "The Aswan Governorate in southern Egypt today", "Aswan governorate")
     cands = []
     for q in ("Aswan governorate", "governorate map", "Belgorod governorate 1745"):
-        try:
-            cands += assets.search_commons(q, n=6, min_width=600)
-        except Exception as e:  # network
-            G.setdefault("geo_errors", []).append(f"{q}: {e}")
+        for attempt in range(3):
+            try:
+                cands += assets.search_commons(q, n=6, min_width=600)
+                break
+            except Exception as e:  # network / rate limit: honour the provider's Retry-After, never evade it
+                import re as _re
+                m = _re.search(r"retry after (\d+)s", str(e))
+                G.setdefault("geo_errors", []).append(f"{q} (attempt {attempt + 1}): {e}")
+                if not m or attempt == 2:
+                    break
+                time.sleep(min(90, int(m.group(1)) + 2))
     rows = []
     for c in cands:
         r = visual_context.check(c, ctx)
@@ -141,7 +148,8 @@ def main() -> None:
     # 9 real render: the approved script verbatim through Account 2 with the visual + typography stages
     if not a.skip_render and h["approved"]:
         t = time.time()
-        out = create.create_video(a.topic, scenes=a.scenes, lang="en", script=h["create_params"]["script"], name="A3 demo10 " + a.topic[:40])
+        out = create.create_video(a.topic, scenes=a.scenes, lang="en", script=h["create_params"]["script"], name="A3 demo10 " + a.topic[:40],
+                                  notes=h["create_params"]["notes"])  # the verified claims, as the create-from-idea job passes them
         from nexus import project as prj
         p = prj.Project(out["project"])
         stages = {s["stage"]: {"passed": s.get("passed"), "failed": [c["check"] + ": " + str(c["detail"])[:160] for c in s.get("checks", []) if not c["ok"]]}
