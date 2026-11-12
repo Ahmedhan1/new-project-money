@@ -149,14 +149,28 @@ def deliver(project, tl: dict, destinations: list[str], title: str, description:
         gdir.mkdir(parents=True, exist_ok=True)
         video = gdir / "video.mp4"
         stats = render.render(ptl, video, project.dir / "work")
+        from . import export as _export
+        caps = [platforms.get(n)["v"].get("max_file_bytes") for n in g["platforms"]]
+        cap = min([c for c in caps if c] or [0]) or None
+        size_fix = None
+        if cap and video.stat().st_size > cap:  # re-encode under the strictest file-size limit of the group
+            fixed = video.with_name("video_sized.mp4")
+            r = _export.export(video, fixed, codec="h264", quality="high", max_bytes=int(cap * 0.97))
+            if r.get("ok"):
+                fixed.replace(video)
+            size_fix = {"limit": cap, "ok": bool(r.get("ok")), "reason": r.get("reason")}
+        ver = _export.verify(video, {"codec": "h264", "audio": True, "width": ptl["width"], "height": ptl["height"]})
         out["groups"].append({"platforms": g["platforms"], "video": str(video.relative_to(project.dir)), "duration": stats["duration"],
-                              "size": f"{ptl['width']}x{ptl['height']}", "tuning": notes})
+                              "size": f"{ptl['width']}x{ptl['height']}", "tuning": notes, "file_size_fix": size_fix,
+                              "verify": {"ok": ver.get("ok"), "failed": [c.get("id") for c in ver.get("checks", []) if not c.get("ok")]}})
         for name in g["platforms"]:
             prof = platforms.get(name)
             v = prof["v"]
             d = project.dir / "publish" / name / lang
             d.mkdir(parents=True, exist_ok=True)
             chk = platforms.check(video, name)
+            chk["export_verify"] = out["groups"][-1]["verify"]
+            chk["ok"] = bool(chk["ok"] and ver.get("ok"))
             tags = _hashtags(title, project.data.get("script"), min(int(v.get("hashtags_max") or 5), 5))
             cap_limit = v.get("caption_max_chars") or v.get("caption_max_utf16")
             meta = {"platform": name, "display": prof["display"], "language": lang, "video": str(video.relative_to(project.dir)),
