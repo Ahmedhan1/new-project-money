@@ -368,7 +368,7 @@ tasks:
     deps: [FX-1]
     acceptance: "Each is a timeline key in docs/TIMELINE.md, rendered and asserted on pixels/audio in tests/fast/test_fx.py."
     test: "pytest tests/fast/test_fx.py"
-    next: "Audio-reactive overlay, opacity keyframes and a multi-track model are still not wired (docs/TIMELINE.md)."
+    next: "Done since: .cube LUT management and face-following crops (a06d3e4). Audio-reactive overlay, opacity keyframes and a multi-track model -> FX-3."
     evidence: "Freeze, split screen, chroma key, masks, credits roll, position/scale/volume keyframes, J/L-cut audio wired in render.py; 20+ pixel/audio tests in test_fx.py; credits + full-frame cutaways used in the 4-min acceptance edit."
   - id: BRL-1
     priority: 1
@@ -403,3 +403,35 @@ tasks:
     acceptance: "Reviewer can edit/approve each translated line in the UI; at least one Arabic voice with verified commercial licence."
     test: "UI review of a localised branch."
     next: "No Arabic Piper voice has a verified commercial licence; evaluate other open TTS (licence first)."
+  # ------------------------------------------------------------------ next stage (session 6)
+  - id: REV-1
+    priority: 1
+    title: "Review UI: approve/edit translated lines, speaker names/merge/reassign, cutaway approve/replace"
+    status: planned
+    deps: [LANG-2, DIA-1, BRL-1]
+    acceptance: "On the NASA project a reviewer fixes one MT line, names the guest (lower third appears), rejects one cutaway; re-render reflects all three."
+    test: "API tests for each edit + a Chromium run of the panel."
+    next: "Backend ops exist (diarize.rename/merge/reassign_turn/set_name; timeline set_props); add API routes and a list UI."
+  - id: BRL-2
+    priority: 2
+    title: "Visual relevance score for B-roll (image-text model with a commercial-use licence)"
+    status: planned
+    deps: [BRL-1]
+    acceptance: "Cutaways below a relevance bar are dropped; owner review agrees on a sample of 20."
+    test: "Fixed set of sentence/image pairs."
+    next: "Licence check of candidate CLIP-class weights first (K-18)."
+  - id: CAP-1
+    priority: 2
+    title: "Opt-in readable caption mode (condense fillers/false starts to keep reading speed under 20 chars/s)"
+    status: planned
+    acceptance: "editing.caption_speed passes on the 4-min edit in readable mode; verbatim stays the default."
+    test: "Caption speed before/after on the acceptance edit."
+    next: "Speech rate there is 16.5 chars/s overall; p90 22.5 comes from fast bursts in continuous speech (K-21)."
+  - id: FX-3
+    priority: 2
+    title: "Multi-track timeline model, opacity keyframes, tracked masks (face blur) on faces.follow_keyframes"
+    status: planned
+    deps: [FX-2]
+    acceptance: "A two-video-track composite and a moving face blur render and pass pixel tests."
+    test: "pytest tests/fast/test_fx.py"
+    next: "LUT management and face-following crops are done (a06d3e4); masks are static rectangles today."

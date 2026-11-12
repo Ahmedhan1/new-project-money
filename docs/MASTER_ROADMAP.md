@@ -126,3 +126,31 @@ demos, release (lead: INT-4, DEMO-1…5).
 ## 7. Things only the owner can unblock
 Windows run (WIN-1) · off-machine backup account (STO-3) · free GPU account for real video generation (GEN-2) ·
 platform OAuth for upload/analytics (PUB-1, ANA-1) · LICENSE choice (D-10).
+
+## 8. Status after the final quality closure (2026-11-12, sessions 5-6)
+
+Phases 0-4 and 6-7 have run end to end on real media; phase 5 (generated video) is blocked on GPU access.
+Acceptance evidence: `docs/results/demos/acceptance_*.json` (+ contact sheets). Verified matrix: `docs/FEATURE_MATRIX.md`.
+Final report: `docs/FINAL_REPORT.md`.
+
+Defects found by inspecting real renders this phase, each fixed with a regression test: killed jobs left 'running'
+after a fast restart; audio 0.3 s longer than video; "guest"/"interviewer" lower thirds; frozen launch-pad cutaway and
+320x180 B-roll; captions spanning a title card; duplicated words at cuts; Whisper '160 -meter' and zero-length words;
+peak-based leveller putting the interviewer 7-11 dB under the guest; quality check counting phrase pauses as level
+jumps; interviewer questions labelled as guest (sentence-level speaker voting); 39 junk hashtags; MT inventing endings
+for fragments.
+
+## 9. Next development stage (in order; each item must end in a rendered, inspected result)
+1. **Owner-run checks** (cannot be done by an agent): NEXUS_SETUP/START on the owner's PC (WIN-1); `scripts/gpu_video_bench.py`
+   on the owner's GPU or the owner's own free Kaggle notebook (GEN-2); native review of de/fr/ar-EG/hi subtitles.
+2. **Review UI (LANG-2 + DIA-1 corrections)**: per-line approve/edit for translations, speaker rename/merge/names
+   (lower thirds appear only after a name is set), cutaway approve/replace. Highest leverage: every remaining automatic
+   weakness (MT omissions, B-roll relevance, speaker edge cases) is cheap for a person to fix in a list.
+3. **Visual relevance for B-roll** (K-18): a licence-clean image-text model (CLIP-class, check weights licence) to score
+   cutaways against the spoken sentence; keep the lexical gate.
+4. **Caption condensation option** (K-21): an opt-in "readable" caption mode that drops fillers/false starts to keep
+   reading speed under 20 chars/s; verbatim stays the default.
+5. **Multi-track timeline model** (FX-3): tracks for video/overlay/audio with the existing renderer as the compositor;
+   opacity keyframes; tracked masks (face blur) using `faces.follow_keyframes`.
+6. **Real video generation** once a GPU is available: Wan 2.1 1.3B T2V first (Apache-2.0, ~8 GB VRAM), then Wan 2.2 5B
+   TI2V for animating licensed stills; provenance kind `generated` only for those clips.

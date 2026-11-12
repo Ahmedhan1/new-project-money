@@ -22,3 +22,5 @@
 | K-18 | B-roll matching is lexical (titles/keywords of NASA/Openverse items), not visual | A cutaway can be on-topic by words but visually generic | Owner glance at the cutaway list; a CLIP-class relevance check needs a licence-clean model |
 | K-19 | Text/image-to-video on CPU produces noise (AnimateDiff benchmark) | No generated video on this machine | GPU needed (GEN-2); never claimed |
 | K-20 | Speakers have no names until a person sets them | No lower thirds on edits (roles are never put on screen) | `diarize.set_name`; UI for it is still missing |
+| K-21 | Caption reading speed: 90th percentile 22.5 chars/s on the 4-min edit (bar 20) | Fast bursts inside continuous speech; overall rate is 16.5 chars/s, fillers only 1.4 % | Verbatim captions kept; opt-in condensed mode is CAP-1 |
+| K-22 | Real text/image-to-video never run: no GPU in the build container, no owner GPU account | Generation claims stay "animated stills" | `scripts/gpu_video_bench.py` on the owner's GPU/notebook (GEN-2) |
