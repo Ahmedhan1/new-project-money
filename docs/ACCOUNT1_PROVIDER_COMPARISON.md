@@ -38,7 +38,28 @@ accounts to get around a limit.
 | Hugging Face Spaces | CPU Basic 2 vCPU / 16 GB / 50 GB **non-persistent** disk; sleeps when unused. **Gradio and Docker Spaces now require a paid plan** (PRO); free accounts get static Spaces and up to 2 ZeroGPU Gradio Spaces [HF1]. | Paid plan for Docker | Ephemeral. | Not eligible for a FastAPI Docker control plane any more. |
 | Oracle Cloud Always Free | Docs historically: Ampere A1 = 4 OCPU / 24 GB; 2026 third-party reports say it was halved to 2 OCPU / 12 GB (1,500 OCPU-h and 9,000 GB-h per month) - figures **unverified** (oracle.com returned 403 to our fetch). Idle instances (95th-pct CPU < 20 % over 7 days) may be reclaimed [O1, docs page found but not fetched]. | Sign-up card: **unverified** | Persistent block volume. | Technically the best fit (real VM, disk, FFmpeg) **if** the owner confirms no charge is possible; needs the owner. |
 | Google Cloud Run / e2-micro | 2 M requests/month; e2-micro 1 VM + 30 GB disk [GC1]. | Billing account required [GC1]. | - | Not eligible. |
-| Owner's own PC / GitHub Codespaces | (current setup) | No | Persistent | **Current recommendation**: keep the control plane on the owner's machine/Codespace; use Drive for durable artifacts. |
+| Tailscale Funnel (in front of an always-on machine the owner controls) | Personal plan "$0, free forever"; Funnel "available for all plans", **beta**; ports 443/8443/10000 only; TLS only; "non-configurable bandwidth limits" (no figures) [TS1, TS2]. | Not stated on the pages | The machine's own disk (SQLite, vault, FFmpeg all work). | **Recommended zero-cost option** (see 2.1). |
+| TryCloudflare quick tunnel | No account; "hostname changes each time"; "for testing and development"; 200 in-flight requests; no uptime guarantee [CF-QT]. | No | URL dies with the process. | Testing only. |
+| GitHub Codespaces / GitHub Actions | Development VM / CI runner | No | Codespaces stop when idle; Actions are not servers. | **Not a production host** (owner rule). Development only. |
+
+### 2.1 Recommendation (verified 2026-11-12)
+The control plane needs a long-running Python process (dispatcher poller, scheduler), a persistent disk (SQLite, vault,
+artifact cache) and FFmpeg. No verified *card-free* PaaS free tier offers all three: Workers/Pages/GitHub Pages have no
+process or disk, Render's free disk is wiped and sleeps, Fly/Cloud Run/HF Docker need billing or a paid plan.
+
+1. **Zero-cost, no card (recommended now):** run NEXUS on an always-on machine the owner controls (a spare PC/laptop or
+   mini-PC at home; Windows works with the existing launchers) and publish it with **Tailscale Funnel** at
+   `https://<device>.<tailnet>.ts.net` (HTTPS, port 443). Set `NEXUS_API_TOKEN` and `NEXUS_PUBLIC_ORIGIN` to that URL.
+   Heavy work stays on Kaggle and media stays in Drive, so the machine only needs ~1 GB RAM and a few GB of disk; the
+   owner's browser (any device) never downloads masters. Limits: the machine must stay on; Funnel is beta with unstated
+   bandwidth limits (fine for the Studio, previews are thumbnails/proxies); URL stability across restarts is not stated -
+   measure on first use.
+2. **Zero-cost, needs a card for identity only:** Oracle Cloud Always Free VM (real VM + persistent block volume). Card
+   requirement and current Always Free shape are unverified from here (oracle.com refused our fetch), and idle instances can
+   be reclaimed. Only with the owner's explicit approval, after reading Oracle's terms; never upgrade the account.
+3. **Not chosen:** anything that needs a paid plan or a billing account (Fly, Cloud Run/e2-micro, HF Docker Spaces,
+   Railway after trial), and Codespaces/Actions as a permanent host.
+Nothing has been deployed publicly; that needs the owner's go-ahead.
 
 ## 3. Compute (GPU)
 
@@ -88,6 +109,8 @@ is refused by costguard (the fake-Drive tests use loopback and are unaffected).
 * **Not yet evidence: real Google Drive.** Consent needs the owner's OAuth client and browser (Demo B above).
 
 ## Sources (read 2026-11-12)
+- [TS1] https://tailscale.com/kb/1223/funnel ("Last validated Jan 20, 2026") - [TS2] https://tailscale.com/pricing
+- [CF-QT] https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/ ("Last updated Sep 30, 2026")
 
 - [G1] https://support.google.com/googleone/answer/9312312
 - [G2] https://developers.google.com/workspace/drive/api/guides/limits
