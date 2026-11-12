@@ -34,7 +34,9 @@ GENERIC = set("thing things time times people person way part lot lots year year
               "make made good great well want come came look looking start started talk talking because always mostly "
               "basically totally probably pretty little closer before after suspect being been find found other another "
               "every everything something anything someone everyone could would should might maybe sure kind sort able "
-              "long short place places idea ideas stuff right still even also just only very much many most some".split())
+              "long short place places idea ideas stuff right still even also just only very much many most some "
+              "board throughout goal goals hope office further human humans establishing presence back peaceful meantime "
+              "couple prior knew whole different same next last first second third great".split())
 CACHE_VERSION = 1
 
 
@@ -141,6 +143,12 @@ def search_openverse(query: str, n: int = 8) -> list[dict]:
 
 
 SOURCES = {"nasa": search_nasa, "openverse": search_openverse}
+GENERAL_SOURCES = {"openverse"}  # not topic-specific: stricter subject check (a Paris street matched "Lemoine College")
+
+
+def head_hits(cand: dict, query_terms: list[str]) -> list[str]:
+    head = set(und.content(cand["title"] + " " + " ".join(cand.get("keywords") or [])))
+    return [t for t in query_terms if set(und.content(t)) and set(und.content(t)) & head]
 
 
 def relevance(cand: dict, query_terms: list[str]) -> tuple[float, list[str]]:
@@ -197,9 +205,14 @@ def plan(tl: dict, *, max_share: float = 0.4, per_cut: float = 4.5, min_cut: flo
                     weak = SOURCE_GENERIC.get(src, set())
                     hit = [h for h in hit if " " in h or not (set(und.content(h)) <= {w for t in weak for w in und.content(t)})]
                     sc = round(sc if hit else 0.0, 2)
-                    strong = len(set(hit)) >= 2 or any(" " in h for h in hit)  # one generic shared word is not a match
+                    # one generic shared word is not a match, and the asset's own title/keywords must name the subject
+                    # (a term found only deep in a long description is how 'board, throughout' matched a random photo)
+                    strong = (len(set(hit)) >= 2 or any(" " in h for h in hit)) and bool(head_hits(c, hit))
                     blob = set(und.content(c["title"] + " " + " ".join(c.get("keywords") or []) + " " + (c.get("description") or "")))
                     on_topic = not ctx or bool(ctx & blob)
+                    if src in GENERAL_SOURCES and ctx:  # a general index: the title must share the programme's subject too
+                        own = set(und.content(c["title"] + " " + " ".join(c.get("keywords") or [])))
+                        on_topic = bool((ctx - set(und.content(" ".join(q_terms)))) & own)
                     if not on_topic:
                         rejected.append(f"{c['id']}: off the programme's subject ({', '.join(sorted(ctx)[:5])})")
                         continue
