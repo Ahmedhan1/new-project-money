@@ -3,14 +3,14 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-12T18:45:52Z",
+ "updated": "2026-11-12T23:46:31Z",
  "git": {
   "branch": "work/account-3-intelligence-growth",
-  "commit": "bee4233",
-  "subject": "Merge Account 3 work stream D (15-language matrix with verified licences, translation QA, Egyptian/Gulf dialect profiles, dubbing manifests, SRT/VTT/ASS)",
-  "dirty_files": 12,
+  "commit": "41ce12b",
+  "subject": "Docs: execution report V2 and final feature matrix",
+  "dirty_files": 1,
   "upstream": "origin/work/account-3-intelligence-growth",
-  "unpushed_commits": 11
+  "unpushed_commits": 0
  },
  "current_task": {
   "id": "QLT-1",
@@ -27,6 +27,20 @@
    "next": "1) Series visuals - derive the image query from the bible's location LOOK text (generic nouns), not its fictional name, and allow reuse of an image for a repeated location. 2) Repair off-bible locations instead of only reporting them. 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Scored rubric in the QA report."
   },
   {
+   "id": "A3-HANDOFF",
+   "priority": 1,
+   "title": "Strategy Handoff to Account 2 (EditorialPlan + RenderJobManifest), approved script used verbatim; shared contracts package",
+   "status": "tested",
+   "next": "Owner approves the merge order; Account 1 fixes two of its own tests (RESULT.md)."
+  },
+  {
+   "id": "A3-QGATES",
+   "priority": 1,
+   "title": "Demo 4 defects: visual-context gate (geography/period/maps), glyph-coverage fonts + OCR read-back, scene visual plan (no silent title cards), factual framing gate",
+   "status": "tested",
+   "next": "Optional SigLIP image classification on the owner's PC (local only, never downloaded during a render)."
+  },
+  {
    "id": "AUD-1",
    "priority": 1,
    "title": "Voice mastering chain, ambience/SFX helpers, scene-to-scene continuity QA (level, colour, brightness jumps)",
@@ -39,27 +53,13 @@
    "title": "Effects, transition library, animated word captions, procedural SFX in the renderer",
    "status": "tested",
    "next": "Wire the remaining builders (chroma key, masks, split screen, freeze frames, credits roll, audio-reactive overlay) and real J/L-cut audio overlaps - task FX-2."
-  },
-  {
-   "id": "GRW-1",
-   "priority": 1,
-   "title": "Growth: shorts extractor, retention rubric + auto retention pass, hook/title variants, reference-video style profile",
-   "status": "tested",
-   "next": "Extended by GRW-2."
-  },
-  {
-   "id": "MED-1",
-   "priority": 1,
-   "title": "Media engine: encoder detection, H.264/H.265/AV1 presets, size-targeted export, proxies, export verification, benchmark",
-   "status": "tested",
-   "next": "Use export.export() for final deliverables in the deliver job (max file size per platform); benchmark on the owner's machine."
   }
  ],
  "tasks": {
-  "total": 60,
+  "total": 67,
   "by_status": {
    "verified": 18,
-   "tested": 18,
+   "tested": 25,
    "blocked": 4,
    "deferred": 1,
    "planned": 15,
@@ -70,7 +70,7 @@
  },
  "tests": {
   "fast": {
-   "summary": "333 passed, 0 failed, 3 skipped",
+   "summary": "365 passed, 0 failed, 3 skipped",
    "ok": true,
    "date": "2026-11-12",
    "platform": "Linux",
