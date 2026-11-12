@@ -236,46 +236,51 @@ tasks:
   - id: FX-1
     priority: 1
     title: "Effects, transition library, animated word captions, procedural SFX in the renderer"
-    status: in_progress
+    status: tested
     acceptance: "clip effects / xfade names / caption styles / overlays from docs/PHASE3_PLAN.md render correctly and are cache-safe."
     test: "pytest tests/fast/test_fx.py"
-    next: "Implementation delegated; lead integrates into API/UI."
+    evidence: "pytest tests/fast/test_fx.py (12 tests); all 8 presets rendered 16:9 + 9:16 incl. Arabic captions and passed qa.technical_review; frames inspected"
+    next: "Blur/glitch have no ramp; SFX never listened to by a person."
   - id: PERF-1
     priority: 1
     title: "Render efficiency: parallel segments, per-segment caption burn (final pass copies video), draft mode, hw-encoder detection"
-    status: in_progress
+    status: tested
     acceptance: "Measured before/after on the same timeline in docs/results/perf_render.json; output still passes technical QA."
     test: "pytest tests/fast/test_fx.py -k perf"
-    next: "Benchmark on the user's ZBook (QuickSync availability unknown)."
+    evidence: "docs/results/perf_render.json: 62 s timeline cold 52-54 s -> 24-40 s, warm 39-42 s -> 0.4-0.6 s, caption edit 38-60 s -> 2-3 s (shared, noisy CPU)"
+    next: "Measure on the user's ZBook; hardware encoders were never exercised (none available here)."
   - id: GRW-1
     priority: 1
     title: "Growth: shorts extractor, retention rubric + auto retention pass, hook/title variants, reference-video style profile"
-    status: in_progress
+    status: tested
     acceptance: "Long video -> ranked vertical shorts timelines; any timeline gets a scored retention report with applicable fixes."
     test: "pytest tests/fast/test_growth.py"
-    next: "Wire platform analytics once the user authorises OAuth (ANA-1) so the rubric can be calibrated on real retention."
+    evidence: "tests/fast/test_growth.py (13); real short from solar_talk rendered 1080x1920 and passed technical QA; API: /shorts, /retention, /retention/apply, /api/hooks"
+    next: "Re-run on real long footage; hook detection is English keyword heuristics."
   - id: RPR-1
     priority: 1
     title: "Repurpose studio: rights gate, commentary/recap layouts, transformation report (no detection-evasion features)"
-    status: in_progress
+    status: tested
     acceptance: "Media without a rights declaration cannot be exported; report states the share of original vs new material."
     test: "pytest tests/fast/test_repurpose.py"
-    next: "Recap script quality depends on the local LLM; review with real footage."
+    evidence: "tests/fast/test_repurpose.py (12); real recap (overlap 0.0) and commentary (narration 67%) rendered; rights gate wired into qa.render_with_qa"
+    next: "Compilation never rendered for real; fallback recap narration reads poorly."
   - id: AUD-1
     priority: 1
     title: "Voice mastering chain, ambience/SFX helpers, scene-to-scene continuity QA (level, colour, brightness jumps)"
-    status: in_progress
+    status: tested
     acceptance: "Narration clips leave TTS at a consistent loudness; continuity stage flags level/brightness jumps between adjacent scenes."
     test: "pytest tests/fast/test_audio_continuity.py"
-    next: "A properly licensed Arabic voice is still missing (Chatterbox benchmark)."
+    evidence: "tests/fast/test_audio_continuity.py (5); narration spread 4.57 LU -> 0.17 LU, true peak <= -1.96 dBTP; continuity stage runs in every render_with_qa"
+    next: "Arabic voice licence still unverified."
   - id: INT-3
     priority: 1
     title: "Integrate phase 3 into API, job handlers, UI, presets and docs"
-    status: planned
+    status: in_progress
     deps: [FX-1, PERF-1, GRW-1, RPR-1, AUD-1]
     acceptance: "Every phase-3 capability is reachable from the UI through a durable job and covered by a fast test."
     test: "pytest tests/fast"
-    next: "Start when the work packages report."
+    next: "Done: presets, shorts/retention, repurpose+rights gate, continuity stage, director, platform tuning in API/UI. Open: LANG-1 integration, heavy tests A-F re-run, version 0.3.0, CHANGELOG."
   - id: LANG-1
     priority: 1
     title: "12+ languages (en, de, fr, ar-EG, ar-Gulf, zh, ru, hi first): translation tags, licensed voices, fonts, per-language QA"
@@ -286,16 +291,18 @@ tasks:
   - id: PLAT-1
     priority: 1
     title: "Platform knowledge base (specs + documented ranking signals with sources) and per-platform timeline tuning"
-    status: in_progress
+    status: tested
     acceptance: "tune(tl, platform) changes duration/aspect/captions/hook/loudness per platform; every encoded signal cites its source and date."
     test: "pytest tests/fast/test_platforms.py"
-    next: "Implementation delegated."
+    evidence: "tests/fast/test_platforms.py; 14 signals sourced, 22 labelled editorial (platform sites unreachable from the sandbox); /api/platforms/knowledge, /platform/tune"
+    next: "Re-read official pages from a machine that can reach them; Facebook/LinkedIn have no official source yet."
   - id: DIR-1
     priority: 1
     title: "Director: long footage -> condensed cinematic master + per-platform cuts + shorts in one job"
-    status: in_progress
+    status: tested
     deps: [GRW-1, FX-1]
     acceptance: "One call produces a master timeline at a target length plus platform deliverables, each with QA and retention reports."
     test: "pytest tests/fast/test_director.py"
-    next: "Implementation delegated."
+    evidence: "tests/fast/test_director.py; real run on 3 fixtures: master 53.9 s + TikTok short 16.1 s both passed technical QA; Director page + job"
+    next: "Prove on long real speech: filler removal, topic-shift chapters and condensing were only tested on hand-built data."
 

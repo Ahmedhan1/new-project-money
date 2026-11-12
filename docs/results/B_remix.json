@@ -37,7 +37,7 @@
   {
    "version": "A-story",
    "size": "1280x720",
-   "duration": 55.2,
+   "duration": 54.7,
    "shots": 16,
    "grade": "cinematic",
    "music": "inspiring",
@@ -77,7 +77,7 @@
   {
    "version": "C-chronological-doc",
    "size": "1280x720",
-   "duration": 55.1,
+   "duration": 54.7,
    "shots": 16,
    "grade": "documentary",
    "music": "documentary",
@@ -101,45 +101,45 @@
  "renders": {
   "A-story": {
    "status": "PASSED_AUTOMATED_CHECKS",
-   "duration": 55.283,
+   "duration": 54.666667,
    "video": {
     "codec": "h264",
     "width": 1280,
     "height": 720,
     "fps": 30.0,
     "pix_fmt": "yuv420p",
-    "duration": 55.233333
+    "duration": 54.666667
    },
    "known_issues": [],
-   "render_seconds": 50.53
+   "render_seconds": 29.54
   },
   "B-highlights-vertical": {
    "status": "PASSED_AUTOMATED_CHECKS",
-   "duration": 24.666667,
+   "duration": 24.633333,
    "video": {
     "codec": "h264",
     "width": 720,
     "height": 1280,
     "fps": 30.0,
     "pix_fmt": "yuv420p",
-    "duration": 24.666667
+    "duration": 24.633333
    },
    "known_issues": [],
-   "render_seconds": 16.96
+   "render_seconds": 10.31
   },
   "C-chronological-doc": {
    "status": "PASSED_AUTOMATED_CHECKS",
-   "duration": 55.171,
+   "duration": 54.666667,
    "video": {
     "codec": "h264",
     "width": 1280,
     "height": 720,
     "fps": 30.0,
     "pix_fmt": "yuv420p",
-    "duration": 55.133333
+    "duration": 54.666667
    },
    "known_issues": [],
-   "render_seconds": 32.16
+   "render_seconds": 17.17
   }
  }
 }

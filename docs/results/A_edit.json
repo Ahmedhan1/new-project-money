@@ -50,18 +50,18 @@
   "proposed_duration": 18.19
  },
  "output": {
-  "duration": 20.2,
-  "lufs": -14.35,
-  "true_peak": -1.86,
+  "duration": 20.166667,
+  "lufs": -14.43,
+  "true_peak": -2.89,
   "video": {
    "codec": "h264",
    "width": 1280,
    "height": 720,
    "fps": 30.0,
    "pix_fmt": "yuv420p",
-   "duration": 20.2
+   "duration": 20.166667
   },
-  "render_seconds": 14.12
+  "render_seconds": 13.65
  },
  "qa_status": "PASSED_AUTOMATED_CHECKS",
  "known_issues": [],
@@ -81,13 +81,20 @@
   "PASS frame rate: 30.0 fps",
   "PASS black frames: none beyond intentional fades",
   "PASS frozen frames: none",
-  "PASS duration matches timeline: 20.20s vs timeline 20.19s",
-  "PASS A/V stream length: video 20.20s, audio 20.19s",
+  "PASS duration matches timeline: 20.17s vs timeline 20.19s",
+  "PASS A/V stream length: video 20.17s, audio 20.17s",
   "PASS audio channels: 2 ch @ 48000 Hz",
-  "PASS loudness: -14.35 LUFS (target -14.0 +/-1.5)",
-  "PASS clipping / true peak: true peak -1.86 dBTP (limit -1.0)",
+  "PASS loudness: -14.43 LUFS (target -14.0 +/-1.5)",
+  "PASS clipping / true peak: true peak -2.89 dBTP (limit -1.0)",
   "PASS dead air: none",
   "PASS subtitle timing: 10 cues, 0 out of range, 0 overlapping",
-  "PASS subtitle reading speed: 1 cues above 25 chars/s"
+  "PASS subtitle reading speed: 1 cues above 25 chars/s",
+  "PASS flash frames: no clip shorter than 3 frames",
+  "PASS audio level across cuts: no unplanned jump > 6 dB at 5 cut(s)",
+  "PASS brightness/colour across cuts: no unexplained jump within a source",
+  "PASS expected jumps (information): 2.0s +167 dB (by design); 5.2s brightness +53 (different shots/sources or designed); 5.2s colour cast +83 (different shots/sources or designed); 9.3s colour cast +88 (different shots/sources or designed); 12.7s brightness +89 (different shots/sources or designed); 12.7s colour cast +74 (different shots/sources or designed); 16.6s brightness -106 (different shots/sources or designed); 16.6s colour cast +104 (different shots/sources or designed)",
+  "PASS caption overlap: no overlapping cues",
+  "PASS caption continuity across cuts: 10 cues, usual gap 0.04s",
+  "PASS measured: 5 cut(s) over 20.2s; active-level window 1.5 s, 2 frames each side"
  ]
 }
