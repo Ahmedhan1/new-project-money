@@ -1,31 +1,31 @@
 {
  "ref": "HEAD",
- "commit": "932275f1fbacb4e73b772d22751ade0069512874",
- "started_utc": "2026-11-12T12:46:44Z",
+ "commit": "9e9b5271b58a8df558fcc1a087895de5633aac24",
+ "started_utc": "2026-11-12T14:25:16Z",
  "python": "3.13.18",
  "checks": {
   "clone": {
    "ok": true,
-   "seconds": 0.2,
+   "seconds": 1.7,
    "log": ""
   },
   "hygiene": {
    "ok": true,
-   "tracked_files": 220,
+   "tracked_files": 230,
    "over_2mb": [],
    "media_or_model_files": [],
    "possible_secrets": []
   },
   "ruff": {
    "ok": true,
-   "seconds": 0.1,
+   "seconds": 1.6,
    "log": "All checks passed!\n"
   },
   "fast_tests": {
-   "ok": false,
-   "seconds": 230.2,
-   "summary": "5 failed, 198 passed, 4 skipped, 3 warnings in 229.68s (0:03:49)"
+   "ok": true,
+   "seconds": 198.0,
+   "summary": "209 passed, 4 skipped, 3 warnings in 197.57s (0:03:17)"
   }
  },
- "ok": false
+ "ok": true
 }

@@ -42,7 +42,12 @@ shorts ending with sound on the last frame · CI red from a duplicate task id.
 - B-roll matching is lexical, not visual (K-18).
 
 ## Tests
-TESTS_RESULT
+- Fast suite in a fresh clone with an empty data folder (`scripts/release_check.py`, commit 9e9b527): **209 passed,
+  4 skipped** (skips need local voice/model files), ruff clean, repository hygiene clean (no file > 2 MB, no media,
+  model or database files, no secrets). Report: `docs/results/release_check.json`.
+- CI on PR #3: Linux + Windows lint/fast tests and the Windows end-to-end launcher job green (it was red from 44f6a4b
+  to b71010a: lint, then a duplicate task id; fixed in a06d3e4 and 78f5344).
+- Every defect listed above has a regression test that fails without its fix (checked by reverting the fix).
 
 ## Zero spend
 No paid service, card or billable API was used. Models: Whisper small (MIT), MADLAD-400 (Apache-2.0), Piper voices
