@@ -216,7 +216,8 @@ def build_profile(measured: dict | None, *, source: dict, creator: str = "unknow
               "on_screen_text": "not_measured (no OCR model deployed)"}
     audio = {**au, "speech_share": sp["speech_share"], "wpm_speaking": sp["wpm_speaking"], "mode": it["audio_mode"]}
     confs = [it[k]["confidence"] for k in ("hook_type", "pacing_shape", "edit_tempo", "audio_mode")]
-    conf = round(statistics.fmean(confs) * (1.0 if sp["available"] or not au["has_audio"] else 0.8), 2)
+    conf = round(statistics.fmean(confs) * (1.0 if sp["available"] or not au["has_audio"] else 0.8)
+                 * (0.6 if sp.get("caption_mismatch") else 1.0), 2)
     ev.append(C.evidence("nexus.intelligence.creators.measure (ffmpeg scene/silence/loudness" +
                          (", faster-whisper word timings)" if sp["available"] else ")"), source.get("url"), kind="measurement"))
     return C.make("CreatorReferenceProfile", id=C.new_id("crp"), source=source, creator=creator, category=category, format=fmt,

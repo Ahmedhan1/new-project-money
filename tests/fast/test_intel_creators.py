@@ -106,3 +106,9 @@ def test_library_sources():
     ids = {a["id"] for a in library.archetypes()}
     assert {"challenge_high_stakes", "arabic_edu_explainer", "science_documentary", "travel_vlog", "interview_podcast",
             "investigative", "product_review", "premium_ad", "short_form_story"} <= ids
+
+
+def test_caption_mismatch_flagged():
+    tr = fake_transcript(1.0, ["word"] * 200, step=1.0)  # captions run to ~200 s on a 60 s video
+    m = M.from_parts(duration=60, scenes=[(0, 60)], transcript=tr)
+    assert m["speech"]["caption_mismatch"] and m["speech"]["speech_share"] <= 1.0

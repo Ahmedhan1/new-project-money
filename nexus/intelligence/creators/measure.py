@@ -104,6 +104,11 @@ def from_parts(*, duration: float, scenes: list, silences: list | None = None, t
     cuts = cut_times(scenes)
     mins = max(duration / 60.0, 1e-6)
     words = _words(transcript)
+    caption_end = max((w["end"] for w in words), default=0.0)
+    mismatch = bool(words) and caption_end > duration * 1.05 + 1.0
+    words = [w for w in words if w["start"] < duration]
+    for w in words:
+        w["end"] = min(w["end"], duration)
     speech = _merge([(w["start"], w["end"]) for w in words])
     speech_s = sum(b - a for a, b in speech)
     sil = [(float(a), float(b)) for a, b in (silences or [])]
@@ -139,7 +144,10 @@ def from_parts(*, duration: float, scenes: list, silences: list | None = None, t
                    "speech_share": _r(speech_s / duration) if duration else None, "time_to_first_speech_s": _r(onset),
                    "word_timing": "spread_from_segments" if any(w.get("spread") for w in words) else
                    ("whisper_words" if words else None),
-                   "language": (transcript or {}).get("language"), **text_markers(words)},
+                   "language": (transcript or {}).get("language"), **text_markers(words),
+                   "caption_mismatch": ({"captions_end_s": _r(caption_end), "media_duration_s": _r(duration),
+                                         "note": "captions belong to a different cut of this video; speech fields unreliable"}
+                                        if mismatch else None)},
         "audio": {"has_audio": has_audio, "silence_share": _r(silence_s / duration) if duration and has_audio else None,
                   "non_speech_audio_share_upper_bound": _r(other_audio / duration) if duration and transcript else None,
                   "integrated_lufs": (loudness or {}).get("lufs"), "lra": (loudness or {}).get("lra"),

@@ -45,6 +45,13 @@ def get(p: dict, path: str):
     return cur
 
 
+def usable(p: dict, path: str):
+    """Field value, or None when it rests on captions that do not match the media (flagged in the profile)."""
+    if get(p, "measured.speech.caption_mismatch") and (".speech." in path or ".opening." in path):
+        return None
+    return get(p, path)
+
+
 def _st(text: str, cites: list[str], **kw) -> dict:
     return {"text": text, "cites": cites, **kw}
 
@@ -57,7 +64,7 @@ def _label(p: dict) -> str:
 def opening_ranking(profiles: list[dict]) -> list[dict]:
     rows = []
     for path, direction, name in OPENING_CRITERIA:
-        vals = {p["id"]: get(p, path) for p in profiles}
+        vals = {p["id"]: usable(p, path) for p in profiles}
         known = {k: v for k, v in vals.items() if v is not None}
         for pid in vals:
             rows.append((pid, path, name, vals[pid], known, direction))
@@ -84,7 +91,8 @@ def compare(profiles: list[dict]) -> dict:
            "adaptable_techniques": [], "nexus_should_differently": [], "original_angle": None,
            "not_compared": [p["id"] for p in profiles if not p.get("measured")]}
     for p in measured:
-        rep["table"].append({"id": p["id"], "format": p["format"], **{lab: get(p, f) for f, lab in METRICS.items()},
+        rep["table"].append({"id": p["id"], "format": p["format"], **{lab: usable(p, f) for f, lab in METRICS.items()},
+                             "caption_mismatch": bool(get(p, "measured.speech.caption_mismatch")),
                              "hook_type": get(p, "hook.type.value"), "pacing_shape": get(p, "story.pacing_shape.value")})
     if len(measured) < 2:
         rep["shared_patterns"].append(_st("Fewer than two measured profiles: nothing to compare.", []))
@@ -99,7 +107,7 @@ def compare(profiles: list[dict]) -> dict:
         else:
             rep["differences"].append(_st(f"{name} differs: " + ", ".join(f"{k}={v}" for k, v in vals.items()) + " (interpreted).", cites))
     for path, lab in METRICS.items():
-        vals = {p["id"]: get(p, path) for p in measured if get(p, path) is not None}
+        vals = {p["id"]: usable(p, path) for p in measured if usable(p, path) is not None}
         if len(vals) < 2:
             continue
         lo_id, hi_id = min(vals, key=vals.get), max(vals, key=vals.get)
@@ -128,7 +136,8 @@ def compare(profiles: list[dict]) -> dict:
     ids = [p["id"] for p in measured]
 
     def allp(path, pred):
-        vs = [get(p, path) for p in measured]
+        vs = [usable(p, path) for p in measured]
+        vs = [v for v in vs if v is not None] or [None]
         return all(v is not None and pred(v) for v in vs)
     if allp("measured.speech.time_to_first_speech_s", lambda v: v > 3):
         rep["nexus_should_differently"].append(_st("None of these references speaks within 3 s; NEXUS can test an earlier "
