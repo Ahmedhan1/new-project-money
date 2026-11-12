@@ -314,7 +314,10 @@ def copy_to(artifact_id: str, dst_cid: str, *, delete_source: str | None = None)
             srcs = [lo for lo in m.locations if lo.connection_id != dst_cid] or m.locations
             fetch_local(m.model_copy(update={"locations": srcs}), tmp)
             p = provider(dst_cid)
-            path = next((lo.path for lo in m.locations if lo.path), f"{folder_for(m.kind, m.project_id)}/{m.name}")
+            # keep an existing NEXUS/... path (copy between clouds); anything else (e.g. compute/artifacts/<job>/ on the
+            # server) is filed by kind under the NEXUS folder structure, with the job id so names never collide
+            path = next((lo.path for lo in m.locations if (lo.path or "").startswith(NEXUS_ROOT + "/")), None) or \
+                f"{folder_for(m.kind, m.project_id)}/{(m.produced_by_job + '_') if m.produced_by_job else ''}{m.name}"
             f = p.upload(tmp, path, mime=m.mime, props={"nexus_kind": m.kind, "nexus_retention": m.retention})
             m = _finish_store(p, dst_cid, f, path, m.sha256, m.size, m, name=m.name, kind=m.kind, mime=m.mime,
                               project_id=m.project_id, job_id=m.produced_by_job, provenance=m.provenance,

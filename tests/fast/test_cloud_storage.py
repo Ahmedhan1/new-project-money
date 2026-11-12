@@ -567,3 +567,26 @@ def test_fetch_local_reads_compute_outputs_anywhere_inside_nexus_home_but_not_ou
     from nexus.cloud.storage.base import StorageError
     with pytest.raises(StorageError):
         A.fetch_local(bad, tmp_path / "e.bin")
+
+
+def test_copy_to_files_compute_outputs_under_the_nexus_folder_for_their_kind(home, monkeypatch):
+    """Live demo: a Kaggle output was stored in Drive B under the server's internal path compute/artifacts/<job>/."""
+    from nexus.cloud.storage import artifacts as A
+    from nexus.contracts import ArtifactLocation, ArtifactManifest
+    m = ArtifactManifest(kind="master", name="output.mp4", mime="video/mp4", size=1, sha256="a" * 64, produced_by_job="rjob_1",
+                         locations=[ArtifactLocation(provider="local", connection_id="local", ref="compute/artifacts/rjob_1/output.mp4",
+                                                     path="compute/artifacts/rjob_1/output.mp4")])
+    A._save(m)
+    seen = {}
+
+    class P:
+        INFO = type("I", (), {"provider": "stub"})
+        def upload(self, src, path, **k):
+            seen["path"] = path
+            return type("F", (), {"ref": "x"})()
+    monkeypatch.setattr(A, "check_authorized", lambda c: None)
+    monkeypatch.setattr(A, "fetch_local", lambda mm, dest: dest.write_bytes(b"a") or dest)
+    monkeypatch.setattr(A, "provider", lambda c: P())
+    monkeypatch.setattr(A, "_put_manifest", lambda *a, **k: None)
+    A.copy_to(m.artifact_id, "drive_b")
+    assert seen["path"] == "NEXUS/Masters/_shared/rjob_1_output.mp4"
