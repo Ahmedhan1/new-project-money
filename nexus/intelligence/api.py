@@ -66,4 +66,5 @@ def ai_try(q: AskReq):
         raise HTTPException(503, str(e))
     except KeyError as e:
         raise HTTPException(422, str(e))
-    return {"text": res.text, "provider": res.provider, "model": res.model, "latency_s": res.latency_s, "fallbacks": res.fallbacks}
+    return {"text": res.text, "provider": res.provider, "model": res.model, "latency_s": res.latency_s, "fallbacks": res.fallbacks,
+            "below_bar": res.below_bar}

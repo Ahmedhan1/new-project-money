@@ -18,7 +18,7 @@ PAGES.models=async function(m){
   <h3 class="sec">Provider health</h3>${table(d.health,[["Provider",x=>esc(x.provider)],["Requests",x=>x.requests],["Mean latency",x=>x.mean_latency_s+" s"],["Failures",x=>x.failures],["Circuit",x=>tag(x.circuit,x.circuit==="closed"?"ok":"bad")],["Used today",x=>x.today]])}
   <h3 class="sec">Try a task</h3><div class="row"><label style="max-width:240px">Task<select id="tk">${Object.keys(r.tasks).map(t=>`<option>${t}</option>`).join("")}</select></label><label>Prompt<input id="tp" placeholder="Suggest 3 titles for a video about solar storage"></label><button id="tg">Run</button></div><pre id="to"></pre>`;
   $("#pv").onchange=()=>{sel=$("#pv").value;go("models")};
-  $("#tg").onclick=async()=>{$("#to").textContent="running…";try{const o=await api("/api/a3/ai/try",{task:$("#tk").value,prompt:$("#tp").value||"Say hello",privacy:pr});$("#to").textContent=`${o.provider}/${o.model} · ${o.latency_s}s\n\n${o.text}`}catch(e){$("#to").textContent=e.message}};
+  $("#tg").onclick=async()=>{$("#to").textContent="running…";try{const o=await api("/api/a3/ai/try",{task:$("#tk").value,prompt:$("#tp").value||"Say hello",privacy:pr});$("#to").textContent=`${o.provider}/${o.model} · ${o.latency_s}s${o.below_bar?`\nDRAFT QUALITY: best available model scores ${o.below_bar.used_quality} (${o.below_bar.quality_source}) below the bar ${o.below_bar.required} for this task - review before use`:""}\n\n${o.text}`}catch(e){$("#to").textContent=e.message}};
 };
 window.A3={ev,conf,unavailable,A3};
 })();

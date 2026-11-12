@@ -179,3 +179,17 @@ def test_make_accepts_a_field_called_name():
     d = contracts.make("CreativeStyleProfile", id="s", name="Calm explainer", from_references=[], pacing={}, hook_patterns=[], structure=[],
                        visual_rules=[], audio_rules=[], do_not_copy=[])
     assert d["name"] == "Calm explainer" and contracts.validate(d) == []
+
+
+
+def test_below_quality_bar_runs_as_labelled_draft_unless_strict(settings, server):
+    settings({"ai_providers": {"owner-openai-compatible": {"base_url": server}}})
+    weak = _entry("owner-openai-compatible", "tiny", q=2)               # deep_research needs 4
+    _Srv.replies = [(200, "draft answer")]
+    r = router.complete("deep_research", "q", entries=[weak], use_cache=False)
+    assert r.text == "draft answer" and r.below_bar["required"] == 4 and r.below_bar["used_quality"] == 2
+    with pytest.raises(router.NoProviderAvailable):
+        router.complete("deep_research", "q", entries=[weak], use_cache=False, strict=True)
+    _Srv.replies = [(200, "fine")]
+    ok = router.complete("general", "q2", entries=[_entry("owner-openai-compatible", "big", q=8)], use_cache=False)
+    assert ok.below_bar is None

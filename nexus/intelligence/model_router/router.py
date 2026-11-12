@@ -54,6 +54,9 @@ class Result:
     cached: bool = False
     fallbacks: list[str] = field(default_factory=list)
     usage: dict = field(default_factory=dict)
+    # set when no eligible model met the task's quality bar and the best one below it was used (strict=False);
+    # callers must show it ("draft quality - review before use"), never present the output as meeting the bar
+    below_bar: dict | None = None
 
 
 _lock = threading.Lock()
@@ -185,7 +188,9 @@ def _measured_quality(entry: dict, cap: str) -> float | None:
 
 
 def candidates(task: str, privacy: str = "internal", entries: list[dict] | None = None,
-               need_tokens: int = 0) -> tuple[list[dict], list[str]]:
+               need_tokens: int = 0, below_bar: list | None = None) -> tuple[list[dict], list[str]]:
+    """Eligible models meeting the task's quality bar, best first. Eligible models BELOW the bar are appended to
+    `below_bar` (if a list is passed) so a non-strict caller can still run as a labelled draft."""
     if task not in TASKS:
         raise KeyError(f"unknown AI task '{task}' (known: {', '.join(TASKS)})")
     t = TASKS[task]
@@ -201,6 +206,8 @@ def candidates(task: str, privacy: str = "internal", entries: list[dict] | None 
             if mv is not None:
                 qsrc += f" (bench {round(mv, 2)} on n={mn} < {MIN_MEASURED_ITEMS} items: not used)"
         if good and q < t["min_q"]:
+            if below_bar is not None and q > 0:
+                below_bar.append({**e, "_q": q, "_q_source": qsrc})
             good, reason = False, f"{e['provider']}/{e['model']}: quality {q} ({qsrc}) < {t['min_q']} needed for {task}"
         (ok.append({**e, "_q": q, "_q_source": qsrc}) if good else why.append(reason))
     if t["light"]:  # adequate + fastest + most private first
@@ -281,19 +288,28 @@ def _call(entry: dict, prompt: str, system: str, schema: dict | None, max_tokens
 
 def complete(task: str, prompt: str, *, system: str = "You are a precise assistant.", schema: dict | None = None,
              privacy: str = "internal", max_tokens: int = 900, temperature: float = 0.4, use_cache: bool = True,
-             retries_per_provider: int = 1, entries: list[dict] | None = None) -> Result:
-    """Run one AI task on the best eligible provider, falling back down the ranked list."""
+             retries_per_provider: int = 1, entries: list[dict] | None = None, strict: bool = False) -> Result:
+    """Run one AI task on the best eligible provider, falling back down the ranked list.
+
+    When no eligible model reaches the task's quality bar: strict=True raises NoProviderAvailable; the default runs the
+    best eligible model below the bar and sets Result.below_bar so the output is shown as a draft for human review."""
     if privacy not in PRIVACY_RANK:
         raise ValueError("privacy must be public, internal or private")
     need = estimate_tokens(system) + estimate_tokens(prompt) + max_tokens
-    ranked, why = candidates(task, privacy, entries, need_tokens=need)
+    low: list[dict] = []
+    ranked, why = candidates(task, privacy, entries, need_tokens=need, below_bar=low)
+    bar = None
     if not ranked:
-        raise NoProviderAvailable(task, why)
+        if strict or not low:
+            raise NoProviderAvailable(task, why)
+        ranked = sorted(low, key=lambda e: (-e["_q"], -PRIVACY_RANK[e["privacy"]]))
+        bar = {"required": TASKS[task]["min_q"], "reasons": why[:6]}
     tried: list[str] = []
     for e in ranked:
         key = _cache_key(task, prompt, system, schema, e["model"])
         if use_cache and (hit := _cache_get(key)):
-            return Result(hit["text"], hit.get("data"), e["provider"], e["model"], 0.0, True, tried, hit.get("usage", {}))
+            return Result(hit["text"], hit.get("data"), e["provider"], e["model"], 0.0, True, tried, hit.get("usage", {}),
+                          bar and {**bar, "used_quality": e["_q"], "quality_source": e["_q_source"]})
         for attempt in range(retries_per_provider + 1):
             t0 = time.time()
             try:
@@ -318,7 +334,8 @@ def complete(task: str, prompt: str, *, system: str = "You are a precise assista
                       tokens=int(tokens), tokens_estimated=not usage.get("total_tokens"))
             if use_cache:
                 _cache_put(key, {"text": text, "data": data, "usage": usage})
-            return Result(text, data, e["provider"], e["model"], lat, False, tried, usage)
+            return Result(text, data, e["provider"], e["model"], lat, False, tried, usage,
+                          bar and {**bar, "used_quality": e["_q"], "quality_source": e["_q_source"]})
     raise NoProviderAvailable(task, why + tried)
 
 

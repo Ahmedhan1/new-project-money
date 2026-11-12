@@ -33,3 +33,16 @@ mode; a JSON schema makes required keys and array lengths impossible to skip. Pr
 
 **D-10 No LICENSE file yet.** Choosing a licence (or keeping the repository private/all-rights-reserved) is the owner's
 decision; noted in the handoff as a pending user decision.
+
+**D-11 (Account 3) AI quality bars are soft by default.** Each AI task has a minimum quality (router `TASKS[...]["min_q"]`).
+A 6-item benchmark measured local Qwen3-4B at 3.3/10 on reasoning (thinking off), below the 4 needed for deep research,
+reference interpretation, quality review and analytics interpretation. Failing those tasks outright would stop the
+product on any machine without a GPU or an authorised hosted tier. Decision: when nothing eligible meets the bar, the
+router runs the best eligible model and returns `below_bar` (required vs measured score); the UI shows "draft quality -
+review before use". Callers that must not accept a draft pass `strict=True`. Nothing is ever routed to a paid endpoint or
+past a privacy class to reach the bar.
+
+**D-12 (Account 3) Provider exclusions.** Cerebras (payment method required for API access per its docs, 2026-11-12) and
+Hugging Face Inference Providers (no free credits on free accounts) are excluded by the router's zero-spend gate even if
+authorised. Second local provider: llama.cpp's OpenAI-compatible server with Qwen3-0.6B (Apache-2.0) - proves
+multi-provider routing and failover with no hosted API. Details: `docs/ACCOUNT3_MODEL_COMPARISON.md`.
