@@ -1,40 +1,40 @@
 {
- "collected_utc": "2026-11-12T11:42:10Z",
+ "collected_utc": "2026-11-12T12:46:12Z",
  "demo": 1,
  "what": "3-5 minute cinematic edit from licensed source footage (director + B-roll + post)",
- "job": "job_cc28f57412",
+ "job": "job_46fa82c7bb",
  "status": "done",
  "stages": {
   "render-qa": {
    "status": "done",
-   "seconds": 317.222,
-   "runs": 2
+   "seconds": 479.845,
+   "runs": 1
   },
   "quality-score": {
    "status": "done",
-   "seconds": 149.715,
+   "seconds": 122.107,
    "runs": 1
   }
  },
- "retries": 1,
- "recovery": "worker embedded-vm-18617 lost at stage 'render-qa'; resumed from last checkpoint",
+ "retries": 0,
+ "recovery": null,
  "file": {
   "video": "h264 1920x1080",
   "video_s": 244.666667,
   "audio": "aac",
   "audio_s": 244.667,
-  "bytes": 72275701
+  "bytes": 89240384
  },
- "sha256": "1ba615eba475ca147b1830a40895754bc7994a47877db954b9b8ca81d9313f18",
+ "sha256": "6d3cc46bd70c4333644144f10be4d54979c570f5fa464817fb07e1fb0bf95706",
  "segments": 44,
- "segments_from_cache": 44,
+ "segments_from_cache": 0,
  "qa_status": "PASSED_AUTOMATED_CHECKS",
  "qa_issues": [],
  "quality": {
-  "score": 91.2,
+  "score": 92.5,
   "verdict": "pass",
   "categories": {
-   "visual": 87.5,
+   "visual": 91.7,
    "editing": 94.2,
    "audio": 88.0,
    "localization": 100.0

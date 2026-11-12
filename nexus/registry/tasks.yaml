@@ -427,7 +427,7 @@ tasks:
     status: planned
     acceptance: "editing.caption_speed passes on the 4-min edit in readable mode; verbatim stays the default."
     test: "Caption speed before/after on the acceptance edit."
-    next: "Speech rate there is 16.5 chars/s overall; p90 22.5 comes from fast bursts in continuous speech (K-21)."
+    next: "Measured 2026-11-12: removing fillers/stutters cuts only 2.1% of characters and leaves p90 at 22.5 chars/s - the fast cues are dense content. Needs paraphrase (local LLM, reviewed) per cue above 20 chars/s, not a filter."
   - id: FX-3
     priority: 2
     title: "Multi-track timeline model, opacity keyframes, tracked masks (face blur) on faces.follow_keyframes"
