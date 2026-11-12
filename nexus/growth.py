@@ -424,6 +424,11 @@ HOWTO_RE = re.compile(r"\b(how|works?|because|by|step|way|turns?|makes?|uses?)\b
 STAKES_RE = re.compile(r"\b(cost|costs|save|saves|money|bill|bills|price|risk|lose|safe|health|time|cheap|cheaper|expensive|jobs?)\b", re.I)
 
 
+TOPIC_STOP = set("how why what when where which who whom whose part parts thing things stuff really actually basically "
+                 "something anything everything someone everyone talk talking said says going know think good great well "
+                 "maybe sure yeah okay right today time times kind sort lot lots".split())
+
+
 def _topic(text: str) -> str:
     """Topic phrase: the adjacent pair of content words whose words recur most, favouring the first sentence (talks usually
     name their subject first). Exact duplicate sentences (retakes) are counted once."""
@@ -435,14 +440,14 @@ def _topic(text: str) -> str:
     freq: dict[str, int] = {}
     for ts in toks_by_sent:
         for t in ts:
-            if t not in sh.STOP and len(t) > 2:
+            if t not in sh.STOP and t not in TOPIC_STOP and len(t) > 3 and "'" not in t:
                 freq[t] = freq.get(t, 0) + 1
     if not freq:
         return text.strip()[:40]
     best, best_s = "", -1.0
     for si, ts in enumerate(toks_by_sent):
         for x, y in zip(ts, ts[1:]):
-            if x in freq and y in freq:
+            if x in freq and y in freq and x != y:
                 sc = freq[x] + freq[y] + (2 if si == 0 else 0) - 0.01 * si
                 if sc > best_s:
                     best, best_s = f"{x} {y}", sc
@@ -627,3 +632,78 @@ def apply_profile(tl: dict, profile: dict) -> dict:
             done.append(f"captions: style {tl['captions']['style']}, {tl['captions']['words_per_cue']} words per cue")
     tl["style_applied"] = {"changes": done, "profile_source": profile.get("source"), "note": "structure only; no content copied"}
     return tl
+
+
+# ---------------------------------------------------------------- per-platform text (titles, descriptions, captions)
+# Fallback limits when nexus.platforms has no value for a field. The platform profile values (documented, with sources)
+# take precedence; these are conservative defaults chosen by NEXUS.
+TEXT_LIMITS: dict[str, dict] = {
+    "default": {"title_max": 100, "description_max": 2200, "caption_max": 2200, "hashtags_max": 5},
+    "youtube": {"title_max": 100, "description_max": 5000, "caption_max": None, "hashtags_max": 15},
+    "youtube_shorts": {"title_max": 100, "description_max": 5000, "caption_max": None, "hashtags_max": 5},
+    "tiktok": {"title_max": 90, "description_max": 2200, "caption_max": 2200, "hashtags_max": 5},
+    "instagram_reels": {"title_max": 90, "description_max": 2200, "caption_max": 2200, "hashtags_max": 5},
+    "instagram_feed": {"title_max": 90, "description_max": 2200, "caption_max": 2200, "hashtags_max": 5},
+    "facebook": {"title_max": 100, "description_max": 5000, "caption_max": None, "hashtags_max": 5},
+    "snapchat_spotlight": {"title_max": 60, "description_max": 160, "caption_max": 160, "hashtags_max": 3},
+}
+_STOP_TAGS = set("this that with from your what have about they them there their were been into just like over more most very "
+                 "really because which while would could should these those going thing things think".split())
+
+
+def _clip_text(s: str, n: int | None) -> str:
+    s = re.sub(r"\s+", " ", s or "").strip()
+    if n and len(s) > n:
+        s = s[: max(0, n - 1)].rsplit(" ", 1)[0].rstrip(",;:") + "…"
+    return s
+
+
+def platform_text(text: str, title: str | None = None, platform: str = "default", limits: dict | None = None,
+                  use_llm: bool = False) -> dict:
+    """Deterministic title/description/hashtags/caption for one platform, within its limits. Hashtags come only from
+    words the speaker actually used (no trend-bait). `use_llm` is accepted for API symmetry; the local LLM is not used
+    here so the output is reproducible."""
+    lim = {**TEXT_LIMITS["default"], **TEXT_LIMITS.get(platform, {}), **{k: v for k, v in (limits or {}).items() if v}}
+    words = [w.strip(".,!?;:\"'()").lower() for w in (text or "").split()]
+    counts: dict[str, int] = {}
+    for w in words:
+        if len(w) >= 5 and w.isalpha() and w not in _STOP_TAGS:
+            counts[w] = counts.get(w, 0) + 1
+    tags = ["#" + w.capitalize() for w, _ in sorted(counts.items(), key=lambda x: (-x[1], x[0]))][: int(lim["hashtags_max"] or 0)]
+    t = _clip_text(title or sh.suggest_title(text or ""), lim["title_max"])
+    first = re.split(r"(?<=[.!?])\s+", (text or "").strip())[:2]
+    desc = _clip_text(" ".join(first), lim["description_max"])
+    out = {"title": t, "description": desc, "hashtags": tags, "source": "deterministic (transcript words)"}
+    if lim.get("caption_max"):
+        out["caption"] = _clip_text(" ".join([t, desc, " ".join(tags)]), lim["caption_max"])
+    else:
+        out["caption"] = None
+    return out
+
+
+# ---------------------------------------------------------------- learning from real performance data
+def calibrate(records: list[dict], min_samples: int = 12, ridge: float = 1.0) -> dict:
+    """Fit editorial-component weights to REAL performance data the user supplies (e.g. platforms.import_metrics rows joined
+    with each short's `features`). records: [{"features": {name: 0..1}, "retention": 0..1 | None, "views": n | None}].
+    Target = retention when present, else log(views) scaled to 0..1. Refuses with too few samples: below that, any fit is
+    noise. Returns weights normalised to sum 1 (negative evidence clipped to 0) and the fit's R^2 on the samples."""
+    import numpy as np
+    rows = [r for r in records if r.get("features") and (r.get("retention") is not None or r.get("views"))]
+    if len(rows) < min_samples:
+        return {"ok": False, "samples": len(rows), "min_samples": min_samples,
+                "reason": f"only {len(rows)} usable records; at least {min_samples} are needed before learning weights"}
+    names = sorted({k for r in rows for k in r["features"]})
+    X = np.array([[float(r["features"].get(k, 0.0)) for k in names] for r in rows])
+    if all(r.get("retention") is not None for r in rows):
+        y, target = np.array([float(r["retention"]) for r in rows]), "retention"
+    else:
+        v = np.log1p(np.array([float(r.get("views") or 0) for r in rows]))
+        y, target = (v - v.min()) / max(1e-9, v.max() - v.min()), "log views (scaled)"
+    Xc, yc = X - X.mean(0), y - y.mean()
+    w = np.linalg.solve(Xc.T @ Xc + ridge * np.eye(len(names)), Xc.T @ yc)
+    pred = Xc @ w
+    r2 = 1 - float(((yc - pred) ** 2).sum()) / max(1e-12, float((yc ** 2).sum()))
+    pos = np.clip(w, 0, None)
+    weights = {k: round(float(x / pos.sum()), 4) if pos.sum() > 0 else 0.0 for k, x in zip(names, pos)}
+    return {"ok": True, "samples": len(rows), "target": target, "weights": weights, "raw": {k: round(float(x), 5) for k, x in zip(names, w)},
+            "r2": round(r2, 3), "note": "fitted on your own published results; correlation, not a guarantee of future views"}

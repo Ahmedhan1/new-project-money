@@ -17,7 +17,8 @@ SOLAR = ("Solar panels convert sunlight into electricity with silicon cells. Hea
 BREAD = ("Sourdough bread rises because wild yeast and bacteria ferment the flour. The starter needs feeding with flour and "
          "water every single day. A hot oven and a covered pot give the loaf its crisp crust. Bakers score the dough so steam "
          "can escape in one place. Rye flour makes a denser and more sour loaf than wheat.")
-PROMPTS = "Thank you so much for joining us today. How are you doing today? What can you tell us about your training?"
+PROMPTS = ("Thank you so much for joining us today. How are you doing today? What can you tell us about your training? "
+           "Where did you do the cave training? How do you feel about the next mission?")
 ANSWER = "We flew the jets from Houston all the way out to Mississippi and practised spacewalks in the big pool for six hours."
 
 
@@ -79,6 +80,16 @@ def test_hook_rejects_pleasantries_and_interviewer_prompts():
     roles = u.narrative_roles(sents, u.segment_topics(sents))
     assert sents[roles["hook"]]["text"] not in (PROMPTS.split("? ")[0] + "?",)
     assert not sents[roles["hook"]]["prompt_like"]
+
+
+def test_rhetorical_question_in_a_monologue_stays_a_strong_hook():
+    q = "Why do your solar panels lose twenty percent of their power every single summer?"
+    an = _analysis([(0.5, q + " " + SOLAR + " " + BREAD)])
+    sents = u.sentences(an)
+    assert not u.dialogue_like(sents)
+    u.score_sentences(sents)
+    s0 = next(s for s in sents if s["text"] == q)
+    assert not s0["prompt_like"] and s0["hook"] >= 0.7
 
 
 def test_speaker_labels_switch_off_the_prompt_heuristic():

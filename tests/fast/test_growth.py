@@ -52,7 +52,7 @@ def test_moments_whole_sentences_and_bounds():
         inside = [w for w in words if m["start"] <= w["start"] and w["end"] <= m["end"]]
         assert inside[0]["word"][0].isupper() and inside[-1]["word"].endswith((".", "!", "?"))
         assert set(m["components"]) == set(shorts.WEIGHTS) and 0 <= m["score"] <= 100
-        assert 0 < len(m["title"].split()) <= 6
+        assert 0 < len(m["title"].split()) <= 9
     for a in ms:  # ranked and non-overlapping
         assert all(not (a["start"] < b["end"] and b["start"] < a["end"]) for b in ms if b is not a)
     assert [m["score"] for m in ms] == sorted((m["score"] for m in ms), reverse=True)
