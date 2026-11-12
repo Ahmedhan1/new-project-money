@@ -3,14 +3,14 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-12T18:33:29Z",
+ "updated": "2026-11-12T23:15:30Z",
  "git": {
   "branch": "work/account-1-cloud-platform",
-  "commit": "9bd5669",
-  "subject": "Account 1 docs: handoff to Accounts 2/3, setup guide, acceptance results, execution report, lead demo evidence; tasks, roadmap, work log, handoff",
-  "dirty_files": 0,
+  "commit": "d3237bc",
+  "subject": "Studio alerts + GPU quota panels, resolved state alerts clear, disk figure = total-free; Account 3 handoff; acceptance A-K with capability classes",
+  "dirty_files": 1,
   "upstream": "origin/work/account-1-cloud-platform",
-  "unpushed_commits": 1
+  "unpushed_commits": 0
  },
  "current_task": {
   "id": "QLT-1",
@@ -25,13 +25,6 @@
    "title": "Creative quality pass: measured rubric + series writer on the script schema + research/visual relevance",
    "status": "in_progress",
    "next": "1) Series visuals - derive the image query from the bible's location LOOK text (generic nouns), not its fictional name, and allow reuse of an image for a repeated location. 2) Repair off-bible locations instead of only reporting them. 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Scored rubric in the QA report."
-  },
-  {
-   "id": "ACC1-STORAGE",
-   "priority": 1,
-   "title": "Multi-account storage (Drive A/B/C), resumable transfers, SSRF-safe ingestion",
-   "status": "tested",
-   "next": "Owner runs setup_google and connects drive_a/b/c; then the live Drive test and Demo E with Drive legs."
   },
   {
    "id": "AUD-1",
@@ -53,13 +46,20 @@
    "title": "Growth: shorts extractor, retention rubric + auto retention pass, hook/title variants, reference-video style profile",
    "status": "tested",
    "next": "Extended by GRW-2."
+  },
+  {
+   "id": "MED-1",
+   "priority": 1,
+   "title": "Media engine: encoder detection, H.264/H.265/AV1 presets, size-targeted export, proxies, export verification, benchmark",
+   "status": "tested",
+   "next": "Use export.export() for final deliverables in the deliver job (max file size per platform); benchmark on the owner's machine."
   }
  ],
  "tasks": {
   "total": 57,
   "by_status": {
-   "verified": 20,
-   "tested": 13,
+   "verified": 21,
+   "tested": 12,
    "blocked": 5,
    "deferred": 1,
    "planned": 16,
@@ -69,7 +69,7 @@
  },
  "tests": {
   "fast": {
-   "summary": "209 passed, 0 failed, 4 skipped",
+   "summary": "399 passed, 0 failed, 4 skipped",
    "ok": true,
    "date": "2026-11-12",
    "platform": "Linux",

@@ -448,12 +448,11 @@ tasks:
   - id: ACC1-STORAGE
     priority: 1
     title: "Multi-account storage (Drive A/B/C), resumable transfers, SSRF-safe ingestion"
-    status: tested
+    status: verified
     acceptance: "Three real Drive accounts connected, upload/checksum/quota verified (Demo B)."
     test: "pytest tests/fast/test_cloud_storage.py tests/fast/test_ingest.py; NEXUS_LIVE_DRIVE=1 tests/live/test_drive_live.py"
-    evidence: "fake-server tests over real HTTP; storage_resume.json (SIGKILL mid-upload); ingest_live.json, ingest_ssrf_live.json"
-    blocked_by: "Owner's Google OAuth client + consent for three accounts."
-    next: "Owner runs setup_google and connects drive_a/b/c; then the live Drive test and Demo E with Drive legs."
+    evidence: "storage_drive_live.json, storage_drive_live_isolation.json (3 real accounts); Demo E Drive A -> Kaggle T4 -> Drive B (lead_demos.json); ingest_live.json"
+    next: "Owner publishes the OAuth consent screen (Testing-mode tokens expire in 7 days). Not yet live: token revocation, Drive backup/restore run."
   - id: ACC1-STUDIO
     priority: 1
     title: "NEXUS Remote Studio + scheduler"
