@@ -83,3 +83,38 @@ def test_edit_my_video_end_to_end(client, tmp_path):
     assert q["not_measured"]  # storytelling etc. are reported as unmeasured, never as passed
     reports = client.get(f"/api/projects/{p.id}/quality").json()
     assert reports and reports[0]["score"] == q["score"] and reports[0]["checks"]
+
+
+def test_destination_selector_shares_renders_and_writes_packages(client, tmp_path, monkeypatch):
+    from nexus import platforms
+    from nexus import project as prj
+    real_get = platforms.get
+
+    def small(name):  # same aspect ratios, a quarter of the size, so the test stays fast
+        p = real_get(name)
+        r = p["v"].get("resolution_recommended") or {}
+        if r.get("width"):
+            p["v"]["resolution_recommended"] = {"width": r["width"] // 3 // 2 * 2, "height": r["height"] // 3 // 2 * 2}
+        return p
+    monkeypatch.setattr(platforms, "get", small)
+    src = tmp_path / "talk.mp4"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "testsrc2=s=640x360:r=30:d=40", "-f", "lavfi",
+                    "-i", "sine=f=220:d=40:r=48000", "-c:v", "libx264", "-preset", "ultrafast", "-c:a", "aac", "-shortest", str(src)],
+                   check=True)
+    p = prj.Project.create("deliver test", "edit")
+    m = p.import_media(src)
+    (p.dir / "reports" / f"analysis_{m['id']}.json").write_text(json.dumps(_analysis(m["path"], 40.0)))
+    _run(client, client.post(f"/api/projects/{p.id}/direct", json={"profile": "short_fast", "target_seconds": 12, "size": "640x360"}))
+    assert client.post(f"/api/projects/{p.id}/deliver", json={"platforms": []}).status_code == 400
+    assert client.post(f"/api/projects/{p.id}/deliver", json={"platforms": ["myspace"]}).status_code == 400
+    r = client.post(f"/api/projects/{p.id}/deliver", json={"platforms": ["youtube_shorts", "tiktok", "youtube"], "title": "Solar " * 40})
+    assert r.json()["renders_planned"] == 2
+    job = _run(client, r)
+    assert job["status"] == "done", job.get("error")
+    res = job["result"]
+    assert res["renders"] == 2 and set(res["packages"]) == {"youtube_shorts", "tiktok", "youtube"}
+    assert res["packages"]["tiktok"]["video"] == res["packages"]["youtube_shorts"]["video"]   # shared vertical render
+    yt = json.loads((p.dir / res["packages"]["youtube"]["folder"] / "metadata.json").read_text())
+    assert len(yt["title"]) <= 100 and yt["check"]["checks"]                                # title within YouTube's limit
+    assert (p.dir / res["packages"]["tiktok"]["folder"] / "MANUAL_UPLOAD.md").read_text().startswith("# Upload to")
+    assert (p.dir / res["packages"]["tiktok"]["cover"]).exists()
