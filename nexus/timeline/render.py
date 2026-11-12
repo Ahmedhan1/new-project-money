@@ -509,12 +509,19 @@ def _workers(n_clips: int, workers: int | None) -> tuple[int, int | None]:
     return w, (max(1, cpu // w) if w > 1 else None)
 
 
-def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = False, workers: int | None = None) -> dict:
+def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = False, workers: int | None = None,
+           checkpoint: dict | None = None) -> dict:
     """Render the full timeline. Returns stats incl. how many segments were reused from cache.
-    `draft` renders at half resolution with a fast preset (separate cache entries); `workers` segments render at once."""
+    `draft` renders at half resolution with a fast preset (separate cache entries); `workers` segments render at once.
+    Interrupted renders resume: finished segments are reused from the cache and `stats["checkpoint"]` (the shape of
+    RenderExecutionResult.checkpoint, see timeline/resume.py) says what was reused. `checkpoint` may pass the last
+    checkpoint of a run on another worker; by default it is read from `workdir`."""
+    from . import resume as rs
     t0 = time.time()
+    out, workdir = Path(out), Path(workdir)
     workdir.mkdir(parents=True, exist_ok=True)
     out.parent.mkdir(parents=True, exist_ok=True)
+    cp = rs.Checkpoint(workdir, out, tl, draft, seed=checkpoint)
     tl = _jl_cuts(tl, workdir)
     from . import tracks as trk
     tl = trk.with_audio(tl)
@@ -526,9 +533,12 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
     w, threads = _workers(len(jobs), workers)
     done = [0]
     lock = threading.Lock()
+    rs.clean_stale_tmp(cache)
+    cp.stage("segments", segments_total=len(jobs))
 
     def one(job):
         r = render_segment(job[0], job[1], cache, draft, threads)
+        cp.done("segments", r[0].stem, r[1])
         with lock:
             done[0] += 1
             if on_progress:
@@ -551,6 +561,7 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
         if nf.exists():
             seg_notes += json.loads(nf.read_text(encoding="utf-8"))
     prog = workdir / f"programme_{out.stem}.mp4"
+    cp.stage("programme")
     _concat(segs, tl, prog, draft)
     # The picture defines the programme length: each concatenated segment carries a few ms of AAC priming/padding, which
     # added up to 0.3 s of extra audio over 44 segments in the acceptance edit (QA: A/V stream length mismatch).
@@ -566,6 +577,7 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
         inputs += ["-stream_loop", "-1", "-i", music["src"]]
     fc, pre = _mix_graph(tl, len(narr), has_music, dur)
     target = float(tl.get("target_lufs", -14.0))
+    cp.stage("audio")
     # pass 1: measure the mixed programme
     err = ff.run([*inputs, "-filter_complex", ";".join(fc + [f"[{pre}]loudnorm=I={target}:TP=-1.5:LRA=11:print_format=json[m]"]),
                   "-map", "[m]", "-vn", "-f", "null", "-"], op="mix-measure")
@@ -610,8 +622,11 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
         vcodec = _vcodec(draft, None)
     else:
         vcodec = ["-c:v", "copy"]
+    cp.stage("final")
+    part = out.with_name(out.stem + ".partial" + (out.suffix or ".mp4"))
     ff.run([*inputs, *oargs, "-filter_complex", ";".join(fc), *vmap, "-map", "[aout]", *vcodec, *config.ACODEC, "-t", f"{dur:.3f}",
-            "-movflags", "+faststart", out], op="final-mix")
+            "-movflags", "+faststart", part], op="final-mix")
+    os.replace(part, out)  # atomic: an interrupted render never leaves a truncated programme at `out`
     sidecars = {}
     if tl.get("subtitles"):
         sidecars["srt"] = str(subs.write_srt(tl["subtitles"], out.with_suffix(".srt")))
@@ -621,4 +636,5 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
     if on_progress:
         on_progress(1.0)
     return {"output": str(out), "duration": dur, "elapsed": round(elapsed, 2), "segments": len(all_results),
-            "segments_from_cache": cached, "sidecars": sidecars, "draft": draft, "workers": w, "notes": sorted(set(seg_notes))}
+            "segments_from_cache": cached, "sidecars": sidecars, "draft": draft, "workers": w, "notes": sorted(set(seg_notes)),
+            "resumed": cp.data["resumed"], "checkpoint": cp.finish()}
