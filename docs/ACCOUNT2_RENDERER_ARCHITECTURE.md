@@ -64,7 +64,13 @@ under heavier load (load average 7-12). One-clip edit = grade of one clip; capti
 | pieces_2 | 33.7 | 0.4 | 12.1 | 2.5 | 20.1 | 0.76 | 503 | 54 |
 | pieces_audio_digest | 37.5 | 0.4 | 3.9 | 2.0 | 22.5 | 0.75 | 501 | 54 |
 
-SLOWMO_TABLE
+Slow-motion profiles (`slowmo_1`): broll 40-42 s at speed 0.5 -> 4 s of 1280x720 output, whole render.
+
+| profile | wall s | note |
+|---|---|---|
+| none | 2.9 | repeated frames (includes first-run warm-up) |
+| blend | 2.0 | `framerate` frame blending |
+| optical_flow | 64.5 | minterpolate mci: ~16 s of CPU per output second here, ~30x the others; opt-in only |
 
 ## Limits (honest)
 - Layers are drawn over the main storyline only; a layer cannot sit below it. Layer items on the same track may overlap

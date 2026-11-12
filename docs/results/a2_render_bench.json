@@ -825,5 +825,22 @@
   }
  },
  "notes": "Load differed between runs (load average 7-12 during baseline_c1e2d90 and pieces_1, lower for pieces_2/legacy_rerun/pieces_audio_digest); compare runs made close together: legacy_rerun vs pieces_2 / pieces_audio_digest. stage_s sums FFmpeg time per op across parallel workers.",
- "summary_table_md": "| run | cold s | warm s | one-clip edit s | caption edit s | draft s | cold CPU (of 4) | cold peak RSS MB | cache MB |\n|---|---|---|---|---|---|---|---|---|\n| baseline_c1e2d90 | 111.2 | 79.1 | 67.6 | 74.8 | 55.3 | 0.33 | 852 | 52 |\n| pieces_1 | 68.2 | 0.5 | 19.5 | 4.4 | 37.5 | 0.38 | 506 | 54 |\n| legacy_rerun | 50.9 | 30.9 | 35.0 | 33.6 | 29.4 | 0.71 | 853 | 52 |\n| pieces_2 | 33.7 | 0.4 | 12.1 | 2.5 | 20.1 | 0.76 | 503 | 54 |\n| pieces_audio_digest | 37.5 | 0.4 | 3.9 | 2.0 | 22.5 | 0.75 | 501 | 54 |"
+ "summary_table_md": "| run | cold s | warm s | one-clip edit s | caption edit s | draft s | cold CPU (of 4) | cold peak RSS MB | cache MB |\n|---|---|---|---|---|---|---|---|---|\n| baseline_c1e2d90 | 111.2 | 79.1 | 67.6 | 74.8 | 55.3 | 0.33 | 852 | 52 |\n| pieces_1 | 68.2 | 0.5 | 19.5 | 4.4 | 37.5 | 0.38 | 506 | 54 |\n| legacy_rerun | 50.9 | 30.9 | 35.0 | 33.6 | 29.4 | 0.71 | 853 | 52 |\n| pieces_2 | 33.7 | 0.4 | 12.1 | 2.5 | 20.1 | 0.76 | 503 | 54 |\n| pieces_audio_digest | 37.5 | 0.4 | 3.9 | 2.0 | 22.5 | 0.75 | 501 | 54 |",
+ "slowmo": {
+  "slowmo_1": {
+   "date": "2026-11-12T22:23:04",
+   "size": "1280x720",
+   "clip": "broll 40-42 s at speed 0.5 (4 s output)",
+   "wall_s": {
+    "none": 2.91,
+    "blend": 2.02,
+    "optical_flow": 64.5
+   },
+   "cpu_s": {
+    "none": 3.7,
+    "blend": 3.8,
+    "optical_flow": 65.7
+   }
+  }
+ }
 }
