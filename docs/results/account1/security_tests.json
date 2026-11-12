@@ -1,0 +1,236 @@
+{
+ "date": "2026-11-12T17:01:18Z",
+ "commit": "aa0dbfd",
+ "platform": "Linux",
+ "python": "3.13.18",
+ "summary": {
+  "passed": 54,
+  "failure": 0,
+  "error": 0,
+  "xfail": 1,
+  "skipped": 0
+ },
+ "xfail_reason": ".gitignore lacks *.secret, kaggle.json, client_secret*.json (lead file)",
+ "tests": [
+  {
+   "test": "test_cloud_security::test_loopback_allowed_without_token",
+   "status": "passed"
+  },
+  {
+   "test": "test_cloud_security::test_remote_denied_without_token",
+   "status": "passed"
+  },
+  {
+   "test": "test_cloud_security::test_proxied_loopback_is_remote",
+   "status": "passed"
+  },
+  {
+   "test": "test_cloud_security::test_dns_rebinding_host_refused",
+   "status": "passed"
+  },
+  {
+   "test": "test_cloud_security::test_loopback_cross_origin_post_refused",
+   "status": "passed"
+  },
+  {
+   "test": "test_cloud_security::test_bearer_ok_and_wrong",
+   "status": "passed"
+  },
+  {
+   "test": "test_cloud_security::test_cookie_session_and_csrf",
+   "status": "passed"
+  },
+  {
+   "test": "test_cloud_security::test_proxy_origin_via_forwarded_host",
+   "status": "passed"
+  },
+  {
+   "test": "test_cloud_security::test_rate_limit_after_failures",
+   "status": "passed"
+  },
+  {
+   "test": "test_cloud_security::test_security_headers",
+   "status": "passed"
+  },
+  {
+   "test": "test_cloud_security::test_worker_token_hashing",
+   "status": "passed"
+  },
+  {
+   "test": "test_cloud_security::test_secrets_endpoint_never_returns_values",
+   "status": "passed"
+  },
+  {
+   "test": "test_cloud_security::test_health_endpoint_shape",
+   "status": "passed"
+  },
+  {
+   "test": "test_cloud_security::test_audit_and_scan_endpoints",
+   "status": "passed"
+  },
+  {
+   "test": "test_cloud_security::test_audit_strips_secrets",
+   "status": "passed"
+  },
+  {
+   "test": "test_cloud_security::test_every_v1_route_requires_auth",
+   "status": "passed"
+  },
+  {
+   "test": "test_cloud_security::test_route_inventory_detects_unprotected",
+   "status": "passed"
+  },
+  {
+   "test": "test_cloud_security::test_recovery",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_every_contract_has_a_valid_documented_example",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_extra_fields_rejected[AIProviderCapability]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_extra_fields_rejected[ArtifactLocation]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_extra_fields_rejected[ArtifactManifest]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_extra_fields_rejected[JobCheckpoint]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_extra_fields_rejected[MediaIngestionJob]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_extra_fields_rejected[MediaSource]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_extra_fields_rejected[NotificationEvent]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_extra_fields_rejected[ProductionEvent]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_extra_fields_rejected[ProductionJobManifest]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_extra_fields_rejected[ProviderHealth]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_extra_fields_rejected[QuotaStatus]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_extra_fields_rejected[RemoteWorkerCapability]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_extra_fields_rejected[StorageProviderInfo]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_extra_fields_rejected[WorkerExecutionResult]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_contract_names_and_version",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_committed_schemas_match",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_task_name_validation[probe-True]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_task_name_validation[ffmpeg_transcode-True]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_task_name_validation[render_timeline2-True]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_task_name_validation[a-False]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_task_name_validation[Probe-False]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_task_name_validation[1probe-False]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_task_name_validation[probe-x-False]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_task_name_validation[probe x-False]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_task_name_validation[ppppppppppppppppppppppppppppppppppppppppppppppppp-True]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_task_name_validation[pppppppppppppppppppppppppppppppppppppppppppppppppp-False]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_task_name_validation[../etc-False]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_task_name_validation[probe;rm-False]",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_field_constraints",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_no_secret_fields_in_contracts",
+   "status": "passed"
+  },
+  {
+   "test": "test_contracts::test_api_serves_the_same_schemas",
+   "status": "passed"
+  },
+  {
+   "test": "test_no_secrets::test_tracked_files_contain_no_tokens",
+   "status": "passed"
+  },
+  {
+   "test": "test_no_secrets::test_no_credential_files_tracked",
+   "status": "passed"
+  },
+  {
+   "test": "test_no_secrets::test_gitignore_core",
+   "status": "passed"
+  },
+  {
+   "test": "test_no_secrets::test_gitignore_credentials",
+   "status": "xfail"
+  },
+  {
+   "test": "test_no_secrets::test_scanner_positive_control",
+   "status": "passed"
+  }
+ ]
+}
