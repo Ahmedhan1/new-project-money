@@ -50,7 +50,11 @@ class Project:
     # ---- media (originals preserved, read-only)
     def import_media(self, src: str | Path) -> dict:
         src = Path(src)
-        sha = hashlib.sha256(src.read_bytes()).hexdigest()
+        h = hashlib.sha256()  # streamed: sources can be many GB
+        with src.open("rb") as f:
+            for block in iter(lambda: f.read(1 << 20), b""):
+                h.update(block)
+        sha = h.hexdigest()
         for m in self.data["media"]:
             if m["sha256"] == sha:
                 return m

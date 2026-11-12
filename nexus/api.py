@@ -483,3 +483,34 @@ def api_channel(r: ChannelReq):
 @app.get("/api/platforms")
 def api_platforms():
     return {k: {**v, "auto_publish": publish.AUTO_PUBLISH[k]} for k, v in publish.PLATFORMS.items()}
+
+
+# ---------------------------------------------------------------- rights (repurpose gate)
+class RightsReq(BaseModel):
+    media: str
+    basis: str  # owned | licensed | public-domain | commentary
+    evidence: str = ""
+    holder: str = ""
+
+
+@app.post("/api/projects/{pid}/rights")
+def api_rights_declare(pid: str, r: RightsReq):
+    """The user's own declaration of the right to use an uploaded source. Exports of reworked footage need one."""
+    from . import repurpose
+    try:
+        return repurpose.declare_rights(_project(pid), r.media, r.basis, r.evidence, r.holder)
+    except (ValueError, KeyError, LookupError) as e:
+        raise HTTPException(400, str(e))
+
+
+@app.get("/api/projects/{pid}/rights")
+def api_rights_review(pid: str, branch: str = "main"):
+    from . import repurpose
+    p = _project(pid)
+    try:
+        tl = p.timeline(branch)
+    except KeyError:
+        return {"passed": False, "checks": [], "media": [{"id": m["id"], "name": m["name"], "rights": m.get("rights")} for m in p.data["media"]]}
+    rv = repurpose.rights_review(p, tl, _analysis(p) or None)
+    return {"passed": rv["passed"], "checks": rv["checks"], "transformation": rv["report"].get("text"),
+            "media": [{"id": m["id"], "name": m["name"], "rights": m.get("rights")} for m in p.data["media"]]}
