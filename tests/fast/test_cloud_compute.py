@@ -350,8 +350,8 @@ def test_safe_production_mode_gpu_jobs_wait_queued_without_an_authorised_gpu_wor
     the reason names how to authorise one."""
     from nexus.cloud.compute import dispatcher as D
     from nexus.contracts import ProductionJobManifest
-    jid = D.submit(ProductionJobManifest(task="probe", requires={"gpu": True}, providers=None) if False else
-                   ProductionJobManifest(task="probe", requires={"gpu": True, "providers": ["kaggle", "user_gpu", "colab"]}))["job"]["id"]
+    r = D.submit(ProductionJobManifest(task="probe", requires={"gpu": True, "providers": ["kaggle", "user_gpu", "colab"]}))
+    jid = r["job_id"]
     d = D.get()
     for _ in range(3):
         d.tick()
