@@ -182,26 +182,27 @@ tasks:
     priority: 3
     title: "Platform upload via official APIs (YouTube first)"
     status: blocked
-    blocked_by: "Needs the user's own OAuth client + explicit authorisation for each platform. Today NEXUS produces upload packages only."
-    acceptance: "An approved package is uploaded as private/unlisted to the user's channel through the official API."
-    test: "Upload one unlisted video."
-    next: "Ask the user to create a Google Cloud OAuth client (free); implement resumable upload in publish.py behind costguard."
+    blocked_by: "Needs the owner's own Google Cloud OAuth client + consent. Engine, approval gate, idempotency, resumable YouTube adapter and durable publish-upload job are built and tested on recorded responses (Account 3 stream E)."
+    acceptance: "An approved package is uploaded as private to the owner's channel through the official API; quota recorded."
+    test: "Owner runs the OAuth helper (nexus/intelligence/publishing/youtube_oauth.py), then Publishing page -> Upload."
+    next: "Owner: create a Google Cloud project (no billing), enable YouTube Data API v3, OAuth client 'Desktop app', then run the helper. TikTok/Instagram/Facebook need approved apps."
   - id: ANA-1
     priority: 3
     title: "Analytics + monetisation intelligence from real platform data"
     status: blocked
     deps: [PUB-1]
-    blocked_by: "Same OAuth authorisation as PUB-1. The revenue ledger exists but holds only manual entries."
-    acceptance: "Views/retention/revenue per video pulled from the platform API and fed into topic selection."
-    test: "Compare with the platform's own dashboard."
-    next: "After PUB-1."
+    blocked_by: "No owner analytics in this environment. CSV import (YouTube Studio/TikTok/Instagram/Facebook) and YouTube Analytics API import are built; growth statistics ran only on a public CC BY 4.0 dataset."
+    acceptance: "Owner analytics imported; one experiment evaluated; a recommendation traced to the owner's own numbers."
+    test: "Analytics & Growth page: import an export, plan + evaluate an experiment."
+    next: "Owner exports a YouTube Studio CSV (Advanced mode -> Export) and imports it on the Analytics & Growth page."
   - id: RES-1
     priority: 3
     title: "Topic/opportunity research beyond Wikipedia (trends, competitor gaps) and content calendar automation"
-    status: planned
+    status: implemented
     acceptance: "A daily list of ranked topics with sources; calendar fills from it; all sources are free and permitted."
-    test: "Offline fixture of a trends feed."
-    next: "Start with free official feeds (Wikipedia pageviews API, Google Trends RSS); never scrape against ToS."
+    test: "pytest tests/fast/test_intel_market.py; Content Research page"
+    evidence: "Account 3 stream C: multi-source research (Wikipedia + pageviews in 7 languages, NASA, Openverse, GDELT/RSS/YouTube when available), evidence-backed opportunity scoring, trend monitor. docs/results/account3/market_report_*.json"
+    next: "Calendar auto-fill from the trend monitor; GDELT unreachable from the build sandbox (connection reset) - verify on the owner's machine."
   - id: CAP-1
     priority: 2
     title: "Measured five-per-day capacity report on the user's real machine"
@@ -436,3 +437,69 @@ tasks:
     acceptance: "A two-video-track composite and a moving face blur render and pass pixel tests."
     test: "pytest tests/fast/test_fx.py"
     next: "LUT management and face-following crops are done (a06d3e4); masks are static rectangles today."
+  # ------------------------------------------------------------------ Account 3: intelligence, research, publishing, growth
+  - id: A3-ROUTER
+    priority: 1
+    title: "Provider-independent AI model router (privacy classes, quotas, breaker, schema validation, soft quality bar)"
+    status: verified
+    acceptance: "Every Account 3 AI call goes through complete(); works with no hosted API; never reaches a paid endpoint; private data stays local."
+    test: "pytest tests/fast/test_intel_router.py tests/fast/test_intel_models.py"
+    evidence: "Two real local providers (in-process Qwen3-4B + llama.cpp server Qwen3-0.6B) with failover (docs/results/account3/models_routing_demo.json); AI Models page driven in Chromium."
+    next: "Owner GPU worker (vLLM/SGLang on Account 1) or an authorised free tier to lift deep_research etc. above draft quality (D-11)."
+  - id: A3-BENCH
+    priority: 2
+    title: "Reproducible model benchmark (JSON, extraction, reasoning, summarisation, 6-language translation, dialect, titles)"
+    status: tested
+    acceptance: "Scores per model stored and used by the router; repeatable from one command."
+    test: "python -m nexus.intelligence.model_router bench"
+    evidence: "docs/results/account3/models_bench.json (18 items; 4B vs 0.6B)."
+    next: "Larger item set (>= 30 per capability) and hosted models once authorised."
+  - id: A3-CREATORS
+    priority: 2
+    title: "Creator reference intelligence: measured structural profiles, comparison, abstract styles, cited pattern library"
+    status: tested
+    acceptance: "Profiles of lawfully held references are measured, comparable and explainable; styles carry do_not_copy."
+    test: "pytest tests/fast/test_intel_creators.py; Creator References page"
+    evidence: "4 public-domain NASA/JPL references profiled and compared (docs/results/account3/creators_*.json)."
+    next: "Owner-supplied references for challenge / Arabic educational / vlog formats; OCR for on-screen text; music detection."
+  - id: A3-MARKET
+    priority: 2
+    title: "Market intelligence: evidence-backed opportunity scores, cross-checked research briefs, trend monitor"
+    status: tested
+    acceptance: "Reports show every factor's evidence and confidence; missing data stays unknown; no view predictions."
+    test: "pytest tests/fast/test_intel_market.py; Content Research page (real job)"
+    evidence: "docs/results/account3/market_report_jwst_en.json, market_report_ai_ar.json"
+    next: "Competition needs the owner's YouTube key; GDELT reachability on the owner's machine."
+  - id: A3-STRATEGY
+    priority: 2
+    title: "Original strategy: research + style -> original script + storyboard, originality and grounding gates, hand-off to Account 2"
+    status: tested
+    acceptance: "Only original, grounded scripts reach Account 2's create-from-idea job."
+    test: "pytest tests/fast/test_intel_strategy.py; Script Studio"
+    next: "Account 2 to accept an approved ContentScript verbatim (today it is passed as notes/direction)."
+  - id: A3-LANG
+    priority: 2
+    title: "Localisation intelligence: 15-language matrix with verified licences, translation QA, EG/Gulf dialect profiles, dubbing manifests, SRT/VTT/ASS"
+    status: tested
+    acceptance: "QA catches real omissions/additions on real MT; voices gated by licence/consent; dialects distinguishable."
+    test: "pytest tests/fast/test_intel_language.py; Language Studio"
+    evidence: "docs/results/account3/language_demo.json: real errors caught in de/ar/es MT."
+    next: "Gulf Arabic output still classifies as MSA (K-15); native-speaker review; integration patches for localize.py in docs/ACCOUNT3_LANGUAGE_MATRIX.md."
+  - id: A3-PUBLISH
+    priority: 2
+    title: "Publishing engine + platform capability matrix + packaging + analytics import"
+    status: implemented
+    deps: [A3-ROUTER]
+    acceptance: "Private/draft by default, owner approval for public, idempotent, resumable; one real private upload."
+    test: "pytest tests/fast/test_intel_publishing.py; Publishing page"
+    evidence: "docs/results/account3/publishing_demo.json (no real upload - no owner credentials)."
+    next: "PUB-1 (owner OAuth) for the first real private upload."
+  - id: A3-GROWTH
+    priority: 2
+    title: "Growth engine: experiments with power calculation, honest statistics, learning loop, recommendations"
+    status: tested
+    acceptance: "No winner from small samples; every recommendation carries evidence and confidence."
+    test: "pytest tests/fast/test_intel_growth.py; Analytics & Growth page"
+    evidence: "docs/results/account3/growth_demo.json (public CC BY 4.0 dataset, not the owner's channel)."
+    next: "ANA-1: first experiment on the owner's own analytics."
+

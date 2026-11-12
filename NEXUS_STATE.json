@@ -3,14 +3,14 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-12T14:28:46Z",
+ "updated": "2026-11-12T18:45:52Z",
  "git": {
-  "branch": "claude/hopeful-allen-luubcy",
-  "commit": "c69fc56",
-  "subject": "Final report: tests section; release check PASS on 9e9b527",
-  "dirty_files": 0,
-  "upstream": "origin/claude/hopeful-allen-luubcy",
-  "unpushed_commits": 1
+  "branch": "work/account-3-intelligence-growth",
+  "commit": "bee4233",
+  "subject": "Merge Account 3 work stream D (15-language matrix with verified licences, translation QA, Egyptian/Gulf dialect profiles, dubbing manifests, SRT/VTT/ASS)",
+  "dirty_files": 12,
+  "upstream": "origin/work/account-3-intelligence-growth",
+  "unpushed_commits": 11
  },
  "current_task": {
   "id": "QLT-1",
@@ -56,20 +56,21 @@
   }
  ],
  "tasks": {
-  "total": 52,
+  "total": 60,
   "by_status": {
-   "verified": 17,
-   "tested": 12,
+   "verified": 18,
+   "tested": 18,
    "blocked": 4,
    "deferred": 1,
-   "planned": 16,
-   "in_progress": 2
+   "planned": 15,
+   "in_progress": 2,
+   "implemented": 2
   },
   "registry": "nexus/registry/tasks.yaml"
  },
  "tests": {
   "fast": {
-   "summary": "209 passed, 0 failed, 4 skipped",
+   "summary": "333 passed, 0 failed, 3 skipped",
    "ok": true,
    "date": "2026-11-12",
    "platform": "Linux",
@@ -77,10 +78,7 @@
   }
  },
  "jobs": {
-  "counts": {
-   "cancelled": 3,
-   "done": 29
-  },
+  "counts": {},
   "active": []
  },
  "blockers": [
@@ -97,35 +95,26 @@
   {
    "id": "PUB-1",
    "title": "Platform upload via official APIs (YouTube first)",
-   "why": "Needs the user's own OAuth client + explicit authorisation for each platform. Today NEXUS produces upload packages only."
+   "why": "Needs the owner's own Google Cloud OAuth client + consent. Engine, approval gate, idempotency, resumable YouTube adapter and durable publish-upload job are built and tested on recorded responses (Account 3 stream E)."
   },
   {
    "id": "ANA-1",
    "title": "Analytics + monetisation intelligence from real platform data",
-   "why": "Same OAuth authorisation as PUB-1. The revenue ledger exists but holds only manual entries."
+   "why": "No owner analytics in this environment. CSV import (YouTube Studio/TikTok/Instagram/Facebook) and YouTube Analytics API import are built; growth statistics ran only on a public CC BY 4.0 dataset."
   }
  ],
  "backup": {
-  "last": {
-   "ts": 1794471742.665457,
-   "ok": true,
-   "copies": 1,
-   "warning": null,
-   "destinations": [
-    {
-     "name": "local",
-     "ok": true,
-     "snapshot": "20261112-082221-a033"
-    }
-   ]
-  },
+  "last": null,
   "restore_drill": null
  },
  "environment": {
   "models_installed": [
+   "llm-qwen3-4b",
    "mt-madlad400-3b",
+   "voice:ar_JO-kareem-medium",
    "voice:de_DE-thorsten-medium",
    "voice:en_US-joe-medium",
+   "voice:en_US-ljspeech-medium",
    "voice:es_ES-davefx-medium",
    "voice:fr_FR-siwis-medium",
    "voice:ru_RU-denis-medium",

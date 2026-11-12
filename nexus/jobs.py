@@ -47,9 +47,22 @@ def worker_id(role: str = "worker") -> str:
     return f"{role}-{socket.gethostname()}-{os.getpid()}"
 
 
+_held = threading.local()
+
+
 @contextmanager
 def heavy_lock():
-    """One heavy job at a time on this machine, across processes (API thread and worker process)."""
+    """One heavy job at a time on this machine, across processes (API thread and worker process).
+
+    Re-entrant within a thread: a job handler already runs inside the lock, and library code that also guards its own
+    heavy calls (e.g. the Account 3 research brief calling the local LLM) must not wait on itself."""
+    if getattr(_held, "depth", 0):
+        _held.depth += 1
+        try:
+            yield
+        finally:
+            _held.depth -= 1
+        return
     config.ensure_dirs()
     f = open(config.RUN / "heavy.lock", "a+")
     try:
@@ -65,8 +78,10 @@ def heavy_lock():
         else:
             import fcntl
             fcntl.flock(f, fcntl.LOCK_EX)
+        _held.depth = 1
         yield
     finally:
+        _held.depth = 0
         try:
             if os.name == "nt":
                 import msvcrt

@@ -58,3 +58,21 @@ output, so the lead did the work sequentially. Every item below was driven by a 
 | Delivery | export verify + size-cap re-encode inside the deliver job; subtitle package with readiness manifest | gap list | `628ca30`, `dc40e8d` |
 | Windows | `windows-e2e.yml`: SETUP → START → API e2e (non-ASCII paths) → STATUS → BACKUP drill → STOP on a clean VM | WIN-1 | `33ac0af`, `3cb50aa` |
 | Release | `scripts/release_check.py`: fresh clone, hygiene, ruff, fast suite | release discipline | `1ed89a0` |
+
+
+## Account 3 session (2026-11-12) — intelligence, research, strategy, languages, publishing, growth
+
+Lead built contracts v1 + model router + API/UI mounts first, then six parallel sub-agents in worktrees (A creators,
+B models, C market, D language, E publishing, F growth). All six finished with tests and evidence; the lead reviewed
+scope, ran tests, merged each with `--no-ff` and applied integration requests.
+
+| Area | What changed | Found by | Commit |
+|---|---|---|---|
+| Foundation | contracts v1, model router, adapters, cost-guard free-tier exception | brief | `bd71690` |
+| UI/API | `/api/a3/*`, `intelligence.js` (7 pages), job kinds a3-market-research / a3-reference / a3-strategy | brief | `6a4b060`, `7ff7818` |
+| Strategy | originality + grounding gates, hand-off to Account 2 create job | brief | `4165931` |
+| Streams A-F | merged | sub-agents | `6560ba6`, `68365d6`, `3917c9d`, `74fb0d2`, `bee4233`, merge of E |
+| Jobs | heavy_lock re-entrant per thread (worker deadlocked on itself during a real research job) | py-spy on the real job | this session |
+| Jobs | light (network-bound) job kinds skip the CPU lock | stream E | `294206c` |
+| Router | soft quality bar with labelled drafts; strict mode | stream B measurement (4B reasoning 3.3/10) | `af48bc2` |
+| Manifest | YouTube Data/Analytics, Wikimedia Pageviews, GDELT, extra Wikipedia hosts; corrected YouTube quota text | streams A/C/E | `7f09f31`, `74fb0d2` |

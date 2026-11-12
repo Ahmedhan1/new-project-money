@@ -359,3 +359,52 @@ def recommendations():
         return {"records": 0, "recommendations": [], "note": "import your analytics first (CSV export or YouTube Analytics)"}
     out = recs_mod.from_weak_openings(learn.weak_openings(rows))
     return {"records": len(rows), "recommendations": out}
+
+
+# ----------------------------------------------------------------- languages
+@router.get("/languages")
+def languages():
+    return _mod("language.matrix").summary()
+
+
+class LangCheckReq(BaseModel):
+    source: list[str]
+    target: list[str]
+    lang: str
+    glossary: dict | None = None
+    protected: list[str] | None = None
+    back_translate: bool = False
+    privacy: str = "private"
+
+
+@router.post("/language/check")
+def language_check(r: LangCheckReq):
+    qa = _mod("language.translation_qa")
+    back, how = (qa.back_translate(r.target, r.lang, r.privacy) if r.back_translate else (None, "not requested"))
+    return {**qa.check_lines(r.source, r.target, r.lang, r.glossary, back, r.protected), "back_translation": how}
+
+
+class DialectReq(BaseModel):
+    text: str
+    adapt_to: str | None = None   # "ar-EG" | "ar-Gulf"
+    use_router: bool = False
+
+
+@router.post("/language/dialect")
+def language_dialect(r: DialectReq):
+    d = _mod("language.dialect")
+    out = {"classification": d.classify(r.text)}
+    if r.adapt_to:
+        res = d.adapt_lines([r.text], r.adapt_to, privacy="private", use_router=r.use_router)[0]
+        out["adapted"] = res
+        out["adapted_classification"] = d.classify(res.get("text", r.text))
+    return out
+
+
+@router.get("/language/voice")
+def language_voice(lang: str, commercial: bool = True):
+    dub = _mod("language.dubbing")
+    try:
+        return dub.select_voice(lang, commercial=commercial)
+    except Exception as e:  # VoiceRefused: the reasons are the answer
+        raise HTTPException(409, str(e))

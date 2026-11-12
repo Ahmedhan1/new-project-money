@@ -20,3 +20,21 @@ Full facts and sources: `docs/ACCOUNT3_AI_MODEL_CATALOG.md`. Routing config: `ne
 | Mistral Experiment plan | hosted Mistral models | phone verification, no card (help centre; unverified on re-check) | public only | adapter + config |
 | Cerebras | - | needs a payment method for the $5 trial credit | - | **excluded** (never routed) |
 | Hugging Face Inference Providers | - | free users get no monthly credits | - | **excluded** (never routed) |
+
+## Research, publishing and analytics sources (lead summary of streams A, C, E)
+
+Facts and first-party URLs: `docs/ACCOUNT3_RESEARCH_SOURCES.md`, `docs/ACCOUNT3_PLATFORM_CAPABILITIES.md`,
+`docs/ACCOUNT3_CREATOR_INTELLIGENCE.md`. Declared hosts: `nexus/registry/components.yaml` (cost guard).
+
+| Tool | What for | Cost / card | Status here |
+|---|---|---|---|
+| Wikipedia Action API (en, ar, de, fr, hi, zh, ru) | facts, per-wiki readership (`prop=pageviews`) | free, no key | used (demo reports) |
+| Wikimedia Pageviews REST API | daily demand per article | free, no key | declared; 429 rate limits from the shared sandbox IP |
+| GDELT DOC 2.0 | news momentum | free, no key; commercial terms unverified | declared as adapter; connection reset from the build sandbox |
+| NASA Image & Video Library, Openverse | available licensed visuals (production-difficulty signal) | free | used |
+| RSS/Atom feeds | owner-chosen news/industry feeds | free | parser built; owner adds feeds + declares their hosts |
+| YouTube Data API v3 / Analytics API | public metadata, competition, private uploads, owner analytics | owner's own Google Cloud project, default free quota, no billing | declared; needs the owner's key / OAuth |
+| Google Trends API | search demand | limited alpha (access by application) | adapter disabled; never scraped |
+| TikTok Research API | - | academic/approved researchers only | not built |
+| TikTok Content Posting, Instagram/Facebook Graph | publishing | free, need approved apps; TikTok unaudited apps post private only | gated adapters, never run |
+| Snapchat Marketing API | - | ads-oriented, no organic posting | manual export package |

@@ -49,4 +49,17 @@ Rules enforced by `validate()`: confidence ∈ [0,1]; evidence items need a sour
    with licences). Privacy class `internal` may go there; `private` stays in-process.
 
 ## Status
-Filled in as work streams are reviewed and merged — see `docs/ACCOUNT3_EXECUTION_REPORT.md`.
+All six work streams are merged into `work/account-3-intelligence-growth`. Feature matrix, demos and blockers:
+`docs/ACCOUNT3_EXECUTION_REPORT.md`.
+
+## Integration requests to Accounts 1 and 2
+| To | Request | Why |
+|---|---|---|
+| 1 | Rename `nexus/contracts.py` → `nexus/cloud/contracts.py` (or Account 2 renames its package) | import-name collision |
+| 1 | Vault secret names `ai.<provider>`, `yt.<account>` (vault regex forbids `/`) | router + publishing read them |
+| 1 | `batch_llm` job kind on the Kaggle worker (no persistent serving allowed there) | heavy AI tasks on a free GPU |
+| 1 | OAuth connection records the publishing engine can reference by id | uploads |
+| 2 | `create_video(script=ContentScript)` to use an approved script verbatim | strategy hand-off |
+| 2 | Consume `CreativeStyleProfile` via `creators.to_account2_reference_style()` in the director | style transfer |
+| 2 | Apply `production` overrides from accepted `GrowthRecommendation`s only after owner acceptance | growth loop |
+| 2 | Render `LocalizationManifest` dubbing lines (voices are licence/consent-gated on our side) | dubbing |
