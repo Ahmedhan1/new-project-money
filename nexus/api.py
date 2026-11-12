@@ -332,12 +332,19 @@ class CreateReq(BaseModel):
     lang: str = "en"
     notes: str | None = None
     vertical: bool = False
+    preset: str | None = None
 
 
 @app.post("/api/create")
 def api_create(r: CreateReq):
     return jobs.submit("create-from-idea", {"topic": r.topic, "scenes": r.scenes, "lang": r.lang, "notes": r.notes,
-                                            "size": [720, 1280] if r.vertical else [1280, 720]})
+                                            "size": [720, 1280] if r.vertical else [1280, 720], "preset": r.preset})
+
+
+@app.get("/api/presets")
+def api_presets():
+    from . import presets
+    return presets.names()
 
 
 class RemixReq(BaseModel):

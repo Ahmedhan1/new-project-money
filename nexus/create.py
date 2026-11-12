@@ -18,6 +18,29 @@ STOP = set("the a an and or but of to in on for with is are was were be been it 
 
 
 # ------------------------------------------------------------------ research
+def rank_hits(topic: str, hits: list[dict]) -> list[str]:
+    """Order Wikipedia search hits by how much of the topic they cover, so the script is grounded in the page about
+    the topic rather than a neighbouring one (K-4). Topic words that few hits mention are the distinctive ones and
+    weigh more; a title match counts double. Ties keep the search engine's order."""
+    import math
+    stem = lambda w: w[:5]
+    want = {stem(w) for w in _content(topic)} or {stem(w) for w in re.findall(r"\w{3,}", topic.lower())}
+    parsed = []
+    for h in hits:
+        title = {stem(w) for w in re.findall(r"[a-zA-Z]{3,}", h.get("title", "").lower())}
+        snip = {stem(w) for w in re.findall(r"[a-zA-Z]{4,}", re.sub(r"<[^>]+>", "", h.get("snippet", "")).lower())}
+        parsed.append((h["title"], title, snip))
+    df = {w: sum(w in t or w in sn for _, t, sn in parsed) for w in want}
+    idf = {w: math.log(1 + len(parsed) / (1 + df[w])) for w in want}
+    total = sum(idf.values()) or 1.0
+    scored = []
+    for i, (name, title, snip) in enumerate(parsed):
+        cover = sum(idf[w] * (2 if w in title else 1 if w in snip else 0) for w in want) / (2 * total)
+        extra = len(title - want) / max(len(title), 1)  # a title mostly about something else is penalised a little
+        scored.append((-(cover - 0.1 * extra), i, name))
+    return [t for _, _, t in sorted(scored)]
+
+
 def research(topic: str, lang: str = "en", max_pages: int = 2, notes: str | None = None) -> dict:
     """Collect source text from Wikipedia (with URLs for the source list). Falls back to user notes when offline."""
     sources, corpus = [], []
@@ -26,8 +49,8 @@ def research(topic: str, lang: str = "en", max_pages: int = 2, notes: str | None
         corpus.append(notes)
     try:
         host = f"https://{lang}.wikipedia.org/w/api.php"
-        hits = net.get_json(host, {"action": "query", "list": "search", "srsearch": topic, "format": "json", "srlimit": max_pages}, max_wait=45)
-        titles = [h["title"] for h in hits.get("query", {}).get("search", [])]
+        hits = net.get_json(host, {"action": "query", "list": "search", "srsearch": topic, "format": "json", "srlimit": 8}, max_wait=45)
+        titles = rank_hits(topic, hits.get("query", {}).get("search", []))[:max_pages]
         if titles:
             pages = net.get_json(host, {"action": "query", "prop": "extracts|info", "exintro": 1, "explaintext": 1, "inprop": "url",
                                         "titles": "|".join(titles), "format": "json", "redirects": 1}, max_wait=45)
@@ -248,6 +271,9 @@ def produce(project, script: dict, *, lang: str = "en", size=(1280, 720), style:
         project.data["storyboard"] = str(storyboard_sheet(still, project.dir / "reports" / "storyboard.png"))
     (project.dir / "reports" / "script.json").write_text(json.dumps(script, indent=1, ensure_ascii=False))
     project.save()
+    if style.get("preset"):
+        from . import presets
+        tl = presets.apply(tl, style)
     return tl
 
 
@@ -262,12 +288,16 @@ def _timed_stage(name: str, fn):
 
 
 def create_video(topic: str, *, scenes: int = 5, lang: str = "en", size=(1280, 720), notes: str | None = None, style: dict | None = None,
-                 name: str | None = None, stage=None, on_project=None) -> dict:
+                 name: str | None = None, stage=None, on_project=None, preset: str | None = None) -> dict:
     """The whole from-zero workflow. Returns paths + the approval report.
 
     Runs as named stages. When called from a durable job, `stage` is `Job.stage`: each finished stage is
     checkpointed, so a crashed/restarted worker resumes at the first unfinished stage instead of redoing
     research, script-writing or narration."""
+    if preset:  # a named production preset supplies look, sound, pacing and (for vertical presets) the frame size
+        from . import presets
+        style = presets.get(preset, **(style or {}))
+        size = tuple(style.get("size") or size)
     stage = stage or _timed_stage
     pid = stage("project", lambda: prj.Project.create(name or topic[:60], "create").id)
     if on_project:
@@ -275,7 +305,8 @@ def create_video(topic: str, *, scenes: int = 5, lang: str = "en", size=(1280, 7
     res = stage("research", lambda: research(topic, notes=notes))
 
     def _script():
-        script, pre = script_with_review(topic, res, scenes)
+        kw = {"style": style["script_style"]} if style and style.get("script_style") else {}
+        script, pre = script_with_review(topic, res, scenes, **kw)
         return {"script": script, "pre": pre}
 
     sp = stage("script", _script)

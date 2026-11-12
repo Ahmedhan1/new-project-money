@@ -1,0 +1,102 @@
+# Production presets: one name -> the look, sound and pacing of a video. Used by create.produce(style=...),
+# the remix/shorts builders and the UI. Keys follow the timeline contract in docs/PHASE3_PLAN.md.
+# `script_style` and `scene_words` steer the script writer; everything else lands in the timeline and stays editable.
+presets:
+  cinematic:
+    label: Cinematic
+    grade: cinematic
+    mood: tense
+    music_volume: 0.28
+    xfade: fadeblack
+    transition_dur: 0.6
+    captions: {style: classic, position: bottom}
+    effects: [{type: letterbox, ratio: 2.39}, {type: vignette}, {type: grain, amount: 6}]
+    kenburns: slow
+    script_style: "cinematic, evocative narration with concrete images"
+    scene_words: [32, 46]
+  documentary:
+    label: Documentary
+    grade: documentary
+    mood: documentary
+    music_volume: 0.25
+    xfade: fade
+    transition_dur: 0.5
+    captions: {style: classic, position: bottom}
+    effects: [{type: vignette}]
+    kenburns: slow
+    script_style: "measured documentary narration; every claim tied to a source"
+    scene_words: [34, 50]
+  educational:
+    label: Educational explainer
+    grade: none
+    mood: calm
+    music_volume: 0.22
+    xfade: fade
+    transition_dur: 0.4
+    captions: {style: boxed, position: bottom}
+    effects: []
+    kenburns: normal
+    script_style: "clear teacher voice; one idea per scene; define every term"
+    scene_words: [30, 44]
+  scientific:
+    label: Scientific
+    grade: cool
+    mood: calm
+    music_volume: 0.2
+    xfade: fade
+    transition_dur: 0.4
+    captions: {style: boxed, position: bottom}
+    effects: []
+    kenburns: normal
+    script_style: "precise scientific explanation; numbers with units; no hype"
+    scene_words: [32, 48]
+  storytelling:
+    label: Storytelling
+    grade: warm
+    mood: inspiring
+    music_volume: 0.3
+    xfade: dissolve
+    transition_dur: 0.6
+    captions: {style: classic, position: bottom}
+    effects: [{type: vignette}]
+    kenburns: slow
+    script_style: "story with a character, a problem and a turn; short sentences"
+    scene_words: [28, 42]
+  commercial:
+    label: Commercial / product
+    grade: vivid
+    mood: upbeat
+    music_volume: 0.34
+    xfade: slideleft
+    transition_dur: 0.35
+    captions: {style: pop, position: middle, words_per_cue: 3, highlight: "#FFD400"}
+    effects: []
+    kenburns: fast
+    script_style: "benefit-led, energetic, concrete; one promise per scene"
+    scene_words: [18, 30]
+  social-short:
+    label: Social short (9:16)
+    size: [1080, 1920]
+    grade: vivid
+    mood: upbeat
+    music_volume: 0.3
+    xfade: slideup
+    transition_dur: 0.25
+    captions: {style: pop, position: middle, words_per_cue: 3, highlight: "#FFD400", uppercase: true}
+    overlays: [{type: progress_bar, color: "#3EC5FF", height: 8}]
+    effects: []
+    kenburns: fast
+    script_style: "hook in the first sentence, fast, spoken, second person; ends on a line that loops or pays off"
+    scene_words: [14, 24]
+  news:
+    label: News brief
+    grade: none
+    mood: documentary
+    music_volume: 0.18
+    xfade: fade
+    transition_dur: 0.3
+    captions: {style: boxed, position: bottom}
+    effects: []
+    kenburns: normal
+    script_style: "neutral news brief: what happened, why it matters, what is next"
+    scene_words: [26, 40]
