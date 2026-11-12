@@ -36,11 +36,58 @@ def render(job: jobs.Job) -> dict:
     tl = p.timeline(a.get("branch", "main"))
 
     def run():  # the renderer caches finished segments on disk, so a resumed render only encodes what is missing
-        stats, report = qa.render_with_qa(p, tl, a["name"], _analysis(p) or None)
+        stats, report = qa.render_with_qa(p, tl, a["name"], _analysis(p) or None, draft=bool(a.get("draft")))
         return {"output": str(Path(stats["output"]).relative_to(p.dir)), "status": report["status"], "issues": report["known_issues"],
-                "segments_from_cache": stats["segments_from_cache"], "segments": stats["segments"], "seconds": stats["elapsed"]}
+                "segments_from_cache": stats["segments_from_cache"], "segments": stats["segments"], "seconds": stats["elapsed"],
+                "draft": bool(a.get("draft")), "render_notes": stats.get("notes", [])}
 
-    return job.stage("render-qa", run)
+    r = job.stage("render-qa", run)
+    if a.get("draft"):
+        return r  # drafts are previews: no quality verdict
+    r["quality"] = job.stage("quality-score", lambda: _quality(p, tl, r["output"], a.get("platform")))
+    return r
+
+
+def _quality(p, tl: dict, output: str, platform: str | None = None) -> dict:
+    """Weighted quality score of a finished render, stored next to the QA report (nexus/quality.py)."""
+    import json
+    from . import quality
+    # The source analysis describes the SOURCE, not this programme: an edit is meant to cover only part of it, so it is
+    # not passed (it would turn every condensed edit into a "missing dialogue" localization failure).
+    rep = quality.score(p.dir / output, tl=tl, analysis=None, lang=tl.get("lang"), platform=platform)
+    (p.dir / "reports" / f"{Path(output).stem}.quality.json").write_text(json.dumps(rep, ensure_ascii=False, default=str), encoding="utf-8")
+    return quality.summary(rep)
+
+
+@jobs.handler("direct")
+def direct_(job: jobs.Job) -> dict:
+    """Edit-my-video: analysis -> director plan (every kept/dropped span with a reason) -> editable timeline."""
+    import json
+    from . import director, project as prj
+    a = job.params
+    p = prj.Project(a["project"])
+    brief = {k: a[k] for k in ("profile", "target_seconds", "instructions", "title", "platforms", "languages", "shorts") if a.get(k) is not None}
+    size = tuple(a.get("size") or (1920, 1080))
+
+    def plan():
+        an = _analysis(p)
+        if not an:
+            raise ValueError("no finished analysis in this project yet: upload a video and wait for the analysis job")
+        out = director.direct(list(an), an, brief, size=size)
+        (p.dir / "reports" / "director_plan.json").write_text(json.dumps(out["plan"], ensure_ascii=False, default=str), encoding="utf-8")
+        (p.dir / "reports" / "director_edl.edl").write_text(out["edl"]["cmx3600"], encoding="utf-8")
+        (p.dir / "work" / "director_timeline.json").write_text(json.dumps(out["master"], ensure_ascii=False), encoding="utf-8")
+        s = out["plan"]["summary"]
+        return {"summary": s, "notes": out["notes"], "retention": out.get("retention"), "profile": out["plan"]["profile"]}
+
+    r = job.stage("plan", plan)
+
+    def build():
+        tl = json.loads((p.dir / "work" / "director_timeline.json").read_text(encoding="utf-8"))
+        vid = p.save_timeline(tl, f"director: {r['profile']} -> {r['summary']['programme_seconds']:.0f}s", a.get("branch", "main"))
+        return {"version": vid}
+
+    return {**r, **job.stage("build-timeline", build)}
 
 
 @jobs.handler("localize")
@@ -189,14 +236,62 @@ def shorts_(job: jobs.Job) -> dict:
     from . import project as prj, shorts
     p = prj.Project(job.params["project"])
 
-    def run():
+    a = job.params
+    if not a.get("v2"):  # legacy request shape (n/min_s/max_s): unchanged behaviour
+        def run():
+            lib = _analysis(p)
+            if not lib:
+                raise ValueError("this project has no analysed video yet")
+            path = a.get("media") or next(iter(lib))
+            media = next(m for m in p.data["media"] if m["path"] == path)
+            rows = shorts.make_shorts(p, media, lib[path], n=a.get("n", 3), min_s=a.get("min_s", 18), max_s=a.get("max_s", 58), sfx=True)
+            return {"project": p.id, "shorts": rows}
+
+        return job.stage("find-and-build", run)
+
+    def plan():
         lib = _analysis(p)
         if not lib:
             raise ValueError("this project has no analysed video yet")
-        path = job.params.get("media") or next(iter(lib))
-        media = next(m for m in p.data["media"] if m["path"] == path)
-        rows = shorts.make_shorts(p, media, lib[path], n=job.params.get("n", 3), min_s=job.params.get("min_s", 18),
-                                  max_s=job.params.get("max_s", 58), sfx=True)
-        return {"project": p.id, "shorts": rows}
+        path = a.get("media") or next(iter(lib))
+        ctl = {k: a[k] for k in ("pick", "time_range", "topic", "speaker", "durations", "intensity", "captions", "music", "aspect",
+                                 "brand", "min_score") if a.get(k) not in (None, [], "")}
+        if ctl.get("time_range"):
+            ctl["time_range"] = tuple(ctl["time_range"])
+        items = shorts.factory(path, lib[path], n=a.get("n", 3), platforms=tuple(a.get("platforms") or ("youtube_shorts",)),
+                               variants=int(a.get("variants", 1)), **ctl)
+        rows = shorts.save_batch(p, items)
+        notes = list(getattr(items, "notes", []))
+        for r, it in zip(rows, items):
+            r["why"] = it["why"]
+            r["context_check"] = {k: it["context_check"].get(k) for k in ("status", "why")}
+        return {"project": p.id, "shorts": rows, "notes": notes, "moments": len({(r["start"], r["end"]) for r in rows})}
 
-    return job.stage("find-and-build", run)
+    r = job.stage("select-and-build", plan)
+    if not a.get("render"):
+        return r
+    limit = int(a.get("render_limit", 12))
+
+    def render_all():
+        from . import qa
+        done = []
+        for row in r["shorts"][:limit]:
+            tl = p.timeline(row["branch"])
+            stats, rep = qa.render_with_qa(p, tl, row["branch"], max_rounds=1)
+            out = str(Path(stats["output"]).relative_to(p.dir))
+            done.append({"branch": row["branch"], "output": out, "seconds": stats["elapsed"],
+                         "quality": _quality(p, tl, out, row["platform"])})
+        return {"rendered": done, "not_rendered": [x["branch"] for x in r["shorts"][limit:]]}
+
+    return {**r, **job.stage("render-and-score", render_all)}
+
+
+@jobs.handler("deliver")
+def deliver_(job: jobs.Job) -> dict:
+    """Destination selector: one master -> tuned, checked, packaged versions for every selected platform."""
+    from . import project as prj, publish
+    a = job.params
+    p = prj.Project(a["project"])
+    tl = p.timeline(a.get("branch", "main"))
+    return job.stage("render-check-package", lambda: publish.deliver(p, tl, a["platforms"], a.get("title") or p.name,
+                                                                     a.get("description", ""), a.get("lang") or tl.get("lang", "en")))

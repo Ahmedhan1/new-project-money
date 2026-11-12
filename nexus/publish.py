@@ -121,3 +121,69 @@ def business_summary(channel_id: str) -> dict:
     return {"actual_revenue": sum(r["amount"] for r in rows if r["kind"] == "actual"),
             "estimated_revenue": sum(r["amount"] for r in rows if r["kind"] == "estimate"),
             "expenses": 0.0, "note": "No income is guaranteed. Estimates are projections, not earnings.", "entries": rows}
+
+
+# ------------------------------------------------------------------ destination selector (nexus/platforms.py)
+def _limit_text(text: str, chars: int | None = None, utf8_bytes: int | None = None) -> str:
+    text = text.replace("<", "").replace(">", "") if utf8_bytes else text
+    if chars and len(text) > chars:
+        text = text[: max(0, chars - 1)].rstrip() + "…"
+    while utf8_bytes and len(text.encode("utf-8")) > utf8_bytes:
+        text = text[:-2].rstrip() + "…"
+    return text
+
+
+def deliver(project, tl: dict, destinations: list[str], title: str, description: str = "", lang: str = "en",
+            on_group=None) -> dict:
+    """One master -> every selected destination. Destinations that can share a render share it (platforms.deliverables);
+    each destination still gets its own package: tuned timeline notes, file check against its limits, title/description/
+    hashtags within its limits, caption sidecars, cover frame and a MANUAL_UPLOAD.md. Nothing is uploaded."""
+    from . import platforms
+    from .timeline.render import total_duration as _td
+    groups = platforms.deliverables(destinations, duration=_td(tl), fps=int(tl.get("fps", 30)))
+    out: dict = {"groups": [], "packages": {}}
+    for gi, g in enumerate(groups):
+        lead = g["platforms"][0]
+        ptl, notes = platforms.tune(tl, lead)
+        gdir = project.dir / "publish" / f"render_{gi}_{ptl['width']}x{ptl['height']}" / lang
+        gdir.mkdir(parents=True, exist_ok=True)
+        video = gdir / "video.mp4"
+        stats = render.render(ptl, video, project.dir / "work")
+        out["groups"].append({"platforms": g["platforms"], "video": str(video.relative_to(project.dir)), "duration": stats["duration"],
+                              "size": f"{ptl['width']}x{ptl['height']}", "tuning": notes})
+        for name in g["platforms"]:
+            prof = platforms.get(name)
+            v = prof["v"]
+            d = project.dir / "publish" / name / lang
+            d.mkdir(parents=True, exist_ok=True)
+            chk = platforms.check(video, name)
+            tags = _hashtags(title, project.data.get("script"), min(int(v.get("hashtags_max") or 5), 5))
+            cap_limit = v.get("caption_max_chars") or v.get("caption_max_utf16")
+            meta = {"platform": name, "display": prof["display"], "language": lang, "video": str(video.relative_to(project.dir)),
+                    "shared_render_with": [x for x in g["platforms"] if x != name],
+                    "title": _limit_text(title, v.get("title_max_chars")),
+                    "description": _limit_text(description.strip(), v.get("description_max_chars"), v.get("description_max_bytes")),
+                    "hashtags": tags, "check": chk, "tuning": notes, "captions": stats["sidecars"],
+                    "music_policy": v.get("music_policy"), "upload_api": v.get("upload_api"),
+                    "auto_publish": "not performed: needs your own authorised app/account for this platform",
+                    "human_approval": "PENDING", "built": time.strftime("%Y-%m-%dT%H:%M:%S")}
+            if cap_limit:
+                meta["caption_text"] = _limit_text(" ".join([meta["title"], meta["description"], " ".join(tags)]).strip(), int(cap_limit))
+            vw, vh = ptl["width"], ptl["height"]
+            meta["cover"] = str(thumbnail(str(video), title, d / "cover.jpg", (1280, 720) if vw > vh else (720, 1280), lang=lang).relative_to(project.dir))
+            steps = v.get("manual_upload") or ["Open the platform's upload page and use the files in this folder."]
+            (d / "MANUAL_UPLOAD.md").write_text(
+                f"# Upload to {prof['display']}\n\nVideo: `{meta['video']}` · cover: `{meta['cover']}`\n\n"
+                + "\n".join(f"{k + 1}. {s}" for k, s in enumerate(steps))
+                + f"\n\n## Check against {prof['display']} limits\n"
+                + "\n".join(f"- [{'x' if c['ok'] else ' '}] {c['id']}: {c['value']} (limit {c['limit']}; {c['basis']})" for c in chk["checks"])
+                + (f"\n\n## Music\n{v['music_policy']}\n" if v.get("music_policy") else "\n")
+                + "\nNEXUS did not upload anything. Approve the video yourself before posting.\n", encoding="utf-8")
+            (d / "metadata.json").write_text(json.dumps(meta, indent=1, ensure_ascii=False, default=str), encoding="utf-8")
+            out["packages"][name] = {k: meta[k] for k in ("video", "title", "shared_render_with", "cover")} | {"ok": chk["ok"],
+                                                                                                         "folder": str(d.relative_to(project.dir))}
+        if on_group:
+            on_group(gi + 1, len(groups))
+    out["renders"] = len(groups)
+    out["destinations"] = len(destinations)
+    return out
