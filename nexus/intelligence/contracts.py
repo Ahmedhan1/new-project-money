@@ -66,6 +66,10 @@ SCHEMAS: dict[str, dict] = {
                            "min_samples": I, "status": S, "results": D + OPT, "confidence": N + OPT, "limitations": L + OPT},
     "GrowthRecommendation": {"id": S, "kind": S, "text": S, "evidence": L, "confidence": N, "target": S,
                              "status": S, "experiment_id": S + OPT},
+    # The one document Account 2 consumes: approved script (verbatim), Account 2 EditorialPlan + RenderJobManifest
+    # (their schema, nexus.contracts.media) and the create-from-idea params. Built by nexus/intelligence/handoff.py.
+    "StrategyHandoff": {"id": S, "script_id": S, "storyboard_id": S, "approved": B, "editorial_plan": D, "render_job": D,
+                        "create_params": D, "checks": D, "claims": L},
 }
 
 CONFIDENCE_KEYS = {"ResearchBrief", "ContentOpportunity", "CreatorReferenceProfile", "GrowthRecommendation"}

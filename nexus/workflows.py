@@ -13,7 +13,7 @@ def create_from_idea(job: jobs.Job) -> dict:
     p = job.params
     out = create.create_video(p["topic"], scenes=p.get("scenes", 5), lang=p.get("lang", "en"), notes=p.get("notes"),
                               size=tuple(p.get("size", (1280, 720))), name=p.get("name"), stage=job.stage, on_project=job.set_project,
-                              preset=p.get("preset"))
+                              preset=p.get("preset"), script=p.get("script"))
     return {"project": out["project"], "status": out["report"]["status"], "issues": out["report"]["known_issues"],
             "title": out["script"]["title"], "output": out["output"]}
 

@@ -309,8 +309,13 @@ def _timed_stage(name: str, fn):
 
 
 def create_video(topic: str, *, scenes: int = 5, lang: str = "en", size=(1280, 720), notes: str | None = None, style: dict | None = None,
-                 name: str | None = None, stage=None, on_project=None, preset: str | None = None) -> dict:
+                 name: str | None = None, stage=None, on_project=None, preset: str | None = None,
+                 script: dict | None = None) -> dict:
     """The whole from-zero workflow. Returns paths + the approval report.
+
+    `script` (optional): an APPROVED script from Account 3's Strategy Handoff ({"title", "scenes": [{"narration",
+    "on_screen_text", "visual_query"}]}). It is used verbatim - never paraphrased - and still runs the stage-1 review, whose
+    findings go into the report instead of triggering a rewrite (Demo 4: the approved script used to be rewritten).
 
     Runs as named stages. When called from a durable job, `stage` is `Job.stage`: each finished stage is
     checkpointed, so a crashed/restarted worker resumes at the first unfinished stage instead of redoing
@@ -325,10 +330,20 @@ def create_video(topic: str, *, scenes: int = 5, lang: str = "en", size=(1280, 7
         on_project(pid)
     res = stage("research", lambda: research(topic, notes=notes))
 
+    approved = script
+
     def _script():
+        if approved:
+            sc = {"title": str(approved.get("title") or topic)[:90], "topic": topic, "verbatim": True,
+                  "scenes": [{"narration": s["narration"], "on_screen_text": str(s.get("on_screen_text", ""))[:48],
+                              "visual_query": str(s.get("visual_query") or topic)[:60]} for s in approved["scenes"]]}
+            pre = review_script(sc, res, len(sc["scenes"]))
+            pre["attempts"] = 0
+            pre["verbatim"] = True
+            return {"script": sc, "pre": pre}
         kw = {"style": style["script_style"]} if style and style.get("script_style") else {}
-        script, pre = script_with_review(topic, res, scenes, **kw)
-        return {"script": script, "pre": pre}
+        script_, pre = script_with_review(topic, res, scenes, **kw)
+        return {"script": script_, "pre": pre}
 
     sp = stage("script", _script)
     script, pre = sp["script"], sp["pre"]

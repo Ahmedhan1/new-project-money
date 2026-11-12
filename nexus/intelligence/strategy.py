@@ -159,5 +159,6 @@ def submit(script: dict, board: dict, brief: dict | None = None, style: dict | N
     if require_checks and not (o["ok"] and o["grounding"]["ok"] and o.get("framing", {"ok": True})["ok"]):
         raise ValueError(f"script not approved for production: originality={o['ok']} grounding={o['grounding']} framing={o.get('framing')}")
     from .. import jobs
-    params = production_job(script, board, brief, style)
-    return {**jobs.submit("create-from-idea", params), "params": params}
+    from . import handoff
+    h = handoff.build(script, board, brief, style)  # Account 2 documents + the approved script, used verbatim
+    return {**jobs.submit("create-from-idea", h["create_params"]), "params": h["create_params"], "handoff": h}
