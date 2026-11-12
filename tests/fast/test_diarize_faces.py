@@ -78,7 +78,7 @@ def test_shorts_reframing_uses_face_focus():
     assert mode == "cover" and focus[0] > 0.6 and "subject" in note
 
 
-def test_a_question_and_answer_merged_in_one_segment_are_split_by_voice(tmp_path):
+def _two_voice_fixture(tmp_path):
     """Whisper merged interviewer question + guest answer: the voice change inside the segment is found from audio."""
     import subprocess as sp
     from nexus import config
@@ -114,7 +114,13 @@ def test_a_question_and_answer_merged_in_one_segment_are_split_by_voice(tmp_path
         words = [{"start": round(t + i * step, 3), "end": round(t + (i + 0.8) * step, 3), "word": x} for i, x in enumerate(ws)]
         segs.append({"start": words[0]["start"], "end": words[-1]["end"], "text": text, "words": words, "who": who})
         t += d
-    # merge the first question with its answer, as Whisper does
+    return wav, segs
+
+
+def test_a_question_and_answer_merged_in_one_segment_are_split_by_voice(tmp_path):
+    """Whisper merged interviewer question + guest answer: the voice change inside the segment is found from audio."""
+    from nexus.media import diarize as dz
+    wav, segs = _two_voice_fixture(tmp_path)
     q, a = segs[0], segs[1]
     merged = {"start": q["start"], "end": a["end"], "text": q["text"] + " " + a["text"], "words": q["words"] + a["words"]}
     segs = [merged] + segs[2:]
@@ -126,3 +132,20 @@ def test_a_question_and_answer_merged_in_one_segment_are_split_by_voice(tmp_path
     assert spk["segment_labels"][0] != spk["segment_labels"][1]
     an = dz.apply_labels({"transcript": {"segments": segs}}, spk)
     assert len(an["transcript"]["segments"]) == len(new) and "segments" not in an["speakers"]
+
+
+def test_question_answer_question_in_one_segment_split_at_sentence_ends(tmp_path):
+    """Each sentence takes the majority voice of the windows inside it (session 6: a change-point estimate had put an
+    interviewer question on the guest)."""
+    from nexus.media import diarize as dz
+    wav, segs = _two_voice_fixture(tmp_path)
+    q1, a1, q2 = segs[2], segs[3], segs[4]
+    merged = {"start": q1["start"], "end": q2["end"], "text": " ".join(x["text"] for x in (q1, a1, q2)),
+              "words": q1["words"] + a1["words"] + q2["words"]}
+    segs = segs[:2] + [merged] + segs[5:]
+    spk = dz.diarize(wav, {"transcript": {"segments": segs}})
+    new = spk["segments"]
+    k = next(i for i, x in enumerate(new) if x.get("split_from"))
+    texts, labs = [x["text"] for x in new[k:k + 3]], spk["segment_labels"][k:k + 3]
+    assert texts[0].endswith("that day?") and texts[1].startswith("Nous") and texts[2].endswith("that day?"), texts
+    assert labs[0] == labs[2] != labs[1]

@@ -41,3 +41,13 @@ def test_a_word_on_a_cut_is_captioned_once():
           "subtitles": []}
     text = " ".join(c["text"] for c in edit.retime_subtitles(tl, {"s": an})["subtitles"])
     assert text.split().count("as") == 1, text
+
+
+def test_whisper_hyphen_tokens_are_merged_in_the_transcript():
+    from nexus.speech import asr
+    seg = {"start": 0, "end": 2, "text": "a 160 -meter shaft and T -38 jets - fast",
+           "words": [{"start": 0.0, "end": 0.2, "word": "a"}, {"start": 0.3, "end": 0.6, "word": "160"},
+                     {"start": 0.6, "end": 0.9, "word": "-meter"}, {"start": 1.0, "end": 1.2, "word": "shaft"}]}
+    n = asr.normalize_segment(seg)
+    assert n["text"] == "a 160-meter shaft and T-38 jets - fast"          # a free-standing dash is left alone
+    assert [w["word"] for w in n["words"]] == ["a", "160-meter", "shaft"] and n["words"][1]["end"] == 0.9

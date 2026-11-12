@@ -255,6 +255,7 @@ def roles(segs: list[dict], labels: dict[int, str]) -> dict:
 
 
 WIN_S, HOP_S, MIN_SPLIT_S = 1.6, 0.8, 4.0
+DOMINANT_SHARE = 0.7  # windows agreeing on one voice before it overrides the whole-segment label
 
 
 def _boundary(words: list[dict], t: float, reach: float = 1.2) -> int | None:
@@ -292,6 +293,40 @@ def split_mixed(x: np.ndarray, segs: list[dict], cents: np.ndarray) -> tuple[lis
             forced.append(None)
             continue
         lab = np.argmin(_cos_dist(np.vstack([E, cents]))[: len(E), len(E):], axis=1)
+        centres = [(wins[k]["start"] + wins[k]["end"]) / 2 for k in keep]
+        # 1) several sentences in the segment: each sentence takes the majority voice of the windows inside it, and
+        #    splits fall on sentence ends (a change-point estimate put "mission has there been any talk..." on the guest)
+        sents, cur = [], []
+        for wi, w in enumerate(words):
+            cur.append(wi)
+            if str(w.get("word", "")).strip().endswith(("?", ".", "!")) or wi == len(words) - 1:
+                sents.append(cur)
+                cur = []
+        if len(sents) >= 2:
+            votes = []
+            for sw in sents:
+                t0, t1 = float(words[sw[0]]["start"]), float(words[sw[-1]]["end"])
+                inside = [int(lab[j]) for j, c in enumerate(centres) if t0 <= c <= t1]
+                if not inside:
+                    inside = [int(lab[int(np.argmin([abs(c - (t0 + t1) / 2) for c in centres]))])]
+                votes.append(int(np.bincount(inside).argmax()))
+            pieces = []
+            for sw, v in zip(sents, votes):
+                if pieces and pieces[-1][1] == v:
+                    pieces[-1][0].extend(sw)
+                else:
+                    pieces.append([list(sw), v])
+            if len(pieces) > 1:
+                for idx, v in pieces:
+                    ws = [words[i] for i in idx]
+                    out.append({**{k: v2 for k, v2 in s.items() if k not in ("words", "text", "start", "end")},
+                                "start": float(ws[0]["start"]), "end": float(ws[-1]["end"]), "words": ws,
+                                "text": " ".join(str(w.get("word", "")).strip() for w in ws), "split_from": [a, b]})
+                    forced.append(v)
+                continue
+        # 2) one voice dominates the windows clearly: trust the windows over the whole-segment embedding
+        share = np.bincount(lab).max() / len(lab)
+        dominant = int(np.bincount(lab).argmax()) if share >= DOMINANT_SHARE else None
         sm = np.array([int(np.bincount(lab[max(0, i - 1): i + 2]).argmax()) for i in range(len(lab))])  # 3-window majority
         cuts, i0 = [], 0
         for i in range(1, len(sm)):
@@ -305,7 +340,7 @@ def split_mixed(x: np.ndarray, segs: list[dict], cents: np.ndarray) -> tuple[lis
                     i0 = i
         if not cuts:
             out.append(s)
-            forced.append(None)
+            forced.append(dominant)
             continue
         bounds = [0] + [c[0] for c in cuts] + [len(words)]
         labs = [cuts[0][1]] + [c[2] for c in cuts]
@@ -338,10 +373,10 @@ def diarize(path, analysis: dict, max_speakers: int = 4) -> dict:
         labels[i] = f"S{int(lab[j]) + 1}"
         d = np.sort(D[j])
         conf[i] = round(float((d[1] - d[0]) / (d[1] + 1e-9)) if k > 1 else 1.0, 3)
-    n_split = 0
+    n_split = n_relabel = 0
     if neural and k > 1:  # one speaker per segment is an assumption: check long segments for a voice change inside
         new_segs, forced = split_mixed(x, segs, cents)
-        if len(new_segs) != len(segs):
+        if len(new_segs) != len(segs) or any(f is not None for f in forced):
             n_split = len(new_segs) - len(segs)
             old_of = []  # map each new segment back to its original index for the segment-level label
             j = 0
@@ -349,6 +384,8 @@ def diarize(path, analysis: dict, max_speakers: int = 4) -> dict:
                 while j < len(segs) and not (float(segs[j]["start"]) - 1e-3 <= float(ns["start"]) <= float(segs[j]["end"]) + 1e-3):
                     j += 1
                 old_of.append(min(j, len(segs) - 1))
+            n_relabel = sum(1 for i, ns in enumerate(new_segs) if forced[i] is not None and not ns.get("split_from")
+                            and labels.get(old_of[i]) not in (None, f"S{forced[i] + 1}"))
             labels = {i: (f"S{forced[i] + 1}" if forced[i] is not None else labels.get(old_of[i])) for i in range(len(new_segs))}
             conf = {i: (0.5 if forced[i] is not None else conf.get(old_of[i], 0.0)) for i in range(len(new_segs))}
             labels = {i: v for i, v in labels.items() if v is not None}
@@ -371,7 +408,7 @@ def diarize(path, analysis: dict, max_speakers: int = 4) -> dict:
                                           "MFCC statistics (numpy fallback)") + " + agglomerative clustering, speakers chosen by silhouette",
             "licence": EMB_LICENCE if neural else "own code (no model)", "n_speakers": k, "silhouette": round(sil, 3), "turns": turns,
             "segment_labels": [labels[i] for i in range(len(segs))], "speakers": roles(segs, labels),
-            "segments_split": n_split, **({"segments": segs} if n_split else {}),
+            "segments_split": n_split, "relabelled_by_windows": n_relabel, **({"segments": segs} if n_split else {}),
             "note": ("long segments are scanned for a voice change and split at the nearest word gap"
                      if neural else "weaker than neural speaker embeddings; assumes one speaker per transcript segment")}
 
