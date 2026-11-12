@@ -236,38 +236,41 @@ tasks:
   - id: FX-1
     priority: 1
     title: "Effects, transition library, animated word captions, procedural SFX in the renderer"
-    status: in_progress
+    status: implemented
     acceptance: "clip effects / xfade names / caption styles / overlays from docs/PHASE3_PLAN.md render correctly and are cache-safe."
     test: "pytest tests/fast/test_fx.py"
-    next: "Implementation delegated; lead integrates into API/UI."
+    next: "Session 4 audit: nexus/fx/* exists but timeline/render.py never calls it and tests/fast/test_fx.py does not exist. Workstream A wires and tests it."
   - id: PERF-1
     priority: 1
     title: "Render efficiency: parallel segments, per-segment caption burn (final pass copies video), draft mode, hw-encoder detection"
-    status: in_progress
+    status: planned
     acceptance: "Measured before/after on the same timeline in docs/results/perf_render.json; output still passes technical QA."
     test: "pytest tests/fast/test_fx.py -k perf"
-    next: "Benchmark on the user's ZBook (QuickSync availability unknown)."
+    next: "Session 4 audit: nothing implemented. Workstream A (parallel/draft) + E (encoders)."
   - id: GRW-1
     priority: 1
     title: "Growth: shorts extractor, retention rubric + auto retention pass, hook/title variants, reference-video style profile"
-    status: in_progress
+    status: tested
     acceptance: "Long video -> ranked vertical shorts timelines; any timeline gets a scored retention report with applicable fixes."
     test: "pytest tests/fast/test_growth.py"
-    next: "Wire platform analytics once the user authorises OAuth (ANA-1) so the rubric can be calibrated on real retention."
+    evidence: "tests/fast/test_growth.py; API /shorts, /retention, /retention/apply, /api/hooks; shorts job in workflows.py"
+    next: "Extended by GRW-2."
   - id: RPR-1
     priority: 1
     title: "Repurpose studio: rights gate, commentary/recap layouts, transformation report (no detection-evasion features)"
-    status: in_progress
+    status: tested
     acceptance: "Media without a rights declaration cannot be exported; report states the share of original vs new material."
     test: "pytest tests/fast/test_repurpose.py"
-    next: "Recap script quality depends on the local LLM; review with real footage."
+    evidence: "tests/fast/test_repurpose.py"
+    next: "No API/UI/job yet - lead integrates (INT-4)."
   - id: AUD-1
     priority: 1
     title: "Voice mastering chain, ambience/SFX helpers, scene-to-scene continuity QA (level, colour, brightness jumps)"
-    status: in_progress
+    status: tested
     acceptance: "Narration clips leave TTS at a consistent loudness; continuity stage flags level/brightness jumps between adjacent scenes."
     test: "pytest tests/fast/test_audio_continuity.py"
-    next: "A properly licensed Arabic voice is still missing (Chatterbox benchmark)."
+    evidence: "tests/fast/test_audio_continuity.py"
+    next: "A properly licensed Arabic voice is still missing (LANG-1)."
   - id: INT-3
     priority: 1
     title: "Integrate phase 3 into API, job handlers, UI, presets and docs"
@@ -279,23 +282,69 @@ tasks:
   - id: LANG-1
     priority: 1
     title: "12+ languages (en, de, fr, ar-EG, ar-Gulf, zh, ru, hi first): translation tags, licensed voices, fonts, per-language QA"
-    status: in_progress
+    status: planned
     acceptance: "Each listed language either passes translation + dub checks in a real run or is reported as not available with the reason."
     test: "pytest tests/fast/test_languages.py; heavy: pytest tests/test_c_language.py"
-    next: "Implementation delegated."
+    next: "Session 4 audit: no code existed. Workstream D."
   - id: PLAT-1
     priority: 1
     title: "Platform knowledge base (specs + documented ranking signals with sources) and per-platform timeline tuning"
-    status: in_progress
+    status: planned
     acceptance: "tune(tl, platform) changes duration/aspect/captions/hook/loudness per platform; every encoded signal cites its source and date."
     test: "pytest tests/fast/test_platforms.py"
-    next: "Implementation delegated."
+    next: "Session 4 audit: no code existed. Workstream F."
   - id: DIR-1
     priority: 1
     title: "Director: long footage -> condensed cinematic master + per-platform cuts + shorts in one job"
-    status: in_progress
+    status: planned
     deps: [GRW-1, FX-1]
     acceptance: "One call produces a master timeline at a target length plus platform deliverables, each with QA and retention reports."
     test: "pytest tests/fast/test_director.py"
-    next: "Implementation delegated."
+    next: "Session 4 audit: no code existed. Workstream B."
 
+  # ------------------------------------------------------------------ session 4 (docs/MASTER_ROADMAP.md)
+  - id: GRW-2
+    priority: 1
+    title: "Shorts factory v2: select by time range/topic/speaker, duration options, variants, context check, per-platform batch"
+    status: planned
+    deps: [GRW-1]
+    acceptance: "One source -> N ranked shorts x variants x platforms, each with a stated reason, scores and a context check."
+    test: "pytest tests/fast/test_shorts_factory.py"
+    next: "Workstream C."
+  - id: MED-1
+    priority: 1
+    title: "Media engine: encoder detection, H.264/H.265/AV1 presets, size-targeted export, proxies, export verification, benchmark"
+    status: planned
+    acceptance: "export() hits a max file size, verify() catches a broken file, proxies never touch the original; measured numbers in docs/results/media_bench.json."
+    test: "pytest tests/fast/test_media_engine.py"
+    next: "Workstream E."
+  - id: QSC-1
+    priority: 1
+    title: "Weighted quality score (visual, editing, audio, localization) with a reason per failed criterion"
+    status: planned
+    acceptance: "A deliberately bad render (black frames, clipping, frozen frames, unreadable captions) scores low with the right reasons; a completed render is never 'premium' by default."
+    test: "pytest tests/fast/test_quality.py"
+    next: "Workstream G."
+  - id: GEN-0
+    priority: 1
+    title: "Generation provider abstraction, model/licence matrix, honest capability labels and provenance"
+    status: planned
+    acceptance: "capabilities() reports what this machine can really do; every asset carries provenance (generated / animated still / motion graphics / footage / slideshow)."
+    test: "pytest tests/fast/test_generate.py"
+    next: "Workstream H. Real video generation stays blocked on GPU access (GEN-2)."
+  - id: INT-4
+    priority: 1
+    title: "Integrate workstreams A-H into API, durable jobs and UI (Edit-my-video flow, destination selector, quality report)"
+    status: planned
+    deps: [FX-1, DIR-1, GRW-2, LANG-1, MED-1, PLAT-1, QSC-1, GEN-0]
+    acceptance: "Upload -> direct -> render -> platform deliverables -> quality report through the UI on durable jobs."
+    test: "pytest tests/fast + a Playwright smoke run"
+    next: "Lead, after the workstream merges."
+  - id: DEMO-1
+    priority: 1
+    title: "Real demonstrations 1-5 (long-form edit, shorts factory, multilingual, generation, interrupted-job recovery) with stored evidence"
+    status: planned
+    deps: [INT-4]
+    acceptance: "Each demo has an output file, a quality report and a statement of what it does not prove."
+    test: "docs/results/demo_*.json"
+    next: "Needs properly licensed long-form source footage with speech; synthetic fixtures prove the pipeline only."

@@ -3,14 +3,14 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-12T05:34:11Z",
+ "updated": "2026-11-12T07:22:00Z",
  "git": {
-  "branch": "claude/intelligent-faraday-y28cx1",
-  "commit": "c39c8c9",
-  "subject": "Record Tests D and F passing, automatic backups, updated task registry and reports",
-  "dirty_files": 8,
-  "upstream": "origin/claude/intelligent-faraday-y28cx1",
-  "unpushed_commits": 0
+  "branch": "claude/hopeful-allen-luubcy",
+  "commit": "42f02b5",
+  "subject": "Integrate GRW-1: shorts job, retention report/apply and hook endpoints, UI controls; QA treats only narration tracks as narration (WIP snapshot of other packages included)",
+  "dirty_files": 3,
+  "upstream": null,
+  "unpushed_commits": null
  },
  "current_task": {
   "id": "QLT-1",
@@ -27,6 +27,13 @@
    "next": "1) Series visuals - derive the image query from the bible's location LOOK text (generic nouns), not its fictional name, and allow reuse of an image for a repeated location. 2) Repair off-bible locations instead of only reporting them. 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Scored rubric in the QA report."
   },
   {
+   "id": "FX-1",
+   "priority": 1,
+   "title": "Effects, transition library, animated word captions, procedural SFX in the renderer",
+   "status": "implemented",
+   "next": "Session 4 audit: nexus/fx/* exists but timeline/render.py never calls it and tests/fast/test_fx.py does not exist. Workstream A wires and tests it."
+  },
+  {
    "id": "WIN-1",
    "priority": 1,
    "title": "One-click Windows launchers (SETUP/START/STOP/STATUS/DOCTOR/BACKUP/RESTORE/CHECKPOINT/RESUME/UPDATE)",
@@ -34,43 +41,36 @@
    "next": "Run NEXUS_SETUP.bat and NEXUS_START.bat on the user's Windows machine; fix whatever fails (likely llama-cpp-python wheel, espeak-ng, Blender path)."
   },
   {
-   "id": "STO-1",
+   "id": "AUD-1",
    "priority": 1,
-   "title": "Federated storage adapter (local + rclone backends) with zero-spend eligibility and free-allowance caps",
+   "title": "Voice mastering chain, ambience/SFX helpers, scene-to-scene continuity QA (level, colour, brightness jumps)",
    "status": "tested",
-   "next": "Verify against one real remote (Backblaze B2 or Google Drive) once the user authorises an account - see STO-3."
+   "next": "A properly licensed Arabic voice is still missing (LANG-1)."
   },
   {
-   "id": "UX-1",
-   "priority": 2,
-   "title": "UI - storage/backup page, job stages + resume (done); onboarding, video preview player, friendlier errors (open)",
-   "status": "in_progress",
-   "next": "Commit the Playwright smoke test; add an in-app video player on the project page; first-run checklist on the home page."
-  },
-  {
-   "id": "JOB-2",
-   "priority": 2,
-   "title": "Move remaining in-process API jobs onto the durable ledger (analyze, remix, series, film, animate, package)",
+   "id": "GRW-1",
+   "priority": 1,
+   "title": "Growth: shorts extractor, retention rubric + auto retention pass, hook/title variants, reference-video style profile",
    "status": "tested",
-   "next": "Verify analyze, remix and package handlers with real models (they are covered by heavy tests A, B, G only through the library, not through the job handlers)."
+   "next": "Extended by GRW-2."
   }
  ],
  "tasks": {
-  "total": 28,
+  "total": 43,
   "by_status": {
    "verified": 6,
-   "tested": 3,
+   "tested": 6,
    "blocked": 4,
-   "implemented": 1,
+   "implemented": 2,
    "deferred": 1,
-   "planned": 11,
+   "planned": 22,
    "in_progress": 2
   },
   "registry": "nexus/registry/tasks.yaml"
  },
  "tests": {
   "fast": {
-   "summary": "32 passed, 0 failed, 0 skipped",
+   "summary": "63 passed, 0 failed, 1 skipped",
    "ok": true,
    "date": "2026-11-12",
    "platform": "Linux",
