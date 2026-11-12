@@ -281,3 +281,10 @@ def test_youtube_analytics_without_credentials_blocks(home):
     with pytest.raises(AdapterBlocked) as e:
         analytics.youtube_daily("v", "2026-10-01", "2026-10-02", None, transport=FakeTransport([]))
     assert e.value.code == "account_not_connected"
+
+
+def test_weak_hashtags_dropped_and_description_fits(home):
+    d = packaging.package("snapchat_spotlight", TRANSCRIPT + " When when when.", title="Solar heat", use_router=False)
+    assert d["ok"] and len(d["description"]) <= 160
+    assert "#When" not in d["tags"]
+    assert creds.env_name("pub.youtube.main.refresh_token") == "NEXUS_PUB_YOUTUBE_MAIN_REFRESH_TOKEN"

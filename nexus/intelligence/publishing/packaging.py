@@ -16,6 +16,8 @@ CTA = {"youtube": "Subscribe for the next one.", "youtube_shorts": "Follow for m
        "instagram_reels": "Save this for later.", "instagram_feed": "Save this for later.", "facebook": "Share it with someone who needs it.",
        "snapchat_spotlight": ""}
 THUMB_WORDS = 4
+WEAK_TAGS = {"when", "what", "why", "how", "where", "which", "who", "this", "that", "they", "them", "then", "there", "here",
+             "with", "from", "about", "just", "very", "really"}
 SCHEMA = {"type": "object", "required": ["title", "description", "hashtags", "thumbnail_text"],
           "properties": {"title": {"type": "string"}, "description": {"type": "string"}, "hashtags": {"type": "array"},
                          "thumbnail_text": {"type": "string"}, "cta": {"type": "string"}}}
@@ -101,7 +103,8 @@ def package(platform: str, transcript: str, title: str | None = None, language: 
     n_tags = min(int(lim["hashtags_max"] or HASHTAGS_EDITORIAL), HASHTAGS_EDITORIAL)
     tags = ["#" + re.sub(r"\W", "", str(t).lstrip("#")) for t in draft.get("hashtags") or []]
     dropped = [t for t in tags if not _said(t, transcript)]
-    tags = [t for t in tags if t not in dropped and len(t) > 1] or det["hashtags"]
+    dropped += [t for t in tags if t not in dropped and t[1:].lower() in WEAK_TAGS]
+    tags = [t for t in tags if t not in dropped and len(t) > 1] or [t for t in det["hashtags"] if t[1:].lower() not in WEAK_TAGS]
     tags = list(dict.fromkeys(tags))[:n_tags]
     t = _clip(draft.get("title") or det["title"], lim["title_max"] or 100)
     desc = _clip(draft.get("description") or det["description"], lim["description_max"])
@@ -109,6 +112,8 @@ def package(platform: str, transcript: str, title: str | None = None, language: 
     if platform.startswith("youtube"):
         t, desc = t.replace("<", "").replace(">", ""), desc.replace("<", "").replace(">", "")
     full_desc = "\n\n".join(x for x in (desc, cta, " ".join(tags)) if x)
+    if lim["description_max"]:
+        full_desc = _clip(full_desc, int(lim["description_max"])) if len(full_desc) > lim["description_max"] else full_desc
     if lim["description_max_bytes"]:
         full_desc = _clip_bytes(full_desc, int(lim["description_max_bytes"]))
     caption = None

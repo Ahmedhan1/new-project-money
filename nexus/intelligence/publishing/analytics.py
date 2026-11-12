@@ -33,7 +33,7 @@ _ms = "ms_to_s"
 CSV_MAPS: dict[str, dict] = {
     "youtube_studio": {"platform": "youtube", "verified": False,
                        "id": ["content", "video id"], "title": ["video title"], "date": ["date"], "published": ["video publish time"],
-                       "map": {"views": ("views", _num), "watch time (hours)": ("watch_minutes", _hours_to_min),
+                       "map": {"duration": ("duration_s", _num), "views": ("views", _num), "watch time (hours)": ("watch_minutes", _hours_to_min),
                                "average view duration": ("avg_view_duration_s", _hms),
                                "average percentage viewed (%)": ("avg_view_pct", _num), "subscribers": ("subscribers_net", _num),
                                "subscribers gained": ("subscribers_gained", _num), "impressions": ("impressions", _num),

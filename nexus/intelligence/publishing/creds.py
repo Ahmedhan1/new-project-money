@@ -1,7 +1,7 @@
 """Thin adapter over Account 1's secret vault (nexus/vault.py on work/account-1-cloud-platform), else environment vars.
 
 This package never stores a token itself: the DB keeps only a *reference* (secret name). Without the vault, secrets
-are read from environment variables `NEXUS_PUB_<NAME>` (dots/dashes -> underscores, upper case) and cannot be written.
+are read from environment variables `NEXUS_PUB_<NAME>` (name without 'pub.', dots/dashes -> underscores, upper case; e.g. NEXUS_PUB_YOUTUBE_MAIN_REFRESH_TOKEN) and cannot be written.
 """
 from __future__ import annotations
 
@@ -35,7 +35,7 @@ def secret_name(platform: str, account_ref: str, kind: str) -> str:
 
 
 def env_name(name: str) -> str:
-    return "NEXUS_PUB_" + re.sub(r"[^A-Z0-9]", "_", name.upper())
+    return "NEXUS_PUB_" + re.sub(r"[^A-Z0-9]", "_", name.removeprefix("pub.").upper())
 
 
 def get(name: str) -> str | None:
