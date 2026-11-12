@@ -255,3 +255,23 @@ def test_full_vs_condensed(tmp_path):
     assert "actually" not in cond and "basically" not in cond
     assert out["qa_full"]["findings"]  # too fast at 17 cps: reported, not hidden
     assert out["condense_todo"]
+
+
+def test_back_translation_echo_is_retried_and_never_counted(monkeypatch):
+    calls = []
+
+    def fake(task, prompt, **kw):
+        calls.append(prompt)
+        if kw.get("schema"):  # batch: line 1 copied (untranslated), line 2 fine
+            return model_router.Result(text="", data={"lines": ["Der Damm ist hoch.", "It is long."]}, provider="stub", model="stub")
+        return model_router.Result(text="Der Damm ist hoch.", provider="stub", model="stub")  # retry copies again
+    monkeypatch.setattr(model_router, "complete", fake)
+    back, note = tq.back_translate(["Der Damm ist hoch.", "Er ist lang."], "de")
+    assert back == ["", "It is long."] and "retried" in note and "lines [1]" in note
+    assert "German" in calls[0]
+    r = tq.check_line("The dam is high.", "Der Damm ist hoch.", "de", back=back[0])
+    assert r["coverage"] is None and not {"unsupported_content", "omission_backcheck"} & checks(r)
+
+
+def test_sentence_split_keeps_german_ordinals():
+    assert len(tq.sentences("Die Tempel wurden für Ramses II. gebaut. Sie stehen noch.")) == 2

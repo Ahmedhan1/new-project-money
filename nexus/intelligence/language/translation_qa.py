@@ -36,7 +36,13 @@ DIGIT_MAP = str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹०१२३�
 # ------------------------------------------------------------------ helpers
 def sentences(text: str) -> list[str]:
     parts = re.split(r"(?:(?<=[.!?\u061f\u0964])|(?<=[.!?\u061f\u0964]['\")\]\u00bb\u201d]))\s+|(?<=[\u3002\uff01\uff1f])", text.strip())
-    return [p.strip() for p in parts if re.search(r"\w", p)]
+    out: list[str] = []
+    for p in (p.strip() for p in parts if re.search(r"\w", p)):
+        if out and p[:1].islower():   # "Ramses II. gebaut", "ca. 3", "z. B." - not a sentence end
+            out[-1] += " " + p
+        else:
+            out.append(p)
+    return out
 
 
 def _norm_num(s: str) -> str:
@@ -161,6 +167,8 @@ def check_line(src: str, tgt: str, lang: str, glossary: dict | None = None, back
 
 def _score(src: str, tgt: str, lang: str, f: list[dict], back: str | None) -> dict:
     coverage = None
+    if back is not None and not back.strip():
+        back = None
     if back is not None and tgt.strip():
         sw, bw = content_words(src), content_words(back)
         s_st, b_st = {_stem(w) for w in sw}, {_stem(w) for w in bw}
@@ -216,24 +224,63 @@ def check_lines(source: list[str], target: list[str], lang: str, glossary: dict 
 
 
 # ------------------------------------------------------------------ back-translation through the router
+LANG_NAMES = {"de": "German", "fr": "French", "es": "Spanish", "pt": "Portuguese", "it": "Italian", "tr": "Turkish",
+              "ru": "Russian", "zh": "Chinese", "ja": "Japanese", "ko": "Korean", "hi": "Hindi", "ar": "Arabic",
+              "ar-EG": "Egyptian Arabic", "ar-Gulf": "Gulf Arabic", "en": "English"}
+EN_FUNCTION = set("the a an of to in on is are was were and it its that which for from with by as at be".split())
+
+
+def is_english(text: str, target: str) -> bool:
+    """A back-translation line is usable only if it is English and not a copy of the target line."""
+    words = re.findall(r"[A-Za-z']+", text.lower())
+    letters = [c for c in text if c.isalpha()]
+    if not words or (letters and sum(c.isascii() for c in letters) / len(letters) < 0.9):
+        return False
+    if text.strip() == target.strip():
+        return False
+    hits = sum(w in EN_FUNCTION for w in words)
+    return (hits >= 1 and hits / len(words) >= 0.08) or len(words) <= 2
+
+
+def _bt_line(line: str, name: str, privacy: str, complete) -> str | None:
+    r = complete("translation", f"{name} sentence:\n{line}\n\nWrite its literal English translation. Output only the English sentence.",
+                 system="You translate into English, literally, for quality control.", privacy=privacy, max_tokens=300, temperature=0.1)
+    txt = re.sub(r"<think>.*?</think>", "", r.text or "", flags=re.S).strip().strip('"').splitlines()
+    txt = next((t.strip() for t in txt if t.strip()), "")
+    return txt if is_english(txt, line) else None
+
+
 def back_translate(lines: list[str], lang: str, privacy: str = "internal") -> tuple[list[str] | None, str]:
     """Literal English back-translation of `lines` via the model router (task 'translation').
-    Returns (lines or None, note). Never raises for a missing provider."""
+    Batch call first; lines that come back untranslated (a small model sometimes copies the input) are retried one by
+    one; lines that still fail are returned as "" and listed in the note. Returns (lines or None, note)."""
     from ..model_router import NoProviderAvailable, complete
+    name = LANG_NAMES.get(lang, lang)
     numbered = "\n".join(f"{i + 1}. {t}" for i, t in enumerate(lines))
-    prompt = (f"Translate each numbered line from {lang} into English as LITERALLY as possible. Do not fix, complete or "
+    prompt = (f"Translate each numbered {name} line into ENGLISH as literally as possible. Do not fix, complete or "
               "improve anything: if a line says something odd or omits something, your English must show that. Keep every "
-              f"number as digits. Return JSON {{\"lines\": [...]}} with exactly {len(lines)} strings, in order.\n\n{numbered}")
+              f"number as digits. Return JSON {{\"lines\": [...]}} with exactly {len(lines)} English strings, in order.\n\n{numbered}")
     schema = {"type": "object", "required": ["lines"], "properties": {"lines": {"type": "array", "minItems": len(lines)}}}
     try:
-        r = complete("translation", prompt, system="You are a literal back-translator for translation quality control.",
+        r = complete("translation", prompt, system=f"You are a literal {name}-to-English back-translator for translation quality control.",
                      schema=schema, privacy=privacy, max_tokens=1600, temperature=0.1)
+        out = [re.sub(r"^\s*\d+[.)]\s*", "", str(x)).strip() for x in (r.data or {}).get("lines", [])][:len(lines)]
+        out += [""] * (len(lines) - len(out))
+        retried, failed = [], []
+        for i, (src, b) in enumerate(zip(lines, out)):
+            if not is_english(b, src):
+                retried.append(i + 1)
+                out[i] = _bt_line(src, name, privacy, complete) or ""
+                if not out[i]:
+                    failed.append(i + 1)
     except NoProviderAvailable as e:
         return None, f"back-translation not run: {e}"
-    out = [re.sub(r"^\s*\d+[.)]\s*", "", str(x)).strip() for x in (r.data or {}).get("lines", [])][:len(lines)]
-    if len(out) != len(lines):
-        return None, f"back-translation returned {len(out)} lines for {len(lines)} ({r.provider}/{r.model})"
-    return out, f"{r.provider}/{r.model}" + (" (cached)" if r.cached else "")
+    note = f"{r.provider}/{r.model}" + (" (cached)" if r.cached else "")
+    if retried:
+        note += f"; batch output not English for lines {retried}, retried one by one"
+    if failed:
+        note += f"; no usable back-translation for lines {failed} (meaning not cross-checked there)"
+    return out, note
 
 
 # ------------------------------------------------------------------ LocalizationManifest + approval workflow
