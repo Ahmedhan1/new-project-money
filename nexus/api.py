@@ -296,6 +296,8 @@ class LocalizeReq(BaseModel):
     lang: str
     branch: str = "main"
     dub: bool = True
+    mode: str = "replace"          # replace | voiceover (original speaker stays audible underneath)
+    out_branch: str | None = None
 
 
 @app.post("/api/projects/{pid}/localize")
@@ -306,7 +308,10 @@ def api_localize(pid: str, r: LocalizeReq):
     except KeyError:
         raise HTTPException(409, f"project has no timeline on branch '{r.branch}' yet")
 
-    return jobs.submit("localize", {"project": pid, "lang": r.lang, "branch": r.branch, "dub": r.dub}, pid)
+    if r.mode not in ("replace", "voiceover"):
+        raise HTTPException(400, "mode must be replace or voiceover")
+    return jobs.submit("localize", {"project": pid, "lang": r.lang, "branch": r.branch, "dub": r.dub, "mode": r.mode,
+                                    "out_branch": r.out_branch}, pid)
 
 
 class PackageReq(BaseModel):

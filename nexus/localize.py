@@ -19,7 +19,9 @@ def _langs() -> dict:
 LANGS = _langs()
 
 STOPWORDS = set("that this with from have they their there which would could about than then also been were what when will more most very much many some such into over only just even because while where these those other being does".split())
-PACE = {"ar": 0.85}  # the Arabic voice reads slowly; this brings it to a natural narration pace
+PACE = {"ar": 0.85}
+VOICEOVER_ORIGINAL_GAIN = 0.2   # original speech under a voice-over: about -14 dB, audible but not competing
+VOICEOVER_DELAY = 0.6           # the voice-over starts a beat after the original, as in broadcast voice-over  # the Arabic voice reads slowly; this brings it to a natural narration pace
 
 EGYPTIAN_STYLE = """Egyptian colloquial Arabic (Masri) as spoken in Cairo, written in Arabic script only.
 Use everyday Egyptian words, for example: ده/دي (this), مش (not), عشان (because), دلوقتي (now), إزاي (how),
@@ -187,7 +189,7 @@ def narration_units(tl: dict, analyses: dict | None = None) -> list[dict]:
 
 
 def localize(project, tl: dict, lang: str, analyses: dict | None = None, context: str = "", dub: bool = True,
-             source_lang: str = "en", allow_noncommercial: bool = False) -> tuple[dict, dict]:
+             source_lang: str = "en", allow_noncommercial: bool = False, mode: str = "replace") -> tuple[dict, dict]:
     """Return (localised timeline, language review). The source timeline is not modified."""
     units = narration_units(tl, analyses)
     out = copy.deepcopy(tl)
@@ -242,7 +244,10 @@ def localize(project, tl: dict, lang: str, analyses: dict | None = None, context
                 else:
                     c["duration"] = round(need, 3)
             if c["type"] == "video":
-                c["mute"] = True  # original speech replaced (no source separation deployed: original music/effects go too)
+                if mode == "voiceover":  # UN-style voice-over: the real speaker stays audible underneath
+                    c["volume"] = round(float(c.get("volume", 1.0)) * VOICEOVER_ORIGINAL_GAIN, 3)
+                else:
+                    c["mute"] = True  # original speech replaced (no source separation deployed: original music/effects go too)
             c["narration"] = line
             review["checks"].append(qa.dub_review(wav, line, lang))
         starts = clip_starts(out)
@@ -250,10 +255,15 @@ def localize(project, tl: dict, lang: str, analyses: dict | None = None, context
         for u, line in zip(units, lines):
             wav = adir / f"u{u['clip']:03d}.wav"
             st = starts[u["clip"]] + 0.1
-            out["audio"].append({"src": str(wav), "start": round(st, 3), "clip": out["clips"][u["clip"]]["id"]})
+            out["audio"].append({"src": str(wav), "start": round(st + (VOICEOVER_DELAY if mode == "voiceover" else 0.0), 3),
+                                 "clip": out["clips"][u["clip"]]["id"], "role": "narration", "synthetic": True, "lang": lang})
             cues += _cues(line, st, st + ff.duration(wav), lang)
         out["subtitles"] = subs.fix_timing(cues)
         review["voice"] = {k2: voice_info[k2] for k2 in ("voice", "license", "commercial", "engine")} if voice_info else None
+        review["dub_mode"] = mode
+        review["label"] = ("AI voice-over (synthetic voice) over the original speaker" if mode == "voiceover"
+                           else "AI dub (synthetic voice replaces the original speech)")
+        out["dub"] = {"mode": mode, "label": review["label"], "voice": review["voice"], "lang": lang}
         if voice_info and not voice_info["commercial"]:
             review["checks"].append(qa._c(f"voice licence [{lang}]", False, f"{voice_info['voice']}: {voice_info['license']}", "major"))
     elif lang != source_lang:

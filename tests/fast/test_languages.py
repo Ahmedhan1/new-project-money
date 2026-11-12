@@ -125,3 +125,31 @@ def test_mt_post_processing_fixes_the_errors_found_in_the_real_german_run():
     assert len(mt._sentences("Ich hoffe, du fliegst eines Tages zum Mond… Ich wünsche dir viel Erfolg.")) == 2
     assert mt.collapse_repeats("Das ist eine lange Zeit, eine lange Zeit.") == "Das ist eine lange Zeit."
     assert mt.collapse_repeats("Wir sehen uns, wir sehen es.") == "Wir sehen uns, wir sehen es."
+
+
+def test_voiceover_mode_keeps_the_original_speaker_audible_and_labels_the_synthetic_voice(home, monkeypatch, tmp_path):
+    import subprocess
+
+    from nexus import project as prj
+    from nexus.timeline import ops
+    wav = tmp_path / "v.wav"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "sine=f=500:d=1.5:r=48000", str(wav)], check=True)
+    monkeypatch.setattr(localize.mt, "translate", lambda lines, lang: ["Solarenergie ist sauber."] * len(lines))
+    monkeypatch.setattr(localize, "llm_translate_lines", lambda lines, lang, context="": lines)
+    monkeypatch.setattr(localize.qa, "dub_review", lambda *a, **k: {"check": "dub", "ok": True, "severity": "minor", "detail": "stub"})
+
+    def fake_tts(text, out, lang, voice=None, length_scale=1.0, **k):
+        import shutil
+        from pathlib import Path
+        Path(out).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(wav, out)
+        return {"duration": 1.5, "voice": voice, "license": "CC0", "commercial": True, "engine": "stub"}
+    monkeypatch.setattr(localize.tts, "synthesize", fake_tts)
+    p = prj.Project.create("vo", "edit")
+    clip = ops.video_clip(str(wav), 0, 3.0, narration="Solar power is clean.")
+    tl = {"width": 320, "height": 180, "fps": 30, "lang": "en", "clips": [clip], "audio": [], "subtitles": [], "music": None, "markers": []}
+    out, review = localize.localize(p, tl, "de", dub=True, mode="voiceover")
+    c = out["clips"][0]
+    assert not c.get("mute") and 0 < c["volume"] < 0.5                       # original speaker still audible
+    assert out["audio"][0]["synthetic"] and out["audio"][0]["role"] == "narration"
+    assert "voice-over" in review["label"] and out["dub"]["voice"]["commercial"]

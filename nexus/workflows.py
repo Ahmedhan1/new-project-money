@@ -113,14 +113,16 @@ def localize_(job: jobs.Job) -> dict:
     branch, lang = a.get("branch", "main"), a["lang"]
 
     def translate():
-        ltl, review = localize.localize(p, p.timeline(branch), lang, _analysis(p) or None, context=p.name, dub=a.get("dub", True))
-        p.save_timeline(ltl, f"{lang} version", branch=lang)
+        ltl, review = localize.localize(p, p.timeline(branch), lang, _analysis(p) or None, context=p.name, dub=a.get("dub", True),
+                                        mode=a.get("mode", "replace"))
+        p.save_timeline(ltl, f"{lang} version", branch=a.get("out_branch") or lang)
         return {"review": review}
 
     review = job.stage("translate-dub", translate)["review"]
 
     def run():
-        stats, report = qa.render_with_qa(p, p.timeline(lang), f"{branch}_{lang}", extra_stages=[review], extra={"language": lang})
+        ob = a.get("out_branch") or lang
+        stats, report = qa.render_with_qa(p, p.timeline(ob), f"{branch}_{ob}", extra_stages=[review], extra={"language": lang})
         return {"output": str(Path(stats["output"]).relative_to(p.dir)), "status": report["status"], "issues": report["known_issues"],
                 "lines": review["lines"]}
 
