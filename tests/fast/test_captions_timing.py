@@ -51,3 +51,15 @@ def test_whisper_hyphen_tokens_are_merged_in_the_transcript():
     n = asr.normalize_segment(seg)
     assert n["text"] == "a 160-meter shaft and T-38 jets - fast"          # a free-standing dash is left alone
     assert [w["word"] for w in n["words"]] == ["a", "160-meter", "shaft"] and n["words"][1]["end"] == 0.9
+
+
+def test_zero_length_words_get_a_duration_and_reach_the_captions():
+    from nexus.speech import asr
+    seg = {"start": 585.5, "end": 588.0, "text": "surface. We had each",
+           "words": [{"start": 585.96, "end": 586.38, "word": "surface."}, {"start": 586.64, "end": 586.64, "word": "We"},
+                     {"start": 586.64, "end": 586.86, "word": "had"}, {"start": 586.86, "end": 587.16, "word": "each"}]}
+    n = asr.normalize_segment(seg)
+    we = n["words"][1]
+    assert we["end"] > we["start"] >= 586.38
+    cues = subs.cues_from_transcript([{"start": 0, "end": 0, "text": "", "words": n["words"][1:]}])
+    assert cues[0]["text"].startswith("We had")

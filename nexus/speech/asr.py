@@ -45,7 +45,15 @@ def normalize_segment(s: dict) -> dict:
     import re
     s = dict(s)
     if s.get("words"):
-        s["words"] = merge_split_tokens(s["words"])
+        ws = merge_split_tokens(s["words"])
+        prev_end = float(s.get("start", 0)) if ws else 0.0
+        for w in ws:  # zero-length words (Whisper gives some) borrow up to 120 ms from the gap before them
+            if float(w["end"]) - float(w["start"]) < 0.02:
+                w["start"] = round(max(prev_end, float(w["end"]) - 0.12), 3)
+                if float(w["end"]) - float(w["start"]) < 0.02:
+                    w["end"] = round(float(w["start"]) + 0.08, 3)
+            prev_end = float(w["end"])
+        s["words"] = ws
     s["text"] = re.sub(r"(?<=[A-Za-z0-9]) -(?=[A-Za-z0-9])", "-", s.get("text", ""))
     return s
 
