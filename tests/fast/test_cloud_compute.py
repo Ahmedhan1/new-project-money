@@ -311,3 +311,19 @@ def test_lost_attempt_without_result_is_retried(env):
     r = d.run_until_done(row["id"], timeout=60, interval=0.05)
     assert r["status"] == "succeeded" and r["attempts"] == 2
     assert "worker.lost" in _types(row["id"])
+
+
+def test_quota_endpoint_returns_exactly_the_published_contract(home, monkeypatch):
+    """GET /api/v1/compute/quota once added fields outside QuotaStatus/v1 (extra=forbid): clients validating the
+    contract rejected it. Extra detail now lives at /quota/details."""
+    monkeypatch.setenv("NEXUS_EMBEDDED_WORKER", "0")
+    from fastapi.testclient import TestClient
+
+    from nexus import api
+    from nexus.contracts import QuotaStatus
+    c = TestClient(api.app)
+    rows = c.get("/api/v1/compute/quota").json()
+    for q in rows:
+        QuotaStatus(**q)
+    d = c.get("/api/v1/compute/quota/details").json()
+    assert len(d) == len(rows) and all("allowance_source" in x and QuotaStatus(**x["quota"]) for x in d)

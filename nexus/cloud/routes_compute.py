@@ -135,12 +135,20 @@ def retry_job(job_id: str):
 
 @router.get("/quota", dependencies=owner)
 def quota():
-    out = []
+    """List of QuotaStatus/v1 objects - exactly the published contract (extra fields are forbidden by it)."""
     p = _d().providers.get("kaggle")
-    if p is not None:
-        from .compute.kaggle import ALLOWANCE_SOURCE
-        out.append({**p.quota().model_dump(), "allowance_source": ALLOWANCE_SOURCE, "paused": p.paused()[0], "paused_reason": p.paused()[1]})
-    return out
+    return [p.quota().model_dump()] if p is not None else []
+
+
+@router.get("/quota/details", dependencies=owner)
+def quota_details():
+    """Quota plus where the allowance figure comes from and the provider's pause state (not part of the contract)."""
+    p = _d().providers.get("kaggle")
+    if p is None:
+        return []
+    from .compute.kaggle import ALLOWANCE_SOURCE
+    return [{"quota": p.quota().model_dump(), "allowance_source": ALLOWANCE_SOURCE, "paused": p.paused()[0],
+             "paused_reason": p.paused()[1]}]
 
 
 # ---------------------------------------------------------------- pull workers (user_gpu / colab)
