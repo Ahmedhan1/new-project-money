@@ -73,8 +73,32 @@ Local files need an owner-stated rights basis (`owned, licensed, public-domain, 
 URLs are never downloaded. Transcripts are reduced to counts; the opening phrase (<= 12 words) is kept only with
 `keep_quote=True` and then lands in `do_not_copy`. Router calls are `privacy="private"` and wrapped in `jobs.heavy_lock()`.
 
-## Demo evidence
-See section appended by the demo run below.
+## Demo evidence (2026-11-12, `scripts/account3/creators_demo.py --router`)
+Four NASA/JPL videos from the NASA Image and Video Library (declared host `images-assets.nasa.gov`), publisher's
+`~mobile.mp4` rendition (2.7-50 MB) + the publisher's own `.srt`, stored in `.nexus/a3_refs/` (not in Git).
+Licence checked: NASA media "generally are not subject to copyright in the United States"
+(https://www.nasa.gov/nasa-brand-center/images-and-media/); JPL media "may be used for any purpose without prior
+permission" with credit "Courtesy NASA/JPL-Caltech" (https://www.jpl.nasa.gov/jpl-image-use-policy) - stored as rights
+`licensed`. Results: `docs/results/account3/creators_profiles.json`, `creators_compare.json` (+ style + Account 2 projection).
+
+| reference | format | cuts/min | median shot s | speech share | hook (interpreted) | pacing shape |
+|---|---|---|---|---|---|---|
+| What's Up: April 2026 (JPL) | science explainer | 1.31 | 10.8 | 0.90 | specific_number | front_loaded |
+| Artemis interviews, J. Epps (JSC) | interview | 0.0 | 1165.7 (single shot) | unreliable* | question | no cuts |
+| Crew-3 launch day highlights (KSC) | highlights montage | 7.55 | 5.0 | 0.79 | specific_number | even |
+| NASA podcasts promo (HQ) | promo / ad | 13.35 | 3.4 | 0.92 | question | front_loaded |
+
+\* The interview's `.srt` runs to 2162 s but the video is 1166 s (captions of a longer cut): the profile flags
+`speech.caption_mismatch`, confidence drops to 0.35, and `compare()` excludes its speech/opening fields. Whisper was not run
+on it (19 min on the shared CPU); the promo's first six cues are captions of on-screen titles, not speech, which captions
+cannot distinguish (counts as speech). Strongest opening by the stated criteria: the promo (3.94 / 7).
+
+Router: `reference_interpretation` ran on the JPL profile with the local `qwen3-4b-q4km` (privacy private, under the heavy
+lock). Its output is stored as `interpreted_by_model`, confidence 0.35, and **it embellishes** (e.g. "slow-motion shot",
+"three-act structure" - not derivable from the numbers). It is shown for review only; rule-based fields do not depend on it.
+
+Formats not covered by a lawful reference in this run: challenge/high-stakes (no PD/CC item found), Arabic educational
+explainer (no CC El Daheeh-style item; the show is copyrighted and was not downloaded), travel vlog (Commons not searched).
 
 ## Integration requests (for the lead)
 1. `nexus/registry/components.yaml`: declare a zero-cost component for the YouTube Data API (`network_hosts: [www.googleapis.com]`,
