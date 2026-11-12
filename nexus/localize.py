@@ -22,7 +22,8 @@ STOPWORDS = set("that this with from have they their there which would could abo
 PACE = {"ar": 0.85}
 VOICEOVER_ORIGINAL_GAIN = 0.2   # original speech under a voice-over: about -14 dB, audible but not competing
 VOICEOVER_SPILL = 0.5           # a voice-over line may run this far past its cut (never into the next line's start)
-VOICEOVER_MIN_SPEED = 0.85      # slowest the real speaker's picture may be played under a voice-over
+VOICEOVER_MIN_SPEED = 0.85
+VOICEOVER_MAX_DRIFT = 1.2       # a voice-over line starting later than this after its cut is flagged for review      # slowest the real speaker's picture may be played under a voice-over
 VOICEOVER_DELAY = 0.6           # the voice-over starts a beat after the original, as in broadcast voice-over  # the Arabic voice reads slowly; this brings it to a natural narration pace
 
 EGYPTIAN_STYLE = """Egyptian colloquial Arabic (Masri) as spoken in Cairo, written in Arabic script only.
@@ -351,12 +352,23 @@ def localize(project, tl: dict, lang: str, analyses: dict | None = None, context
             review["checks"].append(qa.dub_review(wav, line, lang))
         starts = clip_starts(out)
         cues = []
+        prev_end = -1.0
         for u, line in zip(units, lines):
             wav = adir / f"u{u['clip']:03d}.wav"
             st = starts[u["clip"]] + 0.1
-            out["audio"].append({"src": str(wav), "start": round(st + (vo_delay.get(u["clip"], VOICEOVER_DELAY) if mode == "voiceover" else 0.0), 3),
+            at = st + (vo_delay.get(u["clip"], VOICEOVER_DELAY) if mode == "voiceover" else 0.0)
+            if mode == "voiceover":
+                # a line that spilled over its cut pushes the next one back: two synthetic voices never overlap
+                # (the first run with spill had 4 overlaps)
+                at = max(at, prev_end + 0.08)
+                if at - starts[u["clip"]] > VOICEOVER_MAX_DRIFT:
+                    review["checks"].append(qa._c(f"voice-over drift [{lang}] scene {u['clip']}", False,
+                                                  f"line starts {at - starts[u['clip']]:.1f}s after its cut because the previous one "
+                                                  "ran long - shorten the previous line in review", "major", fix="shorten-line"))
+                prev_end = at + ff.duration(wav)
+            out["audio"].append({"src": str(wav), "start": round(at, 3),
                                  "clip": out["clips"][u["clip"]]["id"], "role": "narration", "synthetic": True, "lang": lang})
-            cues += _cues(line, st, st + ff.duration(wav), lang)
+            cues += _cues(line, at if mode == "voiceover" else st, (at if mode == "voiceover" else st) + ff.duration(wav), lang)
         out["subtitles"] = subs.fix_timing(cues)
         review["voice"] = {k2: voice_info[k2] for k2 in ("voice", "license", "commercial", "engine")} if voice_info else None
         review["dub_mode"] = mode

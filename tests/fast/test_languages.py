@@ -216,3 +216,30 @@ def test_voiceover_never_puts_the_speaker_in_slow_motion(home, monkeypatch, tmp_
     assert abs(float(out["clips"][0].get("speed", 1.0)) - expect_speed) < 0.01
     assert any(c["check"].startswith("voice-over fit") and not c["ok"] for c in review["checks"]) == flagged
     assert out["audio"][0]["start"] < 0.1 + localize.VOICEOVER_DELAY + 1e-6
+
+
+def test_voiceover_lines_never_overlap_even_when_one_spills_over_its_cut(home, monkeypatch, tmp_path):
+    """Second German voice-over run: spill allowance produced 4 overlapping synthetic lines (critical)."""
+    import subprocess
+
+    from nexus import project as prj
+    from nexus.timeline import ops
+    wav = tmp_path / "v.wav"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "sine=f=500:d=3.3:r=48000", str(wav)], check=True)
+    monkeypatch.setattr(localize.mt, "translate", lambda lines, lang: ["Ein ziemlich langer deutscher Satz hier."] * len(lines))
+    monkeypatch.setattr(localize, "llm_translate_lines", lambda lines, lang, context="": lines)
+    monkeypatch.setattr(localize.qa, "dub_review", lambda *a, **k: {"check": "dub", "ok": True, "severity": "minor", "detail": "stub"})
+
+    def fake_tts(text, out, lang, voice=None, length_scale=1.0, **k):
+        import shutil
+        from pathlib import Path
+        Path(out).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(wav, out)
+        return {"duration": 3.3, "voice": voice, "license": "CC0", "commercial": True, "engine": "stub"}
+    monkeypatch.setattr(localize.tts, "synthesize", fake_tts)
+    p = prj.Project.create("vo3", "edit")
+    clips = [ops.video_clip(str(wav), 0, 3.0, narration=f"Line {k} is a sentence.") for k in range(3)]
+    tl = {"width": 320, "height": 180, "fps": 30, "lang": "en", "clips": clips, "audio": [], "subtitles": [], "music": None, "markers": []}
+    out, review = localize.localize(p, tl, "de", dub=True, mode="voiceover")
+    spans = sorted((a["start"], a["start"] + 3.3) for a in out["audio"])
+    assert all(b[0] >= a[1] + 0.05 for a, b in zip(spans, spans[1:])), spans
