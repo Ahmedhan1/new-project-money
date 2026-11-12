@@ -109,6 +109,14 @@ def research_get(rid: str):
     return d
 
 
+@router.get("/research/{rid}/assessment")
+def research_assessment(rid: str):
+    """Market research V2 evidence-quality layer (credibility, cross-source, recency, geography, language demand,
+    competition/saturation, evidence coverage, uncertainty interval)."""
+    from .market import assess_v2
+    return assess_v2.assess(research_get(rid))
+
+
 @router.get("/niches")
 def niches_list():
     m = _mod("market")

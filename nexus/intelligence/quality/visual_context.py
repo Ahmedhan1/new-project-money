@@ -59,7 +59,7 @@ def _index() -> dict[str, set[str]]:
     for name, cc in {"Egypt": "EG", "Aswan": "EG", "Cairo": "EG", "Giza": "EG", "Luxor": "EG", "Alexandria": "EG", "Nile": "EG",
                      "Lake Nasser": "EG", "Russia": "RU", "Moscow": "RU", "Belgorod": "RU", "Bavaria": "DE", "Munich": "DE",
                      "Dubai": "AE", "Abu Dhabi": "AE", "Riyadh": "SA", "Mecca": "SA", "Doha": "QA", "Kuwait": "KW", "Sudan": "SD",
-                     "Khartoum": "SD", "Paris": "FR", "Berlin": "DE", "London": "GB", "Beijing": "CN", "Delhi": "IN", "Mumbai": "IN"}.items():
+                     "Khartoum": "SD", "Kourou": "GF", "Paris": "FR", "Berlin": "DE", "London": "GB", "Beijing": "CN", "Delhi": "IN", "Mumbai": "IN"}.items():
         idx.setdefault(_fold(name), set()).add(cc)
     return idx
 
@@ -108,7 +108,9 @@ def places(text: str, online: bool = False) -> dict[str, list[str]]:
     for ph in candidates(text):
         for piece in [ph, *ph.split()]:
             k = _fold(piece)
-            ccs = idx.get(k) or next((v for kk, v in idx.items() if len(k) >= 6 and kk.startswith(k[:6]) and len(kk) <= len(k) + 6), None)
+            # inflected forms only ("Belgorodskaya" -> stem "belgorod"): the INDEX key must be a prefix of the phrase.
+            # The reverse direction matched "Kourou" (French Guiana) to Guinea's "Kouroussa" - a real false positive.
+            ccs = idx.get(k) or next((v for kk, v in idx.items() if len(kk) >= 5 and k.startswith(kk) and len(k) - len(kk) <= 5), None)
             if ccs:
                 found.setdefault(piece, set()).update(ccs)
                 break
