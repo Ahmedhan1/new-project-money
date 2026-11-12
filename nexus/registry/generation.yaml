@@ -1,0 +1,1220 @@
+# NEXUS generation matrix (WS H, task GEN-0). Machine-readable; validated by nexus/generate/registry.py and
+# tests/fast/test_generate.py. Decision document: docs/GENERATION.md.
+#
+# Rules for every entry
+#   * `weights_licence` is the licence of the WEIGHTS (not the code). `commercial_use` is one of
+#       yes         - commercial use of outputs allowed without registration, revenue cap or territory limit
+#                     (use-based restrictions such as OpenRAIL "Attachment A" may still apply; see `conditions`)
+#       restricted  - allowed only under conditions (revenue cap, registration, territory, attribution in UI ...)
+#       no          - research / non-commercial only
+#       unverified  - we could not read the licence text (gated, missing, or ambiguous) - treated like `no`
+#   * `source_url` is the page we actually read; `read_on` is when. Hugging Face metadata was read through
+#     https://huggingface.co/api/models/<repo> and the licence files through .../raw/main/<file>.
+#   * `cpu.feasible`: yes (measured or documented usable) | slow (works, minutes per output) | no | unmeasured
+#   * Numbers we did not measure or read are written as `unverified` / `unmeasured`, never guessed.
+#   * `download_gb` = what NEXUS would fetch (subset), `repo_gb` = whole HF repo (all precisions/variants).
+#   * NEXUS policy: only `commercial_use: yes` models are used by default. `restricted` needs the caller to accept
+#     the conditions; `no`/`unverified` need an explicit non-commercial opt-in (generate.image(..., allow_noncommercial=True)).
+schema_version: 1
+read_on: "2026-11-12"
+
+models:
+  # ------------------------------------------------------------------ image (text-to-image)
+  - id: sd15-lcm
+    name: "Stable Diffusion 1.5 + LCM-LoRA (4-step)"
+    tasks: [image, inpaint, outpaint, reference]
+    hf_repo: stable-diffusion-v1-5/stable-diffusion-v1-5
+    weights_licence: "CreativeML OpenRAIL-M (SD 1.5) + OpenRAIL++-M (latent-consistency/lcm-lora-sdv1-5)"
+    commercial_use: "yes"
+    conditions: "OpenRAIL use-based restrictions (Attachment A) must be passed on; outputs are yours; no safety checker shipped by NEXUS - the restrictions still apply"
+    source_url: https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5
+    licence_url: https://huggingface.co/spaces/CompVis/stable-diffusion-license
+    read_on: "2026-11-12"
+    params_b: 0.98
+    download_gb: 2.27
+    repo_gb: 47.3
+    min_vram_gb: unverified
+    min_ram_gb: 6
+    cpu: {feasible: "yes", speed: "measured here: ~31 s per 512x512 image at 4 steps after warm-up, 4 vCPU, float32 (docs/results/generation_bench.json)", source: "docs/results/generation_bench.json"}
+    resolution: "512x512 native (768x432 works, composition degrades above ~768 px)"
+    max_seconds: null
+    runtimes: [diffusers, sdcpp, openvino, comfyui]
+    windows: "yes (diffusers CPU/CUDA/DirectML; sd.cpp Windows binaries)"
+    install: low
+    quality: "Dated 2022 base model; recognisable subjects, weak text/hands, LCM trades detail for speed. Fine for backgrounds and B-roll stills, not hero shots."
+    status: recommended
+    tier: [cpu, vram_6_8]
+    fetch:
+      - repo: stable-diffusion-v1-5/stable-diffusion-v1-5
+        allow_patterns: [model_index.json, "scheduler/*", "tokenizer/*", text_encoder/config.json, text_encoder/model.fp16.safetensors,
+                         unet/config.json, unet/diffusion_pytorch_model.fp16.safetensors, vae/config.json, vae/diffusion_pytorch_model.fp16.safetensors]
+      - repo: latent-consistency/lcm-lora-sdv1-5
+        allow_patterns: [pytorch_lora_weights.safetensors]
+        subdir: lcm-lora
+    diffusers: {pipeline: StableDiffusionPipeline, variant: fp16, scheduler: LCMScheduler, lora: lcm-lora, steps: 4, guidance: 1.0, native: [512, 512]}
+
+  - id: sdxl-base
+    name: "Stable Diffusion XL 1.0 base (+ optional LCM/Lightning LoRA)"
+    tasks: [image, inpaint, outpaint, reference]
+    hf_repo: stabilityai/stable-diffusion-xl-base-1.0
+    weights_licence: "CreativeML OpenRAIL++-M"
+    commercial_use: "yes"
+    conditions: "OpenRAIL++ use-based restrictions"
+    source_url: https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0
+    read_on: "2026-11-12"
+    params_b: 3.5
+    download_gb: 6.9
+    repo_gb: 76.9
+    min_vram_gb: unverified
+    min_ram_gb: 12
+    cpu: {feasible: unmeasured, speed: "unmeasured; ~3x the UNet cost of SD 1.5 at 1024 px - expect minutes per image on 4 cores", source: unmeasured}
+    resolution: "1024x1024 native"
+    runtimes: [diffusers, sdcpp, openvino, comfyui]
+    windows: "yes"
+    install: low
+    quality: "Clearly better composition than SD 1.5; huge LoRA ecosystem (check each LoRA's own licence)."
+    status: candidate
+    tier: [vram_6_8, vram_12_16]
+    diffusers: {pipeline: StableDiffusionXLPipeline, variant: fp16, steps: 25, guidance: 6.0, native: [1024, 1024]}
+
+  - id: lcm-lora-sdxl
+    name: "LCM-LoRA for SDXL (4-8 step distillation adapter)"
+    tasks: [image]
+    hf_repo: latent-consistency/lcm-lora-sdxl
+    weights_licence: "OpenRAIL++-M"
+    commercial_use: "yes"
+    conditions: "inherits SDXL OpenRAIL++ restrictions"
+    source_url: https://huggingface.co/latent-consistency/lcm-lora-sdxl
+    read_on: "2026-11-12"
+    download_gb: 0.39
+    min_vram_gb: unverified
+    cpu: {feasible: unmeasured, speed: unmeasured, source: unmeasured}
+    resolution: "1024x1024"
+    runtimes: [diffusers, sdcpp, comfyui]
+    windows: "yes"
+    install: low
+    quality: "Adapter, not a model: lowers SDXL steps to 4-8 at some loss of detail."
+    status: candidate
+    tier: [vram_6_8]
+
+  - id: sdxl-lightning
+    name: "SDXL-Lightning (ByteDance, 1-8 step)"
+    tasks: [image]
+    hf_repo: ByteDance/SDXL-Lightning
+    weights_licence: "OpenRAIL++-M"
+    commercial_use: "yes"
+    conditions: "OpenRAIL++ use-based restrictions"
+    source_url: https://huggingface.co/ByteDance/SDXL-Lightning
+    read_on: "2026-11-12"
+    download_gb: 5.1
+    repo_gb: 49.5
+    min_vram_gb: unverified
+    cpu: {feasible: unmeasured, speed: unmeasured, source: unmeasured}
+    resolution: "1024x1024"
+    runtimes: [diffusers, comfyui]
+    windows: "yes"
+    install: low
+    quality: "Fast SDXL distillation; better than LCM at 4 steps by the authors' comparison (not verified here)."
+    status: candidate
+    tier: [vram_6_8, vram_12_16]
+
+  - id: hyper-sd
+    name: "Hyper-SD LoRAs (ByteDance)"
+    tasks: [image]
+    hf_repo: ByteDance/Hyper-SD
+    weights_licence: "not stated in the model card metadata (license field empty)"
+    commercial_use: unverified
+    conditions: "SD1.5/SDXL LoRAs would also inherit the base licence; the FLUX.1-dev LoRAs inherit the FLUX.1-dev NON-COMMERCIAL licence"
+    source_url: https://huggingface.co/ByteDance/Hyper-SD
+    read_on: "2026-11-12"
+    repo_gb: 27.7
+    min_vram_gb: unverified
+    cpu: {feasible: unmeasured, speed: unmeasured, source: unmeasured}
+    resolution: "per base model"
+    runtimes: [diffusers, comfyui]
+    windows: "yes"
+    install: low
+    quality: "Not evaluated."
+    status: rejected
+    why: "Licence not stated - unusable until clarified."
+
+  - id: sd-turbo
+    name: "SD-Turbo / SDXL-Turbo (Stability AI)"
+    tasks: [image]
+    hf_repo: stabilityai/sd-turbo
+    weights_licence: "Stability AI Community License (July 5, 2024) - LICENSE.md in both repos; sdxl-turbo metadata says sai-nc-community"
+    commercial_use: restricted
+    conditions: "Commercial use only for individuals/organisations with < US$1M annual revenue and registration with Stability AI; otherwise an enterprise licence"
+    source_url: https://huggingface.co/stabilityai/sd-turbo/raw/main/LICENSE.md
+    read_on: "2026-11-12"
+    download_gb: 2.6
+    repo_gb: 13.0
+    min_vram_gb: unverified
+    cpu: {feasible: unmeasured, speed: "1-step model; expected faster than SD1.5+LCM but unmeasured here", source: unmeasured}
+    resolution: "512x512 (sd-turbo), 512x512 (sdxl-turbo)"
+    runtimes: [diffusers, sdcpp, openvino, comfyui]
+    windows: "yes"
+    install: low
+    quality: "1-4 step, low detail."
+    status: rejected
+    why: "Revenue-capped, registration-required licence; SD1.5+LCM-LoRA gives similar CPU speed under a clean licence."
+
+  - id: sd35-medium
+    name: "Stable Diffusion 3.5 Medium / Large"
+    tasks: [image]
+    hf_repo: stabilityai/stable-diffusion-3.5-medium
+    weights_licence: "Stability AI Community License (metadata: stabilityai-ai-community; repo gated, licence file not readable without accepting)"
+    commercial_use: restricted
+    conditions: "Same community licence family as SD-Turbo (< US$1M revenue) - text not re-read because the repo is gated"
+    source_url: https://huggingface.co/api/models/stabilityai/stable-diffusion-3.5-medium
+    read_on: "2026-11-12"
+    params_b: 2.5
+    repo_gb: 48.9
+    min_vram_gb: unverified
+    cpu: {feasible: unmeasured, speed: unmeasured, source: unmeasured}
+    resolution: "up to 1440 px"
+    runtimes: [diffusers, sdcpp, comfyui]
+    windows: "yes"
+    install: medium
+    quality: "Good typography and prompt following for its size."
+    status: rejected
+    why: "Revenue-capped licence; gated."
+
+  - id: flux1-schnell
+    name: "FLUX.1 [schnell] (12B, 1-4 step)"
+    tasks: [image]
+    hf_repo: black-forest-labs/FLUX.1-schnell
+    weights_licence: "Apache-2.0 (model card metadata; repo is click-through gated)"
+    commercial_use: "yes"
+    conditions: "none beyond Apache-2.0; uses T5-XXL text encoder (Apache-2.0)"
+    source_url: https://huggingface.co/black-forest-labs/FLUX.1-schnell
+    read_on: "2026-11-12"
+    params_b: 12
+    download_gb: "~34 (bf16 transformer + T5-XXL + CLIP + VAE); GGUF Q4 transformer ~6.8 from city96/FLUX.1-schnell-gguf"
+    repo_gb: 57.9
+    min_vram_gb: unverified
+    min_ram_gb: 16
+    cpu: {feasible: "slow", speed: "unmeasured; GGUF Q4 via stable-diffusion.cpp runs on CPU but is expected to take several minutes per 1024 px image on 4 cores", source: unmeasured}
+    resolution: "up to ~2 MP"
+    runtimes: [diffusers, sdcpp, comfyui]
+    windows: "yes"
+    install: medium
+    quality: "Strong prompt following and text rendering; 2024 state of the art for open weights."
+    status: recommended
+    tier: [vram_12_16, vram_24, remote]
+    diffusers: {pipeline: FluxPipeline, steps: 4, guidance: 0.0, native: [1024, 1024]}
+
+  - id: flux1-dev
+    name: "FLUX.1 [dev]"
+    tasks: [image]
+    hf_repo: black-forest-labs/FLUX.1-dev
+    weights_licence: "FLUX.1 [dev] Non-Commercial License"
+    commercial_use: "no"
+    conditions: "Non-commercial; derivative LoRAs (e.g. Hyper-FLUX) inherit this"
+    source_url: https://huggingface.co/black-forest-labs/FLUX.1-dev
+    read_on: "2026-11-12"
+    params_b: 12
+    repo_gb: 57.9
+    min_vram_gb: unverified
+    cpu: {feasible: "slow", speed: unmeasured, source: unmeasured}
+    resolution: "up to ~2 MP"
+    runtimes: [diffusers, sdcpp, comfyui]
+    windows: "yes"
+    install: medium
+    quality: "Higher quality than schnell."
+    status: rejected
+    why: "Non-commercial weights."
+
+  - id: flux2-klein-4b
+    name: "FLUX.2 [klein] 4B"
+    tasks: [image, inpaint, reference]
+    hf_repo: black-forest-labs/FLUX.2-klein-4B
+    weights_licence: "Apache-2.0 (the 9B klein variant is FLUX Non-Commercial)"
+    commercial_use: "yes"
+    conditions: "Only the 4B variant; card says it ships input/output filters - keep them"
+    source_url: https://huggingface.co/black-forest-labs/FLUX.2-klein-4B
+    read_on: "2026-11-12"
+    params_b: 4
+    repo_gb: 23.7
+    min_vram_gb: 13
+    cpu: {feasible: unmeasured, speed: "unmeasured; sd.cpp supports FLUX.2-klein (README 2026-01-18)", source: https://github.com/leejet/stable-diffusion.cpp}
+    resolution: "up to ~1 MP+"
+    runtimes: [diffusers, sdcpp, comfyui]
+    windows: "yes"
+    install: medium
+    quality: "Model card: 'sub-second' on datacentre GPUs, generation + editing + multi-reference in one model."
+    status: recommended
+    tier: [vram_12_16, vram_24, remote]
+    diffusers: {pipeline: Flux2KleinPipeline, steps: 4, guidance: 1.0, native: [1024, 1024]}
+
+  - id: flux3-klein
+    name: "FLUX.3 Image [klein] (Oct 2026)"
+    tasks: [image]
+    hf_repo: black-forest-labs/flux-3-image-klein
+    weights_licence: "flux-kommunity-license (metadata only; repo gated, licence text not readable without accepting)"
+    commercial_use: unverified
+    source_url: https://huggingface.co/api/models/black-forest-labs/flux-3-image-klein
+    read_on: "2026-11-12"
+    repo_gb: 43.3
+    min_vram_gb: unverified
+    cpu: {feasible: unmeasured, speed: unmeasured, source: unmeasured}
+    resolution: unverified
+    runtimes: [sdcpp, comfyui]
+    windows: unverified
+    install: medium
+    quality: "Not evaluated."
+    status: candidate
+    why: "Read the licence after accepting the gate before any use."
+
+  - id: z-image-turbo
+    name: "Z-Image-Turbo (Alibaba Tongyi, 6B, 8 NFE)"
+    tasks: [image]
+    hf_repo: Tongyi-MAI/Z-Image-Turbo
+    weights_licence: "Apache-2.0"
+    commercial_use: "yes"
+    conditions: "none beyond Apache-2.0"
+    source_url: https://huggingface.co/Tongyi-MAI/Z-Image-Turbo
+    read_on: "2026-11-12"
+    params_b: 6
+    repo_gb: 32.9
+    download_gb: "unverified (bf16 ~12 for the DiT + Qwen3-4B text encoder); GGUF at leejet/Z-Image-Turbo-GGUF"
+    min_vram_gb: 16
+    cpu: {feasible: unmeasured, speed: "unmeasured; sd.cpp supports Z-Image (README 2025-12-01)", source: https://github.com/leejet/stable-diffusion.cpp}
+    resolution: "1024x1024 class"
+    runtimes: [diffusers, sdcpp, comfyui]
+    windows: "yes"
+    install: medium
+    quality: "Card: 'fits comfortably within 16G VRAM consumer devices'; photorealism and bilingual text rendering are its stated strengths."
+    status: recommended
+    tier: [vram_12_16, vram_24, remote]
+    diffusers: {pipeline: ZImagePipeline, steps: 9, guidance: 0.0, native: [1024, 1024]}
+
+  - id: qwen-image-2512
+    name: "Qwen-Image (2512 release, 20B)"
+    tasks: [image, inpaint]
+    hf_repo: Qwen/Qwen-Image-2512
+    weights_licence: "Apache-2.0"
+    commercial_use: "yes"
+    source_url: https://huggingface.co/Qwen/Qwen-Image-2512
+    read_on: "2026-11-12"
+    params_b: 20
+    repo_gb: 57.7
+    min_vram_gb: unverified
+    cpu: {feasible: "no", speed: "20B DiT - not practical on CPU", source: unmeasured}
+    resolution: "1328 px class"
+    runtimes: [diffusers, sdcpp, comfyui]
+    windows: "yes"
+    install: high
+    quality: "Best-in-class open text rendering (incl. CJK)."
+    status: candidate
+    tier: [vram_24, remote]
+
+  - id: qwen-image-2.1
+    name: "Qwen-Image 2.1 / 2.1-Turbo (Sep-Oct 2026)"
+    tasks: [image]
+    hf_repo: Qwen/Qwen-Image-2.1
+    weights_licence: "Qwen RESEARCH License Agreement (2026-09-20)"
+    commercial_use: "no"
+    conditions: "'FOR NON-COMMERCIAL PURPOSES ONLY' - commercial use needs a separate licence from Alibaba"
+    source_url: https://huggingface.co/Qwen/Qwen-Image-2.1/raw/main/LICENSE
+    read_on: "2026-11-12"
+    repo_gb: 33.1
+    min_vram_gb: unverified
+    cpu: {feasible: unmeasured, speed: unmeasured, source: unmeasured}
+    resolution: unverified
+    runtimes: [sdcpp, comfyui]
+    windows: unverified
+    install: medium
+    quality: "Not evaluated."
+    status: rejected
+    why: "Research licence - unlike Qwen-Image 2512 (Apache-2.0)."
+
+  - id: sana-sprint-0.6b
+    name: "SANA-Sprint 0.6B (NVIDIA, 1-4 step)"
+    tasks: [image]
+    hf_repo: Efficient-Large-Model/Sana_Sprint_0.6B_1024px_diffusers
+    weights_licence: "Apache-2.0 for the SANA weights; text encoder Gemma-2-2B-IT under the Gemma Terms of Use + Prohibited Use Policy"
+    commercial_use: "yes"
+    conditions: "Gemma Terms of Use apply to the text encoder (commercial use allowed, use policy applies)"
+    source_url: https://huggingface.co/Efficient-Large-Model/Sana_Sprint_0.6B_1024px_diffusers
+    read_on: "2026-11-12"
+    params_b: 0.6
+    repo_gb: 7.7
+    min_vram_gb: unverified
+    cpu: {feasible: unmeasured, speed: "unmeasured; small DiT but the 2.6B Gemma encoder dominates RAM (~5 GB download)", source: unmeasured}
+    resolution: "1024x1024"
+    runtimes: [diffusers, comfyui]
+    windows: "yes"
+    install: low
+    quality: "Card: 0.31 s per 1024 px image on an RTX 4090. Good CPU candidate to benchmark next (not done: Gemma encoder exceeds this session's download budget)."
+    status: candidate
+    tier: [cpu, vram_6_8]
+
+  - id: sana-600m
+    name: "SANA 600M / 1.6B"
+    tasks: [image]
+    hf_repo: Efficient-Large-Model/Sana_600M_1024px_diffusers
+    weights_licence: "Apache-2.0 (+ Gemma Terms of Use for the text encoder)"
+    commercial_use: "yes"
+    conditions: "Gemma Terms of Use"
+    source_url: https://huggingface.co/Efficient-Large-Model/Sana_600M_1024px_diffusers
+    read_on: "2026-11-12"
+    params_b: 0.6
+    repo_gb: 16.5
+    min_vram_gb: unverified
+    cpu: {feasible: unmeasured, speed: unmeasured, source: unmeasured}
+    resolution: "1024 px"
+    runtimes: [diffusers, comfyui]
+    windows: "yes"
+    install: low
+    quality: "20-step base model; Sprint is the faster sibling."
+    status: candidate
+    tier: [vram_6_8]
+
+  - id: pixart-sigma
+    name: "PixArt-Sigma XL 1024"
+    tasks: [image]
+    hf_repo: PixArt-alpha/PixArt-Sigma-XL-2-1024-MS
+    weights_licence: "OpenRAIL++-M"
+    commercial_use: "yes"
+    conditions: "OpenRAIL++ use restrictions; T5-XXL encoder (~9 GB fp16) dominates memory"
+    source_url: https://huggingface.co/PixArt-alpha/PixArt-Sigma-XL-2-1024-MS
+    read_on: "2026-11-12"
+    params_b: 0.6
+    repo_gb: 21.8
+    min_vram_gb: unverified
+    cpu: {feasible: unmeasured, speed: unmeasured, source: unmeasured}
+    resolution: "1024 px (up to 4K variants)"
+    runtimes: [diffusers, comfyui]
+    windows: "yes"
+    install: medium
+    quality: "Superseded by SANA/FLUX.2-klein for most uses."
+    status: candidate
+
+  - id: kolors
+    name: "Kolors (Kuaishou)"
+    tasks: [image]
+    hf_repo: Kwai-Kolors/Kolors-diffusers
+    weights_licence: "HF metadata says apache-2.0, but the model card says weights are open for academic research and commercial use requires registration by questionnaire"
+    commercial_use: restricted
+    conditions: "Registration with Kuaishou (questionnaire + e-mail) before commercial use"
+    source_url: https://huggingface.co/Kwai-Kolors/Kolors-diffusers
+    read_on: "2026-11-12"
+    repo_gb: 17.8
+    min_vram_gb: unverified
+    cpu: {feasible: unmeasured, speed: unmeasured, source: unmeasured}
+    resolution: "1024 px"
+    runtimes: [diffusers, comfyui]
+    windows: "yes"
+    install: medium
+    quality: "Strong Chinese prompt understanding."
+    status: rejected
+    why: "Registration needed for commercial use."
+
+  - id: hidream-i1-fast
+    name: "HiDream-I1 Fast (17B)"
+    tasks: [image]
+    hf_repo: HiDream-ai/HiDream-I1-Fast
+    weights_licence: "MIT (metadata); uses Llama-3.1-8B-Instruct as a text encoder (Llama 3.1 Community License)"
+    commercial_use: restricted
+    conditions: "Llama 3.1 Community License for the encoder (700M MAU cap, attribution)"
+    source_url: https://huggingface.co/HiDream-ai/HiDream-I1-Fast
+    read_on: "2026-11-12"
+    params_b: 17
+    repo_gb: 47.2
+    min_vram_gb: unverified
+    cpu: {feasible: "no", speed: unmeasured, source: unmeasured}
+    resolution: "1024 px"
+    runtimes: [diffusers, comfyui]
+    windows: "yes"
+    install: high
+    quality: "Not evaluated."
+    status: candidate
+
+  - id: minimax-h3-image
+    name: "MiniMax-H3-Image (Nov 2026)"
+    tasks: [image]
+    hf_repo: MiniMaxAI/MiniMax-H3-Image
+    weights_licence: "MiniMax-H3-Image Community License (2026-11-10)"
+    commercial_use: "no"
+    conditions: "Licence EXCLUDES the EU, UK, South Korea and the USA ('Excluded Territories'); >US$1M revenue needs authorisation"
+    source_url: https://huggingface.co/MiniMaxAI/MiniMax-H3-Image/raw/main/LICENSE
+    read_on: "2026-11-12"
+    repo_gb: 204
+    min_vram_gb: unverified
+    cpu: {feasible: "no", speed: unmeasured, source: unmeasured}
+    resolution: unverified
+    runtimes: [sdcpp, comfyui]
+    windows: unverified
+    install: high
+    quality: "Not evaluated."
+    status: rejected
+    why: "Territory exclusion covers the owner's market (EU) - recorded as `no`."
+
+  - id: krea-2
+    name: "Krea 2 (Turbo/Raw)"
+    tasks: [image]
+    hf_repo: krea/Krea-2-Turbo
+    weights_licence: "Krea 2 Community License (PDF; gated repo) - text not read"
+    commercial_use: unverified
+    source_url: https://huggingface.co/api/models/krea/Krea-2-Turbo
+    read_on: "2026-11-12"
+    repo_gb: 62
+    min_vram_gb: unverified
+    cpu: {feasible: unmeasured, speed: unmeasured, source: unmeasured}
+    resolution: unverified
+    runtimes: [sdcpp, comfyui]
+    windows: unverified
+    install: medium
+    quality: "Not evaluated."
+    status: candidate
+
+  - id: bk-sdm-tiny
+    name: "BK-SDM-Tiny (distilled SD 1.4)"
+    tasks: [image]
+    hf_repo: nota-ai/bk-sdm-tiny
+    weights_licence: "CreativeML OpenRAIL-M"
+    commercial_use: "yes"
+    conditions: "OpenRAIL use restrictions"
+    source_url: https://huggingface.co/nota-ai/bk-sdm-tiny
+    read_on: "2026-11-12"
+    params_b: 0.5
+    repo_gb: 10.0
+    min_vram_gb: unverified
+    cpu: {feasible: unmeasured, speed: "unmeasured; smaller UNet than SD1.5 so faster, lower quality", source: unmeasured}
+    resolution: "512 px"
+    runtimes: [diffusers, sdcpp]
+    windows: "yes"
+    install: low
+    quality: "Lower quality than SD 1.5."
+    status: candidate
+    tier: [cpu]
+
+  # ------------------------------------------------------------------ inpaint / reference conditioning helpers
+  - id: sdxl-inpaint
+    name: "SDXL 1.0 inpainting 0.1 (diffusers)"
+    tasks: [inpaint, outpaint]
+    hf_repo: diffusers/stable-diffusion-xl-1.0-inpainting-0.1
+    weights_licence: "OpenRAIL++-M"
+    commercial_use: "yes"
+    source_url: https://huggingface.co/diffusers/stable-diffusion-xl-1.0-inpainting-0.1
+    read_on: "2026-11-12"
+    repo_gb: 20.8
+    min_vram_gb: unverified
+    cpu: {feasible: unmeasured, speed: unmeasured, source: unmeasured}
+    resolution: "1024 px"
+    runtimes: [diffusers, comfyui]
+    windows: "yes"
+    install: low
+    quality: "Outpainting = inpainting a padded canvas."
+    status: candidate
+    tier: [vram_6_8, vram_12_16]
+
+  - id: ip-adapter
+    name: "IP-Adapter (h94) - image prompt / reference conditioning for SD1.5 and SDXL"
+    tasks: [reference]
+    hf_repo: h94/IP-Adapter
+    weights_licence: "Apache-2.0 (adapter); FaceID variants use InsightFace models that are non-commercial - excluded"
+    commercial_use: "yes"
+    conditions: "Only the plain/plus adapters; not FaceID (InsightFace weights are non-commercial)"
+    source_url: https://huggingface.co/h94/IP-Adapter
+    read_on: "2026-11-12"
+    repo_gb: 19.8
+    download_gb: "0.04-0.1 per adapter + 2.5 image encoder"
+    min_vram_gb: unverified
+    cpu: {feasible: unmeasured, speed: unmeasured, source: unmeasured}
+    resolution: "per base model"
+    runtimes: [diffusers, sdcpp, comfyui]
+    windows: "yes"
+    install: low
+    quality: "Character/style consistency hook for the reference-conditioning interface."
+    status: candidate
+
+  # ------------------------------------------------------------------ video
+  - id: wan21-t2v-1.3b
+    name: "Wan 2.1 T2V 1.3B"
+    tasks: [text_to_video]
+    hf_repo: Wan-AI/Wan2.1-T2V-1.3B-Diffusers
+    weights_licence: "Apache-2.0"
+    commercial_use: "yes"
+    conditions: "Card: 'We claim no rights over your generated contents'; usual lawful-use clause"
+    source_url: https://huggingface.co/Wan-AI/Wan2.1-T2V-1.3B
+    read_on: "2026-11-12"
+    params_b: 1.3
+    repo_gb: 28.9
+    download_gb: "~17 (bf16 transformer ~2.8 + umT5-XXL encoder ~11 + VAE) - unverified subset"
+    min_vram_gb: 8.19
+    cpu: {feasible: "no", speed: "not attempted (policy: no video generation on CPU)", source: policy}
+    resolution: "480p (832x480)"
+    max_seconds: 5
+    runtimes: [diffusers, comfyui, sdcpp]
+    windows: "yes"
+    install: medium
+    quality: "Card: 5-second 480p clip in ~4 min on an RTX 4090 without optimisation. Coherent short motion; weak text and fine detail."
+    status: recommended
+    tier: [vram_6_8, vram_12_16, remote]
+    diffusers: {pipeline: WanPipeline, steps: 30, guidance: 5.0, native: [832, 480], fps: 16}
+
+  - id: wan21-i2v-14b
+    name: "Wan 2.1 I2V 14B 480P / 720P"
+    tasks: [image_to_video]
+    hf_repo: Wan-AI/Wan2.1-I2V-14B-480P
+    weights_licence: "Apache-2.0"
+    commercial_use: "yes"
+    source_url: https://huggingface.co/Wan-AI/Wan2.1-I2V-14B-480P
+    read_on: "2026-11-12"
+    params_b: 14
+    repo_gb: 82.3
+    min_vram_gb: unverified
+    cpu: {feasible: "no", speed: "policy", source: policy}
+    resolution: "480p / 720p"
+    max_seconds: 5
+    runtimes: [diffusers, comfyui]
+    windows: "yes"
+    install: high
+    quality: "Animates a licensed still - the honest path to 'generated' motion from stock photos."
+    status: candidate
+    tier: [vram_24, remote]
+
+  - id: wan22-ti2v-5b
+    name: "Wan 2.2 TI2V 5B (text+image to video, 720p24)"
+    tasks: [text_to_video, image_to_video]
+    hf_repo: Wan-AI/Wan2.2-TI2V-5B-Diffusers
+    weights_licence: "Apache-2.0"
+    commercial_use: "yes"
+    source_url: https://huggingface.co/Wan-AI/Wan2.2-TI2V-5B-Diffusers
+    read_on: "2026-11-12"
+    params_b: 5
+    repo_gb: 34.2
+    min_vram_gb: 24
+    cpu: {feasible: "no", speed: "policy", source: policy}
+    resolution: "1280x704, 24 fps"
+    max_seconds: 5
+    runtimes: [diffusers, comfyui, sdcpp]
+    windows: "yes"
+    install: medium
+    quality: "Card: runs on a single 24 GB GPU (RTX 4090) with offload; one model for T2V and I2V."
+    status: recommended
+    tier: [vram_24, remote]
+    diffusers: {pipeline: WanPipeline, steps: 50, guidance: 5.0, native: [1280, 704], fps: 24}
+
+  - id: wan22-a14b
+    name: "Wan 2.2 T2V/I2V A14B (MoE, 27B total) and Wan2.2-Animate-14B"
+    tasks: [text_to_video, image_to_video, video_to_video]
+    hf_repo: Wan-AI/Wan2.2-T2V-A14B
+    weights_licence: "Apache-2.0"
+    commercial_use: "yes"
+    source_url: https://huggingface.co/Wan-AI/Wan2.2-T2V-A14B
+    read_on: "2026-11-12"
+    params_b: 27
+    repo_gb: 126
+    min_vram_gb: unverified
+    cpu: {feasible: "no", speed: "policy", source: policy}
+    resolution: "480p/720p"
+    max_seconds: 5
+    runtimes: [diffusers, comfyui]
+    windows: "yes"
+    install: high
+    quality: "Best open Apache-2.0 video quality we found; needs datacentre-class or heavily quantised setups."
+    status: candidate
+    tier: [vram_24, remote]
+    note: "Wan 2.5/2.6 were API-only releases - no official open weights found on huggingface.co/Wan-AI (checked 2026-11-12)."
+
+  - id: ltx-video-2b-095
+    name: "LTX-Video 2B v0.9 - 0.9.5"
+    tasks: [text_to_video, image_to_video]
+    hf_repo: Lightricks/LTX-Video
+    weights_licence: "LTXV 2B 0.9.5 Open RAIL-M (per-version licence files; v0.9.6+ use the LTXV Open Weights License 0.X)"
+    commercial_use: "yes"
+    conditions: "Only versions <= 0.9.5 are OpenRAIL-M; pin the file. Use-based restrictions apply."
+    source_url: https://huggingface.co/Lightricks/LTX-Video/raw/main/ltx-video-2b-v0.9.5.license.txt
+    read_on: "2026-11-12"
+    params_b: 2
+    repo_gb: 254
+    min_vram_gb: unverified
+    cpu: {feasible: "no", speed: "policy", source: policy}
+    resolution: "768x512 class, 24-30 fps"
+    max_seconds: 5
+    runtimes: [diffusers, comfyui]
+    windows: "yes"
+    install: medium
+    quality: "Fast; softer and less coherent than Wan."
+    status: candidate
+    tier: [vram_12_16, remote]
+
+  - id: ltx-video-096plus
+    name: "LTX-Video 0.9.6 - 0.9.8 (2B/13B)"
+    tasks: [text_to_video, image_to_video]
+    hf_repo: Lightricks/LTX-Video
+    weights_licence: "LTXV Open Weights License 0.X (2025-04-15)"
+    commercial_use: restricted
+    conditions: "Free for entities below US$10M annual revenue; above that a paid licence; Attachment A use restrictions"
+    source_url: https://huggingface.co/Lightricks/LTX-Video/raw/main/LTX-Video-Open-Weights-License-0.X.txt
+    read_on: "2026-11-12"
+    repo_gb: 254
+    min_vram_gb: unverified
+    cpu: {feasible: "no", speed: "policy", source: policy}
+    resolution: "up to 1216x704"
+    max_seconds: 10
+    runtimes: [diffusers, comfyui]
+    windows: "yes"
+    install: medium
+    quality: "Distilled variants are among the fastest open video models."
+    status: candidate
+    tier: [vram_12_16, remote]
+
+  - id: ltx-2
+    name: "LTX-2 / LTX-2.3 / LTX-2.5 (audio+video)"
+    tasks: [text_to_video, image_to_video]
+    hf_repo: Lightricks/LTX-2.5
+    weights_licence: "LTX-2 Community License (2026-01-05) / LTX-2.x Community License (2026-08-11, amended 2026-10-29)"
+    commercial_use: restricted
+    conditions: "Entities with >= US$10M annual revenue must buy a licence; Attachment A restrictions"
+    source_url: https://raw.githubusercontent.com/Lightricks/LTX-2/main/LICENSE-2_x
+    read_on: "2026-11-12"
+    repo_gb: 200
+    min_vram_gb: unverified
+    cpu: {feasible: "no", speed: "policy", source: policy}
+    resolution: unverified
+    max_seconds: unverified
+    runtimes: [comfyui, sdcpp]
+    windows: "yes"
+    install: high
+    quality: "Not evaluated; generates synchronised audio."
+    status: candidate
+    tier: [vram_24, remote]
+
+  - id: cogvideox-2b
+    name: "CogVideoX 2B"
+    tasks: [text_to_video]
+    hf_repo: THUDM/CogVideoX-2b
+    weights_licence: "Apache-2.0 (2B transformer + VAE)"
+    commercial_use: "yes"
+    source_url: https://huggingface.co/THUDM/CogVideoX-2b
+    read_on: "2026-11-12"
+    params_b: 2
+    repo_gb: 13.8
+    min_vram_gb: 4
+    cpu: {feasible: "no", speed: "policy", source: policy}
+    resolution: "720x480 only, 8 fps, 49 frames (6 s)"
+    max_seconds: 6
+    runtimes: [diffusers, comfyui]
+    windows: "yes"
+    install: low
+    quality: "Card: 'from 4GB' VRAM with all diffusers optimisations (about 3x without). Older and lower quality than Wan 2.1 1.3B; 8 fps."
+    status: candidate
+    tier: [vram_6_8]
+    diffusers: {pipeline: CogVideoXPipeline, steps: 50, guidance: 6.0, native: [720, 480], fps: 8}
+
+  - id: cogvideox-5b
+    name: "CogVideoX 5B / 1.5-5B"
+    tasks: [text_to_video, image_to_video]
+    hf_repo: THUDM/CogVideoX-5b
+    weights_licence: "The CogVideoX License"
+    commercial_use: restricted
+    conditions: "Commercial use requires registration for a basic commercial licence at open.bigmodel.cn"
+    source_url: https://huggingface.co/THUDM/CogVideoX-5b/raw/main/LICENSE
+    read_on: "2026-11-12"
+    params_b: 5
+    repo_gb: 21.5
+    min_vram_gb: unverified
+    cpu: {feasible: "no", speed: "policy", source: policy}
+    resolution: "720x480 (1.5: 1360x768)"
+    max_seconds: 10
+    runtimes: [diffusers, comfyui]
+    windows: "yes"
+    install: medium
+    quality: "Better than 2B."
+    status: rejected
+    why: "Registration required for commercial use."
+
+  - id: mochi-1
+    name: "Mochi 1 preview (Genmo, 10B)"
+    tasks: [text_to_video]
+    hf_repo: genmo/mochi-1-preview
+    weights_licence: "Apache-2.0"
+    commercial_use: "yes"
+    source_url: https://huggingface.co/genmo/mochi-1-preview
+    read_on: "2026-11-12"
+    params_b: 10
+    repo_gb: 133.5
+    min_vram_gb: 22
+    cpu: {feasible: "no", speed: "policy", source: policy}
+    resolution: "480p"
+    max_seconds: 5.4
+    runtimes: [diffusers, comfyui]
+    windows: "yes"
+    install: high
+    quality: "Card: ~60 GB VRAM single-GPU reference, 42 GB diffusers full quality, 22 GB bf16 variant; ComfyUI < 20 GB."
+    status: candidate
+    tier: [vram_24, remote]
+
+  - id: hunyuanvideo
+    name: "HunyuanVideo / HunyuanVideo 1.5 (and FramePack, which uses its weights)"
+    tasks: [text_to_video, image_to_video]
+    hf_repo: tencent/HunyuanVideo-1.5
+    weights_licence: "Tencent Hunyuan Community License"
+    commercial_use: "no"
+    conditions: "'DOES NOT APPLY IN THE EUROPEAN UNION, UNITED KINGDOM AND SOUTH KOREA'; >100M MAU needs a licence"
+    source_url: https://raw.githubusercontent.com/Tencent-Hunyuan/HunyuanVideo-1.5/master/LICENSE
+    read_on: "2026-11-12"
+    params_b: 8.3
+    repo_gb: 371.8
+    min_vram_gb: unverified
+    cpu: {feasible: "no", speed: "policy", source: policy}
+    resolution: "480p/720p"
+    max_seconds: 10
+    runtimes: [diffusers, comfyui]
+    windows: "yes"
+    install: high
+    quality: "High quality; irrelevant while the licence excludes the owner's territory."
+    status: rejected
+    why: "Territory exclusion (EU/UK/KR) - recorded as `no` for an EU-based channel."
+
+  - id: minimax-h3
+    name: "MiniMax-H3 (video, Jul 2026)"
+    tasks: [text_to_video, image_to_video]
+    hf_repo: MiniMaxAI/MiniMax-H3
+    weights_licence: "MiniMax H3 Community License (2026-08-02)"
+    commercial_use: "no"
+    conditions: "Excluded Territories: EU, UK, Republic of Korea, USA"
+    source_url: https://huggingface.co/MiniMaxAI/MiniMax-H3/raw/main/LICENSE
+    read_on: "2026-11-12"
+    repo_gb: 498
+    min_vram_gb: unverified
+    cpu: {feasible: "no", speed: "policy", source: policy}
+    resolution: unverified
+    max_seconds: unverified
+    runtimes: [comfyui, sdcpp]
+    windows: unverified
+    install: high
+    quality: "Not evaluated."
+    status: rejected
+    why: "Territory exclusion."
+
+  - id: kandinsky-6-lite
+    name: "Kandinsky 6.0 Video Lite (3B, text/image to audio+video, 5 s)"
+    tasks: [text_to_video, image_to_video]
+    hf_repo: kandinskylab/Kandinsky-6.0-Lite-pretrain-5s-Diffusers
+    weights_licence: "MIT (model card metadata)"
+    commercial_use: "yes"
+    conditions: "Card metadata only; full licence text not separately reviewed - re-read before first commercial use"
+    source_url: https://huggingface.co/kandinskylab/Kandinsky-6.0-Lite-pretrain-5s-Diffusers
+    read_on: "2026-11-12"
+    params_b: 3
+    repo_gb: 27.8
+    min_vram_gb: unverified
+    cpu: {feasible: "no", speed: "policy", source: policy}
+    resolution: unverified
+    max_seconds: 5
+    runtimes: [diffusers]
+    windows: unverified
+    install: medium
+    quality: "New (Sep 2026); not evaluated. The 29B Pro variant is also MIT."
+    status: candidate
+    tier: [vram_12_16, remote]
+
+  - id: animatediff
+    name: "AnimateDiff motion adapter v1-5-3 / AnimateDiff-Lightning"
+    tasks: [text_to_video, video_to_video]
+    hf_repo: ByteDance/AnimateDiff-Lightning
+    weights_licence: "AnimateDiff-Lightning: CreativeML OpenRAIL-M; guoyww motion adapter: no licence in the HF card (code repo is Apache-2.0)"
+    commercial_use: unverified
+    conditions: "Lightning variant is OpenRAIL-M (yes); original motion adapter weights carry no stated licence - treated as unverified"
+    source_url: https://huggingface.co/ByteDance/AnimateDiff-Lightning
+    read_on: "2026-11-12"
+    repo_gb: 7.3
+    min_vram_gb: unverified
+    cpu: {feasible: "no", speed: "policy", source: policy}
+    resolution: "512 px, 16 frames"
+    max_seconds: 2
+    runtimes: [diffusers, comfyui]
+    windows: "yes"
+    install: low
+    quality: "Short, flickery SD1.5-based loops; superseded by Wan/LTX."
+    status: candidate
+
+  - id: svd
+    name: "Stable Video Diffusion img2vid(-xt, -1.1)"
+    tasks: [image_to_video]
+    hf_repo: stabilityai/stable-video-diffusion-img2vid-xt
+    weights_licence: "Stability AI Community License (LICENSE.md, July 5, 2024)"
+    commercial_use: restricted
+    conditions: "< US$1M annual revenue + registration"
+    source_url: https://huggingface.co/stabilityai/stable-video-diffusion-img2vid-xt/raw/main/LICENSE.md
+    read_on: "2026-11-12"
+    repo_gb: 32.6
+    min_vram_gb: unverified
+    cpu: {feasible: "no", speed: "policy", source: policy}
+    resolution: "1024x576, 25 frames"
+    max_seconds: 4
+    runtimes: [diffusers, comfyui]
+    windows: "yes"
+    install: low
+    quality: "Mostly camera motion; superseded."
+    status: rejected
+    why: "Revenue-capped licence; Wan I2V is Apache-2.0."
+
+  # ------------------------------------------------------------------ upscale / restore / interpolate / depth
+  - id: real-esrgan
+    name: "Real-ESRGAN x4plus / ncnn-vulkan"
+    tasks: [upscale]
+    hf_repo: null
+    weights_licence: "BSD-3-Clause (repo LICENSE; weights published in the repo's GitHub releases)"
+    commercial_use: "yes"
+    source_url: https://raw.githubusercontent.com/xinntao/Real-ESRGAN/master/LICENSE
+    read_on: "2026-11-12"
+    download_gb: 0.07
+    min_vram_gb: unverified
+    cpu: {feasible: "slow", speed: "unmeasured; ncnn-vulkan build runs on integrated GPUs, PyTorch build on CPU", source: unmeasured}
+    resolution: "x2/x4"
+    runtimes: [pytorch, ncnn-vulkan]
+    windows: "yes (ncnn-vulkan portable exe)"
+    install: low
+    quality: "Good for stills/animation; temporal flicker on video."
+    status: recommended
+    tier: [cpu, vram_6_8]
+
+  - id: rife
+    name: "Practical-RIFE (frame interpolation)"
+    tasks: [interpolate]
+    hf_repo: null
+    weights_licence: "MIT (repo LICENSE); weights distributed via the author's links"
+    commercial_use: "yes"
+    conditions: "Weights hosted on third-party drives - confirm the specific weight file's terms when fetching"
+    source_url: https://raw.githubusercontent.com/hzwer/Practical-RIFE/main/LICENSE
+    read_on: "2026-11-12"
+    download_gb: 0.02
+    min_vram_gb: unverified
+    cpu: {feasible: unmeasured, speed: unmeasured, source: unmeasured}
+    resolution: "any"
+    runtimes: [pytorch, ncnn-vulkan]
+    windows: "yes (rife-ncnn-vulkan)"
+    install: low
+    quality: "Standard choice for 2x/4x interpolation."
+    status: recommended
+    tier: [vram_6_8]
+
+  - id: film
+    name: "FILM (Google frame interpolation for large motion)"
+    tasks: [interpolate]
+    hf_repo: null
+    weights_licence: "Apache-2.0 (repo LICENSE)"
+    commercial_use: "yes"
+    source_url: https://raw.githubusercontent.com/google-research/frame-interpolation/main/LICENSE
+    read_on: "2026-11-12"
+    min_vram_gb: unverified
+    cpu: {feasible: unmeasured, speed: unmeasured, source: unmeasured}
+    resolution: "any"
+    runtimes: [tensorflow]
+    windows: "yes"
+    install: medium
+    quality: "Better than RIFE on large motion, slower; TensorFlow dependency."
+    status: candidate
+
+  - id: gfpgan
+    name: "GFPGAN (face restoration)"
+    tasks: [upscale]
+    hf_repo: null
+    weights_licence: "Apache-2.0 for GFPGAN code, but the LICENSE bundles NVIDIA StyleGAN2 components 'only ... non-commercially'; weights trained on FFHQ (CC BY-NC-SA images)"
+    commercial_use: unverified
+    source_url: https://raw.githubusercontent.com/TencentARC/GFPGAN/master/LICENSE
+    read_on: "2026-11-12"
+    min_vram_gb: unverified
+    cpu: {feasible: unmeasured, speed: unmeasured, source: unmeasured}
+    resolution: "faces"
+    runtimes: [pytorch]
+    windows: "yes"
+    install: medium
+    quality: "Not evaluated."
+    status: rejected
+    why: "Mixed licence with non-commercial components."
+
+  - id: codeformer
+    name: "CodeFormer (face restoration)"
+    tasks: [upscale]
+    hf_repo: null
+    weights_licence: "S-Lab License 1.0"
+    commercial_use: "no"
+    conditions: "'Redistribution and use for non-commercial purpose'"
+    source_url: https://raw.githubusercontent.com/sczhou/CodeFormer/master/LICENSE
+    read_on: "2026-11-12"
+    min_vram_gb: unverified
+    cpu: {feasible: unmeasured, speed: unmeasured, source: unmeasured}
+    resolution: "faces"
+    runtimes: [pytorch]
+    windows: "yes"
+    install: medium
+    quality: "Not evaluated."
+    status: rejected
+    why: "Non-commercial."
+
+  - id: sd-x2-latent-upscaler
+    name: "SD x2 latent upscaler / x4 upscaler"
+    tasks: [upscale]
+    hf_repo: stabilityai/sd-x2-latent-upscaler
+    weights_licence: "OpenRAIL++-M"
+    commercial_use: "yes"
+    source_url: https://huggingface.co/stabilityai/sd-x2-latent-upscaler
+    read_on: "2026-11-12"
+    repo_gb: 4.6
+    min_vram_gb: unverified
+    cpu: {feasible: unmeasured, speed: unmeasured, source: unmeasured}
+    resolution: "x2 / x4"
+    runtimes: [diffusers]
+    windows: "yes"
+    install: low
+    quality: "Diffusion upscaler - invents detail; only for generated images."
+    status: candidate
+
+  - id: depth-anything-v2-small
+    name: "Depth Anything V2 Small (for 2.5D parallax of stills)"
+    tasks: [depth]
+    hf_repo: depth-anything/Depth-Anything-V2-Small-hf
+    weights_licence: "Apache-2.0 (Small only; Base/Large are CC BY-NC 4.0)"
+    commercial_use: "yes"
+    source_url: https://huggingface.co/depth-anything/Depth-Anything-V2-Small-hf
+    read_on: "2026-11-12"
+    params_b: 0.025
+    download_gb: 0.1
+    min_vram_gb: 0
+    cpu: {feasible: "yes", speed: "unmeasured here; 25M-parameter ViT-S is small enough for CPU", source: unmeasured}
+    resolution: "any (518 px internal)"
+    runtimes: [transformers, onnxruntime]
+    windows: "yes"
+    install: low
+    quality: "Drives a depth-layered parallax ('2.5D') move of a licensed still. The output is NOT generated video."
+    status: recommended
+    tier: [cpu]
+
+  - id: depth-anything-v2-large
+    name: "Depth Anything V2 Base/Large"
+    tasks: [depth]
+    hf_repo: depth-anything/Depth-Anything-V2-Large-hf
+    weights_licence: "CC BY-NC 4.0"
+    commercial_use: "no"
+    source_url: https://huggingface.co/depth-anything/Depth-Anything-V2-Large-hf
+    read_on: "2026-11-12"
+    download_gb: 1.34
+    min_vram_gb: unverified
+    cpu: {feasible: unmeasured, speed: unmeasured, source: unmeasured}
+    resolution: "any"
+    runtimes: [transformers]
+    windows: "yes"
+    install: low
+    quality: "Better depth than Small."
+    status: rejected
+    why: "Non-commercial."
+
+  - id: midas-dpt-hybrid
+    name: "MiDaS DPT-Hybrid (Intel)"
+    tasks: [depth]
+    hf_repo: Intel/dpt-hybrid-midas
+    weights_licence: "Apache-2.0"
+    commercial_use: "yes"
+    source_url: https://huggingface.co/Intel/dpt-hybrid-midas
+    read_on: "2026-11-12"
+    download_gb: 0.49
+    min_vram_gb: 0
+    cpu: {feasible: unmeasured, speed: unmeasured, source: unmeasured}
+    resolution: "384 px internal"
+    runtimes: [transformers]
+    windows: "yes"
+    install: low
+    quality: "Older alternative to Depth Anything V2 Small."
+    status: candidate
+
+  - id: depth-pro
+    name: "Apple Depth Pro"
+    tasks: [depth]
+    hf_repo: apple/DepthPro-hf
+    weights_licence: "Apple AMLR (Apple Machine Learning Research) licence"
+    commercial_use: "no"
+    conditions: "AMLR is a research-only licence"
+    source_url: https://huggingface.co/apple/DepthPro-hf
+    read_on: "2026-11-12"
+    download_gb: 1.9
+    min_vram_gb: unverified
+    cpu: {feasible: unmeasured, speed: unmeasured, source: unmeasured}
+    resolution: "any"
+    runtimes: [transformers]
+    windows: "yes"
+    install: low
+    quality: "Sharp metric depth."
+    status: rejected
+    why: "Research-only licence."
+
+# ------------------------------------------------------------------ runtimes
+runtimes:
+  - id: diffusers
+    licence: Apache-2.0
+    source_url: https://github.com/huggingface/diffusers
+    cpu: "yes (float32; slow but works - measured here with SD1.5+LCM)"
+    windows: "yes (CUDA wheels; DirectML via torch-directml for AMD/Intel GPUs is community-supported and unverified)"
+    install: "pip install torch (CPU or CUDA wheel) diffusers transformers safetensors peft"
+    notes: "NEXUS's primary provider (nexus/generate/providers.py: LocalDiffusers)."
+  - id: comfyui
+    licence: GPL-3.0
+    source_url: https://github.com/Comfy-Org/ComfyUI
+    cpu: "yes (--cpu), slow"
+    windows: "yes (portable build)"
+    install: "portable zip or pip; workflows as JSON"
+    notes: "Best model coverage and memory tricks (offload, GGUF via custom nodes). Not wired: NEXUS would talk to its local HTTP API; candidate for the GPU tier."
+  - id: sdcpp
+    licence: MIT
+    source_url: https://github.com/leejet/stable-diffusion.cpp
+    cpu: "yes (AVX/AVX2/AVX512) - no Python/PyTorch needed; Vulkan backend for any GPU"
+    windows: "yes (prebuilt binaries)"
+    install: "download a release binary (sd / sd-cli) + a GGUF/safetensors model"
+    notes: "Supports SD1.x/2.x, SDXL, FLUX.1/2, Z-Image, Qwen-Image, Wan2.1/2.2, LCM-LoRA, IP-Adapter, PhotoMaker (README read 2026-11-12). Provider implemented (SdCpp), not run here."
+  - id: openvino
+    licence: Apache-2.0
+    source_url: https://github.com/openvinotoolkit/openvino.genai
+    cpu: "yes - Intel-optimised (Text2ImagePipeline); integrated Intel GPU/NPU"
+    windows: "yes"
+    install: "pip install openvino-genai; pre-converted models e.g. OpenVINO/stable-diffusion-v1-5-fp16-ov (CreativeML OpenRAIL-M, 3.35 GB)"
+    notes: "Likely the fastest CPU path on an Intel laptop (unmeasured). Not wired; detection only."
+  - id: onnxruntime
+    licence: MIT
+    source_url: https://github.com/microsoft/onnxruntime
+    cpu: "yes; DirectML EP on Windows"
+    windows: "yes"
+    install: "pip install onnxruntime(-directml)"
+    notes: "Viable for depth models and Real-ESRGAN; not used for diffusion here."
+  - id: gguf-dit
+    licence: "per tool"
+    source_url: https://github.com/city96/ComfyUI-GGUF
+    cpu: "via sd.cpp or ComfyUI-GGUF"
+    windows: "yes"
+    install: "GGUF-quantised DiT weights (FLUX, Wan, Z-Image) cut VRAM roughly in proportion to bits"
+    notes: "Quantisation does not change the licence of the weights."
+
+# ------------------------------------------------------------------ free remote compute (adapters only; NEXUS signs up for nothing)
+compute:
+  - id: kaggle
+    name: "Kaggle Notebooks"
+    free_allowance: "weekly GPU quota shown in the account (commonly reported ~30 h/week, not published by Kaggle); 12 h max per GPU session; T4x2 or P100 16 GB"
+    card_required: false
+    billing_activation_required: false
+    phone_verification: "required for GPU/internet per existing NEXUS manifest (not re-verified: kaggle.com/docs is JS-rendered)"
+    overage: "sessions stop when the weekly quota is used; no billing"
+    data_retention: "notebooks, outputs and datasets stored in the owner's Kaggle account (private by default)"
+    automation_allowed: "yes - `kaggle kernels push` (Save & Run All) is the official API"
+    commercial_output: unverified
+    source_url: https://gpuperhour.com/blog/free-cloud-gpus-and-credits
+    read_on: "2026-11-12"
+    verdict: survives
+    owner_must_authorise: "create one Kaggle account, phone-verify, generate an API token (~/.kaggle/kaggle.json); read Kaggle's ToS for commercial output"
+  - id: colab-free
+    name: "Google Colab (free)"
+    free_allowance: "not published; 'access to expensive resources like GPUs is heavily restricted'"
+    card_required: false
+    billing_activation_required: false
+    overage: "runtime disconnects"
+    data_retention: "notebook in the owner's Google Drive"
+    automation_allowed: "no - free runtimes prioritise interactive use; remote control, bypassing the notebook UI and distributed workers are disallowed"
+    commercial_output: unverified
+    source_url: https://research.google.com/colaboratory/faq.html
+    read_on: "2026-11-12"
+    verdict: "manual hand-off only"
+    owner_must_authorise: "open the generated notebook and run it by hand"
+  - id: hf-zerogpu
+    name: "Hugging Face Spaces ZeroGPU"
+    free_allowance: "5 min GPU/day for a free account (2 min unauthenticated); hosting own ZeroGPU Space: free accounts in good standing can host 2"
+    card_required: false
+    billing_activation_required: false
+    overage: "PRO/Team users are billed from pre-paid credits beyond quota ($1 per 10 min) - not applicable to a free account, which is simply throttled"
+    data_retention: "Space code public or private in the owner's account; inputs pass through HF"
+    automation_allowed: "unverified for batch use; designed for interactive Gradio demos"
+    commercial_output: "per model licence"
+    source_url: https://huggingface.co/docs/hub/spaces-zerogpu
+    read_on: "2026-11-12"
+    verdict: "rejected for production (5 min/day); acceptable for a one-off manual test"
+  - id: lightning-ai
+    name: "Lightning AI Studios (free plan)"
+    free_allowance: "promotional credits whose recurrence is not stated on the vendor's billing FAQ; third-party reports conflict (monthly 15 credits vs one-time grant, some of it unlocked by adding a card)"
+    card_required: unverified
+    billing_activation_required: unverified
+    overage: "workloads are shut down when credits run out (billing FAQ)"
+    data_retention: "persistent studio storage in the owner's account"
+    automation_allowed: unverified
+    commercial_output: unverified
+    source_url: https://lightning.ai/docs/platform/overview/faq/billing.md
+    read_on: "2026-11-12"
+    verdict: "excluded until the owner confirms no payment method is needed"
+  - id: sagemaker-studio-lab
+    name: "Amazon SageMaker Studio Lab"
+    free_allowance: "4 h GPU per 24 h (existing users only)"
+    card_required: false
+    billing_activation_required: false
+    data_retention: "15 GB persistent project storage"
+    automation_allowed: unverified
+    commercial_output: unverified
+    source_url: https://gpuperhour.com/blog/free-cloud-gpus-and-credits
+    read_on: "2026-11-12"
+    verdict: "closed to new customers"
+  - id: paperspace-free
+    name: "Paperspace Gradient free"
+    free_allowance: "free M4000 (8 GB, 2016-era) when available; 6 h auto-shutdown"
+    card_required: unverified
+    billing_activation_required: unverified
+    automation_allowed: unverified
+    commercial_output: unverified
+    source_url: https://gpuperhour.com/blog/free-cloud-gpus-and-credits
+    read_on: "2026-11-12"
+    verdict: "excluded - card requirement unverified, GPU too old for Wan"
+  - id: cloud-trials
+    name: "Modal / Google Cloud / AWS / Azure credits"
+    free_allowance: "credits"
+    card_required: true
+    billing_activation_required: true
+    source_url: https://gpuperhour.com/blog/free-cloud-gpus-and-credits
+    read_on: "2026-11-12"
+    verdict: "excluded by policy (payment method / billing account)"
+  - id: owner-gpu-folder
+    name: "Owner's own GPU machine via folder hand-off"
+    free_allowance: "unlimited (own hardware)"
+    card_required: false
+    billing_activation_required: false
+    data_retention: "local"
+    automation_allowed: "yes"
+    commercial_output: "per model licence"
+    source_url: https://github.com/huggingface/diffusers
+    read_on: "2026-11-12"
+    verdict: survives
+    owner_must_authorise: "nothing - copy the job folder, run `python -m nexus.generate.runner <job_dir>` on the GPU machine, copy back"
+
+# ------------------------------------------------------------------ recommendation per hardware tier (the reasoning is in docs/GENERATION.md)
+tiers:
+  cpu:
+    image: sd15-lcm
+    image_alternatives: [sana-sprint-0.6b, bk-sdm-tiny]
+    video: null
+    video_note: "No generated video. Use animated_still (Ken Burns / depth parallax with depth-anything-v2-small) and motion_graphics, labelled as such."
+    upscale: real-esrgan
+  vram_6_8:
+    image: sd15-lcm
+    image_alternatives: [sdxl-base, sdxl-lightning, sana-600m]
+    video: wan21-t2v-1.3b
+    video_note: "Wan 2.1 1.3B needs 8.19 GB by its card - 6 GB cards need offload/GGUF (unmeasured). CogVideoX-2B from 4 GB with all optimisations."
+    upscale: real-esrgan
+    interpolate: rife
+  vram_12_16:
+    image: flux2-klein-4b
+    image_alternatives: [z-image-turbo, flux1-schnell, sdxl-base]
+    video: wan21-t2v-1.3b
+    video_alternatives: [ltx-video-2b-095, kandinsky-6-lite]
+    upscale: real-esrgan
+    interpolate: rife
+  vram_24:
+    image: z-image-turbo
+    image_alternatives: [flux1-schnell, qwen-image-2512]
+    video: wan22-ti2v-5b
+    video_alternatives: [wan21-i2v-14b, mochi-1]
+    upscale: real-esrgan
+    interpolate: rife
+  remote:
+    image: flux1-schnell
+    video: wan21-t2v-1.3b
+    video_alternatives: [wan22-ti2v-5b]
+    video_note: "Kaggle T4/P100 = 16 GB: Wan 2.1 1.3B fits; Wan 2.2 5B needs 24 GB by its card (offload on 16 GB unmeasured)."
