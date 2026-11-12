@@ -254,6 +254,72 @@ def roles(segs: list[dict], labels: dict[int, str]) -> dict:
     return out
 
 
+WIN_S, HOP_S, MIN_SPLIT_S = 1.6, 0.8, 4.0
+
+
+def _boundary(words: list[dict], t: float, reach: float = 1.2) -> int | None:
+    """Index of the first word of the second speaker: the word gap nearest to `t`, preferring a gap after ? or ."""
+    best, score = None, 1e9
+    for i in range(1, len(words)):
+        g0, g1 = float(words[i - 1]["end"]), float(words[i]["start"])
+        mid = (g0 + g1) / 2
+        if abs(mid - t) > reach:
+            continue
+        sc = abs(mid - t) - 0.6 * (g1 - g0) - (0.8 if str(words[i - 1].get("word", "")).strip().endswith(("?", ".", "!")) else 0)
+        if sc < score:
+            best, score = i, sc
+    return best
+
+
+def split_mixed(x: np.ndarray, segs: list[dict], cents: np.ndarray) -> tuple[list[dict], list[int | None]]:
+    """Split transcript segments in which the voice changes (Whisper often merges a question and its answer).
+
+    Each long segment is scanned with overlapping 1.6 s windows; a change of nearest speaker centroid that holds for at
+    least two windows on both sides splits the segment at the nearest word gap. Returns (segments, forced labels) where a
+    forced label is the centroid index measured for a split piece (None = keep the segment-level label)."""
+    out, forced = [], []
+    for s in segs:
+        words = s.get("words") or []
+        a, b = float(s["start"]), float(s["end"])
+        if b - a < MIN_SPLIT_S or len(words) < 6:
+            out.append(s)
+            forced.append(None)
+            continue
+        wins = [{"start": t, "end": t + WIN_S} for t in np.arange(a, b - WIN_S + 1e-6, HOP_S)]
+        E, keep = embed_neural(x, wins)
+        if len(E) < 4:
+            out.append(s)
+            forced.append(None)
+            continue
+        lab = np.argmin(_cos_dist(np.vstack([E, cents]))[: len(E), len(E):], axis=1)
+        sm = np.array([int(np.bincount(lab[max(0, i - 1): i + 2]).argmax()) for i in range(len(lab))])  # 3-window majority
+        cuts, i0 = [], 0
+        for i in range(1, len(sm)):
+            if sm[i] != sm[i - 1] and i - i0 >= 2 and len(sm) - i >= 2 and all(sm[i:i + 2] == sm[i]):
+                # window i-1 is mostly the old voice, window i mostly the new one: the change lies in
+                # [start_i, start_i + HOP]; take the middle and let a sentence-ending word gap nearby win
+                t = wins[keep[i]]["start"] + HOP_S / 2
+                k = _boundary(words, t)
+                if k is not None:
+                    cuts.append((k, int(sm[i - 1]), int(sm[i])))
+                    i0 = i
+        if not cuts:
+            out.append(s)
+            forced.append(None)
+            continue
+        bounds = [0] + [c[0] for c in cuts] + [len(words)]
+        labs = [cuts[0][1]] + [c[2] for c in cuts]
+        for (w0, w1), lb in zip(zip(bounds[:-1], bounds[1:]), labs):
+            ws = words[w0:w1]
+            if not ws:
+                continue
+            out.append({**{k: v for k, v in s.items() if k not in ("words", "text", "start", "end")},
+                        "start": float(ws[0]["start"]), "end": float(ws[-1]["end"]), "words": ws,
+                        "text": " ".join(str(w.get("word", "")).strip() for w in ws), "split_from": [a, b]})
+            forced.append(lb)
+    return out, forced
+
+
 def diarize(path, analysis: dict, max_speakers: int = 4) -> dict:
     """Label transcript segments with speakers (in place on a copy) and return analysis['speakers']."""
     segs = ((analysis.get("transcript") or {}).get("segments")) or []
@@ -265,12 +331,28 @@ def diarize(path, analysis: dict, max_speakers: int = 4) -> dict:
     if len(E) < 4:
         return {"available": False, "why": "too little speech to compare voices"}
     lab, sil, k = _cluster(E, max_speakers)
-    D = _cos_dist(np.vstack([E, np.array([E[lab == c].mean(0) for c in range(k)])]))[: len(E), len(E):]
+    cents = np.array([E[lab == c].mean(0) for c in range(k)])
+    D = _cos_dist(np.vstack([E, cents]))[: len(E), len(E):]
     labels, conf = {}, {}
     for j, i in enumerate(keep):
         labels[i] = f"S{int(lab[j]) + 1}"
         d = np.sort(D[j])
         conf[i] = round(float((d[1] - d[0]) / (d[1] + 1e-9)) if k > 1 else 1.0, 3)
+    n_split = 0
+    if neural and k > 1:  # one speaker per segment is an assumption: check long segments for a voice change inside
+        new_segs, forced = split_mixed(x, segs, cents)
+        if len(new_segs) != len(segs):
+            n_split = len(new_segs) - len(segs)
+            old_of = []  # map each new segment back to its original index for the segment-level label
+            j = 0
+            for ns in new_segs:
+                while j < len(segs) and not (float(segs[j]["start"]) - 1e-3 <= float(ns["start"]) <= float(segs[j]["end"]) + 1e-3):
+                    j += 1
+                old_of.append(min(j, len(segs) - 1))
+            labels = {i: (f"S{forced[i] + 1}" if forced[i] is not None else labels.get(old_of[i])) for i in range(len(new_segs))}
+            conf = {i: (0.5 if forced[i] is not None else conf.get(old_of[i], 0.0)) for i in range(len(new_segs))}
+            labels = {i: v for i, v in labels.items() if v is not None}
+            segs = new_segs
     for i in range(len(segs)):  # very short segments inherit the nearest labelled neighbour
         if i not in labels:
             near = min(labels, key=lambda j: abs(j - i))
@@ -289,7 +371,9 @@ def diarize(path, analysis: dict, max_speakers: int = 4) -> dict:
                                           "MFCC statistics (numpy fallback)") + " + agglomerative clustering, speakers chosen by silhouette",
             "licence": EMB_LICENCE if neural else "own code (no model)", "n_speakers": k, "silhouette": round(sil, 3), "turns": turns,
             "segment_labels": [labels[i] for i in range(len(segs))], "speakers": roles(segs, labels),
-            "note": "weaker than neural speaker embeddings; assumes one speaker per transcript segment"}
+            "segments_split": n_split, **({"segments": segs} if n_split else {}),
+            "note": ("long segments are scanned for a voice change and split at the nearest word gap"
+                     if neural else "weaker than neural speaker embeddings; assumes one speaker per transcript segment")}
 
 
 def apply_labels(analysis: dict, spk: dict) -> dict:
@@ -298,6 +382,9 @@ def apply_labels(analysis: dict, spk: dict) -> dict:
     an["speakers"] = spk
     if not spk.get("available"):
         return an
+    if spk.get("segments"):  # segments were split where the voice changed inside them
+        an["transcript"]["segments"] = copy.deepcopy(spk["segments"])
+        an["speakers"] = {k: v for k, v in spk.items() if k != "segments"}
     names = {k: (v["role"] if v.get("role") in ("interviewer", "guest", "narrator") else k) for k, v in spk["speakers"].items()}
     for s, lab in zip(an["transcript"]["segments"], spk["segment_labels"]):
         s["speaker"] = names.get(lab, lab)

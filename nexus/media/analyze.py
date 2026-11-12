@@ -227,6 +227,8 @@ def analyze(path: str | Path, language: str | None = None, transcribe: bool = Tr
                     from . import diarize as dmod
                     spk = dmod.diarize(path, out)
                     out = dmod.apply_labels(out, spk) if spk.get("available") else {**out, "speakers": spk}
+                    if spk.get("segments_split"):  # segment indices changed: repetitions refer to them
+                        out["repetitions"] = find_repetitions(out["transcript"]["segments"])
                     if spk.get("available"):
                         out["not_available"] = [x for x in out["not_available"] if not x.startswith("speaker diarisation")]
                 except Exception as e:  # noqa: BLE001 - never lose the analysis over diarisation

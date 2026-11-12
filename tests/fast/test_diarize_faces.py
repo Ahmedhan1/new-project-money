@@ -1,5 +1,6 @@
 """DIA-1 + face tracking: role assignment (incl. several interviewers), manual corrections that keep the automatic result,
 clustering, filterbank features, face-path smoothing/spans/focus lookup and shorts reframing from face data. No models."""
+import pytest
 import numpy as np
 
 from nexus import shorts
@@ -75,3 +76,53 @@ def test_shorts_reframing_uses_face_focus():
         {"start": 0, "end": 100, "x": 0.72, "y": 0.33}]}}
     mode, focus, note = shorts.reframe_for(an, 10, 20, 1080, 1920)
     assert mode == "cover" and focus[0] > 0.6 and "subject" in note
+
+
+def test_a_question_and_answer_merged_in_one_segment_are_split_by_voice(tmp_path):
+    """Whisper merged interviewer question + guest answer: the voice change inside the segment is found from audio."""
+    import subprocess as sp
+    from nexus import config
+    from nexus.media import diarize as dz
+    try:
+        from nexus.speech import tts
+        if dz.ensure_emb_model() is None:
+            raise FileNotFoundError("speaker model")
+        a_voice, b_voice = (config.MODELS / "piper" / f"{v}.onnx" for v in ("en_US-joe-medium", "fr_FR-siwis-medium"))
+        if not (a_voice.exists() and b_voice.exists()):
+            raise FileNotFoundError("voices")
+        parts = []
+        lines = [("joe", "en_US-joe-medium", "en", "So tell me, what did you find down in the cave that day?"),
+                 ("siwis", "fr_FR-siwis-medium", "fr", "Nous avons trouvé une zone de sable plate, ce qui est très rare dans "
+                                                        "les grottes, et cela nous a beaucoup surpris pendant la mission.")]
+        for k in range(3):
+            for who, voice, lang, text in lines:
+                w = tmp_path / f"{k}_{who}.wav"
+                tts.synthesize(text, w, lang, voice=voice, master=False, cache=False)
+                parts.append((who, text, w))
+    except Exception as e:  # noqa: BLE001
+        pytest.skip(f"no local voices/speaker model for a two-voice fixture ({type(e).__name__})")
+    lst = tmp_path / "l.txt"
+    lst.write_text("".join(f"file '{w}'\n" for _, _, w in parts))
+    wav = tmp_path / "talk.wav"
+    sp.run(["ffmpeg", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(lst), "-ar", "16000", "-ac", "1", str(wav)], check=True)
+    segs, t = [], 0.0
+    for who, text, w in parts:
+        d = float(sp.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(w)],
+                         capture_output=True, text=True).stdout)
+        ws = text.split()
+        step = d / len(ws)
+        words = [{"start": round(t + i * step, 3), "end": round(t + (i + 0.8) * step, 3), "word": x} for i, x in enumerate(ws)]
+        segs.append({"start": words[0]["start"], "end": words[-1]["end"], "text": text, "words": words, "who": who})
+        t += d
+    # merge the first question with its answer, as Whisper does
+    q, a = segs[0], segs[1]
+    merged = {"start": q["start"], "end": a["end"], "text": q["text"] + " " + a["text"], "words": q["words"] + a["words"]}
+    segs = [merged] + segs[2:]
+    spk = dz.diarize(wav, {"transcript": {"segments": segs}})
+    assert spk["available"] and spk["n_speakers"] == 2 and spk["segments_split"] >= 1
+    new = spk["segments"]
+    first, second = new[0], new[1]
+    assert first["text"].endswith("that day?") and second["text"].startswith("Nous")       # split at the question mark
+    assert spk["segment_labels"][0] != spk["segment_labels"][1]
+    an = dz.apply_labels({"transcript": {"segments": segs}}, spk)
+    assert len(an["transcript"]["segments"]) == len(new) and "segments" not in an["speakers"]
