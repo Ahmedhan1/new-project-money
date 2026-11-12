@@ -78,7 +78,8 @@ def test_leveller_gives_a_spiky_voice_nearly_the_same_gain_as_a_smooth_one(tmp_p
     old = gap("dynaudnorm=f=250:g=15:p=0.9:m=8:s=6")
     new = gap(post.LEVEL.split(",")[0])
     assert new < old - 1.2 and new < 4.0, (old, new)
-    assert post.chain_signature() != post.chain_signature("voice_level")
+    import hashlib
+    assert post.chain_signature("voice_level").endswith(hashlib.sha1(post.VOICE_LEVEL.encode()).hexdigest()[:10])
 
 
 def test_speaker_gains_match_the_main_speaker_and_render_inside_the_clip(home, tmp_path):

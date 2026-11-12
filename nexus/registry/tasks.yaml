@@ -421,7 +421,7 @@ tasks:
     acceptance: "Cutaways below a relevance bar are dropped; owner review agrees on a sample of 20."
     test: "Fixed set of sentence/image pairs."
     next: "Licence check of candidate CLIP-class weights first (K-18)."
-  - id: CAP-1
+  - id: CAP-2
     priority: 2
     title: "Opt-in readable caption mode (condense fillers/false starts to keep reading speed under 20 chars/s)"
     status: planned
