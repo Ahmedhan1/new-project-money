@@ -1,7 +1,7 @@
 # Account 3: language matrix, translation QA, dialects, dubbing manifest and subtitles (agent D)
 
 Branch `work/account-3-d-language`. Code: `nexus/intelligence/language/` (machine-readable matrix:
-`nexus/intelligence/language/matrix.yaml`). Tests: `tests/fast/test_intel_language.py` (29 tests, no models, no network).
+`nexus/intelligence/language/matrix.yaml`). Tests: `tests/fast/test_intel_language.py` (33 tests, no models, no network).
 Demo: `scripts/account3/language_demo.py` -> `docs/results/account3/language_demo.json`.
 
 This package builds on `nexus/localize.py` (MADLAD-400 MT, sentence groups), `nexus/speech/packs.py` +
@@ -115,9 +115,67 @@ text cannot inject ASS overrides). RTL: every line starts with RLM and Latin run
 Products: **full** (verbatim) and **condensed** (one line, filler words removed, <= 75 % of the max cps; cues that still
 read too fast are listed in `condense_todo` for a human or the router - nothing is cut silently).
 
-## 6. Demo results
+## 6. Demo results (verified on this machine, 2026-11-12)
 
-See section "Demo results (filled from language_demo.json)" below.
+`scripts/account3/language_demo.py` translated a fixed 8-sentence English text about the Aswan High Dam (numbers,
+names, dates) into de, fr, ar-EG, ar-Gulf, zh, ru, hi, es with the existing `localize.translate_sentences` (MADLAD-400 +
+local-LLM fallback + pack rules), then ran the dialect pass (ar-EG, ar-Gulf), back-translation through the model router
+(local Qwen3-4B, privacy `internal`), the QA, SRT/VTT/ASS export (full + condensed) and a dubbing manifest per
+language. Everything is in `docs/results/account3/language_demo.json` (per line: MT output, final text, back-translation,
+every finding, confidence; SRT text; ASS style; dubbing lines; voice-over results). `--reqa` recomputes the
+deterministic QA from the stored outputs without models.
+
+| Lang | Lines flagged (of 8) | Mean confidence | Voice-over line 1 | Subtitle QA (full) |
+|---|---|---|---|---|
+| de | 1, 2, 6 | 0.74 | de_DE-thorsten (CC0), 7.6 s | 2 findings (reading speed) |
+| fr | 1 | 0.81 | fr_FR-siwis (CC BY 4.0, attribution SIWIS + Hi-Fi TTS), 5.5 s | 6 findings (reading speed) |
+| ar-EG | 5, 6 | 0.86 | none: no commercially cleared voice (kareem unverified) | passed |
+| ar-Gulf | 1, 2, 4, 6, 7 | 0.61 | none: no commercially cleared voice | passed |
+| zh | 7, 8 | 0.87 | **failed**: zh_CN-chaowen raised "Error: # channels not specified" in Piper (IR-9) | passed |
+| ru | 6, 7 | 0.88 | ru_RU-denis (CC0), 8.0 s | 2 findings |
+| hi | 3, 6, 8 | 0.84 | none rendered: the only cleared option (Kokoro) is not installed | passed |
+| es | 1, 2, 5 | 0.77 | es_ES-davefx (CC0), 7.0 s | 4 findings |
+
+Real errors the QA caught (agent's reading; no native reviewer):
+- **de 1**: MADLAD wrote "Aswan-**Hochbehinderung**" ("high disability") for "High Dam". Caught by glossary + name
+  check. The back-translator *repaired* it to "High Dam", so back-translation alone would have missed it.
+- **de 2, de 6**: sentences cut in half ("Er ist 111 Meter hoch, ca." / "bedrohte die für Ramses II."): `mt._sentences`
+  treats "ca." and "II." as sentence ends and `mt.translate` keeps only as many sentences as the source had (IR-7).
+  Caught as too_short + number_missing (3830) and omission.
+- **ar-Gulf 1**: MSA MT invented "وتم الانتهاء من بنائه في عام ٢٠٠٥" ("completed in 2005"). Caught (number_added 2005).
+- **ar-Gulf 2, 4**: 3,830 and 2,100 came out as "٨٣٠ ٣" and "١٠٠ ٢" (digit groups reversed). Caught as number
+  missing/added. Root cause (MADLAD output vs. typography) not isolated (IR-8).
+- **es 2**: invented "y 111 de ancho" (111 m wide). **es 5**: invented "que fue inaugurada en 1960". Both caught
+  (number_added; added_clause).
+- **ar-EG 5**: MT added "وساعدوا على إنجازه" ("and they helped complete it"). Caught by the added-clause check that was
+  written after the first run missed it.
+- **fr 1**: "L'ouvrage de l'Aswan" dropped "High Dam", "Nile" and "Egypt". Caught (glossary, name, omission).
+- ru 6: "Абу Симбели", "Рамесеса" vs the glossary Абу-Симбел / Рамсес (caught, glossary).
+
+Findings that are probably false or debatable: zh 7 uses the short form 教科文组织 instead of the glossary's full
+联合国教科文组织; hi 3/6 use spelling variants (नासर, सिम्बेल, रामेसेस) of the glossary terms (the glossary was written by
+the agent, not by a linguist); "unsupported_content" on zh 8 / hi 8 / ru 7 is back-translation paraphrase. Glossary
+and name findings are only as good as the glossary.
+
+Dialects. The router (local Qwen3-4B) is **not good enough** for Egyptian/Gulf rewriting: run 1 accepted invented
+non-words (بيو، كايل، "واي بيرف") and a "but" -> "why" swap (ولكنه -> وليش). The acceptance check now rejects router lines
+with words that have no source or lexicon counterpart, or that add question words; in the final run ar-EG used 4 router
+lines and 4 lexical, ar-Gulf 8/8 lexical (`first_run_arabic` in the JSON keeps run 1 for reference). The MADLAD `<2arz>`
+output is itself partly Egyptian (اللي بتقدر تحمل ... من المية), so ar-EG and ar-Gulf texts differ clearly; the classifier
+labels the ar-EG text **EG** (0.63/0.19/0.18) and the ar-Gulf text **MSA** (0.14/0.14/0.71), which is the honest
+result: K-15 (Gulf reads as MSA) is still open; the lexical fallback only changes function words that the MT happens to
+use. `dialect_contrast`: the same 8 MSA MT lines through the EG and Gulf lexical passes - whole text classified MSA ->
+EG -> Gulf as expected, but only 3 of 8 lines change. Per line, most lines are `uncertain` (too little evidence),
+which the classifier reports instead of guessing. Native-quality Gulf needs a better model (owner-authorised hosted
+provider via the router, privacy `public` only for public scripts) or a human.
+
+Subtitles: the full SRT of every language is in the JSON; ASS styles use Noto Naskh Arabic (charset 178) and WenQuanYi
+Zen Hei (134) on this machine. Reading-speed findings for de/fr/ru/es are real: the timing comes from the English
+narration, and the translations are longer - the condensed product lists 8-14 cues per language to shorten
+(`condense_todo`); nothing was cut automatically.
+
+Performance (shared 4-CPU machine): MT 16-183 s per language for 8 sentences (includes model load and LLM retries),
+back-translation 30-60 s, dialect pass about 1-3 min.
 
 ## Integration requests (for the lead)
 
@@ -229,6 +287,32 @@ product default.
 **IR-6 - docs/FEATURE_MATRIX.md "Languages" rows**: add "translation QA per line (omission / addition / names /
 glossary / repetition / back-translation) - T (tested), V on the demo" and "Egyptian vs Gulf classifier + router
 adaptation - T, demo evidence in docs/results/account3/language_demo.json".
+
+**IR-7 - MT truncates sentences at abbreviations / ordinals** (`nexus/speech/mt.py`, `_sentences`). German "ca. 3.830"
+and "Ramses II. gebaut" were cut because `translate()` keeps `len(_sentences(src))` sentences of the output. Patch:
+```python
+def _sentences(text: str) -> list[str]:
+    parts = [s for s in re.split(r"(?<=[!?؟。…])\s+|(?<=(?<!\d)\.)\s+", text.strip()) if s]
+    out: list[str] = []
+    for s in parts:
+        # "ca. 3", "II. gebaut", "z. B." are not sentence ends: the next piece starts lower-case or with a digit,
+        # or the previous piece ends in an abbreviation / Roman numeral
+        if out and (s[:1].islower() or s[:1].isdigit() or re.search(r"(?:\b(?:ca|bzw|vgl|Nr|usw|etc|env|approx|z\.\s?B|d\.\s?h)|\b[IVXLC]+)\.$", out[-1])):
+            out[-1] += " " + s
+        else:
+            out.append(s)
+    return out
+```
+(`translation_qa.sentences` already merges lower-case continuations; test `test_sentence_split_keeps_german_ordinals`.)
+
+**IR-8 - reversed digit groups in Arabic output** ("3,830" -> "٨٣٠ ٣", "2,100" -> "١٠٠ ٢" in the MSA run). Suggested
+fix in `localize._finish_line` before typography: if the source has a grouped number and the target has
+`(\d{3}) (\d{1,3})` whose swap equals it, swap back and record the repair; otherwise QA keeps flagging it. Needs
+the raw MADLAD output to locate the cause (not isolated here).
+
+**IR-9 - zh_CN-chaowen voice fails in Piper** ("Error: # channels not specified"; the card says it needs Piper >= 1.5
+with g2pW). Until fixed, `languages.yaml` zh should not offer chaowen first, or Account 2 should catch it and fall back
+to subtitles.
 
 ## Unverified / blocked
 
