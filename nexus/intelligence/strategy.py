@@ -54,6 +54,20 @@ def grounding(script: dict, brief: dict | None) -> dict:
     return {"ok": not nums and not bad_ids, "unsupported_numbers": nums, "unknown_claim_ids": bad_ids}
 
 
+def claims_from_research(brief: dict, allow_single_source: bool = True) -> dict:
+    """Market ResearchBrief -> the claim list the script writer may use (text + first supporting source URL).
+    Claims in conflict are never passed on; single-source claims only when allowed (they stay marked)."""
+    urls = {x["id"]: x.get("url") or x.get("title") for x in brief.get("sources", [])}
+    out = []
+    for i, c in enumerate(brief.get("claims", [])):
+        st = c.get("status", "")
+        if "conflict" in st or (st == "single_source" and not allow_single_source):
+            continue
+        sid = (c.get("supported_by") or c.get("source_ids") or [None])[0]
+        out.append({"id": f"c{i + 1}", "text": c["text"], "source_url": urls.get(sid), "status": st})
+    return {"id": brief.get("id", "brief"), "claims": out}
+
+
 def _outline(topic: str, brief: dict | None, style: dict | None, n: int) -> dict:
     """Deterministic fallback: hook from the strongest claim, one scene per claim, takeaway."""
     claims = (brief or {}).get("claims", [])[: max(1, n - 1)]

@@ -323,3 +323,4 @@ def deliver_(job: jobs.Job) -> dict:
 
 # Account 3 job kinds (registered by import): publish-upload
 from .intelligence.publishing import jobs_handler as _a3_publish  # noqa: E402,F401
+from .intelligence import workflows as _a3_workflows  # noqa: E402,F401

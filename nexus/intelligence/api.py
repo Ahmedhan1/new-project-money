@@ -68,3 +68,294 @@ def ai_try(q: AskReq):
         raise HTTPException(422, str(e))
     return {"text": res.text, "provider": res.provider, "model": res.model, "latency_s": res.latency_s, "fallbacks": res.fallbacks,
             "below_bar": res.below_bar}
+
+
+# ----------------------------------------------------------------- research / opportunities
+def _jobs():
+    from .. import jobs, workflows  # noqa: F401  (registers Account 3 job kinds)
+    return jobs
+
+
+class ResearchReq(BaseModel):
+    topic: str
+    niche: str = "science"
+    lang: str = "en"
+
+
+@router.post("/research")
+def research_start(r: ResearchReq):
+    if not r.topic.strip():
+        raise HTTPException(422, "topic is required")
+    return _jobs().submit("a3-market-research", r.model_dump(), max_retries=1)
+
+
+@router.get("/research")
+def research_list():
+    from .. import db
+    out = []
+    for d in reversed(db.list_docs("a3_report")):
+        o = d.get("opportunity", {})
+        out.append({"id": d["id"], "topic": d["topic"], "niche": d["niche"], "language": d["language"], "date": d["date"],
+                    "score": o.get("score"), "confidence": o.get("confidence"), "status": o.get("status")})
+    return out
+
+
+@router.get("/research/{rid}")
+def research_get(rid: str):
+    from .. import db
+    d = db.get_doc("a3_report", rid)
+    if not d:
+        raise HTTPException(404, "report not found")
+    return d
+
+
+@router.get("/niches")
+def niches_list():
+    m = _mod("market")
+    return m.load_niches()
+
+
+class TrendReq(BaseModel):
+    niches: list[str] | None = None
+
+
+@router.post("/trends")
+def trends(r: TrendReq):
+    m = _mod("market")
+    return m.trend_monitor(m.Ctx(), m.watchlist(r.niches))
+
+
+class StrategyReq(BaseModel):
+    report: str
+    style: str | None = None
+    scenes: int = 5
+    aspect: str = "16:9"
+    submit: bool = False
+    allow_single_source: bool = True
+
+
+@router.post("/strategy")
+def strategy_start(r: StrategyReq):
+    from .. import db
+    if not db.get_doc("a3_report", r.report):
+        raise HTTPException(404, "research report not found")
+    if r.style and not db.get_doc("a3_style", r.style):
+        raise HTTPException(404, "style not found")
+    return _jobs().submit("a3-strategy", r.model_dump(), max_retries=1)
+
+
+@router.get("/strategy")
+def strategy_list():
+    from .. import db
+    return [{"id": d["id"], "report": d["report"], "title": d["script"]["title"], "language": d["script"]["language"],
+             "originality": d["script"]["originality"], "scenes": d["script"]["scenes"], "shots": len(d["storyboard"]["shots"]),
+             "target_s": d["storyboard"]["target_s"], "submitted": d.get("submitted")} for d in reversed(db.list_docs("a3_strategy"))]
+
+
+# ----------------------------------------------------------------- creator references
+class RefReq(BaseModel):
+    path: str
+    rights: str
+    creator: str = "unknown"
+    category: str = "unknown"
+    format: str = "unknown"
+    title: str | None = None
+    licence_url: str | None = None
+
+
+@router.post("/references")
+def reference_start(r: RefReq):
+    m = _mod("creators")
+    if r.rights not in m.RIGHTS_OK:
+        raise HTTPException(422, f"rights must be one of {sorted(m.RIGHTS_OK)} - NEXUS only analyses media you may use")
+    meta = {k: v for k, v in {"creator": r.creator, "category": r.category, "format": r.format, "title": r.title}.items() if v}
+    return _jobs().submit("a3-reference", {"path": r.path, "rights": r.rights, "meta": meta, "licence_url": r.licence_url}, max_retries=0)
+
+
+@router.get("/references")
+def reference_list():
+    from .. import db
+    return [{"id": d["id"], "creator": d.get("creator"), "category": d.get("category"), "format": d.get("format"),
+             "duration_s": d.get("duration_s"), "hook": (d.get("hook") or {}).get("type"), "confidence": d.get("confidence"),
+             "source": d.get("source")} for d in reversed(db.list_docs("a3_reference"))]
+
+
+@router.get("/references/library")
+def reference_library():
+    return _mod("creators").library.archetypes()
+
+
+class IdsReq(BaseModel):
+    ids: list[str]
+    name: str = "reference style"
+
+
+def _profiles(ids: list[str]) -> list[dict]:
+    from .. import db
+    ps = [db.get_doc("a3_reference", i) for i in ids]
+    if not ids or any(p is None for p in ps):
+        raise HTTPException(404, "unknown reference id")
+    return ps
+
+
+@router.post("/references/compare")
+def reference_compare(r: IdsReq):
+    return _mod("creators").compare(_profiles(r.ids))
+
+
+@router.post("/styles")
+def style_create(r: IdsReq):
+    from .. import db
+    st = _mod("creators").style_from(_profiles(r.ids), name=r.name)
+    db.put_doc("a3_style", st, st["id"])
+    return st
+
+
+@router.get("/styles")
+def style_list():
+    from .. import db
+    return list(reversed(db.list_docs("a3_style")))
+
+
+# ----------------------------------------------------------------- publishing
+@router.get("/platforms")
+def platforms():
+    return _mod("publishing.capabilities").matrix()
+
+
+class PackReq(BaseModel):
+    platform: str
+    transcript: str
+    title: str | None = None
+    language: str = "en"
+    duration_s: float | None = None
+
+
+@router.post("/package")
+def package(r: PackReq):
+    try:
+        return _mod("publishing.packaging").package(r.platform, r.transcript, r.title, r.language, r.duration_s)
+    except KeyError as e:
+        raise HTTPException(404, f"unknown platform {e}")
+
+
+class PubReq(BaseModel):
+    project_id: str
+    file: str
+    platform: str
+    metadata: dict
+    visibility: str | None = None
+    schedule: str | None = None
+    connection_id: str | None = None
+
+
+@router.post("/publish")
+def publish_create(r: PubReq):
+    e = _mod("publishing.engine")
+    try:
+        m = e.create(r.project_id, {"uri": r.file}, r.platform, r.metadata, r.connection_id, r.visibility, r.schedule)
+    except Exception as ex:  # PublishError and contract violations -> the reason, verbatim
+        raise HTTPException(422, str(ex))
+    return e.public_view(m)
+
+
+@router.get("/publish")
+def publish_list():
+    e = _mod("publishing.engine")
+    store = _mod("publishing.store")
+    return [e.public_view(m) for m in store.list_manifests()]
+
+
+@router.post("/publish/{mid}/approve")
+def publish_approve(mid: str):
+    """The owner's explicit approval (required for unlisted/public). Only reachable from the owner's own UI session."""
+    e = _mod("publishing.engine")
+    try:
+        return e.public_view(e.approve(mid))
+    except Exception as ex:
+        raise HTTPException(422, str(ex))
+
+
+@router.post("/publish/{mid}/queue")
+def publish_queue(mid: str):
+    jh = _mod("publishing.jobs_handler")
+    try:
+        return jh.submit(mid)
+    except Exception as ex:
+        raise HTTPException(422, str(ex))
+
+
+@router.get("/publish/{mid}/history")
+def publish_history(mid: str):
+    return _mod("publishing.engine").history(mid)
+
+
+# ----------------------------------------------------------------- analytics + growth
+class CsvReq(BaseModel):
+    kind: str
+    text: str
+    period: str | None = None
+    project_id: str | None = None
+
+
+@router.post("/analytics/import")
+def analytics_import(r: CsvReq):
+    try:
+        return _mod("publishing.analytics").import_csv(r.text, r.kind, r.period, r.project_id)
+    except Exception as ex:
+        raise HTTPException(422, str(ex))
+
+
+@router.get("/analytics")
+def analytics_list(platform: str | None = None):
+    return _mod("publishing.analytics").records(platform)
+
+
+class ExpReq(BaseModel):
+    hypothesis: str
+    variable: str
+    variants: list[dict]
+    platform: str
+    metric: str
+    baseline: float
+    mde: float
+
+
+@router.post("/experiments")
+def experiment_create(r: ExpReq):
+    from .. import db
+    ex = _mod("growth.experiments")
+    try:
+        e = ex.create(r.hypothesis, r.variable, r.variants, r.platform, r.metric, baseline=r.baseline, mde=r.mde)
+    except Exception as err:
+        raise HTTPException(422, str(err))
+    db.put_doc("a3_experiment", e, e["id"])
+    return e
+
+
+@router.get("/experiments")
+def experiment_list():
+    from .. import db
+    return list(reversed(db.list_docs("a3_experiment")))
+
+
+@router.post("/experiments/{eid}/evaluate")
+def experiment_evaluate(eid: str):
+    from .. import db
+    e = db.get_doc("a3_experiment", eid)
+    if not e:
+        raise HTTPException(404, "experiment not found")
+    res = _mod("growth.experiments").evaluate(e, _mod("publishing.analytics").records(e["platform"]))
+    db.put_doc("a3_experiment", res, eid)
+    return res
+
+
+@router.get("/recommendations")
+def recommendations():
+    """Evidence-backed recommendations from the owner's imported analytics. Empty until real records exist."""
+    recs_mod, learn = _mod("growth.recommend"), _mod("growth.learning")
+    rows = _mod("publishing.analytics").records()
+    if not rows:
+        return {"records": 0, "recommendations": [], "note": "import your analytics first (CSV export or YouTube Analytics)"}
+    out = recs_mod.from_weak_openings(learn.weak_openings(rows))
+    return {"records": len(rows), "recommendations": out}
