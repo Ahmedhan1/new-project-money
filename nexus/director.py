@@ -778,6 +778,21 @@ def _chapters(items: list[dict], labels: dict) -> list[dict]:
     return out
 
 
+MACHINE_SPEAKER = re.compile(r"^(interviewer|guest|narrator|S\d+|SPEAKER_\d+|unknown)$", re.I)
+
+
+def speaker_names(analyses) -> dict:
+    """{speaker label used in segments -> display name a person gave}. Machine labels without a name are left out."""
+    out = {}
+    for u in analyses:
+        spk = (u or {}).get("speakers") or {}
+        for k, v in (spk.get("speakers") or {}).items():
+            if isinstance(v, dict) and str(v.get("name") or "").strip():
+                key = v["role"] if v.get("role") in ("interviewer", "guest", "narrator") else k
+                out[key] = str(v["name"]).strip()
+    return out
+
+
 def _finish(brief, prof, ins, target, tol, items, est, decisions, notes, srcs, chapters, hook, lifted) -> dict:
     for it in items:  # drop internal bookkeeping that the timeline does not need
         for k in ("lo", "hi", "first", "last", "after"):
@@ -790,8 +805,12 @@ def _finish(brief, prof, ins, target, tol, items, est, decisions, notes, srcs, c
                      "and lower thirds carry no names")
     if not any(sh.get("measured") for S in srcs.values() for sh in S["shots"]):
         notes.append("shot quality was not measured (analysis without frame measurements): low-quality-shot rules were not applied")
+    names = speaker_names([S["an"] for S in srcs.values()])
+    if any((S["u"].get("speakers") or {}).get("available") for S in srcs.values()) and not names:
+        notes.append("speakers were detected but none has a name yet: no lower thirds (a role such as 'guest' is never put on "
+                     "screen); set names with diarize.set_name")
     return {"version": 1, "profile": prof["name"], "profile_params": prof, "brief": {k: v for k, v in brief.items() if k != "music"},
-            "instructions": ins, "target_seconds": target, "tolerance": tol, "estimated_duration": est,
+            "speaker_names": names, "instructions": ins, "target_seconds": target, "tolerance": tol, "estimated_duration": est,
             "items": items, "chapters": chapters, "decisions": decisions,
             "summary": {"sources": len(srcs), "source_seconds": round(sum(S["dur"] for S in srcs.values()), 2),
                         "programme_seconds": est, "clips": sum(1 for it in items if it["kind"] == "piece"),
@@ -918,9 +937,10 @@ def build(plan: dict, size: tuple[int, int] = (1920, 1080), music: bool = True) 
             if it.get("cut") == "crossfade":
                 c["transition"], c["xfade"], c["transition_dur"] = "crossfade", tr.get("xfade", "fade"), it["xfade_dur"]
             sp = it.get("speaker")
-            if sp and tcfg.get("lower_thirds") and sp not in seen_speakers:
+            name = (plan.get("speaker_names") or {}).get(sp) or (None if not sp or MACHINE_SPEAKER.match(str(sp)) else str(sp))
+            if name and tcfg.get("lower_thirds") and sp not in seen_speakers:
                 seen_speakers.add(sp)
-                c["text"] = [{"text": str(sp), "style": "lower_third", "start": 0.3, "end": round(min(3.5, it["out"] - it["in"]), 3)}]
+                c["text"] = [{"text": name, "style": "lower_third", "start": 0.3, "end": round(min(3.5, it["out"] - it["in"]), 3)}]
         tl["clips"].append(c)
     if tl["clips"]:
         first, last = tl["clips"][0], tl["clips"][-1]

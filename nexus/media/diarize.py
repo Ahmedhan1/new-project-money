@@ -320,6 +320,14 @@ def rename(spk: dict, old: str, new_role: str, who: str = "user") -> dict:
     return out
 
 
+def set_name(spk: dict, label: str, name: str, who: str = "user") -> dict:
+    """Give a detected speaker a display name (used for lower thirds). Roles alone are never shown on screen."""
+    out = _editable(spk)
+    out["speakers"][label]["name"] = name.strip()
+    out["edits"].append({"op": "name", "speaker": label, "name": name.strip(), "by": who})
+    return out
+
+
 def merge(spk: dict, keep: str, drop: str, who: str = "user") -> dict:
     out = _editable(spk)
     out["segment_labels"] = [keep if x == drop else x for x in out["segment_labels"]]

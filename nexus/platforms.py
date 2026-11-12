@@ -143,7 +143,7 @@ def _trim_to(tl: dict, limit: float, notes: list[str]) -> dict:
     return tl
 
 
-def tune(tl: dict, name: str) -> tuple[dict, list[str]]:
+def tune(tl: dict, name: str, analysis_by_src: dict | None = None) -> tuple[dict, list[str]]:
     """Adapt a master timeline for one destination. Never mutates `tl`. Every change cites the field that caused it."""
     from .timeline import ops
     prof = get(name)
@@ -155,15 +155,24 @@ def tune(tl: dict, name: str) -> tuple[dict, list[str]]:
     if (W, H) != (tl["width"], tl["height"]):
         src_ar, dst_ar = tl["width"] / tl["height"], W / H
         out = ops.reframe(out, W, H, "cover")
-        changed = 0
+        changed = tracked = 0
+        from .media import faces as _faces
         for c in out["clips"]:
             if c["type"] != "video":
                 continue
+            unset = not (isinstance(c.get("focus"), (list, tuple)) and tuple(round(float(x), 3) for x in c["focus"]) != (0.5, 0.5))
+            an = (analysis_by_src or {}).get(c.get("src"))
+            if unset and an and abs(src_ar - dst_ar) > 0.3:
+                f = _faces.focus_at(an, float(c.get("in", 0)), float(c.get("out", 0)))
+                if f:  # measured subject (face track) for exactly this source span
+                    c["focus"] = [f[0], f[1]]
+                    tracked += 1
             has_focus = isinstance(c.get("focus"), (list, tuple)) and tuple(round(float(x), 3) for x in c["focus"]) != (0.5, 0.5)
             if abs(src_ar - dst_ar) > 0.3 and not has_focus and not c.get("fit_override"):
                 c["fit"] = "blur"  # no measured subject position: keep the whole picture over a blurred fill
                 changed += 1
         notes.append(f"reframed {tl['width']}x{tl['height']} -> {W}x{H} [{_cite(prof, 'resolution_recommended')}]" +
+                     (f"; {tracked} clip(s) cropped on the tracked face" if tracked else "") +
                      (f"; {changed} clip(s) without a measured subject position use blur-fill instead of a blind centre crop"
                       if changed else "; clips keep their subject focus"))
     limit = v.get("duration_max_s")

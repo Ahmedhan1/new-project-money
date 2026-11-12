@@ -62,6 +62,19 @@ def test_tune_vertical_reframes_keeps_focus_moves_captions_and_never_mutates():
     assert tl["platform"] == "tiktok"
 
 
+def test_tune_crops_on_the_tracked_face_when_the_analysis_has_one():
+    master = _master(n_sent=4)
+    faces = {"available": True, "focus": [{"start": 0.0, "end": 8.0, "x": 0.7, "y": 0.35},
+                                           {"start": 8.0, "end": 99.0, "x": 0.25, "y": 0.4}]}
+    tl, notes = platforms.tune(master, "tiktok", {"/dev/null.mp4": {"faces": faces}})
+    vids = [c for c in tl["clips"] if c["type"] == "video"]
+    assert vids[0]["focus"] == [0.7, 0.35] and vids[0]["fit"] == "cover"     # was unset: now follows the face
+    assert vids[1]["focus"] == [0.3, 0.5]                                     # a focus set by the editor is kept
+    assert vids[2]["focus"] == [0.25, 0.4]
+    assert not any(c["fit"] == "blur" for c in vids)
+    assert any("tracked face" in n for n in notes)
+
+
 def test_over_long_master_is_cut_after_a_whole_sentence_under_the_limit():
     tl, notes = platforms.tune(_master(n_sent=30), "snapchat_spotlight")   # 120 s master, 60 s limit
     limit = platforms.value("snapchat_spotlight", "duration_max_s")

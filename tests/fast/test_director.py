@@ -210,3 +210,21 @@ def test_built_timeline_renders_to_planned_duration(talk_video, tmp_path):
     assert abs(ff.duration(tmp_path / "master.mp4") - total_duration(tl)) < 0.3
     assert abs(stats["duration"] - 20) <= 3
     assert out["edl"]["cmx3600"].startswith("TITLE:")
+
+
+def test_lower_thirds_show_names_never_machine_roles():
+    an = _analysis([(0.5, SOLAR + " " + BREAD)])
+    for s in an["transcript"]["segments"]:
+        s["speaker"] = "guest"
+    an["speakers"] = {"available": True, "speakers": {"S1": {"role": "guest"}}}
+    def lower_thirds(a):
+        p = director.plan({"talk.mp4": a}, {"profile": "documentary", "target_seconds": 20})
+        tl = director.build(p, size=(640, 360), music=False)
+        return p, [x["text"] for c in tl["clips"] for x in c.get("text", []) if x.get("style") == "lower_third"]
+    p, lt = lower_thirds(an)
+    assert "guest" not in lt and not any(director.MACHINE_SPEAKER.match(t) for t in lt), lt
+    assert any("no lower thirds" in n for n in p["notes"]) if "notes" in p else True
+    from nexus.media import diarize
+    an["speakers"] = diarize.set_name(an["speakers"], "S1", "Dr. Ada Example")
+    p, lt = lower_thirds(an)
+    assert "Dr. Ada Example" in lt and p["speaker_names"] == {"guest": "Dr. Ada Example"}

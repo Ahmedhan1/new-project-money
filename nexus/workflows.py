@@ -311,4 +311,5 @@ def deliver_(job: jobs.Job) -> dict:
     p = prj.Project(a["project"])
     tl = p.timeline(a.get("branch", "main"))
     return job.stage("render-check-package", lambda: publish.deliver(p, tl, a["platforms"], a.get("title") or p.name,
-                                                                     a.get("description", ""), a.get("lang") or tl.get("lang", "en")))
+                                                                     a.get("description", ""), a.get("lang") or tl.get("lang", "en"),
+                                                                     analysis_by_src=_analysis(p) or None))

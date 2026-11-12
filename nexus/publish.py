@@ -134,7 +134,7 @@ def _limit_text(text: str, chars: int | None = None, utf8_bytes: int | None = No
 
 
 def deliver(project, tl: dict, destinations: list[str], title: str, description: str = "", lang: str = "en",
-            on_group=None) -> dict:
+            on_group=None, analysis_by_src: dict | None = None) -> dict:
     """One master -> every selected destination. Destinations that can share a render share it (platforms.deliverables);
     each destination still gets its own package: tuned timeline notes, file check against its limits, title/description/
     hashtags within its limits, caption sidecars, cover frame and a MANUAL_UPLOAD.md. Nothing is uploaded."""
@@ -144,7 +144,7 @@ def deliver(project, tl: dict, destinations: list[str], title: str, description:
     out: dict = {"groups": [], "packages": {}}
     for gi, g in enumerate(groups):
         lead = g["platforms"][0]
-        ptl, notes = platforms.tune(tl, lead)
+        ptl, notes = platforms.tune(tl, lead, analysis_by_src)
         gdir = project.dir / "publish" / f"render_{gi}_{ptl['width']}x{ptl['height']}" / lang
         gdir.mkdir(parents=True, exist_ok=True)
         video = gdir / "video.mp4"
