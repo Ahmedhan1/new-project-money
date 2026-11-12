@@ -167,7 +167,7 @@ components:
     data_retention: "query terms are sent to Wikimedia"
     availability: "remote; research falls back to user-supplied notes when unreachable"
     hardware: none
-    network_hosts: [en.wikipedia.org, ar.wikipedia.org, de.wikipedia.org]
+    network_hosts: [en.wikipedia.org, ar.wikipedia.org, de.wikipedia.org, fr.wikipedia.org, hi.wikipedia.org, zh.wikipedia.org, ru.wikipedia.org]
     status: deployed
   - id: openverse
     name: Openverse API (CC-licensed images/audio index)
@@ -274,6 +274,36 @@ components:
     availability: remote
     hardware: none
     network_hosts: [www.googleapis.com, youtubeanalytics.googleapis.com, youtube.googleapis.com, oauth2.googleapis.com]
+    status: adapter
+  - id: wikimedia-pageviews
+    name: Wikimedia Analytics API (Pageviews, AQS)
+    kind: service
+    capability: [demand-signal]
+    source_url: https://doc.wikimedia.org/generated-data-platform/aqs/analytics-api/reference/page-views.html
+    license: "data CC BY-SA 4.0 (per AQS docs), code MIT-0"
+    free_tier: "free, no key"
+    quotas: "unpublished; descriptive User-Agent, serial requests; 429 => back off"
+    commercial_use: "yes (aggregate statistics, attribution)"
+    usage_restrictions: "no bulk crawling"
+    data_retention: "article titles queried are sent to Wikimedia"
+    availability: "remote; falls back to prop=pageviews on the wiki host"
+    hardware: none
+    network_hosts: [wikimedia.org]
+    status: deployed
+  - id: gdelt-doc
+    name: GDELT DOC 2.0 API (news volume timeline)
+    kind: service
+    capability: [news-signal]
+    source_url: https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/
+    license: "GDELT open data; article text belongs to publishers (only counts/links used)"
+    free_tier: "free, no key"
+    quotas: "not published; NEXUS makes 1 call per topic"
+    commercial_use: "unverified - check https://www.gdeltproject.org/about.html#termsofuse"
+    usage_restrictions: "do not store article text"
+    data_retention: "query terms are sent to GDELT"
+    availability: "remote; freshness = unknown when unreachable"
+    hardware: none
+    network_hosts: [api.gdeltproject.org]
     status: adapter
   - id: github-api
     name: GitHub REST API (public repository metadata)

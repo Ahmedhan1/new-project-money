@@ -19,6 +19,17 @@ def _norm(url, params):
     return url, json.dumps({k: v for k, v in (params or {}).items() if k not in IGNORE}, sort_keys=True, ensure_ascii=False)
 
 
+# The fixtures were recorded when only these hosts were declared; tests replay that manifest state so they do not
+# change meaning when the lead declares more hosts in components.yaml.
+RECORDED_HOSTS = ("en.wikipedia.org", "ar.wikipedia.org", "de.wikipedia.org", "images-api.nasa.gov", "api.openverse.org")
+
+
+def recorded_host_ok(url):
+    from urllib.parse import urlparse
+    h = urlparse(url).hostname or ""
+    return (True, "declared") if h in RECORDED_HOSTS else (False, f"host {h} not declared in components.yaml")
+
+
 def replay_ctx(name="jwst_en.json", host_ok=None, extra=None, **kw):
     recs = json.loads((FIX / name).read_text(encoding="utf-8"))["records"]
     table = {_norm(r["url"], r["params"]): r["response"] for r in recs}
@@ -31,7 +42,7 @@ def replay_ctx(name="jwst_en.json", host_ok=None, extra=None, **kw):
         if k not in table:
             raise src.net.RemoteUnavailable(f"no fixture for {k}")
         return table[k]
-    return src.Ctx(fetch_json=fetch, fetch_text=lambda url, params=None: (extra or {})[url], host_ok=host_ok or src.host_declared,
+    return src.Ctx(fetch_json=fetch, fetch_text=lambda url, params=None: (extra or {})[url], host_ok=host_ok or recorded_host_ok,
                    today=TODAY, settings=kw.pop("settings", {}), youtube_key=kw.pop("youtube_key", lambda: None), min_interval=0,
                    rate_limit_wait=0, **kw)
 
@@ -43,7 +54,7 @@ def report():
 
 def test_host_rule_matches_cost_guard():
     assert src.host_declared("https://en.wikipedia.org/w/api.php")[0]
-    ok, why = src.host_declared("https://api.gdeltproject.org/api/v2/doc/doc")
+    ok, why = src.host_declared("https://api.news-example.invalid/v2/doc")
     assert not ok and "not declared" in why
     assert not src.host_declared("https://api.openai.com/v1/x")[0]
 
