@@ -218,7 +218,7 @@ def render_segment(c: dict, tl: dict, cache: Path, draft: bool = False, threads:
         if plines:
             args += pargs
             fc += plines
-            n_in += 3
+            n_in += sum(1 for a in pargs if a == "-i")
             last = "vp"
         else:
             notes.append("pip source missing or unusable: picture-in-picture skipped")

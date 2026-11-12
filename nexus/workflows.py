@@ -87,7 +87,22 @@ def direct_(job: jobs.Job) -> dict:
         vid = p.save_timeline(tl, f"director: {r['profile']} -> {r['summary']['programme_seconds']:.0f}s", a.get("branch", "main"))
         return {"version": vid}
 
-    return {**r, **job.stage("build-timeline", build)}
+    r = {**r, **job.stage("build-timeline", build)}
+    if not a.get("broll"):
+        return r
+
+    def add_broll():  # licensed cutaways over the speaker's own audio (nexus/broll.py); network sources can be down
+        from . import broll
+        tl = p.timeline(a.get("branch", "main"))
+        pl = broll.plan(tl, max_share=float(a.get("broll_share", 0.35)))
+        new, rep = broll.apply(tl, pl)
+        if rep["inserted"]:
+            p.save_timeline(new, f"B-roll: {rep['inserted']} licensed cutaways", a.get("branch", "main"))
+        (p.dir / "reports" / "broll_plan.json").write_text(json.dumps(rep, ensure_ascii=False, default=str), encoding="utf-8")
+        return {"inserted": rep["inserted"], "share": rep["share"], "credits": rep["credits"],
+                "source_errors": pl["source_errors"]}
+
+    return {**r, "broll": job.stage("broll", add_broll)}
 
 
 @jobs.handler("localize")

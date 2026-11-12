@@ -184,6 +184,21 @@ components:
     hardware: none
     network_hosts: [api.openverse.org]
     status: deployed
+  - id: nasa-media
+    name: NASA Image and Video Library API (images.nasa.gov)
+    kind: media-source
+    capability: [image-search, video-search]
+    source_url: https://images.nasa.gov/docs/images.nasa.gov_api_docs.pdf
+    license: "NASA-produced media is generally not subject to US copyright; per-item checks: some items carry third-party rights (see the item's description/secondary creator)"
+    free_tier: "public API, no key, no card"
+    quotas: "not published; NEXUS caches every search and download and backs off on 429"
+    commercial_use: "allowed for NASA-produced media under the NASA Media Usage Guidelines; NASA logos/insignia and implied endorsement are not allowed"
+    usage_restrictions: "no implied NASA endorsement; do not use the NASA insignia/logotype as branding; identifiable people need care in commercial use"
+    data_retention: "search terms are sent to NASA"
+    availability: "remote; B-roll falls back to Openverse, generated stills or motion graphics"
+    hardware: none
+    network_hosts: [images-api.nasa.gov, images-assets.nasa.gov]
+    status: deployed
   - id: wikimedia-commons
     name: Wikimedia Commons (asset downloads + licence metadata)
     kind: media-source

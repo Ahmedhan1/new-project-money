@@ -559,6 +559,8 @@ class DirectReq(BaseModel):
     platforms: list[str] = []
     languages: list[str] = []
     shorts: int = 0
+    broll: bool = False          # add licensed B-roll cutaways (NASA library, Openverse) over the speaker's audio
+    broll_share: float = 0.35
 
 
 @app.post("/api/projects/{pid}/direct")
@@ -577,7 +579,7 @@ def api_direct(pid: str, r: DirectReq):
         raise HTTPException(400, "size must look like 1920x1080")
     params = {"project": pid, "profile": r.profile, "target_seconds": r.target_seconds, "instructions": r.instructions or None,
               "title": r.title or None, "size": [w, h], "branch": r.branch, "platforms": r.platforms or None,
-              "languages": r.languages or None, "shorts": r.shorts or None}
+              "languages": r.languages or None, "shorts": r.shorts or None, "broll": r.broll, "broll_share": r.broll_share}
     return jobs.submit("direct", params, pid)
 
 

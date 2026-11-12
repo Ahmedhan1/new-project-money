@@ -283,6 +283,20 @@ def pip_graph(pip: dict, W: int, H: int, fps: int, dur: float, n_in: int, src_la
     src = pip.get("src") if isinstance(pip, dict) else None
     if not src or not Path(src).exists():
         return [], []
+    if pip.get("full"):  # full-frame cutaway (B-roll): cover-crop to the frame, short fades, no border, clip audio continues
+        st, en = max(0.0, _f(pip, "start", 0.0)), min(dur, _f(pip, "end", dur))
+        if en - st < 0.2:
+            return [], []
+        fd = min(0.25, (en - st) / 4)
+        is_img = Path(src).suffix.lower() in (".png", ".jpg", ".jpeg", ".webp", ".bmp")
+        args = (["-loop", "1", "-t", f"{dur:.3f}", "-i", src] if is_img else
+                ["-ss", f"{max(0.0, _f(pip, 'in', 0.0)):.3f}", "-t", f"{en - st + 0.5:.3f}", "-i", src])
+        fx, fy = (pip.get("focus") or [0.5, 0.5])[:2]
+        lines = [f"[{n_in}:v]setpts=PTS-STARTPTS+{st:.3f}/TB,fps={fps},scale={W}:{H}:force_original_aspect_ratio=increase,"
+                 f"crop={W}:{H}:(iw-{W})*{float(fx):.3f}:(ih-{H})*{float(fy):.3f},setsar=1,format=yuva420p,"
+                 f"fade=t=in:st={st:.3f}:d={fd:.3f}:alpha=1,fade=t=out:st={en - fd:.3f}:d={fd:.3f}:alpha=1[pq]",
+                 f"{src_label}[pq]overlay=0:0:eof_action=pass:enable='between(t,{st:.3f},{en:.3f})'{dst_label}"]
+        return args, lines
     shape = "circle" if pip.get("shape") == "circle" else "rect"
     pw = max(16, int(round(W * min(0.9, max(0.05, _f(pip, "w", 0.28))) / 2)) * 2)
     if shape == "circle":
