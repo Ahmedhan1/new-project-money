@@ -277,6 +277,73 @@ def test_audit_strips_secrets(app):
     assert audit.prune() >= 2 and audit.entries() == []
 
 
+# ---------------------------------------------------------------- route inventory (guards B/C/D routers after merge)
+# Every /api/v1 route must depend on an owner or worker check. Public exceptions need a reason here.
+PUBLIC_V1 = {
+    "/api/v1/contracts": "JSON Schemas only, no data",
+    "/api/v1/session": "the login endpoint itself (rate limited when delegated to security.open_session)",
+    "/api/v1/health/live": "liveness probe, returns only {'ok': true}",
+}
+PUBLIC_V1_PATTERNS = (r"/oauth/.*callback$",)  # Google redirects the browser here: protected by single-use state + PKCE
+
+
+def _flat(routes):
+    for r in routes:
+        if hasattr(r, "original_router"):  # FastAPI >= 0.16x keeps included routers lazily
+            yield from _flat(r.original_router.routes)
+        elif hasattr(r, "routes") and not hasattr(r, "dependant"):
+            yield from _flat(r.routes)
+        else:
+            yield r
+
+
+def _deps(dependant):
+    for d in getattr(dependant, "dependencies", []):
+        yield d.call
+        yield from _deps(d)
+
+
+def unprotected_routes(app) -> list[str]:
+    import re
+    unprotected = []
+    for r in _flat(app.routes):
+        path = getattr(r, "path", "")
+        if not path.startswith("/api/v1") or path in PUBLIC_V1 or any(re.search(p, path) for p in PUBLIC_V1_PATTERNS):
+            continue
+        names = [getattr(c, "__name__", "") for c in _deps(getattr(r, "dependant", None))]
+        if not any("owner" in n or "worker" in n for n in names):
+            unprotected.append(f"{sorted(getattr(r, 'methods', []) or [])} {path}")
+    return unprotected
+
+
+def test_every_v1_route_requires_auth(home, monkeypatch):
+    monkeypatch.setenv("NEXUS_EMBEDDED_WORKER", "0")
+    from nexus import api
+    bad = unprotected_routes(api.app)
+    assert not bad, f"/api/v1 routes without require_owner/require_worker: {bad}"
+
+
+def test_route_inventory_detects_unprotected(app):
+    from fastapi import APIRouter
+    r = APIRouter(prefix="/api/v1/x")
+
+    @r.post("/open")
+    def open_():
+        return {}
+
+    @r.get("/closed", dependencies=[Depends(security.require_owner)])
+    def closed():
+        return {}
+
+    @r.get("/oauth/google/callback")
+    def cb():
+        return {}
+
+    app.include_router(r)
+    # the test app's /_session is deliberately public (login); /x/open is the planted unprotected route
+    assert sorted(unprotected_routes(app)) == ["['POST'] /api/v1/_session", "['POST'] /api/v1/x/open"]
+
+
 # ---------------------------------------------------------------- recovery
 def _pre_cloud_db(path: Path, version: int) -> None:
     """A database as an older release left it: base schema + migrations up to `version`, with real rows."""
