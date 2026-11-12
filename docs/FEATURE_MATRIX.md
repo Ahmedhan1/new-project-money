@@ -34,7 +34,7 @@ Real media used for verification: a 19.4-minute NASA interview (public domain, N
 | Platforms | Profiles with evidence kinds, tune/check/deliverables, deliver job with export verify + size cap | V | `acceptance_platforms.json`: 16:9/4:5/9:16 for 4 platforms, face-tracked crops, safe zones inspected on frames, caption.txt + hashtags from speech |
 | Languages | Subtitles de/fr/ar-EG/ar-Gulf/zh/ru/hi from real MT, per-language QA, subtitle package | V | `acceptance_subtitles.json`: ready ar-EG/de/fr/hi; ar-Gulf/ru/zh flagged NEEDS_FIXES by QA |
 | Languages | Egyptian vs Gulf Arabic as separate profiles | P | separate packs, lexicon checks; MT model has no dialect control, so Gulf output is mostly MSA (flagged) |
-| Languages | Dubbing with a commercially cleared voice | V | `acceptance_dub.json`: German AI voice-over, Piper `de_DE-thorsten` (licence verified); labelled AI voice-over, native review required |
+| Languages | Dubbing with a commercially cleared voice | V (needs review) | `acceptance_dub.json`: German AI voice-over, Piper `de_DE-thorsten` (CC0); no overlaps, speaker never below 0.85x; QA flags 8 MT lines + 3 long lines for a native reviewer |
 | Languages | Native-speaker review workflow | I | Review page: approve/correct each line (machine text kept); fully approved branch -> `commercially_ready` in the package. Driven in Chromium on test data; no native reviewer has used it yet |
 | Quality | Weighted score, reasons, not-measured list, render-job stage | V | drove the fixes listed in `docs/AGENT_WORK_LOG.md` |
 | Quality | Calibration against human-reviewed examples | N | thresholds are engineering defaults |

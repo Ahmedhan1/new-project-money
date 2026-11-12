@@ -1,0 +1,101 @@
+{
+ "collected_utc": "2026-11-12T14:25:08Z",
+ "demo": 5,
+ "what": "dubbed version with a commercially cleared synthetic voice",
+ "job": "job_7125b9ad2c",
+ "status": "done",
+ "params": {
+  "project": "prj_2b1a5a2f07",
+  "lang": "de",
+  "branch": "cinematic",
+  "dub": true,
+  "mode": "voiceover",
+  "out_branch": "cinematic_de_vo"
+ },
+ "stages": {
+  "translate-dub": {
+   "status": "done",
+   "seconds": 268.291,
+   "runs": 1
+  },
+  "render-qa": {
+   "status": "done",
+   "seconds": 306.952,
+   "runs": 1
+  }
+ },
+ "file": {
+  "video": "h264 1920x1080",
+  "video_s": 246.233333,
+  "audio": "aac",
+  "audio_s": 246.233,
+  "bytes": 90552148
+ },
+ "sha256": "f51de4fd900e06cbc58c2490bb00ea5a2eadb1ec749adc649bd860bf95321374",
+ "qa_status": "NEEDS_FIXES",
+ "issues": [
+  "[major] no added/dropped content [de]: lines [4, 18, 22, 23, 28, 32, 34, 35] are much longer/shorter than the source - possible invented or missing content",
+  "[major] voice-over fit [de] scene 38: translation is 0.8s too long even at 1.25x read and 0.85x picture - shorten this line in review",
+  "[major] voice-over drift [de] scene 37: line starts 1.5s after its cut because the previous one ran long - shorten the previous line in review",
+  "[major] voice-over drift [de] scene 39: line starts 1.7s after its cut because the previous one ran long - shorten the previous line in review",
+  "[minor] numbers preserved [de]: numbers missing/changed in lines [(28, ['10'])] (may be spelled out - verify)",
+  "[minor] native-speaker review [de]: REQUIRED before publishing - machine translation can still miss nuance and tone",
+  "[minor] back-translation [de]: back-translation not run (ModuleNotFoundError: local LLM unavailable) - meaning was not cross-checked",
+  "[minor] dub intelligibility [de]: Whisper heard 50% of the script words back: \"Für Boehling.\"",
+  "[minor] subtitles reading_speed [de]: 49 cue(s) above 17 chars/s"
+ ],
+ "dub": {
+  "mode": "voiceover",
+  "voice": "de_DE-thorsten-medium (Piper)",
+  "licence": "CC0 (Thorsten-Voice) - commercial use allowed",
+  "label": "AI voice-over (synthetic voice) over the original speaker",
+  "original_speech": "kept underneath at about -14 dB (gain 0.2)"
+ },
+ "label": null,
+ "sample_lines": [
+  {
+   "source": "We went down about a 160-meter shaft in this Lepayama, the cave,",
+   "target": "Wir stiegen ungefähr einen 160-Meter-Schacht in diese Lepayama, die Höhle, ab."
+  },
+  {
+   "source": "and then we hiked in probably about a good two to 300 meters and we found a flat sandy area and",
+   "target": "Und dann sind wir wahrscheinlich gut zwei bis 300 Meter weitergewandert und haben ein flaches Sandgebiet gefunden."
+  },
+  {
+   "source": "that's unusual in caves because usually you don't find a bunch of sand in a relatively flat area.",
+   "target": "Das ist in Höhlen ungewöhnlich, denn normalerweise findet man keinen Haufen Sand auf einer relativ flachen Fläche."
+  },
+  {
+   "source": "long before you find out if you are on the mission for sure well I think it'll be quite some time before anyone finds out if they're on the mission so I would suspect you know",
+   "target": "Ich glaube, es wird eine ganze Weile dauern, bis irgendjemand herausfindet, ob er auf der Mission ist."
+  },
+  {
+   "source": "know as we get closer and closer to 24 2024 probably two years prior 2022 or so someone would find out that they're on the mission.",
+   "target": "Ich weiß, wenn wir uns dem 24. 2024 nähern und nähern, würde wahrscheinlich zwei Jahre vor 2022 oder so jemand herausfinden, dass sie auf der Mission sind."
+  },
+  {
+   "source": "So it would be a couple of years or so before any of us knew.",
+   "target": "Es würde also ungefähr ein paar Jahre dauern, bis irgendjemand von uns es wusste."
+  },
+  {
+   "source": "Supposed to be on the last mission to the International Space Station,",
+   "target": "Es sollte die letzte Mission zur Internationalen Raumstation sein, das hat"
+  },
+  {
+   "source": "that didn't work out. But this time around,",
+   "target": "nicht geklappt, aber dieses Mal ist es gelungen."
+  }
+ ],
+ "contact_sheet": "docs/results/demos/acceptance_dub_contact.jpg",
+ "inspection": {
+  "language_id": "Whisper on a 20 s excerpt: German, probability 0.994; the voice-over is clearly intelligible",
+  "picture": "4 clips slowed (min 0.85x) - previously 19 clips down to 0.598x; final frame held 0.23 s so the last line finishes",
+  "overlaps": "0 (previous run: 4, BLOCKED)",
+  "content_review_needed": [
+   "8 lines flagged for possible dropped/added content (e.g. 'long before you find out...' omitted in line 4)",
+   "scenes 37-39 too long for their slot: shorten in review",
+   "'Für Boeing' pronounced so Whisper hears 'Boehling'"
+  ],
+  "verdict": "technically complete and licence-clean; NOT publishable until a German native speaker reviews the lines (QA: NEEDS_FIXES)"
+ }
+}
