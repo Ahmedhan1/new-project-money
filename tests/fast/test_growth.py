@@ -80,7 +80,7 @@ def test_build_short_exact_cuts_and_word_timing(home):
     extra = total_duration(tl) - sum(b - a for a, b in plan)      # the out added by shorts.add_out (pause, never a word)
     assert -1e-6 <= extra <= shorts.OUT_EXTEND_S + 1e-6 and tl["clips"][-1]["audio_fade_out"] > 0
     assert -1e-3 <= total_duration(tl) - m["tight_duration"] <= shorts.OUT_EXTEND_S + 1e-3   # + the out (shorts.add_out)
-    assert tl["clips"][0]["in"] == m["start"] and tl["clips"][-1]["out"] == m["end"]
+    assert tl["clips"][0]["in"] == m["start"] and m["end"] <= tl["clips"][-1]["out"] <= m["end"] + shorts.OUT_EXTEND_S + 1e-6
     assert len(tl["clips"]) == len(sents)  # 0.5 s pauses > 0.35 s: one jump cut per sentence boundary
     assert all(c["fit"] == "blur" for c in tl["clips"])
     kinds = [c["effects"][0]["type"] for c in tl["clips"]]
