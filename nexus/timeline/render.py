@@ -110,12 +110,14 @@ def segment_key(c: dict, tl: dict, draft: bool = False) -> str:
 
 
 def _vcodec(draft: bool, threads: int | None) -> list:
-    args: list = []
-    try:  # media engine (workstream E) when present: hardware encoders + quality presets
+    args: list = ["-c:v", "libx264", "-preset", "ultrafast", "-crf", "26", "-pix_fmt", "yuv420p"] if draft else list(config.VCODEC)
+    try:  # a hardware H.264 encoder that encoders.detect() PROVED works here; CPU keeps the measured x264 settings above
         from ..media import encoders
-        args = list(encoders.video_args(codec="h264", quality="draft" if draft else "balanced", draft=draft, hw="auto"))
-    except Exception:  # noqa: BLE001 - optional module
-        args = ["-c:v", "libx264", "-preset", "ultrafast", "-crf", "26", "-pix_fmt", "yuv420p"] if draft else list(config.VCODEC)
+        enc = encoders.choose_encoder("h264", "auto")
+        if enc not in encoders.SOFTWARE:
+            args = list(encoders.video_args(codec="h264", quality="draft" if draft else "high", draft=draft, hw="auto"))
+    except Exception:  # noqa: BLE001 - detection unavailable: stay on the CPU settings
+        pass
     if threads:
         args += ["-threads", threads]
     return args
