@@ -113,7 +113,9 @@ def places(text: str, online: bool = False) -> dict[str, list[str]]:
     idx = _index()
     found: dict[str, set[str]] = {}
     for ph in candidates(text):
-        for piece in [ph, *[w for w in ph.split() if _fold(w) not in GENERIC]]:
+        ws = ph.split()
+        subs = [" ".join(ws[:n]) for n in range(len(ws) - 1, 1, -1)]  # "New Valley Governorate" -> "New Valley"
+        for piece in [ph, *subs, *[w for w in ws if _fold(w) not in GENERIC]]:
             k = _fold(piece)
             # inflected forms only ("Belgorodskaya" -> stem "belgorod"): the INDEX key must be a prefix of the phrase.
             # The reverse direction matched "Kourou" (French Guiana) to Guinea's "Kouroussa" - a real false positive.
