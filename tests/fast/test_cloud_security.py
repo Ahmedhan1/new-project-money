@@ -283,7 +283,11 @@ PUBLIC_V1 = {
     "/api/v1/contracts": "JSON Schemas only, no data",
     "/api/v1/session": "the login endpoint itself (rate limited when delegated to security.open_session)",
     "/api/v1/health/live": "liveness probe, returns only {'ok': true}",
+    "/api/v1/studio/auth": "sub-agent D: tells the Studio page whether to show the login (mode only, no data)",
+    "/api/v1/studio/logout": "sub-agent D: clears the session cookie (worst case of a forged request: a logout)",
 }
+# Sub-agent B's pull-worker endpoints (/api/v1/compute/workers/next, /workers/{id}/result) depend on its own
+# `require_worker` (per-worker bearer, hash-only), which this check recognises by name.
 PUBLIC_V1_PATTERNS = (r"/oauth/.*callback$",)  # Google redirects the browser here: protected by single-use state + PKCE
 
 
