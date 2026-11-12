@@ -503,3 +503,59 @@ tasks:
     evidence: "docs/results/account3/growth_demo.json (public CC BY 4.0 dataset, not the owner's channel)."
     next: "ANA-1: first experiment on the owner's own analytics."
 
+  # ------------------------------------------------------------------ Account 3 V2 (intelligence, real-world quality, integration)
+  - id: A3-QGATES
+    priority: 1
+    title: "Demo 4 defects: visual-context gate (geography/period/maps), glyph-coverage fonts + OCR read-back, scene visual plan (no silent title cards), factual framing gate"
+    status: tested
+    acceptance: "Each Demo 4 defect is rejected by a gate with a regression test, and a new real render shows it."
+    test: "pytest tests/fast/test_intel_quality_gates.py tests/fast/test_intel_market_v2.py; python scripts/account3/demo10_e2e.py"
+    evidence: "docs/results/account3/demo10_e2e.json"
+    next: "Optional SigLIP image classification on the owner's PC (local only, never downloaded during a render)."
+  - id: A3-HANDOFF
+    priority: 1
+    title: "Strategy Handoff to Account 2 (EditorialPlan + RenderJobManifest), approved script used verbatim; shared contracts package"
+    status: tested
+    acceptance: "Handoff validates with Account 2's own validator; create_video(script=...) never paraphrases; one nexus.contracts package for all accounts."
+    test: "pytest tests/fast/test_intel_handoff.py; integration/contracts_v1/apply.sh on a three-account merge"
+    evidence: "integration/contracts_v1/RESULT.md; docs/SHARED_CONTRACTS_ARCHITECTURE.md"
+    next: "Owner approves the merge order; Account 1 fixes two of its own tests (RESULT.md)."
+  - id: A3-BENCH2
+    priority: 2
+    title: "Open-weight model benchmark V2 on Kaggle GPUs (36 items, Qwen/DeepSeek/Mistral/GLM/Nemotron) + task routing"
+    status: in_progress
+    acceptance: "Every routed task has a measured model; critical tasks below the bar require human review."
+    test: "python scripts/account3/bench_v2_score.py docs/results/account3/models_bench_v2.json <kaggle outputs>"
+    evidence: "docs/results/account3/models_bench_v2.json; docs/ACCOUNT3_MODEL_BENCHMARKS.md"
+    next: "Collect kernels A and C (Nemotron rerun with /no_think, Qwen 27B/35B with per-model disk cleanup)."
+  - id: A3-CREATORS2
+    acceptance: "Every dimension is a measured number with a method or null with a reason; incompatible references are reported, not averaged."
+    priority: 2
+    title: "Creator intelligence V2: 14 measured dimensions, multi-reference weighted blends with conflict detection"
+    status: tested
+    test: "pytest tests/fast/test_intel_creators_v2.py"
+    evidence: "docs/results/account3/creators_v2.json (4 public-domain references, 14/14 dimensions)"
+    next: "Owner-supplied lawful references for challenge / Arabic educational / vlog formats."
+  - id: A3-MARKET2
+    acceptance: "Unknown factors stay unknown and widen the score interval; single-source claims are counted."
+    priority: 2
+    title: "Market research V2: credibility, cross-publisher verification, recency, geography, language demand, coverage, uncertainty interval"
+    status: tested
+    test: "pytest tests/fast/test_intel_market_v2.py"
+    evidence: "docs/results/account3/market_v2_assessments.json"
+    next: "YouTube key (owner) for competition and saturation."
+  - id: A3-LANG2
+    acceptance: "No language is publishable without native review; every state is backed by evidence."
+    priority: 2
+    title: "Per-language readiness (8 dimensions), terminology memory, native-review workflow"
+    status: tested
+    test: "pytest tests/fast/test_intel_readiness.py"
+    evidence: "docs/results/account3/language_readiness.json"
+    next: "Native reviewers (ar-EG, ar-Gulf, hi, zh); Gulf generation still classifies as MSA (K-15)."
+  - id: A3-LEDGER
+    acceptance: "Only NEXUS-uploaded videos carry production features and experiment arms."
+    priority: 3
+    title: "First-party analytics ledger: platform analytics joined to production facts and experiment arms"
+    status: tested
+    test: "pytest tests/fast/test_intel_ledger.py"
+    next: "ANA-1 / PUB-1: owner OAuth client -> first private upload -> first real analytics import."
