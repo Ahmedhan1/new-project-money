@@ -178,8 +178,12 @@ def analyze(path, analysis: dict, name: str | None = None, rights: dict | None =
                 "motion": round(float(np.mean([diff[k] for k in idx])) if idx else 0.0, 4),
                 "first_speech_s": round(first_speech, 2) if first_speech is not None and first_speech < t1 else None}
     # ---- pattern interrupts: cuts + motion spikes (a visual change of any kind)
-    spikes = [times[k] for k in range(1, len(diff)) if diff[k] > max(0.08, 3 * float(np.median(diff) + 1e-6))]
-    events = sorted(set([round(c, 1) for c in cuts] + [round(t, 1) for t in spikes]))
+    thr = max(0.1, 4 * float(np.median(diff) if diff else 0.0))
+    spikes = [times[k] for k in range(1, len(diff)) if diff[k] > thr and diff[k - 1] <= thr]  # onsets of big changes only
+    events: list[float] = []
+    for t in sorted([float(c) for c in cuts] + spikes):
+        if not events or t - events[-1] >= 1.0:  # a cut and the motion it causes are one interrupt
+            events.append(round(t, 2))
     gaps = [b - a for a, b in zip([0.0] + events, events + [dur])]
     # ---- ending
     tail = [k for k, t in enumerate(times) if t >= dur - min(8.0, 0.1 * dur)]
@@ -271,7 +275,7 @@ def to_overrides(ref: dict) -> dict:
         o["pacing"] = "steady"
     pi = (m.get("pattern_interrupt_s") or {}).get("median")
     if pi:
-        o["pattern_interrupt_s"] = round(max(1.0, min(20.0, pi * 1.5)), 2)
+        o["pattern_interrupt_s"] = round(max(1.0, (o.get("shot_len") or [1.0])[0], min(20.0, pi * 1.5)), 2)
         why.append(f"a visual change every {pi:.1f}s (median) -> interrupt at most every {o['pattern_interrupt_s']}s")
     h = m.get("hook") or {}
     first = h.get("t") if h.get("t") is not None else h.get("first_speech_s")
