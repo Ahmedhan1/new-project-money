@@ -29,6 +29,13 @@ STOP = {"The", "A", "An", "In", "On", "At", "Of", "And", "This", "That", "It", "
         "Did", "What", "Why", "How", "When", "Where", "Who", "Today", "Built", "Designed", "Even", "Source", "Image", "Photo"}
 
 
+# Words that never identify a place on their own ("Upper" matched Ghana's "Upper East", Gambia's "Upper River",
+# Guyana's "Upper Takutu" and South Sudan's "Upper Nile" for the phrase "Upper Egypt" - a real false positive).
+GENERIC = {"upper", "lower", "north", "south", "east", "west", "northern", "southern", "eastern", "western", "central",
+           "new", "saint", "san", "santa", "greater", "inner", "outer", "middle", "grand", "great", "high", "lake", "river",
+           "mount", "valley", "city", "province", "region", "state", "district", "governorate", "island", "islands", "red", "white", "blue"}
+
+
 def _fold(s: str) -> str:
     return "".join(c for c in unicodedata.normalize("NFKD", s) if not unicodedata.combining(c)).lower().replace("'", "").replace("’", "")
 
@@ -53,13 +60,13 @@ def _index() -> dict[str, set[str]]:
         add(base, cc)
         first = base.split()[0] if base.split() else base
         stem = re.sub(r"(skaya|skiy|skij|skaja|ska|sko|ia|iya)$", "", _fold(first))
-        if len(stem) >= 5:
+        if len(stem) >= 5 and _fold(first) not in GENERIC:
             idx.setdefault(stem, set()).add(cc)
     # common English exonyms that ISO lists under local names
     for name, cc in {"Egypt": "EG", "Aswan": "EG", "Cairo": "EG", "Giza": "EG", "Luxor": "EG", "Alexandria": "EG", "Nile": "EG",
                      "Lake Nasser": "EG", "Russia": "RU", "Moscow": "RU", "Belgorod": "RU", "Bavaria": "DE", "Munich": "DE",
                      "Dubai": "AE", "Abu Dhabi": "AE", "Riyadh": "SA", "Mecca": "SA", "Doha": "QA", "Kuwait": "KW", "Sudan": "SD",
-                     "Khartoum": "SD", "Kourou": "GF", "Paris": "FR", "Berlin": "DE", "London": "GB", "Beijing": "CN", "Delhi": "IN", "Mumbai": "IN"}.items():
+                     "Khartoum": "SD", "Kourou": "GF", "Upper Egypt": "EG", "Lower Egypt": "EG", "New Valley": "EG", "Lower Nile": "EG", "Nubia": "EG", "Paris": "FR", "Berlin": "DE", "London": "GB", "Beijing": "CN", "Delhi": "IN", "Mumbai": "IN"}.items():
         idx.setdefault(_fold(name), set()).add(cc)
     return idx
 
@@ -106,11 +113,12 @@ def places(text: str, online: bool = False) -> dict[str, list[str]]:
     idx = _index()
     found: dict[str, set[str]] = {}
     for ph in candidates(text):
-        for piece in [ph, *ph.split()]:
+        for piece in [ph, *[w for w in ph.split() if _fold(w) not in GENERIC]]:
             k = _fold(piece)
             # inflected forms only ("Belgorodskaya" -> stem "belgorod"): the INDEX key must be a prefix of the phrase.
             # The reverse direction matched "Kourou" (French Guiana) to Guinea's "Kouroussa" - a real false positive.
-            ccs = idx.get(k) or next((v for kk, v in idx.items() if len(kk) >= 5 and k.startswith(kk) and len(k) - len(kk) <= 5), None)
+            ccs = idx.get(k) or next((v for kk, v in idx.items() if len(kk) >= 5 and kk not in GENERIC and k.startswith(kk)
+                                      and len(k) - len(kk) <= 5), None)
             if ccs:
                 found.setdefault(piece, set()).update(ccs)
                 break

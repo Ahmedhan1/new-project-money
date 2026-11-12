@@ -34,3 +34,11 @@ def test_place_resolver_does_not_match_longer_names_by_prefix():
     # regression: "Kourou" (French Guiana) was resolved to Guinea via the subdivision "Kouroussa"
     assert visual_context.places("launched from Kourou")["Kourou"] == ["GF"]
     assert "GN" not in {c for v in visual_context.places("Kourou launch site").values() for c in v}
+
+
+def test_generic_words_never_identify_a_place():
+    # regression from the Demo 10 research: "Upper Egypt" resolved to Ghana/Gambia/Guyana/South Sudan via "Upper ...",
+    # "New Valley" (Egypt) to Colombia/Honduras/Italy via "Valle"
+    assert visual_context.places("the southernmost governorate in Upper Egypt") == {"Upper Egypt": ["EG"]}
+    assert visual_context.places("the New Valley Governorate") == {"New Valley": ["EG"]}
+    assert visual_context.places("Belgorodskaya oblast") == {"Belgorodskaya": ["RU"]}  # inflected forms still resolve

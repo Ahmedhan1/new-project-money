@@ -1,21 +1,20 @@
 {
  "schema": "nexus.Demo10/1",
  "topic": "Aswan High Dam",
- "started": "2026-11-12T22:57:19",
+ "started": "2026-11-12T23:07:25",
  "steps": {
   "research": {
-   "seconds": 582.2,
-   "score": 64.6,
-   "confidence": 0.46,
+   "seconds": 297.1,
+   "score": 57.1,
+   "confidence": 0.52,
    "claims": 23,
-   "assessment_verdict": "indicative only: score range 52.1-71.4; 20 single-source claim(s) need a second source before scripting",
+   "assessment_verdict": "indicative only: score range 51.2-61.6; 20 single-source claim(s) need a second source before scripting",
    "uncertainty": {
-    "score": 64.6,
-    "low": 52.1,
-    "high": 71.4,
-    "width": 19.3,
+    "score": 57.1,
+    "low": 51.2,
+    "high": 61.6,
+    "width": 10.4,
     "unknown_factors": [
-     "freshness",
      "competition"
     ],
     "method": "score recomputed with each unknown factor at its worst and best value (confidence 0.5)"
