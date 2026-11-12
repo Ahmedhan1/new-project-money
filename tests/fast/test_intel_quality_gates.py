@@ -101,3 +101,12 @@ def test_same_place_with_different_wording_is_accepted():
     ctx = vc.scene_context("Aswan High Dam", "The Aswan High Dam, located in southern Egypt, shaped Egypt's history.", "Aswan High Dam")
     assert vc.check({"title": "High Dam Burg, Aswan, Egypt, Oct 2004", "description": "Aswan, Egypt"}, ctx)["ok"]
     assert not vc.check({"title": "Alexandria in Egypt (2011)", "description": "Alexandria, Egypt"}, ctx)["ok"]
+
+
+def test_flag_or_emblem_is_not_scene_footage():
+    # Demo 10 run 3: "Flag of Aswan Governorate" passed the place check (right place, wrong kind of image)
+    ctx = vc.scene_context("Aswan High Dam", "The Aswan High Dam in southern Egypt.", "Aswan Governorate")
+    r = vc.check({"title": "Flag of Aswan Governorate", "description": "Aswan Governorate, Egypt"}, ctx)
+    assert not r["ok"] and any(f["check"] == "emblem" for f in r["findings"])
+    flag_ctx = vc.scene_context("Flags of Egypt", "The flag of Aswan Governorate shows the dam.", "flag")
+    assert vc.check({"title": "Flag of Aswan Governorate", "description": "Aswan Governorate, Egypt"}, flag_ctx)["ok"]

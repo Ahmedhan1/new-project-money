@@ -25,6 +25,7 @@ from ... import config
 MODERN_FROM = 1900
 MAP_WORDS = re.compile(r"\b(map|maps|karte|carte|mapa|kaart|atlas|cartograph\w*|خريطة|карта)\b", re.I)
 HISTORIC_WORDS = re.compile(r"\b(engraving|lithograph|woodcut|etching|antique|ancient|medieval|historic(al)?|governorate of the russian empire)\b", re.I)
+EMBLEM_WORDS = re.compile(r"\b(flag|flags|coat of arms|emblem|seal of|logo|insignia|banner of|علم|شعار)\b", re.I)
 STOP = {"The", "A", "An", "In", "On", "At", "Of", "And", "This", "That", "It", "Its", "From", "To", "By", "With", "For", "As", "File",
         "Did", "What", "Why", "How", "When", "Where", "Who", "Today", "Built", "Designed", "Even", "Source", "Image", "Photo"}
 
@@ -172,6 +173,7 @@ def asset_profile(asset: dict, online: bool = False) -> dict:
     meta = " ".join(str(asset.get(k) or "") for k in ("title", "description", "categories", "date", "object_name"))
     ys = years(" ".join(str(asset.get(k) or "") for k in ("title", "date", "description")))
     return {"places": places(meta, online), "years": ys, "is_map": bool(MAP_WORDS.search(meta)),
+            "is_emblem": bool(EMBLEM_WORDS.search(str(asset.get("title") or ""))),
             "historic_words": bool(HISTORIC_WORDS.search(meta)), "meta": meta[:400]}
 
 
@@ -199,6 +201,9 @@ def check(asset: dict, ctx: dict, online: bool = False, classify: bool = False, 
                          "detail": f"asset dated {max(a['years'])}, scene is modern ({ctx['years'] or 'present day'})"})
     if a["is_map"] and (a["years"] and max(a["years"]) < MODERN_FROM or a["historic_words"]) and not ctx["about_maps"]:
         findings.append({"check": "old_map", "blocking": True, "detail": "historical map used for a scene that is not about maps or history"})
+    if a["is_emblem"] and not EMBLEM_WORDS.search(ctx["text"]):
+        findings.append({"check": "emblem", "blocking": True,
+                         "detail": "flag / coat of arms / logo used as scene footage for a scene that is not about it"})
     if classify and image_path:
         cls = classify_image(image_path, ctx.get("subject") or ctx["text"][:60])
         if cls:

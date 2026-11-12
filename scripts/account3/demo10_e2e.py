@@ -103,9 +103,10 @@ def main() -> None:
                 import re as _re
                 m = _re.search(r"retry after (\d+)s", str(e))
                 G.setdefault("geo_errors", []).append(f"{q} (attempt {attempt + 1}): {e}")
-                if not m or attempt == 2:
+                wait = int(m.group(1)) + 2 if m else (30 if "429" in str(e) else None)
+                if wait is None or attempt == 2:
                     break
-                time.sleep(min(90, int(m.group(1)) + 2))
+                time.sleep(min(90, wait))
     rows = []
     for c in cands:
         r = visual_context.check(c, ctx)
