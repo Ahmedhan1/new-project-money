@@ -58,25 +58,26 @@ def collect_sources(results: list[dict]) -> list[dict]:
 YEAR = re.compile(r"^(1[5-9]|20)\d\d$")
 
 
-def _supports(claim: str, claim_lang: str, src: dict) -> bool:
+def _supports(claim: str, claim_lang: str, src: dict, ignore: frozenset = frozenset()) -> bool:
     """Deterministic support test (numbers + words, not semantics):
     same language: all significant numbers present and >= 30 % word overlap (>= 60 % when the claim has no numbers);
-    other language: only numbers can match, and a lone year is too common to count - needs >= 2 numbers or a non-year."""
+    other language: only numbers can match, and a lone year is too common to count - needs >= 2 numbers or a non-year.
+    `ignore` = topic/title words: they are in every source, so they do not count as overlap."""
     nums, text = numbers(claim), src["text"]
-    w = words(claim)
+    w = words(claim) - ignore
     overlap = len(w & words(text)) / len(w) if w else 0.0
     if src.get("lang", "en") == claim_lang:
-        return (nums <= numbers(text) and overlap >= 0.3) if nums else overlap >= 0.6
+        return (nums <= numbers(text) and overlap >= 0.3) if nums else (len(w) >= 2 and overlap >= 0.6)
     if not nums or not nums <= numbers(text):
         return False
     return len(nums) >= 2 or not YEAR.match(next(iter(nums)))
 
 
-def cross_check(claim: dict, sources: list[dict]) -> dict:
+def cross_check(claim: dict, sources: list[dict], ignore: frozenset = frozenset()) -> dict:
     """Which sources support the claim; 'verified' needs >= 2 supporting sources (publisher independence noted)."""
     lang = claim.get("lang", "en")
-    sup = [s["id"] for s in sources if s["id"] in claim["source_ids"] or _supports(claim["text"], lang, s)]
-    sup = [i for i in sup if _supports(claim["text"], lang, next(s for s in sources if s["id"] == i))]
+    sup = [s["id"] for s in sources if s["id"] in claim["source_ids"] or _supports(claim["text"], lang, s, ignore)]
+    sup = [i for i in sup if _supports(claim["text"], lang, next(s for s in sources if s["id"] == i), ignore)]
     pubs = {_publisher(next(s for s in sources if s["id"] == i)) for i in sup}
     status = "verified" if len(sup) >= 2 else "single_source" if sup else "unsupported"
     return {**claim, "supported_by": sup, "status": status,
@@ -84,14 +85,15 @@ def cross_check(claim: dict, sources: list[dict]) -> dict:
 
 
 def extract_claims(sources: list[dict], per_source: int = 6) -> list[dict]:
-    """Deterministic: first two sentences + sentences with numbers, from fact sources."""
+    """Deterministic: first two sentences + sentences with numbers, from encyclopaedic fact sources only. Image captions
+    (NASA/Openverse) and headlines are used to corroborate, not as claims."""
     claims = []
     for s in sources:
-        if s.get("kind") not in ("facts", "visual"):
+        if s.get("kind") != "facts":
             continue
         sents = [x.strip() for x in SENT.split(s["text"]) if 40 <= len(x.strip()) <= 320]
         pick = sents[:2] + [x for x in sents[2:] if numbers(x)]
-        for x in pick[:per_source if s.get("kind") == "facts" else 2]:
+        for x in pick[:per_source]:
             claims.append({"text": x, "source_ids": [s["id"]], "lang": s.get("lang", "en"), "by": "deterministic"})
     return claims
 
@@ -156,6 +158,7 @@ def _router_ai(task: str, prompt: str, schema: dict):
 def build_brief(topic: str, results: list[dict], language: str = "en", signals: dict | None = None, ai=_router_ai) -> dict:
     """`results` are adapter SourceResults. `ai(task, prompt, schema) -> dict` or None for deterministic only."""
     sources = collect_sources(results)
+    ignore = frozenset(words(topic).union(*[words(s["title"] or "") for s in sources if s.get("kind") == "facts"]))
     notes, claims, rejected = [], extract_claims(sources), []
     if ai is not None and sources:
         listing = "\n\n".join(f"[{s['id']}] ({s['source']}, {s['lang']}) {s['text'][:1200]}" for s in sources[:6])
@@ -167,7 +170,7 @@ def build_brief(topic: str, results: list[dict], language: str = "en", signals: 
                 c = {"text": str(c["text"])[:320], "source_ids": [i for i in c.get("source_ids", []) if any(s["id"] == i for s in sources)],
                      "lang": language, "by": "ai"}
                 if c["source_ids"] and all(_supports(c["text"], next(s for s in sources if s["id"] == c["source_ids"][0]).get("lang", language),
-                                                     next(s for s in sources if s["id"] == i)) for i in c["source_ids"]):
+                                                     next(s for s in sources if s["id"] == i), ignore) for i in c["source_ids"]):
                     claims.insert(0, c)
                 else:
                     rejected.append({**c, "reason": "cited sources do not contain the claim's numbers/words"})
@@ -181,7 +184,7 @@ def build_brief(topic: str, results: list[dict], language: str = "en", signals: 
         k = re.sub(r"\W+", " ", c["text"].lower()).strip()
         if k not in seen:
             seen.add(k)
-            checked.append(cross_check(c, sources))
+            checked.append(cross_check(c, sources, ignore))
     conflicts = find_conflicts(checked, sources)
     signals = dict(signals or {})
     signals.setdefault("conflicts", conflicts)

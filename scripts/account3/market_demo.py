@@ -48,12 +48,13 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--no-ai", action="store_true")
     ap.add_argument("--record")
+    ap.add_argument("--topic", choices=["en", "ar"], help="run only this report")
     ap.add_argument("--only", choices=["reports", "trends", "niches"], default=None)
     a = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
     ai = None if a.no_ai else brief_mod._router_ai
     if a.only in (None, "reports"):
-        for topic, niche, lang, fname in TOPICS:
+        for topic, niche, lang, fname in [t for t in TOPICS if not a.topic or t[2] == a.topic]:
             ctx = Ctx()
             if a.record:
                 recording(ctx, Path(a.record) / fname.removesuffix(".json"))
