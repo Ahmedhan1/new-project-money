@@ -32,6 +32,18 @@ if os.environ.get("NEXUS_EMBEDDED_WORKER", "1") != "0":  # `nexus start` runs th
     threading.Thread(target=jobs.run_worker, kwargs={"role": "embedded"}, daemon=True).start()
 
 
+# Account 1 cloud platform routers (/api/v1). Each owner module exposes `router`; a module that is not present in
+# this build is reported by /api/v1/health instead of failing the whole app.
+CLOUD_ROUTERS = ("routes_core", "routes_security", "routes_compute", "routes_storage", "routes_studio")
+CLOUD_MISSING: dict[str, str] = {}
+for _name in CLOUD_ROUTERS:
+    try:
+        import importlib as _il
+        app.include_router(_il.import_module(f"nexus.cloud.{_name}").router)
+    except ModuleNotFoundError as _e:
+        CLOUD_MISSING[_name] = str(_e)
+
+
 def _project(pid: str) -> prj.Project:
     try:
         return prj.Project(pid)
