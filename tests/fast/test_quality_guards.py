@@ -85,15 +85,15 @@ def _speechy(path, gain_change: bool):
     import subprocess
     expr = "1.5*sin(2*PI*5*t)*sin(2*PI*5*t)*lt(mod(t,2.1),1.6)"
     if gain_change:
-        expr = f"({expr})*if(lt(t,5.0),1,0.25)"
+        expr = f"({expr})*if(lt(t,5.2),1,0.2)"
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "color=c=gray:s=160x90:r=10:d=10",
-                    "-f", "lavfi", "-i", f"anoisesrc=d=10:c=pink:a=0.5:r=48000",
+                    "-f", "lavfi", "-i", f"anoisesrc=d=10:c=pink:a=0.5:r=48000:seed=7",
                     "-filter_complex", f"[1:a]volume='{expr}':eval=frame[a]", "-map", "0:v", "-map", "[a]",
                     "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", str(path)], check=True)
     return path
 
 
-def test_pauses_between_phrases_are_not_level_jumps_but_a_gain_change_is(tmp_path):
+def test_pauses_between_phrases_are_not_level_jumps_but_a_gain_change_is(home, tmp_path):
     from nexus import quality
     def jumps(p):
         r = quality.score(p)
