@@ -237,15 +237,18 @@ async workspace(m,pid){
    ${lane(gaps,"tc",it=>it.gap?"":it.t)}${lane((tl.subtitles||[]).length?[{d:1,t:(tl.subtitles||[]).length+" caption cues"}]:[],"ti",it=>it.t)}
    <p class="lead">Lanes: picture · added audio (narration/sfx/ambience) · captions. ⇢ transition, ✦ effects, ▣ cutaway/picture-in-picture.</p>
    <div id="winsp"></div>
-   <h3 class="sec">Scene browser (click a shot to add it at the end)</h3><div id="wsc" class="grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr))"><p class="lead">Loading shots…</p></div></div>
+   <h3 class="sec">Layers (above the storyline)</h3><div id="wlay"></div>
+   <h3 class="sec">Scene browser</h3><div class="row"><label>Click a shot to<select id="wmode"><option value="main">add it to the end of the storyline</option><option value="pip">overlay it as picture-in-picture</option><option value="full">overlay it full-frame (cutaway)</option></select></label><label>Overlay starts at (s)<input id="wat" type="number" step="0.1" value="0"></label></div><div id="wsc" class="grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr))"><p class="lead">Loading shots…</p></div></div>
   <div>
    <div class="card"><h3>Whole programme</h3><div class="row"><label>Look<select id="gg">${opt(cat.grades,tl.grade)}</select></label><label>LUT<select id="glut"><option value="">none</option>${opt([...(cat.luts||[]).map(l=>l.name||l)],typeof tl.lut==="string"?tl.lut:"")}</select></label></div>
     <div class="row"><label>Captions<select id="gcs">${opt(["(legacy)",...cat.caption_styles],(tl.captions||{}).style||"(legacy)")}</select></label><label>Position<select id="gcp">${opt(["bottom","middle","top"],(tl.captions||{}).position||"bottom")}</select></label><label>Words per cue<input id="gcw" type="number" min="2" max="6" value="${(tl.captions||{}).words_per_cue||3}"></label></div>
     <div class="row"><label>Highlight<input id="gch" value="${esc((tl.captions||{}).highlight||"#FFD400")}"></label><label>Music volume<input id="gmv" type="number" step="0.05" value="${tl.music?tl.music.volume:""}" ${tl.music?"":"disabled"}></label><label>Loudness (LUFS)<input id="glu" type="number" step="0.5" value="${tl.target_lufs??-14}"></label></div>
+    <div class="row"><label>Slow-motion quality<select id="gsm">${opt(cat.slowmo||["none"],tl.slowmo||"none")}</select></label><label>Render pipeline<select id="gpl">${opt(cat.pipelines||["pieces"],tl.render_pipeline||"pieces")}</select></label></div>
     <div class="row"><button class="sm" id="gapply">Apply to programme</button></div></div>
    <div class="card" style="margin-top:12px"><h3>Export</h3><div class="row"><label>File<select id="xf">${opt(renders,last)}</select></label></div>
     <div class="row"><label>Codec<select id="xc">${Object.entries(xp.codecs).map(([k,v])=>`<option value="${k}" ${v.available?"":"disabled"}>${k}${v.available?"":" (no encoder)"}</option>`).join("")}</select></label><label>Quality<select id="xq">${opt(Object.keys(xp.qualities),"balanced")}</select></label><label>Max size MB<input id="xm" type="number"></label></div>
-    <div class="row"><button class="sm" id="xgo" ${renders.length?"":"disabled"}>Export and verify</button></div></div>
+    <div class="row"><button class="sm" id="xgo" ${renders.length?"":"disabled"}>Export and verify</button></div>
+    <p class="lead">Edit list for another editor: <a href="/api/projects/${pid}/edl?branch=${encodeURIComponent(branch)}&fmt=cmx3600" target="_blank">CMX3600 EDL</a> · <a href="/api/projects/${pid}/edl?branch=${encodeURIComponent(branch)}&fmt=otio" target="_blank">OpenTimelineIO</a> (main storyline)</p></div>
    ${rep?`<div class="card" style="margin-top:12px"><h3>Quality: ${statusTag(rep.status)}</h3><p class="lead">${esc(rep.human_approval||"")}</p>${table(rep.stages.flatMap(s=>s.checks.filter(c=>!c.ok).map(c=>({s:s.stage,...c}))),[["Stage",r=>esc(r.s)],["Problem",r=>esc(r.check)],["Detail",r=>esc(r.detail)]])}</div>`:""}
   </div></div><div id="jobs"></div>`;
  poll($("#jobs"));
@@ -256,11 +259,23 @@ async workspace(m,pid){
  $("#wfinal").onclick=async()=>{await api(`/api/projects/${pid}/render`,{branch});poll($("#jobs"))};
  $("#gapply").onclick=()=>{const cs=$("#gcs").value;const a={grade:$("#gg").value,lut:$("#glut").value||null,target_lufs:+$("#glu").value,
    captions:cs==="(legacy)"?null:{style:cs,position:$("#gcp").value,words_per_cue:+$("#gcw").value,highlight:$("#gch").value}};
+   a.slowmo=$("#gsm").value;a.render_pipeline=$("#gpl").value;
    if(tl.music&&$("#gmv").value!=="")a.music={...tl.music,volume:+$("#gmv").value};op("set_global",null,a)};
  $("#xgo").onclick=async()=>{await api(`/api/projects/${pid}/export`,{render:$("#xf").value,codec:$("#xc").value,quality:$("#xq").value,max_mb:+$("#xm").value||null});poll($("#jobs"))};
  document.querySelectorAll(".tl div[data-c]").forEach(d=>d.onclick=()=>{sel=d.dataset.c;go("workspace",pid)});
  api(`/api/projects/${pid}/scenes`).then(sc=>{$("#wsc").innerHTML=sc.length?sc.slice(0,120).map(s=>`<div class="card click" style="padding:4px" data-s='${esc(JSON.stringify({src:s.src,in:s.in,out:s.out}))}'><img src="/api/projects/${pid}/file?path=${encodeURIComponent(s.thumb)}" style="width:100%;border-radius:4px"><p>${s.in.toFixed(1)}–${s.out.toFixed(1)} s</p></div>`).join(""):'<p class="lead">No analysed source in this project.</p>';
-  document.querySelectorAll("#wsc [data-s]").forEach(e=>e.onclick=()=>op("insert_video",null,JSON.parse(e.dataset.s)))}).catch(e=>$("#wsc").innerHTML=`<p class="lead">${esc(e.message)}</p>`);
+  document.querySelectorAll("#wsc [data-s]").forEach(e=>e.onclick=async()=>{const sc=JSON.parse(e.dataset.s);const mode=$("#wmode").value;
+   if(mode==="main")return op("insert_video",null,sc);
+   try{if(!(tl.tracks||[]).some(t=>t.id==="V2"))await api(`/api/projects/${pid}/op`,{op:"add_track",args:{kind:"video",track_id:"V2"},branch});
+    const box=mode==="pip"?{x:0.63,y:0.06,w:0.33,h:0.33}:{x:0,y:0,w:1,h:1};
+    await op("add_item","V2",{item:{type:"video",src:sc.src,in:sc.in,out:Math.min(sc.out,sc.in+8),...box,opacity:1},start:+$("#wat").value||0})}catch(err){alert(err.message)}})}).catch(e=>$("#wsc").innerHTML=`<p class="lead">${esc(e.message)}</p>`);
+ const trs=(tl.tracks||[]).filter(t=>t.kind!=="audio");
+ $("#wlay").innerHTML=trs.length?trs.map(t=>`<div class="card" style="margin:6px 0"><b>${esc(t.id)}</b> · ${esc(t.kind)} · z ${t.z} <label style="display:inline-flex;gap:4px;align-items:center">opacity <input type="number" step="0.05" min="0" max="1" value="${t.opacity??1}" data-topac="${t.id}" style="width:70px"></label> <button class="sec sm" data-trm="${t.id}">Remove layer</button>
+  ${table(t.items||[],[["Item",it=>esc(it.text||((it.src||"").split("/").pop()+" "+(+it.in||0).toFixed(1)+"-"+(+(it.out||0)).toFixed(1)))],["Starts",it=>(+it.start||0).toFixed(1)+" s"],["Box",it=>[it.x,it.y,it.w,it.h].map(v=>v??"-").join(", ")],["",it=>`<button class="sec sm" data-irm="${it.id}">Remove</button>`]])}</div>`).join("")
+  :'<p class="lead">No layers. Use the scene browser in overlay mode to add picture-in-picture or a full-frame cutaway.</p>';
+ document.querySelectorAll("[data-topac]").forEach(e=>e.onchange=()=>op("set_track",e.dataset.topac,{opacity:+e.value}));
+ document.querySelectorAll("[data-trm]").forEach(e=>e.onclick=()=>op("remove_track",e.dataset.trm));
+ document.querySelectorAll("[data-irm]").forEach(e=>e.onclick=()=>op("remove_item",e.dataset.irm));
  const c=tl.clips.find(x=>x.id===sel);if(!c)return;
  const kf=c.keyframes||{};const fxOn=new Set((c.effects||[]).map(e=>e.type));const cc=c.correct||{};
  $("#winsp").innerHTML=`<div class="card"><h3>Selected clip · ${c.type} · ${c._duration}s</h3>

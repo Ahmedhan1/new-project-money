@@ -268,6 +268,12 @@ def api_op(pid: str, r: OpReq):
                 raise HTTPException(400, "only media imported into this project can be inserted")
             clip = ops.video_clip(r.args["src"], float(r.args["in"]), float(r.args["out"]))
             tl = ops.insert(tl, clip, r.args.get("index"))
+        elif r.op in ("add_track", "remove_track", "set_track", "add_item", "remove_item", "move_item", "set_item", "set_keyframes"):
+            # multi-track layers (nexus/timeline/tracks.py); `clip` carries the track/item id where the op needs one
+            if r.op == "add_item" and r.args.get("item", {}).get("src") and r.args["item"]["src"] not in {m["path"] for m in p.data["media"]}:
+                raise HTTPException(400, "only media imported into this project can be placed on a layer")
+            fn2 = getattr(ops, r.op)
+            tl = fn2(tl, r.clip, **r.args) if r.op not in ("add_track",) else fn2(tl, **r.args)
         elif r.op == "restore":  # bring an earlier version back as the newest one (history is kept)
             tl = p.timeline(r.branch, vid=r.args["version"])
         else:
@@ -530,7 +536,9 @@ def api_fx_catalog():
     return {"transitions": sorted(transitions.NAMES), "aliases": getattr(transitions, "ALIASES", {}),
             "effects": list(effects.KNOWN), "grades": sorted(post.GRADES), "luts": luts, "caption_styles": list(captions.STYLES),
             "keyframe_props": list(getattr(effects, "KEYFRAME_PROPS", ("x", "y", "scale", "volume"))),
-            "fits": ["cover", "contain", "blur"]}
+            "fits": ["cover", "contain", "blur"], "mask_keyframe_props": list(getattr(effects, "MASK_KEYFRAME_PROPS", ())),
+            "split_layouts": list(getattr(post, "SPLIT_LAYOUTS", ())), "slowmo": list(getattr(post, "SLOWMO_PROFILES", ())),
+            "pipelines": ["pieces", "legacy"]}
 
 
 @app.get("/api/effects")
@@ -747,9 +755,18 @@ def api_edl(pid: str, branch: str = "main", fmt: str = "cmx3600"):
     from fastapi.responses import PlainTextResponse
     from . import director
     p = _project(pid)
-    if fmt not in ("cmx3600", "json"):
-        raise HTTPException(400, "fmt must be cmx3600 or json")
+    if fmt not in ("cmx3600", "json", "otio"):
+        raise HTTPException(400, "fmt must be cmx3600, json or otio")
+    if fmt == "otio":  # OpenTimelineIO JSON (main storyline), readable by Resolve/Premiere/Kdenlive importers
+        from .timeline import edl as edlmod
+        return PlainTextResponse(json.dumps(edlmod.to_otio(p.timeline(branch), name=p.name[:60]), indent=1), media_type="application/json")
     return PlainTextResponse(director.edl(p.timeline(branch), fmt, title=p.name[:60]))
+
+
+@app.get("/api/projects/{pid}/tracks/validate")
+def api_tracks_validate(pid: str, branch: str = "main"):
+    from .timeline import tracks
+    return {"warnings": tracks.validate(_project(pid).timeline(branch))}
 
 
 @app.get("/api/projects/{pid}/quality")
