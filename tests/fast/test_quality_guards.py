@@ -101,3 +101,16 @@ def test_pauses_between_phrases_are_not_level_jumps_but_a_gain_change_is(home, t
         return c
     assert jumps(_speechy(tmp_path / "a.mp4", False)) is None
     assert jumps(_speechy(tmp_path / "b.mp4", True)) is not None
+
+
+def test_language_qa_is_folded_into_the_score_not_reported_as_crashed(home, tmp_path):
+    """The hook called localize.qa (a module) and every report said "localize.qa raised: 'module' object is not callable"."""
+    import subprocess
+    from nexus import quality
+    v = tmp_path / "c.mp4"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "testsrc2=s=320x180:r=25:d=3", "-f", "lavfi", "-i",
+                    "sine=f=300:d=3", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", str(v)], check=True)
+    tl = {"lang": "en", "width": 320, "height": 180, "fps": 25, "clips": [{"id": "a", "type": "video", "src": str(v), "in": 0, "out": 3}],
+          "audio": [], "subtitles": [{"start": 0.2, "end": 2.0, "text": "A short caption."}]}
+    r = quality.score(v, tl=tl, lang="en")
+    assert not any(m["id"] == "localization.ext" for m in r["not_measured"])

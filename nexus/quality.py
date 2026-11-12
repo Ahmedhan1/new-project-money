@@ -1133,12 +1133,12 @@ def localization_checks(tl: dict | None, lang: str, analysis: dict | None = None
     # fold in the language workstream's own QA when it exists
     try:
         from . import localize
-        fn = getattr(localize, "qa", None)
+        fn = getattr(localize, "qa_cues", None)   # (was getattr(localize, "qa"): that is the qa MODULE, never callable)
     except Exception:
         fn = None
-    if fn is not None and tl is not None:
+    if callable(fn) and tl is not None and tl.get("subtitles"):
         try:
-            ext = fn(tl, lang) or {}
+            ext = fn(tl["subtitles"], lang or tl.get("lang") or "en") or {}
             for c in ext.get("checks", []):
                 name = c.get("id") or c.get("check") or "check"
                 slug = re.sub(r"[^a-z0-9]+", "_", str(name).lower()).strip("_")[:40]

@@ -138,3 +138,18 @@ def test_hashtags_are_entities_and_repeated_words_never_fillers():
     assert tags[:2] == ["#NewMexico", "#NASA"] and "#Cave" in tags and "#Microbes" in tags
     assert not {"#Basically", "#Absolutely", "#Sometimes", "#Gotten", "#Always"} & set(tags)
     assert growth.platform_text(text, platform="youtube_shorts")["hashtags"] == tags[:growth.HASHTAGS_EDITORIAL]
+
+
+def test_a_short_ends_with_an_out_not_on_the_last_frame_of_the_last_word():
+    """Acceptance batch: shorts 1, 3 and 5 ended with sound running to the last frame (editing.ending)."""
+    from nexus import shorts
+    words = [{"start": 10.0 + 0.3 * i, "end": 10.25 + 0.3 * i, "word": w} for i, w in enumerate("we flew home today.".split())]
+    nxt = [{"start": 12.0, "end": 12.3, "word": "Next"}]
+    an = {"probe": {"duration": 60.0}, "transcript": {"segments": [{"start": 10, "end": 11.2, "words": words}, {"start": 12, "end": 12.3, "words": nxt}]}}
+    tl = {"clips": [{"type": "video", "src": "s.mp4", "in": 9.9, "out": 11.15}]}
+    shorts.add_out(tl, an, "s.mp4")
+    c = tl["clips"][0]
+    assert abs(c["out"] - 11.55) < 1e-6 and c["audio_fade_out"] == 0.3        # +0.4 s of pause, sound fades
+    tl2 = {"clips": [{"type": "video", "src": "s.mp4", "in": 9.9, "out": 11.8}]}
+    shorts.add_out(tl2, an, "s.mp4")
+    assert tl2["clips"][0]["out"] <= 12.0 - 0.08 + 1e-6                        # never into the next word

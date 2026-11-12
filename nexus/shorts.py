@@ -429,6 +429,28 @@ def _sfx_path(name: str = "whoosh") -> str | None:
         return None
 
 
+OUT_EXTEND_S, OUT_FADE_S = 0.4, 0.3
+
+
+def add_out(tl: dict, analysis: dict, src: str) -> dict:
+    """Give the short an out: let the last clip run into the following pause (never into the next word, at most
+    OUT_EXTEND_S) and fade the sound over OUT_FADE_S. The acceptance batch ended three shorts with the sound running to
+    the last frame (quality: editing.ending)."""
+    vids = [c for c in tl["clips"] if c.get("type") == "video" and c.get("src") == src]
+    if not vids:
+        return tl
+    last = vids[-1]
+    out = float(last["out"])
+    nxt = [float(w["start"]) for sg in (analysis.get("transcript") or {}).get("segments") or [] for w in sg.get("words") or []
+           if float(w["start"]) > out + 0.02]
+    dur = float(((analysis.get("probe") or {}).get("duration")) or analysis.get("duration") or out + OUT_EXTEND_S)
+    room = min(OUT_EXTEND_S, (min(nxt) - 0.08 - out) if nxt else OUT_EXTEND_S, dur - out)
+    if room > 0.04:
+        last["out"] = round(out + room, 3)
+    last["audio_fade_out"] = round(min(OUT_FADE_S, clip_duration(last) / 3), 3)
+    return tl
+
+
 def build_short(src_path: str, analysis: dict, moment: dict, size: tuple[int, int] = (1080, 1920), style: dict | None = None,
                 sfx: bool = False, title: str | None = None) -> dict:
     """Vertical timeline cut exactly on the moment, with jump cuts, movement, word captions, a hook title and a progress bar."""
@@ -460,6 +482,7 @@ def build_short(src_path: str, analysis: dict, moment: dict, size: tuple[int, in
             c["effects"] += [{"type": "punch_in", "start": round(t, 3), "end": round(min(d, t + 2.0), 3), "scale": 1.1}
                              for t in [4.0 * n for n in range(1, int(d // 4.0) + 1)] if t < d - 1.0]
         tl["clips"].append(c)
+    add_out(tl, analysis, src_path)
     title = title if title is not None else (moment.get("title") or suggest_title(moment.get("text", "")))
     if title and len(title.split()) > HOOK_CARD_WORDS:  # the card is on screen ~2.5 s: keep it readable
         title = suggest_title(title, max_words=HOOK_CARD_WORDS)
@@ -1267,6 +1290,8 @@ def compose(src: str, analysis: dict, moment: dict, *, variant: dict | str | Non
         tl["clips"].insert(0, t)
         if len(tl["clips"]) > 1:
             tl["clips"][1]["effects"] = [{"type": "flash", "at": 0.0}] + list(tl["clips"][1].get("effects") or [])
+    if tl["clips"]:
+        add_out(tl, an, src)
     if title and tl["clips"]:
         d0 = clip_duration(tl["clips"][0])
         hold = TEXT_HOOK_SECONDS if name.startswith("text_hook") else HOOK_TITLE_SECONDS
