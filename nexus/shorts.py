@@ -241,8 +241,10 @@ def usable_sentences(analysis: dict) -> list[dict]:
     from .media import understand
     allx = sentences(analysis)
     dialogue = not any(s.get("speaker") for s in allx) and understand.dialogue_like(allx)
+    labelled = any(s.get("speaker") for s in allx)
     for s in allx:
         s["dialogue"] = dialogue
+        s["interviewer"] = labelled and s.get("speaker") == "interviewer"  # real speaker labels (media/diarize.py)
     dropped = {r["earlier"] for r in analysis.get("repetitions") or []}
     out = []
     for k, s in enumerate(allx):
@@ -276,6 +278,8 @@ def _score_window(sents: list[dict], i: int, j: int, start: float, end: float) -
     text = " ".join(s["text"] for s in win)
     raw = end - start
     hook, reasons = hook_score(win[0]["text"], win[0].get("dialogue"))
+    if win[0].get("interviewer"):  # a short should open on the guest, not on the reporter's question
+        hook, reasons = min(hook, 0.15), reasons + ["opens on the interviewer's question (speaker labels; capped)"]
     n_words = sum(len(s["words"]) for s in win)
     speech = sum(s["end"] - s["start"] for s in win) or raw
     density = min(1.0, len(set(content_words(text))) / max(speech, 0.1) / DENSITY_REF)
@@ -1005,7 +1009,9 @@ def select(analysis: dict, *, time_range: tuple[float, float] | None = None, top
     chosen.sort(key=lambda m: (-m["rank_score"], m["start"]))
     for k, m in enumerate(chosen, 1):
         m["rank"] = k
-        m["title"] = (_llm_title(m["text"]) if use_llm else None) or suggest_title(m["text"])
+        sl = m.get("sentences") or []
+        guest_text = " ".join(x["text"] for x in sents[sl[0]:sl[1] + 1] if not x.get("interviewer")) if len(sl) == 2 else ""
+        m["title"] = (_llm_title(m["text"]) if use_llm else None) or suggest_title(guest_text or m["text"])
         m["scores"] = editorial_scores(m)
     if speaker is not None and not chosen:
         notes.append(f"no window where {speaker!r} speaks at least half of the time")
