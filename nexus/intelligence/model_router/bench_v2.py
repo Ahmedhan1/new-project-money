@@ -33,7 +33,8 @@ MODELS: dict[str, dict] = {
                         "licence": "Apache-2.0", "params_b": 13.9, "think": False},
     "glm-4.7-flash": {"pull": "hf.co/unsloth/GLM-4.7-Flash-GGUF:Q4_K_M", "repo": "zai-org/GLM-4.7-Flash", "licence": "MIT", "params_b": 31.2, "think": False},
     "nemotron-nano-9b-v2": {"pull": "hf.co/bartowski/nvidia_NVIDIA-Nemotron-Nano-9B-v2-GGUF:Q4_K_M", "repo": "nvidia/NVIDIA-Nemotron-Nano-9B-v2",
-                            "licence": "NVIDIA Open Model License (commercial use allowed under its terms)", "params_b": 8.9, "think": False},
+                            "licence": "NVIDIA Open Model License (commercial use allowed under its terms)", "params_b": 8.9, "think": False,
+                            "system_suffix": "/no_think"},  # model card: reasoning is switched off by /no_think in the system prompt
 }
 
 # ----------------------------------------------------------------- items
@@ -209,8 +210,8 @@ for _ in range(60):
         urllib.request.urlopen("http://127.0.0.1:11434/api/version", timeout=2); break
     except Exception: time.sleep(2)
 log["env"]["ollama_version"] = sh("ollama --version")[1].strip()
-def chat(model, it, think):
-    body = {"model": model, "stream": False, "messages": [{"role": "system", "content": "You are a precise assistant. Follow the format exactly."},
+def chat(model, it, think, suffix=""):
+    body = {"model": model, "stream": False, "messages": [{"role": "system", "content": ("You are a precise assistant. Follow the format exactly. " + suffix).strip()},
             {"role": "user", "content": it["prompt"]}], "options": {"temperature": 0, "num_ctx": it.get("num_ctx", 4096),
             "num_predict": (it["max_tokens"] + 3000) if think else it["max_tokens"]}, "think": bool(think)}
     if it.get("schema"): body["format"] = it["schema"]
@@ -221,7 +222,8 @@ for name, m in MODELS.items():
     rec = {"spec": m, "items": []}; t0 = time.time()
     rc, out = sh(f"ollama pull {m['pull']}", 3600); rec["pull_s"] = round(time.time() - t0, 1); rec["pull_ok"] = rc == 0; rec["pull_log"] = out[-400:]
     if rc != 0:
-        log["models"][name] = rec; json.dump(log, open(OUT, "w")); continue
+        rec["disk"] = sh("df -h / /root /tmp /kaggle/working")[1][-600:]
+        log["models"][name] = rec; json.dump(log, open(OUT, "w")); sh(f"ollama rm {m['pull']}"); continue
     try: chat(m["pull"], {"prompt": "hi", "max_tokens": 5}, False)
     except Exception as e: rec["warmup_error"] = str(e)[:300]
     rec["vram"] = sh("nvidia-smi --query-gpu=memory.used --format=csv,noheader")[1].strip()
@@ -229,7 +231,7 @@ for name, m in MODELS.items():
     for it in ITEMS:
         r = {"id": it["id"]}
         try:
-            d, lat = chat(m["pull"], it, m.get("think"))
+            d, lat = chat(m["pull"], it, m.get("think"), m.get("system_suffix", ""))
             r.update(text=d["message"].get("content", ""), thinking_chars=len(d["message"].get("thinking") or ""), latency_s=round(lat, 2),
                      eval_count=d.get("eval_count"), eval_s=round((d.get("eval_duration") or 0) / 1e9, 2),
                      prompt_tokens=d.get("prompt_eval_count"))
@@ -238,7 +240,8 @@ for name, m in MODELS.items():
         rec["items"].append(r)
         log["models"][name] = rec; json.dump(log, open(OUT, "w"))
     rec["total_s"] = round(time.time() - t0, 1)
-    sh(f"ollama stop {m['pull']}"); log["models"][name] = rec; json.dump(log, open(OUT, "w"))
+    sh(f"ollama stop {m['pull']}"); sh(f"ollama rm {m['pull']}")  # free disk: 20-30 GB models do not fit side by side
+    log["models"][name] = rec; json.dump(log, open(OUT, "w"))
 log["finished"] = time.time(); json.dump(log, open(OUT, "w"))
 '''
 
