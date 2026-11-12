@@ -149,7 +149,7 @@ def test_priority_order(home):
         d.submit(ProductionJobManifest(task="probe", params={"n": n}, priority=prio))
     for _ in range(4):  # local runs one at a time: each tick dispatches the most urgent queued job
         d.tick()
-        db.execute("UPDATE remote_jobs SET status='succeeded' WHERE status IN ('dispatched','running')")
+        db.execute("UPDATE remote_jobs SET status='succeeded' WHERE status='running'")
     assert rec.order == [2, 4, 1, 3]
 
 
@@ -188,7 +188,11 @@ def test_quota_error_pauses_kaggle_and_fails_over_to_local(env):
     assert len(pushes) == 1                                                             # paused: not retried, no other account
     d.tick()
     o = dsp._row(only["id"])
-    assert o["status"] == "queued" and "waiting" in o["error"]
+    assert o["status"] == "quota_exhausted" and "waiting" in o["error"]
+    assert dsp.quota_status()[0].exhausted
+    k.resume()
+    fake.mode = "ok"
+    assert d.run_until_done(only["id"], timeout=120, interval=0.05)["status"] == "succeeded"
     with pytest.raises(ValueError):
         KaggleProvider("kaggle_secondary")                                              # no multi-account rotation
 
@@ -199,7 +203,7 @@ def test_cancel_queued_and_running(env):
     q, _ = d.submit(ProductionJobManifest(task="probe", requires={"providers": ["kaggle"]}))
     q2, _ = d.submit(ProductionJobManifest(task="probe", requires={"providers": ["kaggle"]}))
     d.tick()
-    assert dsp._row(q["id"])["status"] in ("dispatched", "running")
+    assert dsp._row(q["id"])["status"] == "running"
     r = d.cancel(q2["id"])
     assert r["status"] == "cancelled"
     r = d.cancel(q["id"])
@@ -250,7 +254,7 @@ def test_pull_worker_protocol(env, monkeypatch):
     job = c.post("/api/v1/compute/jobs", json={"task": "probe", "preferred_providers": ["user_gpu"], "requires": {"providers": ["user_gpu"]}}).json()
     jid = job["job"]["id"]
     d.tick()
-    assert dsp._row(jid)["status"] == "dispatched"
+    assert dsp._row(jid)["status"] == "running"
     nxt = c.get("/api/v1/compute/workers/next", headers=h)
     assert nxt.status_code == 200
     work = Path(dsp.compute_dir("pulltest"))

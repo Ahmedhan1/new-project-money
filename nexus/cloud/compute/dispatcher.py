@@ -38,7 +38,8 @@ from ..events import emit
 from . import tasks as task_registry
 from .base import Provider, ProviderError, QuotaExhausted, compute_dir
 
-ACTIVE = ("dispatched", "running")
+ACTIVE = ("running",)            # persisted statuses: queued | running | succeeded | failed | cancelled | quota_exhausted
+WAITING = ("queued", "quota_exhausted")
 TERMINAL = ("succeeded", "failed", "cancelled")
 QUOTA_PAUSE_S = 6 * 3600         # after a quota message Kaggle is not tried again for 6 h (or until the owner resumes it)
 MAX_ACTIVE = {"kaggle": 1, "local": 1}
@@ -119,6 +120,7 @@ class Dispatcher:
         self._next_poll: dict[str, tuple[float, float]] = {}
         self._unknown: dict[str, int] = {}
         self._waiting: dict[str, str] = {}
+        self._seen: dict[str, str] = {}
         self._lock = threading.RLock()
 
     # ------------------------------------------------------------ submission
@@ -190,7 +192,7 @@ class Dispatcher:
         lim = MAX_ACTIVE.get(p.provider)
         if lim is None:
             return False
-        n = db.query("SELECT COUNT(*) n FROM remote_jobs WHERE provider=? AND status IN ('dispatched','running')", (p.provider,))[0]["n"]
+        n = db.query("SELECT COUNT(*) n FROM remote_jobs WHERE provider=? AND status='running'", (p.provider,))[0]["n"]
         return n >= lim
 
     def _bundle(self, row: dict, m: ProductionJobManifest, p: Provider, attempt: int) -> dict:
@@ -240,7 +242,7 @@ class Dispatcher:
                 emit("provider.health", f"{p.provider} dispatch failed: {vault.redact(str(e))[:300]}", m.job_id, provider=p.provider)
                 continue
             now = time.time()
-            _set(m.job_id, status="dispatched", provider=p.provider, connection_id=p.connection_id, remote_ref=ref, attempts=attempt,
+            _set(m.job_id, status="running", provider=p.provider, connection_id=p.connection_id, remote_ref=ref, attempts=attempt,
                  started=row["started"] or now, heartbeat=now, error=None)
             self._next_poll[m.job_id] = (now + self.poll_min, self.poll_min)
             self._waiting.pop(m.job_id, None)
@@ -253,10 +255,13 @@ class Dispatcher:
             _set(m.job_id, attempts=n)
             row = {**row, "attempts": n}
             return self._retry_or_fail(row, "every provider failed to start the job: " + "; ".join(errors))
-        self._wait(row, "waiting for a provider: " + ("; ".join(why + errors) or "none eligible"))
+        quota_only = not errors and any("[quota_exhausted]" in w for w in why)
+        self._wait(row, "waiting for a provider: " + ("; ".join(why + errors) or "none eligible"), "quota_exhausted" if quota_only else "queued")
         return "waiting"
 
-    def _wait(self, row: dict, reason: str) -> None:
+    def _wait(self, row: dict, reason: str, status: str = "queued") -> None:
+        if row["status"] != status:
+            _set(row["id"], status=status)
         if self._waiting.get(row["id"]) != reason:
             self._waiting[row["id"]] = reason
             _set(row["id"], error=reason[:1000])
@@ -288,9 +293,9 @@ class Dispatcher:
             self._next_poll[jid] = (time.time() + self.poll_max, self.poll_max)
             return "backoff"
         if st.state in ("queued", "running"):
-            if st.state == "running" and row["status"] != "running":
-                _set(jid, status="running")
-                emit("job.progress", f"running on {p.provider}", jid, state="running", provider=p.provider)
+            if self._seen.get(jid) != st.state:
+                self._seen[jid] = st.state
+                emit("job.progress", f"{st.state} on {p.provider}", jid, state=st.state, provider=p.provider)
             if time.time() - (row["heartbeat"] or row["started"] or time.time()) > json.loads(row["manifest"]).get("max_runtime_s", 3600) + LOST_GRACE_S:
                 return self._lost(row, "attempt exceeded max_runtime_s + grace without finishing")
             back = min(self.poll_max, max(self.poll_min, back * 1.6))
@@ -468,6 +473,7 @@ class Dispatcher:
         if extra:
             data["postprocess"] = extra
         data["artifacts"] = job_artifacts(jid)
+        data.update(accelerator=res.accelerator, duration_s=res.duration_s, metrics=res.metrics, provider=res.provider)
         _set(jid, status="succeeded", finished=time.time(), result=json.dumps(data, default=str), error=None)
         emit("job.succeeded", f"{row['task']} succeeded on {res.provider} in {res.duration_s}s ({len(res.artifacts)} verified artifact(s))", jid,
              provider=res.provider, accelerator=res.accelerator, duration_s=res.duration_s, artifacts=len(data["artifacts"]))
@@ -509,7 +515,7 @@ class Dispatcher:
         if row["status"] in TERMINAL:
             return row
         _set(job_id, cancel_requested=1)
-        if row["status"] == "queued":
+        if row["status"] in WAITING:
             _set(job_id, status="cancelled", finished=time.time(), error="cancelled by owner before dispatch")
             emit("job.cancelled", "cancelled before dispatch", job_id)
         else:
@@ -531,12 +537,12 @@ class Dispatcher:
     def tick(self) -> dict:
         out = {"polled": {}, "dispatched": {}}
         with self._lock:
-            for row in db.query("SELECT * FROM remote_jobs WHERE status IN ('dispatched','running') ORDER BY priority, created"):
+            for row in db.query("SELECT * FROM remote_jobs WHERE status='running' ORDER BY priority, created"):
                 try:
                     out["polled"][row["id"]] = self._poll(row)
                 except Exception as e:  # noqa: BLE001 - one bad job must not stop the loop
                     out["polled"][row["id"]] = f"error: {vault.redact(str(e))[:200]}"
-            for row in db.query("SELECT * FROM remote_jobs WHERE status='queued' ORDER BY priority, created"):
+            for row in db.query("SELECT * FROM remote_jobs WHERE status IN ('queued','quota_exhausted') ORDER BY priority, created"):
                 if row["cancel_requested"]:
                     _set(row["id"], status="cancelled", finished=time.time())
                     continue
@@ -547,7 +553,7 @@ class Dispatcher:
         return out
 
     def active(self) -> int:
-        return db.query("SELECT COUNT(*) n FROM remote_jobs WHERE status IN ('queued','dispatched','running')")[0]["n"]
+        return db.query("SELECT COUNT(*) n FROM remote_jobs WHERE status IN ('queued','quota_exhausted','running')")[0]["n"]
 
     def run_until_done(self, job_id: str, timeout: float = 1800, interval: float = 2.0) -> dict:
         end = time.time() + timeout
@@ -590,6 +596,33 @@ def postprocess(row: dict, res: WorkerExecutionResult) -> dict | None:
     db.execute("INSERT OR REPLACE INTO artifacts(id,kind,name,sha256,size,project_id,job_id,manifest,created) VALUES(?,?,?,?,?,?,?,?,?)",
                (a.artifact_id, a.kind, a.name, a.sha256, a.size, row["project_id"], row["id"], a.model_dump_json(), a.created_at))
     return {"concat": "ok", "artifact": a.artifact_id, "sha256": a.sha256, "chunks": len(chunks)}
+
+
+# ---------------------------------------------------------------- module-level interface (scheduler, Accounts 2/3)
+def submit(manifest: ProductionJobManifest) -> dict:
+    """Queue a job (idempotency_key honoured). Returns {"job_id", "status", "created"}."""
+    row, created = get().submit(manifest)
+    return {"job_id": row["id"], "status": row["status"], "created": created}
+
+
+def cancel(job_id: str) -> bool:
+    """True when the job is (now) cancelled."""
+    r = get().cancel(job_id)
+    return bool(r) and r["status"] == "cancelled"
+
+
+def status(job_id: str) -> dict | None:
+    return _row(job_id)
+
+
+def quota_status() -> list:
+    """QuotaStatus/v1 for every provider that has a quota (today: Kaggle weekly GPU seconds, measured)."""
+    out = []
+    for p in get().providers.values():
+        q = getattr(p, "quota", None)
+        if callable(q):
+            out.append(q())
+    return out
 
 
 _DISPATCHER: Dispatcher | None = None

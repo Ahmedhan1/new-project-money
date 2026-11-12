@@ -86,7 +86,7 @@ def touch(wid: str, kind: str, hardware: dict | None = None) -> None:
 def claim_next(worker: dict) -> dict | None:
     """Give the oldest highest-priority attempt waiting for this worker kind to this worker (atomic)."""
     kind = worker["kind"]
-    for r in db.query("SELECT id, remote_ref FROM remote_jobs WHERE provider=? AND status='dispatched' ORDER BY priority, created", (kind,)):
+    for r in db.query("SELECT id, remote_ref FROM remote_jobs WHERE provider=? AND status='running' ORDER BY priority, created", (kind,)):
         d = compute_dir("pull", r["remote_ref"])
         claim = d / "claimed.json"
         try:

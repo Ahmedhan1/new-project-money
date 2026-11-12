@@ -205,7 +205,6 @@ def worker_next(w: Worker, hardware: str | None = None):
     job = pull.claim_next(w)
     if job is None:
         return Response(status_code=204)
-    dsp._set(job["job_id"], status="running")
     events.emit("job.progress", f"claimed by {w['kind']} worker {w['worker_id']}", job["job_id"], state="running", worker=w["worker_id"])
     return job
 

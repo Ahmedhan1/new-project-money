@@ -107,7 +107,7 @@ class Provider:
 
     def available(self) -> tuple[bool, str]:
         h = self.health()
-        return h.status in ("ok", "degraded"), h.detail or h.status
+        return h.status in ("ok", "degraded"), f"[{h.status}] {h.detail}".strip()
 
     # ---- one attempt
     def submit(self, job_id: str, attempt: int, bundle: dict, gpu: bool, timeout_s: float) -> str:
