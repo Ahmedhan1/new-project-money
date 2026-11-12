@@ -232,3 +232,48 @@ tasks:
     acceptance: "tools.evolution_check findings create proposals with benchmark evidence; nothing is replaced without approval."
     test: "Fixture catalog with an archived repo."
     next: "evolution_check (read-only GitHub re-verification) exists; add benchmark harness per capability."
+  # ------------------------------------------------------------------ phase 3: production power (docs/PHASE3_PLAN.md)
+  - id: FX-1
+    priority: 1
+    title: "Effects, transition library, animated word captions, procedural SFX in the renderer"
+    status: in_progress
+    acceptance: "clip effects / xfade names / caption styles / overlays from docs/PHASE3_PLAN.md render correctly and are cache-safe."
+    test: "pytest tests/fast/test_fx.py"
+    next: "Implementation delegated; lead integrates into API/UI."
+  - id: PERF-1
+    priority: 1
+    title: "Render efficiency: parallel segments, per-segment caption burn (final pass copies video), draft mode, hw-encoder detection"
+    status: in_progress
+    acceptance: "Measured before/after on the same timeline in docs/results/perf_render.json; output still passes technical QA."
+    test: "pytest tests/fast/test_fx.py -k perf"
+    next: "Benchmark on the user's ZBook (QuickSync availability unknown)."
+  - id: GRW-1
+    priority: 1
+    title: "Growth: shorts extractor, retention rubric + auto retention pass, hook/title variants, reference-video style profile"
+    status: in_progress
+    acceptance: "Long video -> ranked vertical shorts timelines; any timeline gets a scored retention report with applicable fixes."
+    test: "pytest tests/fast/test_growth.py"
+    next: "Wire platform analytics once the user authorises OAuth (ANA-1) so the rubric can be calibrated on real retention."
+  - id: RPR-1
+    priority: 1
+    title: "Repurpose studio: rights gate, commentary/recap layouts, transformation report (no detection-evasion features)"
+    status: in_progress
+    acceptance: "Media without a rights declaration cannot be exported; report states the share of original vs new material."
+    test: "pytest tests/fast/test_repurpose.py"
+    next: "Recap script quality depends on the local LLM; review with real footage."
+  - id: AUD-1
+    priority: 1
+    title: "Voice mastering chain, ambience/SFX helpers, scene-to-scene continuity QA (level, colour, brightness jumps)"
+    status: in_progress
+    acceptance: "Narration clips leave TTS at a consistent loudness; continuity stage flags level/brightness jumps between adjacent scenes."
+    test: "pytest tests/fast/test_audio_continuity.py"
+    next: "A properly licensed Arabic voice is still missing (Chatterbox benchmark)."
+  - id: INT-3
+    priority: 1
+    title: "Integrate phase 3 into API, job handlers, UI, presets and docs"
+    status: planned
+    deps: [FX-1, PERF-1, GRW-1, RPR-1, AUD-1]
+    acceptance: "Every phase-3 capability is reachable from the UI through a durable job and covered by a fast test."
+    test: "pytest tests/fast"
+    next: "Start when the work packages report."
+
