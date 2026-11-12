@@ -1,0 +1,18 @@
+{
+ "source": "NASA interview iss061m2627771232 (1165.6 s, 1280x720)",
+ "method": "YuNet (OpenCV 5.0.0) at 1.0 fps, largest face per frame, median-smoothed",
+ "licence": "YuNet face_detection_yunet_2023mar.onnx: MIT (opencv_zoo); OpenCV: Apache-2.0",
+ "samples": 1166,
+ "frames_with_face": 1158,
+ "coverage": 0.993,
+ "focus": [
+  {
+   "start": 0.0,
+   "end": 1165.6,
+   "x": 0.5059,
+   "y": 0.3287
+  }
+ ],
+ "measured_seconds": 61.3,
+ "note": "single on-camera subject; reframing to 9:16 centres x=0.506, y=0.329 (face at one third height), not the frame centre"
+}

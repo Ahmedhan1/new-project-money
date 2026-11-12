@@ -185,7 +185,8 @@ def score_segments(segments: list[dict]) -> list[float]:
     return scores
 
 
-def analyze(path: str | Path, language: str | None = None, transcribe: bool = True, understand: bool = True) -> dict:
+def analyze(path: str | Path, language: str | None = None, transcribe: bool = True, understand: bool = True,
+            faces: bool = True, diarize: bool = True) -> dict:
     info = ff.probe(path)
     out: dict = {"probe": info, "path": str(path), "duration": info["duration"], "scenes": [], "silences": [],
                  "transcript": None, "loudness": None, "black": [], "freeze": [], "quality": None, "repetitions": [], "issues": [],
@@ -198,6 +199,15 @@ def analyze(path: str | Path, language: str | None = None, transcribe: bool = Tr
         out["freeze"] = ff.detect_freeze(path)
         out["quality"] = visual_quality(path)
         out["issues"] += out["quality"]["issues"]
+        if faces:
+            try:
+                from . import faces as fmod
+                out["faces"] = fmod.detect(path, fps=1.0)
+            except Exception as e:  # noqa: BLE001 - OpenCV/model missing: reframing falls back to blur-fill
+                out["faces"] = {"available": False, "why": f"{type(e).__name__}: {e}"}
+            if out["faces"].get("available"):
+                out["not_available"] = [x for x in out["not_available"] if not x.startswith("object")] + [
+                    "object/action recognition (faces are tracked; other objects are not)"]
     if info["audio"]:
         out["silences"] = ff.detect_silence(path)
         out["loudness"] = ff.loudness(path)
@@ -212,6 +222,15 @@ def analyze(path: str | Path, language: str | None = None, transcribe: bool = Tr
                 s["score"] = sc
             out["transcript"] = t
             out["repetitions"] = find_repetitions(t["segments"])
+            if diarize:
+                try:
+                    from . import diarize as dmod
+                    spk = dmod.diarize(path, out)
+                    out = dmod.apply_labels(out, spk) if spk.get("available") else {**out, "speakers": spk}
+                    if spk.get("available"):
+                        out["not_available"] = [x for x in out["not_available"] if not x.startswith("speaker diarisation")]
+                except Exception as e:  # noqa: BLE001 - never lose the analysis over diarisation
+                    out["speakers"] = {"available": False, "why": f"{type(e).__name__}: {e}"}
         else:
             out["not_available"].append("transcript (transcription was not requested)")
     else:

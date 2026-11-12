@@ -214,6 +214,36 @@ components:
     hardware: cpu
     network_hosts: [raw.githubusercontent.com]
     status: deployed
+  - id: yunet-face
+    name: YuNet face detector (opencv_zoo face_detection_yunet_2023mar.onnx) via OpenCV FaceDetectorYN
+    kind: model
+    capability: [face-detection]
+    source_url: https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet
+    license: "MIT (model files, opencv_zoo LICENSE read 2026-11-12); OpenCV Apache-2.0"
+    free_tier: "static file download from the official opencv Hugging Face mirror, no key"
+    quotas: "none (one 230 KB download, cached)"
+    commercial_use: "yes"
+    usage_restrictions: "detection only; NEXUS does not identify people"
+    data_retention: "none - runs locally"
+    availability: "local after one download; without it reframing uses blur-fill"
+    hardware: cpu
+    network_hosts: [huggingface.co]
+    status: deployed
+  - id: wespeaker
+    name: WeSpeaker ResNet34-LM speaker embedding model (ONNX) for diarisation
+    kind: model
+    capability: [speaker-embedding, diarisation]
+    source_url: https://huggingface.co/Wespeaker/wespeaker-voxceleb-resnet34-LM
+    license: "CC BY 4.0 (model card, not gated; read 2026-11-12); attribution: WeSpeaker (wenet-e2e)"
+    free_tier: "public download, no account, no key"
+    quotas: "none (one 26 MB download, cached)"
+    commercial_use: "yes, with attribution (CC BY 4.0)"
+    usage_restrictions: "attribution; NEXUS clusters voices within one recording and never identifies people"
+    data_retention: "none - runs locally with onnxruntime"
+    availability: "local after one download; MFCC fallback otherwise"
+    hardware: cpu
+    network_hosts: [huggingface.co]
+    status: deployed
   - id: wikimedia-commons
     name: Wikimedia Commons (asset downloads + licence metadata)
     kind: media-source

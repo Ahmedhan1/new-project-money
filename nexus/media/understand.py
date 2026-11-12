@@ -318,11 +318,15 @@ def score_sentences(sents: list[dict], fill: list[dict] | None = None) -> None:
         # Without speaker labels: a line addressed to someone else (second person, no first person) is most likely the
         # interviewer's/host's prompt, and a concrete first-person line is most likely the guest's own account.
         question = s["text"].rstrip().endswith("?")
-        s["prompt_like"] = (not labelled) and (bool(SELF_INTRO_RE.search(s["text"])) or (
-            dialogue and bool(SECOND_PERSON & toks) and (question or not (FIRST_PERSON & toks))))
+        if labelled:  # real speaker labels (media/diarize.py): the interviewer's lines are the prompts
+            s["prompt_like"] = s.get("speaker") == "interviewer"
+        else:
+            s["prompt_like"] = bool(SELF_INTRO_RE.search(s["text"])) or (
+                dialogue and bool(SECOND_PERSON & toks) and (question or not (FIRST_PERSON & toks)))
         if s["prompt_like"]:
             hook = min(hook, 0.3)
-            why = why + ["addressed to someone else - likely an interviewer/host prompt (heuristic, no speaker labels; capped)"]
+            why = why + (["spoken by the interviewer (speaker labels; capped)"] if labelled else
+                         ["addressed to someone else - likely an interviewer/host prompt (heuristic, no speaker labels; capped)"])
         elif FIRST_PERSON & toks and len(content(s["text"])) >= 6 and not s["text"].rstrip().endswith("?"):
             hook = min(1.0, hook + 0.15)
             why = why + ["first-hand account"]

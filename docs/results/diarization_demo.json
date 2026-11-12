@@ -1,0 +1,117 @@
+{
+ "method": "WeSpeaker ResNet34 speaker embeddings (ONNX, CPU) + agglomerative clustering, speakers chosen by silhouette",
+ "licence": "WeSpeaker voxceleb_resnet34_LM: CC BY 4.0 (attribution: WeSpeaker, wenet-e2e) - read 2026-11-12",
+ "n_speakers": 3,
+ "silhouette": 0.718,
+ "speakers": {
+  "S1": {
+   "seconds": 103.1,
+   "talk_share": 0.096,
+   "question_share": 0.238,
+   "second_person_share": 0.082,
+   "segments": 21,
+   "interviewer_score": 0.719,
+   "role": "interviewer",
+   "role_confidence": 0.95,
+   "role_reason": "asks questions (24% of segments) and addresses the guest ('you' 8.2% of words)"
+  },
+  "S2": {
+   "seconds": 850.2,
+   "talk_share": 0.789,
+   "question_share": 0.009,
+   "second_person_share": 0.014,
+   "segments": 211,
+   "interviewer_score": 0.122,
+   "role": "guest",
+   "role_confidence": 0.9,
+   "role_reason": "dominant voice (79% of talk time) that rarely asks questions"
+  },
+  "S3": {
+   "seconds": 124.1,
+   "talk_share": 0.115,
+   "question_share": 0.146,
+   "second_person_share": 0.085,
+   "segments": 41,
+   "interviewer_score": 0.679,
+   "role": "interviewer",
+   "role_confidence": 0.95,
+   "role_reason": "asks questions (15% of segments) and addresses the guest ('you' 8.5% of words)"
+  }
+ },
+ "note": "weaker than neural speaker embeddings; assumes one speaker per transcript segment",
+ "turns_sample": [
+  {
+   "start": 0.11,
+   "end": 1.85,
+   "speaker": "S1",
+   "confidence": 0.509
+  },
+  {
+   "start": 2.75,
+   "end": 4.13,
+   "speaker": "S2",
+   "confidence": 0.622
+  },
+  {
+   "start": 5.65,
+   "end": 31.15,
+   "speaker": "S1",
+   "confidence": 0.664
+  },
+  {
+   "start": 31.81,
+   "end": 143.87,
+   "speaker": "S2",
+   "confidence": 0.903
+  },
+  {
+   "start": 143.87,
+   "end": 160.61,
+   "speaker": "S1",
+   "confidence": 0.784
+  },
+  {
+   "start": 160.61,
+   "end": 229.2,
+   "speaker": "S2",
+   "confidence": 0.827
+  },
+  {
+   "start": 233.99,
+   "end": 243.69,
+   "speaker": "S1",
+   "confidence": 0.79
+  },
+  {
+   "start": 245.01,
+   "end": 282.03,
+   "speaker": "S2",
+   "confidence": 0.873
+  },
+  {
+   "start": 286.62,
+   "end": 295.84,
+   "speaker": "S1",
+   "confidence": 0.808
+  },
+  {
+   "start": 296.72,
+   "end": 317.82,
+   "speaker": "S2",
+   "confidence": 0.924
+  },
+  {
+   "start": 318.3,
+   "end": 336.78,
+   "speaker": "S1",
+   "confidence": 0.846
+  },
+  {
+   "start": 337.74,
+   "end": 381.24,
+   "speaker": "S2",
+   "confidence": 0.923
+  }
+ ],
+ "turns": 42
+}

@@ -1045,6 +1045,11 @@ def _focus_entries(an: dict) -> list[dict]:
     v = an["probe"].get("video") or {}
     vw, vh = float(v.get("width") or 1), float(v.get("height") or 1)
     out = []
+    fd = an.get("faces")
+    if isinstance(fd, dict):  # nexus/media/faces.detect(): smoothed subject-centre spans (normalised)
+        for e in (fd.get("focus") or []) if fd.get("available") else []:
+            out.append({"start": float(e["start"]), "end": float(e["end"]), "xs": [float(e["x"])], "ys": [float(e["y"])]})
+        return [{**e, "end": max(e["end"], e["start"] + 0.5)} for e in out]
     for e in (an.get("focus") or q.get("focus") or []):
         if isinstance(e, dict) and "x" in e:
             out.append({"start": float(e.get("start", e.get("t", 0.0))), "end": float(e.get("end", e.get("t", 0.0)) or 0.0),
