@@ -90,7 +90,7 @@ Secrets (Kaggle token, Google OAuth client, refresh tokens, worker-token hashes)
 ## 6. Test commands
 ```bash
 python -m ruff check .
-NEXUS_SCHEDULER_THREAD=0 python -m pytest -q tests/fast          # 399 passed, 4 skipped at handoff
+NEXUS_SCHEDULER_THREAD=0 python -m pytest -q tests/fast          # 412 passed, 4 skipped at 9ea4a73
 python -m pytest -q tests/e2e/test_studio_browser.py            # real Chromium run of the Studio
 NEXUS_LIVE=1 python -m pytest -q tests/live/test_kaggle_live.py  # needs the Kaggle token in the vault (uses GPU quota)
 python scripts/release_check.py                                 # fresh clone + hygiene + lint + fast suite
@@ -115,3 +115,10 @@ python scripts/release_check.py                                 # fresh clone + 
   way; publishing must stay manual-approval until the owner authorises platform OAuth.
 - **Owner:** publish the OAuth consent screen; choose a host; rotate the Kaggle tokens that were pasted in chat; back up the vault key.
 - Account 3 specifics (payload examples, error shapes, checkpoint rules, capability classes): `docs/ACCOUNT1_HANDOFF_TO_ACCOUNT3.md`.
+
+## Shared-contracts integration: Account 2 action (2026-11-13)
+In the three-account integration at exact heads, A1 `2ac7f96`, A2 `9929512` and A3 `24b3f71` merge cleanly with
+`apply.sh`. The full suite passes when the packages are present (663 passed). With CI's declared dependencies only, 27
+Account 2 tests fail or error because `requirements-ci.txt` lacks `scipy`, `opencv-python-headless` and `onnxruntime`.
+These same missing modules make PR #6's own CI red. Adding the three lines fixes it (verified locally: 62 passed,
+1 skipped). Details: `docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md` §7. Account 1 did not edit Account 2's files.

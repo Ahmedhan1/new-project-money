@@ -3,12 +3,12 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-12T23:15:30Z",
+ "updated": "2026-11-13T08:01:10Z",
  "git": {
   "branch": "work/account-1-cloud-platform",
-  "commit": "d3237bc",
-  "subject": "Studio alerts + GPU quota panels, resolved state alerts clear, disk figure = total-free; Account 3 handoff; acceptance A-K with capability classes",
-  "dirty_files": 1,
+  "commit": "9ea4a73",
+  "subject": "Account 1: control-plane restart regression test; batch_llm + research-host handoff (A3 §7-8); tasks ACC1-BATCH-LLM, ACC1-INTEGRATION; decisions D-11, D-12",
+  "dirty_files": 4,
   "upstream": "origin/work/account-1-cloud-platform",
   "unpushed_commits": 0
  },
@@ -56,11 +56,11 @@
   }
  ],
  "tasks": {
-  "total": 57,
+  "total": 59,
   "by_status": {
-   "verified": 21,
+   "verified": 22,
    "tested": 12,
-   "blocked": 5,
+   "blocked": 6,
    "deferred": 1,
    "planned": 16,
    "in_progress": 2
@@ -69,9 +69,9 @@
  },
  "tests": {
   "fast": {
-   "summary": "399 passed, 0 failed, 4 skipped",
+   "summary": "411 passed, 0 failed, 4 skipped",
    "ok": true,
-   "date": "2026-11-12",
+   "date": "2026-11-13",
    "platform": "Linux",
    "python": "3.13.18"
   }
@@ -108,6 +108,11 @@
    "id": "ACC1-HOSTING",
    "title": "Choose and deploy a permanent free host for the control plane",
    "why": "Owner decision (public deployment needs explicit approval); see docs/ACCOUNT1_PROVIDER_COMPARISON.md."
+  },
+  {
+   "id": "ACC1-INTEGRATION",
+   "title": "Three-account shared-contracts integration (nexus/contracts/{cloud,media}.py + shared __init__)",
+   "why": "Account 2: requirements-ci.txt lacks opencv-python-headless, onnxruntime, scipy (PR #6 CI red on its own head). Owner: merge approval."
   }
  ],
  "backup": {

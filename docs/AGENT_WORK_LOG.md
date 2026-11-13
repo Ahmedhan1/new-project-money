@@ -67,3 +67,11 @@ found and fixed: CI backup-test regression, Studio CSRF/session mismatch, token-
 quota response, unauthenticated legacy routes. Demos C, D (worker loss + control-plane SIGKILL), F, G done for real;
 A done on the dev host; B and the Drive legs of E blocked on the owner's Google OAuth client. Fast suite 392 passed.
 Details: docs/ACCOUNT1_EXECUTION_REPORT.md, docs/ACCOUNT1_ACCEPTANCE_RESULTS.md.
+
+**2026-11-13 — Account 1 final closure (lead, single session).** Refreshed GitHub state: PR #4 b2517b2 green, no reviews;
+PR #5 24b3f71 green; PR #6 9929512 red (Account 2's undeclared CI deps). Added the `batch_llm` worker task (Kaggle-only,
+bounded, checkpointed parts; live on T4 x2 with Qwen2.5-0.5B-Instruct, 8/8), declared Wikidata in the Cost Guard (GDELT
+stays with Account 3), made the cookie/CSRF test deterministic, and added a control-plane-restart regression test. Built
+the three-account integration at exact heads with `apply.sh`: 663 passed with the packages present; with CI deps only,
+27 Account 2 tests fail on scipy/cv2/onnxruntime (fix verified). Clean-clone release check at 9ea4a73: 412 passed,
+4 skipped. Verdict and details: docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md.

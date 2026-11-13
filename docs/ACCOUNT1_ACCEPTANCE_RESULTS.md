@@ -1,4 +1,4 @@
-# Account 1 acceptance results (2026-11-12)
+# Account 1 acceptance results (2026-11-12, updated 2026-11-13)
 
 Classes: **RV** real-verified · **MO** mocks/fake-server only · **P** partial · **BU** blocked by user · **BP** blocked by
 provider · **NI** not implemented. Finalization mission (Parts 1-12), demos A-K.
@@ -15,10 +15,12 @@ provider · **NI** not implemented. Finalization mission (Parts 1-12), demos A-K
 | H. Quota exhaustion → safe pause | **P** / **BP** | Simulated exhaustion pauses safely with reason; GPU jobs wait queued (safe production mode, attempts 0) with no account switching. A real Kaggle quota message has not been seen. | `test_scheduler.py`, `test_cloud_compute.py` |
 | I. Secure link ingestion | **RV** | Authorised https source, redirect re-validated, ffprobe, sha256, provenance; SSRF 34/34 refused; platform pages refused. | `ingest_live.json`, `ingest_ssrf_live.json` |
 | J. Browser-only operation + observability | **RV** (dev host) | Studio: jobs, storage, alerts (storage threshold, quota labelled as estimate), GPU quota bar; alerts clear when resolved. | `tests/e2e/test_studio_browser.py`, `GET /api/v1/alerts` |
+| L. `batch_llm` on the Kaggle GPU (Account 3 request) | **RV** | Qwen2.5-0.5B-Instruct, Tesla T4 x2, 8/8 prompts, 2 checksum-verified parts joined, no endpoint. Job `rjob_877fa89eb0ac`. | `batch_llm_live.json`, `test_cloud_batch_llm.py` |
 | K. CI green on the newest commit | see PR #4 checks | Linux + Windows + windows-e2e; tests never start background workers (`conftest.py`), production startup still does. | GitHub Actions on PR #4 |
 
 ## Tests
-- Fast suite: **399 passed, 4 skipped** (`NEXUS_SCHEDULER_THREAD=0 pytest tests/fast`), ruff clean.
+- Fast suite: **412 passed, 4 skipped** in a clean clone at `9ea4a73` (`scripts/release_check.py`), ruff clean.
+- Three-account integration and the final verdict: `docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md`.
 - Real browser E2E of the Studio: passed. Security recovery checks: 7/7. Secret scan (tracked files): clean.
 - Live Kaggle evidence: probe, transcode, worker-loss resume, control-plane-crash resume, scheduler run.
 
