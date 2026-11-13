@@ -78,6 +78,28 @@ async function dlModel(id,gb){const p=await api(`/api/models/${id}/plan`);
  if(!confirm(`Download ${p.name}: ${p.total_gb} GB.\nWeights licence: ${(p.licence&&p.licence.weights_licence)||"see catalogue"}.\nDo you accept the licence and the download?`))return;
  try{await api(`/api/models/${id}/download`,{accepted_gb:p.total_gb,licence_accepted:true});go("models")}catch(e){alert(e.message)}}
 function poll(el){const t=setInterval(async()=>{if(!document.body.contains(el))return clearInterval(t);el.innerHTML=await jobsBlock()},4000);jobsBlock().then(h=>el.innerHTML=h)}
+// ---- disk + archive panels (Storage page)
+const GB=b=>(b/1073741824).toFixed(2)+" GB";
+async function diskPanel(el){const r=await api("/api/disk");const st=r.status,u=r.usage,c=u.categories,a=r.archive||{};
+ const lab={render_cache:"Render cache (segments, pieces)",media_cache:"Media cache (proxies, thumbnails, generated)",temporary:"Temporary + render work",project_sources:"Project source media",renders:"Final renders + exports",project_other:"Timelines, reports",archive_local:"Archive metadata + thumbnails",assets:"Asset library",models:"Models",benchmarks:"Benchmark media",logs:"Logs",backups:"Backups",database:"Database"};
+ el.innerHTML=`<div class="note" style="border-color:${st.level==="ok"?"var(--ok)":st.level==="warning"?"var(--warn)":"var(--bad)"}"><b>${esc(st.level.toUpperCase())}</b> · ${st.free_gb} GB free on ${esc(u.disk.path)} · ${r.active_renders} render(s) running<br>${st.messages.map(esc).join("<br>")}</div>
+ ${table(Object.entries(c).sort((x,y)=>y[1].bytes-x[1].bytes),[["Category",x=>esc(lab[x[0]]||x[0])],["Size",x=>GB(x[1].bytes)],["Files",x=>x[1].files]])}
+ <p class="lead">Local final videos waiting for (or kept after) archiving: ${GB(a.local_bytes||0)} · archived externally: ${GB(a.archived_bytes||0)}${a.destination&&a.destination.usage&&a.destination.usage.limit?` · destination ${GB(a.destination.usage.used||0)} of ${GB(a.destination.usage.limit)} used`:""}</p>
+ <div class="row"><label>Warn below (GB)<input id="dsw" type="number" value="${st.settings.warn_free_gb}"></label><label>Never go below (GB)<input id="dsm" type="number" value="${st.settings.min_free_gb}"></label><label>Cache quota (GB)<input id="dsc" type="number" value="${st.settings.cache_quota_gb}"></label><label>Asset quota (GB)<input id="dsa" type="number" value="${st.settings.asset_cache_quota_gb}"></label><button class="sec sm" id="dss">Save limits</button></div>
+ <div class="row"><button class="sm" id="dsp">Show what can be cleaned</button></div><div id="dsplan"></div>`;
+ $("#dss").onclick=async()=>{try{await api("/api/disk/settings",{settings:{warn_free_gb:+$("#dsw").value,min_free_gb:+$("#dsm").value,cache_quota_gb:+$("#dsc").value,asset_cache_quota_gb:+$("#dsa").value}});diskPanel(el)}catch(e){alert(e.message)}};
+ $("#dsp").onclick=async()=>{const p=await api("/api/disk/cleanup",{});$("#dsplan").innerHTML=`<p class="lead">${p.items.length} file(s), ${GB(p.bytes)} can be removed safely. Never touched: source media, final videos without a verified archive copy, files any timeline uses, active renders, models, backups, secrets. ${p.protected_skipped_count} protected file(s) were skipped.</p>
+  ${table(Object.entries(p.by_rule),[["Rule",x=>esc(x[0])],["Size",x=>GB(x[1])]])}${table(p.items.slice(0,40),[["File",x=>esc(x.path.split(/[\\/]/).slice(-2).join("/"))],["Why",x=>esc(x.reason)],["Size",x=>(x.bytes/1048576).toFixed(1)+" MB"]])}
+  ${p.items.length?`<button class="sm" id="dsx">Delete exactly these ${p.items.length} files</button>`:""}`;
+  const x=$("#dsx");if(x)x.onclick=async()=>{try{const r=await api("/api/disk/cleanup",{plan_id:p.plan_id});alert(`Deleted ${r.deleted} files, freed ${GB(r.freed_bytes)}`+(r.errors.length?`; ${r.errors.length} refused`:""));diskPanel(el)}catch(e){alert(e.message)}}}}
+async function archivePanel(el,pid){const r=await api("/api/archive"+(pid?`?project=${pid}`:""));const d=r.summary.destination||{};
+ el.innerHTML=`<p class="lead">Destination: ${d.name?esc(d.detail):`<b>none</b> - ${esc(d.detail||"")}`}. Final videos are uploaded through the storage layer, verified by checksum, and only then removed from this disk. Archived videos are never deleted automatically.</p>
+ ${table(r.deliverables,[["",x=>x.thumbnail?`<img src="/api/archive/thumb/${x.id}" style="width:96px;border-radius:3px">`:""],["Video",x=>esc(x.name)+`<br><small style="color:var(--mute)">${esc(x.project_id||"")}</small>`],["State",x=>statusTag(x.state)+(x.error?`<div style="color:var(--bad);font-size:12px">${esc(x.error)}</div>`:"")],
+  ["Size",x=>(x.size/1048576).toFixed(1)+" MB"],["Checked by",x=>esc((x.verification||{}).method||"-")],["Where",x=>esc(x.remote?(x.remote.connection_id+": "+(x.remote.path||x.remote.ref)):"-")],["Local copy",x=>x.local_exists?"yes":"no"],
+  ["",x=>x.remote&&!x.local_exists?`<button class="sec sm" data-ret="${x.id}">Download back</button>`:""]])}
+ <div class="row"><button class="sec sm" id="arr">Retry pending uploads</button></div><div id="arjobs"></div>`;
+ el.querySelectorAll("[data-ret]").forEach(b=>b.onclick=async()=>{await api("/api/archive/retrieve",{record:b.dataset.ret});poll($("#arjobs"))});
+ $("#arr").onclick=async()=>{await api("/api/archive/retry",{});poll($("#arjobs"))}}
 const PAGES={
 async home(m){const C=[["creator","Create a video from an idea","Research, script, licensed visuals, narration, music, captions."],["series","Create a cinematic film plan","Logline, characters, scenes and a shot list."],
  ["series","Create an episodic series","Series bible, season plan, continuity-checked episodes."],["creator","Create a documentary","Source-cited narration over licensed archive images."],
@@ -435,28 +457,6 @@ async discovery(m){const c=await api("/api/catalog");const cls=[...new Set(c.map
 async settings(m){m.innerHTML=`<h2 class="page">Settings</h2><div class="row"><label>User mode<select id="mode"><option value="beginner">Beginner: guided, automatic</option><option value="creator">Creator: creative settings</option><option value="professional">Professional: full detail</option></select></label></div>
  <p class="lead">Beginner hides transcripts, research notes and technical detail. Stored in this browser only.</p>`;$("#mode").value=mode;$("#mode").onchange=e=>{mode=e.target.value;localStorage.setItem("nexus-mode",mode)}}
 };
-// ---- disk + archive panels (Storage page)
-const GB=b=>(b/1073741824).toFixed(2)+" GB";
-async function diskPanel(el){const r=await api("/api/disk");const st=r.status,u=r.usage,c=u.categories,a=r.archive||{};
- const lab={render_cache:"Render cache (segments, pieces)",media_cache:"Media cache (proxies, thumbnails, generated)",temporary:"Temporary + render work",project_sources:"Project source media",renders:"Final renders + exports",project_other:"Timelines, reports",archive_local:"Archive metadata + thumbnails",assets:"Asset library",models:"Models",benchmarks:"Benchmark media",logs:"Logs",backups:"Backups",database:"Database"};
- el.innerHTML=`<div class="note" style="border-color:${st.level==="ok"?"var(--ok)":st.level==="warning"?"var(--warn)":"var(--bad)"}"><b>${esc(st.level.toUpperCase())}</b> · ${st.free_gb} GB free on ${esc(u.disk.path)} · ${r.active_renders} render(s) running<br>${st.messages.map(esc).join("<br>")}</div>
- ${table(Object.entries(c).sort((x,y)=>y[1].bytes-x[1].bytes),[["Category",x=>esc(lab[x[0]]||x[0])],["Size",x=>GB(x[1].bytes)],["Files",x=>x[1].files]])}
- <p class="lead">Local final videos waiting for (or kept after) archiving: ${GB(a.local_bytes||0)} · archived externally: ${GB(a.archived_bytes||0)}${a.destination&&a.destination.usage&&a.destination.usage.limit?` · destination ${GB(a.destination.usage.used||0)} of ${GB(a.destination.usage.limit)} used`:""}</p>
- <div class="row"><label>Warn below (GB)<input id="dsw" type="number" value="${st.settings.warn_free_gb}"></label><label>Never go below (GB)<input id="dsm" type="number" value="${st.settings.min_free_gb}"></label><label>Cache quota (GB)<input id="dsc" type="number" value="${st.settings.cache_quota_gb}"></label><label>Asset quota (GB)<input id="dsa" type="number" value="${st.settings.asset_cache_quota_gb}"></label><button class="sec sm" id="dss">Save limits</button></div>
- <div class="row"><button class="sm" id="dsp">Show what can be cleaned</button></div><div id="dsplan"></div>`;
- $("#dss").onclick=async()=>{try{await api("/api/disk/settings",{settings:{warn_free_gb:+$("#dsw").value,min_free_gb:+$("#dsm").value,cache_quota_gb:+$("#dsc").value,asset_cache_quota_gb:+$("#dsa").value}});diskPanel(el)}catch(e){alert(e.message)}};
- $("#dsp").onclick=async()=>{const p=await api("/api/disk/cleanup",{});$("#dsplan").innerHTML=`<p class="lead">${p.items.length} file(s), ${GB(p.bytes)} can be removed safely. Never touched: source media, final videos without a verified archive copy, files any timeline uses, active renders, models, backups, secrets. ${p.protected_skipped_count} protected file(s) were skipped.</p>
-  ${table(Object.entries(p.by_rule),[["Rule",x=>esc(x[0])],["Size",x=>GB(x[1])]])}${table(p.items.slice(0,40),[["File",x=>esc(x.path.split(/[\\/]/).slice(-2).join("/"))],["Why",x=>esc(x.reason)],["Size",x=>(x.bytes/1048576).toFixed(1)+" MB"]])}
-  ${p.items.length?`<button class="sm" id="dsx">Delete exactly these ${p.items.length} files</button>`:""}`;
-  const x=$("#dsx");if(x)x.onclick=async()=>{try{const r=await api("/api/disk/cleanup",{plan_id:p.plan_id});alert(`Deleted ${r.deleted} files, freed ${GB(r.freed_bytes)}`+(r.errors.length?`; ${r.errors.length} refused`:""));diskPanel(el)}catch(e){alert(e.message)}}}}
-async function archivePanel(el,pid){const r=await api("/api/archive"+(pid?`?project=${pid}`:""));const d=r.summary.destination||{};
- el.innerHTML=`<p class="lead">Destination: ${d.name?esc(d.detail):`<b>none</b> - ${esc(d.detail||"")}`}. Final videos are uploaded through the storage layer, verified by checksum, and only then removed from this disk. Archived videos are never deleted automatically.</p>
- ${table(r.deliverables,[["",x=>x.thumbnail?`<img src="/api/archive/thumb/${x.id}" style="width:96px;border-radius:3px">`:""],["Video",x=>esc(x.name)+`<br><small style="color:var(--mute)">${esc(x.project_id||"")}</small>`],["State",x=>statusTag(x.state)+(x.error?`<div style="color:var(--bad);font-size:12px">${esc(x.error)}</div>`:"")],
-  ["Size",x=>(x.size/1048576).toFixed(1)+" MB"],["Checked by",x=>esc((x.verification||{}).method||"-")],["Where",x=>esc(x.remote?(x.remote.connection_id+": "+(x.remote.path||x.remote.ref)):"-")],["Local copy",x=>x.local_exists?"yes":"no"],
-  ["",x=>x.remote&&!x.local_exists?`<button class="sec sm" data-ret="${x.id}">Download back</button>`:""]])}
- <div class="row"><button class="sec sm" id="arr">Retry pending uploads</button></div><div id="arjobs"></div>`;
- el.querySelectorAll("[data-ret]").forEach(b=>b.onclick=async()=>{await api("/api/archive/retrieve",{record:b.dataset.ret});poll($("#arjobs"))});
- $("#arr").onclick=async()=>{await api("/api/archive/retry",{});poll($("#arjobs"))}}
 go("home");
 </script>
 </body>
