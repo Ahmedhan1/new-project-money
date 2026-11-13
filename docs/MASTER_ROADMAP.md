@@ -154,3 +154,10 @@ for fragments.
    opacity keyframes; tracked masks (face blur) using `faces.follow_keyframes`.
 6. **Real video generation** once a GPU is available: Wan 2.1 1.3B T2V first (Apache-2.0, ~8 GB VRAM), then Wan 2.2 5B
    TI2V for animating licensed stills; provenance kind `generated` only for those clips.
+
+## 10. Account 2 (cinematic engine) status - 2026-11-13
+All four Account 2 workstreams are merged on `work/account-2-cinematic-engine` (PR #6, not in `main`). Demos 1-5 exist
+with evidence in `docs/results/a2_demos/`; audit in `docs/ACCOUNT2_FINAL_RELEASE_AUDIT.md`. Remaining items are owner
+actions (listening, creative review, Windows PC, GPU authorisation) and cross-account fixes owned by Accounts 1 and 3.
+Recommended merge order: Account 1 -> Account 2 -> Account 3, then `integration/contracts_v1/apply.sh`.
+

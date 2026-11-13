@@ -3,14 +3,14 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-12T14:28:46Z",
+ "updated": "2026-11-13T09:21:57Z",
  "git": {
-  "branch": "claude/hopeful-allen-luubcy",
-  "commit": "c69fc56",
-  "subject": "Final report: tests section; release check PASS on 9e9b527",
-  "dirty_files": 0,
-  "upstream": "origin/claude/hopeful-allen-luubcy",
-  "unpushed_commits": 1
+  "branch": "work/account-2-cinematic-engine",
+  "commit": "f697355",
+  "subject": "Windows: atomic publish of render cache files retries a refused rename and accepts an existing content-addressed copy (intermittent WinError 5 when two workers produce the same segment, CI run 43394820291); clean-clone Linux end-to-end evidence (fresh clone + fresh venv from requirements-ci.txt + empty non-ASCII NEXUS_HOME: 13/13 steps incl. split/undo/redo, draft, final render, verified export)",
+  "dirty_files": 7,
+  "upstream": "origin/work/account-2-cinematic-engine",
+  "unpushed_commits": 0
  },
  "current_task": {
   "id": "QLT-1",
@@ -27,59 +27,59 @@
    "next": "1) Series visuals - derive the image query from the bible's location LOOK text (generic nouns), not its fictional name, and allow reuse of an image for a repeated location. 2) Repair off-bible locations instead of only reporting them. 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Scored rubric in the QA report."
   },
   {
-   "id": "AUD-1",
+   "id": "A2-0",
    "priority": 1,
-   "title": "Voice mastering chain, ambience/SFX helpers, scene-to-scene continuity QA (level, colour, brightness jumps)",
+   "title": "Account 2 integration contract (schemas + validator) and licensed benchmark media set",
    "status": "tested",
-   "next": "A properly licensed Arabic voice is still missing (LANG-1)."
+   "next": "Account 1 to confirm RenderExecutionRequest/Result against its worker interface."
   },
   {
-   "id": "FX-1",
+   "id": "A2-A",
    "priority": 1,
-   "title": "Effects, transition library, animated word captions, procedural SFX in the renderer",
+   "title": "Agent A: multi-track timeline, opacity keyframes, tracked masks, resumable render, EDL/OTIO, renderer benchmark + perf port",
    "status": "tested",
-   "next": "Wire the remaining builders (chroma key, masks, split screen, freeze frames, credits roll, audio-reactive overlay) and real J/L-cut audio overlaps - task FX-2."
+   "next": "Owner review of Demo 3; renderer on the owner's Windows PC."
   },
   {
-   "id": "GRW-1",
+   "id": "A2-B",
    "priority": 1,
-   "title": "Growth: shorts extractor, retention rubric + auto retention pass, hook/title variants, reference-video style profile",
+   "title": "Agent B: visual embeddings, semantic B-roll, 14 creative profiles, reference-style profiles, director coherence, shorts titles",
    "status": "tested",
-   "next": "Extended by GRW-2."
+   "next": "Better titles (K-23); OCR-class text detection (K-25)."
   },
   {
-   "id": "MED-1",
+   "id": "A2-C",
    "priority": 1,
-   "title": "Media engine: encoder detection, H.264/H.265/AV1 presets, size-targeted export, proxies, export verification, benchmark",
+   "title": "Agent C: audio benchmark, noise-reduction comparison, dialogue chain v2, sound-design engine, audio QA (sync)",
    "status": "tested",
-   "next": "Use export.export() for final deliverables in the deliver job (max file size per platform); benchmark on the owner's machine."
+   "next": "A2-AUDIO-REVIEW (owner listening)."
   }
  ],
  "tasks": {
-  "total": 52,
+  "total": 60,
   "by_status": {
    "verified": 17,
-   "tested": 12,
-   "blocked": 4,
+   "tested": 19,
+   "blocked": 6,
    "deferred": 1,
-   "planned": 16,
+   "planned": 15,
    "in_progress": 2
   },
   "registry": "nexus/registry/tasks.yaml"
  },
  "tests": {
   "fast": {
-   "summary": "209 passed, 0 failed, 4 skipped",
+   "summary": "346 passed, 0 failed, 6 skipped",
    "ok": true,
-   "date": "2026-11-12",
+   "date": "2026-11-13",
    "platform": "Linux",
    "python": "3.13.18"
   }
  },
  "jobs": {
   "counts": {
-   "cancelled": 3,
-   "done": 29
+   "done": 5,
+   "failed": 1
   },
   "active": []
  },
@@ -103,11 +103,21 @@
    "id": "ANA-1",
    "title": "Analytics + monetisation intelligence from real platform data",
    "why": "Same OAuth authorisation as PUB-1. The revenue ledger exists but holds only manual entries."
+  },
+  {
+   "id": "A2-GPU",
+   "title": "Run Wan 2.1 T2V-1.3B once on an authorised GPU worker (Account 1 task a2_wan_video) and classify the result",
+   "why": "Blocked by owner: authorise a free GPU worker (Kaggle/Colab/own GPU). No paid compute."
+  },
+  {
+   "id": "A2-AUDIO-REVIEW",
+   "title": "Owner listens to the audio reviewer package and records a verdict per item",
+   "why": "Blocked by owner (a person must listen)."
   }
  ],
  "backup": {
   "last": {
-   "ts": 1794471742.665457,
+   "ts": 1794502273.5449338,
    "ok": true,
    "copies": 1,
    "warning": null,
@@ -115,7 +125,7 @@
     {
      "name": "local",
      "ok": true,
-     "snapshot": "20261112-082221-a033"
+     "snapshot": "20261112-165113-8779"
     }
    ]
   },
@@ -123,13 +133,20 @@
  },
  "environment": {
   "models_installed": [
+   "llm-qwen3-4b",
    "mt-madlad400-3b",
+   "voice:ar_JO-kareem-medium",
    "voice:de_DE-thorsten-medium",
    "voice:en_US-joe-medium",
+   "voice:en_US-ljspeech-medium",
    "voice:es_ES-davefx-medium",
    "voice:fr_FR-siwis-medium",
+   "voice:it_IT-serena-medium",
+   "voice:nl_NL-alex-medium",
+   "voice:pl_PL-darkman-medium",
+   "voice:pt_BR-cadu-medium",
    "voice:ru_RU-denis-medium",
-   "voice:zh_CN-chaowen-medium",
+   "voice:uk_UA-ukrainian_tts-medium",
    "whisper-small"
   ],
   "data_home": "NEXUS_HOME (default: ./.nexus, never committed)"

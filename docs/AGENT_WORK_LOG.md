@@ -2,6 +2,23 @@
 
 Newest session first. Facts only: what was verified, what was changed, what is open.
 
+## Account 2 finalization — 2026-11-13 — cinematic engine (branch work/account-2-cinematic-engine, PR #6)
+
+- **Start**: `9929512`; A, C, D merged earlier; B still running; CI #137-#141 red (SciPy missing at collection).
+- **CI**: declared SciPy, onnxruntime, opencv-python-headless (runtime imports); this exposed Windows-only bugs, fixed:
+  file-URI -> path (`contracts.media.local_path`), LUT test file names, refused cache renames (`ff.publish`).
+- **Agent B** final head `f7c21a6` merged (`c9719dd`); integrator wired API (profiles fields, overrides, reference
+  profiles, visual install, `broll_subject`), workflow (local-library B-roll), workspace controls; siglip-visual in the
+  manifest; LAION CLIP restricted to benchmarks.
+- **Demos**: 1 documentary 228 s (three runs rejected on inspection; fixes: long-form source, subject gate, full-frame
+  director cutaways, no title-card cutaways), 2 eight shorts, 4 reference style with 22-metric comparison; 3 and 5 earlier.
+- **Cross-account**: shared contracts layout adopted (`nexus/contracts/media.py`); Account 1 worker tasks
+  `a2_render_steps` / `a2_wan_video` via Account 1's extension points; local three-account merge 687 passed
+  (Account 1 cookie test fails on its own branch too); Account 3 publishing gaps documented (K-26).
+- **Validation**: fast suite 346 passed / 6 skipped; clean clone + fresh venv + empty non-ASCII home: 13/13 E2E steps;
+  Playwright drive of the director controls.
+- **Open**: owner listening (A2-AUDIO-REVIEW), GPU run (A2-GPU), owner's Windows PC (K-1), creative review of demos.
+
 ## Session 4 — 2026-11-12 — takeover and parallel build
 
 - **Branch** `claude/hopeful-allen-luubcy`, started from `main` @ `ec5af11`, fast-forwarded to `42f02b5`

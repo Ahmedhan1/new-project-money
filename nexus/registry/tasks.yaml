@@ -431,11 +431,11 @@ tasks:
   - id: FX-3
     priority: 2
     title: "Multi-track timeline model, opacity keyframes, tracked masks (face blur) on faces.follow_keyframes"
-    status: planned
+    status: tested
     deps: [FX-2]
     acceptance: "A two-video-track composite and a moving face blur render and pass pixel tests."
     test: "pytest tests/fast/test_fx.py"
-    next: "LUT management and face-following crops are done (a06d3e4); masks are static rectangles today."
+    next: "Done by Account 2 / Agent A (nexus/timeline/tracks.py, mask keyframes, vfx tracked masks; tests/fast/test_a2_*.py, Demo 3)."
   # ------------------------------------------------------------------ Account 2: cinematic engine (docs/ACCOUNT2_*.md)
   - id: A2-0
     priority: 1
@@ -448,37 +448,55 @@ tasks:
   - id: A2-A
     priority: 1
     title: "Agent A: multi-track timeline, opacity keyframes, tracked masks, resumable render, EDL/OTIO, renderer benchmark + perf port"
-    status: in_progress
+    status: tested
     acceptance: "Pixel/frame tests for every capability; docs/results/a2_render_bench.json before/after on real media."
     test: "pytest tests/fast -k a2_"
-    next: "Delegated (branch work/account-2-agent-a-renderer)."
+    evidence: "merged 26fa1c1; render bench (one-clip edit 35 s -> ~4 s, caption edit 34 s -> ~2 s, warm 0.4 s); A/V drift fix 93f851b; Demo 3; Windows cache publish fix f697355"
+    next: "Owner review of Demo 3; renderer on the owner's Windows PC."
   - id: A2-B
     priority: 1
     title: "Agent B: visual embeddings, semantic B-roll, 14 creative profiles, reference-style profiles, director coherence, shorts titles"
-    status: in_progress
+    status: tested
     acceptance: "B-roll precision measured on a labelled set; director plans on 6 media types; 5-10 distinct shorts with complete openings/endings."
-    test: "pytest tests/fast -k b2_"
-    next: "Delegated (branch work/account-2-agent-b-director)."
+    test: "pytest tests/fast -k 'b2_ or director_api or reference_colour or broll'"
+    evidence: "merged c9719dd (head f7c21a6); B-roll strict precision 28% -> 56% (18 inserts), recall 18% -> 36% (28 opportunities); Demo 1 subject gate 8/15 -> 12/12 on-topic; Demo 2 (8 shorts); Demo 4; browser drive docs/results/a2_demos/ui_director_check.json"
+    next: "Better titles (K-23); OCR-class text detection (K-25)."
   - id: A2-C
     priority: 1
     title: "Agent C: audio benchmark, noise-reduction comparison, dialogue chain v2, sound-design engine, audio QA (sync)"
-    status: in_progress
+    status: tested
     acceptance: "Before/after measurements on 5 real sources; sync offset measured; human listening still required."
     test: "pytest tests/fast -k c2_"
-    next: "Delegated (branch work/account-2-agent-c-audio)."
+    evidence: "merged e8658c1 + 0a7110c; docs/results/a2_audio_acceptance.json (all to -16 LUFS +-0.1, TP <= -1.9 dBTP); real-render pan/duck test; listening sheet docs/results/a2_audio_review/REVIEW.md"
+    next: "A2-AUDIO-REVIEW (owner listening)."
   - id: A2-D
     priority: 1
     title: "Agent D: tool/model catalogue, generation architecture + remote adapter, CPU image-gen benchmark, enhancement + VFX processors"
-    status: in_progress
+    status: tested
     acceptance: "Every generation capability classified (works here / GPU-ready unverified / not feasible) with measured numbers."
     test: "pytest tests/fast -k d2_"
-    next: "Delegated (branch work/account-2-agent-d-generation)."
+    evidence: "merged (2023ff6); BK-SDM-Tiny ~30 s/image on CPU; Wan jobs deferred RESOURCE_EXHAUSTED (Demo 5); classifier guard; Windows file-URI fix a52a24a"
+    next: "A2-GPU."
+  - id: A2-GPU
+    priority: 2
+    title: "Run Wan 2.1 T2V-1.3B once on an authorised GPU worker (Account 1 task a2_wan_video) and classify the result"
+    status: blocked
+    acceptance: "A real model output on a named GPU, classified generated-video by the guard, with WorkerExecutionResult metrics."
+    test: "Account 1 dispatcher with an authorised GPU provider; scripts/gpu_video_bench.py"
+    next: "Blocked by owner: authorise a free GPU worker (Kaggle/Colab/own GPU). No paid compute."
+  - id: A2-AUDIO-REVIEW
+    priority: 2
+    title: "Owner listens to the audio reviewer package and records a verdict per item"
+    status: blocked
+    acceptance: "docs/results/a2_audio_review/review.json human_review filled for every item."
+    test: "python scripts/acceptance/audio_review_package.py; listen; fill REVIEW.md"
+    next: "Blocked by owner (a person must listen)."
   - id: A2-INT
     priority: 1
     title: "Account 2 integration: merge agent branches, editor workspace controls, demos 1-5, clean-clone tests, execution report, handoff to Account 3"
-    status: in_progress
+    status: tested
     deps: [A2-A, A2-B, A2-C, A2-D]
     acceptance: "All Account 2 docs exist; demos rendered and inspected; clean clone fast suite green; PR open for review (not merged)."
-    test: "pytest tests/fast; clean-clone run"
-    next: "Wait for agent reports; integrate in order A, C, B, D."
-
+    test: "pytest tests/fast; scripts/acceptance/windows_e2e.py on a clean clone; three-account local merge"
+    evidence: "docs/ACCOUNT2_FINAL_RELEASE_AUDIT.md; demos 1-5 in docs/results/a2_demos; docs/results/a2_clean_clone_e2e.json; docs/results/a2_three_account_check.json; PR #6"
+    next: "Owner review of PR #6 and the demos; merge order A1 -> A2 -> A3 + integration/contracts_v1/apply.sh."
