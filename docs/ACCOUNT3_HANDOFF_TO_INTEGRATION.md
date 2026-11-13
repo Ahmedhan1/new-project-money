@@ -97,7 +97,7 @@ This supersedes request 1 in the table above (no module is renamed; both import 
 
 ### Integration evidence
 `integration/contracts_v1/RESULT.md` records the exact SHAs, each conflict resolution and the results of every run.
-- Run r3 (A1 `919f158`, A2 `d979df1`, final A3 code): see RESULT.md for the exact counts. It includes the batch_llm
+- Run r3 (A1 `919f158`, A2 `d979df1`, A3 `f1835b5`): full fast suite 850 passed, 8 skipped, 0 failed; `apply.sh` 42 passed. It includes the batch_llm
   dispatcher round trip, the QualityReport → publishing handoff with Account 2's validator, and the disclosure gates.
 - Run r2 (earlier heads): full fast suite 746 passed, 8 skipped, 0 failed; `apply.sh` focused tests 41 passed.
 - Run r1 (earlier heads): full suite 538 passed, 3 skipped, 3 failed; focused tests 53 passed.

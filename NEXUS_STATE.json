@@ -3,12 +3,12 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-12T23:46:31Z",
+ "updated": "2026-11-13T10:33:08Z",
  "git": {
   "branch": "work/account-3-intelligence-growth",
-  "commit": "41ce12b",
-  "subject": "Docs: execution report V2 and final feature matrix",
-  "dirty_files": 1,
+  "commit": "211b97f",
+  "subject": "Analytics: a time zone this machine cannot resolve (Windows without tzdata) leaves publish times unconverted instead of raising",
+  "dirty_files": 2,
   "upstream": "origin/work/account-3-intelligence-growth",
   "unpushed_commits": 0
  },
@@ -27,11 +27,18 @@
    "next": "1) Series visuals - derive the image query from the bible's location LOOK text (generic nouns), not its fictional name, and allow reuse of an image for a repeated location. 2) Repair off-bible locations instead of only reporting them. 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Scored rubric in the QA report."
   },
   {
+   "id": "A3-BATCH",
+   "priority": 1,
+   "title": "Account 1 batch_llm manifests: one job per model, prompts inline, old shape refused (D-17)",
+   "status": "tested",
+   "next": "A real-model batch_llm run with the V3 items on the Kaggle worker (owner/Account 1 operation; Kaggle config unchanged)."
+  },
+  {
    "id": "A3-HANDOFF",
    "priority": 1,
    "title": "Strategy Handoff to Account 2 (EditorialPlan + RenderJobManifest), approved script used verbatim; shared contracts package",
    "status": "tested",
-   "next": "Owner approves the merge order; Account 1 fixes two of its own tests (RESULT.md)."
+   "next": "Pending integration: the owner approves the merge order (A3-INT). Both Account 1 test findings from run r1 are fixed on Account 1's branch (633cc8b, 2ac7f96)."
   },
   {
    "id": "A3-QGATES",
@@ -41,26 +48,19 @@
    "next": "Optional SigLIP image classification on the owner's PC (local only, never downloaded during a render)."
   },
   {
-   "id": "AUD-1",
+   "id": "A3-RELEASE",
    "priority": 1,
-   "title": "Voice mastering chain, ambience/SFX helpers, scene-to-scene continuity QA (level, colour, brightness jumps)",
+   "title": "Release gate: QualityReport, AI-content disclosure and per-output language review decide upload / public (D-18)",
    "status": "tested",
-   "next": "A properly licensed Arabic voice is still missing (LANG-1)."
-  },
-  {
-   "id": "FX-1",
-   "priority": 1,
-   "title": "Effects, transition library, animated word captions, procedural SFX in the renderer",
-   "status": "tested",
-   "next": "Wire the remaining builders (chroma key, masks, split screen, freeze frames, credits roll, audio-reactive overlay) and real J/L-cut audio overlaps - task FX-2."
+   "next": "Owner: OAuth client + one private upload with owner_validation (docs/ACCOUNT3_YOUTUBE_OWNER_VALIDATION.md)."
   }
  ],
  "tasks": {
-  "total": 67,
+  "total": 75,
   "by_status": {
    "verified": 18,
-   "tested": 25,
-   "blocked": 4,
+   "tested": 30,
+   "blocked": 7,
    "deferred": 1,
    "planned": 15,
    "in_progress": 2,
@@ -70,9 +70,9 @@
  },
  "tests": {
   "fast": {
-   "summary": "365 passed, 0 failed, 3 skipped",
+   "summary": "499 passed, 0 failed, 6 skipped",
    "ok": true,
-   "date": "2026-11-12",
+   "date": "2026-11-13",
    "platform": "Linux",
    "python": "3.13.18"
   }
@@ -101,6 +101,21 @@
    "id": "ANA-1",
    "title": "Analytics + monetisation intelligence from real platform data",
    "why": "No owner analytics in this environment. CSV import (YouTube Studio/TikTok/Instagram/Facebook) and YouTube Analytics API import are built; growth statistics ran only on a public CC BY 4.0 dataset."
+  },
+  {
+   "id": "A3-INT",
+   "title": "Three-account integration (A1 -> A2 -> A3, then integration/contracts_v1/apply.sh)",
+   "why": "Owner approval of the merge order and of merging into main. Agents never merge."
+  },
+  {
+   "id": "A3-NATIVE",
+   "title": "Native-language review of ar-EG, ar-Gulf, hi and zh lines",
+   "why": "The owner must supply native reviewers; agents may not mark machine output as reviewed."
+  },
+  {
+   "id": "A3-COMPETITION",
+   "title": "Competition and saturation signals in market research (YouTube supply)",
+   "why": "Needs the owner's YouTube Data API key (free quota)."
   }
  ],
  "backup": {

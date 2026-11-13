@@ -47,7 +47,10 @@ Cross-account checks on the merged tree (132 passed in one focused run, separate
 - **Renderer dispatch:** covered by Account 2's `test_a2_cross_account.py`. It submits Account 2 render tasks through
   Account 1's dispatcher; Account 2 owns that path.
 
-Full fast suite (`python -m pytest tests/fast -rs`): __R3_FULL__.
+Full fast suite (`python -m pytest tests/fast -rs`) on `402b15e`: **850 passed, 8 skipped, 0 failed** (362 s).
+Skips are optional assets not installed here: opentimelineio (1), local TTS/Piper voices (4), SigLIP ONNX files (3).
+Later A3 commit `211b97f` changes one analytics function (an unresolvable time zone gives `None`; it was a Windows CI
+failure). It is covered by the A3 branch's own tests.
 
 Not run on the merged tree: Windows, the clean-machine e2e, and real renders. CI runs those only after the owner
 approves and pushes the merge. The Account 3 branch's own CI (Linux, Windows, Windows clean-machine e2e) is linked from
