@@ -3,12 +3,12 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-13T11:19:55Z",
+ "updated": "2026-11-13T11:24:39Z",
  "git": {
   "branch": "tmp/base-merge-check",
-  "commit": "62414bf",
-  "subject": "Account 3 final closure: batch_llm manifests fixed and dispatcher-tested (D-17); release gate with Account 2 QualityReport, AI disclosure and same-variety language review (D-18); analytics data origin and reconciliation (D-19); owner private YouTube validation path; Bench V3 complete (8 models x 184 items, qwen3-4b invalid); integration r3 on A1 919f158 / A2 d979df1 / A3 f1835b5: 850 passed, 8 skipped, 0 failed. Owner: OAuth client, YouTube key, native reviewers, merge approval; Actions jobs not starting (account-level).",
-  "dirty_files": 120,
+  "commit": "5034c8d",
+  "subject": "Merge PR base claude/hopeful-allen-luubcy (Account 1 f9d8f11 via PR #4) into Account 3",
+  "dirty_files": 1,
   "upstream": null,
   "unpushed_commits": null
  },
@@ -70,7 +70,7 @@
  },
  "tests": {
   "fast": {
-   "summary": "677 passed, 1 failed, 5 skipped",
+   "summary": "721 passed, 1 failed, 5 skipped",
    "ok": false,
    "date": "2026-11-13",
    "platform": "Linux",
