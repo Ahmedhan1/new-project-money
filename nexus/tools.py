@@ -4,6 +4,7 @@ from __future__ import annotations
 import csv
 import importlib
 import importlib.metadata
+import shutil
 import subprocess
 import time
 
@@ -20,6 +21,12 @@ def health() -> list[dict]:
                "weights_license": c.get("weights_license"), "source_url": c["source_url"], "install": c.get("install"),
                "capability": c.get("capability", []), "version": None, "healthy": None, "cost_usd": c["monetary_cost_usd"]}
         try:
+            need = [b for b in c.get("requires_bin") or [] if not shutil.which(b)]
+            if need:  # QA-D9: a component that needs a missing binary is not healthy, whatever its Python side says
+                row["healthy"] = False
+                row["version"] = f"unavailable: needs {', '.join(need)}"
+                out.append(row)
+                continue
             if c.get("version_cmd"):
                 r = subprocess.run(c["version_cmd"], capture_output=True, text=True, timeout=30)
                 row["version"] = (r.stdout or r.stderr).strip().splitlines()[0][:80]

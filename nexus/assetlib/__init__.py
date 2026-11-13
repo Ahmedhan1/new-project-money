@@ -11,11 +11,13 @@ templates, motion presets, fonts, sound effects, ambiences and music beds.
 """
 from __future__ import annotations
 
+import copy
 import fnmatch
 import hashlib
 import json
 import os
 import shutil
+import threading
 import time
 import urllib.request
 import zipfile
@@ -96,8 +98,30 @@ def sha256_file(p: str | Path) -> str:
 
 
 # ------------------------------------------------------------------ catalog
+_REG_LOCK = threading.Lock()
+_REG_CACHE: dict = {}
+_YAML_LOADER = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
+
+
 def _registry() -> dict:
-    return yaml.safe_load((config.REGISTRY_DIR / "asset_library.yaml").read_text(encoding="utf-8"))
+    """Parsed registry/asset_library.yaml, cached per file version (QA-D3: it was re-parsed for every asset, 17.7 s per
+    /api/library). The cache key is (path, mtime_ns, size, sha256 of the bytes), so an edit is always picked up; each
+    caller gets its own deep copy, so a caller that mutates the result cannot corrupt the cache. Thread-safe."""
+    f = config.REGISTRY_DIR / "asset_library.yaml"
+    st = f.stat()
+    meta = (str(f), st.st_mtime_ns, st.st_size)
+    with _REG_LOCK:
+        hit = _REG_CACHE.get("entry")
+        if hit is None or hit[0] != meta:
+            raw = f.read_bytes()
+            digest = hashlib.sha256(raw).hexdigest()
+            if hit is None or hit[1] != digest:
+                hit = (meta, digest, yaml.load(raw.decode("utf-8"), Loader=_YAML_LOADER))
+            else:
+                hit = (meta, digest, hit[2])
+            _REG_CACHE["entry"] = hit
+        data = hit[2]
+    return copy.deepcopy(data)
 
 
 TRANSITION_GROUPS = [  # (category label, predicate) - first match wins; every transition gets one

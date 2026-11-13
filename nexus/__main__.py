@@ -300,7 +300,17 @@ def main() -> None:
     from . import cli_a2  # Account 2 tools: disk, library, archive
     cli_a2.add_parsers(sub)
     a = ap.parse_args()
+    try:
+        _dispatch(a)
+    except Exception as e:  # QA-D2: a damaged database is a plain message with the recovery command, not a traceback
+        from .db import DatabaseDamaged
+        if isinstance(e, DatabaseDamaged):
+            print(f"NEXUS cannot open its database.\n{e}", file=sys.stderr)
+            sys.exit(3)
+        raise
 
+
+def _dispatch(a):
     if a.cmd == "serve":
         import uvicorn
         from . import config

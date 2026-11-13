@@ -11,7 +11,7 @@
 # tiled_decode drops first_chunk and unpatchify for the Wan 2.2 VAE and crashes). NaN/Inf, black or flat output is a
 # failure and is never exported. No silent fallback to the 1.3B model.
 
-_WAN_REPOS = {"wan21-t2v-1.3b": ("Wan-AI/Wan2.1-T2V-1.3B-Diffusers", None),
+_WAN_REPOS = {"wan21-t2v-1.3b": ("Wan-AI/Wan2.1-T2V-1.3B-Diffusers", "0fad780a534b6463e45facd96134c9f345acfa5b"),
               "wan22-ti2v-5b": ("Wan-AI/Wan2.2-TI2V-5B-Diffusers", "b8fff7315c768468a5333511427288870b2e9635")}
 _WAN_DIFFUSERS = "0.35.2"   # first stable line with WanPipeline expand_timesteps (TI2V); pinned for reproducibility
 _WAN_NEG = ("blurry, low quality, worst quality, jpeg artifacts, static, still image, frozen frame, distorted, deformed, "

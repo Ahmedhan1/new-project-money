@@ -22,6 +22,7 @@ import threading
 import time
 import traceback
 from contextlib import contextmanager
+from pathlib import Path
 from typing import Any, Callable
 
 from . import config, db
@@ -132,7 +133,14 @@ class Job:
         self._save(name)
         self.log(f"stage {name}: start (run {runs})")
         t0 = time.time()
-        out = fn()
+        try:
+            out = fn()
+        except BaseException as e:  # QA-D8: a failed stage is recorded as failed, not left 'running'
+            self._stages[name] = {"status": "failed", "started": t0, "finished": time.time(), "runs": runs,
+                                  "error": public_error(e)}
+            self._save(name)
+            self.log(f"stage {name}: failed ({type(e).__name__})")
+            raise
         out = json.loads(json.dumps(out, ensure_ascii=False, default=str))  # what a resumed run will see
         el = round(time.time() - t0, 3)
         self._stages[name] = {"status": "done", "started": t0, "finished": time.time(), "seconds": el, "runs": runs, "output": out}
@@ -234,6 +242,35 @@ def recover(stale_after: float = STALE_S, api_worker: str | None = None) -> dict
     return out
 
 
+class PermanentJobError(RuntimeError):
+    """An input problem that a retry cannot fix (raise it, or let _permanent() classify the error)."""
+
+
+_PERMANENT_HINTS = ("invalid data found when processing input", "moov atom not found", "could not find codec parameters",
+                    "end of file", "no such file or directory", "unsupported file type", "not a video", "corrupt")
+
+
+def _permanent(e: BaseException) -> bool:
+    """Deterministic input errors are not retried (QA-D8: a corrupt upload was analysed three times)."""
+    if isinstance(e, (LookupError, PermanentJobError)):
+        return True
+    from .media import ff
+    if isinstance(e, ff.FFError):
+        txt = (str(e) + " " + str(getattr(e, "stderr_tail", "") or "")).lower()
+        return any(h in txt for h in _PERMANENT_HINTS)
+    return False
+
+
+def public_error(e: BaseException) -> str:
+    """What API clients see: the error type and message, absolute paths replaced, no traceback (the full traceback is
+    in the job's log file)."""
+    msg = f"{type(e).__name__}: {e}".splitlines()[0] if str(e) else type(e).__name__
+    for root, label in ((str(config.HOME), "<NEXUS_HOME>"), (str(config.ROOT), "<app>"), (str(Path.home()), "~")):
+        if root and root not in ("/", "."):
+            msg = msg.replace(root, label)
+    return msg[:400]
+
+
 def run_job(job: Job) -> str:
     """Execute one claimed job. Returns its final status."""
     stop = threading.Event()
@@ -257,11 +294,11 @@ def run_job(job: Job) -> str:
         job.log("job done")
         return "done"
     except Exception as e:
-        err = f"{type(e).__name__}: {e}\n{traceback.format_exc()[-1500:]}"
-        job.log(f"job error: {err}")
+        job.log(f"job error: {type(e).__name__}: {e}\n{traceback.format_exc()[-3000:]}")   # full detail stays in the log
+        err = public_error(e)
         row = db.query("SELECT retries,max_retries FROM jobs WHERE id=?", (job.id,))[0]
         n = (row["retries"] or 0) + 1
-        if isinstance(e, LookupError) or n > (row["max_retries"] or 0):
+        if _permanent(e) or n > (row["max_retries"] or 0):
             db.execute("UPDATE jobs SET status='failed', finished=?, retries=?, error=?, recovery=? WHERE id=?",
                        (time.time(), n, err, "fix the cause, then `nexus jobs retry <id>` (finished stages are kept)", job.id))
             return "failed"

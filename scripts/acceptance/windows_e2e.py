@@ -103,9 +103,11 @@ def main():
     f = wait_job(call(f"/api/projects/{p.id}/render", {"branch": "main", "name": "final"})["job"])
     step("final render", f["status"] == "done", f.get("error") or f.get("result", {}).get("output"))
     e = wait_job(call(f"/api/projects/{p.id}/export", {"render": f["result"]["output"], "codec": "h264", "quality": "balanced"})["job"])
-    ver = (e.get("result") or {}).get("verified", (e.get("result") or {}).get("ok"))
-    step("export with verification", e["status"] == "done" and (e.get("result") or {}).get("output") and ver is not False,
-         e.get("error") or {k: (e.get("result") or {}).get(k) for k in ("output", "verified", "ok", "checks")})
+    res = e.get("result") or {}
+    ver = res.get("verify") or {}
+    # QA-D10: assert the verification export() really ran and passed (it returns rep["verify"] = {"ok", "checks", ...})
+    step("export with verification", e["status"] == "done" and res.get("output") and ver.get("ok") is True and res.get("ok") is True,
+         e.get("error") or {"output": res.get("output"), "verify_ok": ver.get("ok"), "failed": ver.get("failed")})
     # Asset library + disk management + archive (follow-up branch): Windows paths under a non-ASCII NEXUS_HOME
     lib = call("/api/library")
     step("asset library catalog with licences", lib["summary"]["assets"] >= 170 and not lib["summary"]["license_refused"],

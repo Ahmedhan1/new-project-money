@@ -4,6 +4,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import os
 import shutil
 import time
 from pathlib import Path
@@ -48,7 +49,14 @@ class Project:
         db.execute("UPDATE projects SET data=?, name=? WHERE id=?", (json.dumps(self.data, ensure_ascii=False), self.name, self.id))
 
     # ---- media (originals preserved, read-only)
-    def import_media(self, src: str | Path) -> dict:
+    def discard(self) -> None:
+        """Remove a project that never became usable (a failed first upload): its row and its folder."""
+        db.execute("DELETE FROM projects WHERE id=?", (self.id,))
+        shutil.rmtree(self.dir, ignore_errors=True)
+
+    def import_media(self, src: str | Path, move: bool = False) -> dict:
+        """Copy (or, with move=True, move) a source file into the project, atomically: it is written under a temporary
+        name and renamed into place, so a crash or a full disk never leaves a truncated original (QA-D4)."""
         src = Path(src)
         h = hashlib.sha256()  # streamed: sources can be many GB
         with src.open("rb") as f:
@@ -59,7 +67,19 @@ class Project:
             if m["sha256"] == sha:
                 return m
         dest = self.dir / "media" / f"{len(self.data['media']):02d}_{src.name}"
-        shutil.copy2(src, dest)
+        part = dest.with_name(dest.name + ".part")
+        try:
+            if move:
+                try:
+                    os.replace(src, part)          # same filesystem: no second copy, no extra space
+                except OSError:
+                    shutil.copy2(src, part)
+            else:
+                shutil.copy2(src, part)
+            os.replace(part, dest)
+        except BaseException:
+            part.unlink(missing_ok=True)
+            raise
         dest.chmod(0o444)
         m = {"id": f"m{len(self.data['media'])}", "name": src.name, "path": str(dest), "sha256": sha, "rights": "user-supplied"}
         self.data["media"].append(m)

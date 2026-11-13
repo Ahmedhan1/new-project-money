@@ -154,8 +154,33 @@ def same_origin(req: Request) -> bool:
 
 
 # ---------------------------------------------------------------- owner sessions (cookie never holds the token)
-def _session_sig(tok: str, issued: int) -> str:
-    return hmac.new(tok.encode(), f"nexus-session|{issued}".encode(), hashlib.sha256).hexdigest()
+def _epoch_file():
+    from .. import config
+    return config.HOME / "secrets" / "session_epoch"
+
+
+def session_epoch() -> int:
+    """Server-side session generation, part of every session signature. Logout increments it, which revokes every
+    session cookie issued before (QA-D6: a copied cookie used to stay valid until its TTL)."""
+    try:
+        return int(_epoch_file().read_text(encoding="utf-8").strip() or 0)
+    except (OSError, ValueError):
+        return 0
+
+
+def revoke_sessions() -> int:
+    f = _epoch_file()
+    f.parent.mkdir(parents=True, exist_ok=True)
+    n = session_epoch() + 1
+    tmp = f.with_suffix(".tmp")
+    tmp.write_text(str(n), encoding="utf-8")
+    os.replace(tmp, f)
+    return n
+
+
+def _session_sig(tok: str, issued: int, epoch: int | None = None) -> str:
+    e = session_epoch() if epoch is None else epoch
+    return hmac.new(tok.encode(), f"nexus-session|{e}|{issued}".encode(), hashlib.sha256).hexdigest()
 
 
 def make_session_value(tok: str, now: float | None = None) -> str:
@@ -163,21 +188,28 @@ def make_session_value(tok: str, now: float | None = None) -> str:
     return f"s1.{issued}.{_session_sig(tok, issued)}"
 
 
+def session_state(value: str, tok: str, now: float | None = None) -> str:
+    """'valid' | 'expired' (genuinely issued by this server, past its TTL or revoked by logout) | 'invalid'.
+    Only signed, expiring values are accepted: the old raw-token cookie is refused (QA-D7)."""
+    if not value or not value.startswith("s1."):
+        return "invalid"
+    try:
+        _, issued_s, sig = value.split(".", 2)
+        issued = int(issued_s)
+    except ValueError:
+        return "invalid"
+    t = now if now is not None else time.time()
+    e = session_epoch()
+    if hmac.compare_digest(sig.encode(), _session_sig(tok, issued, e).encode()):
+        return "valid" if (issued <= t + 60 and t - issued <= SESSION_TTL_S) else "expired"
+    # signed by this server under an earlier epoch (logged out): expired, not an attack
+    if any(hmac.compare_digest(sig.encode(), _session_sig(tok, issued, k).encode()) for k in range(max(0, e - 3), e)):
+        return "expired"
+    return "invalid"
+
+
 def session_valid(value: str, tok: str, now: float | None = None) -> bool:
-    if not value:
-        return False
-    if value.startswith("s1."):
-        try:
-            _, issued_s, sig = value.split(".", 2)
-            issued = int(issued_s)
-        except ValueError:
-            return False
-        t = now if now is not None else time.time()
-        if not (issued <= t + 60 and t - issued <= SESSION_TTL_S):
-            return False
-        return hmac.compare_digest(sig.encode(), _session_sig(tok, issued).encode())
-    # legacy cookie (raw token, set by routes_core before open_session existed) - still constant-time
-    return hmac.compare_digest(value.encode(), tok.encode())
+    return session_state(value, tok, now) == "valid"
 
 
 def session_cookie_values(req: Request) -> list[str]:
@@ -215,6 +247,9 @@ def open_session(request: Request, response: Response, token: str) -> dict:
 
 
 def close_session(response: Response) -> None:
+    """Logout: revoke every issued session server-side (copied cookies stop working) and delete the cookie."""
+    if api_token() is not None:
+        revoke_sessions()
     response.delete_cookie(COOKIE, path="/")
 
 
@@ -222,8 +257,20 @@ def close_session(response: Response) -> None:
 def check(req: Request) -> None:
     """Raise HTTPException unless the request comes from the owner. Returns None on success."""
     tok = api_token()
-    q = _rate_check(req)
     unsafe = req.method.upper() not in SAFE_METHODS
+    if tok is not None:
+        # QA-D1: a request that presents no credential at all (or only a genuine session that expired or was logged
+        # out - e.g. a tab left open) is refused without counting as a failed login, so it cannot lock the owner out
+        auth = req.headers.get("authorization", "")
+        cookies = session_cookie_values(req)
+        has_bearer = auth.lower().startswith("bearer ") and bool(auth[7:].strip())
+        if not has_bearer:
+            states = [session_state(v, tok) for v in cookies]
+            if not states:
+                raise HTTPException(401, "owner authentication required")
+            if "valid" not in states and "invalid" not in states:
+                raise HTTPException(401, "session expired; sign in again")
+    q = _rate_check(req)
     if tok is None:
         if os.environ.get("NEXUS_ENV", "").strip().lower() in ("production", "prod"):
             _fail_auth(req, q, 503, "production mode needs NEXUS_API_TOKEN; loopback mode is disabled", "production_without_token")
