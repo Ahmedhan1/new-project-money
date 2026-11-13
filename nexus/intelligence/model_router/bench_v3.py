@@ -15,19 +15,23 @@ Scoring rules (all 0..1 per item, capability = mean, with a 95 % normal-approxim
                agreed value without a second one).
   extract      share of gold fields matched (numbers equal, strings contained after normalisation, lists as sets).
   checks       JSON with declared checks (equality, length, set, range, words per element).
-  summary      0.2 within the word limit + 0.6 share of key-idea groups present + 0.2 no number absent from the source.
+  summary      0.2 within the word limit + 0.6 share of key-idea groups present + 0.2 no number absent from the source;
+               0 when no key idea is present.
   translation  0.6 x min(1, chrF(output, reference) / 0.6) + 0.25 x target-script share + 0.15 x source numbers kept;
-               0 when the output is closer to the English source than to the reference (untranslated copy).
+               0 when the output is closer to the English source than to the reference (untranslated copy) or
+               chrF < 0.15 (unrelated text).
   dialect      0.2 Arabic script + 0.4 own-dialect markers (2 distinct = full) + 0.2 no other-dialect marker + 0.2 at
                most one Modern-Standard-Arabic marker; the last two count only when own markers are present. Lexicon
                markers are a proxy - a native reviewer remains mandatory for any published dialect text.
   grounded     one sentence: word limit, no sensational wording, numbers only from the facts sources agree on, none of
-               the disputed or single-source numbers, mentions the subject.
-  titles/hook  count, length, keyword, uniqueness, no clickbait, no invented numbers.
-  strategy     V2 rule set with the item's own brief.
-  constraints  share of declared formatting constraints satisfied.
+               the disputed or single-source numbers; 0 when the subject is not mentioned.
+  titles/hook  count, length, keyword, uniqueness, no clickbait, no invented numbers (hook: 0 without the keyword).
+  strategy     V2 rule set with the item's own brief; 0 without a hook and beats (applies to the V2 item too).
+  constraints  share of declared formatting constraints satisfied; 0 when none of the positive constraints (what to
+               produce) holds, so an empty or one-word reply cannot score on "avoid X" constraints alone.
 V2 items keep their V2 scorers, except translation/dialect, which use the V3 rules above (reference-based, so no
-back-translation model is needed and the score is reproducible anywhere)."""
+back-translation model is needed and the score is reproducible anywhere), and `grounded_hook`, scored by the V3
+grounded rule (the V2 rule did not check that the sentence is about the footbridge)."""
 from __future__ import annotations
 
 import json
@@ -388,6 +392,10 @@ def taskset() -> list[dict]:
             it.update(kind="translation", ref=TRANSLATION_REFS[it["lang"]], src=b1.TRANSLATE_SRC)
         elif it.get("want"):
             it.update(kind="dialect", cap="dialect_" + it["want"])
+        elif it["id"] == "strategy":        # same rules as V2 plus: no hook or no beats scores 0
+            it.update(kind="strategy", brief=b2.BRIEF)
+        elif it["id"] == "grounded_hook":   # V2 rule never checked the subject ("not stated" scored 1.0)
+            it.update(kind="grounded", keyword="footbridge", allowed=["2019", "310", "48"], banned=["2020", "2023", "4", "52"])
         items.append(it)
     A = '\nReply as JSON: {"answer": "<answer>"}'
     items += [{"id": f"reason3_{i}", "cap": "reasoning", "kind": "answer", "gold": g, "schema": b1.S_ANSWER, "max_tokens": 80, "prompt": q + A}
@@ -517,6 +525,8 @@ def score_summary(it: dict, text: str) -> dict:
         return {"score": 0.0}
     low = t.lower()
     cover = sum(any(a.lower() in low for a in g) for g in it["groups"]) / len(it["groups"])
+    if cover == 0:                                     # says nothing from the text: length and "no new numbers" earn nothing
+        return {"score": 0.0, "coverage": 0.0}
     invented = _numbers(t) - _numbers(it["src"])
     s = 0.2 * (len(t.split()) <= it["max_words"]) + 0.6 * cover + 0.2 * (not invented)
     return {"score": round(s, 3), "coverage": round(cover, 3), "invented_numbers": sorted(invented)}
@@ -529,6 +539,8 @@ def score_translation(it: dict, text: str) -> dict:
     c = b1.chrf(t, it["ref"])
     if b1.chrf(t, it["src"]) >= max(0.6, c):            # the source copied back (or left in English) is not a translation
         return {"score": 0.0, "chrf": c, "untranslated": True}
+    if c < 0.15:                                       # unrelated text: script and numbers earn nothing on their own
+        return {"score": 0.0, "chrf": c}
     share = b1.script_share(t, it["lang"])
     nums = {n.rstrip(".") for n in re.findall(r"\d+(?:\.\d+)?", re.sub(r"(?<=\d),(?=\d{3})", "", it["src"]))}  # written digits only
     kept = (nums <= _numbers(t)) if nums else True
@@ -557,6 +569,8 @@ def score_dialect(it: dict, text: str) -> dict:
 
 def score_grounded(it: dict, text: str) -> dict:
     t = (text or "").strip()
+    if it["keyword"].lower() not in t.lower():       # not about the subject: the negative checks earn nothing
+        return {"score": 0.0}
     nums = _numbers(t)
     parts = [0 < len(t.split()) <= 25, not b2.SENSATIONAL.search(t), nums <= set(it["allowed"]), not (nums & set(it["banned"])),
              it["keyword"].lower() in t.lower()]
@@ -578,6 +592,8 @@ def score_titles(it: dict, text: str) -> dict:
 
 def score_hook(it: dict, text: str) -> dict:
     t = (text or "").strip()
+    if it["keyword"].lower() not in t.lower():
+        return {"score": 0.0}
     ends = len(re.findall(r"[.!?](?=\s|$)", t))
     parts = [0 < len(t.split()) <= it["max_words"], ends <= 1, not b2.SENSATIONAL.search(t), _numbers(t) <= _numbers(it["facts"]),
              it["keyword"].lower() in t.lower()]
@@ -590,6 +606,8 @@ def score_strategy(it: dict, text: str) -> dict:
         return {"score": 0.0}
     hook = str(d.get("hook", ""))
     beats, vis = d.get("beats") or [], d.get("visuals") or []
+    if not hook.strip() or not beats:                  # no plan at all: "no invented numbers" earns nothing
+        return {"score": 0.0}
     allowed = _numbers(it["brief"]) | {"60", "1", "2", "3"}
     blob = json.dumps(d, ensure_ascii=False)
     invented = _numbers(blob) - allowed
@@ -607,14 +625,12 @@ def score_constraints(it: dict, text: str) -> dict:
     t = (text or "").strip()
     lines = [ln.strip() for ln in t.splitlines() if ln.strip()]
     c, res = it["checks"], []
-    if "lines" in c:
+    if c.get("lines", 1) > 1:                          # a one-line requirement is trivially met; it is checked below
         res.append(len(lines) == c["lines"])
     if c.get("numbered"):
         res.append(bool(lines) and all(re.match(rf"{i}\.\s", ln) for i, ln in enumerate(lines, 1)))
     if "ends_with" in c:
         res.append(t.endswith(c["ends_with"]))
-    if "max_words" in c:
-        res.append(0 < len(t.split()) <= c["max_words"])
     if "exact" in c:
         res.append(t == c["exact"])
     if "exact_any" in c:
@@ -627,15 +643,9 @@ def score_constraints(it: dict, text: str) -> dict:
         res.append(any(w in t for w in c["contains_any"]))
     if "prefix" in c:
         res.append(bool(lines) and all(ln.startswith(c["prefix"]) for ln in lines))
-    if "forbid_chars" in c:
-        res.append(bool(t) and not any(ch in t for ch in c["forbid_chars"]))
     if "count_word" in c:
         w, n = c["count_word"]
         res.append(len(re.findall(rf"\b{w}\b", t, re.I)) == n)
-    if c.get("no_digits"):
-        res.append(bool(t) and not re.search(r"\d", t))
-    if "forbid_words" in c:
-        res.append(bool(t) and not any(re.search(rf"\b{w}\b", t, re.I) for w in c["forbid_words"]))
     if "line_prefixes" in c:
         res.append(len(lines) == len(c["line_prefixes"]) and all(ln.startswith(p) for ln, p in zip(lines, c["line_prefixes"])))
     if "sentence2_starts" in c:
@@ -646,9 +656,22 @@ def score_constraints(it: dict, text: str) -> dict:
         res.append(len(items) == c["csv_items"])
         if c.get("sorted_lower"):
             res.append(items == sorted(items) and all(x == x.lower() for x in items))
+    neg_from = len(res)
+    if c.get("lines") == 1:
+        res.append(len(lines) == 1)
+    if "max_words" in c:
+        res.append(0 < len(t.split()) <= c["max_words"])
+    if "forbid_chars" in c:
+        res.append(bool(t) and not any(ch in t for ch in c["forbid_chars"]))
+    if c.get("no_digits"):
+        res.append(bool(t) and not re.search(r"\d", t))
+    if "forbid_words" in c:
+        res.append(bool(t) and not any(re.search(rf"\b{w}\b", t, re.I) for w in c["forbid_words"]))
     if c.get("no_punct"):
         res.append(bool(t) and not re.search(r"[^\w\s']", t))
-    return {"score": round(sum(res) / len(res), 3) if res else 0.0, "passed": sum(res), "checks": len(res)}
+    if not any(res[:neg_from]):                       # nothing asked for was produced: avoiding things earns nothing
+        return {"score": 0.0, "passed": 0, "checks": len(res)}
+    return {"score": round(sum(res) / len(res), 3), "passed": sum(res), "checks": len(res)}
 
 
 SCORERS = {"conflict": score_conflict, "extract": score_extract, "checks": score_checks, "summary": score_summary,

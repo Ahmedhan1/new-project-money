@@ -121,6 +121,9 @@ def test_writing_strategy_and_instructions():
 
 def test_v2_items_keep_v2_scorers():
     from nexus.intelligence.model_router import bench_v2
+    gh = ITEMS["grounded_hook"]
+    assert b.score_v3(gh, "The 310 m footbridge, opened in 2019, rises 48 m above the river.")["score"] == 1.0
+    assert b.score_v3(gh, "not stated")["score"] == 0.0 and b.score_v3(gh, "The 52 m footbridge.")["score"] < 1.0
     it = ITEMS["synth"]
     out = json.dumps({"claims": [{"text": "opened in 2019", "sources": ["S1", "S2"]}], "conflicts": ["height 48 m vs 52 m"]})
     assert b.score_v3(it, out) == bench_v2.score_v2(it, out)
@@ -143,3 +146,16 @@ def test_kernel_carries_identical_prompts_for_every_model():
     src = b.kernel_source(["qwen3-4b", "nemotron-nano-9b-v2"])
     items = json.loads(eval(src.split("ITEMS = json.loads(")[1].split(")\nMODELS")[0]))   # the literal embedded in the job
     assert [i["id"] for i in items] == list(ITEMS) and all(i["prompt"] == ITEMS[i["id"]]["prompt"] for i in items)
+
+
+@pytest.mark.parametrize("junk", ["", "x", '{"answer": "not stated"}', "I cannot help with that."])
+def test_degenerate_outputs_earn_almost_nothing(junk):
+    """Absence-only checks (no invented numbers, no forbidden word, within a length) must not reward an empty answer."""
+    by = {}
+    for it in ITEMS.values():
+        by.setdefault(it["cap"], []).append(b.score_v3(it, junk)["score"])
+    for cap, xs in by.items():
+        if cap == "grounding":                         # 4 of 15 items correctly expect "not stated"
+            assert sum(xs) / len(xs) <= 0.29, (cap, junk)
+        else:
+            assert sum(xs) / len(xs) <= 0.12, (cap, junk, sum(xs) / len(xs))
