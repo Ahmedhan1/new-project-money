@@ -2,6 +2,13 @@
 Meta Business Suite). Records are normalised and stored; nothing is estimated or filled in. A value that is missing
 in the source stays absent; unknown columns are kept under `metrics.raw`.
 
+Every record carries `data_origin` (DATA_ORIGINS): data from a platform API is real_platform_data, an owner export is
+user_uploaded_data, and fixtures/demos must say simulated_test_data (public_benchmark_data for published third-party
+figures). Growth code can filter with records(origin=...) / real_only(); simulated rows are never real metrics.
+Import reports: duplicate (video, date) rows, invalid values (dropped, never "fixed"), normalised ISO dates, publish
+times converted to UTC only when the owner states the export's time zone, and a reconciliation of the rows against
+the export's own "Total" row.
+
 Column maps for the CSV exports are built from the exports' visible headers; they are NOT verified against an export
 from every account type/locale (see `CSV_MAPS[...]['verified']`). Unmapped headers are reported so a map can be fixed.
 """
@@ -24,6 +31,11 @@ YT_METRICS = ["views", "estimatedMinutesWatched", "averageViewDuration", "averag
 YT_NORMAL = {"views": "views", "estimatedMinutesWatched": "watch_minutes", "averageViewDuration": "avg_view_duration_s",
              "averageViewPercentage": "avg_view_pct", "subscribersGained": "subscribers_gained", "subscribersLost": "subscribers_lost",
              "likes": "likes", "comments": "comments", "shares": "shares"}
+
+DATA_ORIGINS = ("real_platform_data", "user_uploaded_data", "public_benchmark_data", "simulated_test_data")
+PCT_METRICS = {"avg_view_pct", "impressions_ctr_pct", "completion_pct"}
+SIGNED_METRICS = {"subscribers_net"}          # may be negative (net change); every other metric is a count/duration >= 0
+MONTHS = {m: i for i, m in enumerate(["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"], 1)}
 
 # header (lower-case, stripped) -> (normalised metric, converter)
 _num = "num"
@@ -97,6 +109,58 @@ def _convert(kind: str, raw):
     return _to_num(raw)
 
 
+def norm_date(s: str | None) -> str | None:
+    """ISO date for unambiguous forms (2026-10-03, 2026/10/03, 'Oct 3, 2026', '3 Oct 2026'); None otherwise
+    (01/02/2026 is ambiguous between locales and is not guessed)."""
+    import datetime as dt
+    t = (s or "").strip()
+    m = re.fullmatch(r"(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:[T ].*)?", t)
+    if m:
+        y, mo, d = map(int, m.groups())
+    else:
+        m = re.fullmatch(r"([A-Za-z]{3})[a-z]*\.? (\d{1,2}),? (\d{4})", t) or re.fullmatch(r"(\d{1,2}) ([A-Za-z]{3})[a-z]*\.? (\d{4})", t)
+        if not m:
+            return None
+        a, b, y = m.groups()
+        mon, d = (a, b) if a[0].isalpha() else (b, a)
+        mo, d, y = MONTHS.get(mon.lower()[:3]), int(d), int(y)
+        if not mo:
+            return None
+    try:
+        return dt.date(y, mo, d).isoformat()
+    except ValueError:
+        return None
+
+
+def to_utc(s: str | None, tz: str | None) -> str | None:
+    """Publish time -> UTC ISO. Needs the export's time zone (IANA name) unless the value carries an offset."""
+    import datetime as dt
+    t = (s or "").strip()
+    if not t:
+        return None
+    try:
+        v = dt.datetime.fromisoformat(t.replace("Z", "+00:00"))
+    except ValueError:
+        d = norm_date(t)
+        if not d:
+            return None
+        v = dt.datetime.fromisoformat(d)
+    if v.tzinfo is None:
+        if not tz:
+            return None
+        from zoneinfo import ZoneInfo
+        v = v.replace(tzinfo=ZoneInfo(tz))
+    return v.astimezone(dt.timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _valid(name: str, v) -> bool:
+    if name in SIGNED_METRICS:
+        return True
+    if v < 0:
+        return False
+    return not (name in PCT_METRICS and v > 100)
+
+
 def _pick(row: dict, keys: list[str]) -> str | None:
     for k in keys:
         if row.get(k):
@@ -114,7 +178,17 @@ def save(records: list[dict]) -> int:
     return len(records)
 
 
-def records(platform: str | None = None, video_id: str | None = None) -> list[dict]:
+def real_only(rows: list[dict]) -> list[dict]:
+    """Rows that are real owner/platform data (API or owner export) - what growth decisions may learn from."""
+    return [r for r in rows if r.get("data_origin") in ("real_platform_data", "user_uploaded_data")]
+
+
+def origin_summary(rows: list[dict]) -> dict:
+    from collections import Counter
+    return dict(Counter(r.get("data_origin", "unlabelled") for r in rows))
+
+
+def records(platform: str | None = None, video_id: str | None = None, origin: str | None = None) -> list[dict]:
     store.ensure()
     from ... import db
     sql, a = "SELECT data FROM pub_analytics WHERE 1=1", []
@@ -124,13 +198,17 @@ def records(platform: str | None = None, video_id: str | None = None) -> list[di
     if video_id:
         sql += " AND video_id=?"
         a.append(video_id)
-    return [json.loads(r["data"]) for r in db.query(sql + " ORDER BY date", tuple(a))]
+    rows = [json.loads(r["data"]) for r in db.query(sql + " ORDER BY date", tuple(a))]
+    return [r for r in rows if origin is None or r.get("data_origin") == origin]
 
 
 def import_csv(path_or_text: str | Path, kind: str, period: str | None = None, project_id: str | None = None,
-               persist: bool = True) -> dict:
+               persist: bool = True, origin: str = "user_uploaded_data", tz: str | None = None) -> dict:
     """Owner export -> AnalyticsRecords. `period` (e.g. '2026-10-01..2026-10-31') is used as `date` for table exports
-    without a date column; without either, `date` is 'unknown' (never guessed)."""
+    without a date column; without either, `date` is 'unknown' (never guessed). `origin`: who produced the file
+    (fixtures and demos MUST pass simulated_test_data). `tz`: the export's time zone, used to convert publish times."""
+    if origin not in DATA_ORIGINS:
+        raise ValueError(f"origin must be one of {DATA_ORIGINS}")
     if kind not in CSV_MAPS:
         raise ValueError(f"unknown export kind {kind!r}; known: {', '.join(CSV_MAPS)}")
     spec = CSV_MAPS[kind]
@@ -140,35 +218,87 @@ def import_csv(path_or_text: str | Path, kind: str, period: str | None = None, p
     headers = [h.strip().lower() for h in (reader.fieldnames or [])]
     known = set(spec["map"]) | set(spec["id"]) | set(spec["title"]) | set(spec["date"]) | set(spec["published"])
     unmapped = [h for h in headers if h not in known]
-    out, skipped = [], []
+    out, skipped, invalid, dups, seen, total = [], [], [], [], {}, None
     for i, raw in enumerate(reader):
         row = {(k or "").strip().lower(): (v or "").strip() for k, v in raw.items()}
         vid = _pick(row, spec["id"])
-        if not vid or vid.lower() == "total":  # Studio's first data row is the channel total
-            skipped.append({"row": i + 2, "reason": "total row" if vid and vid.lower() == "total" else "no video id"})
+        if vid and vid.lower() == "total":  # Studio's first data row is the channel total: kept for reconciliation only
+            total = {name: _convert(conv, row[h]) for h, (name, conv) in spec["map"].items() if h in row and _convert(conv, row[h]) is not None}
+            skipped.append({"row": i + 2, "reason": "total row"})
+            continue
+        if not vid:
+            skipped.append({"row": i + 2, "reason": "no video id"})
             continue
         metrics = {}
         for h, (name, conv) in spec["map"].items():
-            if h in row:
+            if h in row and row[h]:
                 v = _convert(conv, row[h])
-                if v is not None:
+                if v is None:
+                    invalid.append({"row": i + 2, "column": h, "value": row[h][:40], "reason": "not a number"})
+                elif not _valid(name, v):
+                    invalid.append({"row": i + 2, "column": h, "value": row[h][:40], "reason": "out of range"})
+                else:
                     metrics[name] = v
         extra = {h: row[h] for h in unmapped if row.get(h)}
         if extra:
             metrics["raw"] = extra
-        date = _pick(row, spec["date"]) or period or "unknown"
+        raw_date = _pick(row, spec["date"])
+        date = (norm_date(raw_date) or raw_date) if raw_date else (period or "unknown")
+        if (vid, date) in seen:
+            dups.append({"row": i + 2, "video_id": vid, "date": date, "first_row": seen[(vid, date)], "kept": "first"})
+            continue
+        seen[(vid, date)] = i + 2
         rec = C.make("AnalyticsRecord", platform=spec["platform"], video_id=vid, date=date, metrics=metrics,
                      source=f"csv:{kind}", imported=time.time(), project_id=project_id)
+        rec["data_origin"] = origin
+        if raw_date and not norm_date(raw_date):
+            rec["date_unparsed"] = True
         title, pub = _pick(row, spec["title"]), _pick(row, spec["published"])
         if title:
             rec["title"] = title
         if pub:
             rec["published"] = pub
+            rec["published_date"] = norm_date(pub)
+            rec["published_utc"] = to_utc(pub, tz)
+            rec["published_tz"] = tz or "unknown (export time zone not stated)"
         out.append(rec)
+    replaced = 0
     if persist:
+        existing = {(r["video_id"], r["date"]) for r in records(spec["platform"])}
+        replaced = sum((r["video_id"], r["date"]) in existing for r in out)
         save(out)
-    return {"records": out, "imported": len(out), "skipped": skipped, "unmapped_columns": unmapped,
-            "map_verified": spec["verified"], "kind": kind}
+    return {"records": out, "imported": len(out), "skipped": skipped, "unmapped_columns": unmapped, "duplicates": dups,
+            "invalid": invalid, "replaced_existing": replaced, "reconciliation": reconcile_total(out, total),
+            "map_verified": spec["verified"], "kind": kind, "data_origin": origin}
+
+
+ADDITIVE = ("views", "watch_minutes", "likes", "comments", "shares", "impressions", "subscribers_net", "subscribers_gained")
+
+
+def reconcile_total(rows: list[dict], total: dict | None, tolerance: float = 0.01) -> dict:
+    """Compare the sum of per-video rows with the export's own Total row (additive metrics only). A mismatch is
+    reported, never corrected: a table export can be filtered or truncated."""
+    if not total:
+        return {"status": "no_total_row"}
+    out = {}
+    for k in ADDITIVE:
+        if k in total:
+            s = sum(r["metrics"].get(k) or 0 for r in rows)
+            diff = s - total[k]
+            out[k] = {"rows_sum": round(s, 3), "total_row": total[k], "diff": round(diff, 3),
+                      "ok": abs(diff) <= max(1.0, tolerance * abs(total[k]))}
+    return {"status": "ok" if all(v["ok"] for v in out.values()) else "mismatch", "metrics": out}
+
+
+def reconcile_api_vs_export(api_rows: list[dict], export_row: dict, metric: str = "views", tolerance: float = 0.02) -> dict:
+    """Daily API rows for one video vs the owner's export row for the same period. Reported, never merged."""
+    s = sum((r["metrics"].get(metric) or 0) for r in api_rows)
+    e = export_row["metrics"].get(metric)
+    if e is None:
+        return {"status": "missing_in_export", "metric": metric}
+    ok = abs(s - e) <= max(1.0, tolerance * abs(e))
+    return {"status": "ok" if ok else "mismatch", "metric": metric, "api_sum": s, "export": e, "diff": s - e,
+            "days": len(api_rows), "note": "API data can lag the Studio export by up to a few days"}
 
 
 # ------------------------------------------------------------------ YouTube Analytics API
@@ -178,7 +308,7 @@ def _yt_rows(resp: dict) -> list[dict]:
 
 
 def youtube_daily(video_id: str, start: str, end: str, account: dict | None, transport=None, adapter=None,
-                  project_id: str | None = None, persist: bool = True) -> list[dict]:
+                  project_id: str | None = None, persist: bool = True, origin: str = "real_platform_data") -> list[dict]:
     """Daily metrics for one video (dimensions=day, filters=video==ID). Needs yt-analytics.readonly consent."""
     from .adapters.base import classify
     from .adapters.youtube import YouTubeAdapter
@@ -191,15 +321,17 @@ def youtube_daily(video_id: str, start: str, end: str, account: dict | None, tra
     out = []
     for row in _yt_rows(r.json()):
         m = {YT_NORMAL[k]: v for k, v in row.items() if k in YT_NORMAL and v is not None}
-        out.append(C.make("AnalyticsRecord", platform="youtube", video_id=video_id, date=str(row.get("day")), metrics=m,
-                          source="api:youtube-analytics/v2", imported=time.time(), project_id=project_id))
+        rec = C.make("AnalyticsRecord", platform="youtube", video_id=video_id, date=str(row.get("day")), metrics=m,
+                     source="api:youtube-analytics/v2", imported=time.time(), project_id=project_id)
+        rec["data_origin"] = origin
+        out.append(rec)
     if persist:
         save(out)
     return out
 
 
 def youtube_retention(video_id: str, start: str, end: str, account: dict | None, transport=None, adapter=None,
-                      project_id: str | None = None, persist: bool = True) -> dict:
+                      project_id: str | None = None, persist: bool = True, origin: str = "real_platform_data") -> dict:
     """audienceWatchRatio by elapsedVideoTimeRatio (one video per request, as documented)."""
     from .adapters.base import classify
     from .adapters.youtube import YouTubeAdapter
@@ -214,6 +346,7 @@ def youtube_retention(video_id: str, start: str, end: str, account: dict | None,
     rec = C.make("AnalyticsRecord", platform="youtube", video_id=video_id, date=f"{start}..{end}",
                  metrics={"retention_curve": curve, "retention_columns": ["elapsed_ratio", "audienceWatchRatio", "relativeRetentionPerformance"]},
                  source="api:youtube-analytics/v2:retention", imported=time.time(), project_id=project_id)
+    rec["data_origin"] = origin
     if persist:
         save([rec])
     return rec

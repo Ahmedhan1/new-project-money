@@ -183,8 +183,14 @@ def evaluate(exp: dict, records: list[dict], alpha: float = st.ALPHA, conclude: 
     exp["results"] = {"verdict": overall, "comparisons": out, "compare_at_day": exp.get("compare_at_day", 7), "alpha": alpha,
                       "correction": "holm", "evaluated": time.time(), "sample_unit": exp.get("sample_unit"), "winner": best,
                       "note": "winner = best arm among significant comparisons vs control; with >2 arms, variants are not tested against each other"}
+    used_rows = [r for arm in arms.values() for r in arm]
+    origins = sorted({r.get("data_origin", "unlabelled") for r in used_rows})
+    simulated = "simulated_test_data" in origins
+    exp["results"].update(data_origin=origins, real_data=bool(used_rows) and not simulated and "unlabelled" not in origins)
+    if simulated:
+        exp["results"]["note"] += "; SIMULATED test data in the sample - not a real result, the status is not concluded"
     exp["confidence"] = round(1 - min((c["p_adjusted"] for c in winners), default=1.0), 3) if winners else 0.0
-    if conclude:
+    if conclude and not simulated:
         if exp["status"] == "planned":
             set_status(exp, "running")
         if exp["status"] == "running":

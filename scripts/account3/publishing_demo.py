@@ -133,7 +133,7 @@ def main() -> int:
                         "network call and recorded what the owner must do.")
 
     imp = analytics.import_csv(ROOT / "tests" / "fast" / "fixtures_publishing" / "youtube_studio_table.csv", "youtube_studio",
-                               period="2026-10-01..2026-10-31", project_id="demo-publishing")
+                               period="2026-10-01..2026-10-31", project_id="demo-publishing", origin="simulated_test_data")
     out["analytics_import"] = {"file": "tests/fast/fixtures_publishing/youtube_studio_table.csv",
                                "note": "SYNTHETIC fixture shaped like a YouTube Studio 'Table data' export; numbers are test data, not metrics",
                                "imported": imp["imported"], "skipped": imp["skipped"], "unmapped_columns": imp["unmapped_columns"],
