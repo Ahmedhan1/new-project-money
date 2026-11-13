@@ -40,7 +40,8 @@ def test_killed_render_resumes_from_finished_segments(home, tmp_path):
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     t0 = time.time()
     while time.time() - t0 < 120 and p.poll() is None:
-        if len(list(seg_dir.glob("seg_*[0-9a-f].mp4"))) >= 3:
+        c0 = resume.load(work, out)  # wait for the CHECKPOINT (a segment file is renamed into place just before it is recorded)
+        if c0 and len(c0.get("segments_done") or []) >= 3:
             break
         time.sleep(0.02)
     killed = p.poll() is None
