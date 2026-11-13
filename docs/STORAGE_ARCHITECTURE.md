@@ -26,7 +26,7 @@ leaves the machine goes through Account 1's storage layer (`nexus/cloud/storage`
 | Uploads, transfers, render checkpoints | `<work>/uploads`, `transfers`, `projects/*/work` | `tmp_max_age_hours` (12) |
 | Draft previews | `projects/*/renders/*_draft_*`, `pieces_draft` | `preview_max_age_days` (7) |
 | Library assets | `NEXUS_HOME/assets/<category>/` | `asset_cache_quota_gb` (10), LRU of re-creatable assets |
-| Logs | `NEXUS_HOME/logs` | server/worker logs rotate at `log_max_mb` (20) × `log_keep` (3); job logs 30 days |
+| Logs | `NEXUS_HOME/logs` | server/worker logs rotated by the launcher (Account 1, 20 MB × 5); job logs of finished jobs 30 days |
 
 `<work>` is `NEXUS_WORK_DIR` when set (a fast local disk), otherwise `NEXUS_HOME/cache`. Every render first estimates
 the space it needs and is refused before it starts when it would leave less than `min_free_gb` (`disk-preflight`

@@ -31,8 +31,10 @@ nothing ever bounded or removed them; render caches had no quota; pytest kept th
 3. **Finished outputs leave.** A verified external archive copy releases the local final video and its intermediate
    segments/pieces (`intermediate_after_archive`, shared intermediates are kept).
 4. **Stale files are recognised by rule:** partial downloads (`incomplete_download`), abandoned temp/render-work files
-   (`abandoned_temporary`), old draft previews (`stale_preview`), logs of finished jobs (`old_job_log`), rotated logs.
-5. **Logs rotate** (server/worker at 20 MB × 3 generations; the disk-manager journal at 2 MB × 2).
+   (`abandoned_temporary`), old draft previews (`stale_preview`), logs of finished jobs (`old_job_log`).
+5. **Logs are bounded**: server/worker logs are rotated by the launcher (Account 1's `launcher.rotate_log`, 20 MB × 5
+   generations, on merge); the disk-manager journal rotates at 2 MB × 2; logs of finished jobs older than 30 days are a
+   cleanup rule. Rotated service logs are left to the launcher (the disk manager never deletes them).
 6. **Tests clean up after themselves:** `tmp_path_retention_policy = "failed"`, `tmp_path_retention_count = 1`
    (`pyproject.toml`). The test suite itself is untouched.
 
