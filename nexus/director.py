@@ -872,8 +872,12 @@ def _shot_pass(items: list[dict], srcs: dict, prof: dict, decisions: list, total
                         _dec(decisions, src, sh["start"], sh["end"], "drop", "broll", "cutaway rejected by a person", 0.0,
                              confidence=1.0)
                         continue
+                    r = rows.get(sh["id"]) or {}
+                    if (r.get("scene") or [{}])[0].get("label") == "text or a title card":
+                        _dec(decisions, src, sh["start"], sh["end"], "drop", "broll",
+                             "title card / text slate: never used as a cutaway", 0.0, confidence=0.8)
+                        continue
                     if not any(s == src and a < sh["end"] and sh["start"] < b for s, a, b in used_ranges):
-                        r = rows.get(sh["id"]) or {}
                         pool.append({"src": src, **sh, "uses": 0, "emb": embs.get(sh["id"]), "shot_type": r.get("shot_type"),
                                      "motion_level": r.get("motion_level"), "dup_of": r.get("dup_of")})
     embed_text = _text_embedder() if any(p["emb"] is not None for p in pool) else None
@@ -1232,7 +1236,8 @@ def build(plan: dict, size: tuple[int, int] = (1920, 1080), music: bool = True) 
                 notes["audio_overlap"] = 0.4  # speculative until docs/TIMELINE.md (WS A) defines J/L-cut keys
             if it.get("cutaway"):
                 ca = it["cutaway"]
-                c["pip"] = {"src": ca["src"], "in": ca["in"], "x": 0.0, "y": 0.0, "w": 1.0, "shape": "rect"}
+                # full-frame cutaway over the whole piece (the renderer draws a bordered inset window without "full")
+                c["pip"] = {"src": ca["src"], "in": ca["in"], "full": True, "start": 0.0, "end": round(it["out"] - it["in"], 3)}
                 notes["cutaway"] = ca
             for key in ("reframe", "why_not_crossfade", "note"):
                 if it.get(key):

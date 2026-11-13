@@ -137,7 +137,9 @@ def test_real_model_picks_the_matching_local_shot_and_renders_it(tmp_path, home,
                                       {"id": 1, "start": 4.0, "end": 8.0, "speech_share": 0.0}]}
     visual.attach(an, visual.analyze_asset(lib, an, fps=2.0))
     loc = broll.local_candidates(str(lib), an, "public domain (test render)", "test library")
-    assert len(loc) == 2 and all(c["embedding"] is not None for c in loc)
+    # the text card is recognised (zero-shot "text or a title card") and never offered as a cutaway; the landscape is
+    assert [c["id"] for c in loc] == [f"local:{lib.stem}#0"] and all(c["embedding"] is not None for c in loc)
+    assert (an["visual"]["shots"][1]["scene"] or [{}])[0].get("label") == "text or a title card"
     talk = tmp_path / "talk.mp4"
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", f"color=c=0x404040:s={W}x{H}:r=30:d=12", "-f", "lavfi",
                     "-i", "sine=f=300:d=12:r=48000", "-c:v", "libx264", "-preset", "ultrafast", "-c:a", "aac", "-shortest",

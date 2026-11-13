@@ -1,0 +1,560 @@
+{
+ "demo": "4 - reference style adaptation",
+ "reference": {
+  "benchmark": "explainer",
+  "page": "https://images.nasa.gov/details/ARC-20140529-AAV3515-NASA-Explains-Cold-Zone-Above-Tropics",
+  "licence": "public domain (NASA media guidelines)",
+  "measure_s": 29.1
+ },
+ "source": {
+  "benchmark": "walktalk",
+  "page": "https://images.nasa.gov/details/KSC-20200508-MH-GEB03_0001-Booster_Processing_Walk_and_Talk-3248689",
+  "licence": "public domain (NASA media guidelines)"
+ },
+ "applied_overrides": {
+  "shot_len": [
+   3.52,
+   50.73
+  ],
+  "shot_len_median": 16.92,
+  "pacing": "steady",
+  "pattern_interrupt_s": 7.12,
+  "hook_window_s": 13.34,
+  "opening": "cold_open",
+  "cutaways_per_min": 0.4,
+  "broll": {
+   "policy": "cutaway"
+  },
+  "captions": {
+   "style": "pop",
+   "position": "middle",
+   "words_per_cue": 3,
+   "uppercase": true
+  },
+  "music": {
+   "enabled": true
+  },
+  "grade": "bleach_bypass",
+  "transitions": {
+   "crossfade_at_topics": false,
+   "xfade": "dissolve"
+  },
+  "ending": "end_card"
+ },
+ "why": [
+  "shot length p10-p90 3.52-50.73s, median 16.916s (2.2 cuts/min)",
+  "a visual change every 4.8s (median) -> interrupt at most every 7.12s",
+  "hook line at 11.3s -> hook window 13.34s",
+  "0.4 cutaways/min (shots without the speaker's face during speech)",
+  "on-screen text in 58% of frames (edge heuristic): bold captions",
+  "sound outside speech 84% of the time -> music on",
+  "colour: saturation 0.133, warmth +0.046, colourfulness 17.6 -> grade 'bleach_bypass'",
+  "82% hard cuts, 18% gradual -> crossfades at topics off",
+  "ending: end_card"
+ ],
+ "project": "prj_1d648d20c1",
+ "output": "/tmp/a2-demos/projects/prj_1d648d20c1/renders/demo4_reference.mp4",
+ "duration": 89.6,
+ "resolution": "1920x1080",
+ "fps": "30/1",
+ "codec": "h264",
+ "render_with_qa_s": 160.3,
+ "output_measure_s": 135.7,
+ "qa_status": "PASSED_AUTOMATED_CHECKS",
+ "known_issues": [],
+ "quality": {
+  "score": 92.1,
+  "verdict": "needs_work",
+  "categories": {
+   "visual": {
+    "score": 88.9,
+    "measured": 15,
+    "failed": 3,
+    "not_measured": 3,
+    "bar": 85.0
+   },
+   "editing": {
+    "score": 96.2,
+    "measured": 13,
+    "failed": 1,
+    "not_measured": 2,
+    "bar": 85.0
+   },
+   "audio": {
+    "score": 88.0,
+    "measured": 10,
+    "failed": 2,
+    "not_measured": 2,
+    "bar": 85.0
+   },
+   "localization": {
+    "score": 100.0,
+    "measured": 9,
+    "failed": 0,
+    "not_measured": 2,
+    "bar": 85.0
+   }
+  }
+ },
+ "loudness": {
+  "lufs": -14.06,
+  "lra": 3.71,
+  "true_peak": -1.97
+ },
+ "comparison": [
+  {
+   "metric": "shot_length_median_s",
+   "reference": 16.916,
+   "generated": 6.9,
+   "diff": -10.016,
+   "rel_diff": 0.592
+  },
+  {
+   "metric": "shot_length_mean_s",
+   "reference": 25.008,
+   "generated": 8.145,
+   "diff": -16.863,
+   "rel_diff": 0.674
+  },
+  {
+   "metric": "cuts_per_min",
+   "reference": 2.2,
+   "generated": 6.7,
+   "diff": 4.5,
+   "rel_diff": 2.045
+  },
+  {
+   "metric": "first_10s_cuts",
+   "reference": 0,
+   "generated": 3,
+   "diff": 3,
+   "rel_diff": null
+  },
+  {
+   "metric": "first_speech_s",
+   "reference": 11.34,
+   "generated": 0.11,
+   "diff": -11.23,
+   "rel_diff": 0.99
+  },
+  {
+   "metric": "hook_t_s",
+   "reference": 11.34,
+   "generated": 0.11,
+   "diff": -11.23,
+   "rel_diff": 0.99
+  },
+  {
+   "metric": "pattern_interrupt_median_s",
+   "reference": 4.75,
+   "generated": 5.18,
+   "diff": 0.43,
+   "rel_diff": 0.091
+  },
+  {
+   "metric": "cutaways_per_min",
+   "reference": 0.4,
+   "generated": 0.67,
+   "diff": 0.27,
+   "rel_diff": 0.675
+  },
+  {
+   "metric": "on_screen_text_share",
+   "reference": 0.585,
+   "generated": 0.626,
+   "diff": 0.041,
+   "rel_diff": 0.07
+  },
+  {
+   "metric": "speech_share",
+   "reference": 0.598,
+   "generated": 0.894,
+   "diff": 0.296,
+   "rel_diff": 0.495
+  },
+  {
+   "metric": "music_bed_share",
+   "reference": 0.842,
+   "generated": 0.989,
+   "diff": 0.147,
+   "rel_diff": 0.175
+  },
+  {
+   "metric": "audio_accents_per_min",
+   "reference": 10.4,
+   "generated": 0.67,
+   "diff": -9.73,
+   "rel_diff": 0.936
+  },
+  {
+   "metric": "wpm",
+   "reference": 95.8,
+   "generated": 175.4,
+   "diff": 79.6,
+   "rel_diff": 0.831
+  },
+  {
+   "metric": "ending",
+   "reference": "end_card",
+   "generated": "end_card",
+   "diff": null,
+   "rel_diff": null
+  },
+  {
+   "metric": "saturation",
+   "reference": 0.133,
+   "generated": 0.347,
+   "diff": 0.214,
+   "rel_diff": 1.609
+  },
+  {
+   "metric": "warmth",
+   "reference": 0.046,
+   "generated": 0.082,
+   "diff": 0.036,
+   "rel_diff": 0.783
+  },
+  {
+   "metric": "colourfulness",
+   "reference": 17.6,
+   "generated": 48.0,
+   "diff": 30.4,
+   "rel_diff": 1.727
+  },
+  {
+   "metric": "luma_contrast",
+   "reference": 0.193,
+   "generated": 0.209,
+   "diff": 0.016,
+   "rel_diff": 0.083
+  },
+  {
+   "metric": "hard_cut_share",
+   "reference": 0.818,
+   "generated": 0.6,
+   "diff": -0.218,
+   "rel_diff": 0.267
+  },
+  {
+   "metric": "gradual_share",
+   "reference": 0.182,
+   "generated": 0.2,
+   "diff": 0.018,
+   "rel_diff": 0.099
+  },
+  {
+   "metric": "fade_through_black_share",
+   "reference": 0.0,
+   "generated": 0.2,
+   "diff": 0.2,
+   "rel_diff": null
+  },
+  {
+   "metric": "shot_type_changes_per_min",
+   "reference": 1.6,
+   "generated": 4.69,
+   "diff": 3.09,
+   "rel_diff": 1.931
+  },
+  {
+   "metric": "motion",
+   "reference": 0.0458,
+   "generated": 0.0384,
+   "diff": -0.007,
+   "rel_diff": 0.162
+  }
+ ],
+ "reference_profile": {
+  "schema": "nexus.ReferenceStyleProfile/1",
+  "name": "explainer (NASA, public domain)",
+  "source": {
+   "uri": "file:///home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+   "duration": 300.067,
+   "analysed_fps": 2.0
+  },
+  "metrics": {
+   "duration": 300.067,
+   "shot_length": {
+    "n": 12,
+    "mean": 25.008,
+    "median": 16.916,
+    "p10": 3.523,
+    "p90": 50.733,
+    "std": 23.253
+   },
+   "cuts_per_min": 2.2,
+   "first_3s": {
+    "cuts": 0,
+    "speech_s": 0,
+    "text_frames_share": 0.0,
+    "motion": 0.0057,
+    "first_speech_s": null
+   },
+   "first_10s": {
+    "cuts": 0,
+    "speech_s": 0,
+    "text_frames_share": 0.3,
+    "motion": 0.0164,
+    "first_speech_s": null
+   },
+   "hook": {
+    "t": 11.34,
+    "score": 0.7000000000000001,
+    "first_speech_s": 11.34
+   },
+   "shot_types": {
+    "close-up": 0.333,
+    "medium": 0.667
+   },
+   "shot_type_changes_per_min": 1.6,
+   "scene_variety": 0.167,
+   "visual_density": {
+    "motion": 0.0458,
+    "edges": 0.0919
+   },
+   "cutaways_per_min": 0.4,
+   "on_screen_text_share": 0.585,
+   "on_screen_text_method": "edge-density heuristic per frame band (not OCR) + SigLIP zero-shot 'text or a title card' / 'a chart or diagram' shots",
+   "speech_share": 0.598,
+   "music_bed_share": 0.842,
+   "audio_accents_per_min": 10.4,
+   "pattern_interrupt_s": {
+    "n": 28,
+    "mean": 10.717,
+    "median": 4.75,
+    "p10": 1.196,
+    "p90": 27.45,
+    "std": 13.547
+   },
+   "ending": {
+    "speech_ends_before_s": 24.04,
+    "text_share": 1.0,
+    "motion": 0.0197,
+    "fade_to_black": false,
+    "kind": "end_card"
+   },
+   "thumbnail_candidates": [
+    {
+     "t": 120.75,
+     "score": 0.654,
+     "why": [
+      "face 0.35 of the height at x=0.50"
+     ]
+    },
+    {
+     "t": 61.75,
+     "score": 0.612,
+     "why": [
+      "face 0.32 of the height at x=0.47"
+     ]
+    },
+    {
+     "t": 11.75,
+     "score": 0.588,
+     "why": [
+      "face 0.25 of the height at x=0.63"
+     ]
+    }
+   ],
+   "wpm": 95.8,
+   "colour": {
+    "n": 600,
+    "luma_mean": 0.717,
+    "luma_contrast": 0.193,
+    "saturation": 0.133,
+    "colourfulness": 17.6,
+    "warmth": 0.046,
+    "monochrome_share": 0.532
+   },
+   "transitions": {
+    "measured_cuts": 11,
+    "hard_cut": 9,
+    "gradual": 2,
+    "fade_through_black": 0,
+    "hard_cut_share": 0.818,
+    "gradual_share": 0.182,
+    "fade_through_black_share": 0.0
+   }
+  },
+  "structure": [
+   {
+    "t0": 0.0,
+    "t1": 3.0,
+    "role": "first_3s"
+   },
+   {
+    "t0": 0.0,
+    "t1": 10.0,
+    "role": "first_10s"
+   },
+   {
+    "t0": 11.34,
+    "t1": 18.1,
+    "role": "hook"
+   },
+   {
+    "t0": 292.07,
+    "t1": 300.07,
+    "role": "ending:end_card"
+   }
+  ],
+  "rights": {
+   "basis": "public-domain",
+   "evidence": "https://images.nasa.gov/details/ARC-20140529-AAV3515-NASA-Explains-Cold-Zone-Above-Tropics",
+   "kept": "numbers and timestamps only; no frames, text or sound of the reference"
+  },
+  "method": {
+   "visual": "siglip-base-patch16-224-int8",
+   "faces": true,
+   "text": "edge-density heuristic per frame band (not OCR) + SigLIP zero-shot 'text or a title card' / 'a chart or diagram' shots"
+  }
+ },
+ "generated_profile": {
+  "schema": "nexus.ReferenceStyleProfile/1",
+  "name": "demo 4 output",
+  "source": {
+   "uri": "file:///tmp/a2-demos/projects/prj_1d648d20c1/renders/demo4_reference.mp4",
+   "duration": 89.6,
+   "analysed_fps": 2.0
+  },
+  "metrics": {
+   "duration": 89.6,
+   "shot_length": {
+    "n": 11,
+    "mean": 8.145,
+    "median": 6.9,
+    "p10": 1.766,
+    "p90": 18.667,
+    "std": 6.984
+   },
+   "cuts_per_min": 6.7,
+   "first_3s": {
+    "cuts": 0,
+    "speech_s": 2.89,
+    "text_frames_share": 0.833,
+    "motion": 0.0237,
+    "first_speech_s": 0.11
+   },
+   "first_10s": {
+    "cuts": 3,
+    "speech_s": 7.39,
+    "text_frames_share": 0.95,
+    "motion": 0.0365,
+    "first_speech_s": 0.11
+   },
+   "hook": {
+    "t": 0.11,
+    "score": 0.9,
+    "first_speech_s": 0.11
+   },
+   "shot_types": {
+    "medium": 0.545,
+    "wide": 0.455
+   },
+   "shot_type_changes_per_min": 4.69,
+   "scene_variety": 0.636,
+   "visual_density": {
+    "motion": 0.0384,
+    "edges": 0.1133
+   },
+   "cutaways_per_min": 0.67,
+   "on_screen_text_share": 0.626,
+   "on_screen_text_method": "edge-density heuristic per frame band (not OCR) + SigLIP zero-shot 'text or a title card' / 'a chart or diagram' shots",
+   "speech_share": 0.894,
+   "music_bed_share": 0.989,
+   "audio_accents_per_min": 0.67,
+   "pattern_interrupt_s": {
+    "n": 17,
+    "mean": 5.271,
+    "median": 5.18,
+    "p10": 1.856,
+    "p90": 7.4,
+    "std": 2.891
+   },
+   "ending": {
+    "speech_ends_before_s": 2.59,
+    "text_share": 0.625,
+    "motion": 0.0457,
+    "fade_to_black": false,
+    "kind": "end_card"
+   },
+   "thumbnail_candidates": [
+    {
+     "t": 40.25,
+     "score": 0.827,
+     "why": [
+      "face 0.27 of the height at x=0.36",
+      "text on screen (-)"
+     ]
+    },
+    {
+     "t": 26.25,
+     "score": 0.826,
+     "why": [
+      "face 0.09 of the height at x=0.57"
+     ]
+    },
+    {
+     "t": 62.25,
+     "score": 0.804,
+     "why": [
+      "face 0.10 of the height at x=0.38"
+     ]
+    }
+   ],
+   "wpm": 175.4,
+   "colour": {
+    "n": 179,
+    "luma_mean": 0.353,
+    "luma_contrast": 0.209,
+    "saturation": 0.347,
+    "colourfulness": 48.0,
+    "warmth": 0.082,
+    "monochrome_share": 0.056
+   },
+   "transitions": {
+    "measured_cuts": 10,
+    "hard_cut": 6,
+    "gradual": 2,
+    "fade_through_black": 2,
+    "hard_cut_share": 0.6,
+    "gradual_share": 0.2,
+    "fade_through_black_share": 0.2
+   }
+  },
+  "structure": [
+   {
+    "t0": 0.0,
+    "t1": 3.0,
+    "role": "first_3s"
+   },
+   {
+    "t0": 0.0,
+    "t1": 10.0,
+    "role": "first_10s"
+   },
+   {
+    "t0": 0.11,
+    "t1": 7.31,
+    "role": "hook"
+   },
+   {
+    "t0": 81.6,
+    "t1": 89.6,
+    "role": "ending:end_card"
+   }
+  ],
+  "rights": {
+   "basis": "owned",
+   "kept": "numbers and timestamps only; no frames, text or sound of the reference"
+  },
+  "method": {
+   "visual": "siglip-base-patch16-224-int8",
+   "faces": true,
+   "text": "edge-density heuristic per frame band (not OCR) + SigLIP zero-shot 'text or a title card' / 'a chart or diagram' shots"
+  }
+ },
+ "not_copied": "no frame, transcript line, title, music or sound of the reference is in the output; the output's words and pictures all come from the source benchmark",
+ "machine": "shared 4-vCPU container, no GPU",
+ "human_review": "PENDING"
+}
