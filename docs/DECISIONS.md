@@ -45,3 +45,21 @@ local server process.
 `nexus/contracts.py` stays as-is on Account 1's branch. `integration/contracts_v1/apply.sh` moves it to
 `nexus/contracts/cloud.py` during the A1 → A2 → A3 merge. Committing the package layout on Account 1's branch alone would
 collide with Account 2's `nexus/contracts/__init__.py` in the same way.
+
+**D-13 The control plane is a single-process service; production enforces it (Account 1, 2026-11-13).** Rate-limit
+counters, the remote-job poller, the alert loop and the scheduler thread live in one process, and SQLite is the only
+state store. A shared rate-limit store (Redis etc.) would add a service for no benefit to a single owner. So
+production takes an OS lock on `NEXUS_HOME/run/api.lock` (released by the kernel on death), `serve` runs uvicorn with
+one worker, and behind the owner's reverse proxy the real client is taken from `X-Forwarded-For` only for peers in
+`NEXUS_TRUSTED_PROXIES`. Horizontal scaling is documented as unsupported.
+
+**D-14 Backups carry the vault as ciphertext and never the key (Account 1, 2026-11-13).** Without the vault entries a
+restored host must re-authorise every Drive account; with entries and key together one backup copy would expose every
+credential. So `*.secret` files go into the `state` tier (Fernet ciphertext, plus AES-256-GCM for remote
+destinations) and `vault.key` never does; the key lives in the host's secret store (`NEXUS_VAULT_KEY`) and in an
+offline copy made with `python -m nexus vault-key export` (never printed, refused inside NEXUS_HOME, the repository or a
+backup destination). Production refuses to start while a key file sits in NEXUS_HOME.
+
+**D-15 Production is an explicit, fail-closed profile (Account 1, 2026-11-13).** `NEXUS_ENV=production` turns
+development conveniences (loopback without token, generated key file, API docs) off and refuses to start unless every
+gate in `nexus/cloud/production.py` passes, so a misconfigured host can never silently serve in development mode.

@@ -82,6 +82,10 @@ supplies `render_master` / `render_short`). New tables: add a NEW migration at t
 | `NEXUS_API_TOKEN` | owner token; **required** on any host that is not loopback (otherwise only 127.0.0.1 is served) |
 | `NEXUS_VAULT_KEY` | Fernet key for the vault (inject from the host's secret store; else a key file in NEXUS_HOME/secrets) |
 | `NEXUS_PUBLIC_ORIGIN` | public origin for the CSRF same-origin check behind a proxy |
+| `NEXUS_ENV` | `production` = production profile: refuses to start unless every gate passes (`python -m nexus production-check`); see `ACCOUNT1_PRODUCTION_DEPLOYMENT.md` |
+| `NEXUS_TRUSTED_PROXIES` | the reverse proxy's address; only it may name the real client in `X-Forwarded-For` (rate limiting) |
+| `NEXUS_MAX_BODY_BYTES` / `NEXUS_MAX_UPLOAD_BYTES` | request limits, default 8 MiB JSON / 20 GiB multipart (413 above) |
+| `NEXUS_BACKUP_PASSPHRASE` | backup encryption for remote destinations (required in production when one exists) |
 | `NEXUS_EMBEDDED_WORKER` | `0` = no in-process job worker / compute poller (scripts, tests) |
 | `NEXUS_SCHEDULER_THREAD` | `0` = no scheduler background loop |
 | `NEXUS_LIVE=1`, `NEXUS_LIVE_DRIVE=1` | enable live tests (`tests/live/`) |
@@ -90,7 +94,7 @@ Secrets (Kaggle token, Google OAuth client, refresh tokens, worker-token hashes)
 ## 6. Test commands
 ```bash
 python -m ruff check .
-NEXUS_SCHEDULER_THREAD=0 python -m pytest -q tests/fast          # 412 passed, 4 skipped in the dev container; CI: 411 passed, 5 skipped (font/rclone skips)
+NEXUS_SCHEDULER_THREAD=0 python -m pytest -q tests/fast          # A1 HEAD: see ACCOUNT1_FINAL_RELEASE_AUDIT.md §2 (CI and dev-container counts)
 python -m pytest -q tests/e2e/test_studio_browser.py            # real Chromium run of the Studio
 NEXUS_LIVE=1 python -m pytest -q tests/live/test_kaggle_live.py  # needs the Kaggle token in the vault (uses GPU quota)
 python scripts/release_check.py                                 # fresh clone + hygiene + lint + fast suite
@@ -106,19 +110,23 @@ python scripts/release_check.py                                 # fresh clone + 
 - Pull workers (owner GPU / Colab) are tested through the API, not yet against a real remote machine.
 - No permanent host chosen: the control plane runs locally/Codespaces; hosting needs the owner's decision (see
   `docs/ACCOUNT1_PROVIDER_COMPARISON.md`). The session cookie is `Secure`: non-localhost needs HTTPS.
-- The rate limiter is in-memory, per process.
+- The rate limiter is in-memory, per process; production enforces a single API process per `NEXUS_HOME` (OS lock).
+- Since `dafefe3`: a job manifest whose params/inputs contain a token-shaped string or a stored secret value is refused
+  on submit (`ValueError`); JSON request bodies above 8 MiB get 413 (use multipart or an artifact for large inputs).
 
 ## 8. Next steps
 - **Account 2:** implement `render_master`, `render_short`, `generate_video` as worker tasks; submit via the dispatcher;
   write outputs as artifacts; set the scheduler plan to these names. Start with Wan 2.1 1.3B on the T4.
 - **Account 3:** declare AI providers with `AIProviderCapability/v1`; implement `translate`, `publish_*` tasks the same
   way; publishing must stay manual-approval until the owner authorises platform OAuth.
-- **Owner:** publish the OAuth consent screen; choose a host; back up the vault key. Kaggle: CLOSED — accepted as-is by the owner.
+- **Owner:** publish the OAuth consent screen; approve a host; offline vault-key backup (`ACCOUNT1_DISASTER_RECOVERY.md`). KAGGLE: CLOSED — ACCEPTED AS-IS BY OWNER.
 - Account 3 specifics (payload examples, error shapes, checkpoint rules, capability classes): `docs/ACCOUNT1_HANDOFF_TO_ACCOUNT3.md`.
 
-## Shared-contracts integration status (refreshed 2026-11-13)
-- Account 2 `a52a24a` declares `scipy`, `onnxruntime` and `opencv-python-headless` and fixed the Windows path issues.
-  PR #6 CI is green (Linux, Windows 339 passed / 11 skipped, windows-e2e).
-- Integration at exact heads A1 `e9ad5e9` + A2 `a52a24a` + A3 `fd71471` + `apply.sh` (local, not pushed): 748 passed,
-  0 failed, 12 skipped with CI's dependency set (Linux). Windows was not run on the merged tree.
-- No open Account 2 item for Account 1. Details: `docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md` §7.
+## Shared-contracts integration status (refreshed 2026-11-13, production-closure round)
+- Latest Account 2 head checked: `d979df1` (`work/account-2-cinematic-engine`). Earlier results at `a52a24a` are superseded.
+- Integration at exact heads A1 `34a5ba1` + A2 `d979df1` + A3 `fd71471` + `apply.sh` (local, not pushed): INTEG_RESULT
+- The previous figure (748 passed at A1 `e9ad5e9` + A2 `a52a24a`) is superseded and no longer quoted as current.
+- Windows CI and the Windows clean-machine E2E on the merged tree are not run: they wait for Account 3's `batch_llm`
+  manifest fix and the owner's merge approval (the merged tree is not pushed).
+- No open Account 2 item for Account 1. The Account 2 report of a failing Account 1 cookie/CSRF test is explained and
+  closed (`ACCOUNT1_SECURITY_MODEL.md` §7.3). Details: `docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md` §7.

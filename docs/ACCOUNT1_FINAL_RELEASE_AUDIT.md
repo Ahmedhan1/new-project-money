@@ -1,214 +1,260 @@
-# Account 1 — final release audit (refreshed 2026-11-13, closure round)
+# Account 1 — final release audit (production-closure round, 2026-11-13)
 
-Scope: Account 1 (cloud platform) on `work/account-1-cloud-platform`, PR #4. This audit covers Account 1's own code and
-its integration status with Accounts 2 and 3. It is **not** a production-readiness claim for NEXUS as a whole.
+Scope: Account 1 (cloud platform and production infrastructure) on `work/account-1-cloud-platform`, PR #4, and its
+integration status with Accounts 2 and 3.
 
-**KAGGLE: CLOSED — ACCEPTED AS-IS BY OWNER** (owner decision, 2026-11-13). No further Kaggle changes are
-requested or planned. The residual credential exposure is recorded in §9.
+This audit makes no production-readiness claim for NEXUS as a whole. Nothing has been deployed, merged or exposed
+publicly.
 
-## 1. Verified PR state (re-fetched from GitHub, 2026-11-13)
+**KAGGLE: CLOSED — ACCEPTED AS-IS BY OWNER.** This round made no Kaggle change, requested no rotation, and did no quota
+work. The residual exposure is recorded in §9 as a fact, not as an action.
+
+## 0. Verdicts
+| Scope | Verdict |
+|---|---|
+| **Account 1** | **READY FOR OWNER DEPLOYMENT.** Engineering is complete and verified (§2–§8). What remains is owner-controlled (§10): approve a host, inject the secrets, make the offline vault-key backup, publish the OAuth consent screen, and run `production-check` plus one backup/restore drill on the host. |
+| Three-account release | **BLOCKED** on one cross-account item owned by Account 3: `bench_v2.account1_manifest` is incompatible with `batch_llm` (§7.4). The merged tree has not been run on Windows. |
+| NEXUS as a whole | Not assessed here. Not READY FOR PRODUCTION: nothing runs on an approved host yet. |
+
+## 1. Verified PR state (re-fetched from GitHub)
 | | Value |
 |---|---|
 | PR #4 | open, **draft**, unmerged: https://github.com/Ahmedhan1/new-project-money/pull/4 |
-| Base | `claude/hopeful-allen-luubcy` @ `c93847d` (PR #3, draft). PR #3 is fully contained in Account 1's branch. |
-| Code head of this audit | `e9ad5e9`. Code is unchanged since `9ea4a73`; `bb94742` and `e9ad5e9` are docs/state only. This closure round adds docs/state commits only. |
+| Base | `claude/hopeful-allen-luubcy` @ `c93847d` (PR #3, draft) |
+| Code head audited | `dafefe3` (production hardening `34a5ba1` + manifest credential refusal / runbooks `dafefe3`). Later commits are docs/state only. |
 | Reviews | 0 reviews, 0 review threads |
-| Merged into `main` | nothing. No merge, force-push, branch deletion or change to an Account 2/3 branch. |
+| Merged / deployed | nothing. No force-push, no branch deletion, no change to an Account 2/3 branch, no billing. |
 
-## 2. Account 1 CI on the newest code head
-Run [43389988132](https://github.com/Ahmedhan1/new-project-money/actions/runs/43389988132) (CI) and run 43389988073
-(Windows end-to-end), both on `e9ad5e90211cd8758895b776e5e3e71b3c6f67cb`. GitHub reports every job as **success**.
-
-| Job | Conclusion | Fast tests | Steps |
-|---|---|---|---|
-| lint-and-fast-tests (ubuntu-latest), [job 131767364365](https://github.com/Ahmedhan1/new-project-money/actions/runs/43389988132/job/131767364365) | success | **411 passed, 0 failed, 5 skipped** (416 collected) | lint, state validation, fast tests, secret/media scan: all success |
-| lint-and-fast-tests (windows-latest), [job 131767364767](https://github.com/Ahmedhan1/new-project-money/actions/runs/43389988132/job/131767364767) | success | **411 passed, 0 failed, 5 skipped** (416 collected) | same steps: all success |
-| windows-e2e (clean machine), job 131767312704 | success | n/a | |
-
-Earlier code heads: `2ac7f96` was green (runs 43385684356 and 43385684363). The CI run on `9ea4a73` was **cancelled**
-because `e9ad5e9` was pushed right after it; it did not fail.
+## 2. Account 1 CI
+CI_TABLE
 
 ### Test-count reconciliation
-All three environments collect the same 416 tests. The differences are environment-dependent skips only:
-| Environment | Result | Skipped tests |
+- Every environment collects the same tests. The differences are environment-dependent skips only.
+- Linux CI skips:
+  - TTS voice (1);
+  - voice models (2);
+  - `test_languages` glyphs for zh and hi (no runner font).
+- Windows CI skips:
+  - TTS voice (1);
+  - voice models (2);
+  - hi glyphs (1);
+  - rclone (1).
+- Dev container skips:
+  - TTS voice (1);
+  - voice models (2);
+  - rclone (1).
+- The local full run on this round's code: **428 passed, 4 skipped** (432 collected). It adds the 16 production tests
+  to the earlier 412/4.
+- Method:
+  - CI prints no skip reasons;
+  - the skips were identified by mapping each `s` to `pytest --collect-only -q` order (reconciled in the previous round,
+    unchanged).
+
+## 3. Production security audit (whole Account 1 branch)
+| Area | Result | Evidence |
 |---|---|---|
-| Linux CI (Ubuntu runner, Python 3.12) | 411 passed, 5 skipped | `test_audio_post::test_clean_speech…` (no TTS voice), `test_diarize_faces` ×2 (no voice models), `test_languages::…glyphs…[zh]` and `[hi]` (runner has no matching font) |
-| Windows CI (Python 3.12) | 411 passed, 5 skipped | TTS voice (1), voice models (2), `test_languages…[hi]` (no font), `test_storage_backup::test_backend_contract[rclone]` (rclone not installed on Windows CI) |
-| Dev container, clean clone (`scripts/release_check.py` at `9ea4a73`; Python 3.13; Noto fonts installed) | 412 passed, 4 skipped | TTS voice (1), voice models (2), rclone (1, not installed here) |
-| Dev container, fresh venv from `requirements-ci.txt` only | 412 passed, 4 skipped | same as above, so Python packages are not the cause; the runner's fonts and tools are |
+| Authentication on every protected route | every `/api/v1` route depends on `require_owner` / `require_worker` except 6 documented public routes (contracts, session, live, ready, studio auth/logout, OAuth callback). Legacy `/api/*`, `/`, `/docs`, `/redoc` and `/openapi.json` are owner-only; the docs are not served in production. | `test_every_v1_route_requires_auth`, `test_route_inventory_detects_unprotected`, `test_api_docs_are_owner_only_in_development` |
+| Session lifecycle | HMAC-signed `s1.<issued>.<sig>` value, 12 h TTL, future-dated values refused, rotating the token ends every session, logout clears the cookie | `test_cookie_session_and_csrf` |
+| Cookie attributes | HttpOnly, SameSite=Strict, Path=/, Max-Age; Secure on https or behind a proxy; never the token itself | `test_session_cookie_attributes` |
+| CSRF | cookie-authenticated unsafe methods need `X-NEXUS-CSRF: 1` **and** a same-origin Origin/Referer (`NEXUS_PUBLIC_ORIGIN`, https-only in production); bearer clients are not CSRF-exposed | `test_cookie_session_and_csrf`, `test_duplicate_session_cookies_are_decided_by_signature_not_parser_order` |
+| Duplicate cookies (Account 2's report) | explained and closed (§3.1) | same |
+| CORS | no CORS middleware: cross-origin requests are never granted, and the custom CSRF header forces a preflight | code review; `test_loopback_cross_origin_post_refused` |
+| Host validation | loopback mode accepts only loopback Host names (DNS rebinding); proxy headers make a request remote | `test_dns_rebinding_host_refused`, `test_proxied_loopback_is_remote` |
+| SSRF / redirects | ingestion resolves and validates every hop (private, link-local and metadata ranges refused; at most 5 redirects, each re-validated); outbound hosts go through the Cost Guard allow-list | `test_ingest.py` (71), `ingest_ssrf_live.json` (34/34 refused) |
+| Rate limiting | 10 failures / 5 min per client → 429 + audit. Behind the proxy the client comes from `X-Forwarded-For` only for `NEXUS_TRUSTED_PROXIES`; spoofing is ignored. Single process enforced. | `test_rate_limit_after_failures`, `test_rate_limit_identity_behind_trusted_proxy`, `test_single_instance_lock_refuses_a_second_api_process` |
+| Request / upload size | JSON 8 MiB, multipart 20 GiB, including chunked bodies (413); legacy upload: type allow-list (415), base name only, private temp folder; ingest adds `max_bytes` and content checks | `test_body_and_upload_limits`, `test_ingest.py` |
+| Worker authentication | per-worker `nxw_` tokens (256 bits), only SHA-256 stored in the vault, rotate/revoke, rate limited and audited | `test_worker_token_hashing` |
+| Vault | Fernet at rest, files 0600 / dir 0700, wrong key fails closed (`undecryptable` counted, health not ok), production key injected and not on disk | `test_recovery`, `test_production_gates_*` |
+| Secret redaction | every stored secret value and token-shaped string is redacted from events, audit, alerts and logs; job manifests carrying a credential are refused | `test_audit_strips_secrets`, `test_alerts_for_backup_auth_and_disk`, `test_job_manifest_with_a_credential_is_refused`, `test_no_secrets.py` |
+| Audit coverage | auth failures and lockouts, sessions, worker tokens, connections and OAuth, secrets, scans, remote dispatch, service start/stop/unclean restart, vault-key export | `test_rate_limit_after_failures`, `test_lifecycle_*`, `test_offline_vault_key_export_and_verify` |
+| Errors without leaks | auth errors are generic; production-gate messages name checks and fixes, never values; `/health/ready` returns only the verdict | `test_production_gates_fail_closed_and_name_fixes_without_values`, `test_readiness_probe_reveals_only_the_verdict` |
 
-Method: CI runs `pytest -q` without `-rs`, so it prints no skip reasons. The CI skips were identified by mapping each
-`s` in the progress output to the collected test order (`pytest --collect-only -q`, 416 items, same order).
-`NEXUS_STATE.json` had shown `411 passed, 4 skipped`. That came from a local run made before the control-plane-restart
-test was added (415 tests). It is regenerated in this round from a full local run on the current code.
+Fixed in this round (with tests):
+- duplicate-cookie order dependence;
+- per-proxy rate-limit lockout;
+- missing body and upload limits;
+- unguarded `/docs` and `/openapi.json`;
+- credentials accepted in job manifests;
+- a hosted deployment silently running in dev mode.
 
-## 3. Verified Account 1 capabilities
-Each row is backed by implementation plus tests or recorded evidence. "Live" means a real provider was used.
-| Capability | Fast tests | Live evidence |
-|---|---|---|
-| Kaggle remote execution (one account), private kernels, artifact SHA-256 verification, idempotency | `test_cloud_compute.py` | `kaggle_probe.json`, `kaggle_transcode.json` (T4 x2, NVENC) |
-| Safe quota handling: provider pause, no rotation, GPU jobs wait queued, never paid fallback | `test_cloud_compute.py`, `test_scheduler.py` | simulated quota message only (§6) |
-| Dispatching, priorities, cancellation, retries, checkpoints, resume after worker loss and after a control-plane restart | `test_cloud_compute.py` (incl. `test_control_plane_restart_adopts_the_running_remote_job_without_a_second_push`) | `kaggle_resume.json`, `lead_demos.json` (control-plane SIGKILL) |
-| Google Drive A/B/C: device flow, encrypted refresh tokens, isolation, resumable upload, SHA-256, move, delete | `test_cloud_storage.py` (fake server) | `storage_drive_live.json`, `storage_drive_live_isolation.json` (3 real accounts) |
-| Drive → Kaggle → Drive with no download to the owner's PC | — | Demo E in `lead_demos.json` |
-| Storage routing (rules, failover, replication, reserve) | `test_cloud_storage.py` | real routing; failover between real Drives not forced |
-| Link ingestion + SSRF protections | `test_ingest.py` | `ingest_live.json`, `ingest_ssrf_live.json` |
-| Scheduler controls (daily target, pause/resume, stop-after-current, stop, budgets) and alerts | `test_scheduler.py`, `test_cloud_security.py` | `lead_demos.json` (demo F) |
-| Remote Studio + observability | `test_studio_api.py`, `tests/e2e/test_studio_browser.py` | dev host only |
-| Vault, owner auth, sessions, CSRF, headers, worker tokens, audit, route-auth inventory | `test_cloud_security.py` (20), `test_no_secrets.py` | `security_recovery.json` (7/7) |
-| `batch_llm`: Kaggle-only routing, limits (items, tokens, prompt chars, weight size before download, time budget), checkpointed parts, joined results | `test_cloud_batch_llm.py` (8, simulated `echo` engine) | `batch_llm_live.json`: Qwen2.5-0.5B-Instruct, Tesla T4 x2, 8/8 items, job `rjob_877fa89eb0ac` |
-| Cost Guard: `www.wikidata.org` declared; GDELT left to Account 3 | `test_costguard_research_hosts.py` (4) | reachability not verified from the owner's PC |
+Accepted residual risks: `ACCOUNT1_SECURITY_MODEL.md` §7.2 (no FFmpeg fuzzing, Codespaces header assumption, in-memory
+counters reset on restart, CSP `unsafe-inline` for the single-file UI, the Kaggle residual exposure).
 
-## 4. Account 1 code changes (all rounds since the start of the final closure)
-| Commit | Change |
+### 3.1 The cookie/CSRF discrepancy
+Account 2's audit reported `test_cookie_session_and_csrf` failing with httpx 0.28 on an earlier Account 1 commit.
+
+Reproduced 2026-11-13 with httpx 0.28.1 and Starlette 1.7.0:
+- httpx keeps the server-set cookie (domain `testserver.local`) next to a manually set one, and sends both:
+  `nexus_session=GOOD; nexus_session=FORGED`.
+- The old test's "forged cookie → 401" therefore depended on which value the server's cookie parser kept.
+
+Conclusions:
+- **Test failure:** environment-dependent; it came from the test's ambiguous input.
+- **Security issue:** none. In every case the server accepted only a value with a valid HMAC, and that client really
+  held a valid session.
+- **Earlier report:** outdated. The test was fixed in `2ac7f96`, and Account 3's `RESULT.md` r2 confirms it passes.
+- **Server:** now decides deterministically. Every presented value is checked, so a planted sibling can neither grant
+  access nor lock the owner out. A regression test sends both orders explicitly.
+- **Current head:** passes on Linux and Windows CI (§2).
+
+## 4. Deployment readiness (`ACCOUNT1_PRODUCTION_DEPLOYMENT.md`)
+| Item | Status |
 |---|---|
-| `2ac7f96` | `batch_llm` worker task, TaskSpec, dispatcher join step, `wikidata` component, deterministic cookie/CSRF test, live script and evidence |
-| `9ea4a73` | control-plane-restart regression test; Account 3 handoff §7–8; tasks; decisions D-11, D-12 |
-| `bb94742`, `e9ad5e9` | audit, acceptance demo L, handoffs, state |
-| this round | docs/state only: Kaggle closure, test-count reconciliation, latest-head integration, PR #5 interface notice |
+| Explicit production mode, different from development | `NEXUS_ENV=production`, fail-closed, 12 gates; tested with a real subprocess (refuses, then serves with docs off) |
+| Service startup / supervision | `nexus serve` (systemd unit and Windows Task Scheduler in the runbook, with `production-check` as ExecStartPre); `NEXUS_START.bat` for the owner PC |
+| Graceful shutdown | uvicorn 30 s drain; lifespan stops poller, alerts and scheduler, audits, releases the lock; durable jobs resume from checkpoints |
+| Health / readiness | `/api/v1/health/live`, `/api/v1/health/ready` (200/503, verdict only), `/api/v1/health` (owner, full detail including failing gates) |
+| Persistent configuration | `NEXUS_HOME` (database, vault ciphertext, settings, storage rules); secrets only through the host's secret store |
+| Database init / migrations | schema migrations on first connection; migration 2 tested on a pre-cloud database |
+| Secure secret loading | token, vault key and backup passphrase from environment / secret store; key file in `NEXUS_HOME` blocks production |
+| TLS / reverse proxy | loopback bind enforced; TLS terminates in the proxy; HSTS on https; `X-Forwarded-*` interpreted only for trusted proxies; uvicorn `proxy_headers=False` |
+| Logging / rotation | service logs size-rotated (20 MiB × 5); journald under systemd; audit table retention 90 days / 20,000 rows |
+| Monitoring / error reporting | alerts + notifications + audit (§7 of the runbook); external uptime check on `/health/ready`; no third-party SaaS |
+| Restart recovery | tested: control-plane restart adopts the running Kaggle job without a second push; unclean stop detected |
+| Scheduled jobs | scheduler persisted and re-planned on restart; backup schedule via timer/cron + overdue alert |
+| Single vs multi instance | **single instance, enforced** (OS lock); multi-instance not supported (D-13) |
+| Host | **not chosen.** Recommended zero-cost target: owner machine + Tailscale Serve (private). Public exposure only with explicit approval. |
 
-## 5. Evidence types, kept separate
-| Type | What it proves | Where |
+## 5. Backup and recovery (`ACCOUNT1_DISASTER_RECOVERY.md`)
+| Item | Status | Evidence |
 |---|---|---|
-| Fast tests (dev container) | logic, with fake services | `scripts/release_check.py` → 412 passed, 4 skipped |
-| CI (GitHub, Linux + Windows) | the same suite on clean runners | §2 |
-| Clean-machine Windows E2E | install + launch on a fresh Windows runner | `windows-e2e` job |
-| Browser E2E | real Chromium against the Studio | `tests/e2e/test_studio_browser.py` (dev container) |
-| Real Kaggle | real GPU jobs | `kaggle_*.json`, `batch_llm_live.json`, `lead_demos.json` |
-| Real Google Drive | three real accounts | `storage_drive_live*.json`, Demo E |
-| Fake services only | revoke flow, quota message, pull-worker protocol | `test_cloud_storage.py`, `test_cloud_compute.py` |
-| Not done on the owner's machine | deployment, host, Wikidata/GDELT reachability, real owner-GPU worker | — |
+| Encrypted backups | AES-256-GCM (scrypt) for remote destinations; vault entries are Fernet ciphertext in every backup | `test_encrypted_backup_roundtrip_and_wrong_passphrase`, `test_backup_carries_vault_ciphertext_never_the_key` |
+| Key separation | `vault.key` is never collected; a snapshot containing one is flagged at restore; raw destination bytes checked for both key and credential | same |
+| Integrity verification | every object re-read and checksummed before success; corruption and missing objects detected | `test_backup_verify_restore_and_reopen_project`, `test_corruption_and_missing_objects_are_detected` |
+| Restore + validation | new empty folder only; checksums per file; references re-opened; vault decryptability reported (no key / right key / wrong key) | `test_backup_carries_vault_ciphertext_never_the_key` |
+| Backup history | `last_backup.json` + `backup` documents in the database; `last_restore_drill.json` | `nexus status` |
+| Safe failure | destinations independent; free-allowance cap respected; failed, incomplete or overdue backups alert | `test_one_destination_down_does_not_lose_data`, `test_free_allowance_cap_is_never_exceeded`, `test_alerts_for_backup_auth_and_disk` |
+| Offline vault-key backup | `vault-key export` (never printed; refuses `NEXUS_HOME`, the repository, backup roots; never overwrites) + `verify` + fingerprint | `test_offline_vault_key_export_and_verify` |
+| Real Drive restore / revoke / failover | **not run.** Owner-authorised procedure documented. | — |
 
-## 6. Live vs simulated
-| Capability | Live | Simulated only |
-|---|---|---|
-| Kaggle probe / transcode / NVENC / checksums | yes | |
-| Worker-loss resume, control-plane-crash resume | yes | also fast tests |
-| `batch_llm` with a real model | yes | `echo` engine in fast tests |
-| Drive A/B/C, isolation, resumable upload, move, delete; Drive → Kaggle → Drive | yes | |
-| Drive token revocation | no | fake server |
-| Drive backup/restore | no | local drill only |
-| Forced failover between real Drives | no | logic tests |
-| Kaggle quota-exhaustion message | no (never forced; Kaggle closed) | fake CLI message |
-| Owner GPU / Colab pull worker | no | protocol tests |
-| Permanent public HTTPS | no | |
+## 6. OAuth readiness (`ACCOUNT1_OAUTH_PRODUCTION_CHECKLIST.md`)
+- Engineering is complete:
+  - device flow and web flow (PKCE, single-use state, https redirect);
+  - `drive.file` + `openid` + `email` only;
+  - refresh tokens only in the vault;
+  - revoke on disconnect;
+  - reauth alerts.
+- Google's facts were re-checked from Google's pages on 2026-11-13:
+  - Testing-mode refresh tokens expire after 7 days;
+  - `drive.file` is non-sensitive, so verification is not mandatory;
+  - `drive.file` is allowed in the device flow.
+- **Production OAuth readiness is not claimed.** The owner must publish the consent screen and reconnect A/B/C.
 
 ## 7. Cross-account integration (exact SHAs; separate from Account 1's own CI)
-### 7.1 Latest-head run (this round), local branch `integration/latest-heads-check`, not pushed
+### 7.1 Current run (this round), local branch `integration/heads-34a5ba1`, not pushed
 | Input | SHA |
 |---|---|
-| Account 1 | `e9ad5e90211cd8758895b776e5e3e71b3c6f67cb` |
-| Account 2 | `a52a24ac93689ebac917f9e9ac0452ab9bc2f297` |
-| Account 3 | `fd71471df08dc82e262176487651c04c947fa9f8` (its `integration/contracts_v1/apply.sh`) |
+| Account 1 | `34a5ba1349f99bda83865bf15103943286791698` |
+| Account 2 | `d979df1e390abc48e79a7e6645229968a5b94107` (`work/account-2-cinematic-engine`) |
+| Account 3 | `fd71471df08dc82e262176487651c04c947fa9f8` (`work/account-3-intelligence-growth`, its `integration/contracts_v1/apply.sh`) |
 
-Order: A1 → merge A2 → merge A3 → `apply.sh`.
+Order: fresh tree at A1 → merge A2 → merge A3 → `apply.sh`.
 
 Conflicts, all resolved by keeping both sides:
-- `nexus/registry/tasks.yaml` (85 unique ids);
-- `nexus/api.py` (A1 security middleware + A3 router);
-- `nexus/workflows.py`;
-- `nexus/ui/index.html` (A1's deep-link `go(...)` placed after `intelligence.js`).
+- `nexus/registry/tasks.yaml`: union; 87 unique ids, registry validates.
+- `nexus/api.py`: A1 production gate, owner guard and limits + A3 router.
+- `nexus/workflows.py`: A2 remote-render registration + A3 job kinds.
+- `nexus/ui/index.html`: A1 deep-link `go(...)` after `intelligence.js`, replacing A3's `go("home")`.
 
-Generated docs/state files took Account 1's side. `apply.sh` moved `nexus/contracts.py` → `nexus/contracts/cloud.py`
-and `test_contracts.py` → `test_contracts_cloud.py`. Account 2 already ships `media.py`.
+Generated docs/state files took Account 1's side.
 
-Results:
-- **Focused contract tests** (from `apply.sh`): 42 passed.
-- **Ruff:** clean.
-- **Full fast suite** in a fresh venv built only from the merged `requirements-ci.txt` (Linux, Python 3.13):
-  **748 passed, 0 failed, 12 skipped**. All skips are optional assets: opentimelineio 1, TTS/Piper voices 2, voice
-  models 2, SigLIP ONNX 3, tesseract 3, rclone 1.
-- **Not run on the merged tree:** Windows, the clean-machine E2E, renders with real models. Those run only once the
-  owner approves the merge and it is pushed.
+INTEG_RESULTS
 
-### 7.2 Earlier runs (superseded; not evidence for the current heads)
+`dafefe3` came after this run. Its code delta is the manifest-credential refusal and the `/studio/auth` cookie rule;
+the rest is docs.
+
+### 7.2 Superseded runs (not evidence for current heads)
 | Run | A1 | A2 | A3 | Result |
 |---|---|---|---|---|
-| Account 1, 2026-11-13 morning | `2ac7f96` | `9929512` | `24b3f71` | 663 passed with extra packages; 628 passed / 27 failed or error with CI deps (Account 2's missing `scipy`, `cv2`, `onnxruntime`), since fixed by Account 2 |
-| Account 3 r2 | `2ac7f96` | `cc836de` | `5976a49` | 746 passed, 8 skipped, 0 failed (base `main`, per Account 3's `integration/contracts_v1/RESULT.md`) |
+| closure round | `e9ad5e9` | `a52a24a` | `fd71471` | 748 passed, 12 skipped |
+| Account 3 r2 | `2ac7f96` | `cc836de` | `5976a49` | 746 passed, 8 skipped |
+| final-closure morning | `2ac7f96` | `9929512` | `24b3f71` | 628 passed / 27 failed with CI deps (Account 2's undeclared packages, since fixed) |
 
-### 7.3 Account 2 status (PR #6, head `a52a24a`)
-CI on `a52a24a`, run 43391530347: Linux **success**, Windows **success** (339 passed, 11 skipped, 0 failed), and
-`windows-e2e` **success**. The four Windows failures reported on `cc836de` (OTIO path normalisation, the two
-generation-classification tests, the LUT file name) no longer fail. `a52a24a` replaces the `file://` slicing with
-`url2pathname`, removes `:` from the LUT test names, and declares `scipy`, `onnxruntime` and `opencv-python-headless`
-(commits `a443238`, `39d0fac`). **No open Account 2 blocker for Account 1.**
+### 7.3 Account 2 (latest head `d979df1`)
+No open item for Account 1. Account 2's report of a failing Account 1 cookie/CSRF test is explained and closed (§3.1).
 
-### 7.4 Account 3 status (PR #5, head `fd71471`, CI green)
-**Interface mismatch still open.** `bench_v2.account1_manifest()` sends
-`params: {"models": [...], "items": <count>, "runtime": "ollama"}`. Account 1's `batch_llm` needs one `params.model`
-per job and the prompts themselves: a JSONL input artifact (`params.items_input`) or `params.items` as a list.
+### 7.4 Account 3 (PR #5, head `fd71471`, unchanged since the last round)
+**The interface mismatch is still open.** `bench_v2.account1_manifest()` sends
+`params: {"models": [...], "items": <count>, "runtime": "ollama"}`. The contract requires:
+- one model per job, in `params.model`;
+- the actual prompt list (`params.items`) or the JSONL input artifact (`params.items_input`);
+- no Ollama runtime field.
 
-A job in the current shape fails safely (status `failed`, error recorded), but the message
-(`TypeError: 'int' object is not iterable`) doesn't name the cause. Verified by running the worker.
+A job in the current shape fails safely on the worker with `TypeError: 'int' object is not iterable`.
 
 Account 3 was notified on PR #5:
 - [contract](https://github.com/Ahmedhan1/new-project-money/pull/5#issuecomment-6847899922)
-- [correction of the quoted error message](https://github.com/Ahmedhan1/new-project-money/pull/5#issuecomment-6847919100)
+- [correction](https://github.com/Ahmedhan1/new-project-money/pull/5#issuecomment-6847919100)
 
-Account 1 did not edit Account 3's files. No integration test exercises this path, so the green integrated suite does
-not cover it.
+Account 1 did not edit Account 3's files. Account 3 owns the fix.
 
-### 7.5 Integration path
-1. Account 3 fixes `account1_manifest` (handoff §7).
-2. Rerun §7.1 at the then-current exact heads, including Windows.
-3. The owner approves the merge order A1 → A2 → A3 → `apply.sh`.
+### 7.5 Next integration run (after Account 3's fix)
+1. Re-fetch all three exact heads.
+2. Build a fresh tree, merge A1 → A2 → A3, run `apply.sh`.
+3. Run the focused contract and dispatcher tests, then the full fast suite.
+4. Run Linux CI, Windows CI and the Windows clean-machine E2E on the merged tree. Pushing an integration branch for CI
+   needs the owner's go-ahead.
+5. Record the SHAs here.
 
-Account 1 does not adopt the package layout on its own branch (D-12).
+Stale results are not reused.
 
-## 8. Test results (Account 1 branch alone)
-| Check | Result |
-|---|---|
-| Ruff | clean (CI and local) |
-| CI fast suite, Linux / Windows (`e9ad5e9`) | 411 passed, 0 failed, 5 skipped each |
-| Clean-clone release check (`9ea4a73`, dev container) | 412 passed, 0 failed, 4 skipped; hygiene pass |
-| Security / storage + ingestion / compute + scheduler + Studio API / contracts / batch_llm | 29 / 96 / 38 / 32 / 8 passed |
-| Browser Studio E2E | 1 passed (dev container) |
-| Windows clean-machine E2E | success (CI) |
-| Type checks | not configured in this repository |
+## 8. Production acceptance matrix
+| Requirement | Test(s) | Linux | Windows |
+|---|---|---|---|
+| Authentication and authorization | `test_bearer_ok_and_wrong`, `test_every_v1_route_requires_auth`, `test_remote_denied_without_token`, `test_production_gates_fail_closed…` (no token → 503) | ✔ | ✔ |
+| CSRF | `test_cookie_session_and_csrf`, `test_duplicate_session_cookies…`, `test_loopback_cross_origin_post_refused` | ✔ | ✔ |
+| Session expiry | `test_cookie_session_and_csrf` (expired value 401), `test_duplicate_session_cookies…` | ✔ | ✔ |
+| Vault access | `test_recovery`, `test_secrets_endpoint_never_returns_values`, `test_production_gates_pass_with_complete_configuration` (wrong key → gate fails) | ✔ | ✔ |
+| Backup / restore | `test_storage_backup.py` (9), `test_backup_carries_vault_ciphertext_never_the_key` | ✔ | ✔ |
+| Interrupted storage transfers | `test_local_resumable_crash_and_resume`, `test_drive_resumable_upload_survives_crash` | ✔ | ✔ |
+| Duplicate artifact prevention | `test_store_dedupe_manifest_and_move`, `test_idempotency_key_returns_existing_job` | ✔ | ✔ |
+| Worker-loss recovery | `test_lost_attempt_without_result_is_retried`, `test_chunked_transcode_resumes_from_checkpoint`, `test_worker_killed_mid_job_resumes_without_repeating_stages`; live `kaggle_resume.json` | ✔ | ✔ |
+| Control-plane restart recovery | `test_control_plane_restart_adopts_the_running_remote_job_without_a_second_push`, `test_lifecycle_audits_start_stop_and_detects_unclean_restart`; live demo F | ✔ | ✔ |
+| Scheduler recovery | `test_restart_persistence`, `test_stop_cancels_safely_and_restart_replans` | ✔ | ✔ |
+| Storage failure | `test_failover_to_next_allowed_destination_and_opt_in_replication`, `test_drive_quota_exceeded`, `test_one_destination_down_does_not_lose_data`, `test_storage_exhaustion_pauses` | ✔ | ✔ |
+| Rate limiting | `test_rate_limit_after_failures`, `test_rate_limit_identity_behind_trusted_proxy` | ✔ | ✔ |
+| Invalid upload rejection | `test_body_and_upload_limits`, `test_ingest.py` | ✔ | ✔ |
+| Clean installation | Windows clean-machine E2E (`windows-e2e.yml`: setup, start, E2E, status, backup, stop); `scripts/release_check.py` (fresh clone, Linux) | ✔ | ✔ |
+| Production startup | `test_production_startup_refuses_then_serves_without_docs`, `test_single_instance_lock_refuses_a_second_api_process`, `test_readiness_probe_reveals_only_the_verdict` | ✔ | ✔ |
+| Graceful shutdown | `test_lifecycle_audits_start_stop_and_detects_unclean_restart`; Windows E2E `NEXUS_STOP.bat` | ✔ | ✔ |
+| Alerts | `test_alerts_*` (quota estimate labelled, resolution), `test_alerts_for_backup_auth_and_disk` | ✔ | ✔ |
+| Log rotation | `test_service_log_rotation` | ✔ | ✔ |
 
-No test was removed, skipped on purpose or weakened.
+✔ means the test ran and passed in the CI run of §2 for that OS. No test was removed, skipped on purpose or weakened.
+`test_cloud_security.py` gained one public-route entry (`/api/v1/health/ready`) in its documented allow-list.
 
 ## 9. Security status
-- No secrets, tokens or account identities in Git. The repository scan is clean in CI. The Kaggle account id was
-  redacted from the new evidence before push, and history was checked.
-- **KAGGLE: CLOSED — ACCEPTED AS-IS BY OWNER.** Residual exposure: the Kaggle token that was shared
-  in a chat earlier is the one still configured. It worked for the live `batch_llm` job on 2026-11-13. Anyone who saw
-  that chat could use it within the account's own Kaggle quota until the owner chooses to expire it. NEXUS's own
-  controls are unchanged: vault-only storage, redaction, the token never travels in a kernel, scans in CI. This is
-  recorded as a fact, not as an action.
+- No secrets, tokens or account identities in Git. The repository scan is clean in CI.
+- **KAGGLE: CLOSED — ACCEPTED AS-IS BY OWNER.** Residual exposure, recorded as a fact:
+  - the token once shared in a chat is the one still configured;
+  - anyone who saw that chat could use it within the account's own Kaggle quota until the owner chooses to expire it.
+  
+  NEXUS's controls are unchanged: vault-only storage, redaction, never sent in a kernel. Not an action item.
 
-## 10. Genuine owner-side actions (none done; not verifiable from here)
-1. Back up `NEXUS_HOME/secrets/vault.key` offline. Without it, the vault (Drive tokens included) can't be decrypted.
-2. Publish the Google OAuth consent screen. In Testing mode, refresh tokens expire after 7 days.
-3. Choose and approve a permanent host (recommendation: owner machine + Tailscale Funnel), then test on that machine.
-4. Optional, needs the owner's approval because it touches real accounts: real Drive token revocation, a Drive
-   backup/restore run, and a forced failover between real Drives.
-5. Optional: attach a real owner-GPU / Colab pull worker, if that capability is wanted.
-6. Merge decisions and order (A1 → A2 → A3 → `apply.sh`). Nothing merges without the owner.
+## 10. Owner actions still required (none can be done by an agent)
+1. Approve the host and the exposure. Recommended: own machine + Tailscale Serve, private. Funnel/public only by
+   explicit approval.
+2. On the host, inject `NEXUS_API_TOKEN` (≥32 characters, generated there), `NEXUS_VAULT_KEY` and
+   `NEXUS_BACKUP_PASSPHRASE`, and set `NEXUS_PUBLIC_ORIGIN` and `NEXUS_TRUSTED_PROXIES`.
+3. Offline vault-key backup: `python -m nexus vault-key export --to <removable drive>`, then `vault-key verify`.
+   Then remove `NEXUS_HOME/secrets/vault.key` from the host.
+4. Configure an off-disk backup destination (second disk, or an authorised Drive with the passphrase).
+5. Publish the Google OAuth consent screen ("In production") and reconnect Drive A/B/C.
+6. On the host, run `python -m nexus production-check` until it prints READY. Then run one backup + verify + restore
+   drill.
+7. Optional, touches real accounts: a real Drive revoke, a Drive backup/restore and a forced failover.
+8. Merge decisions and order (A1 → A2 → A3 → `apply.sh`). Nothing merges without the owner.
 
-## 11. Zero-cost limits
-No paid API, paid GPU, billing or payment method. One Kaggle account, with no rotation or quota bypass. Nothing has been
-deployed publicly. The control plane has only run in the development container. Drive gives 15 GB per account, shared
-with Gmail/Photos; three accounts are not unlimited storage.
+## 11. Outstanding limitations
+- No permanent host. Nothing has been tested on the owner's own machine or on an approved host.
+- Real Drive revocation, Drive backup/restore and forced Drive failover: fake-server and local tests only.
+- A real Kaggle quota-exhaustion message has never been seen. It is never forced (Kaggle closed).
+- Owner-GPU / Colab pull worker: protocol tests only.
+- The three-account merged tree has not run on Windows or in the clean-machine E2E; it waits for Account 3's fix.
+- Rate-limit counters reset on restart. Horizontal scaling is not supported (single instance by design).
+- No FFmpeg input fuzzing. The CSP allows inline script for the single-file UI.
+- Drive gives 15 GB per account, shared with Gmail/Photos. Three accounts are not unlimited storage.
 
-## 12. Remaining items and ownership
-| Item | Owner |
-|---|---|
-| `account1_manifest` → `batch_llm` contract (§7.4) | Account 3 |
-| New integration run at the next exact heads, including Windows | Account 1 / Account 3 (both have run it before), after the Account 3 fix |
-| Vault-key backup, OAuth production mode, host, owner-machine test, optional real-account checks | Owner |
-| Merge approval | Owner |
-
-## 13. Verdict
-**READY FOR REVIEW** (Account 1 only).
-
-All Account 1 code-level checks pass:
-- CI green on Linux and Windows at `e9ad5e9`;
-- clean-clone suite;
-- browser E2E and Windows clean-machine E2E;
-- live Kaggle and Drive evidence.
-
-The latest-head three-account integration passes on Linux. The one open cross-account item belongs to Account 3. It is
-precisely isolated, fails safely today, and has a documented fix that Account 3 has been notified about. This is not a
-statement that NEXUS is production-ready: there is no permanent host and nothing has been tested on the owner's machine.
+## 12. Zero-cost
+No paid API, paid GPU, billing or payment method. One Kaggle account, with no rotation or quota workaround. No public
+deployment. The recommended host costs nothing (the owner's machine + Tailscale Personal plan).

@@ -82,3 +82,15 @@ dev-container count (412 / 4) is reconciled: same 416 tests, with font and rclon
 output. Integration at the latest exact heads A1 `e9ad5e9` + A2 `a52a24a` + A3 `fd71471` + `apply.sh`: 748 passed,
 0 failed, 12 skipped (Linux, CI deps). PR #6 is green (Windows failures fixed by Account 2). The Account 3
 `account1_manifest` mismatch is still open; Account 3 was notified on PR #5. Audit: docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md.
+
+**2026-11-13 — Account 1 production closure (lead, single session).** PR #4 was at `919f158` (green), PR #5 at `fd71471`
+(Account 3's `batch_llm` manifest still incompatible), Account 2 at `d979df1`. Reproduced Account 2's cookie/CSRF report:
+httpx 0.28 sends the server-set and the manually set cookie together and the old test's verdict depended on the
+parser's order (test ambiguity, not a bypass); fixed in the server too (any presented value must carry a valid
+signature). Added the production profile (`NEXUS_ENV=production`, 12 startup gates, `production-check`), readiness
+probe, single-instance lock, lifespan audit/unclean-restart detection, trusted-proxy rate-limit identity, request/upload
+limits, vault ciphertext in backups (never the key) with restore validation, offline vault-key export/verify, backup/
+auth/disk alerts, log rotation, refusal of credentials in job manifests. 16 new tests (`test_production.py`). Runbooks:
+`ACCOUNT1_PRODUCTION_DEPLOYMENT.md`, `ACCOUNT1_DISASTER_RECOVERY.md`, `ACCOUNT1_OAUTH_PRODUCTION_CHECKLIST.md` (Google
+facts re-checked). Fresh local integration at A1 `34a5ba1` + A2 `d979df1` + A3 `fd71471` + `apply.sh`; results in the
+audit §7. Nothing merged, deployed or changed on Account 2/3 branches; no Kaggle change.

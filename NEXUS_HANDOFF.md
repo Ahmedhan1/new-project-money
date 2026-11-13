@@ -26,8 +26,11 @@ publishing packages, content factory) with a browser UI on `http://127.0.0.1:876
 ## Account 1 cloud platform (branch `work/account-1-cloud-platform`, PR #4)
 Remote GPU on the owner's single Kaggle account (2× T4, verified artifacts, resume after worker loss and after a
 control-plane SIGKILL), Remote Studio at `/studio`, scheduler, encrypted vault, owner auth/CSRF, SSRF-safe ingestion,
-Drive A/B/C on three real accounts, `batch_llm` (bounded batch inference on Kaggle). Kaggle: CLOSED, accepted as-is
-by the owner. Status and verdict: `docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md`; also `docs/ACCOUNT1_ACCEPTANCE_RESULTS.md`,
+Drive A/B/C on three real accounts, `batch_llm` (bounded batch inference on Kaggle), and a fail-closed production
+profile (`NEXUS_ENV=production`, `python -m nexus production-check`, `/api/v1/health/ready`, single instance, vault DR).
+KAGGLE: CLOSED — ACCEPTED AS-IS BY OWNER. Status and verdict: `docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md`; runbooks
+`docs/ACCOUNT1_PRODUCTION_DEPLOYMENT.md`, `docs/ACCOUNT1_DISASTER_RECOVERY.md`, `docs/ACCOUNT1_OAUTH_PRODUCTION_CHECKLIST.md`;
+also `docs/ACCOUNT1_ACCEPTANCE_RESULTS.md`,
 `docs/ACCOUNT1_HANDOFF_TO_ACCOUNT2.md`, `docs/ACCOUNT1_HANDOFF_TO_ACCOUNT3.md`, `docs/ACCOUNT1_SETUP_GUIDE.md`.
 **Never** add a second Kaggle account or rotate accounts to get around quotas.
 
@@ -84,6 +87,9 @@ python -m pytest tests/test_d_create.py                          # heavy tests A
 ```
 
 ## Things only the user can do (ask, do not attempt)
+0. Account 1 production (owner only): approve a host (recommended: own machine + Tailscale Serve, private), inject
+   `NEXUS_API_TOKEN` / `NEXUS_VAULT_KEY` / `NEXUS_BACKUP_PASSPHRASE` on it, `python -m nexus vault-key export` to an
+   offline drive, publish the OAuth consent screen, run `production-check` + one backup/restore drill there.
 1. Run `NEXUS_SETUP.bat` + `NEXUS_START.bat` on their Windows PC and report what fails (`WIN-1`).
 1b. Approve or reject merging PR #3 into `main` (agents never merge). Name the guest speaker in the Review page.
 1c. On a GPU machine (or their own free Kaggle notebook): `python scripts/gpu_video_bench.py` (`GEN-2`).
