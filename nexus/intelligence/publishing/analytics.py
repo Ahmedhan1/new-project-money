@@ -132,6 +132,18 @@ def norm_date(s: str | None) -> str | None:
         return None
 
 
+def zone(tz: str | None):
+    """ZoneInfo for an IANA name, or None when no name is given or this machine has no tz database for it
+    (Windows without the tzdata package): the time is then left unconverted, never guessed."""
+    if not tz:
+        return None
+    try:
+        from zoneinfo import ZoneInfo
+        return ZoneInfo(tz)
+    except Exception:  # noqa: BLE001 - ZoneInfoNotFoundError, ValueError for malformed keys
+        return None
+
+
 def to_utc(s: str | None, tz: str | None) -> str | None:
     """Publish time -> UTC ISO. Needs the export's time zone (IANA name) unless the value carries an offset."""
     import datetime as dt
@@ -146,10 +158,10 @@ def to_utc(s: str | None, tz: str | None) -> str | None:
             return None
         v = dt.datetime.fromisoformat(d)
     if v.tzinfo is None:
-        if not tz:
+        z = zone(tz)
+        if z is None:
             return None
-        from zoneinfo import ZoneInfo
-        v = v.replace(tzinfo=ZoneInfo(tz))
+        v = v.replace(tzinfo=z)
     return v.astimezone(dt.timezone.utc).isoformat().replace("+00:00", "Z")
 
 
@@ -260,7 +272,8 @@ def import_csv(path_or_text: str | Path, kind: str, period: str | None = None, p
             rec["published"] = pub
             rec["published_date"] = norm_date(pub)
             rec["published_utc"] = to_utc(pub, tz)
-            rec["published_tz"] = tz or "unknown (export time zone not stated)"
+            rec["published_tz"] = (tz if zone(tz) else f"{tz} (no tz database for it on this machine - not converted)") if tz \
+                else "unknown (export time zone not stated)"
         out.append(rec)
     replaced = 0
     if persist:

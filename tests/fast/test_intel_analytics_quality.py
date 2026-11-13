@@ -28,7 +28,12 @@ def test_dates_are_normalised_only_when_unambiguous(raw, iso):
 
 
 def test_publish_times_convert_to_utc_only_with_a_stated_time_zone():
-    assert analytics.to_utc("2026-10-03T20:00:00", "America/Los_Angeles") == "2026-10-04T03:00:00Z"
+    la = analytics.to_utc("2026-10-03T20:00:00", "America/Los_Angeles")
+    if analytics.zone("America/Los_Angeles") is None:      # e.g. Windows without tzdata: no tz database -> not converted
+        assert la is None
+    else:
+        assert la == "2026-10-04T03:00:00Z"
+    assert analytics.to_utc("2026-10-03T20:00:00", "Not/AZone") is None
     assert analytics.to_utc("2026-10-03T20:00:00+02:00", None) == "2026-10-03T18:00:00Z"
     assert analytics.to_utc("2026-10-03T20:00:00", None) is None                   # unknown zone: not guessed
     r = analytics.import_csv(HDR + 'v1,t,"Oct 3, 2026",5,,,,\n', "youtube_studio", period="2026-10", persist=False)
