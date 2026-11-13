@@ -5,6 +5,14 @@ Tests (no network): `tests/fast/test_intel_release_gate.py`, `test_intel_publish
 Status words follow `docs/FINAL_FEATURE_MATRIX.md`. **No platform flow is live-verified**: every adapter has run only
 against recorded or mock responses.
 
+Release sign-off: on the three-account tree (run r4), the gate was checked against Account 2's real code:
+- reports from Account 2's own `qa.approve()`;
+- Account 2's own validator;
+- `classify.manifest()` and `contracts.artifact()`.
+
+The result was `test_intel_release_gate.py` 44 passed, 0 skipped, and `test_intel_a2_publishing_integration.py` 3
+passed (`integration/contracts_v1/RESULT.md`).
+
 ## 1. What must be true before anything is uploaded
 A finished render does not make a publishable result. `engine.enqueue()` and `engine.run_one()` both call
 `release_gate.evaluate()`. `run_one` checks again because the file or the evidence can change after queueing. Every

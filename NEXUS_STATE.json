@@ -3,14 +3,14 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-13T11:35:30Z",
+ "updated": "2026-11-13T11:49:34Z",
  "git": {
   "branch": "work/account-3-intelligence-growth",
-  "commit": "f34d9b8",
-  "subject": "Growth: experiment recommendations carry the data origin (real vs simulated) in their evidence (D-19)",
-  "dirty_files": 3,
+  "commit": "0d9d1de",
+  "subject": "Handoff and Account 3 blocker texts shortened so the three-account merge stays under the 1,500-word handoff limit (run r4 finding)",
+  "dirty_files": 9,
   "upstream": "origin/work/account-3-intelligence-growth",
-  "unpushed_commits": 58
+  "unpushed_commits": 59
  },
  "current_task": {
   "id": "QLT-1",

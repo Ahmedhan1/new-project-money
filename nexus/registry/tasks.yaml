@@ -599,9 +599,9 @@ tasks:
     status: blocked
     blocked_by: "Owner merge approval (agents never merge)."
     acceptance: "Merged tree: full fast suite green, apply.sh focused tests green, CI green on Linux and Windows."
-    test: "Follow integration/contracts_v1/RESULT.md (run r2 recipe)."
-    evidence: "integration/contracts_v1/RESULT.md"
-    next: "Owner approves; the integrator repeats run r3 (integration/contracts_v1/RESULT.md) on the then-current heads."
+    test: "Follow integration/contracts_v1/RESULT.md (run r4 recipe)."
+    evidence: "integration/contracts_v1/RESULT.md run r4: A1 f9d8f11, A2 d979df1, A3 0d9d1de; 867 passed, 8 skipped, 0 failed (local Linux)."
+    next: "Owner restores GitHub Actions and approves the merge; CI (Linux, Windows, Windows e2e) on the exact merged head."
   - id: A3-NATIVE
     priority: 2
     title: "Native-language review of ar-EG, ar-Gulf, hi and zh lines"

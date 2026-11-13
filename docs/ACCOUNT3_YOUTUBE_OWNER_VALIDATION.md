@@ -56,6 +56,19 @@ python -m nexus.intelligence.publishing.owner_validation youtube --file <render.
   `user_uploaded_data`. The column map is **not verified** against a real export; unmapped columns are reported.
 - Reconcile the two sources with `analytics.reconcile_api_vs_export`. The API can lag the export by a few days.
 
+## 5b. Analytics validation checklist (one owner export)
+The owner provides the file; the agent never logs in. Each step reports its result and fixes nothing silently:
+1. **Column mapping.** Unmapped columns are listed in the import result.
+2. **Dates and time zones.** Dates are normalised only when unambiguous. Publish times convert to UTC only with the
+   channel's stated `tz`; an unavailable zone leaves them unconverted.
+3. **Totals.** Rows are reconciled against the export's Total row (`reconcile_total`).
+4. **Duplicates and invalid values.** Both are reported, not fixed.
+5. **Data origin.** Every record is labelled `user_uploaded_data`; API rows are `real_platform_data`. Demo and public
+   rows (`public_benchmark_data`, `simulated_test_data`) are never counted as the owner's results, and simulated rows
+   never conclude an experiment.
+
+Status: **implemented and tested on fixtures; not run on a real export** (ANA-1).
+
 ## 6. What stays owner-only
 Public or unlisted publishing needs:
 - `approve()`;

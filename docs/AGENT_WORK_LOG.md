@@ -76,6 +76,10 @@ scope, ran tests, merged each with `--no-ff` and applied integration requests.
 | Jobs | light (network-bound) job kinds skip the CPU lock | stream E | `294206c` |
 | Router | soft quality bar with labelled drafts; strict mode | stream B measurement (4B reasoning 3.3/10) | `af48bc2` |
 | Manifest | YouTube Data/Analytics, Wikimedia Pageviews, GDELT, extra Wikipedia hosts; corrected YouTube quota text | streams A/C/E | `7f09f31`, `74fb0d2` |
+| Sign-off (2026-11-13) | PR #5 base (`claude/hopeful-allen-luubcy`, contains PR #4) merged into the A3 branch; 9 conflicts, all sides kept | GitHub `mergeable: false` | `5034c8d` |
+| Sign-off | batch_llm checkpoint-resume integration test; growth evidence carries data origin; handoff under 1,500 words after the three-way merge | run r4 | `06def55`, `f34d9b8`, `0d9d1de` |
+| Sign-off | run r4: A1 `f9d8f11`, A2 `d979df1`, A3 `0d9d1de`: 867 passed, 8 skipped, 0 failed (local Linux); CI not starting | integration | `integration/contracts_v1/RESULT.md` |
+
 ## Account 1 (2026-11-12): cloud platform — branch work/account-1-cloud-platform, PR #4
 Lead verified real Kaggle GPU access first, then built the shared foundation (contracts v1, vault, migration 2, events,
 owner auth). Four sub-agents in separate worktrees: A security/architecture, B compute (Kaggle), C storage/Drive/ingest,

@@ -203,4 +203,41 @@ Kaggle CLI, echo engine). It checks:
 - A2-1 and A2-2 (Account 2).
 - Merge approval.
 
-Test, CI and integration numbers for the final commit: `integration/contracts_v1/RESULT.md` (run r3) and PR #5.
+Test, CI and integration numbers for the final commit: `integration/contracts_v1/RESULT.md` (run r4) and PR #5.
+
+# Release sign-off (2026-11-13, later)
+No new features. This round reconciled PR #5 with its base and re-verified everything on the latest heads.
+
+## PR mergeability
+PR #5's base is `claude/hopeful-allen-luubcy`, not `main`. It now contains Account 1's final head `f9d8f11` via PR #4.
+The A3 branch was 98 commits ahead and 54 behind, with merge base `c93847d`. The base was **merged into** the A3 branch
+(`5034c8d`): no rebase, no force-push, nothing merged into the base or `main`.
+- Nine files conflicted. Every side was kept (details in `ACCOUNT3_HANDOFF_TO_INTEGRATION.md`).
+- A file-level check confirmed nothing was lost: every file that differs from the base is one Account 3 changed. Only the
+  11 files both sides edited contain combined content.
+
+## Fixes found while verifying
+- **Handoff length.** The merge pushed `NEXUS_HANDOFF.md` over the repository's 1,500-word test. With Account 2 also
+  merged (run r4) it reached 1,561. Account 3's own text was condensed; the test is unchanged.
+- **Checkpoint resume.** A new integration test sends an A3 batch_llm manifest through worker loss and resume on Account
+  1's dispatcher. It also shows the manifest is never routed off Kaggle.
+- **Recommendation evidence.** Growth recommendations from experiments now carry the data origin (real vs simulated)
+  in their evidence.
+
+## Results (local Linux; not GitHub CI)
+- A3 branch alone: full fast suite 723 passed, 5 skipped, 0 failed. Ruff clean.
+- Run r4 (A1 `f9d8f11`, A2 `d979df1`, A3 `0d9d1de`):
+  - full fast suite 867 passed, 8 skipped, 0 failed;
+  - focused cross-account run 209 passed;
+  - `apply.sh` 42 passed, idempotent.
+- GitHub Actions: jobs on every account's branch end in 1–5 s without running a step (account or repository level). No
+  billing, settings, empty commits or re-runs were touched.
+- Windows: not run. No Windows runner or machine is available.
+
+## Verdict: READY FOR OWNER AUTHORIZATION
+Engineering is complete and integrates on the latest heads. It is **not** ready for production:
+- CI has not run on the final code;
+- Windows has not been re-validated;
+- no publishing provider has a real-account validation;
+- no native reviewer has reviewed any output;
+- the merge is not approved.

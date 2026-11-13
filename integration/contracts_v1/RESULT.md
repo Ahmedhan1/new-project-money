@@ -1,9 +1,108 @@
 # Three-account integration runs (local branches only — nothing pushed, nothing merged into `main` or any account branch)
 
-Three runs. Run r3 is the current evidence. Runs r2 and r1 are kept for history; r1's findings were sent to Account 1.
-Full-suite results and focused contract results are reported separately and are never added together.
+Four runs. **Run r4 is the current evidence** (latest heads, after PR #5's base reconciliation). Runs r3, r2 and r1 are
+kept for history. Full-suite results and focused results are reported separately and are never added together.
+All results below are **local Linux runs** (this dev container: Linux x86_64, Python 3.13), **not GitHub CI**.
 
-## Run r3 — 2026-11-13, latest heads, owner's proposed order
+## Run r4 — 2026-11-13, latest heads (current)
+
+| Input | Branch | SHA |
+|---|---|---|
+| base | `claude/hopeful-allen-luubcy` (PR #5's base; contains PR #4) | `b54c952` |
+| Account 1 | `work/account-1-cloud-platform` (already in the base via PR #4) | `f9d8f1131788d5848594bb78c61bff3b86d400e1` |
+| Account 2 | `work/account-2-cinematic-engine` | `d979df1e390abc48e79a7e6645229968a5b94107` |
+| Account 3 | `work/account-3-intelligence-growth` | `0d9d1de81ccfc380a771c67f4faad98eb8bb8401` (all A3 code; later A3 commits change docs and generated state only) |
+
+A3 `0d9d1de` contains the previous head `62414bf`, the base merge `5034c8d` and three follow-ups:
+- `06def55`: checkpoint-resume integration test;
+- `f34d9b8`: data origin in growth recommendation evidence;
+- `0d9d1de`: handoff length.
+
+Local branch `integration/contracts-v1-r4` (not pushed), in order:
+1. start from the base `b54c952` (A1 `f9d8f11` is an ancestor: checked with `git merge-base --is-ancestor`);
+2. merge A2 `d979df1` (`899ab8d`);
+3. merge A3 `0d9d1de` (`be76eda`);
+4. `apply.sh` (`68a3c68`).
+
+Conflict resolutions:
+| Step | Files | Resolution |
+|---|---|---|
+| A2 | `tasks.yaml`, `DECISIONS.md`, `MASTER_ROADMAP.md` | both sides kept; tasks.yaml has 68 unique ids |
+| A2 | `NEXUS_STATE.json`, `NEXUS_HANDOFF.md`, `fast_tests.json` (generated) | base (Account 1) side, as in r2/r3 |
+| A3 | `nexus/workflows.py` | both sides kept: Account 2's `export` and `clip-process` handlers, then the Account 3 job-kind imports. Handler list identical to r3 |
+| A3 | `NEXUS_STATE.json`, `NEXUS_HANDOFF.md`, `fast_tests.json` (generated) | Account 3 side |
+
+Results on `68a3c68`:
+- `apply.sh`: **42 passed**. A second run changed nothing and passed again (42).
+- Focused cross-account run: **209 passed, 0 skipped** (24 s). This is a separate run from the full suite. It covers:
+  - batch_llm (A3 + A1 tests);
+  - QualityReport → publishing;
+  - the release gate;
+  - owner validation;
+  - zero spend;
+  - handoff;
+  - A2 cross-account;
+  - the three contract suites;
+  - publishing;
+  - analytics;
+  - research degradation;
+  - growth.
+- Full fast suite (`python -m pytest tests/fast -rs`): **867 passed, 8 skipped, 0 failed** (411 s). The skips are
+  optional assets not installed here: opentimelineio (1), local TTS/Piper voices (4), SigLIP ONNX files (3).
+- `ruff check .`: clean.
+
+**Finding fixed during r4.** The first full run on the merged tree had **1 failure**:
+`test_state.py::test_task_registry_and_state_file_are_valid`. Merging Account 2's handoff section brought
+`NEXUS_HANDOFF.md` to 1,561 words, over the repository's 1,500-word limit. The fix shortened Account 3's own handoff
+section and the blocker texts Account 3 wrote, in A3 `0d9d1de`. The test was not changed. The merged handoff is now
+1,461 words.
+
+### batch_llm on Account 1's real dispatcher (simulated execution)
+`tests/fast/test_intel_batch_llm_integration.py` (5 tests) uses Account 1's own `FakeKaggleCLI`. The real worker script,
+embedded bundle, checksum verification and checkpoints all run. The `echo` engine loads **no model**, so the results
+are labelled simulated. Each test passes on `68a3c68`:
+
+| Check | Evidence |
+|---|---|
+| One model per job, actual prompt items | `params.model == "Qwen/Qwen3-4B"`, `params.items` is the Bench V3 prompt list; validates as Account 1's pydantic `ProductionJobManifest` |
+| Input/output manifests, artifact checksums | all 12 items come back in order in `batch_llm_results.*`; `sha256` of the artifact file equals the recorded checksum; 3 parts |
+| Idempotency | resubmitting the same manifest returns the same job, `created == False` |
+| Checkpoint handling | worker lost after part 0. Attempt 1 is `lost` after running part 0; attempt 2 skips part 0 and runs parts 1–2; checkpoints `[1, 2, 3]`; all 6 items present |
+| Kaggle-only routing | a dispatcher without Kaggle finds no candidate; the reason names kaggle |
+| No persistent endpoint | summary `persistent_endpoint: false`, `simulated: true`, `engine: echo` |
+| Unsupported shapes | old shape (`params.models`, items as a count, `runtime: ollama`) refused by `validate_manifest` with the field named; Account 1's worker also fails it |
+| Error handling | per-item errors and limits: Account 1's `test_cloud_batch_llm.py` (8 tests, in the same focused run) |
+
+A real-model batch_llm run with Account 3's items has **not** been done. It is optional and must not change the owner's
+Kaggle configuration.
+
+### QualityReport, disclosure and language on Account 2's real code
+- `test_intel_a2_publishing_integration.py` (3 tests):
+  - a report from Account 2's own `qa.approve()` with status BLOCKED cannot be queued;
+  - PASSED allows a **private** upload only while `human_approval` is `PENDING …`;
+  - findings are kept in `release_check`;
+  - `classify.manifest()` gives `ai_generated_imagery`;
+  - `contracts.artifact()` URIs resolve.
+- `test_intel_release_gate.py` (44 tests, **0 skipped** here; the Account 2 validator test skips on the A3 branch alone)
+  covers:
+  - checksum mismatch, a missing output, a file changed after enqueue, critical findings, the human-review gate;
+  - the seven disclosure categories; unknown provenance becomes AI; the owner's YouTube realism decision;
+  - TikTok `is_aigc` and Instagram `is_ai_generated` in the requests; Facebook refuses AI content; Snapchat is manual;
+  - ar-EG and ar-Gulf separated, review ids that do not exist refused, no platform advertised as live-verified.
+
+### Not run (honest gaps)
+- **Windows**: no Windows machine or VM is available to this agent, and GitHub Actions jobs do not start (see below).
+  Neither the Windows fast suite nor the clean-machine Windows e2e has run on r4 or on the final A3 head.
+- **GitHub CI**: every job on every account's branch ends in 1–5 s without running a step. Examples:
+  - A3 `211b97f` and `62414bf`;
+  - Account 1's runs;
+  - Account 2's PR #7 runs at 11:17–11:25 UTC.
+
+  That is a repository- or account-level Actions problem. No billing or settings were changed, and no empty commit or
+  re-run was made.
+- Real renders, real uploads and real-model batch inference.
+
+## Run r3 — 2026-11-13, earlier heads (superseded by r4: A1 was `919f158`, A3 was `f1835b5`)
 
 | Input | Branch | SHA |
 |---|---|---|

@@ -9,14 +9,18 @@ Status categories (used everywhere in Account 3 docs):
 - **Pending integration**: needs the owner-approved three-account merge.
 
 No publishing provider is real-provider verified. A mock or recorded-response test is never counted as a live result.
-Evidence paths are relative to `docs/results/account3/` unless shown otherwise. Updated 2026-11-13.
+Evidence paths are relative to `docs/results/account3/` unless shown otherwise. Updated 2026-11-13 (release sign-off).
+Integration evidence is run r4 (`integration/contracts_v1/RESULT.md`):
+- inputs: A1 `f9d8f11`, A2 `d979df1`, A3 `0d9d1de`;
+- results: 867 passed, 8 skipped, 0 failed;
+- environment: **local Linux only**. GitHub CI and Windows have not run on these heads.
 
 | Capability | Status | Evidence / limit |
 |---|---|---|
 | Model router: privacy classes, quotas, breaker, schema validation, failover | Verified | `tests/fast/test_intel_router.py`; two local providers on real prompts |
 | Zero-spend gate (fails closed; hosted provider needs verified `payment_method_required: false`; no automatic paid fallback) | Tested | `tests/fast/test_zero_spend_fail_closed.py` (network trapped). Groq/Mistral refused; no hosted provider has been used |
 | Hosted free tiers (OpenRouter `:free`, Gemini free tier) | Blocked by owner authorization | needs `authorized: true` + key; Gemini also needs an owner `daily_requests` limit |
-| Account 1 `batch_llm` manifests (one job per model, prompts inline, old shape refused) | Tested; dispatcher round trip on the merged tree | `tests/fast/test_intel_batch_manifest.py`; `test_intel_batch_llm_integration.py` ran on Account 1's real dispatcher and worker script with the `echo` engine (simulated label checked), `integration/contracts_v1/RESULT.md` run r3. A real-model batch_llm run with A3 items has **not** been done |
+| Account 1 `batch_llm` manifests (one job per model, prompts inline, old shape refused) | Tested; dispatcher round trip on the merged tree (simulated execution) | `tests/fast/test_intel_batch_manifest.py`; `test_intel_batch_llm_integration.py` (5 tests) ran on Account 1's real dispatcher and worker script with the `echo` engine in run r4. Covers checksums, idempotency, **checkpoint resume after worker loss** and Kaggle-only routing, with the simulated label checked. A real-model batch_llm run with A3 items has **not** been done |
 | Open-weight benchmark V2 (36 items, 8 models) | Verified, small sample | `models_bench_v2.json`; 3–6 items per capability, not conclusive |
 | Open-weight benchmark V3 (184 items, ≥ 15 per capability, Kaggle T4×2) | see `docs/ACCOUNT3_MODEL_BENCHMARKS_V3.md` | run status per kernel and results in that file; scores are rule-based proxies, not production-grade quality |
 | Mandatory human review: critical tasks below the bar, every dialect output | Tested | `Result.requires_human_review`; `bench_v3.routing` forces review for dialect adaptation |
@@ -42,4 +46,8 @@ Evidence paths are relative to `docs/results/account3/` unless shown otherwise. 
 | Provider readiness: Snapchat | Manual export only | no organic upload API |
 | First private YouTube upload | Blocked by owner authorization | `owner_validation youtube --i-authorize-a-private-upload` (mock-tested only; PUB-1) |
 | Analytics import (API + CSV), data-origin labels, normalisation, duplicates, reconciliation, experiments | Implemented, not verified on a real account | `test_intel_analytics_quality.py`; no owner channel data (ANA-1); CSV maps unverified against real exports |
-| Shared contracts package (A1 + A2 + A3) | Pending integration | `integration/contracts_v1/RESULT.md` run r3 on A1 `919f158`, A2 `d979df1`; awaits the owner's merge approval |
+| Growth recommendations disclose their evidence | Tested | every recommendation carries `evidence` (method, record ids, statistics); experiment results also carry `data_origin` and `real_data` (sign-off fix) |
+| Shared contracts package (A1 + A2 + A3) | Pending integration | `integration/contracts_v1/RESULT.md` run r4: A1 `f9d8f11`, A2 `d979df1`, A3 `0d9d1de`; `apply.sh` 42 passed, idempotent. Awaits the owner's merge approval |
+| PR #5 mergeability against its base (`claude/hopeful-allen-luubcy`, which contains PR #4) | Resolved | base merged into the A3 branch (`5034c8d`, no force-push); 9 conflicted files, all sides kept (see `ACCOUNT3_HANDOFF_TO_INTEGRATION.md`) |
+| CI (GitHub Actions) on the final head | **Not run** | jobs end in 1–5 s without a step on all accounts' branches; owner must restore Actions |
+| Windows fast suite and clean-machine e2e on the final head | **Not run** | no Windows runner or machine available; last Windows evidence is CI on `e9b1754` (e2e passed; one time-zone failure, fixed in `211b97f`) |

@@ -99,6 +99,12 @@ carry a required label and has no private mode (Facebook /videos) refuses AI con
 **D-19 (Account 3) Analytics rows carry their origin.** Every record is real_platform_data, user_uploaded_data,
 public_benchmark_data or simulated_test_data. Simulated rows never conclude an experiment, and fixtures and demos say
 simulated. Ambiguous dates (01/02/2026) and publish times without a stated time zone are not guessed.
+
+**D-20 (Account 3) PR #5 follows its base by merging, never by rebasing (2026-11-13).** The base branch gained
+Account 1's PR #4. Rebasing 98 commits would rewrite a published branch and need a force-push, so the base was merged
+into the A3 branch instead. Every conflict kept both sides; generated files were regenerated. Each later base change
+is handled the same way.
+
 **D-11 `batch_llm` is a bounded batch job on Kaggle, not a model server (Account 1, 2026-11-13).** Kaggle does not allow
 persistent serving, and the owner's PC must not receive multi-GB weights implicitly. So the task loads one model inside
 the kernel, answers a finite JSONL, writes checksum-verified parts with a checkpoint after each part, and exits. Routing
