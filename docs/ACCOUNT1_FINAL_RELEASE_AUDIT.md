@@ -157,6 +157,12 @@ Conclusions:
 
 ## 7. Cross-account integration (exact SHAs; separate from Account 1's own CI)
 ### 7.1 Current run (final review, 2026-11-13), local branch `integration/heads-f9d8f11`, not pushed
+
+**Result artifact:** `docs/results/integration/heads-f9d8f11-d979df1-62414bf.json` (full SHAs, merged tree
+`b962b4e`, counts taken from the JUnit report, its sha256, skip reasons, environment, what was not run).
+**Reproduce:** `scripts/integration/integrate_heads.sh <A1> <A2> <A3> <dir> <branch>`; a second run produced the
+identical tree. PR #3 itself does **not** contain Account 2 or 3: this is a local candidate tree, and the release gate
+(Windows + hosted CI on a pushed integration branch, owner merge order) is **not passed**.
 | Input | SHA |
 |---|---|
 | Account 1 | `f9d8f11` (= PR #3 head `b54c952` tree; code identical to `73c0023`) |
