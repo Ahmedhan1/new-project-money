@@ -72,6 +72,11 @@ def preflight() -> list[dict]:
 
 def _spawn(name: str, args: list[str], env: dict) -> dict:
     log = config.LOGS / f"{name}.log"
+    try:  # bounded logs: rotate above the size limit (nexus/diskman.py settings log_max_mb / log_keep)
+        from . import diskman
+        diskman.rotate_log(log)
+    except Exception:  # noqa: BLE001 - a log problem must never stop the app from starting
+        pass
     f = open(log, "ab")
     kw: dict = {"creationflags": 0x00000008 | 0x00000200 | 0x08000000} if os.name == "nt" else {"start_new_session": True}  # detached, no console
     p = subprocess.Popen([sys.executable, "-m", "nexus", *args], cwd=str(config.ROOT), stdout=f, stderr=subprocess.STDOUT,

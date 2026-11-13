@@ -271,11 +271,27 @@ def schedule_backup(now: float | None = None) -> str | None:
     return submit("backup", {"drill": False, "scheduled": True}, max_retries=0)["job"]
 
 
+def schedule_archive_recovery() -> str | None:
+    """Archive uploads interrupted by a crash or waiting for a retry are resumed by an 'archive-recover' job (one at a
+    time). Nothing happens when no record needs it."""
+    try:
+        from . import archive
+        now = time.time()
+        due = [r for r in archive.records() if r["state"] in ("queued", "uploading", "uploaded")
+               or (r["state"] == "failed" and r.get("next_retry", 0) <= now and r.get("attempts", 0) < archive.settings()["max_attempts"])]
+    except Exception:  # noqa: BLE001
+        return None
+    if not due or db.query("SELECT id FROM jobs WHERE kind IN ('archive-recover','archive') AND status IN ('queued','running')"):
+        return None
+    return submit("archive-recover", {})["job"]
+
+
 def run_worker(stop: threading.Event | None = None, poll: float = 1.0, once: bool = False, role: str = "worker") -> None:
     from . import workflows  # noqa: F401  (registers the production handlers)
     wid = worker_id(role)
     recover()
     schedule_backup()
+    schedule_archive_recovery()
     # Recovery runs on its own thread: a worker busy with a long render must not delay re-queuing a job whose worker
     # died (found in the crash-recovery demo, where a killed render stayed 'running' behind a 10-minute dub job).
     halt = stop or threading.Event()
@@ -285,6 +301,7 @@ def run_worker(stop: threading.Event | None = None, poll: float = 1.0, once: boo
             try:
                 recover()
                 schedule_backup()
+                schedule_archive_recovery()
             except Exception:  # noqa: BLE001 - a locked database must not kill the watchdog
                 pass
 

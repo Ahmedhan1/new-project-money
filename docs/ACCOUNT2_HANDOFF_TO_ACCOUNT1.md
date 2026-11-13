@@ -46,3 +46,21 @@ Verified against Account 1 head `b2517b2` (PR #4) on a local, unpushed three-acc
 - Consider exposing `a2_render_steps` progress (`checkpoints_new`) in Studio's job view; Account 2's UI only polls its own jobs.
 - When an authorised GPU worker exists, run `a2_wan_video` once (Wan 2.1 T2V-1.3B, 33 frames, 480p) and send the
   result + `WorkerExecutionResult` to Account 2: that is the only way Demo 5 moves from GPU-READY-UNVERIFIED to verified.
+
+## Follow-up: daily output archive and asset storage (branch `work/account-2-asset-library-storage`)
+Account 2 now archives final daily videos through your storage layer and does **not** route storage itself.
+Used, unchanged: `artifacts.store_file(..., retention="archive", transfer_id=...)`, `artifacts.resume_transfer`,
+`artifacts.find_by_sha`, `artifacts.get`, `artifacts.fetch_local`, `artifacts.rules`, `get_provider(cid).stat/checksum/
+download/quota`, `connections.provider_of`, `transfers.get`. Verified against your Drive adapter + `FakeGoogle` and your
+LocalProvider in `tests/fast/test_a2_archive_account1.py` (skips without your branch).
+
+Requested operations (none blocks Account 2 today; each has a workaround in `nexus/archive.py`):
+| # | Operation | Contract | Why | Workaround now |
+|---|---|---|---|---|
+| 1 | `artifacts.verify_location(artifact_id, connection_id, *, strict=True) -> {"ok": bool, "method": "provider_sha256"\|"provider_md5"\|"download_sha256", "detail": str}` | strict: a missing provider checksum means download + hash, never "assume valid" | `_location_valid` is private and returns True when the provider reports no checksum (`checksum(...).get("sha256") in (None, sha)`); deleting a local final needs a positive match | Account 2 re-implements the strict check with `stat` / `checksum` / `download` |
+| 2 | `artifacts.find_location(sha256, connection_id) -> ArtifactLocation \| None` (public) | location re-validated | dedupe before upload after a crash | uses `find_by_sha` + private `_location_valid` |
+| 3 | `GET /api/v1/storage/artifacts?retention=archive&kind=master&project_id=` | list of `ArtifactManifest/v1` | archive browser across machines | Account 2 keeps its own ledger (`docs` kind `a2_archive`) |
+| 4 | A documented guarantee that `cleanup()` never deletes `retention="archive"` (today: only `temporary` is deleted) | test in your suite | archived daily videos must never be removed automatically | relies on current behaviour |
+| 5 | (optional) storing large reusable asset libraries as artifacts of kind `other` under `NEXUS/Assets` | new folder in `FOLDERS` | share an installed library between machines | not needed: the full library is 116 MB, installed on demand |
+
+No Account 1 file was modified. The mock adapter Account 2 uses alone is `archive.MockTarget` (test-only).

@@ -35,6 +35,13 @@ def render(job: jobs.Job) -> dict:
     p = prj.Project(a["project"])
     tl = p.timeline(a.get("branch", "main"))
 
+    def preflight():  # refuse before encoding anything when the render cannot finish in the free space
+        from . import diskman
+        est = diskman.estimate_render(tl, bool(a.get("draft")))
+        return {**diskman.preflight(est["required_bytes"], f"render {a['name']}"), "estimate": est}
+
+    job.stage("disk-preflight", preflight)
+
     def run():  # the renderer caches finished segments on disk, so a resumed render only encodes what is missing
         stats, report = qa.render_with_qa(p, tl, a["name"], _analysis(p) or None, draft=bool(a.get("draft")))
         return {"output": str(Path(stats["output"]).relative_to(p.dir)), "status": report["status"], "issues": report["known_issues"],
@@ -45,7 +52,17 @@ def render(job: jobs.Job) -> dict:
     if a.get("draft"):
         return r  # drafts are previews: no quality verdict
     r["quality"] = job.stage("quality-score", lambda: _quality(p, tl, r["output"], a.get("platform")))
+    if a.get("archive") or (a.get("archive") is None and _auto_archive()):
+        # daily output: archive the verified final externally (the local copy is released only after verification)
+        r["archive"] = {"job": jobs.submit("archive", {"project": p.id, "render": r["output"], "kind": a.get("kind", "master")}, p.id)}
     return r
+
+
+def _auto_archive() -> bool:
+    """Auto-archive only when the owner configured a destination (Account 1 storage rules or archive settings)."""
+    from . import archive, config
+    s = archive.settings()
+    return bool(s.get("auto_archive")) and (bool(s.get("connection_id")) or (config.HOME / "storage_rules.json").exists())
 
 
 def _quality(p, tl: dict, output: str, platform: str | None = None) -> dict:
@@ -423,3 +440,44 @@ def visual_install(job: jobs.Job) -> dict:
 from .timeline import remote_render as _remote_render  # noqa: E402
 
 _remote_render.register_account1_tasks()
+
+
+@jobs.handler("asset-install")
+def asset_install(job: jobs.Job) -> dict:
+    """Download (resumable, SHA-256 pinned, licence-checked) one library asset."""
+    from . import assetlib
+    aid = job.params["asset_id"]
+
+    def run():
+        last = [0.0]
+
+        def prog(have, total):
+            if total and have / total - last[0] >= 0.1:
+                last[0] = have / total
+                job.progress(have / total)
+                job.log(f"{aid}: {have}/{total} bytes")
+        rec = assetlib.install(aid, prog)
+        return {"asset_id": aid, "sha256": rec.get("sha256"), "size": rec.get("size")}
+
+    return job.stage("download-verify", run)
+
+
+@jobs.handler("archive")
+def archive_(job: jobs.Job) -> dict:
+    """Daily output: upload the final + metadata through Account 1 storage, verify, then release the local copy."""
+    from . import archive
+    a = job.params
+    return job.stage("archive", lambda: archive.archive_output(a["project"], a["render"], kind=a.get("kind", "master"),
+                                                                release_local=a.get("release_local")))
+
+
+@jobs.handler("archive-retrieve")
+def archive_retrieve(job: jobs.Job) -> dict:
+    from . import archive
+    return job.stage("retrieve", lambda: {"path": str(archive.retrieve(job.params["record"]))})
+
+
+@jobs.handler("archive-recover")
+def archive_recover(job: jobs.Job) -> dict:
+    from . import archive
+    return job.stage("recover", lambda: archive.recover())

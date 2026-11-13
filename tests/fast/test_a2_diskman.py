@@ -183,3 +183,23 @@ def test_render_estimate_covers_a_real_render(home, tmp_path):
     grown = diskman._walk(home)[0] - before
     assert est["duration_s"] == pytest.approx(6.0, abs=0.2)
     assert est["required_bytes"] >= grown > 0, (est, grown)
+
+
+def test_working_storage_on_another_directory(home, tmp_path, monkeypatch):
+    work = tmp_path / "fastdisk" / "nexus-work"
+    monkeypatch.setenv("NEXUS_WORK_DIR", str(work))
+    config.set_home(home)
+    config.ensure_dirs()
+    try:
+        assert config.CACHE == work and work.exists()
+        f = _f(work / "segments" / "seg_old.mp4", 500, old=True)
+        u = diskman.usage()
+        assert u["work_dir"] == str(work) and u["categories"]["render_cache"]["bytes"] == 500
+        diskman.save_settings({"cache_quota_gb": 0.0})
+        p = diskman.plan(["cache_lru"])
+        assert [Path(i["path"]).name for i in p["items"]] == [f.name]
+        diskman.execute(p["plan_id"], ["cache_lru"])
+        assert not f.exists()
+    finally:
+        monkeypatch.delenv("NEXUS_WORK_DIR")
+        config.set_home(home)
