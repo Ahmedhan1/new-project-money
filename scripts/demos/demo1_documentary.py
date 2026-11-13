@@ -75,7 +75,8 @@ def main() -> None:
     # (the Earth-from-orbit library is not offered: it does not show what a Mars film talks about)
     local = broll.local_candidates(src(DOC), doc, "public-domain", "NASA/JPL (Mars - The Search Begins)")
     t0 = time.time()
-    bp = broll.plan(tl, max_share=0.3, sources=("nasa",), local=local, context="Mars planet exploration spacecraft Mariner")
+    bp = broll.plan(tl, max_share=0.3, sources=("nasa",), local=local, context="Mars planet exploration spacecraft Mariner",
+                    subject=["Mars"])
     tl, brep = broll.apply(tl, bp)
     brep["inserts"] = [{k: d.get(k) for k in ("start", "asset", "score", "why", "query", "visual", "lexical", "reasons") if k in d}
                        for d in bp["decisions"] if d.get("action") == "insert"]

@@ -43,3 +43,7 @@ def test_colour_profile_and_grade_override():
     assert o["grade"] == "warm" and o["transitions"]["crossfade_at_topics"] is True and o["transitions"]["xfade"] == "dissolve"
     base["metrics"]["colour"] = cg
     assert reference.to_overrides(base)["profile_overrides"]["grade"] == "bw"
+    muted = np.zeros((4, 36, 64, 3), np.uint8)
+    muted[..., 0], muted[..., 1], muted[..., 2] = 120, 110, 100       # colour present but weak (saturation ~0.17)
+    base["metrics"]["colour"] = reference.colour_profile(muted)
+    assert reference.to_overrides(base)["profile_overrides"]["grade"] == "bleach_bypass"

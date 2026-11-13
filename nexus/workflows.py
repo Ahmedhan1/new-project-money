@@ -115,7 +115,7 @@ def direct_(job: jobs.Job) -> dict:
             basis = (m.get("rights") or {}).get("basis") if isinstance(m.get("rights"), dict) else None
             if an and basis in ("owned", "licensed", "public-domain", "generated") and m["path"] not in used:
                 local += broll.local_candidates(m["path"], an, basis, (m.get("rights") or {}).get("holder") or m["name"])
-        pl = broll.plan(tl, max_share=float(a.get("broll_share", 0.35)), local=local or None)
+        pl = broll.plan(tl, max_share=float(a.get("broll_share", 0.35)), local=local or None, subject=a.get("broll_subject") or ())
         new, rep = broll.apply(tl, pl)
         if rep["inserted"]:
             p.save_timeline(new, f"B-roll: {rep['inserted']} licensed cutaways", a.get("branch", "main"))

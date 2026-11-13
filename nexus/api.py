@@ -180,7 +180,7 @@ def api_project(pid: str, branch: str = "main"):
     renders = [str(f.relative_to(p.dir)) for f in sorted(p.dir.rglob("*.mp4")) if "work" not in f.parts and "media" not in f.parts]
     return {"id": p.id, "name": p.name, "kind": p.kind, "media": p.data["media"], "history": p.history(), "timeline": tl,
             "reports": reports, "renders": renders, "proposal": p.data.get("proposal"), "script": p.data.get("script"),
-            "credits": p.data.get("credits"), "analysis": {m: {k: a[k] for k in ("issues", "scenes", "silences", "repetitions", "not_available")} |
+            "credits": p.data.get("credits"), "analysis": {m: {k: a.get(k) or [] for k in ("issues", "scenes", "silences", "repetitions", "not_available")} |
                                                            {"text": (a.get("transcript") or {}).get("text"), "duration": a["probe"]["duration"],
                                                             "loudness": a.get("loudness")} for m, a in _analysis(p).items()}}
 
@@ -716,6 +716,7 @@ class DirectReq(BaseModel):
     shorts: int = 0
     broll: bool = False          # add licensed B-roll cutaways (NASA library, Openverse) over the speaker's audio
     broll_share: float = 0.35
+    broll_subject: list[str] = []  # the film's named subject (e.g. ["Mars"]): library B-roll must name it in its metadata
     overrides: dict = {}          # {"keep": [decision ids], "drop": [...], "opening": id, "no_lift": bool, "reject_cutaways": [...]}
     profile_overrides: dict = {}  # editorial parameters on top of the profile (e.g. {"shot_len_median": 5})
     end_text: str | None = None   # call-to-action / end card text (only ever from the user)
@@ -739,7 +740,7 @@ def api_direct(pid: str, r: DirectReq):
     params = {"project": pid, "profile": r.profile, "target_seconds": r.target_seconds, "instructions": r.instructions or None,
               "title": r.title or None, "size": [w, h], "branch": r.branch, "platforms": r.platforms or None,
               "languages": r.languages or None, "shorts": r.shorts or None, "broll": r.broll, "broll_share": r.broll_share,
-              "overrides": r.overrides or None, "profile_overrides": r.profile_overrides or None, "end_text": r.end_text or None,
+              "broll_subject": r.broll_subject or None, "overrides": r.overrides or None, "profile_overrides": r.profile_overrides or None, "end_text": r.end_text or None,
               "reference_profile_id": r.reference_profile_id or None}
     if r.reference_profile_id and not (_project(pid).dir / "reports" / "references" / f"{r.reference_profile_id}.json").exists():
         raise HTTPException(404, f"no reference profile '{r.reference_profile_id}' in this project")

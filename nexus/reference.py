@@ -337,7 +337,8 @@ def to_overrides(ref: dict) -> dict:
     why.append(f"sound outside speech {m.get('music_bed_share', 0):.0%} of the time -> music {'on' if o['music']['enabled'] else 'off'}")
     col = m.get("colour") or {}
     if col.get("n"):
-        g = ("bw" if col["monochrome_share"] >= 0.6 else "warm" if col["warmth"] >= 0.06 else "cool" if col["warmth"] <= -0.04
+        g = ("bw" if col["monochrome_share"] >= 0.6 else "bleach_bypass" if col["saturation"] < 0.2  # muted colour: desaturate
+             else "warm" if col["warmth"] >= 0.06 else "cool" if col["warmth"] <= -0.04
              else "vivid" if col["colourfulness"] >= 55 else "documentary")
         o["grade"] = g
         why.append(f"colour: saturation {col['saturation']}, warmth {col['warmth']:+.3f}, colourfulness {col['colourfulness']} -> grade '{g}'")

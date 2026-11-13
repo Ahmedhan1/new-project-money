@@ -267,6 +267,8 @@ def local_candidates(path: str, analysis: dict, licence: str, credit: str, *, ma
             continue
         if r and r.get("dup_of") is not None:
             continue  # a visual repeat of an earlier shot of the same file
+        if r and (r.get("scene") or [{}])[0].get("label") in ("text or a title card",):
+            continue  # a title card / caption slate is never a cutaway (same rule as NOT_BROLL for library pictures)
         out.append({"id": f"local:{Path(path).stem}#{sh['id']}", "source": source, "kind": "local_video", "src": str(path),
                     "in": float(sh["start"]), "out": float(sh["end"]), "title": (r or {}).get("scene", [{}])[0].get("label", "shot"),
                     "description": "", "keywords": [], "license": licence, "credit": credit, "rights_note": None,
@@ -278,6 +280,7 @@ def local_candidates(path: str, analysis: dict, licence: str, credit: str, *, ma
 # ------------------------------------------------------------------ planning
 def plan(tl: dict, *, max_share: float = 0.4, per_cut: float = 4.5, min_cut: float = 2.0, min_score: float = 2.0,
          sources: tuple = ("nasa", "openverse"), search=None, context: str = "", local: list[dict] | None = None,
+         subject: list[str] | tuple = (),
          visual_rank: bool | None = None, embed=None, embed_text=None, speaker_embedding=None,
          vis_min: float = VIS_MIN) -> dict:
     """Choose cutaways for a built timeline.
@@ -359,8 +362,11 @@ def plan(tl: dict, *, max_share: float = 0.4, per_cut: float = 4.5, min_cut: flo
                 if src in GENERAL_SOURCES and ctx:  # a general index: the title must share the programme's subject too
                     own = set(und.content(c["title"] + " " + " ".join(c.get("keywords") or [])))
                     on_topic = bool((ctx - set(und.content(" ".join(q_terms)))) & own)
+                req = {w for t in subject for w in und.content(t)}
+                if on_topic and req and not (req & blob):  # the film's named subject (e.g. "Mars") must be in the metadata
+                    on_topic = False
                 if not on_topic:
-                    rejected.append(f"{c['id']}: off the programme's subject ({', '.join(sorted(ctx)[:5])})")
+                    rejected.append(f"{c['id']}: off the programme's subject ({', '.join(sorted(req or ctx)[:5])})")
                     continue
             if not visual_rank:
                 if src == "local":

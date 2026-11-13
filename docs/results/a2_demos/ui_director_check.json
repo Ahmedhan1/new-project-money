@@ -1,0 +1,7 @@
+{"what": "Playwright drive of the editor's director controls in the real app (uvicorn + Chromium), empty NEXUS_HOME, synthetic 48 s owned clip with an 8-sentence transcript",
+ "profiles_in_picker": 14, "profile_description": "hook within 8s · median shot 6s · pattern interrupt every 12s · 3 cutaways/min · titles: statement",
+ "visual_model_row": "not installed -> 'Install visual model (213.4 MB)' button (consent dialog)",
+ "direct_job": {"sentences_kept": 8}, "correction_selects": 27,
+ "drop_correction_via_ui": {"dropped_id": "sentence:00_talk:24.20-27.91", "sentences_kept_after": 7},
+ "reference_profile_created_via_ui": 1, "page_errors": [],
+ "fixed_during_check": "GET /api/projects/{id} returned 500 for an analysis without 'repetitions' (older/partial analyses): keys now default to []"}
