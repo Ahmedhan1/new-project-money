@@ -25,10 +25,12 @@ Expand-Archive "$B\dl\python.zip" "$B\app\runtime"
 $pth = Get-ChildItem "$B\app\runtime\python*._pth" | Select-Object -First 1
 Set-Content $pth.FullName -Encoding ascii -Value @("python312.zip", ".", "Lib\site-packages", "..", "import site")
 
-# 2. Python packages (binary wheels only, into the bundle; pytest is a dev tool and is left out)
+# 2. Python packages (binary wheels only, into the bundle; pytest is a dev tool and is left out). Exception: `srt`
+#    (a manim dependency) is pure Python and publishes no wheel at all, so it is built from its sdist (no compiler needed);
+#    without this the resolver fails (first real Windows run, 2026-11-13).
 $req = Get-Content requirements.txt | Where-Object { $_ -notmatch '^\s*pytest' }
 $req | Set-Content "$B\requirements-app.txt"
-& $Python -m pip install --only-binary=:all: --prefer-binary --no-warn-script-location --target "$B\app\runtime\Lib\site-packages" `
+& $Python -m pip install --only-binary=:all: --no-binary=srt --prefer-binary --no-warn-script-location --target "$B\app\runtime\Lib\site-packages" `
   --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu -r "$B\requirements-app.txt"
 if ($LASTEXITCODE -ne 0) { throw "pip install into the bundle failed" }
 

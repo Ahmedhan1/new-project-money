@@ -65,8 +65,12 @@ def _key(e: dict) -> str:
 
 
 def _label(text: str) -> str:
+    """drawtext with the font path and text escaped for the filtergraph (Windows paths such as C:\\Windows\\Fonts\\x.ttf
+    contain ':' and '\\', which break an unescaped filter - found by the Windows clean-machine run)."""
+    from ..media import ff
     t = text.replace("\\", "").replace(":", " ").replace("'", "")[:40]
-    return f"drawtext=fontfile='{config.FONT_LATIN}':text='{t}':x=6:y=6:fontsize=16:fontcolor=white:box=1:boxcolor=black@0.55"
+    return (f"drawtext=fontfile={ff.filter_path(config.FONT_LATIN)}:text={ff.escape_filter_value(t)}"
+            ":x=6:y=6:fontsize=16:fontcolor=white:box=1:boxcolor=black@0.55")
 
 
 def _effect(e: dict, out: Path) -> Path:
@@ -87,10 +91,10 @@ def _transition(e: dict, out: Path) -> Path:
 
 
 def _lut(e: dict, path: str, out: Path) -> Path:
-    from ..fx import post
-    p = post.esc_path(path)
+    from ..media import ff
+    p = ff.filter_path(path)
     return _ff(["-i", reference("a"), "-filter_complex",
-                f"[0:v]split[a][b];[b]lut3d=file='{p}'[g];[a]crop=iw/2:ih:0:0[l];[g]crop=iw/2:ih:iw/2:0[r];[l][r]hstack,{_label(e['name'] + ' (left original)')}[o]",
+                f"[0:v]split[a][b];[b]lut3d=file={p}[g];[a]crop=iw/2:ih:0:0[l];[g]crop=iw/2:ih:iw/2:0[r];[l][r]hstack,{_label(e['name'] + ' (left original)')}[o]",
                 "-map", "[o]", "-frames:v", "1"], out)
 
 
