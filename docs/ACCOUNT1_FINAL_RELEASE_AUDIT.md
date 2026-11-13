@@ -13,14 +13,14 @@ work. The residual exposure is recorded in §9 as a fact, not as an action.
 | Scope | Verdict |
 |---|---|
 | **Account 1** | **READY FOR OWNER DEPLOYMENT.** Engineering is complete and verified (§2–§8). What remains is owner-controlled (§10): approve a host, inject the secrets, make the offline vault-key backup, publish the OAuth consent screen, and run `production-check` plus one backup/restore drill on the host. |
-| Three-account release | **BLOCKED** on one cross-account item owned by Account 3: `bench_v2.account1_manifest` is incompatible with `batch_llm` (§7.4). The merged tree has not been run on Windows. |
-| NEXUS as a whole | Not assessed here. Not READY FOR PRODUCTION: nothing runs on an approved host yet. |
+| Three-account release | **Engineering unblocked.** Account 3 fixed the `batch_llm` manifest (`7572acb`, D-17); the merged tree at the current exact heads passes Linux 862/0/12 and a live production-mode smoke (§7.1). Not yet run on Windows: GitHub Actions is not starting any job for the whole repository (account-level, §7.6). |
+| NEXUS as a whole | **Not READY FOR PRODUCTION**, by definition of the owner-only steps: no approved host, no injected secrets, OAuth consent screen unpublished, no merge. Engineering-side it is READY FOR OWNER DEPLOYMENT. |
 
 ## 1. Verified PR state (re-fetched from GitHub)
 | | Value |
 |---|---|
-| PR #4 | open, **draft**, unmerged: https://github.com/Ahmedhan1/new-project-money/pull/4 |
-| Base | `claude/hopeful-allen-luubcy` @ `c93847d` (PR #3, draft) |
+| PR #4 | **merged by the owner** into `claude/hopeful-allen-luubcy` (merge commit `b54c952`, tree identical to `f9d8f11`): https://github.com/Ahmedhan1/new-project-money/pull/4 |
+| Base | PR #3 (`claude/hopeful-allen-luubcy` → `main`), draft, unmerged |
 | Code head audited | `73c0023` (production hardening `34a5ba1`, manifest-credential refusal `dafefe3`, test-literal fix `73c0023`). Later commits are docs/state only. |
 | Reviews | 0 reviews, 0 review threads |
 | Merged / deployed | nothing. No force-push, no branch deletion, no change to an Account 2/3 branch, no billing. |
@@ -156,47 +156,41 @@ Conclusions:
 - **Production OAuth readiness is not claimed.** The owner must publish the consent screen and reconnect A/B/C.
 
 ## 7. Cross-account integration (exact SHAs; separate from Account 1's own CI)
-### 7.1 Current run (this round), local branch `integration/heads-73c0023`, not pushed
+### 7.1 Current run (final review, 2026-11-13), local branch `integration/heads-f9d8f11`, not pushed
 | Input | SHA |
 |---|---|
-| Account 1 | `73c0023a43e8b3e186b9fc0d28c8b402718e2376` (code head; later Account 1 commits are docs/state only) |
-| Account 2 | `d979df1e390abc48e79a7e6645229968a5b94107` (`work/account-2-cinematic-engine`) |
-| Account 3 | `fd71471df08dc82e262176487651c04c947fa9f8` (`work/account-3-intelligence-growth`, its `integration/contracts_v1/apply.sh`) |
+| Account 1 | `f9d8f11` (= PR #3 head `b54c952` tree; code identical to `73c0023`) |
+| Account 2 | `d979df1e390abc48e79a7e6645229968a5b94107` (`work/account-2-cinematic-engine`, unchanged) |
+| Account 3 | `62414bf` (`work/account-3-intelligence-growth`, final closure with the `batch_llm` fix) |
 
-Order: fresh tree at A1 → merge A2 → merge A3 → `apply.sh`.
+Order: fresh worktree at A1 → merge A2 → merge A3 → `apply.sh`, scripted, with the same keep-both resolutions as before
+(`tasks.yaml` union; `api.py` A1 gates + A3 router; `workflows.py` both; `index.html` deep-link `go(...)`; generated
+docs/state files Account 1's side). No conflict markers remain.
 
-Conflicts, all resolved by keeping both sides:
-- `nexus/registry/tasks.yaml`: union; 88 unique ids, registry validates.
-- `nexus/api.py`: A1 production gate, owner guard and limits + A3 router.
-- `nexus/workflows.py`: A2 remote-render registration + A3 job kinds.
-- `nexus/ui/index.html`: A1 deep-link `go(...)` after `intelligence.js`, replacing A3's `go("home")`.
-
-Generated docs/state files took Account 1's side.
-
-The merge is scripted and reproducible: fresh worktree, the same keep-both resolutions, then `apply.sh`.
-
-Results:
-- **Focused contract tests** (from `apply.sh`): **42 passed**.
-- **Ruff:** clean.
-- **Full fast suite** in a venv built from the merged `requirements-ci.txt` (Linux, Python 3.13):
-  **766 passed, 0 failed, 12 skipped**.
-  - All skips are optional assets: opentimelineio 1, TTS/Piper voices 2, voice models 2, SigLIP ONNX 3, tesseract 3,
-    rclone 1.
-- **Not run on the merged tree:**
-  - Windows CI;
-  - the Windows clean-machine E2E;
-  - renders with real models.
-
-  The merged tree is local and is not pushed. These runs wait for Account 3's fix (§7.4) and the owner's go-ahead.
-
-**A defect found by the integration and fixed:** the first run of this round (A1 `34a5ba1`) gave 764 passed, 1 failed.
-- The failure: `test_no_secrets` flagged a token-shaped literal in Account 1's new `test_production.py`.
-- The fix: `73c0023` builds the value at runtime.
-- No test was weakened.
+Results (Linux, Python 3.13, venv from the merged `requirements-ci.txt`):
+- **Focused contract tests** (`apply.sh`): **42 passed**.
+- **Full fast suite: 862 passed, 0 failed, 12 skipped** (skips are optional assets only).
+- **Cross-account `batch_llm`:** `test_intel_batch_llm_integration.py` + `test_intel_batch_manifest.py` +
+  `test_production.py` + `test_cloud_security.py`: 61 passed. Account 3's generated manifests validate against
+  `ProductionJobManifest/v1`, run on Account 1's real `Dispatcher` and return every item; the old shape is refused
+  with a named cause.
+- **Live production-mode smoke on the merged tree** (real `python -m nexus serve`, throwaway secrets generated in the
+  shell, never written to a file):
+  - unconfigured `NEXUS_ENV=production` → exit 1, `ProductionConfigError`, each failing gate prints its fix;
+  - fully configured → `production-check` READY (12/12), `/api/v1/health/ready` 200 `{"ready":true}`;
+  - owner routes (`/api/v1/health`, `/storage/connections`, `/compute/jobs`): 401 anonymous, 200 with the token;
+    `/docs` 401; no `Server` header;
+  - second API process on the same home → refused (`single_instance`);
+  - SIGTERM → "Application shutdown complete", `service.start`/`service.stop` audited, run marker removed
+    (exit status 143 is uvicorn 0.54 re-raising the signal after a clean stop);
+  - backup to an off-home destination verified; restore drill 3/3 files verified;
+  - token, vault key and stored credential plaintext: **0 occurrences** in logs and backup objects;
+  - wrong `NEXUS_VAULT_KEY` → `vault_readable` FAIL, NOT READY.
 
 ### 7.2 Superseded runs (not evidence for current heads)
 | Run | A1 | A2 | A3 | Result |
 |---|---|---|---|---|
+| production closure | `73c0023` | `d979df1` | `fd71471` | 766 passed, 12 skipped (A3 manifest still old shape) |
 | closure round | `e9ad5e9` | `a52a24a` | `fd71471` | 748 passed, 12 skipped |
 | Account 3 r2 | `2ac7f96` | `cc836de` | `5976a49` | 746 passed, 8 skipped |
 | final-closure morning | `2ac7f96` | `9929512` | `24b3f71` | 628 passed / 27 failed with CI deps (Account 2's undeclared packages, since fixed) |
@@ -204,30 +198,23 @@ Results:
 ### 7.3 Account 2 (latest head `d979df1`)
 No open item for Account 1. Account 2's report of a failing Account 1 cookie/CSRF test is explained and closed (§3.1).
 
-### 7.4 Account 3 (PR #5, head `fd71471`, unchanged since the last round)
-**The interface mismatch is still open.** `bench_v2.account1_manifest()` sends
-`params: {"models": [...], "items": <count>, "runtime": "ollama"}`. The contract requires:
-- one model per job, in `params.model`;
-- the actual prompt list (`params.items`) or the JSONL input artifact (`params.items_input`);
-- no Ollama runtime field.
+### 7.4 Account 3 (head `62414bf`)
+**Closed.** The mismatch (`params.models` / item count / `runtime: ollama`) is fixed on Account 3's side
+(`7572acb`: one job per model, prompts inline, old shape refused) and verified on the merged tree (§7.1). Account 1
+edited no Account 3 file. Account 2 also has a newer follow-up branch (`work/account-2-asset-library-storage`, PR #7);
+it was not part of this directive's pinned heads and is not covered by this run.
 
-A job in the current shape fails safely on the worker with `TypeError: 'int' object is not iterable`.
+### 7.5 Remaining integration steps (owner-gated)
+1. Windows CI and the Windows clean-machine E2E on the merged tree: need runners (§7.6) and the owner's go-ahead to
+   push an integration branch.
+2. Merge order A1 → A2 → A3 → `apply.sh`: owner decision. Stale results are not reused; rerun §7.1 at whatever heads
+   are current when the owner merges.
 
-Account 3 was notified on PR #5:
-- [contract](https://github.com/Ahmedhan1/new-project-money/pull/5#issuecomment-6847899922)
-- [correction](https://github.com/Ahmedhan1/new-project-money/pull/5#issuecomment-6847919100)
-
-Account 1 did not edit Account 3's files. Account 3 owns the fix.
-
-### 7.5 Next integration run (after Account 3's fix)
-1. Re-fetch all three exact heads.
-2. Build a fresh tree, merge A1 → A2 → A3, run `apply.sh`.
-3. Run the focused contract and dispatcher tests, then the full fast suite.
-4. Run Linux CI, Windows CI and the Windows clean-machine E2E on the merged tree. Pushing an integration branch for CI
-   needs the owner's go-ahead.
-5. Record the SHAs here.
-
-Stale results are not reused.
+### 7.6 GitHub Actions outage (account-level)
+Since 2026-11-13 ~10:50 UTC every job in the repository (Account 1, 2 and 3 PRs alike) is marked failed 2–5 s after
+creation with no runner assigned and no log. This is the Actions minutes/spending limit or a GitHub-side problem,
+not code. The last run that executed (`73c0023`, same code as today's Account 1 head) passed on Linux and Windows.
+No billing setting was touched; fixing it is an owner action (§10).
 
 ## 8. Production acceptance matrix
 | Requirement | Test(s) | Linux | Windows |
@@ -275,13 +262,16 @@ Stale results are not reused.
    drill.
 7. Optional, touches real accounts: a real Drive revoke, a Drive backup/restore and a forced failover.
 8. Merge decisions and order (A1 → A2 → A3 → `apply.sh`). Nothing merges without the owner.
+9. Restore GitHub Actions runner availability (Settings → Billing / Actions), then re-run CI on PR #3 and on the
+   integration branch. No agent changes billing.
 
 ## 11. Outstanding limitations
 - No permanent host. Nothing has been tested on the owner's own machine or on an approved host.
 - Real Drive revocation, Drive backup/restore and forced Drive failover: fake-server and local tests only.
 - A real Kaggle quota-exhaustion message has never been seen. It is never forced (Kaggle closed).
 - Owner-GPU / Colab pull worker: protocol tests only.
-- The three-account merged tree has not run on Windows or in the clean-machine E2E; it waits for Account 3's fix.
+- The three-account merged tree has not run on Windows or in the clean-machine E2E: GitHub Actions is down for the
+  account (§7.6). Linux and a live production-mode smoke passed.
 - Rate-limit counters reset on restart. Horizontal scaling is not supported (single instance by design).
 - No FFmpeg input fuzzing. The CSP allows inline script for the single-file UI.
 - Drive gives 15 GB per account, shared with Gmail/Photos. Three accounts are not unlimited storage.

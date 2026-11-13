@@ -3,14 +3,14 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-13T10:27:10Z",
+ "updated": "2026-11-13T11:31:33Z",
  "git": {
-  "branch": "work/account-1-cloud-platform",
-  "commit": "a559669",
-  "subject": "Account 1 production closure: CI 427/5 Linux+Windows at 73c0023, integration 766 passed at exact heads, audit verdict READY FOR OWNER DEPLOYMENT",
-  "dirty_files": 0,
-  "upstream": "origin/work/account-1-cloud-platform",
-  "unpushed_commits": 1
+  "branch": "claude/hopeful-allen-luubcy",
+  "commit": "b54c952",
+  "subject": "Merge pull request #4 from Ahmedhan1/work/account-1-cloud-platform",
+  "dirty_files": 3,
+  "upstream": "origin/claude/hopeful-allen-luubcy",
+  "unpushed_commits": 0
  },
  "current_task": {
   "id": "QLT-1",
@@ -19,6 +19,13 @@
   "next": "1) Series visuals - derive the image query from the bible's location LOOK text (generic nouns), not its fictional name, and allow reuse of an image for a repeated location. 2) Repair off-bible locations instead of only reporting them. 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Scored rubric in the QA report."
  },
  "next_tasks": [
+  {
+   "id": "ACC1-INTEGRATION",
+   "priority": 1,
+   "title": "Three-account shared-contracts integration (nexus/contracts/{cloud,media}.py + shared __init__)",
+   "status": "in_progress",
+   "next": "Linux done at A1 f9d8f11 / A2 d979df1 / A3 62414bf: 862 passed, 0 failed + live production smoke. Remaining: Windows CI + clean-machine E2E on the merged tree once runners work; rerun at current heads at merge time."
+  },
   {
    "id": "QLT-1",
    "priority": 1,
@@ -46,13 +53,6 @@
    "title": "Growth: shorts extractor, retention rubric + auto retention pass, hook/title variants, reference-video style profile",
    "status": "tested",
    "next": "Extended by GRW-2."
-  },
-  {
-   "id": "MED-1",
-   "priority": 1,
-   "title": "Media engine: encoder detection, H.264/H.265/AV1 presets, size-targeted export, proxies, export verification, benchmark",
-   "status": "tested",
-   "next": "Use export.export() for final deliverables in the deliver job (max file size per platform); benchmark on the owner's machine."
   }
  ],
  "tasks": {
@@ -60,10 +60,10 @@
   "by_status": {
    "verified": 23,
    "tested": 12,
-   "blocked": 6,
+   "blocked": 5,
    "deferred": 1,
    "planned": 16,
-   "in_progress": 2
+   "in_progress": 3
   },
   "registry": "nexus/registry/tasks.yaml"
  },
@@ -119,11 +119,6 @@
    "id": "ACC1-HOSTING",
    "title": "Deploy the control plane on an owner-approved zero-cost host",
    "why": "Owner decision (host and exposure need explicit approval; no public deployment without it)."
-  },
-  {
-   "id": "ACC1-INTEGRATION",
-   "title": "Three-account shared-contracts integration (nexus/contracts/{cloud,media}.py + shared __init__)",
-   "why": "Account 3: bench_v2.account1_manifest at fd71471 still sends params.models / items as a count / runtime ollama (incompatible with batch_llm). Owner: merge approval and order. (Account 2: no open item.)"
   }
  ],
  "backup": {

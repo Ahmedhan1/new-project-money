@@ -496,8 +496,8 @@ tasks:
   - id: ACC1-INTEGRATION
     priority: 1
     title: "Three-account shared-contracts integration (nexus/contracts/{cloud,media}.py + shared __init__)"
-    status: blocked
-    blocked_by: "Account 3: bench_v2.account1_manifest at fd71471 still sends params.models / items as a count / runtime ollama (incompatible with batch_llm). Owner: merge approval and order. (Account 2: no open item.)"
+    status: in_progress
+    blocked_by: "Owner: GitHub Actions runners (account-level outage, audit section 7.6) and merge approval/order. Account 3 manifest fix landed (62414bf) and verified."
     acceptance: "A1 -> A2 -> A3 merge at exact heads + apply.sh: full fast suite green with CI's dependency set."
     test: "see docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md section 7"
-    next: "Rerun the integration at the newest exact heads after Account 3's manifest fix; owner approves the merge order. Latest run: docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md section 7."
+    next: "Linux done at A1 f9d8f11 / A2 d979df1 / A3 62414bf: 862 passed, 0 failed + live production smoke. Remaining: Windows CI + clean-machine E2E on the merged tree once runners work; rerun at current heads at merge time."
