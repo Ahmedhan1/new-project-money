@@ -3,14 +3,14 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-13T11:31:33Z",
+ "updated": "2026-11-13T11:54:18Z",
  "git": {
   "branch": "claude/hopeful-allen-luubcy",
-  "commit": "b54c952",
-  "subject": "Merge pull request #4 from Ahmedhan1/work/account-1-cloud-platform",
-  "dirty_files": 3,
+  "commit": "a0345f4",
+  "subject": "Pin the three-account integration result to exact SHAs and make it reproducible",
+  "dirty_files": 0,
   "upstream": "origin/claude/hopeful-allen-luubcy",
-  "unpushed_commits": 0
+  "unpushed_commits": 1
  },
  "current_task": {
   "id": "QLT-1",
@@ -74,6 +74,9 @@
    "date": "2026-11-13",
    "platform": "Linux",
    "python": "3.13.18"
+  },
+  "integration": {
+   "summary": "862 passed, 0 failed, 12 skipped at A1 f9d8f11 / A2 d979df1 / A3 62414bf (local Linux (cloud container); not run: Windows CI on the merged tree, Windows clean-machine E2E on the merged tree, GitHub-hosted Linux CI on the merged tree) - docs/results/integration/heads-f9d8f11-d979df1-62414bf.json"
   }
  },
  "jobs": {
