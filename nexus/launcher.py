@@ -65,6 +65,8 @@ def preflight() -> list[dict]:
     try:
         from . import db
         add("database", True, f"{config.DB_PATH.name} schema v{db.schema_version()}")
+    except db.DatabaseDamaged as e:
+        add("database", False, str(e), "python -m nexus restore <new folder>  (NEXUS_RESTORE.bat)")
     except Exception as e:
         add("database", False, f"{type(e).__name__}: {e}", "restore the database from a backup: NEXUS_RESTORE")
     return out

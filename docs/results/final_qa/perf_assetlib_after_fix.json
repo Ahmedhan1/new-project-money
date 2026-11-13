@@ -1,0 +1,25 @@
+{
+ "defect": "QA-D3",
+ "what": "GET /api/library payload (catalog + summary + categories + optional_future), local Linux, same machine and home",
+ "before": {
+  "seconds": [
+   18.8528,
+   18.294
+  ],
+  "median": 18.8528,
+  "payload_sha256": "ce70611b20ed44415835f847fe553973751f9480030f5a5d603f0d8ddcea04ef"
+ },
+ "after": {
+  "seconds": [
+   0.211,
+   0.2281,
+   0.2002,
+   0.2763,
+   0.1932
+  ],
+  "median": 0.211,
+  "payload_sha256": "ce70611b20ed44415835f847fe553973751f9480030f5a5d603f0d8ddcea04ef"
+ },
+ "identical_payload": true,
+ "fix": "nexus/assetlib/__init__.py _registry(): thread-safe cache keyed by (path, mtime_ns, size, sha256), CSafeLoader, deep copy per caller"
+}

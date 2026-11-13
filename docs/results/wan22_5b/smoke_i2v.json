@@ -1,35 +1,35 @@
 {
- "captured_at": "2026-11-13T13:48:08Z",
+ "captured_at": "2026-11-13T15:42:55Z",
  "kind": "LIVE (real Kaggle GPU, real Wan 2.2 TI2V-5B)",
  "profile": "smoke_i2v",
- "job_id": "rjob_c1ad61c90bb8",
+ "job_id": "rjob_a3611e323cb4",
  "status": "succeeded",
  "error": null,
  "accelerator": "Tesla T4 x2",
- "duration_s": 427.054,
+ "duration_s": 434.091,
  "worker_metrics": {
-  "peak_rss_mb": 22020.7,
+  "peak_rss_mb": 22064.0,
   "ram_total_gb": 31.35,
   "gpu_util_max": 100.0,
-  "gpu_util_mean": 12.6,
-  "gpu_mem_used_max_mb": 14187.0,
-  "task_s": 427.054,
+  "gpu_util_mean": 12.5,
+  "gpu_mem_used_max_mb": 14359.0,
+  "task_s": 434.091,
   "per_gpu": [
    {
     "index": 0,
     "util_max": 100.0,
-    "util_mean": 13.8,
-    "smi_mem_used_max_mb": 13215.0
+    "util_mean": 8.8,
+    "smi_mem_used_max_mb": 12405.0
    },
    {
     "index": 1,
     "util_max": 100.0,
-    "util_mean": 14.5,
-    "smi_mem_used_max_mb": 14187.0
+    "util_mean": 19.8,
+    "smi_mem_used_max_mb": 14359.0
    }
   ],
-  "load_s": 130.8,
-  "download_s": 152.3
+  "load_s": 131.3,
+  "download_s": 154.0
  },
  "benchmark": {
   "model": "wan22-ti2v-5b",
@@ -66,13 +66,13 @@
    }
   },
   "strategy": {
-   "transformer": "torch.float16 on cuda:0",
+   "transformer": "torch.float16, blocks split {'blocks_on_main': 15, 'blocks_on_aux': 15} across cuda:0/cuda:1",
    "text_encoder": "gpu-bf16 on cuda:1",
-   "vae": "fp32 encode on cuda:0, untiled fp32 decode on cuda:1 (text encoder freed after encoding)",
+   "vae": "fp32 on cuda:1 for I2V encode (latents handed to cuda:0) and decode (untiled when it fits, else own first-chunk-aware tiling)",
    "cpu_offload": false
   },
-  "download_s": 152.3,
-  "load_s": 130.8,
+  "download_s": 154.0,
+  "load_s": 131.3,
   "runs": [
    {
     "run": "run0",
@@ -93,21 +93,23 @@
     "guidance": 5.0,
     "seed": 11,
     "scheduler": "UniPCMultistepScheduler",
-    "text_encode_s": 5.4,
-    "generate_s": 49.6,
-    "decode_s": 42.9,
-    "s_per_step_mean": 2.48,
-    "aux_free_gb_before_decode": 11.75,
+    "text_encode_s": 5.3,
+    "generate_s": 51.5,
+    "decode_s": 43.4,
+    "s_per_step_mean": 2.57,
+    "aux_free_gb_before_decode": 6.67,
+    "decode": "untiled",
+    "decode_check": null,
     "vram": [
      {
       "index": 0,
-      "peak_allocated_mb": 12752.8,
-      "peak_reserved_mb": 13066.0
+      "peak_allocated_mb": 5244.5,
+      "peak_reserved_mb": 5346.0
      },
      {
       "index": 1,
-      "peak_allocated_mb": 9887.0,
-      "peak_reserved_mb": 14054.0
+      "peak_allocated_mb": 13772.9,
+      "peak_reserved_mb": 14222.0
      }
     ],
     "quality": {
@@ -136,14 +138,14 @@
      ],
      "format": {
       "duration": "1.041667",
-      "size": "404336",
-      "bit_rate": "3105299"
+      "size": "403911",
+      "bit_rate": "3102035"
      }
     },
     "artifact": {
      "name": "wan22_5b_i2v_672x384_25f_run0.mp4",
-     "sha256": "8cb1dc78c922e97f81e017566b424c36fca37634dd1f67f60536f4188638a97a",
-     "size": 404336
+     "sha256": "77736937ca85ed4c93fbcfd651cb316a83b03ec4e9baeafea21d737009995448",
+     "size": 403911
     }
    }
   ],
@@ -151,22 +153,22 @@
    {
     "index": 0,
     "util_max": 100.0,
-    "util_mean": 13.8,
-    "smi_mem_used_max_mb": 13215.0
+    "util_mean": 8.8,
+    "smi_mem_used_max_mb": 12405.0
    },
    {
     "index": 1,
     "util_max": 100.0,
-    "util_mean": 14.5,
-    "smi_mem_used_max_mb": 14187.0
+    "util_mean": 19.8,
+    "smi_mem_used_max_mb": 14359.0
    }
   ]
  },
  "videos": [
   {
    "name": "wan22_5b_i2v_672x384_25f_run0.mp4",
-   "size": 404336,
-   "sha256": "8cb1dc78c922e97f81e017566b424c36fca37634dd1f67f60536f4188638a97a",
+   "size": 403911,
+   "sha256": "77736937ca85ed4c93fbcfd651cb316a83b03ec4e9baeafea21d737009995448",
    "sha256_matches_worker": true,
    "ffprobe": {
     "programs": [],
@@ -182,17 +184,17 @@
     ],
     "format": {
      "duration": "1.041667",
-     "size": "404336"
+     "size": "403911"
     }
    },
    "motion": {
     "decoded_frames": 25,
-    "mean_abs_diff": 1.366,
+    "mean_abs_diff": 1.369,
     "static_pairs": 0,
     "luma_min": 123.4,
     "luma_max": 125.4
    },
-   "local_path": "$NEXUS_HOME/compute/artifacts/rjob_c1ad61c90bb8/wan22_5b_i2v_672x384_25f_run0.mp4"
+   "local_path": "$NEXUS_HOME/compute/artifacts/rjob_a3611e323cb4/wan22_5b_i2v_672x384_25f_run0.mp4"
   }
  ],
  "log_tail": ""

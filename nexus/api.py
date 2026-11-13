@@ -284,23 +284,58 @@ _UPLOAD_EXT = {".mp4", ".mov", ".mkv", ".webm", ".avi", ".m4v", ".mpg", ".mpeg",
                ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".tif", ".tiff", ".heic"}
 
 
+UPLOAD_MARGIN_BYTES = 256 * 2 ** 20  # never fill the disk to the last byte: the database and logs need room too
+
+
+def _upload_size(file: UploadFile) -> int:
+    if getattr(file, "size", None) is not None:
+        return int(file.size)
+    f = file.file
+    pos = f.tell()
+    f.seek(0, 2)
+    n = f.tell()
+    f.seek(pos)
+    return n
+
+
 @app.post("/api/upload")
 async def api_upload(file: UploadFile = File(...), project_id: str | None = None):
-    """Upload media the user owns or is authorised to use. Analysis starts immediately."""
+    """Upload media the user owns or is authorised to use. Analysis starts immediately.
+
+    QA-D4: free space is checked before anything is written (HTTP 507 when it does not fit), the file is staged under a
+    temporary name in NEXUS_HOME (same filesystem as the projects, so it is moved, not copied a second time), and a
+    project created for this upload is removed again if the import fails - no truncated media, no orphan project."""
+    import errno
     import uuid
     name = Path((file.filename or "").replace("\\", "/")).name.strip()
     if not name or name in (".", "..") or Path(name).suffix.lower() not in _UPLOAD_EXT:
         raise HTTPException(415, "unsupported file type: upload a video, audio or image file")
-    p = _project(project_id) if project_id else prj.Project.create(Path(name).stem, "edit")
-    tmp = config.CACHE / "uploads" / uuid.uuid4().hex / name   # one folder per upload: concurrent same-name uploads never collide
+    existing = _project(project_id) if project_id else None
+    size = _upload_size(file)
+    stage_root = config.HOME / "tmp" / "uploads"
+    stage_root.mkdir(parents=True, exist_ok=True)
+    free = shutil.disk_usage(stage_root).free
+    if size + UPLOAD_MARGIN_BYTES > free:
+        raise HTTPException(507, f"not enough free disk space for this upload: it needs {(size + UPLOAD_MARGIN_BYTES) / 1e6:.0f} MB, "
+                                 f"{free / 1e6:.0f} MB free in {config.HOME}. Free some space (Storage page -> cleanup) and try again.")
+    tmp = stage_root / uuid.uuid4().hex / name   # one folder per upload: concurrent same-name uploads never collide
     tmp.parent.mkdir(parents=True, exist_ok=True)
+    created = None
     try:
-        with tmp.open("wb") as f:
-            shutil.copyfileobj(file.file, f)
-        m = p.import_media(tmp)
+        try:
+            with tmp.open("wb") as f:
+                shutil.copyfileobj(file.file, f, 1 << 20)
+            p = existing or prj.Project.create(Path(name).stem, "edit")
+            created = None if existing else p
+            m = p.import_media(tmp, move=True)
+        except BaseException as e:
+            if created is not None:
+                created.discard()
+            if isinstance(e, OSError) and e.errno in (errno.ENOSPC, getattr(errno, "EDQUOT", -1)):
+                raise HTTPException(507, "the disk filled up during the upload; nothing was kept. Free some space and try again.") from None
+            raise
     finally:
         shutil.rmtree(tmp.parent, ignore_errors=True)
-
     return {"project": p.id, "media": m, **jobs.submit("analyze", {"project": p.id, "media": m["id"]}, p.id)}
 
 
