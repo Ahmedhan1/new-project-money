@@ -1,0 +1,133 @@
+{
+ "model": "wan22-ti2v-5b",
+ "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+ "revision": "b8fff7315c768468a5333511427288870b2e9635",
+ "licence": "apache-2.0",
+ "diffusers_pinned": "0.35.2",
+ "env": {
+  "gpu_count": 2,
+  "gpus": [
+   {
+    "index": 0,
+    "name": "Tesla T4",
+    "vram_gb": 14.56,
+    "cc": "7.5"
+   },
+   {
+    "index": 1,
+    "name": "Tesla T4",
+    "vram_gb": 14.56,
+    "cc": "7.5"
+   }
+  ],
+  "bf16_native": false,
+  "bf16_matmul_works": true,
+  "versions": {
+   "torch": "2.11.0+cu130",
+   "diffusers": "0.35.2",
+   "transformers": "5.20.2",
+   "accelerate": "1.15.0",
+   "safetensors": "0.8.0",
+   "huggingface_hub": "1.33.0",
+   "cuda": "13.0"
+  }
+ },
+ "strategy": {
+  "transformer": "torch.float16, blocks split {'blocks_on_main': 15, 'blocks_on_aux': 15} across cuda:0/cuda:1",
+  "text_encoder": "gpu-bf16 on cuda:1",
+  "vae": "fp32 on cuda:1 for I2V encode (latents handed to cuda:0) and decode (untiled when it fits, else own first-chunk-aware tiling)",
+  "cpu_offload": false
+ },
+ "download_s": 156.2,
+ "load_s": 130.9,
+ "runs": [
+  {
+   "run": "run0",
+   "mode": "i2v",
+   "prompt": "The cat slowly turns its head toward the camera and blinks while the background gently moves, natural motion.",
+   "image": {
+    "source": "Wan-AI/Wan2.2-TI2V-5B-Diffusers@b8fff7315c768468a5333511427288870b2e9635:examples/i2v_input.JPG",
+    "size": [
+     832,
+     1104
+    ]
+   },
+   "width": 1280,
+   "height": 704,
+   "frames": 121,
+   "fps": 24,
+   "steps": 30,
+   "guidance": 5.0,
+   "seed": 11,
+   "scheduler": "UniPCMultistepScheduler",
+   "text_encode_s": 5.5,
+   "generate_s": 3230.2,
+   "decode_s": 1357.8,
+   "s_per_step_mean": 107.67,
+   "aux_free_gb_before_decode": 0.57,
+   "decode": "tiled (own, first-chunk aware)",
+   "decode_check": null,
+   "vram": [
+    {
+     "index": 0,
+     "peak_allocated_mb": 10234.0,
+     "peak_reserved_mb": 12678.0
+    },
+    {
+     "index": 1,
+     "peak_allocated_mb": 12429.1,
+     "peak_reserved_mb": 14224.0
+    }
+   ],
+   "quality": {
+    "frames": 121,
+    "mean_luma": 123.79,
+    "min_frame_luma": 116.86,
+    "mean_frame_std": 67.05,
+    "mean_abs_frame_diff": 7.714,
+    "max_abs_frame_diff": 19.843,
+    "first_last_diff": 32.692,
+    "static_pairs": 0,
+    "black": false,
+    "flat": false
+   },
+   "ffprobe": {
+    "programs": [],
+    "streams": [
+     {
+      "codec_name": "h264",
+      "codec_type": "video",
+      "width": 1280,
+      "height": 704,
+      "r_frame_rate": "24/1",
+      "nb_frames": "121"
+     }
+    ],
+    "format": {
+     "duration": "5.041667",
+     "size": "6822287",
+     "bit_rate": "10825446"
+    }
+   },
+   "artifact": {
+    "name": "wan22_5b_i2v_1280x704_121f_run0.mp4",
+    "sha256": "1bd915afa4b8ae104f9468c98619f21f92bd1dffdc901015e39e4fd393ae4387",
+    "size": 6822287
+   }
+  }
+ ],
+ "per_gpu": [
+  {
+   "index": 0,
+   "util_max": 100.0,
+   "util_mean": 29.2,
+   "smi_mem_used_max_mb": 12825.0
+  },
+  {
+   "index": 1,
+   "util_max": 100.0,
+   "util_mean": 64.6,
+   "smi_mem_used_max_mb": 14361.0
+  }
+ ]
+}

@@ -20,7 +20,9 @@ reproducible defect remains). Independent results are listed separately and neve
 Nothing open remains a FAIL on Linux. The release still cannot be signed off as production-ready:
 - **Windows (BLOCKED).** The deliverable is a Windows single-file product, but `NEXUS_VIDEO_AI_Setup.exe` has not been
   built or installed, and GitHub Actions starts no job, so there is no CI, no Windows E2E and no update/rollback test.
-- **Wan 2.2 720p I2V (not verified).** There is no successful run after the VAE change; 720p T2V is evidenced.
+- **Wan 2.2 720p.** Since `44a7cb9`, T2V and I2V both succeed on T4×2. I2V has visible artefacts (the sunglasses
+  warp) and only partial prompt adherence. QA has seen contact sheets, not the MP4s. Account 1's release report §9
+  (final gate) is still a placeholder.
 - **Owner-only validation (BLOCKED)**, listed in §9b: provider OAuth, native-language review, real analytics, the audio
   and creative review, and merge approval.
 
@@ -174,15 +176,16 @@ Performance (`perf_summary.json`, `perf_assetlib.json`):
 | Model identity | `Wan-AI/Wan2.2-TI2V-5B-Diffusers` at revision `b8fff7315c768468a5333511427288870b2e9635` in every successful record. The worker selects it by explicit key, with no fallback path; the 1.3B entry is separate and unpinned (QA-W4). No 14B model and no paid provider appear |
 | Real GPU | Kaggle T4 × 2 on every job (sm 7.5, 14.56 GiB each), with per-GPU memory and utilisation recorded. Not echo, not CPU, not a still |
 | **720p T2V** (`rjob_620150232fa9`) | **succeeded**: 1280×704, 121 frames at 24 fps, 30 steps, h264; the local SHA-256 equals the worker's (`26c351fd…2e1f`). Generation 2,835 s, decode 1,264 s (own tiling), job 4,455 s (74 min). Peak allocated GPU0 12.9 GB / GPU1 9.7 GB; mean utilisation 34 % / 61 %. No static pairs, not black, not flat. Contact sheet: a recognisable red fox trotting through snow in a sunlit birch forest, with the camera moving alongside, temporally consistent and on prompt |
-| **720p I2V** | **not verified.** `rjob_5b6d09efb6d1` failed with CUDA OOM on GPU0. `i2v720.json` is that same failed attempt. The VAE-placement change in `4a3dd6f` has **no successful post-fix run yet**, so there is no I2V MP4 to inspect |
+| **720p I2V** (`rjob_c2b5eb742475`, evidence added in `44a7cb9`) | **succeeded** after the VAE fix: 1280×704, 121 frames at 24 fps, 30 steps; the hash matches the worker (`1bd915af…`). Generation 3,230 s, decode 1,358 s, job 4,937 s (82 min). Peak allocated GPU0 10.2 GB / GPU1 12.4 GB. Decoded motion 2.82 (worker 7.71), no static pairs. Contact sheet: the cat clearly turns its head, so the motion is real. But it turns **away** from the camera, not toward it as prompted; no blink is visible; and the sunglasses warp and slide off the face in the later frames (a temporal artefact). The first attempt `rjob_5b6d09efb6d1` failed with OOM |
 | **I2V after the VAE fix, smoke size** (`rjob_a3611e323cb4`, in `a209660`) | **succeeded** at 672×384, 25 frames. This is a new job: different timings and hash (`77736937…`), and the memory profile changed as the fix intends (GPU0 peak 5.2 GB vs 12.8 GB before). It used the same seed as the pre-fix run, so the frame statistics are nearly identical (decoded motion 1.369 vs 1.366). **Motion is very low**: mean decoded frame difference 1.37, against 3.97 for the 720p T2V clip, and the cat does not turn or blink as prompted. The record replaced the pre-fix `smoke_i2v.json` (the earlier job `rjob_c1ad61c90bb8` is still in git history) |
 | Smoke runs (672×384, 25 f) | T2V and I2V succeeded. Prompt adherence was weak at that size (QA-W2) |
 | MP4 files | not in the repository. `tasks.yaml` cites `media/t2v_1280x704_121f_24fps.mp4`, which does not exist in the tree. QA could inspect only the contact sheets and the ffprobe and hash records, not the video itself (QA-W1) |
 | Motion metrics | two different numbers per clip: worker 13.74 vs local decoded 3.97 at 720p (QA-W3) |
 
-Verdict: **720p T2V is evidenced as real, valid, moving and on-prompt** (from records and the contact sheet).
-**I2V works mechanically after the fix at smoke size, but with very little motion. 720p I2V is still not verified**: it
-needs a successful post-fix 720p run, and its MP4 inspected for real motion. Speed: about 74 min of T4×2 time per 5 s 720p
+Verdict (as of `44a7cb9`): **720p T2V and 720p I2V are both evidenced as real, valid, moving video on the owner's Kaggle
+T4×2**, judged from the records and contact sheets. T2V is on-prompt. I2V moves, but with visible artefacts and only
+partial prompt adherence. The MP4s are not in the repository, so QA has not watched either clip. Cost: 74–82 min of
+T4×2 per 5 s 720p clip. Speed: about 74 min of T4×2 time per 5 s 720p
 clip.
 
 ## 7. Real providers (evidence review; QA has no owner credentials and re-ran nothing live)
@@ -271,6 +274,6 @@ None of it touches product code.
 
 Still open before a production release:
 - Owner: restore GitHub Actions, then build the Windows installer and run the §8 plan.
-- Account 1 / Account 2: a successful post-fix **720p** I2V run with real motion, and its MP4 kept for inspection.
+- Account 1: fill `FINAL_RELEASE_REPORT.md` §9 (still `__GATE__`), and keep the two 720p MP4s somewhere the owner and QA can watch them.
 - Cosmetic: `nexus serve` should not print "NEXUS running at …" when the database check then stops it.
 - Owner: the items in §9b, and merge approval.

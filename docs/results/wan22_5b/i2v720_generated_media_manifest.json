@@ -1,0 +1,42 @@
+{
+ "schema": "nexus.GeneratedMediaManifest/1",
+ "model": {
+  "id": "wan22-ti2v-5b"
+ },
+ "task": "image_to_video",
+ "inputs": [],
+ "output": {
+  "uri": "docs/results/wan22_5b/media/i2v_1280x704_121f_24fps.mp4",
+  "role": "output",
+  "bytes": 6822287,
+  "sha256": "1bd915afa4b8ae104f9468c98619f21f92bd1dffdc901015e39e4fd393ae4387"
+ },
+ "classification": "generated-video",
+ "licence": {
+  "weights_licence": "Apache-2.0",
+  "commercial_use": "yes",
+  "class": "foss",
+  "conditions": null,
+  "source_url": "https://huggingface.co/Wan-AI/Wan2.2-TI2V-5B-Diffusers"
+ },
+ "compute": {
+  "gpu": "Tesla T4 x2 (Kaggle, rjob_c2b5eb742475)",
+  "provider": "kaggle"
+ },
+ "provenance": {
+  "model": "wan22-ti2v-5b"
+ },
+ "classification_reasons": [
+  "wan22-ti2v-5b output with independent motion"
+ ],
+ "evidence": {
+  "still_motion": {
+   "frames": 96,
+   "residual": 24.727,
+   "motion": 23.821,
+   "verdict": "independent-motion"
+  }
+ },
+ "prompt": "The cat slowly turns its head toward the camera and blinks while the background gently moves",
+ "seconds": 5.04
+}

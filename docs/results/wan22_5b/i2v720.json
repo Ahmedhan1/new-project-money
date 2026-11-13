@@ -1,24 +1,201 @@
 {
- "captured_at": "2026-11-13T15:32:52Z",
+ "captured_at": "2026-11-13T17:06:50Z",
  "kind": "LIVE (real Kaggle GPU, real Wan 2.2 TI2V-5B)",
  "profile": "i2v720",
- "job_id": "rjob_5b6d09efb6d1",
- "status": "failed",
- "error": "OutOfMemoryError: CUDA out of memory. Tried to allocate 1.88 GiB. GPU 0 has a total capacity of 14.56 GiB of which 1.81 GiB is free. Including non-PyTorch memory, this process has 12.75 GiB memory in use. Of the allocated memory 10.61 GiB is allocated by PyTorch, and 2.02 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)",
+ "job_id": "rjob_c2b5eb742475",
+ "status": "succeeded",
+ "error": null,
  "accelerator": "Tesla T4 x2",
- "duration_s": 341.591,
+ "duration_s": 4937.147,
  "worker_metrics": {
-  "peak_rss_mb": 21546.5,
+  "peak_rss_mb": 22611.1,
   "ram_total_gb": 31.35,
   "gpu_util_max": 100.0,
-  "gpu_util_mean": 1.6,
-  "gpu_mem_used_max_mb": 14627.0,
-  "task_s": 341.591,
-  "per_gpu": null,
-  "load_s": null,
-  "download_s": null
+  "gpu_util_mean": 46.8,
+  "gpu_mem_used_max_mb": 14361.0,
+  "task_s": 4937.147,
+  "per_gpu": [
+   {
+    "index": 0,
+    "util_max": 100.0,
+    "util_mean": 29.2,
+    "smi_mem_used_max_mb": 12825.0
+   },
+   {
+    "index": 1,
+    "util_max": 100.0,
+    "util_mean": 64.6,
+    "smi_mem_used_max_mb": 14361.0
+   }
+  ],
+  "load_s": 130.9,
+  "download_s": 156.2
  },
- "benchmark": null,
- "videos": [],
- "log_tail": "iffusers\": \"0.35.2\", \"transformers\": \"5.20.2\", \"accelerate\": \"1.15.0\", \"safetensors\": \"0.8.0\", \"huggingface_hub\": \"1.33.0\", \"cuda\": \"13.0\"}}\n15:29:07 snapshot Wan-AI/Wan2.2-TI2V-5B-Diffusers@b8fff7315c768468a5333511427288870b2e9635 in 152s\n15:31:19 loaded in 132s: transformer torch.float16 on cuda:0, text encoder gpu-bf16, vae fp32\n15:31:25 text encoder freed: cuda:1 free 14.4 GB\n15:31:26 transformer sharded {'blocks_on_main': 15, 'blocks_on_aux': 15}: free cuda:0 7.0 GB, cuda:1 9.8 GB\n15:31:33 tates=latent_model_input,\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<4 lines>...\n        return_dict=False,\n        ^^^^^^^^^^^^^^^^^^\n    )[0]\n    ^\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1779, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1790, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/usr/local/lib/python3.13/dist-packages/diffusers/models/transformers/transformer_wan.py\", line 663, in forward\n    hidden_states = block(hidden_states, encoder_hidden_states, timestep_proj, rotary_emb)\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1779, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1885, in _call_impl\n    return inner()\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1833, in inner\n    result = forward_call(*args, **kwargs)\n  File \"/usr/local/lib/python3.13/dist-packages/diffusers/models/transformers/transformer_wan.py\", line 462, in forward\n    self.scale_shift_table.unsqueeze(0) + temb.float()\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~\ntorch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.88 GiB. GPU 0 has a total capacity of 14.56 GiB of which 1.81 GiB is free. Including non-PyTorch memory, this process has 12.75 GiB memory in use. Of the allocated memory 10.61 GiB is allocated by PyTorch, and 2.02 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)\n"
+ "benchmark": {
+  "model": "wan22-ti2v-5b",
+  "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+  "revision": "b8fff7315c768468a5333511427288870b2e9635",
+  "licence": "apache-2.0",
+  "diffusers_pinned": "0.35.2",
+  "env": {
+   "gpu_count": 2,
+   "gpus": [
+    {
+     "index": 0,
+     "name": "Tesla T4",
+     "vram_gb": 14.56,
+     "cc": "7.5"
+    },
+    {
+     "index": 1,
+     "name": "Tesla T4",
+     "vram_gb": 14.56,
+     "cc": "7.5"
+    }
+   ],
+   "bf16_native": false,
+   "bf16_matmul_works": true,
+   "versions": {
+    "torch": "2.11.0+cu130",
+    "diffusers": "0.35.2",
+    "transformers": "5.20.2",
+    "accelerate": "1.15.0",
+    "safetensors": "0.8.0",
+    "huggingface_hub": "1.33.0",
+    "cuda": "13.0"
+   }
+  },
+  "strategy": {
+   "transformer": "torch.float16, blocks split {'blocks_on_main': 15, 'blocks_on_aux': 15} across cuda:0/cuda:1",
+   "text_encoder": "gpu-bf16 on cuda:1",
+   "vae": "fp32 on cuda:1 for I2V encode (latents handed to cuda:0) and decode (untiled when it fits, else own first-chunk-aware tiling)",
+   "cpu_offload": false
+  },
+  "download_s": 156.2,
+  "load_s": 130.9,
+  "runs": [
+   {
+    "run": "run0",
+    "mode": "i2v",
+    "prompt": "The cat slowly turns its head toward the camera and blinks while the background gently moves, natural motion.",
+    "image": {
+     "source": "Wan-AI/Wan2.2-TI2V-5B-Diffusers@b8fff7315c768468a5333511427288870b2e9635:examples/i2v_input.JPG",
+     "size": [
+      832,
+      1104
+     ]
+    },
+    "width": 1280,
+    "height": 704,
+    "frames": 121,
+    "fps": 24,
+    "steps": 30,
+    "guidance": 5.0,
+    "seed": 11,
+    "scheduler": "UniPCMultistepScheduler",
+    "text_encode_s": 5.5,
+    "generate_s": 3230.2,
+    "decode_s": 1357.8,
+    "s_per_step_mean": 107.67,
+    "aux_free_gb_before_decode": 0.57,
+    "decode": "tiled (own, first-chunk aware)",
+    "decode_check": null,
+    "vram": [
+     {
+      "index": 0,
+      "peak_allocated_mb": 10234.0,
+      "peak_reserved_mb": 12678.0
+     },
+     {
+      "index": 1,
+      "peak_allocated_mb": 12429.1,
+      "peak_reserved_mb": 14224.0
+     }
+    ],
+    "quality": {
+     "frames": 121,
+     "mean_luma": 123.79,
+     "min_frame_luma": 116.86,
+     "mean_frame_std": 67.05,
+     "mean_abs_frame_diff": 7.714,
+     "max_abs_frame_diff": 19.843,
+     "first_last_diff": 32.692,
+     "static_pairs": 0,
+     "black": false,
+     "flat": false
+    },
+    "ffprobe": {
+     "programs": [],
+     "streams": [
+      {
+       "codec_name": "h264",
+       "codec_type": "video",
+       "width": 1280,
+       "height": 704,
+       "r_frame_rate": "24/1",
+       "nb_frames": "121"
+      }
+     ],
+     "format": {
+      "duration": "5.041667",
+      "size": "6822287",
+      "bit_rate": "10825446"
+     }
+    },
+    "artifact": {
+     "name": "wan22_5b_i2v_1280x704_121f_run0.mp4",
+     "sha256": "1bd915afa4b8ae104f9468c98619f21f92bd1dffdc901015e39e4fd393ae4387",
+     "size": 6822287
+    }
+   }
+  ],
+  "per_gpu": [
+   {
+    "index": 0,
+    "util_max": 100.0,
+    "util_mean": 29.2,
+    "smi_mem_used_max_mb": 12825.0
+   },
+   {
+    "index": 1,
+    "util_max": 100.0,
+    "util_mean": 64.6,
+    "smi_mem_used_max_mb": 14361.0
+   }
+  ]
+ },
+ "videos": [
+  {
+   "name": "wan22_5b_i2v_1280x704_121f_run0.mp4",
+   "size": 6822287,
+   "sha256": "1bd915afa4b8ae104f9468c98619f21f92bd1dffdc901015e39e4fd393ae4387",
+   "sha256_matches_worker": true,
+   "ffprobe": {
+    "programs": [],
+    "streams": [
+     {
+      "codec_name": "h264",
+      "width": 1280,
+      "height": 704,
+      "pix_fmt": "yuv420p",
+      "r_frame_rate": "24/1",
+      "nb_read_frames": "121"
+     }
+    ],
+    "format": {
+     "duration": "5.041667",
+     "size": "6822287"
+    }
+   },
+   "motion": {
+    "decoded_frames": 121,
+    "mean_abs_diff": 2.816,
+    "static_pairs": 0,
+    "luma_min": 119.0,
+    "luma_max": 136.0
+   },
+   "local_path": "$NEXUS_HOME/compute/artifacts/rjob_c2b5eb742475/wan22_5b_i2v_1280x704_121f_run0.mp4"
+  }
+ ],
+ "log_tail": ""
 }

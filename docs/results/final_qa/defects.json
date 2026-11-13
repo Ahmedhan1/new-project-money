@@ -23,7 +23,9 @@
     "9752d91",
     "4a3dd6f"
    ],
-   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f"
+   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f",
+   "account1_tests": "tests/fast/test_qa_security_fixes.py::test_qa_d1_*",
+   "account1_status": "fixed (a209660)"
   },
   {
    "id": "QA-D2",
@@ -44,7 +46,9 @@
    ],
    "note_4a3dd6f": "code unchanged in 4a3dd6f; not re-run",
    "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f",
-   "residual": "`nexus serve` prints 'NEXUS running at ...' before it stops with the damaged-database message (cosmetic)"
+   "residual": "`nexus serve` prints 'NEXUS running at ...' before it stops with the damaged-database message (cosmetic)",
+   "account1_tests": "tests/fast/test_qa_robustness_fixes.py::test_qa_d2_*",
+   "account1_status": "fixed (a209660)"
   },
   {
    "id": "QA-D3",
@@ -63,7 +67,9 @@
     "9752d91",
     "4a3dd6f"
    ],
-   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f"
+   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f",
+   "account1_tests": "tests/fast/test_qa_robustness_fixes.py::test_qa_d3_*; docs/results/final_qa/perf_assetlib_after_fix.json (18.3-18.9 s -> 0.21 s, identical payload sha256)",
+   "account1_status": "fixed (a209660)"
   },
   {
    "id": "QA-D4",
@@ -84,7 +90,9 @@
    ],
    "note_4a3dd6f": "code unchanged in 4a3dd6f; not re-run",
    "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f",
-   "residual": "only the refusal path was live-tested (preflight reserves ~287 MB for 18 MB); a write failure after a passed preflight is covered by Account 1 unit tests only"
+   "residual": "only the refusal path was live-tested (preflight reserves ~287 MB for 18 MB); a write failure after a passed preflight is covered by Account 1 unit tests only",
+   "account1_tests": "tests/fast/test_qa_upload_fixes.py",
+   "account1_status": "fixed (a209660)"
   },
   {
    "id": "QA-D5",
@@ -103,7 +111,9 @@
     "9752d91",
     "4a3dd6f"
    ],
-   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f"
+   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f",
+   "account1_tests": "tests/fast/test_qa_ui_nav.py; docs/results/final_qa/ui/nav_race_after_fix.json (Chromium, QA's script)",
+   "account1_status": "fixed (a209660)"
   },
   {
    "id": "QA-D6",
@@ -121,7 +131,9 @@
     "9752d91",
     "4a3dd6f"
    ],
-   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f"
+   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f",
+   "account1_tests": "tests/fast/test_qa_security_fixes.py::test_qa_d6_*",
+   "account1_status": "fixed (a209660)"
   },
   {
    "id": "QA-D7",
@@ -139,7 +151,9 @@
     "9752d91",
     "4a3dd6f"
    ],
-   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f"
+   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f",
+   "account1_tests": "tests/fast/test_qa_security_fixes.py::test_qa_d7_*",
+   "account1_status": "fixed (a209660)"
   },
   {
    "id": "QA-D8",
@@ -157,7 +171,9 @@
     "9752d91",
     "4a3dd6f"
    ],
-   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f"
+   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f",
+   "account1_tests": "tests/fast/test_qa_robustness_fixes.py::test_qa_d8_*",
+   "account1_status": "fixed (a209660)"
   },
   {
    "id": "QA-D9",
@@ -175,7 +191,9 @@
     "9752d91"
    ],
    "note_4a3dd6f": "code unchanged in 4a3dd6f; not re-run",
-   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f"
+   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f",
+   "account1_tests": "tests/fast/test_qa_robustness_fixes.py::test_qa_d9_*",
+   "account1_status": "fixed (a209660)"
   },
   {
    "id": "QA-D10",
@@ -193,7 +211,9 @@
     "9752d91"
    ],
    "note_4a3dd6f": "code unchanged in 4a3dd6f; not re-run",
-   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f"
+   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f",
+   "account1_tests": "tests/fast/test_qa_e2e_assertions.py",
+   "account1_status": "fixed (a209660)"
   },
   {
    "id": "QA-D11",
@@ -204,7 +224,8 @@
     "nexus/ui/intelligence.js"
    ],
    "summary": "Creator References page printed '[object Object]' for pattern-library hooks",
-   "fix": "print h.text for object hooks; regression test tests/fast/test_intel_ui_pattern_library.py (fails before, passes after); verified in Chromium"
+   "fix": "print h.text for object hooks; regression test tests/fast/test_intel_ui_pattern_library.py (fails before, passes after); verified in Chromium",
+   "account1_status": "fixed (PR #5, 80e04fc)"
   },
   {
    "id": "QA-D12",
@@ -254,30 +275,38 @@
   {
    "id": "QA-W1",
    "severity": "evidence gap",
-   "status": "open",
+   "status": "partly resolved (44a7cb9)",
    "owner": "Account 1",
-   "summary": "MP4s are not in the repository (tasks.yaml cites media/t2v_1280x704_121f_24fps.mp4, absent); QA reviewed contact sheets and ffprobe/hash records only. 720p T2V succeeded; 720p I2V has only an OOM failure and no post-fix run"
+   "summary": "720p rows and verdict now filled in FINAL_RELEASE_REPORT.md (section 9 still shows __GATE__). MP4s are still not in the repository, so QA judged the 720p clips from ffprobe/hash records and contact sheets only, not by watching them.",
+   "account1_tests": "docs/FINAL_RELEASE_REPORT.md",
+   "account1_status": "fixed (final report filled with the measured 720p rows and gate)"
   },
   {
    "id": "QA-W2",
    "severity": "quality",
-   "status": "open",
+   "status": "partly addressed (44a7cb9)",
    "owner": "Account 1/2",
-   "summary": "Wan smoke clips move and are temporally stable, but prompt adherence is weak at 672x384x25: the fox is an unrecognisable dark shape, no tracking camera; the I2V cat does not turn or blink | update a209660: 720p T2V is on-prompt; post-fix I2V smoke has very low motion (1.37)"
+   "summary": "Wan smoke clips move and are temporally stable, but prompt adherence is weak at 672x384x25: the fox is an unrecognisable dark shape, no tracking camera; the I2V cat does not turn or blink | update a209660: 720p T2V is on-prompt; post-fix I2V smoke has very low motion (1.37) | update 44a7cb9: 720p I2V (rjob_c2b5eb742475) shows real motion (decoded 2.82; the cat's head turns clearly), but it turns away from the camera rather than toward it, no blink is visible, and the sunglasses warp and slide off the face in the later frames (temporal artefact).",
+   "account1_tests": "t2v720 contact sheet shows a recognisable red fox trotting through snow with a tracking camera; smoke settings (672x384, 25 f, 20 steps) are placement checks, not the quality target",
+   "account1_status": "addressed at 720p"
   },
   {
    "id": "QA-W3",
    "severity": "evidence consistency",
    "status": "open",
    "owner": "Account 1",
-   "summary": "Two different motion numbers for the same clip: worker mean_abs_frame_diff 14.67 vs local decoded 5.78 (T2V) - document which measure each is"
+   "summary": "Two different motion numbers for the same clip: worker mean_abs_frame_diff 14.67 vs local decoded 5.78 (T2V) - document which measure each is",
+   "account1_tests": "docs/FINAL_RELEASE_REPORT.md section 4: worker metric = mean |RGB diff| between consecutive full-resolution frames (0-255 scale); local metric = mean |luma diff| at 64x36 grey (scripts/acceptance/wan22_5b_live.py _motion). Different scales, same clip.",
+   "account1_status": "documented"
   },
   {
    "id": "QA-W4",
    "severity": "minor",
    "status": "fixed by Account 1 (pinned 0fad780); not run on a GPU by QA",
    "owner": "Account 2",
-   "summary": "wan21-t2v-1.3b has no pinned revision in _WAN_REPOS (selectable only explicitly; no silent fallback found)"
+   "summary": "wan21-t2v-1.3b has no pinned revision in _WAN_REPOS (selectable only explicitly; no silent fallback found)",
+   "account1_tests": "wan21-t2v-1.3b pinned to 0fad780...; tests/fast/test_qa_ui_nav.py::test_every_wan_model_has_a_pinned_revision",
+   "account1_status": "fixed (a209660)"
   },
   {
    "id": "QA-W5",
@@ -285,6 +314,15 @@
    "status": "observation",
    "owner": "owner",
    "summary": "drive_c reports 13.5 of 15 GB used (90 %) in the live archive health record"
+  },
+  {
+   "id": "QA-O2",
+   "severity": "optimisation",
+   "status": "open (observation)",
+   "owner": "Account 2 module",
+   "summary": "First visit of the Asset Library on a fresh home generates ~20 previews (FFmpeg + PIL, 2 at a time); while they render, light endpoints such as /api/storage take ~1.3 s instead of <0.05 s (GIL/CPU contention), so the next page (Storage) appears after ~1.85 s. Previews are cached afterwards. Visible only since QA-D3 made the library render immediately.",
+   "evidence": "measured with Chromium request timings, final integration 2026-11-13; QA's ui_all_pages.js 1.2 s probe lists 'storage' as empty for this reason (it renders in 85 ms in isolation)",
+   "fix": "Pre-generate previews in the installer/first start, or render them in a separate process"
   }
  ]
 }

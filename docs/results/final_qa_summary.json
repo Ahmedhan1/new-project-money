@@ -3,7 +3,7 @@
  "date": "2026-11-13",
  "qa_owner": "Account 3 (independent QA / performance)",
  "verdict": "NOT READY FOR RELEASE (no open FAIL on Linux; BLOCKED on owner actions)",
- "verdict_reason": "Round 3 on a209660: QA-D1..D10 independently verified fixed and QA-D11 integrated; fast suite 981/9/0, cross-account 157, apply.sh idempotent, break probe 36/36, UI 31 pages clean, clean-machine e2e 18/18 (Linux). Remaining: Windows installer/CI/E2E BLOCKED (Actions starts no job), Wan 720p I2V not verified (smoke I2V after fix succeeded with very low motion), owner-only validations BLOCKED.",
+ "verdict_reason": "Round 3 on a209660: QA-D1..D10 independently verified fixed, QA-D11 integrated; fast suite 981/9/0, cross-account 157, apply.sh idempotent, break probe 36/36, UI 31 pages clean, clean-machine e2e 18/18 (Linux). Wan 720p T2V and (since 44a7cb9) 720p I2V are evidenced as real, moving video on T4x2, judged from records and contact sheets (MP4s not in the repo); I2V shows head motion with sunglasses artefacts. Remaining: Windows installer/CI/E2E BLOCKED (Actions starts no job), final release gate section still a placeholder, owner-only validations BLOCKED.",
  "inputs": {
   "integration_candidate": {
    "branch": "integration/final-release",
@@ -326,7 +326,7 @@
    "area": "Wan 2.2 TI2V-5B generation",
    "status": "TESTED",
    "evidence": "docs/results/wan22_5b/*.json + contact sheets",
-   "notes": "720p T2V real and on-prompt; I2V after the VAE fix succeeded at smoke size (rjob_a3611e323cb4) with very low motion (1.37); 720p I2V not verified; MP4s not in the repo"
+   "notes": "T2V and I2V at 1280x704x121 @ 24 fps succeeded on Kaggle T4x2 at the pinned revision (rjob_620150232fa9, rjob_c2b5eb742475); hashes match the worker; real motion (decoded 3.97 / 2.82). T2V on prompt; I2V head turns but away from camera, no blink, sunglasses warp. MP4s not in the repo: not watched by QA. ~74-82 min of T4x2 per 5 s clip."
   },
   {
    "area": "Google Drive daily archive",
@@ -392,6 +392,7 @@
  "tested_shas": {
   "round1": "9752d919858abdd434501bd13d3a8274a9f41cca",
   "round2": "4a3dd6f8e30c6766cddb18ec88afe1230be7b846",
-  "round3": "a2096606d0908fc7e040eecd8030e6f47d049b7f"
+  "round3": "a2096606d0908fc7e040eecd8030e6f47d049b7f",
+  "evidence_review_44a7cb9": "44a7cb9 (docs/evidence + tasks.yaml only; product code identical to a209660)"
  }
 }
