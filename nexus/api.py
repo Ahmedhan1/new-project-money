@@ -698,7 +698,9 @@ def api_rights_review(pid: str, branch: str = "main"):
 def api_director_profiles():
     """Creative-direction profiles with the parameters each one sets (editorial profiles, not claims about any studio)."""
     from . import director
-    keep = ("description", "shot_length", "pause_tolerance", "filler_removal", "opening", "ending", "grade", "music", "captions")
+    keep = ("label", "description", "shot_len", "shot_len_median", "hook_window_s", "pattern_interrupt_s", "cutaways_per_min",
+            "pacing", "pause_tolerance", "filler_removal", "opening", "ending", "end_structure", "title_style", "grade", "music",
+            "captions", "alias_of")
     return {k: {x: v.get(x) for x in keep if x in v} for k, v in director.profiles().items()}
 
 
@@ -714,6 +716,10 @@ class DirectReq(BaseModel):
     shorts: int = 0
     broll: bool = False          # add licensed B-roll cutaways (NASA library, Openverse) over the speaker's audio
     broll_share: float = 0.35
+    overrides: dict = {}          # {"keep": [decision ids], "drop": [...], "opening": id, "no_lift": bool, "reject_cutaways": [...]}
+    profile_overrides: dict = {}  # editorial parameters on top of the profile (e.g. {"shot_len_median": 5})
+    end_text: str | None = None   # call-to-action / end card text (only ever from the user)
+    reference_profile_id: str | None = None  # a ReferenceStyleProfile made by POST /api/projects/{pid}/reference
 
 
 @app.post("/api/projects/{pid}/direct")
@@ -732,7 +738,11 @@ def api_direct(pid: str, r: DirectReq):
         raise HTTPException(400, "size must look like 1920x1080")
     params = {"project": pid, "profile": r.profile, "target_seconds": r.target_seconds, "instructions": r.instructions or None,
               "title": r.title or None, "size": [w, h], "branch": r.branch, "platforms": r.platforms or None,
-              "languages": r.languages or None, "shorts": r.shorts or None, "broll": r.broll, "broll_share": r.broll_share}
+              "languages": r.languages or None, "shorts": r.shorts or None, "broll": r.broll, "broll_share": r.broll_share,
+              "overrides": r.overrides or None, "profile_overrides": r.profile_overrides or None, "end_text": r.end_text or None,
+              "reference_profile_id": r.reference_profile_id or None}
+    if r.reference_profile_id and not (_project(pid).dir / "reports" / "references" / f"{r.reference_profile_id}.json").exists():
+        raise HTTPException(404, f"no reference profile '{r.reference_profile_id}' in this project")
     return jobs.submit("direct", params, pid)
 
 
@@ -746,8 +756,61 @@ def api_plan(pid: str, limit: int = 400):
     plan = json.loads(f.read_text(encoding="utf-8"))
     dec = plan.get("decisions", [])
     return {"profile": plan.get("profile"), "summary": plan.get("summary"), "notes": plan.get("notes"),
-            "chapters": plan.get("chapters"), "decisions": [{k: d.get(k) for k in ("start", "end", "action", "kind", "reason", "score", "text")}
+            "chapters": plan.get("chapters"), "decisions": [{k: d.get(k) for k in ("id", "sentence_id", "src", "start", "end", "action", "kind", "reason",
+                                                                                  "score", "confidence", "text")}
                                                             for d in dec[:limit]], "decisions_total": len(dec)}
+
+
+class ReferenceReq(BaseModel):
+    media_id: str                 # a video already imported into this project
+    rights_basis: str             # owned | licensed | public-domain | commentary (refused otherwise)
+    name: str | None = None
+
+
+@app.post("/api/projects/{pid}/reference")
+def api_reference(pid: str, r: ReferenceReq):
+    """Measure a lawfully supplied reference video's STRUCTURE (pacing, hook, density, captions, music density, colour) as
+    a ReferenceStyleProfile. Nothing of the reference (frames, words, sound) is ever used in an output."""
+    p = _project(pid)
+    m = next((x for x in p.data["media"] if x["id"] == r.media_id), None)
+    if m is None:
+        raise HTTPException(404, "media not in this project")
+    from . import reference
+    if r.rights_basis not in reference.RIGHTS_OK:
+        raise HTTPException(422, f"rights basis must be one of {sorted(reference.RIGHTS_OK)}")
+    return jobs.submit("reference", {"project": pid, "media_id": r.media_id, "rights_basis": r.rights_basis, "name": r.name}, pid)
+
+
+@app.get("/api/projects/{pid}/references")
+def api_references(pid: str):
+    d = _project(pid).dir / "reports" / "references"
+    out = []
+    for f in sorted(d.glob("*.json")) if d.exists() else []:
+        doc = json.loads(f.read_text(encoding="utf-8"))
+        out.append({"id": f.stem, "name": doc.get("name"), "metrics": doc.get("metrics"), "rights": doc.get("rights")})
+    return {"references": out}
+
+
+@app.get("/api/visual/info")
+def api_visual_info():
+    from .media import visual
+    return visual.info()
+
+
+class VisualInstallReq(BaseModel):
+    licence_accepted: bool = False
+    accepted_mb: float = 0
+
+
+@app.post("/api/visual/install")
+def api_visual_install(r: VisualInstallReq):
+    """Opt-in download of the visual-understanding model (Apache-2.0, ~213 MB) through the Cost Guard."""
+    from .media import visual
+    if visual.available():
+        return {"status": "installed", **visual.info()}
+    if not r.licence_accepted or r.accepted_mb < visual.DOWNLOAD_MB:
+        raise HTTPException(409, f"consent required: licence {visual.LICENCE}; download {visual.DOWNLOAD_MB} MB")
+    return jobs.submit("visual-install", {"accepted_mb": r.accepted_mb})
 
 
 @app.get("/api/projects/{pid}/edl")

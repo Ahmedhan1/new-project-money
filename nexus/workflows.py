@@ -66,7 +66,14 @@ def direct_(job: jobs.Job) -> dict:
     from . import director, project as prj
     a = job.params
     p = prj.Project(a["project"])
-    brief = {k: a[k] for k in ("profile", "target_seconds", "instructions", "title", "platforms", "languages", "shorts") if a.get(k) is not None}
+    brief = {k: a[k] for k in ("profile", "target_seconds", "instructions", "title", "platforms", "languages", "shorts", "overrides",
+                               "profile_overrides", "end_text") if a.get(k) is not None}
+    if a.get("reference_profile_id"):  # structure (numbers) of a lawfully supplied reference, never its content
+        from . import reference
+        ref = json.loads((p.dir / "reports" / "references" / f"{a['reference_profile_id']}.json").read_text(encoding="utf-8"))
+        ov = reference.to_overrides(ref)
+        brief["profile_overrides"] = director._merge(brief.get("profile_overrides") or {}, ov["profile_overrides"])
+        brief.setdefault("instructions", None)
     size = tuple(a.get("size") or (1920, 1080))
 
     def plan():
@@ -100,7 +107,15 @@ def direct_(job: jobs.Job) -> dict:
     def add_broll():  # licensed cutaways over the speaker's own audio (nexus/broll.py); network sources can be down
         from . import broll
         tl = p.timeline(a.get("branch", "main"))
-        pl = broll.plan(tl, max_share=float(a.get("broll_share", 0.35)))
+        local = []  # the user's own other files (declared rights) as cutaway candidates, ranked visually when SigLIP is present
+        used = {c.get("src") for c in tl["clips"]}
+        ans = _analysis(p)
+        for m in p.data["media"]:
+            an = ans.get(m["path"])
+            basis = (m.get("rights") or {}).get("basis") if isinstance(m.get("rights"), dict) else None
+            if an and basis in ("owned", "licensed", "public-domain", "generated") and m["path"] not in used:
+                local += broll.local_candidates(m["path"], an, basis, (m.get("rights") or {}).get("holder") or m["name"])
+        pl = broll.plan(tl, max_share=float(a.get("broll_share", 0.35)), local=local or None)
         new, rep = broll.apply(tl, pl)
         if rep["inserted"]:
             p.save_timeline(new, f"B-roll: {rep['inserted']} licensed cutaways", a.get("branch", "main"))
@@ -371,3 +386,33 @@ def model_download(job: jobs.Job) -> dict:
     a = job.params
     c = downloads.consent(a["model"], a["accepted_gb"], a.get("licence_accepted", False), by="ui")
     return job.stage("download", lambda: downloads.fetch(a["model"], consent=c))
+
+
+@jobs.handler("reference")
+def reference_(job: jobs.Job) -> dict:
+    """ReferenceStyleProfile from a lawfully supplied reference in the project (structure only, nexus/reference.py)."""
+    import json
+    from . import project as prj, reference
+    a = job.params
+    p = prj.Project(a["project"])
+    m = next(x for x in p.data["media"] if x["id"] == a["media_id"])
+
+    def run():
+        an = _analysis(p).get(m["path"])
+        if an is None:
+            from .media import analyze
+            an = analyze.analyze(m["path"])
+        prof = reference.analyze(m["path"], an, name=a.get("name") or m["name"], rights={"basis": a["rights_basis"]})
+        d = p.dir / "reports" / "references"
+        d.mkdir(parents=True, exist_ok=True)
+        rid = f"ref_{m['id']}"
+        (d / f"{rid}.json").write_text(json.dumps(prof, ensure_ascii=False, default=str), encoding="utf-8")
+        return {"reference_profile_id": rid, "metrics": prof.get("metrics")}
+
+    return job.stage("reference-profile", run)
+
+
+@jobs.handler("visual-install")
+def visual_install(job: jobs.Job) -> dict:
+    from .media import visual
+    return job.stage("download", lambda: {"installed": visual.ensure_model(allow_download=True), **visual.info()})

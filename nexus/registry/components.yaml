@@ -407,9 +407,23 @@ components:
     license: "code licence per repo; weights below"
     weights_license: "MIT (HF tag); open_clip code MIT-style"
     commercial_use: "yes - the weights licence permits commercial use (see weights_license)"
-    usage_restrictions: "none beyond the licence"
+    usage_restrictions: "benchmark metric only: the LAION model card puts any deployed use case out of scope, so it is never used in the product path (product visual understanding uses siglip-visual)"
     hardware: CPU
     install: "opt-in download with consent (nexus.generate.downloads)"
+    status: deployed
+    network_hosts: [huggingface.co]
+  # ---- Account 2 / Agent B: visual understanding
+  - id: siglip-visual
+    name: "SigLIP base patch16-224, int8 ONNX export (Xenova) on onnxruntime CPU"
+    kind: model
+    capability: [visual-embedding, broll-relevance, scene-labels]
+    source_url: "https://huggingface.co/google/siglip-base-patch16-224"
+    license: "Apache-2.0 (google model card, read 2026-11-12); ONNX conversion by Xenova of the same weights"
+    weights_license: "Apache-2.0"
+    commercial_use: "yes"
+    usage_restrictions: "none beyond the licence; ~213 MB opt-in download, ~700 MB RAM; never downloaded automatically"
+    hardware: CPU
+    install: "opt-in: nexus.media.visual.ensure_model(allow_download=True) through the Cost Guard"
     status: deployed
     network_hosts: [huggingface.co]
   # ---- Account 2 / Agent C: audio

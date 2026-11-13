@@ -85,6 +85,48 @@ def _colourfulness(rgb: np.ndarray) -> float:
     return float(np.sqrt(rg.std() ** 2 + yb.std() ** 2) + 0.3 * np.sqrt(rg.mean() ** 2 + yb.mean() ** 2))
 
 
+def colour_profile(fr: np.ndarray) -> dict:
+    """Colour characteristics of sampled RGB frames: luma level and contrast, HSV saturation, Hasler-Suesstrunk
+    colourfulness, warm/cool balance (R-B), share of near-monochrome frames."""
+    if not len(fr):
+        return {"n": 0}
+    f = fr.astype(np.float32) / 255.0
+    r, g, b = f[..., 0], f[..., 1], f[..., 2]
+    luma = 0.2126 * r + 0.7152 * g + 0.0722 * b
+    mx, mn = f.max(-1), f.min(-1)
+    sat = np.where(mx > 1e-3, (mx - mn) / np.maximum(mx, 1e-3), 0.0)
+    per_sat = sat.reshape(len(f), -1).mean(1)
+    return {"n": int(len(f)), "luma_mean": round(float(luma.mean()), 3), "luma_contrast": round(float(luma.reshape(len(f), -1).std(1).mean()), 3),
+            "saturation": round(float(per_sat.mean()), 3), "colourfulness": round(float(np.mean([_colourfulness(x) for x in fr])), 1),
+            "warmth": round(float((r - b).mean()), 3), "monochrome_share": round(float(np.mean(per_sat < 0.06)), 3)}
+
+
+def transition_profile(path, cuts: list[float], max_cuts: int = 40, fps: float = 12.0) -> dict:
+    """How shots change: around each detected cut, the frame difference at `fps` over +-0.6 s. A hard cut puts most of
+    the change into one frame step; a dissolve/wipe spreads it (share of the largest step < 0.5); a fade passes
+    through a dark frame. Returns counts and shares."""
+    W, H = 96, 54
+    kinds = {"hard_cut": 0, "gradual": 0, "fade_through_black": 0}
+    sample = cuts if len(cuts) <= max_cuts else [cuts[int(k * len(cuts) / max_cuts)] for k in range(max_cuts)]
+    for c in sample:
+        a = max(0.0, c - 0.6)
+        p = subprocess.run(["ffmpeg", "-hide_banner", "-nostdin", "-v", "error", "-ss", f"{a:.3f}", "-i", str(path), "-t", "1.2", "-an",
+                            "-vf", f"fps={fps},scale={W}:{H},format=gray", "-f", "rawvideo", "-"], capture_output=True, timeout=120)
+        n = len(p.stdout) // (W * H)
+        if n < 4:
+            continue
+        g = np.frombuffer(p.stdout[: n * W * H], dtype=np.uint8).reshape(n, H, W).astype(np.float32)
+        d = np.abs(np.diff(g, axis=0)).mean((1, 2))
+        if g.mean((1, 2)).min() < 12 and g.mean((1, 2)).max() > 30:
+            kinds["fade_through_black"] += 1
+        elif d.sum() > 0 and d.max() / d.sum() >= 0.5:
+            kinds["hard_cut"] += 1
+        else:
+            kinds["gradual"] += 1
+    tot = sum(kinds.values())
+    return {"measured_cuts": tot, **kinds, **{f"{k}_share": round(v / tot, 3) for k, v in kinds.items() if tot}}
+
+
 def _lap(grey: np.ndarray) -> float:
     f = grey.astype(np.float32)
     return float((-4 * f[1:-1, 1:-1] + f[:-2, 1:-1] + f[2:, 1:-1] + f[1:-1, :-2] + f[1:-1, 2:]).var())
@@ -237,6 +279,7 @@ def analyze(path, analysis: dict, name: str | None = None, rights: dict | None =
         "pattern_interrupt_s": _stats(gaps),
         "ending": ending, "thumbnail_candidates": thumbs,
         "wpm": round(sum(len(s["words"]) for s in sents) / mins, 1),
+        "colour": colour_profile(fr), "transitions": transition_profile(path, cuts),
     }
     structure = [{"t0": 0.0, "t1": round(min(dur, 3.0), 2), "role": "first_3s"},
                  {"t0": 0.0, "t1": round(min(dur, 10.0), 2), "role": "first_10s"}]
@@ -244,7 +287,7 @@ def analyze(path, analysis: dict, name: str | None = None, rights: dict | None =
         structure.append({"t0": round(hook["start"], 2), "t1": round(hook["end"], 2), "role": "hook"})
     structure.append({"t0": round(max(0.0, dur - min(8.0, 0.1 * dur)), 2), "t1": round(dur, 2), "role": f"ending:{ending['kind']}"})
     from . import contracts
-    return contracts.check({"schema": f"nexus.ReferenceStyleProfile/{contracts.VERSION}", "name": name or Path(str(path)).stem, **dict(
+    return contracts.check({"schema": f"nexus.ReferenceStyleProfile/{contracts.media.VERSION}", "name": name or Path(str(path)).stem, **dict(
                    source={"uri": Path(str(path)).resolve().as_uri() if Path(str(path)).exists() else str(path),
                            "duration": round(dur, 3), "analysed_fps": fps},
                    metrics=metrics, structure=structure,
@@ -292,6 +335,17 @@ def to_overrides(ref: dict) -> dict:
         why.append(f"on-screen text in {m['on_screen_text_share']:.0%} of frames (edge heuristic): bold captions")
     o["music"] = {"enabled": m.get("music_bed_share", 0) >= 0.4}
     why.append(f"sound outside speech {m.get('music_bed_share', 0):.0%} of the time -> music {'on' if o['music']['enabled'] else 'off'}")
+    col = m.get("colour") or {}
+    if col.get("n"):
+        g = ("bw" if col["monochrome_share"] >= 0.6 else "warm" if col["warmth"] >= 0.06 else "cool" if col["warmth"] <= -0.04
+             else "vivid" if col["colourfulness"] >= 55 else "documentary")
+        o["grade"] = g
+        why.append(f"colour: saturation {col['saturation']}, warmth {col['warmth']:+.3f}, colourfulness {col['colourfulness']} -> grade '{g}'")
+    tr = m.get("transitions") or {}
+    if tr.get("measured_cuts", 0) >= 3:
+        gradual = tr.get("gradual_share", 0) + tr.get("fade_through_black_share", 0)
+        o["transitions"] = {"crossfade_at_topics": gradual >= 0.2, "xfade": "fadeblack" if tr.get("fade_through_black_share", 0) > tr.get("gradual_share", 0) else "dissolve"}
+        why.append(f"{tr.get('hard_cut_share', 0):.0%} hard cuts, {gradual:.0%} gradual -> crossfades at topics {'on' if gradual >= 0.2 else 'off'}")
     end = (m.get("ending") or {}).get("kind")
     if end:
         o["ending"] = end
