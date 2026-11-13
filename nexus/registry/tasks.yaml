@@ -599,8 +599,8 @@ tasks:
     status: blocked
     blocked_by: "Owner merge approval (agents never merge)."
     acceptance: "Merged tree: full fast suite green, apply.sh focused tests green, CI green on Linux and Windows."
-    test: "Follow integration/contracts_v1/RESULT.md (run r4b recipe)."
-    evidence: "integration/contracts_v1/RESULT.md run r4b: A1 f9d8f11, A2 d979df1, A3 fae6d38; 867 passed, 8 skipped, 0 failed (local Linux)."
+    test: "Follow integration/contracts_v1/RESULT.md (run r4c recipe)."
+    evidence: "integration/contracts_v1/RESULT.md run r4c: A1 f9d8f11, A2 d979df1, A3 2384b95; 867 passed, 8 skipped, 0 failed (local Linux)."
     next: "Owner restores GitHub Actions and approves the merge; CI (Linux, Windows, Windows e2e) on the exact merged head."
   - id: A3-NATIVE
     priority: 2

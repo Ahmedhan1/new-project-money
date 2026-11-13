@@ -5,7 +5,7 @@ Tests (no network): `tests/fast/test_intel_release_gate.py`, `test_intel_publish
 Status words follow `docs/FINAL_FEATURE_MATRIX.md`. **No platform flow is live-verified**: every adapter has run only
 against recorded or mock responses.
 
-Release sign-off: on the three-account tree (runs r4 and r4b), the gate was checked against Account 2's real code:
+Release sign-off: on the three-account tree (runs r4, r4b and r4c), the gate was checked against Account 2's real code:
 - reports from Account 2's own `qa.approve()`;
 - Account 2's own validator;
 - `classify.manifest()` and `contracts.artifact()`.

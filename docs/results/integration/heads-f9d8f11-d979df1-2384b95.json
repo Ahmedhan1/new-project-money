@@ -1,0 +1,71 @@
+{
+ "kind": "three-account integration result",
+ "date": "2026-11-13",
+ "run": "r4c (Account 3)",
+ "inputs": {
+  "account1": {
+   "sha": "f9d8f1131788d5848594bb78c61bff3b86d400e1",
+   "branch": "work/account-1-cloud-platform",
+   "note": "in the base: PR #5's base claude/hopeful-allen-luubcy at 813967e (PR #4 merge b54c952 plus Account 1's docs/state/script commits)"
+  },
+  "account2": {
+   "sha": "d979df1e390abc48e79a7e6645229968a5b94107",
+   "branch": "work/account-2-cinematic-engine",
+   "note": "PR #7 (asset library, stacked on PR #6) is NOT included"
+  },
+  "account3": {
+   "sha": "2384b9502723369e5c952ec4feab15e7f55bfbd2",
+   "branch": "work/account-3-intelligence-growth",
+   "note": "final A3 code: contains 62414bf, the base merges 5034c8d/4486de4/2384b95, checkpoint-resume test 06def55, growth evidence origin f34d9b8; later A3 commits are docs/state only"
+  }
+ },
+ "base": {
+  "branch": "claude/hopeful-allen-luubcy",
+  "sha": "813967e524ea7e7372653e1b081fb2b92f14b2de"
+ },
+ "procedure": "integration/contracts_v1/RESULT.md run r4c: worktree at the base, merge A2, merge A3 (keep-both: docs/tasks union, workflows.py both handlers, generated files regenerated per side), integration/contracts_v1/apply.sh twice (idempotent)",
+ "merged_commit_local": "7213ed9a59ba5471285596bf83390cdeabc7f463",
+ "merged_tree": "9c79728e8ed1b48a6ef1be9bd5e28f7b084052bd",
+ "pushed": false,
+ "environment": {
+  "os": "Linux (cloud container)",
+  "python": "3.13",
+  "deps": "existing dev venv",
+  "requirements_ci_sha256": "cba808aa708a70ffb3def09baee744c97198d409cfcf28b2deeb53470b997210"
+ },
+ "results": {
+  "apply_sh_focused_contract_tests": {
+   "passed": 42,
+   "failed": 0,
+   "second_run_changes": 0
+  },
+  "fast_suite": {
+   "tests": 875,
+   "passed": 867,
+   "failed": 0,
+   "errors": 0,
+   "skipped": 8,
+   "seconds": 417.9,
+   "junit_sha256": "de8549891f8d2f4a88ef57b774c4fd444433d73db73e7fdeaf3d5713e4ab88bd"
+  },
+  "skip_reasons": [
+   "SigLIP int8 ONNX files not on this machine (opt-in download)",
+   "no local Piper voice to make a real speech fixture",
+   "no local TTS voice to make a speech fixture (FileNotFoundError)",
+   "no local voices/speaker model for a two-voice fixture (FileNotFoundError)",
+   "opentimelineio not installed (optional)"
+  ],
+  "focused_cross_account": "209 passed, 0 skipped: batch_llm (A3 5 + A1 8), QualityReport->publishing 3, release gate 44, owner validation, zero spend, handoff, A2 cross-account, contracts cloud/media/shared, publishing, analytics, research degradation, growth",
+  "batch_llm": "Account 1 real dispatcher + worker script, FakeKaggleCLI, echo engine: SIMULATED, no model loaded. One model per job, real prompt items, checksums, idempotency, checkpoint resume after worker loss, Kaggle-only routing, persistent_endpoint false, old shape refused",
+  "ruff": "clean"
+ },
+ "not_run": [
+  "GitHub-hosted Linux CI on the merged tree",
+  "Windows CI on the merged tree",
+  "Windows clean-machine E2E on the merged tree",
+  "real-model batch_llm",
+  "real platform upload"
+ ],
+ "why_not_run": "GitHub Actions jobs for this repository end in 1-5 s before any step (all accounts' branches, 2026-11-13); no Windows machine available to the agent; real uploads need owner OAuth",
+ "release_gate": "NOT PASSED for production: local Linux only; CI, Windows, owner OAuth validation, native review and merge approval pending"
+}

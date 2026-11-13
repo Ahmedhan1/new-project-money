@@ -1,38 +1,43 @@
 # Three-account integration runs (local branches only — nothing pushed, nothing merged into `main` or any account branch)
 
-**Run r4b is the current evidence** (exact final heads). Run r4 is the same recipe on the previous base commit; its
-detailed checks below were repeated on r4b with identical counts. Runs r3, r2 and r1 are kept for history. Full-suite results and focused results are reported separately and are never added together.
+**Run r4c is the current evidence** (exact final heads; pinned in `docs/results/integration/heads-f9d8f11-d979df1-2384b95.json`). Runs r4b and r4
+used the same recipe on earlier base commits and gave identical counts; r4's detailed checks below were repeated in
+each. Runs r3, r2 and r1 are kept for history. Full-suite results and focused results are reported separately and are never added together.
 All results below are **local Linux runs** (this dev container: Linux x86_64, Python 3.13), **not GitHub CI**.
 
-## Run r4b — 2026-11-13, exact final heads (current)
+## Run r4c — 2026-11-13, exact final heads (current)
 
 | Input | Branch | SHA |
 |---|---|---|
-| base | `claude/hopeful-allen-luubcy` (PR #5's base; contains PR #4 and Account 1's final review) | `a889cd8dee1f3a19a99858d1d2a40b93ba217da7` |
-| Account 1 | `work/account-1-cloud-platform` (in the base via PR #4; the base's later commit `a889cd8` changes docs/state only) | `f9d8f1131788d5848594bb78c61bff3b86d400e1` |
+| base | `claude/hopeful-allen-luubcy` (PR #5's base; contains PR #4 and Account 1's later docs/state/script commits) | `813967e524ea7e7372653e1b081fb2b92f14b2de` |
+| Account 1 | `work/account-1-cloud-platform` (in the base via PR #4) | `f9d8f1131788d5848594bb78c61bff3b86d400e1` |
 | Account 2 | `work/account-2-cinematic-engine` | `d979df1e390abc48e79a7e6645229968a5b94107` |
-| Account 3 | `work/account-3-intelligence-growth` | `fae6d3842ea7524150949bd3515c2c4439b4b941` (all A3 code; later commits change docs and generated state only) |
+| Account 3 | `work/account-3-intelligence-growth` | `2384b9502723369e5c952ec4feab15e7f55bfbd2` (all A3 code; later commits change docs and generated state only) |
 
-Local branch `integration/contracts-v1-r4b` (not pushed), in order:
-1. start from the base `a889cd8`;
-2. merge A2 `d979df1` (`e9d5a19`);
-3. merge A3 `fae6d38` (`44eec9c`);
-4. `apply.sh` (`813157b`).
+Local branch `integration/contracts-v1-r4c` (not pushed), in order:
+1. start from the base `813967e`;
+2. merge A2 `d979df1` (`a8ba22b`);
+3. merge A3 `2384b95` (`ac69889`);
+4. `apply.sh`. The merged commit is `7213ed9` and its tree is `9c79728`.
 
-The conflicts and resolutions are the same as in r4 (table below). tasks.yaml ends with 91 unique ids, and the merged
-`NEXUS_HANDOFF.md` has 1,415 words.
+The conflicts and resolutions are the same as r4 (table below). The merged `NEXUS_HANDOFF.md` has 1,488 words, under
+the limit.
 
-Results on `813157b` (local Linux, not GitHub CI):
+Results (local Linux, not GitHub CI):
 - `apply.sh`: **42 passed**, then 42 again with no change (idempotent).
-- Focused cross-account run (same 16 files as r4): **209 passed, 0 skipped** (26 s).
-- Full fast suite: **867 passed, 8 skipped, 0 failed** (403 s). The skips are the same 8 optional assets.
+- Focused cross-account run (16 files): **209 passed, 0 skipped**.
+- Full fast suite (`NEXUS_HOME` a fresh temp dir, `--junitxml`): **867 passed, 8 skipped, 0 failed** of 875 tests
+  (418 s). junit sha256 `de854989…88bd`.
 - `ruff check .`: clean.
+
+Earlier on the same day:
+- r4b (base `a889cd8`, A3 `fae6d38`): 867 / 8 / 0, focused 209, `apply.sh` 42.
 
 Independent cross-check: Account 1's final review (`a889cd8`, `docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md`) reports 862
 passed, 12 skipped, 0 failed on its own merged tree (A1 `f9d8f11`, A2 `d979df1`, A3 `62414bf`). That is a separate run on an
 earlier A3 head, so its count is not comparable to the totals above.
 
-## Run r4 — 2026-11-13, base `b54c952` (superseded by r4b only because the base gained a docs commit)
+## Run r4 — 2026-11-13, base `b54c952` (superseded by r4b and r4c only because the base gained later commits)
 
 | Input | Branch | SHA |
 |---|---|---|
