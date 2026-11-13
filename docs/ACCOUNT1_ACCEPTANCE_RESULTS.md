@@ -1,4 +1,6 @@
-# Account 1 acceptance results (2026-11-12, updated 2026-11-13)
+# Account 1 acceptance results (2026-11-12, refreshed 2026-11-13 closure round)
+
+**Kaggle: CLOSED — ACCEPTED AS-IS BY PROJECT OWNER.**
 
 Classes: **RV** real-verified · **MO** mocks/fake-server only · **P** partial · **BU** blocked by user · **BP** blocked by
 provider · **NI** not implemented. Finalization mission (Parts 1-12), demos A-K.
@@ -12,14 +14,14 @@ provider · **NI** not implemented. Finalization mission (Parts 1-12), demos A-K
 | E. Drive → remote GPU → Drive, no PC download | **RV** | Drive A source (49.9 MB) → private Kaggle dataset → T4 NVENC (16× realtime) → Drive B `NEXUS/OriginalMedia/`; 144,587,842 bytes, sha256 matched after re-download. Job `rjob_be153ebe2736`. | `lead_demos.json`, Studio library |
 | F. Control-plane crash recovery | **RV** | API SIGKILLed during a 6-chunk job; after restart it re-attached to the same Kaggle run (no duplicate GPU run). | `lead_demos.json` (`demo_D_control_plane_crash`) |
 | G. Scheduler daily target, pause/resume/stop | **RV** | Real probe jobs; ETA from measured median; stop condition reached. | `lead_demos.json` (`demo_F_scheduler`) |
-| H. Quota exhaustion → safe pause | **P** / **BP** | Simulated exhaustion pauses safely with reason; GPU jobs wait queued (safe production mode, attempts 0) with no account switching. A real Kaggle quota message has not been seen. | `test_scheduler.py`, `test_cloud_compute.py` |
+| H. Quota exhaustion → safe pause | **P** (simulated) | Simulated exhaustion pauses safely with reason; GPU jobs wait queued (safe production mode, attempts 0) with no account switching. A real Kaggle quota message has not been seen and is not pursued (Kaggle closed; never forced). | `test_scheduler.py`, `test_cloud_compute.py` |
 | I. Secure link ingestion | **RV** | Authorised https source, redirect re-validated, ffprobe, sha256, provenance; SSRF 34/34 refused; platform pages refused. | `ingest_live.json`, `ingest_ssrf_live.json` |
 | J. Browser-only operation + observability | **RV** (dev host) | Studio: jobs, storage, alerts (storage threshold, quota labelled as estimate), GPU quota bar; alerts clear when resolved. | `tests/e2e/test_studio_browser.py`, `GET /api/v1/alerts` |
 | L. `batch_llm` on the Kaggle GPU (Account 3 request) | **RV** | Qwen2.5-0.5B-Instruct, Tesla T4 x2, 8/8 prompts, 2 checksum-verified parts joined, no endpoint. Job `rjob_877fa89eb0ac`. | `batch_llm_live.json`, `test_cloud_batch_llm.py` |
-| K. CI green on the newest commit | see PR #4 checks | Linux + Windows + windows-e2e; tests never start background workers (`conftest.py`), production startup still does. | GitHub Actions on PR #4 |
+| K. CI green on the newest commit | **RV** | `e9ad5e9`: Linux 411 passed / 5 skipped, Windows 411 passed / 5 skipped, windows-e2e success. | [run 43389988132](https://github.com/Ahmedhan1/new-project-money/actions/runs/43389988132) |
 
 ## Tests
-- Fast suite: **412 passed, 4 skipped** in a clean clone at `9ea4a73` (`scripts/release_check.py`), ruff clean.
+- Fast suite: CI at `e9ad5e9` **411 passed, 5 skipped** (Linux and Windows); dev-container clean clone at `9ea4a73` **412 passed, 4 skipped**. Same 416 tests; the skips depend on fonts and rclone (reconciled in the audit §2).
 - Three-account integration and the final verdict: `docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md`.
 - Real browser E2E of the Studio: passed. Security recovery checks: 7/7. Secret scan (tracked files): clean.
 - Live Kaggle evidence: probe, transcode, worker-loss resume, control-plane-crash resume, scheduler run.
@@ -44,6 +46,14 @@ provider · **NI** not implemented. Finalization mission (Parts 1-12), demos A-K
 | 26 | Browser end-to-end | `tests/e2e/test_studio_browser.py` |
 
 ## Not complete (stated plainly)
-A permanent public host (owner decision), real Drive token revocation and Drive backup/restore runs, a real owner-GPU/Colab
-pull worker, and a real Kaggle quota-exhaustion message have not been exercised. OAuth consent is still in Testing mode
-(refresh tokens expire after 7 days until the owner publishes it).
+Not exercised for real:
+- a permanent public host (owner decision);
+- real Drive token revocation;
+- a Drive backup/restore run;
+- forced failover between real Drives;
+- a real owner-GPU/Colab pull worker;
+- testing on the owner's machine.
+
+OAuth consent is still in Testing mode: refresh tokens expire after 7 days until the owner publishes it. A real Kaggle
+quota message has not been seen; Kaggle is closed and the quota is never forced. Details and the verdict:
+`docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md`.

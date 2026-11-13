@@ -51,5 +51,6 @@ GPU: Tesla T4 ×2, 15 GB each, 23.9 TFLOPS fp16 / 4.1 fp32 matmul; NVENC 5.6× r
 - Hosting: recommendation only (owner machine + Tailscale Funnel); nothing deployed.
 
 ## Owner actions outstanding
-Rotate both Kaggle tokens pasted in chat (vault command in the setup guide); publish the Google OAuth consent screen to
-production; choose a host; back up the vault key.
+Kaggle: CLOSED — accepted as-is by the project owner (2026-11-13; no token change requested). Publish the Google OAuth
+consent screen to production; choose and approve a host; back up the vault key. Current status:
+`docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md`.

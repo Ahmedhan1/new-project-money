@@ -129,12 +129,13 @@ owner so the right account is connected to A/B/C - errors from Google redacted b
 
 ## 8. Procedures
 
-### Secret rotation (do now: Kaggle token)
-The owner pasted Kaggle API tokens into a chat. Treat them as exposed:
-1. Kaggle -> Settings -> API -> **Expire API token** (revokes every existing key), then *Create New Token*.
-2. Store the new one only through NEXUS (vault), never in a file in the repository, a notebook or a chat.
-3. Check: `POST /api/v1/security/scan {"history": true}` returns `clean: true`; `GET /api/v1/security/secrets` shows
-   the Kaggle entry `readable: true`.
+### Kaggle credential: CLOSED — ACCEPTED AS-IS BY PROJECT OWNER (2026-11-13)
+Kaggle API tokens were once shared in a chat. The owner decided to keep the current Kaggle configuration unchanged and
+closed the topic, so no rotation is requested. The residual exposure stays a fact: anyone who saw that chat could use
+the token within the account's own Kaggle quota until the owner chooses to expire it. NEXUS's controls are unchanged:
+the token lives only in the encrypted vault, is redacted from logs and events, never travels in a kernel, and the
+repository and history scans are clean. If the owner ever reopens the topic, the procedure is: Kaggle -> Settings ->
+API -> Expire API token, create one new token, and store it through the vault only.
 Generic rotation: Google - remove NEXUS under Google Account -> Security -> Third-party access (revokes refresh
 tokens), reconnect drive A/B/C; OAuth client secret - reset in Google Cloud console, re-enter; owner token - set a new
 `NEXUS_API_TOKEN` and restart (all sessions end); worker tokens - `issue_worker_token(id)` again (old one stops working)

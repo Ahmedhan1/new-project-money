@@ -160,4 +160,4 @@ Account 1 (cloud platform: remote compute, multi-account storage, ingestion, sch
 `work/account-1-cloud-platform` (PR #4). Accounts 2 (editing/rendering/video generation) and 3 (research, translation,
 localization, publishing, analytics, AI providers) start from that branch and integrate through the v1 contracts:
 `docs/ACCOUNT1_HANDOFF_TO_ACCOUNT2.md`. Remaining Account 1 items need the owner: Drive OAuth client + consent (Demo B/E),
-a permanent host (ACC1-HOSTING), Kaggle token rotation.
+a permanent host (ACC1-HOSTING). Kaggle is closed (accepted as-is by the owner).

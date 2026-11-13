@@ -444,7 +444,7 @@ tasks:
     acceptance: "A real GPU job completes on Kaggle and its artifact checksum is verified; worker loss and control-plane crash both resume."
     test: "pytest tests/fast/test_cloud_compute.py; NEXUS_LIVE=1 tests/live/test_kaggle_live.py"
     evidence: "docs/results/account1/kaggle_probe.json, kaggle_transcode.json, kaggle_resume.json, lead_demos.json"
-    next: "Real quota-exhaustion message; real owner-GPU / Colab pull worker."
+    next: "Kaggle: CLOSED, accepted as-is by the owner. Optional, owner-side: attach a real owner-GPU / Colab pull worker. A real quota-exhaustion message is observed only if it happens naturally (never forced)."
   - id: ACC1-STORAGE
     priority: 1
     title: "Multi-account storage (Drive A/B/C), resumable transfers, SSRF-safe ingestion"
@@ -468,7 +468,7 @@ tasks:
     acceptance: "No secrets in Git; every /api/v1 route authenticated; recovery checks pass."
     test: "pytest tests/fast/test_cloud_security.py tests/fast/test_no_secrets.py tests/fast/test_contracts.py"
     evidence: "docs/ACCOUNT1_SECURITY_MODEL.md, security_recovery.json (7/7), security_scan.json"
-    next: "Owner rotates the Kaggle tokens pasted in chat; backs up the vault key."
+    next: "Owner backs up the vault key. Kaggle credential: closed, accepted as-is by the owner (residual exposure recorded in ACCOUNT1_SECURITY_MODEL.md section 8)."
   - id: ACC1-HOSTING
     priority: 2
     title: "Choose and deploy a permanent free host for the control plane"
@@ -489,7 +489,7 @@ tasks:
     priority: 1
     title: "Three-account shared-contracts integration (nexus/contracts/{cloud,media}.py + shared __init__)"
     status: blocked
-    blocked_by: "Account 2: requirements-ci.txt lacks opencv-python-headless, onnxruntime, scipy (PR #6 CI red on its own head). Owner: merge approval."
+    blocked_by: "Account 3: bench_v2.account1_manifest still sends params.models / items as a count / runtime ollama (incompatible with batch_llm). Account 2: Windows CI on a52a24a to finish green. Owner: merge approval and order."
     acceptance: "A1 -> A2 -> A3 merge at exact heads + apply.sh: full fast suite green with CI's dependency set."
     test: "see docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md section 7"
-    next: "Account 2 declares its dependencies; rerun the integration at the new heads; owner approves the merge order."
+    next: "Rerun the integration at the newest exact heads after Account 3's manifest fix; owner approves the merge order. Latest run: docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md section 7."

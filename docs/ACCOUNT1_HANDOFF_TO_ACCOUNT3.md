@@ -122,7 +122,7 @@ provider · **NI** not implemented.
 | Storage router (rules, failover, replication, reserve) | P | logic tested; real failover between Drives not forced |
 | Storage + quota alerts, resolved alerts clear | RV | live on dev host |
 | Scheduler + safe production mode | RV | real Kaggle jobs |
-| Real Kaggle quota-exhaustion message | BP | detection pattern-based, not yet seen |
+| Real Kaggle quota-exhaustion message | P (simulated) | detection pattern-based, not yet seen; Kaggle CLOSED, accepted as-is by the owner (never forced) |
 | Owner GPU PC / Colab pull worker | P | API tested; no real remote machine attached (BU) |
 | Permanent HTTPS host | BU | recommendation: Tailscale Funnel on an owner machine |
 | OAuth consent screen in production mode | BU | Testing mode: refresh tokens expire after 7 days |
@@ -160,9 +160,13 @@ and Colab are never chosen, and the worker refuses to download weights outside a
   bounded by `max_retries`.
 - `engine: "vllm"` is used only if the Kaggle image already has vLLM; the task never pip-installs an engine.
   `engine: "echo"` loads no model. It is the deterministic test engine, and its results are labelled `simulated: true`.
-- **Change needed on Account 3's side:** `bench_v2.account1_manifest` currently sends `params.models` (a list),
-  `params.items` (a count) and `runtime: "ollama"`. `batch_llm` takes one `model` per job and the prompts themselves
-  (JSONL input or `params.items` as a list). Submit one job per model.
+- **Change needed on Account 3's side (still open at `fd71471`, 2026-11-13; sent on PR #5):**
+  `bench_v2.account1_manifest` sends `params.models` (a list), `params.items` (a count) and `runtime: "ollama"`.
+  `batch_llm` takes one `model` per job and the prompts themselves: a JSONL input artifact (`params.items_input` names
+  it when there are several inputs), or `params.items` as a **list**. Submit one job per model. Ollama is not an engine
+  here: it runs a server process. Verified 2026-11-13: a job in the current shape fails on the worker (status `failed`,
+  reported, no retry needed) with the unhelpful `TypeError: 'int' object is not iterable`, because `params.items` is a
+  count. The job is refused safely, but the message doesn't name the cause.
 - Kaggle terms: one authorised account (`kaggle_primary`), its own weekly GPU quota, and no rotation. A quota error
   pauses the provider and the job waits (`quota_exhausted`); it never fails over to paid compute.
 

@@ -75,3 +75,10 @@ stays with Account 3), made the cookie/CSRF test deterministic, and added a cont
 the three-account integration at exact heads with `apply.sh`: 663 passed with the packages present; with CI deps only,
 27 Account 2 tests fail on scipy/cv2/onnxruntime (fix verified). Clean-clone release check at 9ea4a73: 412 passed,
 4 skipped. Verdict and details: docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md.
+
+**2026-11-13 — Account 1 closure round (docs/state only, no code change).** The owner closed Kaggle (accepted as-is),
+and the docs and task registry now record it. CI on `e9ad5e9` is green: Linux and Windows 411 passed / 5 skipped. The
+dev-container count (412 / 4) is reconciled: same 416 tests, with font and rclone skips mapped from the CI progress
+output. Integration at the latest exact heads A1 `e9ad5e9` + A2 `a52a24a` + A3 `fd71471` + `apply.sh`: 748 passed,
+0 failed, 12 skipped (Linux, CI deps). PR #6 is green (Windows failures fixed by Account 2). The Account 3
+`account1_manifest` mismatch is still open; Account 3 was notified on PR #5. Audit: docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md.

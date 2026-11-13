@@ -3,12 +3,12 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-13T08:01:23Z",
+ "updated": "2026-11-13T08:36:31Z",
  "git": {
   "branch": "work/account-1-cloud-platform",
-  "commit": "bb94742",
-  "subject": "Account 1 final closure: release audit, acceptance L (batch_llm live), integration result at exact heads, handoffs, work log",
-  "dirty_files": 0,
+  "commit": "e9ad5e9",
+  "subject": "State refresh on a clean tree (Account 1 final closure)",
+  "dirty_files": 11,
   "upstream": "origin/work/account-1-cloud-platform",
   "unpushed_commits": 0
  },
@@ -69,7 +69,7 @@
  },
  "tests": {
   "fast": {
-   "summary": "411 passed, 0 failed, 4 skipped",
+   "summary": "412 passed, 0 failed, 4 skipped",
    "ok": true,
    "date": "2026-11-13",
    "platform": "Linux",
@@ -112,7 +112,7 @@
   {
    "id": "ACC1-INTEGRATION",
    "title": "Three-account shared-contracts integration (nexus/contracts/{cloud,media}.py + shared __init__)",
-   "why": "Account 2: requirements-ci.txt lacks opencv-python-headless, onnxruntime, scipy (PR #6 CI red on its own head). Owner: merge approval."
+   "why": "Account 3: bench_v2.account1_manifest still sends params.models / items as a count / runtime ollama (incompatible with batch_llm). Account 2: Windows CI on a52a24a to finish green. Owner: merge approval and order."
   }
  ],
  "backup": {
