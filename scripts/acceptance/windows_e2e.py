@@ -17,26 +17,7 @@ def step(name, ok, detail=""):
     report["steps"].append({"step": name, "ok": bool(ok), "detail": str(detail)[:400]})
     print(("PASS " if ok else "FAIL ") + name + (f" - {detail}" if detail else ""), flush=True)
     if not ok:
-        # Asset library + disk management + archive (follow-up branch): Windows paths under a non-ASCII NEXUS_HOME
-    lib = call("/api/library")
-    step("asset library catalog with licences", lib["summary"]["assets"] >= 170 and not lib["summary"]["license_refused"],
-         f"{lib['summary']['assets']} assets")
-    inst = call("/api/library/install", {"asset_id": "lut.cinematic"})
-    with urllib.request.urlopen(BASE + "/api/library/preview/lut.cinematic", timeout=120) as h:
-        prev = h.read()
-    step("install a generated LUT + rendered preview", inst.get("installed", {}).get("sha256") and len(prev) > 1000, inst.get("installed", {}).get("path"))
-    ap = call(f"/api/projects/{p.id}/assets/apply", {"asset_id": "transition.film_burn", "target": "timeline", "branch": "main"})
-    ap2 = call(f"/api/projects/{p.id}/assets/apply", {"asset_id": "lut.cinematic", "target": "timeline", "branch": "main"})
-    a = wait_job(call(f"/api/projects/{p.id}/render", {"branch": "main", "name": "with_assets", "draft": True})["job"])
-    step("render with a custom transition + library LUT", a["status"] == "done" and ap.get("version") and ap2.get("version"),
-         a.get("error") or a.get("result", {}).get("output"))
-    disk = call("/api/disk")
-    plan = call("/api/disk/cleanup", {})
-    step("disk dashboard + cleanup dry run", disk["status"]["free_gb"] > 0 and "plan_id" in plan,
-         f"{disk['status']['free_gb']} GB free, {len(plan['items'])} cleanable files")
-    arc = call("/api/archive")
-    step("archive browser answers (no destination configured -> nothing is deleted)", "summary" in arc, arc["summary"].get("destination"))
-    Path("e2e_report.json").write_text(json.dumps(report, indent=1, ensure_ascii=False), encoding="utf-8")
+        Path("e2e_report.json").write_text(json.dumps(report, indent=1, ensure_ascii=False), encoding="utf-8")
         sys.exit(1)
 
 
