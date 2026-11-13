@@ -453,7 +453,7 @@ tasks:
     acceptance: "Scores per model stored and used by the router; repeatable from one command."
     test: "python -m nexus.intelligence.model_router bench"
     evidence: "docs/results/account3/models_bench.json (18 items; 4B vs 0.6B)."
-    next: "Larger item set (>= 30 per capability) and hosted models once authorised."
+    next: "Superseded by A3-BENCH2/A3-BENCH3 on Kaggle GPUs."
   - id: A3-CREATORS
     priority: 2
     title: "Creator reference intelligence: measured structural profiles, comparison, abstract styles, cited pattern library"
@@ -518,8 +518,8 @@ tasks:
     status: tested
     acceptance: "Handoff validates with Account 2's own validator; create_video(script=...) never paraphrases; one nexus.contracts package for all accounts."
     test: "pytest tests/fast/test_intel_handoff.py; integration/contracts_v1/apply.sh on a three-account merge"
-    evidence: "integration/contracts_v1/RESULT.md; docs/SHARED_CONTRACTS_ARCHITECTURE.md"
-    next: "Owner approves the merge order; Account 1 fixes two of its own tests (RESULT.md)."
+    evidence: "integration/contracts_v1/RESULT.md (run r2 on the current heads of all three branches); docs/SHARED_CONTRACTS_ARCHITECTURE.md"
+    next: "Pending integration: the owner approves the merge order (A3-INT). Both Account 1 test findings from run r1 are fixed on Account 1's branch (633cc8b, 2ac7f96)."
   - id: A3-BENCH2
     priority: 2
     title: "Open-weight model benchmark V2 on Kaggle GPUs (36 items, Qwen/DeepSeek/Mistral/GLM/Nemotron) + task routing"
@@ -527,7 +527,7 @@ tasks:
     acceptance: "Every routed task has a measured model; critical tasks below the bar require human review."
     test: "python scripts/account3/bench_v2_score.py docs/results/account3/models_bench_v2.json <kaggle outputs>"
     evidence: "docs/results/account3/models_bench_v2.json; docs/ACCOUNT3_MODEL_BENCHMARKS.md"
-    next: "Qwen3.6-35B-A3B / Qwen3.8-27B: download the text GGUF and ollama create (mmproj pull fails); >= 15 items per capability."
+    next: "Superseded by A3-BENCH3 (>= 15 items per capability). Qwen3.6-35B-A3B / Qwen3.8-27B: download the text GGUF and ollama create (mmproj pull fails)."
   - id: A3-CREATORS2
     acceptance: "Every dimension is a measured number with a method or null with a reason; incompatible references are reported, not averaged."
     priority: 2
@@ -552,6 +552,48 @@ tasks:
     test: "pytest tests/fast/test_intel_readiness.py"
     evidence: "docs/results/account3/language_readiness.json"
     next: "Native reviewers (ar-EG, ar-Gulf, hi, zh); Gulf generation still classifies as MSA (K-15)."
+  - id: A3-ZEROSPEND
+    priority: 1
+    title: "Zero-spend gate fails closed: hosted providers need a verified payment_method_required: false (D-16)"
+    status: tested
+    acceptance: "Missing, null, unverified, malformed or true payment declarations refuse; the cost guard's free-tier exception re-checks the full gate; no network in tests."
+    test: "pytest tests/fast/test_zero_spend_fail_closed.py tests/fast/test_intel_router.py tests/fast/test_intel_models.py"
+    evidence: "Groq and Mistral (unverified) refused even when authorised with a key; OpenRouter :free passes only with authorisation, key and quota."
+    next: "Groq / Mistral stay disabled until their no-card free access is verified from first-party documentation (catalogue change + date)."
+  - id: A3-BENCH3
+    priority: 2
+    title: "Bench V3: 184 items, >= 15 per routed capability (incl. conflicts, Egyptian and Gulf Arabic), deterministic scorers with 95 % intervals"
+    status: tested
+    deps: [A3-BENCH2]
+    acceptance: "Identical inputs for every model; scorers tested on oracle and junk answers; results reported with intervals and separability, never as conclusive rankings."
+    test: "pytest tests/fast/test_intel_bench_v3.py; python scripts/account3/bench_v3_score.py ...; python scripts/account3/bench_v3_report.py"
+    evidence: "docs/ACCOUNT3_MODEL_BENCHMARKS_V3.md (run status stated there)"
+    next: "Use the measured V3 capabilities for routing once the run is complete; dialect stays human-reviewed."
+  - id: A3-INT
+    priority: 1
+    title: "Three-account integration (A1 -> A2 -> A3, then integration/contracts_v1/apply.sh)"
+    status: blocked
+    blocked_by: "Owner approval of the merge order and of merging into main. Agents never merge."
+    acceptance: "Merged tree: full fast suite green, apply.sh focused tests green, CI green on Linux and Windows."
+    test: "Follow integration/contracts_v1/RESULT.md (run r2 recipe)."
+    evidence: "integration/contracts_v1/RESULT.md"
+    next: "Owner approves; the integrator repeats run r2 on the then-current heads."
+  - id: A3-NATIVE
+    priority: 2
+    title: "Native-language review of ar-EG, ar-Gulf, hi and zh lines"
+    status: blocked
+    blocked_by: "The owner must supply native reviewers; agents may not mark machine output as reviewed."
+    acceptance: "At least 20 reviewed lines per language in the review workflow; readiness recomputed from the reviews."
+    test: "pytest tests/fast/test_intel_readiness.py; Review page"
+    next: "Owner assigns reviewers."
+  - id: A3-COMPETITION
+    priority: 3
+    title: "Competition and saturation signals in market research (YouTube supply)"
+    status: blocked
+    blocked_by: "Needs the owner's YouTube Data API key (free quota)."
+    acceptance: "Competition and saturation are measured, not unknown, for a real topic."
+    test: "pytest tests/fast/test_intel_market_v2.py; Content Research page"
+    next: "Owner adds the key (vault ai/youtube or env NEXUS_KEY_YOUTUBE)."
   - id: A3-LEDGER
     acceptance: "Only NEXUS-uploaded videos carry production features and experiment arms."
     priority: 3

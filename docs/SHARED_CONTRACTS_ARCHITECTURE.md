@@ -46,5 +46,12 @@ docstring; `media.py` is Account 2's `__init__.py` unchanged.
 - `tests/fast/test_intel_router.py` (Account 3 contracts), `tests/fast/test_intel_handoff.py` — Account 3.
 
 ## Merge order proposed to the owner
-`work/account-1-*` → `work/account-2-*` → `work/account-3-*`, then this restructure commit (as on
-`integration/contracts-v1`). Nothing is merged into `main` without the owner's approval.
+`main` → merge `work/account-1-cloud-platform` → merge `work/account-2-cinematic-engine` → merge
+`work/account-3-intelligence-growth` → `bash integration/contracts_v1/apply.sh` (stages the restructure; review with
+`git diff --cached`, then commit). Nothing is merged into `main` without the owner's approval.
+
+`apply.sh` checks its preconditions (all three accounts merged, no other unresolved conflicts) and handles both states
+of Account 2: heads before `a443238` still keep their schemas in `nexus/contracts/__init__.py` and ship
+`tests/fast/test_contracts.py` (add/add conflict with Account 1, split by owner). From `a443238` on, Account 2 ships
+`nexus/contracts/media.py` and `tests/fast/test_contracts_media.py` itself, and only Account 1's module and test are
+moved. A second run changes nothing. Recorded runs, exact SHAs and results: `integration/contracts_v1/RESULT.md`.
