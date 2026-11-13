@@ -216,21 +216,106 @@ def suggest_title(text: str, max_words: int = 9) -> str:
     return title[:1].upper() + title[1:] + ("?" if q else "")
 
 
+LEAD_DROP = {"and", "so", "well", "yes", "yeah", "no", "okay", "ok", "but", "now", "oh", "um", "uh", "right", "anyway", "also",
+             "actually", "basically", "then", "because"}
+CLAUSE_SPLIT = re.compile(r"(?<=[,;:])\s+|\s+(?=\b(?:because|but|and then|which|so that|whereas|although)\b)", re.I)
+
+
+def _strip_lead(words: list[str]) -> list[str]:
+    while len(words) > 3 and re.sub(r"[^\w']", "", words[0].lower()) in LEAD_DROP:
+        words = words[1:]
+    return words
+
+
+def _verbish(toks: list[str]) -> bool:
+    return any(t in VERBISH or t.endswith(("ed", "es", "ing")) or t in ("am", "be", "been", "being", "need", "want", "learned",
+                                                                  "live", "lived", "went", "slept", "go", "get", "make", "take")
+               for t in toks)
+
+
+def title_info(text: str, max_words: int = 9, use_llm: bool = False) -> dict:
+    """Title from a COMPLETE thought of the clip (K-23). Candidates, best first by hook strength:
+    1. a whole sentence of 3..max_words words (leading "And/So/Well/Yes," dropped, fillers removed);
+    2. a self-contained clause of a longer sentence (comma/semicolon or 'because/but/which' boundary) with a verb;
+    3. only when neither exists: the old clause-boundary truncation, marked complete=False (a person should retitle).
+    With `use_llm` the local LLM may propose a shorter title; it is accepted only when its content words are the clip's own
+    (>= 60 %, same word family) and every number / acronym in it appears in the clip. Returns {"title", "source", "complete", "why"}."""
+    from .media import understand
+    sents = [x.strip() for x in re.split(r"(?<=[.!?])\s+", (text or "").strip()) if x.strip()]
+    cands = []
+    for k, sent in enumerate(sents[:8]):
+        clean = re.sub(r"\s+", " ", _FILL_RE.sub("", sent)).strip(" ,")
+        if understand.substance(clean)[0] < 1.0 or len(understand.content(clean)) < 3:
+            continue  # pleasantries and content-free lines ("It is a long time") never title a clip
+        q = clean.endswith("?")
+        whole = _strip_lead(clean.rstrip(".!?…").split())
+        lead = [re.sub(r"[^\w']", "", w.lower()) for w in whole[:3]]
+        dangles = _pronoun_dangles(lead) or (lead and lead[0] in BACKREF_OPENERS)
+        base = hook_score(" ".join(whole))[0] + 0.15 * min(1.0, len(understand.content(clean)) / 5) - 0.03 * k
+        if 3 <= len(whole) <= max_words and not dangles:
+            cands.append((base + 0.3, " ".join(whole) + ("?" if q else ""), "sentence", True))
+        for cl in CLAUSE_SPLIT.split(clean.rstrip(".!?…")):
+            cw = _strip_lead(cl.strip(" ,;:").split())
+            toks = [re.sub(r"[^\w']", "", w.lower()) for w in cw]
+            if not (4 <= len(cw) <= max_words) or toks[-1] in STOP or not _verbish(toks) or len(understand.content(cl)) < 2:
+                continue
+            if _pronoun_dangles(toks[:3]) or toks[0] in BACKREF_OPENERS or toks[0] in ("which", "that", "because", "to", "of", "for") or toks[0] in VERBISH:
+                continue
+            cands.append((base + 0.12, " ".join(cw), "clause", True))
+    out = None
+    if cands:
+        s, t, src, ok = max(cands, key=lambda c: c[0])
+        out = {"title": t[:1].upper() + t[1:], "source": src, "complete": ok,
+               "why": f"{'whole sentence' if src == 'sentence' else 'self-contained clause'} of the clip (hook score {s:.2f})"}
+    else:
+        subst = [x for x in sents if understand.substance(x)[0] >= 1.0 and len(understand.content(x)) >= 3]
+        best = max(subst[:8], key=lambda x: len(set(understand.content(x))), default=None) if subst else None
+        words = _strip_lead(re.sub(r"\s+", " ", _FILL_RE.sub("", best)).strip(" ,").rstrip(".!?…").split()) if best else []
+        if words:
+            words = words[:max_words]
+            while len(words) > 3 and (re.sub(r"[^\w']", "", words[-1].lower()) in STOP | PRON_CONTRACT | {"it's", "is", "was", "that", "the"} or words[-1].endswith(",")):
+                words = words[:-1]
+            t = " ".join(words).strip(" ,")
+            t = t[:1].upper() + t[1:]
+        else:
+            t = suggest_title(text, max_words)
+        out = {"title": t, "source": "truncated", "complete": False,
+               "why": "no complete sentence or clause short enough: opening words cut at a clause boundary (retitle advised)"}
+    if use_llm and text:
+        lt = _llm_title(text, max_words=min(8, max_words))
+        if lt:
+            out = {"title": lt, "source": "llm", "complete": True, "fallback": out["title"],
+                   "why": "local LLM title, validated against the clip's own words and numbers"}
+    return out
+
+
 def _llm_title(text: str, max_words: int = 6) -> str | None:
-    """Optional local-LLM title, accepted only if short and built from words the moment actually contains."""
+    """Optional local-LLM title, accepted only if short, a complete phrase, and built from the clip's own content words
+    (>= 60 % of them share a word family with the clip) with no number or acronym the clip does not contain."""
     try:
         from . import llm
-        d = llm.chat_json(f"Write one hook title of at most {max_words} words for this video clip. Use only facts in the text.\n"
-                          f"TEXT: {text[:1200]}", schema={"type": "object", "properties": {"title": {"type": "string"}},
-                                                         "required": ["title"]}, require="title", max_tokens=60, retries=1)
-        t = str(d["title"]).strip().strip('"')
+        d = llm.chat_json(f"Write one hook title of at most {max_words} words for this video clip. It must be a complete "
+                          "phrase that states the clip's main point, use the clip's own words and only facts in the text, "
+                          f"no quotes, no hashtags, no emoji.\nTEXT: {text[:1200]}",
+                          schema={"type": "object", "properties": {"title": {"type": "string"}}, "required": ["title"]},
+                          require="title", max_tokens=60, retries=1)
+        t = str(d["title"]).strip().strip('"').strip()
     except Exception:  # model missing, slow or malformed answer: the deterministic title stands
         return None
-    vocab = set(_tokens(text))
-    cw = content_words(t)
-    if not t or len(t.split()) > max_words or not cw or any(w not in vocab for w in cw):
+    from .media import understand
+    vocab = set(understand.content(text))
+    cw = understand.content(t)
+    nums = re.findall(r"\d+", t)
+    if not t or len(t.split()) > max_words or len(t.split()) < 2 or not cw:
         return None
-    return t
+    pre = {w[:5] for w in vocab}
+    supported = sum(1 for w in cw if w in vocab or w[:5] in pre)  # same stem or word family ("hope"/"hopeful")
+    caps = [w for w in re.findall(r"\b[A-Z]{2,}\b", t) if w not in text]
+    if supported / len(cw) < 0.6 or any(n not in text for n in nums) or caps:
+        return None  # a word family the clip never uses, a number or an acronym it does not contain: not its own words
+    if t.split()[-1].lower().strip(".,!?") in STOP:
+        return None
+    return t.rstrip(".")
 
 
 # ---------------------------------------------------------------- moments
@@ -567,6 +652,8 @@ PRON_PERS = {"he", "she", "they", "him", "her", "them", "his", "their", "he's", 
              "they'll", "he'll", "she'll"}
 PRON_CONTRACT = {"that's", "this's", "these're", "those're", "it'll", "that'll", "it'd", "that'd"}
 VERBISH = {"is", "was", "are", "were", "does", "did", "do", "has", "had", "have", "will", "would", "can", "could", "should", "means",
+           "didn't", "doesn't", "don't", "isn't", "wasn't", "aren't", "weren't", "won't", "can't", "couldn't", "wouldn't",
+           "hasn't", "haven't", "hadn't", "shouldn't",
            "meant", "makes", "made", "works", "worked", "happened", "turned", "shows", "showed", "said", "says", "gets", "got", "goes",
            "went", "comes", "came", "sounds", "seems", "depends", "matters", "helps", "explains", "changed", "changes", "led", "leads"}
 GENERIC_IT = {"important", "easy", "hard", "possible", "impossible", "worth", "true", "clear", "obvious", "likely", "unlikely", "time",
@@ -954,7 +1041,10 @@ def select(analysis: dict, *, time_range: tuple[float, float] | None = None, top
 
     ideas, rejected = [], []
     last = idx[-1]
+    from .media import understand as _und
     for i in idx:
+        if _und.substance(sents[i]["text"])[0] < 1.0:
+            continue  # a short never starts on a greeting, thanks or sound check ("I have you loud and clear")
         opts: dict[tuple[int, int], dict] = {}
         for D in targets:
             best = None
@@ -976,6 +1066,11 @@ def select(analysis: dict, *, time_range: tuple[float, float] | None = None, top
                 continue
             cc = resolve_context(sents, i, best[1], max_raw=max_raw, time_range=time_range)
             ci, cj = cc["sentences"]
+            if not _opens_well(sents[ci]) or not _und.good_ending({**sents[cj], "prompt_like": sents[cj].get("interviewer")}):
+                if len(rejected) < 25:
+                    rejected.append({"start": sents[ci]["start"], "end": sents[cj]["end"], "text": sents[ci]["text"][:120],
+                                     "reason": "opening leans on unseen context or ending is unfinished / a question / a pleasantry"})
+                continue
             m = dict(scored(ci, cj))
             if (ci, cj) in opts:
                 opts[(ci, cj)]["targets"].append(D)
@@ -1034,7 +1129,9 @@ def select(analysis: dict, *, time_range: tuple[float, float] | None = None, top
         m["rank"] = k
         sl = m.get("sentences") or []
         guest_text = " ".join(x["text"] for x in sents[sl[0]:sl[1] + 1] if not x.get("interviewer")) if len(sl) == 2 else ""
-        m["title"] = (_llm_title(m["text"]) if use_llm else None) or suggest_title(guest_text or m["text"])
+        ti = title_info(guest_text or m["text"], use_llm=use_llm)
+        m["title"], m["title_info"] = ti["title"], ti
+        m["context_line"] = context_line(sents, sl[0]) if len(sl) == 2 else None
         m["scores"] = editorial_scores(m)
     if speaker is not None and not chosen:
         notes.append(f"no window where {speaker!r} speaks at least half of the time")
@@ -1171,6 +1268,45 @@ def _hook_titles(text: str, natural: str, use_llm: bool = False) -> list[str]:
     return out
 
 
+CONTEXT_LINE_GAP = 8.0   # a question asked at most this long before the answer is its context
+
+
+def _opens_well(s: dict) -> bool:
+    """A short may open on a question (the viewer hears what is being answered) or on a line that stands alone once
+    leading fillers/answer words are trimmed ("Actually, at the end of ..." -> "At the end of ...")."""
+    from .media import understand
+    if s["text"].strip().endswith("?") and s.get("terminal"):
+        return not s["text"].lstrip("\"'([ ")[:1].islower()
+    ws = s["text"].split()
+    while len(ws) > 4 and re.sub(r"[^\w']", "", ws[0].lower()) in LEAD_DROP:
+        ws = ws[1:]
+    txt = " ".join(ws)
+    return understand.self_contained({**s, "text": txt[:1].upper() + txt[1:], "prompt_like": False})
+
+
+def context_line(sents: list[dict], i: int) -> dict | None:
+    """When a short starts on an answer, the question that was asked right before it (interviewer/host line ending in '?',
+    within CONTEXT_LINE_GAP s) becomes an on-screen context line, so the opening is never a reply to nothing. The text is
+    the question as asked (fillers removed, <= 12 words, else its strongest clause)."""
+    if i is None or i <= 0 or i >= len(sents):
+        return None
+    for k in range(i - 1, max(-1, i - 4), -1):
+        q = sents[k]
+        if sents[i]["start"] - q["end"] > CONTEXT_LINE_GAP:
+            return None
+        asked = q.get("interviewer") or (q.get("speaker") and q.get("speaker") != sents[i].get("speaker"))
+        if q["text"].strip().endswith("?") and asked:
+            words = _strip_lead(re.sub(r"\s+", " ", _FILL_RE.sub("", q["text"])).strip().split())
+            text = " ".join(words) if len(words) <= 12 else title_info(q["text"], max_words=12)["title"]
+            if not text.endswith("?"):
+                text = text.rstrip(".") + "?"
+            return {"text": text[:1].upper() + text[1:], "from": [round(q["start"], 2), round(q["end"], 2)],
+                    "why": "the short opens on an answer: the question asked just before it is shown as context"}
+        if not q.get("interviewer") and q.get("speaker") == sents[i].get("speaker"):
+            return None  # the same speaker was already talking: no question to show
+    return None
+
+
 def plan_variants(analysis: dict, moment: dict, n: int = 3, use_llm: bool = False) -> list[dict]:
     """Up to n hook variants for a moment: natural start, cold open (only when the context check passed), on-screen text hooks.
     Each: {"name","title","caption_style","text_style","cold_open": sentence index | None, "why"}."""
@@ -1296,6 +1432,12 @@ def compose(src: str, analysis: dict, moment: dict, *, variant: dict | str | Non
         d0 = clip_duration(tl["clips"][0])
         hold = TEXT_HOOK_SECONDS if name.startswith("text_hook") else HOOK_TITLE_SECONDS
         tl["clips"][0]["text"] = [{"text": title, "style": text_style, "start": 0.0, "end": round(min(hold, d0), 3)}]
+    cl = moment.get("context_line")
+    if cl and tl["clips"] and variant.get("cold_open") is None:
+        c0 = tl["clips"][0]
+        c0.setdefault("text", []).append({"text": cl["text"], "style": "lower_third", "start": 0.0,
+                                          "end": round(min(3.5, clip_duration(c0)), 3)})
+        notes.append(f"context line: {cl['why']}")
     total = total_duration(tl)
     # captions
     pinned = captions is not None

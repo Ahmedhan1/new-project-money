@@ -263,7 +263,7 @@ def api_project(pid: str, branch: str = "main"):
     renders = [str(f.relative_to(p.dir)) for f in sorted(p.dir.rglob("*.mp4")) if "work" not in f.parts and "media" not in f.parts]
     return {"id": p.id, "name": p.name, "kind": p.kind, "media": p.data["media"], "history": p.history(), "timeline": tl,
             "reports": reports, "renders": renders, "proposal": p.data.get("proposal"), "script": p.data.get("script"),
-            "credits": p.data.get("credits"), "analysis": {m: {k: a[k] for k in ("issues", "scenes", "silences", "repetitions", "not_available")} |
+            "credits": p.data.get("credits"), "analysis": {m: {k: a.get(k) or [] for k in ("issues", "scenes", "silences", "repetitions", "not_available")} |
                                                            {"text": (a.get("transcript") or {}).get("text"), "duration": a["probe"]["duration"],
                                                             "loudness": a.get("loudness")} for m, a in _analysis(p).items()}}
 
@@ -357,11 +357,24 @@ def api_op(pid: str, r: OpReq):
             tl = ops.set_global(tl, **r.args)
         elif r.op == "reframe":
             tl = ops.reframe(tl, **r.args)
+        elif r.op == "insert_video":  # from the scene/B-roll browser: a source range as a new clip
+            if r.args.get("src") not in {m["path"] for m in p.data["media"]}:
+                raise HTTPException(400, "only media imported into this project can be inserted")
+            clip = ops.video_clip(r.args["src"], float(r.args["in"]), float(r.args["out"]))
+            tl = ops.insert(tl, clip, r.args.get("index"))
+        elif r.op in ("add_track", "remove_track", "set_track", "add_item", "remove_item", "move_item", "set_item", "set_keyframes"):
+            # multi-track layers (nexus/timeline/tracks.py); `clip` carries the track/item id where the op needs one
+            if r.op == "add_item" and r.args.get("item", {}).get("src") and r.args["item"]["src"] not in {m["path"] for m in p.data["media"]}:
+                raise HTTPException(400, "only media imported into this project can be placed on a layer")
+            fn2 = getattr(ops, r.op)
+            tl = fn2(tl, r.clip, **r.args) if r.op not in ("add_track",) else fn2(tl, **r.args)
+        elif r.op == "restore":  # bring an earlier version back as the newest one (history is kept)
+            tl = p.timeline(r.branch, vid=r.args["version"])
         else:
             raise HTTPException(400, f"unknown op {r.op}")
     except (KeyError, ValueError, TypeError) as e:
         raise HTTPException(400, str(e))
-    if r.op in ("ripple_delete", "trim", "split", "move") and _analysis(p):
+    if r.op in ("ripple_delete", "trim", "split", "move", "insert_video") and _analysis(p):
         edit.retime_subtitles(tl, _analysis(p))
     p.save_timeline(tl, f"{r.op} {r.clip or ''}".strip(), r.branch)
     return _tl_view(tl)
@@ -603,6 +616,141 @@ def api_channel(r: ChannelReq):
     return publish.create_channel(r.name, r.niche, r.audience, r.languages, r.platforms, r.pillars)
 
 
+# ---------------------------------------------------------------- cinematic workspace (Account 2)
+@app.get("/api/fx/catalog")
+def api_fx_catalog():
+    """Everything the editor's effect/transition/colour/caption panels may offer - read from the renderer itself,
+    so the UI never shows a control the renderer cannot render."""
+    from .fx import captions, effects, lut, post, transitions
+    luts = []
+    try:
+        luts = lut.list_luts()
+    except Exception:  # noqa: BLE001 - a broken LUT folder must not hide the rest of the catalogue
+        pass
+    return {"transitions": sorted(transitions.NAMES), "aliases": getattr(transitions, "ALIASES", {}),
+            "effects": list(effects.KNOWN), "grades": sorted(post.GRADES), "luts": luts, "caption_styles": list(captions.STYLES),
+            "keyframe_props": list(getattr(effects, "KEYFRAME_PROPS", ("x", "y", "scale", "volume"))),
+            "fits": ["cover", "contain", "blur"], "mask_keyframe_props": list(getattr(effects, "MASK_KEYFRAME_PROPS", ())),
+            "split_layouts": list(getattr(post, "SPLIT_LAYOUTS", ())), "slowmo": list(getattr(post, "SLOWMO_PROFILES", ())),
+            "pipelines": ["pieces", "legacy"]}
+
+
+@app.get("/api/effects")
+def api_effects():
+    """Media-to-media processors (enhancement + VFX) with availability on this machine and model download sizes."""
+    from . import enhance, vfx
+    return {"enhance": enhance.effect_manifest(), "vfx": vfx.effect_manifest()}
+
+
+@app.get("/api/generation/models")
+def api_gen_models(task: str | None = None):
+    from .generate import catalog
+    return catalog.table(task)
+
+
+@app.get("/api/generation/hardware")
+def api_gen_hardware():
+    from .generate import hardware
+    return hardware.detect()
+
+
+@app.get("/api/models/{model_id}/plan")
+def api_model_plan(model_id: str):
+    from .generate import downloads
+    try:
+        return downloads.plan(model_id)
+    except KeyError:
+        raise HTTPException(404, f"unknown model {model_id}")
+
+
+class DownloadReq(BaseModel):
+    accepted_gb: float
+    licence_accepted: bool = False
+
+
+@app.post("/api/models/{model_id}/download")
+def api_model_download(model_id: str, r: DownloadReq):
+    from .generate import downloads
+    p = downloads.plan(model_id)
+    if not r.licence_accepted or r.accepted_gb < p["total_gb"]:
+        raise HTTPException(400, f"accept the licence and at least {p['total_gb']} GB to download {p['name']}")
+    return jobs.submit("model-download", {"model": model_id, "accepted_gb": r.accepted_gb, "licence_accepted": True})
+
+
+@app.delete("/api/models/{model_id}")
+def api_model_remove(model_id: str):
+    from .generate import downloads
+    return {"removed": downloads.remove(model_id)}
+
+
+class ProcessReq(BaseModel):
+    op: str
+    params: dict = {}
+    branch: str = "main"
+
+
+@app.post("/api/projects/{pid}/clips/{clip_id}/process")
+def api_clip_process(pid: str, clip_id: str, r: ProcessReq):
+    from . import enhance
+    p = _project(pid)
+    if not any(c["id"] == clip_id for c in p.timeline(r.branch)["clips"]):
+        raise HTTPException(404, "clip not found on this branch")
+    known = {e["type"].split(".", 1)[-1] for e in enhance.effect_manifest()["effects"]} | {"replace_background", "tracked_mask"}
+    if r.op not in known:
+        raise HTTPException(400, f"unknown operation {r.op}")
+    return jobs.submit("clip-process", {"project": pid, "clip": clip_id, "op": r.op, "params": r.params, "branch": r.branch}, pid)
+
+
+@app.get("/api/export/profiles")
+def api_export_profiles():
+    from . import export
+    return export.profiles()
+
+
+class ExportReq(BaseModel):
+    render: str
+    codec: str = "h264"
+    quality: str = "balanced"
+    width: int | None = None
+    height: int | None = None
+    fps: float | None = None
+    max_mb: float | None = None
+    audio: str | None = "aac"
+
+
+@app.post("/api/projects/{pid}/export")
+def api_export(pid: str, r: ExportReq):
+    _project(pid)
+    q = r.model_dump()
+    q["max_bytes"] = int(q.pop("max_mb") * 1e6) if r.max_mb else None
+    return jobs.submit("export", {"project": pid, **q}, pid)
+
+
+@app.get("/api/projects/{pid}/scenes")
+def api_scenes(pid: str):
+    """Scene browser: every detected shot of every source with a cached thumbnail at its middle."""
+    from .media import ff
+    p = _project(pid)
+    out = []
+    for m in p.data["media"]:
+        an = _analysis(p).get(m["path"])
+        if not an:
+            continue
+        tdir = p.dir / "work" / "thumbs" / m["id"]
+        tdir.mkdir(parents=True, exist_ok=True)
+        for i, (a, b) in enumerate(an.get("scenes") or []):
+            t = (a + b) / 2
+            f = tdir / f"s{i:04d}.jpg"
+            if not f.exists():
+                try:
+                    ff.run(["-ss", f"{t:.3f}", "-i", m["path"], "-frames:v", "1", "-vf", "scale=240:-2", "-q:v", "5", str(f)], op="thumbnail")
+                except Exception:  # noqa: BLE001 - a missing thumbnail must not break the browser
+                    continue
+            out.append({"media": m["id"], "src": m["path"], "index": i, "in": round(a, 3), "out": round(b, 3),
+                        "thumb": str(f.relative_to(p.dir))})
+    return out
+
+
 @app.get("/api/platforms")
 def api_platforms():
     return {k: {**v, "auto_publish": publish.AUTO_PUBLISH[k]} for k, v in publish.PLATFORMS.items()}
@@ -644,7 +792,9 @@ def api_rights_review(pid: str, branch: str = "main"):
 def api_director_profiles():
     """Creative-direction profiles with the parameters each one sets (editorial profiles, not claims about any studio)."""
     from . import director
-    keep = ("description", "shot_length", "pause_tolerance", "filler_removal", "opening", "ending", "grade", "music", "captions")
+    keep = ("label", "description", "shot_len", "shot_len_median", "hook_window_s", "pattern_interrupt_s", "cutaways_per_min",
+            "pacing", "pause_tolerance", "filler_removal", "opening", "ending", "end_structure", "title_style", "grade", "music",
+            "captions", "alias_of")
     return {k: {x: v.get(x) for x in keep if x in v} for k, v in director.profiles().items()}
 
 
@@ -660,6 +810,11 @@ class DirectReq(BaseModel):
     shorts: int = 0
     broll: bool = False          # add licensed B-roll cutaways (NASA library, Openverse) over the speaker's audio
     broll_share: float = 0.35
+    broll_subject: list[str] = []  # the film's named subject (e.g. ["Mars"]): library B-roll must name it in its metadata
+    overrides: dict = {}          # {"keep": [decision ids], "drop": [...], "opening": id, "no_lift": bool, "reject_cutaways": [...]}
+    profile_overrides: dict = {}  # editorial parameters on top of the profile (e.g. {"shot_len_median": 5})
+    end_text: str | None = None   # call-to-action / end card text (only ever from the user)
+    reference_profile_id: str | None = None  # a ReferenceStyleProfile made by POST /api/projects/{pid}/reference
 
 
 @app.post("/api/projects/{pid}/direct")
@@ -678,7 +833,11 @@ def api_direct(pid: str, r: DirectReq):
         raise HTTPException(400, "size must look like 1920x1080")
     params = {"project": pid, "profile": r.profile, "target_seconds": r.target_seconds, "instructions": r.instructions or None,
               "title": r.title or None, "size": [w, h], "branch": r.branch, "platforms": r.platforms or None,
-              "languages": r.languages or None, "shorts": r.shorts or None, "broll": r.broll, "broll_share": r.broll_share}
+              "languages": r.languages or None, "shorts": r.shorts or None, "broll": r.broll, "broll_share": r.broll_share,
+              "broll_subject": r.broll_subject or None, "overrides": r.overrides or None, "profile_overrides": r.profile_overrides or None, "end_text": r.end_text or None,
+              "reference_profile_id": r.reference_profile_id or None}
+    if r.reference_profile_id and not (_project(pid).dir / "reports" / "references" / f"{r.reference_profile_id}.json").exists():
+        raise HTTPException(404, f"no reference profile '{r.reference_profile_id}' in this project")
     return jobs.submit("direct", params, pid)
 
 
@@ -692,8 +851,61 @@ def api_plan(pid: str, limit: int = 400):
     plan = json.loads(f.read_text(encoding="utf-8"))
     dec = plan.get("decisions", [])
     return {"profile": plan.get("profile"), "summary": plan.get("summary"), "notes": plan.get("notes"),
-            "chapters": plan.get("chapters"), "decisions": [{k: d.get(k) for k in ("start", "end", "action", "kind", "reason", "score", "text")}
+            "chapters": plan.get("chapters"), "decisions": [{k: d.get(k) for k in ("id", "sentence_id", "src", "start", "end", "action", "kind", "reason",
+                                                                                  "score", "confidence", "text")}
                                                             for d in dec[:limit]], "decisions_total": len(dec)}
+
+
+class ReferenceReq(BaseModel):
+    media_id: str                 # a video already imported into this project
+    rights_basis: str             # owned | licensed | public-domain | commentary (refused otherwise)
+    name: str | None = None
+
+
+@app.post("/api/projects/{pid}/reference")
+def api_reference(pid: str, r: ReferenceReq):
+    """Measure a lawfully supplied reference video's STRUCTURE (pacing, hook, density, captions, music density, colour) as
+    a ReferenceStyleProfile. Nothing of the reference (frames, words, sound) is ever used in an output."""
+    p = _project(pid)
+    m = next((x for x in p.data["media"] if x["id"] == r.media_id), None)
+    if m is None:
+        raise HTTPException(404, "media not in this project")
+    from . import reference
+    if r.rights_basis not in reference.RIGHTS_OK:
+        raise HTTPException(422, f"rights basis must be one of {sorted(reference.RIGHTS_OK)}")
+    return jobs.submit("reference", {"project": pid, "media_id": r.media_id, "rights_basis": r.rights_basis, "name": r.name}, pid)
+
+
+@app.get("/api/projects/{pid}/references")
+def api_references(pid: str):
+    d = _project(pid).dir / "reports" / "references"
+    out = []
+    for f in sorted(d.glob("*.json")) if d.exists() else []:
+        doc = json.loads(f.read_text(encoding="utf-8"))
+        out.append({"id": f.stem, "name": doc.get("name"), "metrics": doc.get("metrics"), "rights": doc.get("rights")})
+    return {"references": out}
+
+
+@app.get("/api/visual/info")
+def api_visual_info():
+    from .media import visual
+    return visual.info()
+
+
+class VisualInstallReq(BaseModel):
+    licence_accepted: bool = False
+    accepted_mb: float = 0
+
+
+@app.post("/api/visual/install")
+def api_visual_install(r: VisualInstallReq):
+    """Opt-in download of the visual-understanding model (Apache-2.0, ~213 MB) through the Cost Guard."""
+    from .media import visual
+    if visual.available():
+        return {"status": "installed", **visual.info()}
+    if not r.licence_accepted or r.accepted_mb < visual.DOWNLOAD_MB:
+        raise HTTPException(409, f"consent required: licence {visual.LICENCE}; download {visual.DOWNLOAD_MB} MB")
+    return jobs.submit("visual-install", {"accepted_mb": r.accepted_mb})
 
 
 @app.get("/api/projects/{pid}/edl")
@@ -701,9 +913,18 @@ def api_edl(pid: str, branch: str = "main", fmt: str = "cmx3600"):
     from fastapi.responses import PlainTextResponse
     from . import director
     p = _project(pid)
-    if fmt not in ("cmx3600", "json"):
-        raise HTTPException(400, "fmt must be cmx3600 or json")
+    if fmt not in ("cmx3600", "json", "otio"):
+        raise HTTPException(400, "fmt must be cmx3600, json or otio")
+    if fmt == "otio":  # OpenTimelineIO JSON (main storyline), readable by Resolve/Premiere/Kdenlive importers
+        from .timeline import edl as edlmod
+        return PlainTextResponse(json.dumps(edlmod.to_otio(p.timeline(branch), name=p.name[:60]), indent=1), media_type="application/json")
     return PlainTextResponse(director.edl(p.timeline(branch), fmt, title=p.name[:60]))
+
+
+@app.get("/api/projects/{pid}/tracks/validate")
+def api_tracks_validate(pid: str, branch: str = "main"):
+    from .timeline import tracks
+    return {"warnings": tracks.validate(_project(pid).timeline(branch))}
 
 
 @app.get("/api/projects/{pid}/quality")

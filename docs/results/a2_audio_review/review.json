@@ -1,0 +1,338 @@
+{
+ "what": "audio reviewer package - before/after excerpts for human listening",
+ "created_utc": "2026-11-13T08:53:07Z",
+ "status": "PENDING_OWNER_REVIEW",
+ "note": "No person has listened to these files yet. Automated measurements are not approval.",
+ "how_to_review": "Play each pair on headphones and on a phone speaker; fill human_review (verdict: approve / approve-with-notes / reject).",
+ "items": [
+  {
+   "id": "interview",
+   "kind": "dialogue only",
+   "source": "https://images.nasa.gov/details/iss061m2627771232_Live_Interviews_Jeanette_Epps_191004",
+   "licence": "public domain",
+   "excerpt": {
+    "start_s": 60.0,
+    "seconds": 20.0
+   },
+   "material": "interview",
+   "processing_s": 6.37,
+   "chain_applied": [
+    "dc_highpass",
+    "denoise",
+    "eq",
+    "compress",
+    "loudness"
+   ],
+   "before": {
+    "lufs": -27.05,
+    "true_peak": -10.66,
+    "noise_floor_db": -52.43,
+    "speech_band_snr_db": 27.45,
+    "clipped_samples": 0,
+    "bandwidth_hz": 12325
+   },
+   "after": {
+    "lufs": -16.05,
+    "true_peak": -1.96,
+    "noise_floor_db": -46.18,
+    "speech_band_snr_db": 31.96,
+    "clipped_samples": 0,
+    "bandwidth_hz": 10887
+   },
+   "automated_notes": [
+    "no automated warning; listen anyway"
+   ],
+   "files": [
+    "interview_before.ogg",
+    "interview_after.ogg"
+   ],
+   "human_review": {
+    "status": "PENDING_OWNER_REVIEW",
+    "reviewer": null,
+    "date": null,
+    "verdict": null,
+    "artefacts_heard": null,
+    "comments": null
+   }
+  },
+  {
+   "id": "panel",
+   "kind": "dialogue only",
+   "source": "https://images.nasa.gov/details/NHQ_2020_0826_WOMEN%20IN%20SPACE",
+   "licence": "public domain",
+   "excerpt": {
+    "start_s": 40.0,
+    "seconds": 20.0
+   },
+   "material": "studio",
+   "processing_s": 5.59,
+   "chain_applied": [
+    "dc_highpass",
+    "dehum",
+    "eq",
+    "speakers",
+    "compress",
+    "roomtone",
+    "loudness"
+   ],
+   "before": {
+    "lufs": -21.97,
+    "true_peak": -3.53,
+    "noise_floor_db": -57.01,
+    "speech_band_snr_db": 43.4,
+    "clipped_samples": 0,
+    "bandwidth_hz": 15688
+   },
+   "after": {
+    "lufs": -16.01,
+    "true_peak": -1.95,
+    "noise_floor_db": -53.42,
+    "speech_band_snr_db": 41.2,
+    "clipped_samples": 0,
+    "bandwidth_hz": 15665
+   },
+   "automated_notes": [
+    "no automated warning; listen anyway"
+   ],
+   "files": [
+    "panel_before.ogg",
+    "panel_after.ogg"
+   ],
+   "human_review": {
+    "status": "PENDING_OWNER_REVIEW",
+    "reviewer": null,
+    "date": null,
+    "verdict": null,
+    "artefacts_heard": null,
+    "comments": null
+   }
+  },
+  {
+   "id": "podcast",
+   "kind": "dialogue only",
+   "source": "https://images.nasa.gov/details/jsc2021m000179_Houston_We_Have_a_Podcast-Artemis_Flight_Directors-MP4",
+   "licence": "public domain",
+   "excerpt": {
+    "start_s": 90.0,
+    "seconds": 20.0
+   },
+   "material": "interview",
+   "processing_s": 5.13,
+   "chain_applied": [
+    "dc_highpass",
+    "dehum",
+    "denoise",
+    "eq",
+    "compress",
+    "loudness"
+   ],
+   "before": {
+    "lufs": -21.36,
+    "true_peak": -11.92,
+    "noise_floor_db": -48.8,
+    "speech_band_snr_db": 34.25,
+    "clipped_samples": 0,
+    "bandwidth_hz": 9606
+   },
+   "after": {
+    "lufs": -16.03,
+    "true_peak": -3.13,
+    "noise_floor_db": -43.83,
+    "speech_band_snr_db": 32.4,
+    "clipped_samples": 0,
+    "bandwidth_hz": 8763
+   },
+   "automated_notes": [
+    "no automated warning; listen anyway"
+   ],
+   "files": [
+    "podcast_before.ogg",
+    "podcast_after.ogg"
+   ],
+   "human_review": {
+    "status": "PENDING_OWNER_REVIEW",
+    "reviewer": null,
+    "date": null,
+    "verdict": null,
+    "artefacts_heard": null,
+    "comments": null
+   }
+  },
+  {
+   "id": "walktalk",
+   "kind": "dialogue only",
+   "source": "https://images.nasa.gov/details/KSC-20200508-MH-GEB03_0001-Booster_Processing_Walk_and_Talk-3248689",
+   "licence": "public domain",
+   "excerpt": {
+    "start_s": 30.0,
+    "seconds": 20.0
+   },
+   "material": "outdoor",
+   "processing_s": 5.55,
+   "chain_applied": [
+    "dc_highpass",
+    "denoise",
+    "eq",
+    "compress",
+    "loudness"
+   ],
+   "before": {
+    "lufs": -32.4,
+    "true_peak": -15.25,
+    "noise_floor_db": -51.47,
+    "speech_band_snr_db": 21.51,
+    "clipped_samples": 0,
+    "bandwidth_hz": 16075
+   },
+   "after": {
+    "lufs": -16.05,
+    "true_peak": -1.99,
+    "noise_floor_db": -41.96,
+    "speech_band_snr_db": 28.15,
+    "clipped_samples": 0,
+    "bandwidth_hz": 12996
+   },
+   "automated_notes": [
+    "no automated warning; listen anyway"
+   ],
+   "files": [
+    "walktalk_before.ogg",
+    "walktalk_after.ogg"
+   ],
+   "human_review": {
+    "status": "PENDING_OWNER_REVIEW",
+    "reviewer": null,
+    "date": null,
+    "verdict": null,
+    "artefacts_heard": null,
+    "comments": null
+   }
+  },
+  {
+   "id": "ad",
+   "kind": "dialogue only",
+   "source": "https://archive.org/details/ClassicT1948_6",
+   "licence": "public domain",
+   "excerpt": {
+    "start_s": 20.0,
+    "seconds": 20.0
+   },
+   "material": "archival",
+   "processing_s": 4.98,
+   "chain_applied": [
+    "dc_highpass",
+    "denoise",
+    "eq",
+    "compress",
+    "loudness"
+   ],
+   "before": {
+    "lufs": -18.77,
+    "true_peak": -5.8,
+    "noise_floor_db": -30.23,
+    "speech_band_snr_db": 18.95,
+    "clipped_samples": 0,
+    "bandwidth_hz": 5678
+   },
+   "after": {
+    "lufs": -16.0,
+    "true_peak": -3.87,
+    "noise_floor_db": -28.58,
+    "speech_band_snr_db": 22.51,
+    "clipped_samples": 0,
+    "bandwidth_hz": 5619
+   },
+   "automated_notes": [
+    "no automated warning; listen anyway"
+   ],
+   "files": [
+    "ad_before.ogg",
+    "ad_after.ogg"
+   ],
+   "human_review": {
+    "status": "PENDING_OWNER_REVIEW",
+    "reviewer": null,
+    "date": null,
+    "verdict": null,
+    "artefacts_heard": null,
+    "comments": null
+   }
+  },
+  {
+   "id": "documentary",
+   "kind": "dialogue only",
+   "source": "https://images.nasa.gov/details/Mars%20-%20The%20Search%20Begins%20Documentary",
+   "licence": "public domain",
+   "excerpt": {
+    "start_s": 30.0,
+    "seconds": 20.0
+   },
+   "material": "outdoor",
+   "processing_s": 5.23,
+   "chain_applied": [
+    "dc_highpass",
+    "denoise",
+    "eq",
+    "compress",
+    "loudness"
+   ],
+   "before": {
+    "lufs": -14.61,
+    "true_peak": -2.81,
+    "noise_floor_db": -36.34,
+    "speech_band_snr_db": 21.63,
+    "clipped_samples": 0,
+    "bandwidth_hz": 8241
+   },
+   "after": {
+    "lufs": -16.0,
+    "true_peak": -3.63,
+    "noise_floor_db": -39.54,
+    "speech_band_snr_db": 23.4,
+    "clipped_samples": 0,
+    "bandwidth_hz": 7251
+   },
+   "automated_notes": [
+    "no automated warning; listen anyway"
+   ],
+   "files": [
+    "documentary_before.ogg",
+    "documentary_after.ogg"
+   ],
+   "human_review": {
+    "status": "PENDING_OWNER_REVIEW",
+    "reviewer": null,
+    "date": null,
+    "verdict": null,
+    "artefacts_heard": null,
+    "comments": null
+   }
+  },
+  {
+   "id": "programme_mix",
+   "kind": "programme mix (Demo 1 master 40-65 s: cleaned narration + ducked music)",
+   "files": [
+    "programme_mix.ogg"
+   ],
+   "measurements_whole_master": {
+    "lufs": -14.17,
+    "lra": 2.54,
+    "true_peak": -1.91
+   },
+   "listen_for": [
+    "music level under narration (should never mask words)",
+    "music recovery in pauses (no pumping)",
+    "level steps at cuts",
+    "sync of words to picture"
+   ],
+   "human_review": {
+    "status": "PENDING_OWNER_REVIEW",
+    "reviewer": null,
+    "date": null,
+    "verdict": null,
+    "comments": null
+   }
+  }
+ ],
+ "audio_folder": "$NEXUS_HOME/review/a2_audio (regenerate: python scripts/acceptance/audio_review_package.py --master <demo1 master>)"
+}

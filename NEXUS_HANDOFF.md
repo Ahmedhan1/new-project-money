@@ -62,6 +62,14 @@ Sessions 4-6 (2026-11-12), all on a real 19.4-min public-domain NASA interview (
 `nexus/intelligence/` (API `/api/a3/*`). Verdict and status: `docs/ACCOUNT3_EXECUTION_REPORT.md`; integration:
 `integration/contracts_v1/RESULT.md`; owner steps: `docs/ACCOUNT3_YOUTUBE_OWNER_VALIDATION.md`.
 
+## Account 2 (cinematic engine) - read before touching editing/render/audio/director/generation
+- Branch `work/account-2-cinematic-engine`, PR #6 (open, not merged). Audit: `docs/ACCOUNT2_FINAL_RELEASE_AUDIT.md`;
+  measured results: `docs/ACCOUNT2_QUALITY_REPORT.md`; guide: `docs/ACCOUNT2_EDITING_GUIDE.md`.
+- Contracts: Account 2 owns `nexus/contracts/media.py` only; read its version as `contracts.media.VERSION`.
+- Demos: `scripts/demos/demo{1,2,3,4,5}_*.py` (need `.nexus/benchmarks` from `scripts/benchmarks/fetch_media.py` and
+  analyses in `.nexus/analyses`, computed on first run). Audio listening sheet: `docs/results/a2_audio_review/REVIEW.md`.
+- Owner-blocked: A2-AUDIO-REVIEW (listen), A2-GPU (authorise a free GPU worker), K-1 (own Windows PC).
+
 ## Where things are
 | Thing | Path |
 |---|---|

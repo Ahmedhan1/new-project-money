@@ -186,6 +186,54 @@ def interp_filter(c: dict, fps: int, notes: list[str]) -> str | None:
     return None
 
 
+# Timeline-wide slow-motion quality profile (tl["slowmo"]) for clips slowed down (speed < 1 or a ramp) that have no
+# `interpolate` of their own. "optical_flow" = motion-compensated minterpolate (mci): smooth but slow on CPU, opt-in.
+SLOWMO_PROFILES = {"none": None, "blend": "blend", "optical_flow": "mci"}
+
+
+# ------------------------------------------------------------------ geometry: perspective + animated rotation
+def perspective_filters(c: dict, W: int, H: int, notes: list[str]) -> list[str]:
+    """Keystone / perspective correction: c["perspective"] = {"tl": [x, y], "tr": [x, y], "bl": [x, y], "br": [x, y]}
+    (0..1 positions in the fitted frame of the four corners of the area that should fill the frame)."""
+    pc = c.get("perspective")
+    if not isinstance(pc, dict):
+        return []
+    if not has("perspective"):
+        notes.append("perspective filter unavailable in this FFmpeg build; skipped")
+        return []
+    pts = []
+    for k, dflt in (("tl", (0, 0)), ("tr", (1, 0)), ("bl", (0, 1)), ("br", (1, 1))):
+        v = pc.get(k) or dflt
+        try:
+            x, y = float(v[0]), float(v[1])
+        except (TypeError, ValueError, IndexError):
+            x, y = dflt
+        pts.append((min(1.5, max(-0.5, x)) * W, min(1.5, max(-0.5, y)) * H))
+    xs = ":".join(f"x{i}={x:.2f}:y{i}={y:.2f}" for i, (x, y) in enumerate(pts))
+    return [f"perspective={xs}:interpolation=linear:sense=source"]
+
+
+def rotation_filters(c: dict, W: int, H: int, kf_expr) -> list[str]:
+    """Animated rotation: c["keyframes"]["rotation"] in degrees (clockwise) over clip time. By default the picture is
+    zoomed just enough (for the largest angle) that no corner shows; c["rotation_fill"] = "black" keeps the full
+    picture with black corners instead."""
+    pts = (c.get("keyframes") or {}).get("rotation")
+    expr = kf_expr(pts, "t")
+    if not expr:
+        return []
+    try:
+        amax = max(abs(float(p[1])) for p in pts if len(p) >= 2)
+    except ValueError:
+        amax = 0.0
+    out = []
+    if c.get("rotation_fill") != "black" and amax > 0:
+        th = math.radians(min(amax, 45.0))
+        k = math.cos(th) + max(W / H, H / W) * math.sin(th)
+        out.append(f"scale={even(W * k)}:{even(H * k)}")
+    out.append(f"rotate=a='({expr})*PI/180':ow={W}:oh={H}:c=black")
+    return out
+
+
 # ------------------------------------------------------------------ freeze frames
 def freezes(c: dict) -> list[tuple[float, float]]:
     """[(at, duration)] in clip-local output seconds (before earlier freezes are inserted), sorted."""
@@ -348,7 +396,100 @@ def masks(c: dict) -> list[dict]:
                     "effect": m.get("effect") if m.get("effect") in MASK_EFFECTS else "black",
                     "region": "inside" if m.get("region") == "inside" else "outside",
                     "amount": min(1.0, max(0.0, _f(m, "amount", 0.6)))})
+        kf = {k: v for k, v in (m.get("keyframes") or {}).items() if k in MASK_KF and isinstance(v, list) and v}
+        if kf:  # a moving / tracked mask: x, y, w, h follow keyframes over clip-local time
+            out[-1]["keyframes"] = kf
     return out
+
+
+MASK_KF = ("x", "y", "w", "h")
+
+
+def kf_value(points, t: float, default: float = 0.0) -> float:
+    """The value of keyframes [[t, v, "linear"|"ease"], ...] at time t (same curve as render.kf_expr)."""
+    pts = sorted((float(p[0]), float(p[1]), (p[2] if len(p) > 2 else "linear")) for p in points or [] if len(p) >= 2)
+    if not pts:
+        return default
+    if t <= pts[0][0]:
+        return pts[0][1]
+    for (t0, v0, mode), (t1, v1, _) in zip(pts, pts[1:]):
+        if t < t1:
+            u = (t - t0) / max(t1 - t0, 1e-4)
+            if mode == "ease":
+                u = u * u * (3 - 2 * u)
+            return v0 + (v1 - v0) * u
+    return pts[-1][1]
+
+
+def mask_at(m: dict, t: float) -> dict:
+    """The mask's geometry at clip time t."""
+    kf = m.get("keyframes") or {}
+    g = {k: kf_value(kf[k], t, m[k]) if k in kf else m[k] for k in MASK_KF}
+    g["x"], g["y"] = min(1.0, max(-1.0, g["x"])), min(1.0, max(-1.0, g["y"]))
+    g["w"], g["h"] = min(2.0, max(0.005, g["w"])), min(2.0, max(0.005, g["h"]))
+    return g
+
+
+def mask_video(m: dict, W: int, H: int, dur: float, fps: int) -> tuple[Path, int, int]:
+    """Raw grey matte video (one frame per output frame) of a moving mask, drawn at quarter size (the renderer scales
+    it up; the feather hides the steps). Cached by its parameters. Returns (path, width, height)."""
+    from PIL import Image, ImageDraw, ImageFilter
+    mw, mh = max(32, even(W / 4)), max(32, even(H / 4))
+    n = max(1, round(dur * fps))
+    key = hashlib.sha1(f"mmask|{sorted((k, str(v)) for k, v in m.items())}|{mw}x{mh}|{n}|{fps}|v1".encode()).hexdigest()[:16]
+    out = config.CACHE / "overlays" / f"mmask_{key}_{mw}x{mh}.gray"
+    if out.exists() and out.stat().st_size == mw * mh * n:
+        return out, mw, mh
+    out.parent.mkdir(parents=True, exist_ok=True)
+    inside_keep = m["region"] == "outside"
+    fill, bg = (255, 0) if inside_keep else (0, 255)
+    rad = m["feather"] * min(mw, mh)
+    tmp = out.with_suffix(".tmp")
+    with tmp.open("wb") as f:
+        for i in range(n):
+            g = mask_at(m, i / fps)
+            img = Image.new("L", (mw, mh), bg)
+            box = [g["x"] * mw, g["y"] * mh, (g["x"] + g["w"]) * mw, (g["y"] + g["h"]) * mh]
+            (ImageDraw.Draw(img).ellipse if m["shape"] == "ellipse" else ImageDraw.Draw(img).rectangle)(box, fill=fill)
+            if rad > 0:
+                img = img.filter(ImageFilter.GaussianBlur(rad))
+            f.write(img.tobytes())
+    tmp.replace(out)
+    return out, mw, mh
+
+
+def mask_from_track(samples: list[dict], c: dict, W: int, H: int, src_w: int, src_h: int, pad: float = 1.5,
+                    effect: str = "blur", region: str = "inside", shape: str = "ellipse", amount: float = 0.8,
+                    step: float = 0.2) -> dict | None:
+    """A moving mask that follows a face/object track (nexus.media.faces samples: t in source seconds, x/y centre and
+    w/h size as fractions of the source frame) through the clip's cover crop at its static `focus`. `pad` enlarges
+    the box (1.5 = 50 % margin round the face). Typical use: blur or pixelate a bystander's face (effect inside), or
+    dim everything but the speaker (region outside). Returns None when the track has no sample inside the clip."""
+    t0, t1 = float(c.get("in", 0)), float(c.get("out", 0))
+    sp = float(c.get("speed", 1.0)) or 1.0
+    pts = [p for p in samples or [] if t0 - 0.5 <= float(p["t"]) <= t1 + 0.5 and "x" in p and "y" in p]
+    if not pts:
+        return None
+    sc = max(W / src_w, H / src_h)
+    fx, fy = (c.get("focus") or (0.5, 0.5))[:2]
+    ox, oy = (src_w * sc - W) * float(fx), (src_h * sc - H) * float(fy)
+    kf: dict[str, list] = {"x": [], "y": [], "w": [], "h": []}
+    last = -1e9
+    for p in pts:
+        if float(p["t"]) - last < step and p is not pts[-1]:
+            continue
+        last = float(p["t"])
+        tt = round(max(0.0, (float(p["t"]) - t0) / sp), 3)
+        bw = float(p.get("w", 0.15)) * src_w * sc / W * pad
+        bh = float(p.get("h", 0.2)) * src_h * sc / H * pad
+        cx = (float(p["x"]) * src_w * sc - ox) / W
+        cy = (float(p["y"]) * src_h * sc - oy) / H
+        kf["x"].append([tt, round(cx - bw / 2, 4)])
+        kf["y"].append([tt, round(cy - bh / 2, 4)])
+        kf["w"].append([tt, round(bw, 4)])
+        kf["h"].append([tt, round(bh, 4)])
+    first = {k: v[0][1] for k, v in kf.items()}
+    return {"shape": shape, **first, "feather": 0.04, "effect": effect, "region": region, "amount": amount, "keyframes": kf}
 
 
 def mask_png(m: dict, W: int, H: int) -> Path:
@@ -372,13 +513,18 @@ def mask_png(m: dict, W: int, H: int) -> Path:
 
 
 def mask_graph(c: dict, lines: list[str], src: str, W: int, H: int, dur: float, n_in: int, scale: float,
-               tag: str) -> tuple[list, str]:
+               tag: str, fps: int | None = None) -> tuple[list, str]:
     """Apply every mask of the clip in order. Returns (extra input args, output label)."""
     args: list = []
     cur = src
     for k, m in enumerate(masks(c)):
-        png = mask_png(m, W, H)
-        args += ["-loop", "1", "-t", f"{dur:.3f}", "-i", str(png)]
+        if m.get("keyframes"):
+            fps = int(fps or config.FPS)
+            raw, mw, mh = mask_video(m, W, H, dur, fps)
+            args += ["-f", "rawvideo", "-pix_fmt", "gray", "-s", f"{mw}x{mh}", "-framerate", fps, "-i", str(raw)]
+        else:
+            png = mask_png(m, W, H)
+            args += ["-loop", "1", "-t", f"{dur:.3f}", "-i", str(png)]
         if m["effect"] == "blur":
             fx = f"gblur=sigma={max(1.0, 30 * m['amount'] * scale):.2f}"
         elif m["effect"] == "dim":
@@ -390,7 +536,7 @@ def mask_graph(c: dict, lines: list[str], src: str, W: int, H: int, dur: float, 
             fx = "drawbox=x=0:y=0:w=iw:h=ih:color=black:t=fill"
         lines.append(f"{cur}split[{tag}a{k}][{tag}b{k}]")
         lines.append(f"[{tag}b{k}]{fx},format=yuv420p[{tag}e{k}]")
-        lines.append(f"[{n_in}:v]format=gray,scale={W}:{H}[{tag}m{k}]")
+        lines.append(f"[{n_in}:v]format=gray,scale={W}:{H}:flags=bilinear,setpts=PTS-STARTPTS[{tag}m{k}]")
         lines.append(f"[{tag}a{k}]format=yuva420p[{tag}c{k}]")
         lines.append(f"[{tag}c{k}][{tag}m{k}]alphamerge[{tag}k{k}]")
         lines.append(f"[{tag}e{k}][{tag}k{k}]overlay=0:0:format=auto,format=yuv420p[{tag}o{k}]")
@@ -409,16 +555,36 @@ def split_opts(c: dict) -> dict | None:
     if not srcs:
         return None
     layout = s.get("layout", "h")
-    if layout not in ("h", "v", "grid"):
+    if layout not in SPLIT_LAYOUTS:
         layout = "h"
-    if layout == "grid" or len(srcs) >= 3:
+    if layout in ("h", "v") and len(srcs) >= 3:
         layout = "grid"
     return {"layout": layout, "srcs": srcs, "gap": int(min(64, max(0, _f(s, "gap", 6)))), "color": _hex(s.get("color"), "000000")}
+
+
+# h / v: side by side / stacked (2-3 panels); grid: 2x2; main_left / main_right: the clip in a 2/3-wide main panel,
+# the others stacked in the remaining third; main_top: main panel on top 2/3, the others side by side under it;
+# thirds_h / thirds_v: three equal columns / rows (the clip plus two sources).
+SPLIT_LAYOUTS = ("h", "v", "grid", "main_left", "main_right", "main_top", "thirds_h", "thirds_v")
 
 
 def split_cells(opts: dict, W: int, H: int, scale: float = 1.0) -> list[tuple[int, int, int, int]]:
     n = 1 + len(opts["srcs"])
     g = int(opts["gap"] * scale) // 2 * 2
+    lay = opts["layout"]
+    if lay in ("main_left", "main_right", "main_top"):
+        k = max(1, n - 1)
+        if lay == "main_top":
+            mh = (H * 2 // 3 - g // 2) // 2 * 2
+            sw = (W - g * (k - 1)) // k // 2 * 2
+            return [(0, 0, W, mh)] + [(i * (sw + g), mh + g, sw, H - mh - g) for i in range(k)]
+        mw = (W * 2 // 3 - g // 2) // 2 * 2
+        sh = (H - g * (k - 1)) // k // 2 * 2
+        mx, sx = (0, mw + g) if lay == "main_left" else (W - mw, 0)
+        return [(mx, 0, mw, H)] + [(sx, i * (sh + g), W - mw - g, sh) for i in range(k)]
+    if lay in ("thirds_h", "thirds_v"):
+        lay = "h" if lay == "thirds_h" else "v"
+        opts = {**opts, "layout": lay}
     if opts["layout"] == "h":
         w = (W - g * (n - 1)) // n // 2 * 2
         return [(i * (w + g), 0, w, H) for i in range(n)]

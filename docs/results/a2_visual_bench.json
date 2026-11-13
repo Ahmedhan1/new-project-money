@@ -1,0 +1,24 @@
+{
+ "model": "SigLIP base patch16-224 (google/siglip-base-patch16-224, Apache-2.0), int8 ONNX export Xenova/siglip-base-patch16-224",
+ "files": {"vision_model_quantized.onnx": "99.5 MB (sha256 ef14a954f3d57e1806666432bd9785004c1dc27100aa260eee0cb0f10a5de058)",
+           "text_model_quantized.onnx": "111.5 MB (sha256 ad0329b1f35acc66d8953ff2559ce358da8eb0a7011794cf951523d63a4dbce2)",
+           "tokenizer.json": "2.4 MB", "total_download_mb": 213.4},
+ "runtime": "onnxruntime 1.31.1 CPUExecutionProvider, intra_op_num_threads=2; no torch",
+ "machine": "shared, noisy 4-vCPU cloud container (5 agents), no GPU",
+ "measured": {
+  "image_embedding_ms_per_frame": {"broll 24 frames (cold)": 223, "per benchmark analysis at 1 fps": {
+     "interview": 195.6, "explainer": 186.9, "panel": 240.4, "podcast": 160.5, "walktalk": 160.5, "documentary": 152.2, "broll": 150.3, "ad": 153.1}},
+  "text_embedding_ms": 89,
+  "peak_rss_mb": 685,
+  "per_asset_cost_1fps": {"interview 300 s": {"decode_s": 24.2, "embed_s": 58.7}, "panel 360 s": {"decode_s": 21.5, "embed_s": 86.5},
+                           "broll 240 s 1920x1012": {"decode_s": 17.1, "embed_s": 36.1}},
+  "share_of_full_analysis": "about 80 s of a ~330 s analysis (Whisper small + diarisation + faces) for a 300 s source"
+ },
+ "licence_evidence": {
+  "google/siglip-base-patch16-224": "model card front matter 'license: apache-2.0' (read 2026-11-12); Apache-2.0 permits commercial use and redistribution",
+  "Xenova/siglip-base-patch16-224": "ONNX conversion of the same weights for Transformers.js, card states base_model google/siglip-base-patch16-224; no separate licence tag, so the base Apache-2.0 terms apply to the derivative",
+  "rejected": {"laion/CLIP-ViT-B-32-laion2B-s34B-b79K": "weights MIT, but the model card says 'Any deployed use case of the model - whether commercial or not - is currently out of scope'",
+               "openai CLIP ONNX ports": "OpenAI model card: research output, deployment out of scope",
+               "MobileCLIP": "Apple sample-code licence terms; not evaluated further"}
+ }
+}

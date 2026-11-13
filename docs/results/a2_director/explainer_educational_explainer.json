@@ -1,0 +1,1526 @@
+{
+ "summary": {
+  "benchmark": "explainer",
+  "profile": "educational_explainer",
+  "target": 120.0,
+  "plan_s": 0.21,
+  "sources": 1,
+  "source_seconds": 300.07,
+  "programme_seconds": 123.353,
+  "clips": 25,
+  "sentences_kept": 16,
+  "spans_dropped": 39,
+  "hook": "Most of the ozone in our atmosphere is found up here in the stratosphere.",
+  "cold_open": true,
+  "median_shot": 5.14,
+  "max_shot": 7.78,
+  "cutaways": 0,
+  "punch_ins": 12,
+  "chapters": [
+   {
+    "t": 0.0,
+    "topic": 1,
+    "label": "stratosphere tropopause increase",
+    "merged": [
+     "troposphere temperatur where"
+    ]
+   },
+   {
+    "t": 55.7,
+    "topic": 2,
+    "label": "ozone layer form",
+    "merged": [
+     "surface radiation down",
+     "here' that' because"
+    ]
+   }
+  ],
+  "notes": [
+   "speakers were detected but none has a name yet: no lower thirds (a role such as 'guest' is never put on screen); set names with diarize.set_name"
+  ],
+  "opening_text": "Most of the ozone in our atmosphere is found up here in the stratosphere. The Earth's atmosphere is divided into layers the lowest at the lowest layer is what we call the troposphere and temperatures decrease as you go upward",
+  "ending_text": "And because you have very little absorption of UV here, it just gets cold. So that's why you have a tropopause between the stratosphere and the troposphere because here's where you absorb energy and up here's where you absorb energy.",
+  "speakers": [
+   "narrator"
+  ],
+  "decision_kinds": {
+   "clip": 25,
+   "compression": 9,
+   "dead_air": 22,
+   "filler": 1,
+   "filler_gap": 1,
+   "opening": 2,
+   "pause": 5,
+   "pleasantry": 1,
+   "sentence": 16
+  },
+  "low_confidence": [],
+  "reference": null
+ },
+ "clips": [
+  {
+   "t": 0.0,
+   "dur": 5.7,
+   "type": "video",
+   "cut": "start",
+   "src_in": 105.767,
+   "src_out": 111.467,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.5034,
+    0.389
+   ],
+   "text": []
+  },
+  {
+   "t": 5.3,
+   "dur": 7.33,
+   "type": "video",
+   "cut": "crossfade",
+   "src_in": 10.933,
+   "src_out": 18.267,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.6177,
+    0.2584
+   ],
+   "text": []
+  },
+  {
+   "t": 12.63,
+   "dur": 4.63,
+   "type": "video",
+   "cut": "hard_cut",
+   "src_in": 21.533,
+   "src_out": 26.167,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.6177,
+    0.2584
+   ],
+   "text": []
+  },
+  {
+   "t": 17.27,
+   "dur": 5.2,
+   "type": "video",
+   "cut": "jump_cut",
+   "src_in": 26.6,
+   "src_out": 31.8,
+   "punch": 1.1,
+   "cutaway": null,
+   "focus": [
+    0.6177,
+    0.2584
+   ],
+   "text": []
+  },
+  {
+   "t": 22.47,
+   "dur": 3.5,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 31.8,
+   "src_out": 35.3,
+   "punch": 1.1,
+   "cutaway": null,
+   "focus": [
+    0.6177,
+    0.2584
+   ],
+   "text": []
+  },
+  {
+   "t": 25.97,
+   "dur": 1.9,
+   "type": "video",
+   "cut": "jump_cut",
+   "src_in": 35.7,
+   "src_out": 37.6,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.6177,
+    0.2584
+   ],
+   "text": []
+  },
+  {
+   "t": 27.87,
+   "dur": 5.27,
+   "type": "video",
+   "cut": "jump_cut",
+   "src_in": 38.367,
+   "src_out": 43.633,
+   "punch": 1.1,
+   "cutaway": null,
+   "focus": [
+    0.5473,
+    0.2949
+   ],
+   "text": []
+  },
+  {
+   "t": 33.13,
+   "dur": 4.96,
+   "type": "video",
+   "cut": "hard_cut",
+   "src_in": 47.967,
+   "src_out": 52.93,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.4696,
+    0.4665
+   ],
+   "text": []
+  },
+  {
+   "t": 38.1,
+   "dur": 5.14,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 52.93,
+   "src_out": 58.067,
+   "punch": 1.21,
+   "cutaway": null,
+   "focus": [
+    0.4677,
+    0.502
+   ],
+   "text": []
+  },
+  {
+   "t": 43.23,
+   "dur": 5.08,
+   "type": "video",
+   "cut": "hard_cut",
+   "src_in": 70.567,
+   "src_out": 75.65,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.599,
+    0.3127
+   ],
+   "text": []
+  },
+  {
+   "t": 48.32,
+   "dur": 7.78,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 75.65,
+   "src_out": 83.433,
+   "punch": 1.1,
+   "cutaway": null,
+   "focus": [
+    0.599,
+    0.3127
+   ],
+   "text": []
+  },
+  {
+   "t": 55.7,
+   "dur": 7.57,
+   "type": "video",
+   "cut": "crossfade",
+   "src_in": 117.733,
+   "src_out": 125.3,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.5034,
+    0.389
+   ],
+   "text": [
+    "Ozone Layer Form"
+   ]
+  },
+  {
+   "t": 63.27,
+   "dur": 4.91,
+   "type": "video",
+   "cut": "hard_cut",
+   "src_in": 145.133,
+   "src_out": 150.04,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.6583,
+    0.2202
+   ],
+   "text": []
+  },
+  {
+   "t": 68.17,
+   "dur": 5.52,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 150.04,
+   "src_out": 155.56,
+   "punch": 1.21,
+   "cutaway": null,
+   "focus": [
+    0.5616,
+    0.2786
+   ],
+   "text": []
+  },
+  {
+   "t": 73.69,
+   "dur": 4.87,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 155.56,
+   "src_out": 160.433,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.5616,
+    0.2786
+   ],
+   "text": []
+  },
+  {
+   "t": 78.57,
+   "dur": 1.27,
+   "type": "video",
+   "cut": "hard_cut",
+   "src_in": 160.433,
+   "src_out": 161.7,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.5616,
+    0.2786
+   ],
+   "text": []
+  },
+  {
+   "t": 79.83,
+   "dur": 4.81,
+   "type": "video",
+   "cut": "jump_cut",
+   "src_in": 163.167,
+   "src_out": 167.98,
+   "punch": 1.1,
+   "cutaway": null,
+   "focus": [
+    0.6176,
+    0.2597
+   ],
+   "text": []
+  },
+  {
+   "t": 84.65,
+   "dur": 5.45,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 167.98,
+   "src_out": 173.433,
+   "punch": 1.1,
+   "cutaway": null,
+   "focus": [
+    0.6391,
+    0.2525
+   ],
+   "text": []
+  },
+  {
+   "t": 90.1,
+   "dur": 5.2,
+   "type": "video",
+   "cut": "hard_cut",
+   "src_in": 214.833,
+   "src_out": 220.03,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.7091,
+    0.2412
+   ],
+   "text": []
+  },
+  {
+   "t": 95.3,
+   "dur": 4.1,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 220.03,
+   "src_out": 224.133,
+   "punch": 1.21,
+   "cutaway": null,
+   "focus": [
+    0.615,
+    0.2809
+   ],
+   "text": []
+  },
+  {
+   "t": 99.01,
+   "dur": 5.19,
+   "type": "video",
+   "cut": "crossfade",
+   "src_in": 227.4,
+   "src_out": 232.59,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.615,
+    0.2809
+   ],
+   "text": []
+  },
+  {
+   "t": 104.2,
+   "dur": 3.51,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 232.59,
+   "src_out": 236.1,
+   "punch": 1.1,
+   "cutaway": null,
+   "focus": [
+    0.615,
+    0.2809
+   ],
+   "text": []
+  },
+  {
+   "t": 107.42,
+   "dur": 6.67,
+   "type": "video",
+   "cut": "crossfade",
+   "src_in": 259.733,
+   "src_out": 266.4,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.615,
+    0.2809
+   ],
+   "text": []
+  },
+  {
+   "t": 114.09,
+   "dur": 5.24,
+   "type": "video",
+   "cut": "jump_cut",
+   "src_in": 266.933,
+   "src_out": 272.17,
+   "punch": 1.1,
+   "cutaway": null,
+   "focus": [
+    0.615,
+    0.2809
+   ],
+   "text": []
+  },
+  {
+   "t": 119.32,
+   "dur": 4.03,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 272.17,
+   "src_out": 276.2,
+   "punch": 1.21,
+   "cutaway": null,
+   "focus": [
+    0.615,
+    0.2809
+   ],
+   "text": []
+  }
+ ],
+ "editorial_plan": {
+  "schema": "nexus.EditorialPlan/1",
+  "brief": "",
+  "profile": "educational_explainer",
+  "decisions": [
+   {
+    "id": "pause:source:26.18-26.62",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 26.18,
+    "end": 26.62,
+    "action": "drop",
+    "kind": "pause",
+    "reason": "jump cut: pause 0.72s > tolerance 0.6s",
+    "score": 0.72,
+    "confidence": 0.9
+   },
+   {
+    "id": "pause:source:35.32-35.72",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 35.32,
+    "end": 35.72,
+    "action": "drop",
+    "kind": "pause",
+    "reason": "jump cut: pause 0.68s > tolerance 0.6s",
+    "score": 0.68,
+    "confidence": 0.9
+   },
+   {
+    "id": "pause:source:37.60-38.38",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 37.6,
+    "end": 38.38,
+    "action": "drop",
+    "kind": "pause",
+    "reason": "jump cut: pause 1.06s > tolerance 0.6s",
+    "score": 1.06,
+    "confidence": 0.9
+   },
+   {
+    "id": "filler:source:161.70-162.74",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 161.7,
+    "end": 162.74,
+    "action": "drop",
+    "kind": "filler",
+    "reason": "filler \"UVC,\" removed (filler aggressiveness 0.6)",
+    "score": 0.6,
+    "confidence": 0.8
+   },
+   {
+    "id": "filler_gap:source:161.70-163.18",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 161.7,
+    "end": 163.18,
+    "action": "drop",
+    "kind": "filler_gap",
+    "reason": "jump cut: filler removed",
+    "score": 1.58,
+    "confidence": 0.6
+   },
+   {
+    "id": "pause:source:255.19-255.55",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 255.19,
+    "end": 255.55,
+    "action": "drop",
+    "kind": "pause",
+    "reason": "jump cut: pause 0.64s > tolerance 0.6s",
+    "score": 0.64,
+    "confidence": 0.9
+   },
+   {
+    "id": "pause:source:266.43-266.95",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 266.43,
+    "end": 266.95,
+    "action": "drop",
+    "kind": "pause",
+    "reason": "jump cut: pause 0.80s > tolerance 0.6s",
+    "score": 0.8,
+    "confidence": 0.9
+   },
+   {
+    "id": "opening:source:105.88-111.08",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 105.88,
+    "end": 111.08,
+    "action": "lift",
+    "kind": "opening",
+    "reason": "lifted to the opening hook: strongest self-contained line (hook 0.5: claim, punchy length); it does not lean on earlier context, and it is not repeated later",
+    "score": 0.5,
+    "confidence": 0.6
+   },
+   {
+    "id": "pleasantry:source:112.06-115.20",
+    "sentence_id": "sentence:source:112.06-115.20",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 112.06,
+    "end": 115.2,
+    "action": "drop",
+    "kind": "pleasantry",
+    "reason": "greeting/thanks/sign-off or an interviewer prompt with no information of its own",
+    "score": 63.5,
+    "confidence": 0.7,
+    "text": "We call this the ozone layer.",
+    "thought": "t10"
+   },
+   {
+    "id": "compression:source:224.71-227.35",
+    "sentence_id": "sentence:source:224.71-227.35",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 224.71,
+    "end": 227.35,
+    "action": "drop",
+    "kind": "compression",
+    "reason": "compressed to the 120s target: thought priority 61.6 is below the cut line 77.4 (lowest-priority material goes first; hook, ending and requested topics are protected)",
+    "score": 49.3,
+    "confidence": 0.55,
+    "text": "So the atmosphere is a bit warmer down here.",
+    "thought": "t16"
+   },
+   {
+    "id": "compression:source:83.79-89.21",
+    "sentence_id": "sentence:source:83.79-89.21",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 83.79,
+    "end": 89.21,
+    "action": "drop",
+    "kind": "compression",
+    "reason": "compressed to the 120s target: thought priority 71.1 is below the cut line 77.4 (lowest-priority material goes first; hook, ending and requested topics are protected)",
+    "score": 56.9,
+    "confidence": 0.55,
+    "text": "Now you get to the stratosphere, that's this layer, and temperatures begin to increase.",
+    "thought": "t6"
+   },
+   {
+    "id": "compression:source:125.76-137.18",
+    "sentence_id": "sentence:source:125.76-137.18",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 125.76,
+    "end": 137.18,
+    "action": "drop",
+    "kind": "compression",
+    "reason": "compressed to the 120s target: thought priority 72.5 is below the cut line 77.4 (lowest-priority material goes first; hook, ending and requested topics are protected)",
+    "score": 51.6,
+    "confidence": 0.55,
+    "text": "Now this is an invisible form of light it can't be seen and this is a very damaging form of light it can cause skin cancer for example but it's mainly absorbed here by the ozone layer.",
+    "thought": "t12"
+   },
+   {
+    "id": "compression:source:236.13-243.91",
+    "sentence_id": "sentence:source:236.13-243.91",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 236.13,
+    "end": 243.91,
+    "action": "drop",
+    "kind": "compression",
+    "reason": "compressed to the 120s target: thought priority 73.6 is below the cut line 77.4 (lowest-priority material goes first; hook, ending and requested topics are protected)",
+    "score": 59.3,
+    "confidence": 0.55,
+    "text": "Now you go down all the way to the surface and you get down here and all of the visible radiation gets to the surface.",
+    "thought": "t18"
+   },
+   {
+    "id": "compression:source:244.19-248.25",
+    "sentence_id": "sentence:source:244.19-248.25",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 244.19,
+    "end": 248.25,
+    "action": "drop",
+    "kind": "compression",
+    "reason": "compressed to the 120s target: thought priority 73.6 is below the cut line 77.4 (lowest-priority material goes first; hook, ending and requested topics are protected)",
+    "score": 53.2,
+    "confidence": 0.55,
+    "text": "So the visible radiation getting to the surface makes the surface warm.",
+    "thought": "t18"
+   },
+   {
+    "id": "compression:source:248.71-259.47",
+    "sentence_id": "sentence:source:248.71-259.47",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 248.71,
+    "end": 259.47,
+    "action": "drop",
+    "kind": "compression",
+    "reason": "compressed to the 120s target: thought priority 73.6 is below the cut line 77.4 (lowest-priority material goes first; hook, ending and requested topics are protected)",
+    "score": 58.9,
+    "confidence": 0.55,
+    "text": "So you have a lot of absorption of solar energy down here, visible radiation, and you have a lot of absorption of solar energy up here.",
+    "thought": "t18"
+   },
+   {
+    "id": "compression:source:60.71-67.99",
+    "sentence_id": "sentence:source:60.71-67.99",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 60.71,
+    "end": 67.99,
+    "action": "drop",
+    "kind": "compression",
+    "reason": "compressed to the 120s target: thought priority 76.0 is below the cut line 77.4 (lowest-priority material goes first; hook, ending and requested topics are protected)",
+    "score": 58.4,
+    "confidence": 0.55,
+    "text": "So here it's getting down to temperatures of about minus 110 degrees below zero.",
+    "thought": "t4"
+   },
+   {
+    "id": "compression:source:99.90-105.00",
+    "sentence_id": "sentence:source:99.90-105.00",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 99.9,
+    "end": 105.0,
+    "action": "drop",
+    "kind": "compression",
+    "reason": "compressed to the 120s target: thought priority 76.8 is below the cut line 77.4 (lowest-priority material goes first; hook, ending and requested topics are protected)",
+    "score": 61.4,
+    "confidence": 0.55,
+    "text": "The tropopause separates the troposphere from the stratosphere.",
+    "thought": "t8"
+   },
+   {
+    "id": "compression:source:94.12-98.92",
+    "sentence_id": "sentence:source:94.12-98.92",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 94.12,
+    "end": 98.92,
+    "action": "drop",
+    "kind": "compression",
+    "reason": "compressed to the 120s target: thought priority 77.4 is below the cut line 77.4 (lowest-priority material goes first; hook, ending and requested topics are protected)",
+    "score": 61.9,
+    "confidence": 0.55,
+    "text": "This cold point is called the tropopause.",
+    "thought": "t7"
+   },
+   {
+    "id": "sentence:source:105.88-111.08",
+    "sentence_id": "sentence:source:105.88-111.08",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 105.88,
+    "end": 111.08,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 81.4, role hook, hook",
+    "score": 65.1,
+    "confidence": 0.7,
+    "text": "Most of the ozone in our atmosphere is found up here in the stratosphere.",
+    "speaker": "narrator",
+    "thought": "t9"
+   },
+   {
+    "id": "sentence:source:11.34-18.10",
+    "sentence_id": "sentence:source:11.34-18.10",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 11.34,
+    "end": 18.1,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 81.1, role setup",
+    "score": 64.9,
+    "confidence": 0.7,
+    "text": "The Earth's atmosphere is divided into layers the lowest at the lowest layer is what we call the troposphere and",
+    "speaker": "narrator",
+    "thought": "t1"
+   },
+   {
+    "id": "sentence:source:21.64-43.48",
+    "sentence_id": "sentence:source:21.64-43.48",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 21.64,
+    "end": 43.48,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 95.1, role setup",
+    "score": 76.1,
+    "confidence": 0.7,
+    "text": "temperatures decrease as you go upward into the troposphere You eventually reach a point where it's incredibly cold In fact interestingly enough some of the warmest temperatures that we see at the ground are in the tropics Where this might be 80 to 90 degrees But",
+    "speaker": "narrator",
+    "thought": "t2"
+   },
+   {
+    "id": "sentence:source:48.09-57.89",
+    "sentence_id": "sentence:source:48.09-57.89",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 48.09,
+    "end": 57.89,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 86.0, role setup",
+    "score": 68.8,
+    "confidence": 0.7,
+    "text": "also some of the coldest temperatures that we see in the world are found about 50 ,000 feet above the ground in the tropics.",
+    "speaker": "narrator",
+    "thought": "t3"
+   },
+   {
+    "id": "sentence:source:70.69-75.57",
+    "sentence_id": "sentence:source:70.69-75.57",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 70.69,
+    "end": 75.57,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 74.7, role setup",
+    "score": 51.1,
+    "confidence": 0.7,
+    "text": "So there's a huge decrease in temperature and this is all occurring in the troposphere.",
+    "speaker": "narrator",
+    "thought": "t5"
+   },
+   {
+    "id": "sentence:source:75.73-83.05",
+    "sentence_id": "sentence:source:75.73-83.05",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 75.73,
+    "end": 83.05,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 74.7, role setup",
+    "score": 60.7,
+    "confidence": 0.7,
+    "text": "And the troposphere is where we find most of our weather, all the cloud systems, are down here in the troposphere.",
+    "speaker": "narrator",
+    "thought": "t5"
+   },
+   {
+    "id": "sentence:source:118.14-125.14",
+    "sentence_id": "sentence:source:118.14-125.14",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 118.14,
+    "end": 125.14,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 82.4, role climax",
+    "score": 65.9,
+    "confidence": 0.7,
+    "text": "Now the sun's radiation as it comes down it comes down in a couple of different forms one we call ultraviolet radiation.",
+    "speaker": "narrator",
+    "thought": "t11"
+   },
+   {
+    "id": "sentence:source:145.26-151.02",
+    "sentence_id": "sentence:source:145.26-151.02",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 145.26,
+    "end": 151.02,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 75.6, role climax",
+    "score": 52.8,
+    "confidence": 0.7,
+    "text": "So we see this stuff coming down but if we don't see much of it get through the ozone layer.",
+    "speaker": "narrator",
+    "thought": "t13"
+   },
+   {
+    "id": "sentence:source:151.48-160.26",
+    "sentence_id": "sentence:source:151.48-160.26",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 151.48,
+    "end": 160.26,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 75.6, role climax",
+    "score": 61.3,
+    "confidence": 0.7,
+    "text": "So about 90 % of what we call UVB, 90 % is absorbed by the ozone layer.",
+    "speaker": "narrator",
+    "thought": "t13"
+   },
+   {
+    "id": "sentence:source:160.54-167.32",
+    "sentence_id": "sentence:source:160.54-167.32",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 160.54,
+    "end": 167.32,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 89.0, role climax",
+    "score": 72.2,
+    "confidence": 0.7,
+    "text": "There's another class called UVC, UVC, 100 % of the UVC.",
+    "speaker": "narrator",
+    "thought": "t14"
+   },
+   {
+    "id": "sentence:source:167.42-173.26",
+    "sentence_id": "sentence:source:167.42-173.26",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 167.42,
+    "end": 173.26,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 89.0, role climax",
+    "score": 62.2,
+    "confidence": 0.7,
+    "text": "This is a very dangerous form of solar agents completely absorbed by the ozone layer.",
+    "speaker": "narrator",
+    "thought": "t14"
+   },
+   {
+    "id": "sentence:source:214.96-223.75",
+    "sentence_id": "sentence:source:214.96-223.75",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 214.96,
+    "end": 223.75,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 79.4, role climax",
+    "score": 63.5,
+    "confidence": 0.7,
+    "text": "The interesting thing is the reason that stratosphere begins to warm up is because all of this radiation from the Sun is being absorbed in the ozone layer up here.",
+    "speaker": "narrator",
+    "thought": "t15"
+   },
+   {
+    "id": "sentence:source:227.77-235.81",
+    "sentence_id": "sentence:source:227.77-235.81",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 227.77,
+    "end": 235.81,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 78.1",
+    "score": 62.5,
+    "confidence": 0.7,
+    "text": "There's almost no UV radiation that gets down here and so it gets pretty cold because there's no absorption of solar radiation here.",
+    "speaker": "narrator",
+    "thought": "t17"
+   },
+   {
+    "id": "sentence:source:260.05-260.89",
+    "sentence_id": "sentence:source:260.05-260.89",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 260.05,
+    "end": 260.89,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 84.4, role resolution, ending: resolution",
+    "score": 60.4,
+    "confidence": 0.7,
+    "text": "That's the UV.",
+    "speaker": "narrator",
+    "thought": "t19"
+   },
+   {
+    "id": "sentence:source:261.45-266.25",
+    "sentence_id": "sentence:source:261.45-266.25",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 261.45,
+    "end": 266.25,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 84.4, role resolution, ending: resolution",
+    "score": 60.9,
+    "confidence": 0.7,
+    "text": "And because you have very little absorption of UV here, it just gets cold.",
+    "speaker": "narrator",
+    "thought": "t19"
+   },
+   {
+    "id": "sentence:source:267.05-276.03",
+    "sentence_id": "sentence:source:267.05-276.03",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 267.05,
+    "end": 276.03,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 84.4, role resolution, ending: resolution",
+    "score": 68.6,
+    "confidence": 0.7,
+    "text": "So that's why you have a tropopause between the stratosphere and the troposphere because here's where you absorb energy and up here's where you absorb energy.",
+    "speaker": "narrator",
+    "thought": "t19"
+   },
+   {
+    "id": "clip:source:105.77-111.47",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 105.767,
+    "end": 111.467,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (first in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t9"
+   },
+   {
+    "id": "clip:source:10.93-18.27",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 10.933,
+    "end": 18.267,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (crossfade in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t1"
+   },
+   {
+    "id": "clip:source:21.53-26.17",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 21.533,
+    "end": 26.167,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (hard_cut in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t2"
+   },
+   {
+    "id": "clip:source:26.60-31.80",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 26.6,
+    "end": 31.8,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (jump_cut in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t2"
+   },
+   {
+    "id": "clip:source:31.80-35.30",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 31.8,
+    "end": 35.3,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (continuous in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t2"
+   },
+   {
+    "id": "clip:source:35.70-37.60",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 35.7,
+    "end": 37.6,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (jump_cut in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t2"
+   },
+   {
+    "id": "clip:source:38.37-43.63",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 38.367,
+    "end": 43.633,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (jump_cut in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t2"
+   },
+   {
+    "id": "clip:source:47.97-52.93",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 47.967,
+    "end": 52.93,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (hard_cut in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t3"
+   },
+   {
+    "id": "clip:source:52.93-58.07",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 52.93,
+    "end": 58.067,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (continuous in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t3"
+   },
+   {
+    "id": "clip:source:70.57-75.65",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 70.567,
+    "end": 75.65,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (hard_cut in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t5"
+   },
+   {
+    "id": "clip:source:75.65-83.43",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 75.65,
+    "end": 83.433,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (continuous in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t5"
+   },
+   {
+    "id": "clip:source:117.73-125.30",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 117.733,
+    "end": 125.3,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (crossfade in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t11"
+   },
+   {
+    "id": "clip:source:145.13-150.04",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 145.133,
+    "end": 150.04,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (hard_cut in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t13"
+   },
+   {
+    "id": "clip:source:150.04-155.56",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 150.04,
+    "end": 155.56,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (continuous in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t13"
+   },
+   {
+    "id": "clip:source:155.56-160.43",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 155.56,
+    "end": 160.433,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (continuous in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t13"
+   },
+   {
+    "id": "clip:source:160.43-161.70",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 160.433,
+    "end": 161.7,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (hard_cut in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t14"
+   },
+   {
+    "id": "clip:source:163.17-167.98",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 163.167,
+    "end": 167.98,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (jump_cut in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t14"
+   },
+   {
+    "id": "clip:source:167.98-173.43",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 167.98,
+    "end": 173.433,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (continuous in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t14"
+   },
+   {
+    "id": "clip:source:214.83-220.03",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 214.833,
+    "end": 220.03,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (hard_cut in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t15"
+   },
+   {
+    "id": "clip:source:220.03-224.13",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 220.03,
+    "end": 224.133,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (continuous in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t15"
+   },
+   {
+    "id": "clip:source:227.40-232.59",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 227.4,
+    "end": 232.59,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (crossfade in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t17"
+   },
+   {
+    "id": "clip:source:232.59-236.10",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 232.59,
+    "end": 236.1,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (continuous in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t17"
+   },
+   {
+    "id": "clip:source:259.73-266.40",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 259.733,
+    "end": 266.4,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (crossfade in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t19"
+   },
+   {
+    "id": "clip:source:266.93-272.17",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 266.933,
+    "end": 272.17,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (jump_cut in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t19"
+   },
+   {
+    "id": "clip:source:272.17-276.20",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 272.17,
+    "end": 276.2,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (continuous in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t19"
+   },
+   {
+    "id": "dead_air:source:0.00-10.93",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 0.0,
+    "end": 10.933,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 10.93s without speech between selected material; picture issues: shaky",
+    "score": 0.8,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:18.27-21.53",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 18.267,
+    "end": 21.533,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 3.27s without speech between selected material; picture issues: shaky",
+    "score": 0.8,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:43.63-47.97",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 43.633,
+    "end": 47.967,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 4.33s without speech between selected material; picture issues: blown out, shaky",
+    "score": 0.55,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:58.07-60.71",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 58.067,
+    "end": 60.71,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 2.64s without speech between selected material; picture issues: blown out, shaky",
+    "score": 0.55,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:67.99-70.57",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 67.99,
+    "end": 70.567,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 2.58s without speech between selected material; picture issues: blown out, shaky",
+    "score": 0.55,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:83.43-83.79",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 83.433,
+    "end": 83.79,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.36s without speech between selected material",
+    "score": 1.0,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:89.21-94.12",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 89.21,
+    "end": 94.12,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 4.91s without speech between selected material; picture issues: blown out, shaky",
+    "score": 0.55,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:98.92-99.90",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 98.92,
+    "end": 99.9,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.98s without speech between selected material; picture issues: blown out, shaky",
+    "score": 0.55,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:105.00-105.77",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 105.0,
+    "end": 105.767,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.77s without speech between selected material; picture issues: blown out, shaky",
+    "score": 0.55,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:111.47-112.06",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 111.467,
+    "end": 112.06,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.59s without speech between selected material; picture issues: blown out, shaky",
+    "score": 0.55,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:115.20-117.73",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 115.2,
+    "end": 117.733,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 2.53s without speech between selected material; picture issues: blown out, shaky",
+    "score": 0.55,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:125.30-125.76",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 125.3,
+    "end": 125.76,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.46s without speech between selected material; picture issues: blown out, shaky",
+    "score": 0.55,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:137.18-145.13",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 137.18,
+    "end": 145.133,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 7.95s without speech between selected material; picture issues: shaky",
+    "score": 0.8,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:173.43-214.83",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 173.433,
+    "end": 214.833,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 41.40s without speech between selected material; picture issues: soft, shaky",
+    "score": 0.45,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:224.13-224.71",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 224.133,
+    "end": 224.71,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.58s without speech between selected material; picture issues: shaky",
+    "score": 0.8,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:227.35-227.40",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 227.35,
+    "end": 227.4,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.05s without speech between selected material; picture issues: shaky",
+    "score": 0.8,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:236.10-236.13",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 236.1,
+    "end": 236.13,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.03s without speech between selected material; picture issues: shaky",
+    "score": 0.8,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:243.91-244.19",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 243.91,
+    "end": 244.19,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.28s without speech between selected material; picture issues: shaky",
+    "score": 0.8,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:248.25-248.71",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 248.25,
+    "end": 248.71,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.46s without speech between selected material; picture issues: shaky",
+    "score": 0.8,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:259.47-259.73",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 259.47,
+    "end": 259.733,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.26s without speech between selected material; picture issues: shaky",
+    "score": 0.8,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:266.40-266.43",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 266.4,
+    "end": 266.43,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.03s without speech between selected material; picture issues: shaky",
+    "score": 0.8,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:276.20-300.07",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 276.2,
+    "end": 300.067,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 23.87s without speech between selected material; picture issues: shaky",
+    "score": 0.8,
+    "confidence": 0.95
+   },
+   {
+    "id": "opening:source:105.88-111.08",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+    "start": 105.88,
+    "end": 111.08,
+    "action": "note",
+    "kind": "opening",
+    "reason": "hook starts at 0.0s of the programme (inside the 5s hook window)",
+    "score": 1.0,
+    "confidence": 0.6
+   }
+  ],
+  "chapters": [
+   {
+    "t": 0.0,
+    "topic": 1,
+    "label": "stratosphere tropopause increase",
+    "merged": [
+     "troposphere temperatur where"
+    ]
+   },
+   {
+    "t": 55.7,
+    "topic": 2,
+    "label": "ozone layer form",
+    "merged": [
+     "surface radiation down",
+     "here' that' because"
+    ]
+   }
+  ],
+  "target_s": 120.0,
+  "deliverables": [
+   "master"
+  ],
+  "summary": {
+   "sources": 1,
+   "source_seconds": 300.07,
+   "programme_seconds": 123.353,
+   "clips": 25,
+   "sentences_kept": 16,
+   "spans_dropped": 39,
+   "hook": "Most of the ozone in our atmosphere is found up here in the stratosphere.",
+   "cold_open": true
+  },
+  "notes": [
+   "speakers were detected but none has a name yet: no lower thirds (a role such as 'guest' is never put on screen); set names with diarize.set_name"
+  ],
+  "overrides": {
+   "keep": [],
+   "drop": [],
+   "opening": null,
+   "no_lift": false,
+   "reject_cutaways": []
+  },
+  "profile_params": {
+   "label": "Educational explainer",
+   "shot_len": [
+    3.0,
+    9.0
+   ],
+   "shot_len_median": 5.0,
+   "pacing": "steady",
+   "opening": "hook_first",
+   "hook_window_s": 5.0,
+   "ending": "resolution",
+   "pattern_interrupt_s": 8.0,
+   "cutaways_per_min": 4.0,
+   "title_style": "how_to",
+   "grade": "none"
+  }
+ }
+}

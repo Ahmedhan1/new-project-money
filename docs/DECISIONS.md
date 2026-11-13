@@ -134,3 +134,21 @@ backup destination). Production refuses to start while a key file sits in NEXUS_
 **D-15 Production is an explicit, fail-closed profile (Account 1, 2026-11-13).** `NEXUS_ENV=production` turns
 development conveniences (loopback without token, generated key file, API docs) off and refuses to start unless every
 gate in `nexus/cloud/production.py` passes, so a misconfigured host can never silently serve in development mode.
+**D-11 Visual understanding = SigLIP base (Apache-2.0) as int8 ONNX on onnxruntime; LAION CLIP only as a benchmark
+metric.** The LAION ViT-B/32 card puts any deployed use out of scope, OpenAI CLIP ports are research-only, MobileCLIP is
+Apple sample-code licensed. SigLIP: 213 MB opt-in download through the Cost Guard, 150-240 ms per frame on 2 CPU threads.
+
+**D-12 Shared contracts layout (three accounts).** Account 2's schemas live in `nexus/contracts/media.py`; the package
+`__init__` re-exports them on this branch and is replaced by the shared `__init__` from Account 3's
+`integration/contracts_v1/apply.sh` at the three-account merge. Account 2 code reads its own version as
+`contracts.media.VERSION` (the package-level `VERSION` means Account 1's `"v1"` after the merge).
+
+**D-13 Account 2 work on Account 1 workers goes through Account 1's extension points only.** Worker task files under
+`nexus/cloud/worker_kit/tasks/` (the folder Account 1 documents for Accounts 2/3) and `tasks.register(...)` at import;
+no Account 1 file is edited. The worker cannot import the renderer, so Account 2 compiles plain-cut timelines into FFmpeg
+steps; richer timelines render locally.
+
+**D-14 B-roll from a library needs the film's named subject.** The broad gate (any of the programme's 12 top terms)
+let an Earth storm through under Mars narration because "storm" matched. `subject` (API `broll_subject`, editor "B-roll
+must show") is required metadata for library pictures; local shots of the user's own files are judged visually.
+

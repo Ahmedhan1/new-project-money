@@ -62,7 +62,7 @@ def test_opportunities_skip_hook_and_emotional_statements(tmp_path):
 
 def test_plan_gates_relevance_rights_and_never_reuses():
     tl = _tl("/x.mp4", TEXTS)
-    p = broll.plan(tl, search=fake_search, max_share=1.0)
+    p = broll.plan(tl, search=fake_search, max_share=1.0, visual_rank=False)
     ids = [i["asset"]["id"] for i in p["inserts"]]
     assert len(ids) == len(set(ids)) and "nasa:bad1" not in ids and "nasa:rights1" not in ids
     assert "nasa:rov2" in ids or any("rover" in (d.get("why") or "") for d in p["decisions"])
@@ -76,7 +76,7 @@ def test_apply_inserts_full_frame_cutaways_that_change_pixels_and_keep_audio(hom
                     "-i", "sine=f=300:d=25:r=48000", "-c:v", "libx264", "-preset", "ultrafast", "-c:a", "aac", "-shortest", str(src)],
                    check=True)
     tl = _tl(str(src), TEXTS)
-    p = broll.plan(tl, search=fake_search, max_share=1.0)
+    p = broll.plan(tl, search=fake_search, max_share=1.0, visual_rank=False)
 
     def fetcher(asset):
         f = tmp_path / f"{asset['id'].split(':')[1]}.jpg"
@@ -117,3 +117,22 @@ def test_footage_in_point_skips_a_static_opening(tmp_path):
     t = broll.moving_in_point(v, 3.0)
     assert t >= 5.5, t
     assert broll.hd_window({"kind": "video"}, 0, 3) is None          # no HD rendition known: keep the fetched file
+
+
+def test_named_subject_gate_rejects_on_topic_words_about_another_subject():
+    """Demo 1 finding: under Mars narration, 'storm'/'surface' let an Earth storm and a Moon video through the broad
+    subject gate. With subject=["mars"], a library picture must name Mars in its metadata."""
+    texts = ["Hello and welcome to the film.", "A great dust storm covered the whole planet for two months.",
+             "Then the storm cleared and the volcanoes appeared above the dust."]
+    cands = {"storm": [_cand("earth1", "Violent storm strikes western Europe", keywords=["storm", "earth", "clouds"]),
+                       _cand("mars1", "Global dust storm on Mars", keywords=["mars", "dust storm", "planet"])],
+             "volcano": [_cand("moon1", "Volcanoes appeared on the lunar dome above the dust", keywords=["moon", "volcanoes", "dust"])]}
+
+    def search(src, q):
+        return next((v for k, v in cands.items() if k in q), [c for v in cands.values() for c in v]) if src == "nasa" else []
+    tl = _tl("/x.mp4", texts)
+    free = broll.plan(tl, search=search, max_share=1.0, visual_rank=False)
+    gated = broll.plan(tl, search=search, max_share=1.0, visual_rank=False, subject=["Mars"])
+    ids = lambda p: {i["asset"]["id"] for i in p["inserts"]}  # noqa: E731
+    assert "nasa:moon1" in ids(free)                       # the broad gate lets the Moon picture through on shared words
+    assert "nasa:moon1" not in ids(gated) and ids(gated) <= {"nasa:mars1"} and ids(gated)

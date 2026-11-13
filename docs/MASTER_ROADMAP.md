@@ -183,3 +183,9 @@ Account 1 (cloud platform: remote compute, multi-account storage, ingestion, sch
 localization, publishing, analytics, AI providers) start from that branch and integrate through the v1 contracts:
 `docs/ACCOUNT1_HANDOFF_TO_ACCOUNT2.md`. Remaining Account 1 items need the owner: Drive OAuth client + consent (Demo B/E),
 a permanent host (ACC1-HOSTING). Kaggle is closed (accepted as-is by the owner).
+## 10. Account 2 (cinematic engine) status - 2026-11-13
+All four Account 2 workstreams are merged on `work/account-2-cinematic-engine` (PR #6, not in `main`). Demos 1-5 exist
+with evidence in `docs/results/a2_demos/`; audit in `docs/ACCOUNT2_FINAL_RELEASE_AUDIT.md`. Remaining items are owner
+actions (listening, creative review, Windows PC, GPU authorisation) and cross-account fixes owned by Accounts 1 and 3.
+Recommended merge order: Account 1 -> Account 2 -> Account 3, then `integration/contracts_v1/apply.sh`.
+

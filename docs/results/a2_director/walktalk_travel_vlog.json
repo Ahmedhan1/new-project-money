@@ -1,0 +1,1615 @@
+{
+ "summary": {
+  "benchmark": "walktalk",
+  "profile": "travel_vlog",
+  "target": 90.0,
+  "plan_s": 0.86,
+  "sources": 1,
+  "source_seconds": 243.1,
+  "programme_seconds": 92.03,
+  "clips": 36,
+  "sentences_kept": 15,
+  "spans_dropped": 25,
+  "hook": "Today we're going to walk you around and let you see how we're going to process the segments once they're arriving here at KSC.",
+  "cold_open": true,
+  "median_shot": 2.56,
+  "max_shot": 4.1,
+  "cutaways": 10,
+  "punch_ins": 7,
+  "chapters": [
+   {
+    "t": 0.0,
+    "topic": 0,
+    "label": "rotation we're facility",
+    "merged": [
+     "operation lift rail",
+     "closeout come final",
+     "aft motor piece"
+    ]
+   }
+  ],
+  "notes": [
+   "speakers were detected but none has a name yet: no lower thirds (a role such as 'guest' is never put on screen); set names with diarize.set_name"
+  ],
+  "opening_text": "Today we're going to walk you around and let you see how we're going to process the segments once they're arriving here at KSC. We will roll the railcars into the rotation facility here, right here on these railroad tracks.",
+  "ending_text": "built here at Kennedy Space Center. We will make the aft motor segment to the aft skirt. Once that is completed, we have the aft motor assembly. This will be the first piece of hardware stacked on the mobile launcher.",
+  "speakers": [
+   "narrator"
+  ],
+  "decision_kinds": {
+   "broll": 10,
+   "clip": 26,
+   "compression": 4,
+   "dead_air": 17,
+   "opening": 2,
+   "pause": 2,
+   "pleasantry": 2,
+   "sentence": 15
+  },
+  "low_confidence": [],
+  "reference": null
+ },
+ "clips": [
+  {
+   "t": 0.0,
+   "dur": 2.59,
+   "type": "video",
+   "cut": "start",
+   "src_in": 18.533,
+   "src_out": 21.12,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.4625,
+    0.2722
+   ],
+   "text": []
+  },
+  {
+   "t": 2.59,
+   "dur": 2.56,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 21.12,
+   "src_out": 23.68,
+   "punch": null,
+   "cutaway": 203.237,
+   "focus": [
+    0.4625,
+    0.2722
+   ],
+   "text": []
+  },
+  {
+   "t": 5.15,
+   "dur": 2.29,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 23.68,
+   "src_out": 25.967,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.4833,
+    0.2727
+   ],
+   "text": []
+  },
+  {
+   "t": 7.43,
+   "dur": 2.96,
+   "type": "video",
+   "cut": "hard_cut",
+   "src_in": 28.4,
+   "src_out": 31.36,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.5646,
+    0.2745
+   ],
+   "text": []
+  },
+  {
+   "t": 10.39,
+   "dur": 3.67,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 31.36,
+   "src_out": 35.033,
+   "punch": null,
+   "cutaway": 138.963,
+   "focus": [
+    0.5659,
+    0.2605
+   ],
+   "text": []
+  },
+  {
+   "t": 13.57,
+   "dur": 2.6,
+   "type": "video",
+   "cut": "crossfade",
+   "src_in": 36.133,
+   "src_out": 38.73,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.5736,
+    0.1784
+   ],
+   "text": []
+  },
+  {
+   "t": 16.16,
+   "dur": 2.58,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 38.73,
+   "src_out": 41.31,
+   "punch": null,
+   "cutaway": 240.043,
+   "focus": [
+    0.5736,
+    0.1784
+   ],
+   "text": []
+  },
+  {
+   "t": 18.74,
+   "dur": 2.66,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 41.31,
+   "src_out": 43.97,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.5736,
+    0.1784
+   ],
+   "text": []
+  },
+  {
+   "t": 21.4,
+   "dur": 3.48,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 43.97,
+   "src_out": 47.45,
+   "punch": null,
+   "cutaway": 147.326,
+   "focus": [
+    0.5736,
+    0.1784
+   ],
+   "text": []
+  },
+  {
+   "t": 24.88,
+   "dur": 2.68,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 47.45,
+   "src_out": 50.13,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.5736,
+    0.1784
+   ],
+   "text": []
+  },
+  {
+   "t": 27.56,
+   "dur": 2.86,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 50.13,
+   "src_out": 52.99,
+   "punch": null,
+   "cutaway": 186.137,
+   "focus": [
+    0.5736,
+    0.1784
+   ],
+   "text": []
+  },
+  {
+   "t": 30.42,
+   "dur": 2.58,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 52.99,
+   "src_out": 55.567,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.5736,
+    0.1784
+   ],
+   "text": []
+  },
+  {
+   "t": 33.0,
+   "dur": 3.1,
+   "type": "video",
+   "cut": "hard_cut",
+   "src_in": 55.833,
+   "src_out": 58.93,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.5736,
+    0.1784
+   ],
+   "text": []
+  },
+  {
+   "t": 36.1,
+   "dur": 1.9,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 58.93,
+   "src_out": 60.833,
+   "punch": null,
+   "cutaway": 217.915,
+   "focus": [
+    0.5351,
+    0.2047
+   ],
+   "text": []
+  },
+  {
+   "t": 38.0,
+   "dur": 3.14,
+   "type": "video",
+   "cut": "hard_cut",
+   "src_in": 61.033,
+   "src_out": 64.17,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.3538,
+    0.3287
+   ],
+   "text": []
+  },
+  {
+   "t": 41.14,
+   "dur": 2.0,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 64.17,
+   "src_out": 66.167,
+   "punch": null,
+   "cutaway": 192.685,
+   "focus": [
+    0.3538,
+    0.3287
+   ],
+   "text": []
+  },
+  {
+   "t": 43.13,
+   "dur": 1.77,
+   "type": "video",
+   "cut": "hard_cut",
+   "src_in": 66.7,
+   "src_out": 68.467,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.3538,
+    0.3287
+   ],
+   "text": []
+  },
+  {
+   "t": 44.9,
+   "dur": 2.38,
+   "type": "video",
+   "cut": "jump_cut",
+   "src_in": 68.967,
+   "src_out": 71.35,
+   "punch": 1.08,
+   "cutaway": null,
+   "focus": [
+    0.3538,
+    0.3287
+   ],
+   "text": []
+  },
+  {
+   "t": 47.28,
+   "dur": 2.52,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 71.35,
+   "src_out": 73.867,
+   "punch": 1.08,
+   "cutaway": 236.575,
+   "focus": [
+    0.3538,
+    0.3287
+   ],
+   "text": []
+  },
+  {
+   "t": 49.8,
+   "dur": 2.41,
+   "type": "video",
+   "cut": "hard_cut",
+   "src_in": 73.8,
+   "src_out": 76.21,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.3538,
+    0.3287
+   ],
+   "text": []
+  },
+  {
+   "t": 52.21,
+   "dur": 2.18,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 76.21,
+   "src_out": 78.39,
+   "punch": null,
+   "cutaway": 222.21,
+   "focus": [
+    0.3538,
+    0.3287
+   ],
+   "text": []
+  },
+  {
+   "t": 54.39,
+   "dur": 2.71,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 78.39,
+   "src_out": 81.1,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.3601,
+    0.2947
+   ],
+   "text": []
+  },
+  {
+   "t": 57.1,
+   "dur": 2.24,
+   "type": "video",
+   "cut": "hard_cut",
+   "src_in": 81.9,
+   "src_out": 84.14,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.3822,
+    0.1751
+   ],
+   "text": []
+  },
+  {
+   "t": 59.34,
+   "dur": 2.19,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 84.14,
+   "src_out": 86.33,
+   "punch": null,
+   "cutaway": 160.489,
+   "focus": [
+    0.3822,
+    0.1751
+   ],
+   "text": []
+  },
+  {
+   "t": 61.53,
+   "dur": 2.4,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 86.33,
+   "src_out": 88.73,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.3822,
+    0.1751
+   ],
+   "text": []
+  },
+  {
+   "t": 63.93,
+   "dur": 1.44,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 88.73,
+   "src_out": 90.167,
+   "punch": 1.08,
+   "cutaway": null,
+   "focus": [
+    0.4603,
+    0.1979
+   ],
+   "text": []
+  },
+  {
+   "t": 64.9,
+   "dur": 2.37,
+   "type": "video",
+   "cut": "crossfade",
+   "src_in": 98.5,
+   "src_out": 100.87,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.5505,
+    0.2242
+   ],
+   "text": []
+  },
+  {
+   "t": 67.27,
+   "dur": 3.0,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 100.87,
+   "src_out": 103.87,
+   "punch": 1.188,
+   "cutaway": null,
+   "focus": [
+    0.5505,
+    0.2242
+   ],
+   "text": []
+  },
+  {
+   "t": 70.27,
+   "dur": 4.1,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 103.87,
+   "src_out": 107.967,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.5505,
+    0.2242
+   ],
+   "text": []
+  },
+  {
+   "t": 74.37,
+   "dur": 1.77,
+   "type": "video",
+   "cut": "hard_cut",
+   "src_in": 109.733,
+   "src_out": 111.5,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.4295,
+    0.3498
+   ],
+   "text": []
+  },
+  {
+   "t": 76.13,
+   "dur": 4.06,
+   "type": "video",
+   "cut": "jump_cut",
+   "src_in": 111.967,
+   "src_out": 116.03,
+   "punch": 1.08,
+   "cutaway": null,
+   "focus": [
+    0.4289,
+    0.2836
+   ],
+   "text": []
+  },
+  {
+   "t": 80.2,
+   "dur": 2.18,
+   "type": "video",
+   "cut": "hard_cut",
+   "src_in": 116.03,
+   "src_out": 118.21,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.4285,
+    0.2435
+   ],
+   "text": []
+  },
+  {
+   "t": 82.38,
+   "dur": 2.92,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 118.21,
+   "src_out": 121.133,
+   "punch": 1.08,
+   "cutaway": null,
+   "focus": [
+    0.4285,
+    0.2435
+   ],
+   "text": []
+  },
+  {
+   "t": 85.3,
+   "dur": 2.38,
+   "type": "video",
+   "cut": "hard_cut",
+   "src_in": 125.433,
+   "src_out": 127.81,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.4285,
+    0.2435
+   ],
+   "text": []
+  },
+  {
+   "t": 87.68,
+   "dur": 2.2,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 127.81,
+   "src_out": 130.01,
+   "punch": 1.188,
+   "cutaway": null,
+   "focus": [
+    0.4285,
+    0.2435
+   ],
+   "text": []
+  },
+  {
+   "t": 89.88,
+   "dur": 2.16,
+   "type": "video",
+   "cut": "continuous",
+   "src_in": 130.01,
+   "src_out": 132.167,
+   "punch": null,
+   "cutaway": null,
+   "focus": [
+    0.4285,
+    0.2435
+   ],
+   "text": []
+  }
+ ],
+ "editorial_plan": {
+  "schema": "nexus.EditorialPlan/1",
+  "brief": "",
+  "profile": "travel_vlog",
+  "decisions": [
+   {
+    "id": "pause:source:68.47-68.97",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 68.47,
+    "end": 68.97,
+    "action": "drop",
+    "kind": "pause",
+    "reason": "jump cut: pause 0.78s > tolerance 0.7s",
+    "score": 0.78,
+    "confidence": 0.9
+   },
+   {
+    "id": "pause:source:111.51-111.99",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 111.51,
+    "end": 111.99,
+    "action": "drop",
+    "kind": "pause",
+    "reason": "jump cut: pause 0.76s > tolerance 0.7s",
+    "score": 0.76,
+    "confidence": 0.9
+   },
+   {
+    "id": "opening:source:18.64-25.80",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 18.64,
+    "end": 25.8,
+    "action": "lift",
+    "kind": "opening",
+    "reason": "lifted to the cold open: strongest self-contained line (hook 0.9: second person, curiosity word, first-hand account, first-hand account); it does not lean on earlier context, and it is not repeated later",
+    "score": 0.9,
+    "confidence": 0.6
+   },
+   {
+    "id": "pleasantry:source:11.02-17.76",
+    "sentence_id": "sentence:source:11.02-17.76",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 11.02,
+    "end": 17.76,
+    "action": "drop",
+    "kind": "pleasantry",
+    "reason": "greeting/thanks/sign-off or an interviewer prompt with no information of its own",
+    "score": 67.9,
+    "confidence": 0.7,
+    "text": "I'd like to welcome you into the rotation processing and surge facility here at Kennedy Space Center.",
+    "thought": "t1"
+   },
+   {
+    "id": "pleasantry:source:26.18-27.64",
+    "sentence_id": "sentence:source:26.18-27.64",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 26.18,
+    "end": 27.64,
+    "action": "drop",
+    "kind": "pleasantry",
+    "reason": "greeting/thanks/sign-off or an interviewer prompt with no information of its own",
+    "score": 65.1,
+    "confidence": 0.7,
+    "text": "Here is our first process.",
+    "thought": "t3"
+   },
+   {
+    "id": "compression:source:108.37-109.67",
+    "sentence_id": "sentence:source:108.37-109.67",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 108.37,
+    "end": 109.67,
+    "action": "drop",
+    "kind": "compression",
+    "reason": "compressed to the 90s target: thought priority 69.1 is below the cut line 85.6 (lowest-priority material goes first; hook, ending and requested topics are protected)",
+    "score": 55.3,
+    "confidence": 0.55,
+    "text": "Now onto the next process.",
+    "thought": "t14"
+   },
+   {
+    "id": "compression:source:95.17-98.45",
+    "sentence_id": "sentence:source:95.17-98.45",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 95.17,
+    "end": 98.45,
+    "action": "drop",
+    "kind": "compression",
+    "reason": "compressed to the 90s target: thought priority 74.9 is below the cut line 85.6 (lowest-priority material goes first; hook, ending and requested topics are protected)",
+    "score": 59.9,
+    "confidence": 0.55,
+    "text": "We will do our final closeout in preps for launch.",
+    "thought": "t12"
+   },
+   {
+    "id": "compression:source:121.69-124.97",
+    "sentence_id": "sentence:source:121.69-124.97",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 121.69,
+    "end": 124.97,
+    "action": "drop",
+    "kind": "compression",
+    "reason": "compressed to the 90s target: thought priority 83.4 is below the cut line 85.6 (lowest-priority material goes first; hook, ending and requested topics are protected)",
+    "score": 63.5,
+    "confidence": 0.55,
+    "text": "The next piece of hardware to be made is the aft exit cone.",
+    "thought": "t17"
+   },
+   {
+    "id": "compression:source:90.21-94.75",
+    "sentence_id": "sentence:source:90.21-94.75",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 90.21,
+    "end": 94.75,
+    "action": "drop",
+    "kind": "compression",
+    "reason": "compressed to the 90s target: thought priority 85.6 is below the cut line 85.6 (lowest-priority material goes first; hook, ending and requested topics are protected)",
+    "score": 62.1,
+    "confidence": 0.55,
+    "text": "Now, the next process is to lift the segment and place it on the pallet behind me.",
+    "thought": "t11"
+   },
+   {
+    "id": "sentence:source:18.64-25.80",
+    "sentence_id": "sentence:source:18.64-25.80",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 18.64,
+    "end": 25.8,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 89.4, role hook, hook",
+    "score": 71.5,
+    "confidence": 0.7,
+    "text": "Today we're going to walk you around and let you see how we're going to process the segments once they're arriving here at KSC.",
+    "speaker": "narrator",
+    "thought": "t2"
+   },
+   {
+    "id": "sentence:source:28.52-34.56",
+    "sentence_id": "sentence:source:28.52-34.56",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 28.52,
+    "end": 34.56,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 86.2, role setup",
+    "score": 69.0,
+    "confidence": 0.7,
+    "text": "We will roll the railcars into the rotation facility here, right here on these railroad tracks.",
+    "speaker": "narrator",
+    "thought": "t4"
+   },
+   {
+    "id": "sentence:source:36.65-49.25",
+    "sentence_id": "sentence:source:36.65-49.25",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 36.65,
+    "end": 49.25,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 87.4, role climax",
+    "score": 71.4,
+    "confidence": 0.7,
+    "text": "Next, now that we have the rail car in our facility, the next operation we have to perform is we need to remove the rail car cover off the rail trailer in order to process the hardware.",
+    "speaker": "narrator",
+    "thought": "t5"
+   },
+   {
+    "id": "sentence:source:49.53-55.41",
+    "sentence_id": "sentence:source:49.53-55.41",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 49.53,
+    "end": 55.41,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 87.4, role climax",
+    "score": 56.5,
+    "confidence": 0.7,
+    "text": "So we use a single crane lift to lift the cover off and place it on this dolly that's behind me.",
+    "speaker": "narrator",
+    "thought": "t5"
+   },
+   {
+    "id": "sentence:source:55.95-60.67",
+    "sentence_id": "sentence:source:55.95-60.67",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 55.95,
+    "end": 60.67,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 85.6, role climax",
+    "score": 68.5,
+    "confidence": 0.7,
+    "text": "Once we have that completed, we will roll this dolly outside to move on to our next step.",
+    "speaker": "narrator",
+    "thought": "t6"
+   },
+   {
+    "id": "sentence:source:61.15-65.99",
+    "sentence_id": "sentence:source:61.15-65.99",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 61.15,
+    "end": 65.99,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 95.5, role climax",
+    "score": 76.4,
+    "confidence": 0.7,
+    "text": "The next process is removing the segment from the rail car, which is a two crane operation.",
+    "speaker": "narrator",
+    "thought": "t7"
+   },
+   {
+    "id": "sentence:source:66.83-73.69",
+    "sentence_id": "sentence:source:66.83-73.69",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 66.83,
+    "end": 73.69,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 85.8, role climax",
+    "score": 68.6,
+    "confidence": 0.7,
+    "text": "After we hook up our GSC, we will move it and lift it up into the north position into the facility.",
+    "speaker": "narrator",
+    "thought": "t8"
+   },
+   {
+    "id": "sentence:source:73.93-80.95",
+    "sentence_id": "sentence:source:73.93-80.95",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 73.93,
+    "end": 80.95,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 85.0, role climax",
+    "score": 68.0,
+    "confidence": 0.7,
+    "text": "At that time, the skill of our crane crew will do a break over operation from a horizontal operation to a vertical operation.",
+    "speaker": "narrator",
+    "thought": "t9"
+   },
+   {
+    "id": "sentence:source:82.01-89.71",
+    "sentence_id": "sentence:source:82.01-89.71",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 82.01,
+    "end": 89.71,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 88.6, role climax",
+    "score": 70.9,
+    "confidence": 0.7,
+    "text": "Once we are in the vertical position, this will be the first inspection stand that we place the hardware down to start our inspection process.",
+    "speaker": "narrator",
+    "thought": "t10"
+   },
+   {
+    "id": "sentence:source:98.97-107.79",
+    "sentence_id": "sentence:source:98.97-107.79",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 98.97,
+    "end": 107.79,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 88.8",
+    "score": 71.0,
+    "confidence": 0.7,
+    "text": "Once that is completed, we have a transporter that will come pick it up and move it to our surge facility which is just like your garage at home.",
+    "speaker": "narrator",
+    "thought": "t13"
+   },
+   {
+    "id": "sentence:source:109.85-111.33",
+    "sentence_id": "sentence:source:109.85-111.33",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 109.85,
+    "end": 111.33,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 91.7, role resolution",
+    "score": 60.4,
+    "confidence": 0.7,
+    "text": "Behind me you'll see our buildup stands.",
+    "speaker": "narrator",
+    "thought": "t15"
+   },
+   {
+    "id": "sentence:source:112.09-116.03",
+    "sentence_id": "sentence:source:112.09-116.03",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 112.09,
+    "end": 116.03,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 91.7, role resolution",
+    "score": 74.8,
+    "confidence": 0.7,
+    "text": "This is where we'll receive the aft skirt built here at Kennedy Space Center.",
+    "speaker": "narrator",
+    "thought": "t15"
+   },
+   {
+    "id": "sentence:source:116.03-120.97",
+    "sentence_id": "sentence:source:116.03-120.97",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 116.03,
+    "end": 120.97,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 91.1, role resolution",
+    "score": 72.9,
+    "confidence": 0.7,
+    "text": "We will make the aft motor segment to the aft skirt.",
+    "speaker": "narrator",
+    "thought": "t16"
+   },
+   {
+    "id": "sentence:source:125.55-128.49",
+    "sentence_id": "sentence:source:125.55-128.49",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 125.55,
+    "end": 128.49,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 83.0, role resolution",
+    "score": 67.1,
+    "confidence": 0.7,
+    "text": "Once that is completed, we have the aft motor assembly.",
+    "speaker": "narrator",
+    "thought": "t18"
+   },
+   {
+    "id": "sentence:source:128.67-131.99",
+    "sentence_id": "sentence:source:128.67-131.99",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 128.67,
+    "end": 131.99,
+    "action": "keep",
+    "kind": "sentence",
+    "reason": "kept: importance 83.0, role resolution",
+    "score": 59.9,
+    "confidence": 0.7,
+    "text": "This will be the first piece of hardware stacked on the mobile launcher.",
+    "speaker": "narrator",
+    "thought": "t18"
+   },
+   {
+    "id": "broll:source:203.24-205.80",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 203.237,
+    "end": 205.797,
+    "action": "keep",
+    "kind": "broll",
+    "reason": "b-roll over /home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4 21.12-23.68s: cutaway: 7.4s talking stretch is longer than the 4.3s shot-length target; visual match 0.036 to the words spoken over it (shot quality 0.8, speech share 0.0, shot type wide)",
+    "score": 0.8,
+    "confidence": 0.6
+   },
+   {
+    "id": "broll:source:138.96-142.64",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 138.963,
+    "end": 142.636,
+    "action": "keep",
+    "kind": "broll",
+    "reason": "b-roll over /home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4 31.36-35.03s: cutaway: 6.6s talking stretch is longer than the 4.9s shot-length target; visual match 0.025 to the words spoken over it (shot quality 0.8, speech share 0.0, shot type wide)",
+    "score": 0.8,
+    "confidence": 0.6
+   },
+   {
+    "id": "broll:source:240.04-242.62",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 240.043,
+    "end": 242.623,
+    "action": "keep",
+    "kind": "broll",
+    "reason": "b-roll over /home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4 38.73-41.31s: cutaway: 19.4s talking stretch is longer than the 4.4s shot-length target; visual match 0.003 to the words spoken over it (shot quality 1.0, speech share 0.0, shot type wide)",
+    "score": 1.0,
+    "confidence": 0.6
+   },
+   {
+    "id": "broll:source:147.33-150.81",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 147.326,
+    "end": 150.806,
+    "action": "keep",
+    "kind": "broll",
+    "reason": "b-roll over /home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4 43.97-47.45s: cutaway: 19.4s talking stretch is longer than the 4.4s shot-length target; visual match 0.035 to the words spoken over it (shot quality 0.8, speech share 0.0, shot type wide)",
+    "score": 0.8,
+    "confidence": 0.6
+   },
+   {
+    "id": "broll:source:186.14-189.00",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 186.137,
+    "end": 188.997,
+    "action": "keep",
+    "kind": "broll",
+    "reason": "b-roll over /home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4 50.13-52.99s: cutaway: 19.4s talking stretch is longer than the 4.4s shot-length target; visual match 0.070 to the words spoken over it (shot quality 1.0, speech share 0.0, shot type wide)",
+    "score": 1.0,
+    "confidence": 0.6
+   },
+   {
+    "id": "broll:source:217.91-219.82",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 217.915,
+    "end": 219.818,
+    "action": "keep",
+    "kind": "broll",
+    "reason": "b-roll over /home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4 58.93-60.83s: cutaway: 5.0s talking stretch is longer than the 4.6s shot-length target; visual match -0.009 to the words spoken over it (shot quality 0.8, speech share 0.0, shot type wide)",
+    "score": 0.8,
+    "confidence": 0.6
+   },
+   {
+    "id": "broll:source:192.69-194.68",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 192.685,
+    "end": 194.682,
+    "action": "keep",
+    "kind": "broll",
+    "reason": "b-roll over /home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4 64.17-66.17s: cutaway: 5.1s talking stretch is longer than the 4.9s shot-length target; visual match 0.049 to the words spoken over it (shot quality 1.0, speech share 0.0, shot type wide)",
+    "score": 1.0,
+    "confidence": 0.6
+   },
+   {
+    "id": "broll:source:236.57-239.09",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 236.575,
+    "end": 239.092,
+    "action": "keep",
+    "kind": "broll",
+    "reason": "b-roll over /home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4 71.35-73.87s: cutaway: 4.9s talking stretch is longer than the 4.4s shot-length target; visual match 0.026 to the words spoken over it (shot quality 0.8, speech share 0.0, shot type wide)",
+    "score": 0.8,
+    "confidence": 0.6
+   },
+   {
+    "id": "broll:source:222.21-224.39",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 222.21,
+    "end": 224.39,
+    "action": "keep",
+    "kind": "broll",
+    "reason": "b-roll over /home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4 76.21-78.39s: cutaway: 7.3s talking stretch is longer than the 3.8s shot-length target; visual match -0.026 to the words spoken over it (shot quality 1.0, speech share 0.0, shot type wide)",
+    "score": 1.0,
+    "confidence": 0.6
+   },
+   {
+    "id": "broll:source:160.49-162.68",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 160.489,
+    "end": 162.679,
+    "action": "keep",
+    "kind": "broll",
+    "reason": "b-roll over /home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4 84.14-86.33s: cutaway: 8.3s talking stretch is longer than the 3.8s shot-length target; visual match 0.037 to the words spoken over it (shot quality 1.0, speech share 0.0, shot type wide)",
+    "score": 1.0,
+    "confidence": 0.6
+   },
+   {
+    "id": "clip:source:18.53-21.12",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 18.533,
+    "end": 21.12,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (first in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t2"
+   },
+   {
+    "id": "clip:source:23.68-25.97",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 23.68,
+    "end": 25.967,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (continuous in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t2"
+   },
+   {
+    "id": "clip:source:28.40-31.36",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 28.4,
+    "end": 31.36,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (hard_cut in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t4"
+   },
+   {
+    "id": "clip:source:36.13-38.73",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 36.133,
+    "end": 38.73,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (crossfade in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t5"
+   },
+   {
+    "id": "clip:source:41.31-43.97",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 41.31,
+    "end": 43.97,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (continuous in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t5"
+   },
+   {
+    "id": "clip:source:47.45-50.13",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 47.45,
+    "end": 50.13,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (continuous in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t5"
+   },
+   {
+    "id": "clip:source:52.99-55.57",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 52.99,
+    "end": 55.567,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (continuous in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t5"
+   },
+   {
+    "id": "clip:source:55.83-58.93",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 55.833,
+    "end": 58.93,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (hard_cut in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t6"
+   },
+   {
+    "id": "clip:source:61.03-64.17",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 61.033,
+    "end": 64.17,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (hard_cut in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t7"
+   },
+   {
+    "id": "clip:source:66.70-68.47",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 66.7,
+    "end": 68.467,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (hard_cut in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t8"
+   },
+   {
+    "id": "clip:source:68.97-71.35",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 68.967,
+    "end": 71.35,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (jump_cut in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t8"
+   },
+   {
+    "id": "clip:source:73.80-76.21",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 73.8,
+    "end": 76.21,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (hard_cut in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t9"
+   },
+   {
+    "id": "clip:source:78.39-81.10",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 78.39,
+    "end": 81.1,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (continuous in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t9"
+   },
+   {
+    "id": "clip:source:81.90-84.14",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 81.9,
+    "end": 84.14,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (hard_cut in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t10"
+   },
+   {
+    "id": "clip:source:86.33-88.73",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 86.33,
+    "end": 88.73,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (continuous in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t10"
+   },
+   {
+    "id": "clip:source:88.73-90.17",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 88.73,
+    "end": 90.167,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (continuous in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t10"
+   },
+   {
+    "id": "clip:source:98.50-100.87",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 98.5,
+    "end": 100.87,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (crossfade in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t13"
+   },
+   {
+    "id": "clip:source:100.87-103.87",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 100.87,
+    "end": 103.87,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (continuous in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t13"
+   },
+   {
+    "id": "clip:source:103.87-107.97",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 103.87,
+    "end": 107.967,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (continuous in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t13"
+   },
+   {
+    "id": "clip:source:109.73-111.50",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 109.733,
+    "end": 111.5,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (hard_cut in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t15"
+   },
+   {
+    "id": "clip:source:111.97-116.03",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 111.967,
+    "end": 116.03,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (jump_cut in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t15"
+   },
+   {
+    "id": "clip:source:116.03-118.21",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 116.03,
+    "end": 118.21,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (hard_cut in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t16"
+   },
+   {
+    "id": "clip:source:118.21-121.13",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 118.21,
+    "end": 121.133,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (continuous in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t16"
+   },
+   {
+    "id": "clip:source:125.43-127.81",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 125.433,
+    "end": 127.81,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (hard_cut in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t18"
+   },
+   {
+    "id": "clip:source:127.81-130.01",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 127.81,
+    "end": 130.01,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (continuous in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t18"
+   },
+   {
+    "id": "clip:source:130.01-132.17",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 130.01,
+    "end": 132.167,
+    "action": "keep",
+    "kind": "clip",
+    "reason": "programme clip (continuous in)",
+    "score": 1.0,
+    "confidence": 0.9,
+    "thought": "t18"
+   },
+   {
+    "id": "dead_air:source:0.00-11.02",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 0.0,
+    "end": 11.02,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 11.02s without speech between selected material; picture issues: dark, frozen",
+    "score": 0.25,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:17.76-18.53",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 17.76,
+    "end": 18.533,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.77s without speech between selected material; picture issues: shaky",
+    "score": 0.8,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:25.97-26.18",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 25.967,
+    "end": 26.18,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.21s without speech between selected material",
+    "score": 1.0,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:27.64-28.40",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 27.64,
+    "end": 28.4,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.76s without speech between selected material",
+    "score": 1.0,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:35.03-36.13",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 35.033,
+    "end": 36.133,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 1.10s without speech between selected material",
+    "score": 1.0,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:55.57-55.83",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 55.567,
+    "end": 55.833,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.27s without speech between selected material",
+    "score": 1.0,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:60.83-61.03",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 60.833,
+    "end": 61.033,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.20s without speech between selected material",
+    "score": 1.0,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:66.17-66.70",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 66.167,
+    "end": 66.7,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.53s without speech between selected material",
+    "score": 1.0,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:81.10-81.90",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 81.1,
+    "end": 81.9,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.80s without speech between selected material",
+    "score": 1.0,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:90.17-90.21",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 90.167,
+    "end": 90.21,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.04s without speech between selected material; picture issues: shaky",
+    "score": 0.8,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:94.75-95.17",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 94.75,
+    "end": 95.17,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.42s without speech between selected material; picture issues: shaky",
+    "score": 0.8,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:98.45-98.50",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 98.45,
+    "end": 98.5,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.05s without speech between selected material; picture issues: shaky",
+    "score": 0.8,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:107.97-108.37",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 107.967,
+    "end": 108.37,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.40s without speech between selected material",
+    "score": 1.0,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:109.67-109.73",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 109.67,
+    "end": 109.733,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.06s without speech between selected material",
+    "score": 1.0,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:121.13-121.69",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 121.133,
+    "end": 121.69,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.56s without speech between selected material",
+    "score": 1.0,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:124.97-125.43",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 124.97,
+    "end": 125.433,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 0.46s without speech between selected material",
+    "score": 1.0,
+    "confidence": 0.95
+   },
+   {
+    "id": "dead_air:source:132.17-243.10",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 132.167,
+    "end": 243.1,
+    "action": "drop",
+    "kind": "dead_air",
+    "reason": "dead air: 110.93s without speech between selected material",
+    "score": 1.0,
+    "confidence": 0.95
+   },
+   {
+    "id": "opening:source:18.64-25.80",
+    "src": "/home/user/new-project-money/.nexus/benchmarks/walktalk/source.mp4",
+    "start": 18.64,
+    "end": 25.8,
+    "action": "note",
+    "kind": "opening",
+    "reason": "hook starts at 0.0s of the programme (inside the 4s hook window)",
+    "score": 1.0,
+    "confidence": 0.6
+   }
+  ],
+  "chapters": [
+   {
+    "t": 0.0,
+    "topic": 0,
+    "label": "rotation we're facility",
+    "merged": [
+     "operation lift rail",
+     "closeout come final",
+     "aft motor piece"
+    ]
+   }
+  ],
+  "target_s": 90.0,
+  "deliverables": [
+   "master"
+  ],
+  "summary": {
+   "sources": 1,
+   "source_seconds": 243.1,
+   "programme_seconds": 92.03,
+   "clips": 36,
+   "sentences_kept": 15,
+   "spans_dropped": 25,
+   "hook": "Today we're going to walk you around and let you see how we're going to process the segments once they're arriving here at KSC.",
+   "cold_open": true
+  },
+  "notes": [
+   "speakers were detected but none has a name yet: no lower thirds (a role such as 'guest' is never put on screen); set names with diarize.set_name"
+  ],
+  "overrides": {
+   "keep": [],
+   "drop": [],
+   "opening": null,
+   "no_lift": false,
+   "reject_cutaways": []
+  },
+  "profile_params": {
+   "label": "Travel / vlog",
+   "shot_len": [
+    1.5,
+    4.5
+   ],
+   "shot_len_median": 2.8,
+   "pacing": "wave",
+   "opening": "cold_open",
+   "hook_window_s": 4.0,
+   "ending": "fade_out",
+   "pattern_interrupt_s": 5.0,
+   "cutaways_per_min": 6.0,
+   "title_style": "statement",
+   "grade": "vivid"
+  }
+ }
+}

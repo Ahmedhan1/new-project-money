@@ -15,6 +15,15 @@ from pathlib import Path
 from .. import config
 
 KNOWN = ("punch_in", "zoom", "shake", "vignette", "grain", "letterbox", "blur", "flash", "glitch", "speed_ramp")
+# Every property that accepts keyframes [[t, value, "linear"|"ease"], ...] (clip["keyframes"][prop], layer items, and
+# for "opacity" also tracks). The editor UI builds its keyframe editor from this (GET /api/fx/catalog).
+#   x, y        0..1 crop position (cover fit)          scale     >= 1 zoom           volume  gain (1 = unchanged)
+#   opacity     0..1 (clips: over black; layers: over what is below)
+#   pos_x/pos_y 0..1 top-left of a layer item's box in the frame
+#   rotation    degrees clockwise (clip["rotation_fill"]: "zoom" default, or "black")
+KEYFRAME_PROPS = ("x", "y", "scale", "volume", "opacity", "rotation", "pos_x", "pos_y")
+# Masks take their own keyframes in clip["mask"]["keyframes"]: MASK_KEYFRAME_PROPS (box position and size, 0..1).
+MASK_KEYFRAME_PROPS = ("x", "y", "w", "h")
 
 
 def _f(d: dict, k: str, default: float) -> float:

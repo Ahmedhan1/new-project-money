@@ -49,12 +49,8 @@ SPEECH_BROLL_MAX = 0.15            # a shot with less speech than this share can
 
 # ---------------------------------------------------------------- profiles
 @functools.lru_cache(maxsize=1)
-def _profiles() -> dict:
-    return yaml.safe_load((config.REGISTRY_DIR / "direction.yaml").read_text(encoding="utf-8"))["profiles"]
-
-
-def profiles() -> dict:
-    return copy.deepcopy(_profiles())
+def _registry() -> dict:
+    return yaml.safe_load((config.REGISTRY_DIR / "direction.yaml").read_text(encoding="utf-8"))
 
 
 def _merge(a: dict, b: dict) -> dict:
@@ -62,6 +58,26 @@ def _merge(a: dict, b: dict) -> dict:
     for k, v in (b or {}).items():
         out[k] = _merge(out[k], v) if isinstance(v, dict) and isinstance(out.get(k), dict) else copy.deepcopy(v)
     return out
+
+
+# editorial parameters a profile may leave out (older registries, aliases, user overrides)
+EDITORIAL_DEFAULTS = {"hook_window_s": 6.0, "pattern_interrupt_s": None, "cutaways_per_min": None, "shot_len_median": None,
+                      "chapters": {"min_s": 0.0}, "title_style": "statement", "end_structure": {"recap": True, "cta": False},
+                      "shorts": {"min_s": 18, "max_s": 58}}
+
+
+@functools.lru_cache(maxsize=1)
+def _profiles() -> dict:
+    reg = _registry()
+    out = {k: _merge(EDITORIAL_DEFAULTS, v) for k, v in reg["profiles"].items()}
+    for alias, a in (reg.get("aliases") or {}).items():
+        base = out[a["profile"]]
+        out[alias] = {**_merge(base, a.get("overrides") or {}), "alias_of": a["profile"]}
+    return out
+
+
+def profiles(include_aliases: bool = True) -> dict:
+    return {k: copy.deepcopy(v) for k, v in _profiles().items() if include_aliases or "alias_of" not in v}
 
 
 def get_profile(name: str | None, overrides: dict | None = None) -> dict:
@@ -171,9 +187,26 @@ def _snap(t: float, lo: float, hi: float, fps: float) -> float:
     return round(t, 4)
 
 
+# How sure the director is of each kind of decision (0..1): measured facts (dead air, duplicate takes) are near
+# certain; editorial judgements (tangent, compression, cutaway choice) are not. Shown so a person reviews the doubtful ones.
+CONFIDENCE = {"dead_air": 0.95, "duplicate_take": 0.85, "best_take": 0.85, "clip": 0.9, "sentence": 0.7, "pleasantry": 0.7,
+              "pause": 0.9, "filler": 0.8, "stutter": 0.85, "compression": 0.55, "tangent": 0.5, "instruction": 0.9,
+              "manual": 1.0, "opening": 0.6, "broll": 0.45, "unselected": 0.6, "speaker_turn": 0.7, "chapter": 0.6,
+              "duplicate_shot": 0.8, "low_quality": 0.75, "too_short": 0.9, "trim": 0.8, "shot": 0.6, "ending": 0.6}
+
+
+def decision_id(src: str, kind: str, start: float, end: float) -> str:
+    """Stable id of a decision (same source span + kind -> same id on every re-plan), used by manual overrides."""
+    return f"{kind}:{Path(str(src)).stem}:{float(start):.2f}-{float(end):.2f}"
+
+
 def _dec(decisions: list, src: str, start: float, end: float, action: str, kind: str, reason: str, score: float, **kw) -> dict:
-    d = {"id": f"d{len(decisions) + 1}", "src": src, "start": round(float(start), 3), "end": round(float(end), 3),
+    did = decision_id(src, kind, start, end)
+    if any(x["id"] == did for x in decisions[-50:]):
+        did += f"#{len(decisions) + 1}"
+    d = {"id": did, "src": src, "start": round(float(start), 3), "end": round(float(end), 3),
          "action": action, "kind": kind, "reason": reason, "score": round(float(score), 3), **kw}
+    d.setdefault("confidence", CONFIDENCE.get(kind, 0.6))
     decisions.append(d)
     return d
 
@@ -370,6 +403,86 @@ def _pieces(t: dict, S: dict, prof: dict, fill_keys: set, decisions: list) -> li
     return pieces
 
 
+LEAD_TRIM = {"yes", "yeah", "no", "well", "so", "okay", "ok", "and", "but", "um", "uh", "oh", "right", "alright", "now", "actually",
+             "anyway", "also", "because", "exactly", "absolutely", "sure"}
+
+
+def _coherent_ends(selected: list[dict], pieces: dict, decisions: list, lifted: bool) -> None:
+    """Opening and ending checks on the selected programme (in place):
+    - the first thought must stand alone; otherwise the first one among the next three that does is moved to the front
+      (a pronoun, "another", "both" or a bare count at the very start refers to something the viewer never saw);
+    - the last thought must end on a finished statement (und.good_ending): trailing questions and fragments are dropped,
+      never more than three thoughts, and never the only one."""
+    if not selected:
+        return
+    first = selected[0]
+
+    def stands(sent: dict) -> bool:  # judged after _clean_open's lead-word trim ("Yes, solar panels ..." -> "solar panels ...")
+        ws = sent["text"].split()
+        while len(ws) > 4 and re.sub(r"[^\w']", "", ws[0].lower()) in LEAD_TRIM:
+            ws = ws[1:]
+        txt = " ".join(ws)
+        return und.self_contained({**sent, "text": txt[:1].upper() + txt[1:]})
+    if not lifted and not stands(first["sents"][0]) and not first.get("forced_open"):
+        alt = next((t for t in selected[1:4] if stands(t["sents"][0])), None)
+        if alt is not None:
+            selected.remove(alt)
+            selected.insert(0, alt)
+            _dec(decisions, alt["src"], alt["start"], alt["end"], "lift", "opening",
+                 f"moved to the opening: the planned first line (\"{first['sents'][0]['text'][:50]}\") leans on context the "
+                 "viewer has not seen; this line stands alone", 1.0, confidence=0.6)
+        else:
+            _dec(decisions, first["src"], first["start"], first["end"], "note", "opening",
+                 "the opening line leans on earlier context and no nearby line stands alone: review the opening", 0.0,
+                 confidence=0.3)
+    for _ in range(3):
+        last = selected[-1]
+        if len(selected) < 2 or any(p.startswith("manual") for p in last["protected"]):
+            break
+        tail = [s for s in last["sents"]]
+        if und.good_ending(tail[-1]):
+            break
+        good = [k for k, s in enumerate(tail) if und.good_ending(s)]
+        if good and pieces.get(last["id"]):  # cut the thought after its last finished statement
+            cut_at = tail[good[-1]]["end"]
+            keep = [p for p in pieces[last["id"]] if p["first"] < cut_at]
+            if keep:
+                keep[-1]["words"] = [w for w in keep[-1]["words"] if w["end"] <= cut_at + 1e-6]
+                keep[-1]["last"] = keep[-1]["words"][-1]["end"]
+                keep[-1]["hi"] = min(keep[-1]["hi"], keep[-1]["last"] + 0.6)
+                keep[-1]["out"] = min(keep[-1]["out"], keep[-1]["last"] + PAD_OUT)
+                pieces[last["id"]] = keep
+                for s in tail[good[-1] + 1:]:
+                    _dec(decisions, last["src"], s["start"], s["end"], "drop", "ending",
+                         f"the programme would end on an unfinished line or a question (\"{s['text'][:60]}\")", 0.0,
+                         confidence=0.7, text=s["text"])
+                break
+        selected.remove(last)
+        for s in tail:
+            _dec(decisions, last["src"], s["start"], s["end"], "drop", "ending",
+                 "dropped from the end: the programme would end on an unfinished line or a question", 0.0, confidence=0.7,
+                 text=s["text"])
+
+
+def _clean_open(piece: dict, decisions: list) -> None:
+    """The programme must not open on a dangling word ("Yes, ...", "And so ...", "Well, ..."): leading answer words,
+    conjunctions and fillers are cut between words when at least four words remain."""
+    ws = piece["words"]
+    k = 0
+    while k < len(ws) - 4 and re.sub(r"[^\w']", "", ws[k]["word"].lower()) in LEAD_TRIM:
+        k += 1
+    if not k:
+        return
+    cut = ws[:k]
+    piece["words"] = ws[k:]
+    piece["lo"] = cut[-1]["end"] + GUARD
+    piece["first"] = ws[k]["start"]
+    piece["in"] = max(piece["lo"], piece["first"] - PAD_IN)
+    _dec(decisions, piece["src"], cut[0]["start"], cut[-1]["end"], "drop", "opening",
+         f"opening starts on a complete thought: leading \"{' '.join(w['word'] for w in cut)}\" cut between words", 1.0,
+         confidence=0.8)
+
+
 def _clusters(thoughts: list[dict], srcs: dict) -> dict:
     """Topic clusters across sources (shared vocabulary), in first-appearance order. Returns topic key -> (rank, label)."""
     from collections import Counter
@@ -460,7 +573,7 @@ def plan(analysis_by_src: dict, brief: dict | None = None) -> dict:
     """Explainable edit plan. Pure: uses only the analysis dicts (word timings, scenes, measured shots if present)."""
     brief = dict(brief or {})
     ins = parse_instructions(brief.get("instructions"), bool(brief.get("use_llm")))
-    prof = get_profile(brief.get("profile"), ins["overrides"])
+    prof = get_profile(brief.get("profile"), _merge(brief.get("profile_overrides") or {}, ins["overrides"]))
     pace = ins["pace"]
     prof["shot_len"] = [round(prof["shot_len"][0] * pace, 3), round(prof["shot_len"][1] * pace, 3)]
     prof["pause_tolerance"] = round(ins["pause_tolerance"] if ins["pause_tolerance"] is not None else prof["pause_tolerance"] * pace, 3)
@@ -546,6 +659,27 @@ def plan(analysis_by_src: dict, brief: dict | None = None) -> dict:
         elif "tangent" in t["roles"] and prof.get("drop_tangents") and not t["protected"]:
             coh = next((x["cohesion"] for x in srcs[t["src"]]["u"].get("topics") or [] if x["id"] == t["topic"]), 0.0)
             t["drop_reason"] = ("tangent", f"tangent: topic shares almost no vocabulary with the rest (cohesion {coh})")
+    # ------- manual corrections (decision / sentence ids from an earlier plan): a person always wins
+    ov = overrides_of(brief)
+    for t in thoughts:
+        k_ids = [i for i in ov["keep"] if _matches(i, t)]
+        d_ids = [i for i in ov["drop"] if _matches(i, t)]
+        if d_ids:
+            t["drop_reason"] = ("manual", f"removed by a person (override {d_ids[0]})")
+            t["protected"] = []
+            t["priority"] -= 1000
+            if t is hook:
+                hook = None
+        elif k_ids:
+            t["drop_reason"] = None
+            t["priority"] += 1000
+            t["protected"].append(f"manual: keep ({k_ids[0]})")
+    if ov["opening"]:
+        forced = next((t for t in thoughts if _matches(ov["opening"], t) and not t["drop_reason"]), None)
+        if forced is not None:
+            hook = forced
+            hook["protected"].append("manual: opening")
+            hook["forced_open"] = True
     # ending
     ending = prof.get("ending", "resolution")
     last_cluster = max(t["cluster"] for t in thoughts) if thoughts else 0
@@ -568,11 +702,15 @@ def plan(analysis_by_src: dict, brief: dict | None = None) -> dict:
     order = sorted(thoughts, key=lambda t: (t["cluster"], srcs[t["src"]]["order"], t["start"]))
     opening = prof.get("opening", "hook_first")
     lifted = False
-    if hook and opening in ("cold_open", "hook_first"):
+    if hook and ov["no_lift"]:
+        _dec(decisions, hook["src"], hook["start"], hook["end"], "note", "opening",
+             "a person asked to keep the original order: the hook was not lifted", hook["sents"][0].get("hook", 0), confidence=1.0)
+    elif hook and (opening in ("cold_open", "hook_first") or hook.get("forced_open")):
         if order and order[0] is hook:
             _dec(decisions, hook["src"], hook["start"], hook["end"], "note", "opening",
                  "the strongest self-contained line already opens the programme", hook["sents"][0].get("hook", 0))
-        elif hook["sents"][0].get("self_contained") and len(hook["sents"]) <= 3 and "tangent" not in hook["roles"]:
+        elif hook.get("forced_open") or (und.self_contained(hook["sents"][0]) and len(hook["sents"]) <= 3
+                                          and "tangent" not in hook["roles"]):
             order.remove(hook)
             order.insert(0, hook)
             lifted = True
@@ -594,6 +732,13 @@ def plan(analysis_by_src: dict, brief: dict | None = None) -> dict:
         cards["end"] = brief.get("end_text") or title
         if not cards["end"]:
             notes.append("profile ends on an end card but no title/end_text was given: no end card")
+    elif (prof.get("end_structure") or {}).get("cta") and brief.get("end_text"):
+        cards["end"] = brief["end_text"]  # call-to-action card from the brief (never invented)
+    hw = prof.get("hook_window_s")
+    if hw and cards["title"] and cards["title_at"] == 0 and hook is not None and cards["title_seconds"] > float(hw):
+        cards["title_seconds"] = round(max(1.0, 0.8 * float(hw)), 2)
+        _dec(decisions, hook["src"], hook["start"], hook["end"], "note", "opening",
+             f"title card shortened to {cards['title_seconds']}s so the hook starts inside the profile's {hw:g}s hook window", 1.0)
     # ------- selection to target
     for t in order:
         if t["drop_reason"]:
@@ -637,36 +782,108 @@ def plan(analysis_by_src: dict, brief: dict | None = None) -> dict:
         why = [f"importance {t['score']:.1f}"] + [f"role {r}" for r in t["roles"] if r != "development"] + t["protected"]
         for s in t["sents"]:
             _dec(decisions, t["src"], s["start"], s["end"], "keep", "sentence", "kept: " + ", ".join(why), s.get("score", 0),
-                 text=s["text"], thought=t["id"])
+                 text=s["text"], thought=t["id"], speaker=s.get("speaker"),
+                 confidence=1.0 if any(p.startswith("manual") for p in t["protected"]) else CONFIDENCE["sentence"])
+    _coherent_ends(selected, pieces, decisions, lifted)
+    if selected and pieces.get(selected[0]["id"]):
+        _clean_open(pieces[selected[0]["id"]][0], decisions)
     items, est = _layout(selected, pieces, prof, cards, srcs)
-    items = _shot_pass(items, srcs, prof, decisions, est)
+    items = _shot_pass(items, srcs, prof, decisions, est, rejected=ov["reject_cutaways"])
     for it in items:
         if it["kind"] == "piece" and not it.get("cutaway"):
             _dec(decisions, it["src"], it["in"], it["out"], "keep", "clip", f"programme clip ({it.get('cut') or 'first'} in)",
                  1.0, thought=it["thought"])
     _coverage(srcs, items, decisions)
-    chapters = _chapters(items, cluster_labels)
+    chapters = _chapters(items, cluster_labels, float((prof.get("chapters") or {}).get("min_s") or 0.0))
+    if not (prof.get("titles") or {}).get("chapters", True):
+        chapters = chapters[:1]
+    for d in decisions:  # one id per sentence whatever happened to it: what manual overrides refer to
+        if d.get("text") is not None and d["kind"] not in ("best_take", "opening"):
+            d["sentence_id"] = decision_id(d["src"], "sentence", d["start"], d["end"])
+    notes += _opening_report(items, hook, prof, decisions)
     return _finish(brief, prof, ins, target, tol, items, est, decisions, notes, srcs, chapters, hook, lifted)
 
 
-def _shot_pass(items: list[dict], srcs: dict, prof: dict, decisions: list, total: float) -> list[dict]:
+def _visual_of(S: dict) -> tuple[dict, dict]:
+    """(shot id -> visual row, shot id -> embedding) for a source analysed by media/visual.py, else empty dicts."""
+    vis = S["an"].get("visual") or {}
+    if not vis.get("available"):
+        return {}, {}
+    rows = {r["id"]: r for r in vis.get("shots") or []}
+    try:
+        from .media import visual
+        embs = visual.shot_embeddings(vis)
+    except Exception:  # noqa: BLE001 - cache gone: rows (shot type, motion, duplicates) still help
+        embs = {}
+    return rows, embs
+
+
+def _text_embedder():
+    try:
+        from .media import visual
+        if visual.available():
+            return lambda t: visual.embed_texts([t])[0]
+    except Exception:  # noqa: BLE001
+        pass
+    return None
+
+
+def _focus(S: dict, a: float, b: float) -> list[float] | None:
+    try:
+        from .media import faces
+        f = faces.focus_at(S["an"], a, b)
+    except Exception:  # noqa: BLE001
+        f = None
+    return [f[0], f[1]] if f else None
+
+
+def _shot_pass(items: list[dict], srcs: dict, prof: dict, decisions: list, total: float, rejected: list | None = None) -> list[dict]:
     """Keep visible shot lengths inside the profile range: long pieces are split at word gaps (contiguous, so the sound
     is untouched) and alternate parts get a cutaway (silent/low-speech shot as full-frame pip) or a punch-in reframe.
-    Pieces over low-quality picture are covered by b-roll when any is available."""
+    Pieces over low-quality picture are covered by b-roll when any is available.
+
+    Profile parameters used: shot_len, shot_len_median, pacing, pattern_interrupt_s (longest stretch without a visual
+    change), cutaways_per_min (cutaway budget), broll, transitions.punch_in, allowed_effects.
+    With visual analysis (media/visual.py) the cutaway for a stretch is the pool shot whose picture best matches what is
+    said there (SigLIP cosine), visual duplicates of a used shot are skipped, and consecutive cutaways vary shot type.
+    With face tracks, reframes centre on the face and alternate two framings (virtual camera angles)."""
     lo, hi = prof["shot_len"]
     br = prof.get("broll") or {}
     punch = float(prof["transitions"].get("punch_in", 1.0))
     can_punch = punch > 1.0 or "punch_in" in (prof.get("allowed_effects") or [])
     punch = punch if punch > 1.0 else 1.08
+    interrupt = prof.get("pattern_interrupt_s")
+    median = prof.get("shot_len_median")
+    cpm = prof.get("cutaways_per_min")
+    budget = math.inf if cpm is None else max(0.0, float(cpm)) * total / 60.0
+    n_cut = 0
     used_ranges: list[tuple] = [(it["src"], it["in"], it["out"]) for it in items if it["kind"] == "piece"]
     pool = []
-    if br.get("policy") == "cutaway":
+    vis_rows: dict = {}
+    if br.get("policy") == "cutaway" and budget > 0:
         for src, S in srcs.items():
+            rows, embs = _visual_of(S)
+            vis_rows[src] = rows
             for sh in S["shots"]:
                 q = sh.get("quality")
                 if sh["speech_share"] <= SPEECH_BROLL_MAX and (q is None or q >= 0.5) and sh["duration"] >= float(br.get("min", 1.5)):
+                    no = [x for x in (_span_of(r) for r in rejected or []) if x and x[0] == Path(str(src)).stem]
+                    if any(a < sh["end"] and sh["start"] < b for _, a, b in no):
+                        _dec(decisions, src, sh["start"], sh["end"], "drop", "broll", "cutaway rejected by a person", 0.0,
+                             confidence=1.0)
+                        continue
+                    r = rows.get(sh["id"]) or {}
+                    if (r.get("scene") or [{}])[0].get("label") == "text or a title card":
+                        _dec(decisions, src, sh["start"], sh["end"], "drop", "broll",
+                             "title card / text slate: never used as a cutaway", 0.0, confidence=0.8)
+                        continue
                     if not any(s == src and a < sh["end"] and sh["start"] < b for s, a, b in used_ranges):
-                        pool.append({"src": src, **sh, "uses": 0})
+                        pool.append({"src": src, **sh, "uses": 0, "emb": embs.get(sh["id"]), "shot_type": r.get("shot_type"),
+                                     "motion_level": r.get("motion_level"), "dup_of": r.get("dup_of")})
+    embed_text = _text_embedder() if any(p["emb"] is not None for p in pool) else None
+    used_embs: list = []
+    prev_type = None
+    angle = 0
     out: list[dict] = []
     t = 0.0
     for it in items:
@@ -677,9 +894,14 @@ def _shot_pass(items: list[dict], srcs: dict, prof: dict, decisions: list, total
         d = it["out"] - it["in"]
         x = t / max(total, 1e-6)
         mx = hi * _pace_factor(prof.get("pacing", "steady"), x)
+        if interrupt:
+            mx = min(mx, max(lo, float(interrupt)))
         S = srcs[it["src"]]
         shot = _shot_at(S["shots"], it["in"], it["out"])
         bad = shot is not None and shot.get("quality") is not None and shot["quality"] < 0.5
+        foc = _focus(S, it["in"], it["out"])
+        if foc:
+            it["focus"] = foc
         if d <= mx and not bad:
             out.append(it)
             t += d
@@ -688,6 +910,8 @@ def _shot_pass(items: list[dict], srcs: dict, prof: dict, decisions: list, total
         gaps = [round((a["end"] + b["start"]) / 2, 4) for a, b in zip(it["words"], it["words"][1:])]
         bounds = [it["in"]]
         aim = max(lo, min(mx, (lo + mx) / 2 if d > 2 * mx else d / max(1, math.ceil(d / mx))))
+        if median:
+            aim = max(lo, min(mx, float(median) * _pace_factor(prof.get("pacing", "steady"), x)))
         while it["out"] - bounds[-1] > mx:
             cands = [g for g in gaps if g - bounds[-1] >= max(MIN_PIECE, lo * 0.6) and it["out"] - g >= MIN_PIECE]
             if not cands:
@@ -708,25 +932,53 @@ def _shot_pass(items: list[dict], srcs: dict, prof: dict, decisions: list, total
                 p["lo"], p["first"] = a, a
             if k < len(subs) - 1:
                 p["hi"], p["last"] = b, b
+            sub_foc = _focus(S, a, b)
+            if sub_foc:
+                p["focus"] = sub_foc
             need = b - a
-            want_cover = bad or (k % 2 == 1)
-            choice = None
+            want_cover = bad or (k % 2 == 1 and n_cut < budget)
+            choice, why_vis = None, ""
             if want_cover and pool:
-                fits = [s for s in pool if s["duration"] >= need - 1e-6]
-                if fits:
+                fits = [s for s in pool if s["duration"] >= need - 1e-6 and s["uses"] == 0 and s.get("dup_of") is None]
+                fits = fits or [s for s in pool if s["duration"] >= need - 1e-6]
+                if fits and embed_text is not None and p["words"]:
+                    import numpy as np
+                    te = embed_text(" ".join(w["word"] for w in p["words"]))
+
+                    def vscore(s, te=te, prev_type=prev_type):
+                        if s["emb"] is None:
+                            return -1.0
+                        v = float(np.dot(te, s["emb"]))
+                        rep = max((float(np.dot(s["emb"], u)) for u in used_embs), default=0.0)
+                        v -= 0.2 * max(0.0, rep - 0.8) + (0.01 if prev_type and s.get("shot_type") == prev_type else 0.0)
+                        return v - 0.05 * s["uses"]
+                    fits = [s for s in fits if not used_embs or s["emb"] is None or
+                            max(float(np.dot(s["emb"], u)) for u in used_embs) < 0.92] or fits
+                    choice = max(fits, key=vscore)
+                    why_vis = f"; visual match {vscore(choice):.3f} to the words spoken over it"
+                elif fits:
                     choice = min(fits, key=lambda s: (s["uses"], -(s.get("quality") or 0.7), -s["duration"]))
             if choice is not None:
                 c_in = round(choice["start"] + (choice["duration"] - need) / 2, 3)
                 choice["uses"] += 1
+                n_cut += 1
+                if choice["emb"] is not None:
+                    used_embs.append(choice["emb"])
+                prev_type = choice.get("shot_type")
                 why = (f"cover low-quality picture ({', '.join(shot.get('issues') or [])})" if bad else
                        f"cutaway: {d:.1f}s talking stretch is longer than the {mx:.1f}s shot-length target")
-                p["cutaway"] = {"src": choice["src"], "in": c_in, "out": round(c_in + need, 3), "shot": choice["id"], "why": why}
+                p["cutaway"] = {"src": choice["src"], "in": c_in, "out": round(c_in + need, 3), "shot": choice["id"], "why": why + why_vis}
                 _dec(decisions, choice["src"], c_in, c_in + need, "keep", "broll",
-                     f"b-roll over {it['src']} {a:.2f}-{b:.2f}s: {why} (shot quality {choice.get('quality')}, speech share "
-                     f"{choice['speech_share']})", choice.get("quality") if choice.get("quality") is not None else 0.7)
+                     f"b-roll over {it['src']} {a:.2f}-{b:.2f}s: {why}{why_vis} (shot quality {choice.get('quality')}, speech share "
+                     f"{choice['speech_share']}, shot type {choice.get('shot_type') or 'unknown'})",
+                     choice.get("quality") if choice.get("quality") is not None else 0.7, confidence=0.6 if why_vis else 0.4)
             elif k % 2 == 1 and can_punch:
-                p["punch"] = punch
-                p["reframe"] = f"punch-in reframe: {d:.1f}s stretch exceeds the {mx:.1f}s shot-length target and no b-roll fits"
+                angle += 1
+                tight = sub_foc is not None and angle % 2 == 0
+                p["punch"] = round(min(1.25, punch * (1.1 if tight else 1.0)), 3)
+                p["reframe"] = (f"punch-in reframe x{p['punch']}{' on the face (tighter angle)' if tight else ''}: {d:.1f}s stretch "
+                                f"exceeds the {mx:.1f}s shot-length target and no b-roll fits"
+                                + (" (cutaway budget used)" if n_cut >= budget and pool else ""))
             out.append(p)
         if len(subs) == 1 and d > mx and not (pool or can_punch):
             it["note"] = f"long shot kept ({d:.1f}s): no b-roll available and the profile allows no reframing"
@@ -763,7 +1015,7 @@ def _coverage(srcs: dict, items: list[dict], decisions: list) -> None:
             _dec(decisions, src, a, b, "drop", kind, reason, q if q is not None else round(b - a, 3))
 
 
-def _chapters(items: list[dict], labels: dict) -> list[dict]:
+def _chapters(items: list[dict], labels: dict, min_s: float = 0.0) -> list[dict]:
     out, t, last = [], 0.0, None
     for it in items:
         if it["kind"] == "piece" and it["topic"] != last:
@@ -775,7 +1027,60 @@ def _chapters(items: list[dict], labels: dict) -> list[dict]:
             t -= it.get("xfade_dur", 0.0)
     if out:
         out[0]["t"] = 0.0
+    if min_s > 0 and len(out) > 1:  # a chapter shorter than the profile minimum merges into the previous one
+        ends = [c["t"] for c in out[1:]] + [t]
+        merged = [out[0]]
+        for c, e in zip(out[1:], ends[1:]):
+            if e - c["t"] < min_s or c["t"] - merged[-1]["t"] < min_s:
+                merged[-1].setdefault("merged", []).append(c["label"])
+                continue
+            merged.append(c)
+        out = merged
     return out
+
+
+# ---------------------------------------------------------------- manual corrections + opening check
+_ID_RE = re.compile(r"^(?P<kind>[a-z_]+):(?P<stem>.+):(?P<a>\d+(?:\.\d+)?)-(?P<b>\d+(?:\.\d+)?)(?:#\d+)?$")
+
+
+def overrides_of(brief: dict) -> dict:
+    """Manual corrections in a brief: {"keep": [ids], "drop": [ids], "opening": id|None, "no_lift": bool,
+    "reject_cutaways": [ids]}. Ids are decision ids or sentence ids of an earlier plan (decision_id())."""
+    o = dict((brief or {}).get("overrides") or {})
+    return {"keep": list(o.get("keep") or []), "drop": list(o.get("drop") or []), "opening": o.get("opening"),
+            "no_lift": bool(o.get("no_lift")), "reject_cutaways": list(o.get("reject_cutaways") or [])}
+
+
+def _span_of(did: str) -> tuple[str, float, float] | None:
+    m = _ID_RE.match(str(did))
+    return (m["stem"], float(m["a"]), float(m["b"])) if m else None
+
+
+def _matches(did: str, t: dict) -> bool:
+    sp = _span_of(did)
+    if not sp or Path(str(t["src"])).stem != sp[0]:
+        return False
+    return any(min(sp[2], s["end"]) - max(sp[1], s["start"]) > 0.5 * min(sp[2] - sp[1], s["end"] - s["start"]) - 1e-6
+               for s in t["sents"])
+
+
+def _opening_report(items: list[dict], hook: dict | None, prof: dict, decisions: list) -> list[str]:
+    """Where the hook line actually starts in the programme vs the profile's hook window (a decision + a note)."""
+    hw = prof.get("hook_window_s")
+    if not hook or not hw:
+        return []
+    t = 0.0
+    for it in items:
+        if it["kind"] == "piece" and it["thought"] == hook["id"]:
+            ok = t <= float(hw) + 1e-6
+            _dec(decisions, hook["src"], hook["start"], hook["end"], "note", "opening",
+                 f"hook starts at {t:.1f}s of the programme ({'inside' if ok else 'OUTSIDE'} the {hw:g}s hook window)",
+                 1.0 if ok else 0.0, hook_start_s=round(t, 3), window_s=hw)
+            return [] if ok else [f"the hook starts at {t:.1f}s, after the profile's {hw:g}s hook window"]
+        t += (it["out"] - it["in"]) if it["kind"] == "piece" else it["duration"]
+        if it.get("cut") == "crossfade":
+            t -= it.get("xfade_dur", 0.0)
+    return ["the hook line is not in the programme (compressed or removed)"]
 
 
 MACHINE_SPEAKER = re.compile(r"^(interviewer|guest|narrator|S\d+|SPEAKER_\d+|unknown)$", re.I)
@@ -817,6 +1122,8 @@ def _finish(brief, prof, ins, target, tol, items, est, decisions, notes, srcs, c
                         "sentences_kept": kept, "spans_dropped": len(dropped),
                         "hook": hook["text"][:140] if hook else None, "cold_open": lifted},
             "grade": prof["grade"], "music": dict(prof["music"]), "captions": prof.get("captions"),
+            "title_style": prof.get("title_style"), "end_structure": prof.get("end_structure"),
+            "overrides": overrides_of(brief),
             "captions_enabled": prof.get("captions_enabled", True), "look": prof.get("look") or [],
             "audio_fx": "clean_speech" if any(S["sents"] for S in srcs.values()) else "none", "lang": langs[0] if langs else "en",
             "notes": notes}
@@ -917,7 +1224,8 @@ def build(plan: dict, size: tuple[int, int] = (1920, 1080), music: bool = True) 
                                fade_in=0.4, fade_out=0.4, label=f"{it['role']} card")
             c["notes"] = {"role": it["role"]}
         else:
-            c = ops.video_clip(it["src"], it["in"], it["out"], fit="cover", focus=[0.5, 0.5], label=f"{it['thought']}")
+            c = ops.video_clip(it["src"], it["in"], it["out"], fit="cover", focus=list(it.get("focus") or [0.5, 0.5]),
+                               label=f"{it['thought']}")
             fx = copy.deepcopy(look)
             if it.get("punch"):
                 fx.append({"type": "punch_in", "start": 0.0, "end": round(it["out"] - it["in"], 3), "scale": it["punch"]})
@@ -928,7 +1236,8 @@ def build(plan: dict, size: tuple[int, int] = (1920, 1080), music: bool = True) 
                 notes["audio_overlap"] = 0.4  # speculative until docs/TIMELINE.md (WS A) defines J/L-cut keys
             if it.get("cutaway"):
                 ca = it["cutaway"]
-                c["pip"] = {"src": ca["src"], "in": ca["in"], "x": 0.0, "y": 0.0, "w": 1.0, "shape": "rect"}
+                # full-frame cutaway over the whole piece (the renderer draws a bordered inset window without "full")
+                c["pip"] = {"src": ca["src"], "in": ca["in"], "full": True, "start": 0.0, "end": round(it["out"] - it["in"], 3)}
                 notes["cutaway"] = ca
             for key in ("reframe", "why_not_crossfade", "note"):
                 if it.get(key):
@@ -986,6 +1295,7 @@ def build(plan: dict, size: tuple[int, int] = (1920, 1080), music: bool = True) 
                     c["text"] = [{"text": ch["label"].title(), "style": "lower_third", "start": 0.4, "end": round(min(3.0, clip_duration(c)), 3)}]
                     break
     tl["director"] = {"profile": plan["profile"], "target_seconds": plan.get("target_seconds"),
+                      "music_energy": (plan.get("music") or {}).get("energy"), "title_style": plan.get("title_style"),
                       "estimated_duration": plan["estimated_duration"], "notes": list(plan.get("notes") or [])}
     m = plan.get("music") or {}
     tl["music"] = None
@@ -1105,3 +1415,19 @@ def direct(sources: list[str], analysis_by_src: dict | None, brief: dict | None 
             notes.append(f"platform tuning not available ({type(e).__name__}): only the master was built")
     out["notes"] = notes + p["notes"]
     return out
+
+
+# ---------------------------------------------------------------- contract view
+def editorial_plan(p: dict) -> dict:
+    """The plan as a nexus.EditorialPlan/1 document (docs/ACCOUNT2_CONTRACTS.md): every decision with its id, action,
+    reason and confidence; editable through brief["overrides"] and a re-plan."""
+    from . import contracts
+    keep = ("id", "sentence_id", "src", "start", "end", "action", "kind", "reason", "score", "confidence", "text", "speaker",
+            "thought")
+    return contracts.make("EditorialPlan", brief=str((p.get("brief") or {}).get("instructions") or ""), profile=p["profile"],
+                          decisions=[{k: d[k] for k in keep if k in d} for d in p["decisions"]], chapters=p.get("chapters") or [],
+                          target_s=p.get("target_seconds"), deliverables=["master"],
+                          summary=p.get("summary"), notes=p.get("notes"), overrides=p.get("overrides"),
+                          profile_params={k: p["profile_params"].get(k) for k in (
+                              "label", "shot_len", "shot_len_median", "pacing", "opening", "hook_window_s", "ending",
+                              "pattern_interrupt_s", "cutaways_per_min", "title_style", "grade")})

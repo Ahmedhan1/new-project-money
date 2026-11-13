@@ -199,8 +199,14 @@ def approve(project_dir: Path, name: str, stages: list[dict], extra: dict | None
     return report
 
 
-def expectation(tl: dict) -> dict:
-    return {"width": tl["width"], "height": tl["height"], "fps": tl.get("fps", 30), "duration": total_duration(tl),
+def expectation(tl: dict, draft: bool = False) -> dict:
+    """What a render of `tl` must measure. A draft is rendered smaller on purpose (render._size), so it is judged
+    against the draft geometry instead of being reported as a broken full-size render."""
+    W, H = tl["width"], tl["height"]
+    if draft:
+        from .timeline import render
+        W, H, _ = render._size(tl, True)
+    return {"width": W, "height": H, "fps": tl.get("fps", 30), "duration": total_duration(tl),
             "target_lufs": tl.get("target_lufs", -14.0), "subtitles": tl.get("subtitles") or None}
 
 
@@ -216,7 +222,7 @@ def render_with_qa(project, tl: dict, name: str, analyses: dict | None = None, m
         stats = render.render(tl, out, project.dir / "work", draft=draft)
         known = {m["path"]: {"license": m.get("rights", "user-supplied"), "source": "user upload"} for m in project.data.get("media", [])}
         known.update(project.data.get("generated", {}))
-        stages = [asset_review(tl, known), editing_review(tl), technical_review(out, expectation(tl))]
+        stages = [asset_review(tl, known), editing_review(tl), technical_review(out, expectation(tl, draft))]
         fixes = {c["fix"] for s in stages for c in s["checks"] if not c["ok"] and c.get("fix") and c["severity"] != "minor"}
         if not fixes or rnd == max_rounds - 1:
             break

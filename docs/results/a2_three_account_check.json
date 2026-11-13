@@ -1,0 +1,16 @@
+{"what": "Local, unpushed three-account integration check (branch local/three-account-check, never pushed)",
+ "date": "2026-11-13",
+ "heads": {"account1": "b2517b2 (PR #4, work/account-1-cloud-platform)", "account2": "012a436 + test_a2_resume race fix (work/account-2-cinematic-engine)",
+           "account3": "24b3f71 (PR #5, work/account-3-intelligence-growth)"},
+ "procedure": ["git worktree from origin/work/account-1-cloud-platform", "merge Account 2 (conflict: nexus/registry/tasks.yaml both task lists kept; docs/results/fast_tests.json regenerated)",
+               "merge Account 3 (conflicts: nexus/api.py, nexus/workflows.py, tasks.yaml, DECISIONS.md - both sides kept; ui/index.html - Account 3 loads intelligence.js before the first go(), deep-link go() kept there; memory docs not merged)",
+               "bash integration/contracts_v1/apply.sh (Account 3's agreed layout): nexus/contracts.py -> nexus/contracts/cloud.py, shared __init__; Account 2's media.py already in place",
+               "pip install -r requirements-ci.txt (merged: adds pycountry from Account 3)", "pytest tests/fast"],
+ "result": {"fast_suite": "687 passed, 4 failed, 11 skipped (418 s)",
+            "failures": [
+              {"test": "test_cloud_security::test_cookie_session_and_csrf", "owner": "account1", "cause": "httpx 0.28.1 keeps the domain cookie next to the forged one; fails on Account 1's own branch at b2517b2 too (verified)", "status": "open (Account 1)"},
+              {"test": "test_launcher::test_start_health_previous_project_stop, test_start_fails_clearly_when_port_is_taken", "owner": "environment", "cause": "container had 1.8 GB free; launcher preflight requires 2.0 GB", "status": "pass after freeing disk (34 passed in the targeted re-run)"},
+              {"test": "test_a2_resume::test_killed_render_resumes_from_finished_segments", "owner": "account2", "cause": "test race under load: waited for 3 segment FILES, killed before the 3rd was recorded in the checkpoint", "status": "fixed (waits for the checkpoint); passes on the merged tree"}]},
+ "cross_account_tests": "tests/fast/test_a2_cross_account.py: 4 passed (Account 1 worker runs a2_render_steps -> master artifact SHA-256 = Account 2 ArtifactRef, length within 2 frames of Account 2's own render; Wan job queued with 0 attempts without a GPU; ArtifactRef accepted by Account 3 publishing, non-public until owner approval; QualityReport/GeneratedMediaManifest via validate_any)",
+ "contract_tests": "test_contracts_shared + test_contracts (A1) + test_contracts_media (A2) + test_intel_handoff (A3): all pass",
+ "gaps_owned_by_others": ["Account 3: publishing does not gate on QualityReport; no AI-content disclosure from GeneratedMediaManifest (K-26)", "Account 1: cookie/CSRF test with httpx 0.28"]}

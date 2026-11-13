@@ -1,228 +1,400 @@
-# Creative-direction profiles for nexus/director.py (WS B, DIR-1).
-# Each profile is a set of MEASURABLE editing parameters. They are NEXUS's own creative profiles, written from general
-# editing practice; they make no claim of equivalence to any studio, broadcaster or named editor.
+# Creative-direction profiles for nexus/director.py (WS B, DIR-1; 14 creative profiles DIR-3).
+# Each profile is a set of MEASURABLE editorial parameters - an abstraction of how a kind of programme is paced and
+# structured. They are written from general editing practice. No profile contains or copies anyone's footage, scripts,
+# titles, music or graphics, and none claims equivalence to a studio, broadcaster, channel or named creator; a name such
+# as "high-energy challenge" describes a structure (stakes up front, escalation, frequent interrupts, payoff), nothing more.
 #
 # Fields (seconds unless stated):
 #   shot_len: [min, max]        target length of a visible shot; longer stretches get a cutaway or a punch-in reframe
+#   shot_len_median             target median visible shot (the split point aimed for inside long pieces)
 #   pacing: steady|build|front_loaded|wave   how the shot-length target varies over the programme
 #   pause_tolerance             longest pause kept inside speech; longer ones become jump cuts
 #   filler_removal 0..1         0 keeps every filler; >=0.3 removes um/uh; >=0.6 also "you know"/"I mean"; >=0.9 also loose fillers
 #   drop_tangents               drop topics classified as tangents
 #   opening: cold_open|hook_first|title_first   cold_open = strongest self-contained line, then the title card
+#   hook_window_s               the hook line must START inside this window; a title card that would push it out moves after it
 #   ending: resolution|callback|end_card|fade_out
+#   end_structure: {recap, cta}  recap = keep the concluding line; cta = end card with the brief's end_text
 #   transitions.vocabulary      cut types the director may use: hard_cut, jump_cut, j_cut, l_cut, crossfade
 #   transitions.crossfade_at_topics  crossfades only ever happen at topic boundaries
-#   transitions.xfade / dur     FFmpeg xfade name and duration for those crossfades
+#   transitions.xfade / dur     FFmpeg xfade name (fx.transitions.NAMES) and duration for those crossfades
 #   transitions.punch_in        scale used to hide a jump cut (1.0 = do not hide)
-#   grade                       a name in timeline/render.GRADES
-#   music: {enabled, mood, volume}   mood is a nexus.audio.music mood; volume under ducked dialogue
-#   captions                    tl["captions"] (docs/PHASE3_PLAN.md)
+#   pattern_interrupt_s         longest stretch without a visual change (cut, cutaway or reframe)
+#   cutaways_per_min            budget of cutaways per programme minute (0 = none)
+#   grade                       a name in fx.post.GRADES (colour look)
+#   music: {enabled, mood, volume, energy: [start, middle, end] 0..1}   mood = nexus.audio.music mood
+#   captions                    tl["captions"] (docs/TIMELINE.md)
 #   titles: {card_seconds, lower_thirds, chapters, chapter_text}
-#   broll: {policy: none|cutaway, max_talk, min, max}   cutaway = silent/low-speech shots over talking stretches longer than max_talk
-#   look                        clip effects applied to every footage clip (contract in docs/PHASE3_PLAN.md)
+#   chapters: {min_s}           chapters shorter than this merge into the previous one
+#   title_style: statement|question|how_to|number|teaser   how titles (master + shorts) are phrased
+#   broll: {policy: none|cutaway, max_talk, min, max}
+#   look                        clip effects applied to every footage clip
 #   allowed_effects             effect types the director may add
+#   shorts: {min_s, max_s, captions}   defaults for shorts made under this profile
 profiles:
-  cinematic_story:
-    label: Cinematic story
-    shot_len: [3.0, 7.0]
+  cinematic_documentary:
+    label: Cinematic documentary
+    shot_len: [3.5, 10.0]
+    shot_len_median: 6.0
     pacing: build
-    pause_tolerance: 0.9
+    pause_tolerance: 1.1
     filler_removal: 0.6
     drop_tangents: true
     opening: cold_open
+    hook_window_s: 8.0
     ending: resolution
+    end_structure: {recap: true, cta: false}
     transitions: {vocabulary: [hard_cut, j_cut, l_cut, crossfade], crossfade_at_topics: true, xfade: fadeblack, dur: 0.8, punch_in: 1.0}
+    pattern_interrupt_s: 12.0
+    cutaways_per_min: 3.0
     grade: cinematic
-    music: {enabled: true, mood: tense, volume: 0.28}
+    music: {enabled: true, mood: tense, volume: 0.26, energy: [0.4, 0.6, 0.8]}
     captions: {style: classic, position: bottom}
     titles: {card_seconds: 3.0, lower_thirds: true, chapters: true, chapter_text: false}
-    broll: {policy: cutaway, max_talk: 9.0, min: 2.0, max: 4.5}
-    look: [{type: letterbox, ratio: 2.39}, {type: grain, amount: 5}]
+    chapters: {min_s: 30.0}
+    title_style: statement
+    broll: {policy: cutaway, max_talk: 10.0, min: 2.5, max: 5.0}
+    look: [{type: letterbox, ratio: 2.39}, {type: vignette}]
     allowed_effects: [letterbox, grain, vignette, zoom]
-  commercial:
-    label: Commercial / promo
-    shot_len: [1.2, 3.0]
+    shorts: {min_s: 25, max_s: 58, captions: classic}
+  premium_brand_commercial:
+    label: Premium brand commercial
+    shot_len: [1.2, 3.5]
+    shot_len_median: 2.2
     pacing: front_loaded
     pause_tolerance: 0.3
     filler_removal: 0.9
     drop_tangents: true
     opening: hook_first
+    hook_window_s: 2.0
     ending: end_card
+    end_structure: {recap: false, cta: true}
     transitions: {vocabulary: [hard_cut, jump_cut, l_cut], crossfade_at_topics: false, xfade: fade, dur: 0.3, punch_in: 1.12}
+    pattern_interrupt_s: 3.0
+    cutaways_per_min: 8.0
     grade: vivid
-    music: {enabled: true, mood: upbeat, volume: 0.38}
+    music: {enabled: true, mood: upbeat, volume: 0.36, energy: [0.8, 0.7, 0.9]}
     captions: {style: pop, position: middle, words_per_cue: 3, uppercase: true}
     titles: {card_seconds: 2.0, lower_thirds: false, chapters: false, chapter_text: false}
+    chapters: {min_s: 9999}
+    title_style: teaser
     broll: {policy: cutaway, max_talk: 4.0, min: 1.0, max: 2.5}
     look: []
     allowed_effects: [punch_in, zoom, flash]
-  documentary:
-    label: Documentary
-    shot_len: [4.0, 12.0]
-    pacing: steady
-    pause_tolerance: 1.2
-    filler_removal: 0.3
-    drop_tangents: true
-    opening: cold_open
-    ending: resolution
-    transitions: {vocabulary: [hard_cut, j_cut, l_cut, crossfade], crossfade_at_topics: true, xfade: fade, dur: 0.6, punch_in: 1.0}
-    grade: documentary
-    music: {enabled: true, mood: documentary, volume: 0.22}
-    captions: {style: classic, position: bottom}
-    titles: {card_seconds: 3.0, lower_thirds: true, chapters: true, chapter_text: false}
-    broll: {policy: cutaway, max_talk: 12.0, min: 2.5, max: 5.0}
-    look: [{type: vignette}]
-    allowed_effects: [vignette, zoom]
-  interview_natural:
-    label: Interview (natural)
-    shot_len: [4.0, 15.0]
-    pacing: steady
-    pause_tolerance: 1.0
-    filler_removal: 0.3
-    drop_tangents: false
-    opening: hook_first
-    ending: resolution
-    transitions: {vocabulary: [hard_cut, jump_cut, j_cut, l_cut], crossfade_at_topics: false, xfade: fade, dur: 0.4, punch_in: 1.1}
-    grade: none
-    music: {enabled: false, mood: calm, volume: 0.15}
-    captions: {style: classic, position: bottom}
-    titles: {card_seconds: 2.5, lower_thirds: true, chapters: true, chapter_text: false}
-    broll: {policy: cutaway, max_talk: 15.0, min: 2.0, max: 4.0}
-    look: []
-    allowed_effects: [punch_in]
-  educational:
-    label: Educational
-    shot_len: [3.0, 9.0]
-    pacing: steady
-    pause_tolerance: 0.6
-    filler_removal: 0.6
-    drop_tangents: true
-    opening: hook_first
-    ending: resolution
-    transitions: {vocabulary: [hard_cut, jump_cut, crossfade], crossfade_at_topics: true, xfade: fade, dur: 0.4, punch_in: 1.1}
-    grade: none
-    music: {enabled: true, mood: calm, volume: 0.18}
-    captions: {style: boxed, position: bottom}
-    titles: {card_seconds: 2.5, lower_thirds: true, chapters: true, chapter_text: true}
-    broll: {policy: cutaway, max_talk: 10.0, min: 2.0, max: 4.0}
-    look: []
-    allowed_effects: [punch_in, zoom]
-  science_explainer:
-    label: Science explainer
-    shot_len: [3.0, 8.0]
-    pacing: build
-    pause_tolerance: 0.6
-    filler_removal: 0.6
-    drop_tangents: true
-    opening: hook_first
-    ending: resolution
-    transitions: {vocabulary: [hard_cut, jump_cut, crossfade], crossfade_at_topics: true, xfade: dissolve, dur: 0.5, punch_in: 1.1}
-    grade: cool
-    music: {enabled: true, mood: calm, volume: 0.18}
-    captions: {style: boxed, position: bottom}
-    titles: {card_seconds: 2.5, lower_thirds: true, chapters: true, chapter_text: true}
-    broll: {policy: cutaway, max_talk: 9.0, min: 2.0, max: 4.0}
-    look: []
-    allowed_effects: [punch_in, zoom]
-  travel:
-    label: Travel
-    shot_len: [1.5, 4.0]
-    pacing: wave
-    pause_tolerance: 0.7
-    filler_removal: 0.6
-    drop_tangents: true
-    opening: cold_open
-    ending: fade_out
-    transitions: {vocabulary: [hard_cut, l_cut, crossfade], crossfade_at_topics: true, xfade: slideleft, dur: 0.5, punch_in: 1.08}
-    grade: vivid
-    music: {enabled: true, mood: inspiring, volume: 0.35}
-    captions: {style: classic, position: bottom}
-    titles: {card_seconds: 2.5, lower_thirds: false, chapters: true, chapter_text: true}
-    broll: {policy: cutaway, max_talk: 5.0, min: 1.5, max: 3.5}
-    look: []
-    allowed_effects: [zoom, punch_in]
-  luxury_brand:
-    label: Luxury brand
-    shot_len: [3.5, 7.5]
-    pacing: steady
-    pause_tolerance: 1.2
-    filler_removal: 0.9
-    drop_tangents: true
-    opening: title_first
-    ending: end_card
-    transitions: {vocabulary: [hard_cut, crossfade], crossfade_at_topics: true, xfade: fadeblack, dur: 1.0, punch_in: 1.0}
-    grade: cinematic
-    music: {enabled: true, mood: calm, volume: 0.3}
-    captions: {style: classic, position: bottom}
-    titles: {card_seconds: 3.5, lower_thirds: false, chapters: false, chapter_text: false}
-    broll: {policy: cutaway, max_talk: 6.0, min: 2.5, max: 5.0}
-    look: [{type: letterbox, ratio: 2.39}, {type: vignette}]
-    allowed_effects: [letterbox, vignette, zoom]
-  social_story:
-    label: Social story
-    shot_len: [1.5, 4.0]
-    pacing: front_loaded
-    pause_tolerance: 0.35
-    filler_removal: 0.9
-    drop_tangents: true
-    opening: hook_first
-    ending: callback
-    transitions: {vocabulary: [hard_cut, jump_cut], crossfade_at_topics: false, xfade: fade, dur: 0.3, punch_in: 1.12}
-    grade: warm
-    music: {enabled: true, mood: upbeat, volume: 0.25}
-    captions: {style: pop, position: middle, words_per_cue: 3, uppercase: true}
-    titles: {card_seconds: 2.0, lower_thirds: false, chapters: false, chapter_text: false}
-    broll: {policy: cutaway, max_talk: 5.0, min: 1.2, max: 2.5}
-    look: []
-    allowed_effects: [punch_in, zoom]
-  short_fast:
-    label: Short and fast
+    shorts: {min_s: 12, max_s: 30, captions: pop}
+  high_energy_challenge:
+    label: High-energy challenge structure
     shot_len: [0.8, 2.5]
+    shot_len_median: 1.6
     pacing: front_loaded
     pause_tolerance: 0.25
     filler_removal: 1.0
     drop_tangents: true
     opening: hook_first
+    hook_window_s: 1.5
     ending: callback
+    end_structure: {recap: false, cta: false}
     transitions: {vocabulary: [hard_cut, jump_cut], crossfade_at_topics: false, xfade: fade, dur: 0.2, punch_in: 1.15}
+    pattern_interrupt_s: 2.5
+    cutaways_per_min: 10.0
     grade: vivid
-    music: {enabled: true, mood: upbeat, volume: 0.3}
+    music: {enabled: true, mood: upbeat, volume: 0.3, energy: [0.9, 0.8, 1.0]}
     captions: {style: pop, position: middle, words_per_cue: 2, uppercase: true}
-    titles: {card_seconds: 1.5, lower_thirds: false, chapters: false, chapter_text: false}
+    titles: {card_seconds: 1.5, lower_thirds: false, chapters: false, chapter_text: true}
+    chapters: {min_s: 45.0}
+    title_style: number
     broll: {policy: cutaway, max_talk: 3.0, min: 0.8, max: 2.0}
     look: []
-    allowed_effects: [punch_in, zoom, flash]
-  emotional:
-    label: Emotional
+    allowed_effects: [punch_in, zoom, flash, shake]
+    shorts: {min_s: 15, max_s: 45, captions: pop}
+  educational_explainer:
+    label: Educational explainer
+    shot_len: [3.0, 9.0]
+    shot_len_median: 5.0
+    pacing: steady
+    pause_tolerance: 0.6
+    filler_removal: 0.6
+    drop_tangents: true
+    opening: hook_first
+    hook_window_s: 5.0
+    ending: resolution
+    end_structure: {recap: true, cta: false}
+    transitions: {vocabulary: [hard_cut, jump_cut, crossfade], crossfade_at_topics: true, xfade: fade, dur: 0.4, punch_in: 1.1}
+    pattern_interrupt_s: 8.0
+    cutaways_per_min: 4.0
+    grade: none
+    music: {enabled: true, mood: calm, volume: 0.18, energy: [0.5, 0.4, 0.5]}
+    captions: {style: boxed, position: bottom}
+    titles: {card_seconds: 2.5, lower_thirds: true, chapters: true, chapter_text: true}
+    chapters: {min_s: 25.0}
+    title_style: how_to
+    broll: {policy: cutaway, max_talk: 9.0, min: 2.0, max: 4.0}
+    look: []
+    allowed_effects: [punch_in, zoom]
+    shorts: {min_s: 20, max_s: 55, captions: boxed}
+  scientific_documentary:
+    label: Scientific documentary
+    shot_len: [4.0, 12.0]
+    shot_len_median: 7.0
+    pacing: steady
+    pause_tolerance: 1.2
+    filler_removal: 0.3
+    drop_tangents: true
+    opening: cold_open
+    hook_window_s: 10.0
+    ending: resolution
+    end_structure: {recap: true, cta: false}
+    transitions: {vocabulary: [hard_cut, j_cut, l_cut, crossfade], crossfade_at_topics: true, xfade: dissolve, dur: 0.6, punch_in: 1.0}
+    pattern_interrupt_s: 14.0
+    cutaways_per_min: 2.5
+    grade: documentary
+    music: {enabled: true, mood: documentary, volume: 0.2, energy: [0.3, 0.45, 0.5]}
+    captions: {style: classic, position: bottom}
+    titles: {card_seconds: 3.0, lower_thirds: true, chapters: true, chapter_text: false}
+    chapters: {min_s: 40.0}
+    title_style: question
+    broll: {policy: cutaway, max_talk: 12.0, min: 2.5, max: 5.0}
+    look: [{type: vignette}]
+    allowed_effects: [vignette, zoom]
+    shorts: {min_s: 25, max_s: 58, captions: classic}
+  interview_storytelling:
+    label: Interview storytelling
+    shot_len: [4.0, 14.0]
+    shot_len_median: 7.0
+    pacing: steady
+    pause_tolerance: 1.0
+    filler_removal: 0.3
+    drop_tangents: false
+    opening: hook_first
+    hook_window_s: 6.0
+    ending: resolution
+    end_structure: {recap: true, cta: false}
+    transitions: {vocabulary: [hard_cut, jump_cut, j_cut, l_cut], crossfade_at_topics: false, xfade: fade, dur: 0.4, punch_in: 1.1}
+    pattern_interrupt_s: 15.0
+    cutaways_per_min: 2.0
+    grade: none
+    music: {enabled: false, mood: calm, volume: 0.15, energy: [0.3, 0.3, 0.4]}
+    captions: {style: classic, position: bottom}
+    titles: {card_seconds: 2.5, lower_thirds: true, chapters: true, chapter_text: false}
+    chapters: {min_s: 30.0}
+    title_style: statement
+    broll: {policy: cutaway, max_talk: 15.0, min: 2.0, max: 4.0}
+    look: []
+    allowed_effects: [punch_in]
+    shorts: {min_s: 20, max_s: 58, captions: pop}
+  podcast_edit:
+    label: Podcast edit
+    shot_len: [3.0, 16.0]
+    shot_len_median: 6.0
+    pacing: steady
+    pause_tolerance: 0.9
+    filler_removal: 0.6
+    drop_tangents: false
+    opening: hook_first
+    hook_window_s: 8.0
+    ending: resolution
+    end_structure: {recap: false, cta: true}
+    transitions: {vocabulary: [hard_cut, j_cut, l_cut], crossfade_at_topics: false, xfade: fade, dur: 0.3, punch_in: 1.08}
+    pattern_interrupt_s: 16.0
+    cutaways_per_min: 1.0
+    grade: warm
+    music: {enabled: false, mood: calm, volume: 0.12, energy: [0.4, 0.3, 0.4]}
+    captions: {style: boxed, position: bottom}
+    titles: {card_seconds: 2.5, lower_thirds: true, chapters: true, chapter_text: true}
+    chapters: {min_s: 60.0}
+    title_style: question
+    broll: {policy: cutaway, max_talk: 16.0, min: 2.0, max: 4.0}
+    look: []
+    allowed_effects: [punch_in]
+    shorts: {min_s: 20, max_s: 58, captions: karaoke}
+  luxury_advertising:
+    label: Luxury advertising
+    shot_len: [3.5, 7.5]
+    shot_len_median: 5.0
+    pacing: steady
+    pause_tolerance: 1.2
+    filler_removal: 0.9
+    drop_tangents: true
+    opening: title_first
+    hook_window_s: 5.0
+    ending: end_card
+    end_structure: {recap: false, cta: true}
+    transitions: {vocabulary: [hard_cut, crossfade], crossfade_at_topics: true, xfade: fadeblack, dur: 1.0, punch_in: 1.0}
+    pattern_interrupt_s: 8.0
+    cutaways_per_min: 6.0
+    grade: cinematic
+    music: {enabled: true, mood: calm, volume: 0.3, energy: [0.3, 0.5, 0.6]}
+    captions: {style: classic, position: bottom}
+    titles: {card_seconds: 3.5, lower_thirds: false, chapters: false, chapter_text: false}
+    chapters: {min_s: 9999}
+    title_style: teaser
+    broll: {policy: cutaway, max_talk: 6.0, min: 2.5, max: 5.0}
+    look: [{type: letterbox, ratio: 2.39}, {type: vignette}]
+    allowed_effects: [letterbox, vignette, zoom]
+    shorts: {min_s: 10, max_s: 30, captions: classic}
+  travel_vlog:
+    label: Travel / vlog
+    shot_len: [1.5, 4.5]
+    shot_len_median: 2.8
+    pacing: wave
+    pause_tolerance: 0.7
+    filler_removal: 0.6
+    drop_tangents: true
+    opening: cold_open
+    hook_window_s: 4.0
+    ending: fade_out
+    end_structure: {recap: false, cta: false}
+    transitions: {vocabulary: [hard_cut, l_cut, crossfade], crossfade_at_topics: true, xfade: slideleft, dur: 0.5, punch_in: 1.08}
+    pattern_interrupt_s: 5.0
+    cutaways_per_min: 6.0
+    grade: vivid
+    music: {enabled: true, mood: inspiring, volume: 0.34, energy: [0.6, 0.8, 0.6]}
+    captions: {style: classic, position: bottom}
+    titles: {card_seconds: 2.5, lower_thirds: false, chapters: true, chapter_text: true}
+    chapters: {min_s: 30.0}
+    title_style: statement
+    broll: {policy: cutaway, max_talk: 5.0, min: 1.5, max: 3.5}
+    look: []
+    allowed_effects: [zoom, punch_in]
+    shorts: {min_s: 15, max_s: 45, captions: pop}
+  investigative:
+    label: Investigative
+    shot_len: [2.5, 8.0]
+    shot_len_median: 4.5
+    pacing: build
+    pause_tolerance: 0.8
+    filler_removal: 0.6
+    drop_tangents: true
+    opening: cold_open
+    hook_window_s: 6.0
+    ending: callback
+    end_structure: {recap: true, cta: false}
+    transitions: {vocabulary: [hard_cut, j_cut, l_cut, crossfade], crossfade_at_topics: true, xfade: fadeblack, dur: 0.5, punch_in: 1.06}
+    pattern_interrupt_s: 9.0
+    cutaways_per_min: 4.0
+    grade: bleach_bypass
+    music: {enabled: true, mood: tense, volume: 0.22, energy: [0.5, 0.7, 0.9]}
+    captions: {style: boxed, position: bottom}
+    titles: {card_seconds: 2.5, lower_thirds: true, chapters: true, chapter_text: true}
+    chapters: {min_s: 30.0}
+    title_style: question
+    broll: {policy: cutaway, max_talk: 8.0, min: 2.0, max: 4.0}
+    look: [{type: vignette}]
+    allowed_effects: [vignette, zoom, punch_in]
+    shorts: {min_s: 20, max_s: 55, captions: boxed}
+  emotional_storytelling:
+    label: Emotional storytelling
     shot_len: [4.0, 10.0]
+    shot_len_median: 6.5
     pacing: build
     pause_tolerance: 1.6
     filler_removal: 0.3
     drop_tangents: true
     opening: cold_open
+    hook_window_s: 8.0
     ending: resolution
+    end_structure: {recap: true, cta: false}
     transitions: {vocabulary: [hard_cut, j_cut, l_cut, crossfade], crossfade_at_topics: true, xfade: dissolve, dur: 1.0, punch_in: 1.0}
+    pattern_interrupt_s: 14.0
+    cutaways_per_min: 2.0
     grade: warm
-    music: {enabled: true, mood: inspiring, volume: 0.26}
+    music: {enabled: true, mood: inspiring, volume: 0.26, energy: [0.3, 0.5, 0.8]}
     captions: {style: classic, position: bottom}
     titles: {card_seconds: 3.0, lower_thirds: true, chapters: false, chapter_text: false}
+    chapters: {min_s: 9999}
+    title_style: statement
     broll: {policy: cutaway, max_talk: 10.0, min: 2.5, max: 5.0}
     look: [{type: vignette}]
     allowed_effects: [vignette, zoom]
-  news:
-    label: News
+    shorts: {min_s: 25, max_s: 58, captions: classic}
+  fast_social:
+    label: Fast-paced social
+    shot_len: [0.8, 2.5]
+    shot_len_median: 1.5
+    pacing: front_loaded
+    pause_tolerance: 0.25
+    filler_removal: 1.0
+    drop_tangents: true
+    opening: hook_first
+    hook_window_s: 1.5
+    ending: callback
+    end_structure: {recap: false, cta: false}
+    transitions: {vocabulary: [hard_cut, jump_cut], crossfade_at_topics: false, xfade: fade, dur: 0.2, punch_in: 1.15}
+    pattern_interrupt_s: 2.5
+    cutaways_per_min: 8.0
+    grade: vivid
+    music: {enabled: true, mood: upbeat, volume: 0.3, energy: [0.9, 0.8, 0.9]}
+    captions: {style: pop, position: middle, words_per_cue: 2, uppercase: true}
+    titles: {card_seconds: 1.5, lower_thirds: false, chapters: false, chapter_text: false}
+    chapters: {min_s: 9999}
+    title_style: teaser
+    broll: {policy: cutaway, max_talk: 3.0, min: 0.8, max: 2.0}
+    look: []
+    allowed_effects: [punch_in, zoom, flash]
+    shorts: {min_s: 12, max_s: 35, captions: pop}
+  news_analysis:
+    label: News & analysis
     shot_len: [2.5, 8.0]
+    shot_len_median: 4.5
     pacing: steady
     pause_tolerance: 0.5
     filler_removal: 0.6
     drop_tangents: true
     opening: hook_first
+    hook_window_s: 4.0
     ending: resolution
+    end_structure: {recap: true, cta: false}
     transitions: {vocabulary: [hard_cut, j_cut, l_cut], crossfade_at_topics: false, xfade: fade, dur: 0.3, punch_in: 1.0}
+    pattern_interrupt_s: 8.0
+    cutaways_per_min: 4.0
     grade: none
-    music: {enabled: false, mood: documentary, volume: 0.12}
+    music: {enabled: false, mood: documentary, volume: 0.12, energy: [0.4, 0.4, 0.4]}
     captions: {style: boxed, position: bottom}
     titles: {card_seconds: 2.0, lower_thirds: true, chapters: true, chapter_text: true}
+    chapters: {min_s: 20.0}
+    title_style: statement
     broll: {policy: cutaway, max_talk: 8.0, min: 2.0, max: 4.0}
     look: []
     allowed_effects: []
+    shorts: {min_s: 20, max_s: 50, captions: boxed}
+  product_demo:
+    label: Product demonstration
+    shot_len: [2.0, 6.0]
+    shot_len_median: 3.5
+    pacing: steady
+    pause_tolerance: 0.5
+    filler_removal: 0.9
+    drop_tangents: true
+    opening: hook_first
+    hook_window_s: 3.0
+    ending: end_card
+    end_structure: {recap: true, cta: true}
+    transitions: {vocabulary: [hard_cut, jump_cut, crossfade], crossfade_at_topics: true, xfade: wipeleft, dur: 0.4, punch_in: 1.12}
+    pattern_interrupt_s: 6.0
+    cutaways_per_min: 6.0
+    grade: none
+    music: {enabled: true, mood: upbeat, volume: 0.2, energy: [0.6, 0.5, 0.7]}
+    captions: {style: boxed, position: bottom}
+    titles: {card_seconds: 2.0, lower_thirds: false, chapters: true, chapter_text: true}
+    chapters: {min_s: 20.0}
+    title_style: how_to
+    broll: {policy: cutaway, max_talk: 6.0, min: 1.5, max: 3.5}
+    look: []
+    allowed_effects: [punch_in, zoom]
+    shorts: {min_s: 15, max_s: 45, captions: boxed}
+
+# Earlier profile names (API/UI before DIR-3) keep working: each resolves to one of the profiles above, with its old
+# overrides where its behaviour differed.
+aliases:
+  documentary: {profile: scientific_documentary, overrides: {pacing: steady, transitions: {xfade: fade}}}
+  cinematic_story: {profile: cinematic_documentary, overrides: {look: [{type: letterbox, ratio: 2.39}, {type: grain, amount: 5}]}}
+  commercial: {profile: premium_brand_commercial}
+  interview_natural: {profile: interview_storytelling}
+  educational: {profile: educational_explainer}
+  science_explainer: {profile: educational_explainer, overrides: {pacing: build, grade: cool, transitions: {xfade: dissolve}}}
+  travel: {profile: travel_vlog}
+  luxury_brand: {profile: luxury_advertising}
+  social_story: {profile: fast_social, overrides: {shot_len: [1.5, 4.0], grade: warm, captions: {words_per_cue: 3}}}
+  short_fast: {profile: fast_social}
+  emotional: {profile: emotional_storytelling}
+  news: {profile: news_analysis}

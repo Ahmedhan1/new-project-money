@@ -386,3 +386,144 @@ components:
     hardware: "T4 16 GB when granted"
     network_hosts: []
     status: adapter
+  # ---- Account 2 / Agent D: vision + generation runtimes and models (pins + sha256: registry/generation.yaml)
+  - id: onnxruntime
+    name: "ONNX Runtime (CPU inference for vision models)"
+    kind: software
+    capability: [inference-runtime]
+    source_url: "https://github.com/microsoft/onnxruntime"
+    license: "MIT"
+    commercial_use: "yes - the weights licence permits commercial use (see weights_license)"
+    usage_restrictions: "none beyond the licence"
+    hardware: CPU
+    install: "pip install onnxruntime"
+    status: deployed
+    network_hosts: []
+  - id: realesr-general-x4v3
+    name: "Real-ESRGAN general x4v3 (SRVGGNetCompact, 1.2 M params) - ONNX graph built locally from the safetensors"
+    kind: model
+    capability: [upscale]
+    source_url: "https://huggingface.co/OzzyGT/RealESRGAN_general_x4v3"
+    license: "code licence per repo; weights below"
+    weights_license: "BSD-3-Clause (xinntao/Real-ESRGAN LICENSE; the HF mirror's card links it)"
+    commercial_use: "yes - the weights licence permits commercial use (see weights_license)"
+    usage_restrictions: "none beyond the licence"
+    hardware: CPU
+    install: "opt-in download with consent (nexus.generate.downloads)"
+    status: deployed
+    network_hosts: [huggingface.co]
+  - id: mediapipe-selfie
+    name: "MediaPipe Selfie Segmentation (general 256x256) - ONNX"
+    kind: model
+    capability: [segmentation]
+    source_url: "https://huggingface.co/onnx-community/mediapipe_selfie_segmentation"
+    license: "code licence per repo; weights below"
+    weights_license: "Apache-2.0 (HF tag; google-ai-edge/mediapipe Apache-2.0)"
+    commercial_use: "yes - the weights licence permits commercial use (see weights_license)"
+    usage_restrictions: "none beyond the licence"
+    hardware: CPU
+    install: "opt-in download with consent (nexus.generate.downloads)"
+    status: deployed
+    network_hosts: [huggingface.co]
+  - id: modnet
+    name: "MODNet portrait matting - ONNX"
+    kind: model
+    capability: [segmentation]
+    source_url: "https://huggingface.co/Xenova/modnet"
+    license: "code licence per repo; weights below"
+    weights_license: "Apache-2.0 (HF tag; ZHKKKe/MODNet Apache-2.0)"
+    commercial_use: "yes - the weights licence permits commercial use (see weights_license)"
+    usage_restrictions: "none beyond the licence"
+    hardware: CPU
+    install: "opt-in download with consent (nexus.generate.downloads)"
+    status: deployed
+    network_hosts: [huggingface.co]
+  - id: u2netp
+    name: "U^2-Netp salient object segmentation (rembg 'u2netp') - ONNX"
+    kind: model
+    capability: [segmentation]
+    source_url: "https://huggingface.co/BritishWerewolf/U-2-Netp"
+    license: "code licence per repo; weights below"
+    weights_license: "Apache-2.0 (xuebinqin/U-2-Net LICENSE; HF tag apache-2.0, third-party export)"
+    commercial_use: "yes - the weights licence permits commercial use (see weights_license)"
+    usage_restrictions: "none beyond the licence"
+    hardware: CPU
+    install: "opt-in download with consent (nexus.generate.downloads)"
+    status: deployed
+    network_hosts: [huggingface.co]
+  - id: depth-anything-v2-small
+    name: "Depth Anything V2 Small (for 2.5D parallax of stills)"
+    kind: model
+    capability: [depth]
+    source_url: "https://huggingface.co/depth-anything/Depth-Anything-V2-Small-hf"
+    license: "code licence per repo; weights below"
+    weights_license: "Apache-2.0 (Small only; Base/Large are CC BY-NC 4.0)"
+    commercial_use: "yes - the weights licence permits commercial use (see weights_license)"
+    usage_restrictions: "none beyond the licence"
+    hardware: CPU
+    install: "opt-in download with consent (nexus.generate.downloads)"
+    status: deployed
+    network_hosts: [huggingface.co]
+  - id: bk-sdm-tiny
+    name: "BK-SDM-Tiny (distilled SD 1.4)"
+    kind: model
+    capability: [image-generation]
+    source_url: "https://huggingface.co/nota-ai/bk-sdm-tiny"
+    license: "code licence per repo; weights below"
+    weights_license: "CreativeML OpenRAIL-M"
+    commercial_use: "yes - the weights licence permits commercial use (see weights_license)"
+    usage_restrictions: "CreativeML OpenRAIL-M use-based restrictions apply"
+    hardware: CPU
+    install: "opt-in download with consent (nexus.generate.downloads)"
+    status: deployed
+    network_hosts: [huggingface.co]
+  - id: clip-vit-b32-laion
+    name: "OpenCLIP ViT-B/32 laion2B-s34B-b79K (prompt-adherence score in benchmarks only)"
+    kind: model
+    capability: [image-text-embedding]
+    source_url: "https://huggingface.co/laion/CLIP-ViT-B-32-laion2B-s34B-b79K"
+    license: "code licence per repo; weights below"
+    weights_license: "MIT (HF tag); open_clip code MIT-style"
+    commercial_use: "yes - the weights licence permits commercial use (see weights_license)"
+    usage_restrictions: "benchmark metric only: the LAION model card puts any deployed use case out of scope, so it is never used in the product path (product visual understanding uses siglip-visual)"
+    hardware: CPU
+    install: "opt-in download with consent (nexus.generate.downloads)"
+    status: deployed
+    network_hosts: [huggingface.co]
+  # ---- Account 2 / Agent B: visual understanding
+  - id: siglip-visual
+    name: "SigLIP base patch16-224, int8 ONNX export (Xenova) on onnxruntime CPU"
+    kind: model
+    capability: [visual-embedding, broll-relevance, scene-labels]
+    source_url: "https://huggingface.co/google/siglip-base-patch16-224"
+    license: "Apache-2.0 (google model card, read 2026-11-12); ONNX conversion by Xenova of the same weights"
+    weights_license: "Apache-2.0"
+    commercial_use: "yes"
+    usage_restrictions: "none beyond the licence; ~213 MB opt-in download, ~700 MB RAM; never downloaded automatically"
+    hardware: CPU
+    install: "opt-in: nexus.media.visual.ensure_model(allow_download=True) through the Cost Guard"
+    status: deployed
+    network_hosts: [huggingface.co]
+  # ---- Account 2 / Agent C: audio
+  - id: noisereduce
+    name: "noisereduce 3.0.3 (spectral gating denoiser)"
+    kind: software
+    capability: [denoise]
+    source_url: "https://github.com/timsainb/noisereduce"
+    license: "MIT"
+    commercial_use: "yes"
+    usage_restrictions: "optional dependency; chosen per material by nexus/audio/denoise.py (archival/documentary)"
+    hardware: CPU
+    install: "pip install noisereduce==3.0.3 (about 3.5 MB with dependencies)"
+    status: deployed
+  - id: deepfilternet
+    name: "DeepFilterNet (evaluated, not used)"
+    kind: model
+    capability: [denoise]
+    source_url: "https://github.com/Rikorose/DeepFilterNet"
+    license: "MIT / Apache-2.0 (code)"
+    commercial_use: "yes by licence"
+    usage_restrictions: "REJECTED for now: needs torch (~750 MB unpacked), pins numpy<2, no cp313 wheel for its Rust library, weights hosted on GitHub releases"
+    hardware: CPU
+    install: "not installed"
+    status: rejected

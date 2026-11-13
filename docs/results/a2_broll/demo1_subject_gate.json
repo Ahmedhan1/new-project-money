@@ -1,0 +1,207 @@
+{
+ "what": "Demo 1 B-roll: NASA library + the film's own shots under 'Mars - The Search Begins' narration, before and after the named-subject gate (broll_subject=['Mars'])",
+ "labelling": "by asset title and the narration at that time, one non-blind labeller (the integrating agent); on-topic = shows Mars or the film's own Mars imagery. This measures subject agreement, not whether each picture shows the exact thing said.",
+ "without_subject_gate": {
+  "inserts": 15,
+  "on_topic": 8,
+  "rows": [
+   {
+    "t": 14.0,
+    "asset": "nasa:GSFC_20171208_Archive_e002146",
+    "title": "Violent Storm Strikes Western Europe",
+    "score": 0.0891,
+    "label": "off-topic: Earth (storm over Europe)"
+   },
+   {
+    "t": 26.2,
+    "asset": "nasa:GSFC_20171006_LRO_m12739_100LunarDays_Pt1",
+    "title": "100 Lunar Days - Part I",
+    "score": 0.0829,
+    "label": "off-topic: Moon"
+   },
+   {
+    "t": 40.1,
+    "asset": "nasa:S68-26989",
+    "title": "Recovery of Apollo 6 unmanned spacecraft",
+    "score": 0.1341,
+    "label": "off-topic: Apollo 6 recovery (Earth)"
+   },
+   {
+    "t": 51.1,
+    "asset": "nasa:How Did Life Begin on Earth_ - Horizontal Video",
+    "title": "How Did Life Begin on Earth | We Asked a NASA Expert ",
+    "score": 0.1099,
+    "label": "off-topic: Earth / expert interview"
+   },
+   {
+    "t": 72.5,
+    "asset": "nasa:S71-41509",
+    "title": "Apollo 15 Lunar Module (LM) View - Liftoff - Moon - TV Monitor - Missi",
+    "score": 0.1514,
+    "label": "off-topic: Apollo 15 TV monitor (Moon)"
+   },
+   {
+    "t": 75.9,
+    "asset": "nasa:PIA04506",
+    "title": "Surface Textures",
+    "score": 0.1018,
+    "label": "on-topic (shows Mars / the film's own Mars imagery)"
+   },
+   {
+    "t": 108.7,
+    "asset": "nasa:PIA02062",
+    "title": "Observed Spectral Classes TES",
+    "score": 0.1077,
+    "label": "on-topic (shows Mars / the film's own Mars imagery)"
+   },
+   {
+    "t": 143.9,
+    "asset": "nasa:PIA04041",
+    "title": "Acidalia Planitia",
+    "score": 0.0783,
+    "label": "on-topic (shows Mars / the film's own Mars imagery)"
+   },
+   {
+    "t": 157.6,
+    "asset": "nasa:PIA06700",
+    "title": "A Change of Direction",
+    "score": 0.0698,
+    "label": "on-topic (shows Mars / the film's own Mars imagery)"
+   },
+   {
+    "t": 166.7,
+    "asset": "local:source#16",
+    "title": "text or a title card",
+    "score": 0.0713,
+    "label": "off-topic: title card"
+   },
+   {
+    "t": 171.5,
+    "asset": "nasa:PIA25708",
+    "title": "Gully Activity in Triolet Crater",
+    "score": 0.1024,
+    "label": "on-topic (shows Mars / the film's own Mars imagery)"
+   },
+   {
+    "t": 176.2,
+    "asset": "local:source#10",
+    "title": "a night scene",
+    "score": 0.0753,
+    "label": "on-topic (shows Mars / the film's own Mars imagery)"
+   },
+   {
+    "t": 182.7,
+    "asset": "nasa:PIA19400",
+    "title": "Sunset in Mars Gale Crater",
+    "score": 0.0975,
+    "label": "on-topic (shows Mars / the film's own Mars imagery)"
+   },
+   {
+    "t": 202.9,
+    "asset": "nasa:PIA24659",
+    "title": "Aram Chaos - False Color",
+    "score": 0.0575,
+    "label": "on-topic (shows Mars / the film's own Mars imagery)"
+   },
+   {
+    "t": 217.3,
+    "asset": "nasa:iss020e021140",
+    "title": "Earth Observation taken by the Expedition 20 crew",
+    "score": 0.1165,
+    "label": "off-topic: Earth from the ISS"
+   }
+  ],
+  "on_topic_share": 0.533
+ },
+ "with_subject_gate": {
+  "inserts": 12,
+  "on_topic": 12,
+  "rows": [
+   {
+    "t": 26.2,
+    "asset": "nasa:PIA11714",
+    "title": "Mars Obliquity Cycle Illustration",
+    "score": 0.0508,
+    "label": "on-topic (shows Mars / the film's own Mars imagery)"
+   },
+   {
+    "t": 40.1,
+    "asset": "local:source#0",
+    "title": "a rocket or spacecraft",
+    "score": 0.0938,
+    "label": "on-topic (shows Mars / the film's own Mars imagery)"
+   },
+   {
+    "t": 51.1,
+    "asset": "nasa:PIA07085",
+    "title": "Concept for Mars Volcanic Emission Life Scout",
+    "score": 0.092,
+    "label": "on-topic (shows Mars / the film's own Mars imagery)"
+   },
+   {
+    "t": 75.9,
+    "asset": "nasa:PIA04506",
+    "title": "Surface Textures",
+    "score": 0.1018,
+    "label": "on-topic (shows Mars / the film's own Mars imagery)"
+   },
+   {
+    "t": 108.7,
+    "asset": "nasa:PIA02062",
+    "title": "Observed Spectral Classes TES",
+    "score": 0.1077,
+    "label": "on-topic (shows Mars / the film's own Mars imagery)"
+   },
+   {
+    "t": 143.9,
+    "asset": "nasa:PIA04041",
+    "title": "Acidalia Planitia",
+    "score": 0.0783,
+    "label": "on-topic (shows Mars / the film's own Mars imagery)"
+   },
+   {
+    "t": 157.6,
+    "asset": "nasa:PIA06700",
+    "title": "A Change of Direction",
+    "score": 0.0698,
+    "label": "on-topic (shows Mars / the film's own Mars imagery)"
+   },
+   {
+    "t": 171.5,
+    "asset": "nasa:PIA25708",
+    "title": "Gully Activity in Triolet Crater",
+    "score": 0.1024,
+    "label": "on-topic (shows Mars / the film's own Mars imagery)"
+   },
+   {
+    "t": 176.2,
+    "asset": "local:source#10",
+    "title": "a night scene",
+    "score": 0.0753,
+    "label": "on-topic (shows Mars / the film's own Mars imagery)"
+   },
+   {
+    "t": 182.7,
+    "asset": "nasa:PIA19400",
+    "title": "Sunset in Mars Gale Crater",
+    "score": 0.0975,
+    "label": "on-topic (shows Mars / the film's own Mars imagery)"
+   },
+   {
+    "t": 202.9,
+    "asset": "nasa:PIA24659",
+    "title": "Aram Chaos - False Color",
+    "score": 0.0575,
+    "label": "on-topic (shows Mars / the film's own Mars imagery)"
+   },
+   {
+    "t": 217.3,
+    "asset": "nasa:PIA00381",
+    "title": "First Photograph Taken On Mars Surface",
+    "score": 0.0963,
+    "label": "on-topic (shows Mars / the film's own Mars imagery)"
+   }
+  ],
+  "on_topic_share": 1.0
+ }
+}

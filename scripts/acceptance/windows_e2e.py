@@ -83,6 +83,29 @@ def main():
                                       capture_output=True, text=True).stdout)
     step("output MP4 is valid", float(probe["format"]["duration"]) > 5, probe["format"]["duration"])
     report["quality"] = r["result"].get("quality")
+    # Account 2 editor path: workspace page, a local edit with undo/redo, draft preview, final render, verified export
+    with urllib.request.urlopen(BASE + "/", timeout=60) as h:
+        page = h.read().decode("utf-8")
+    cat = call("/api/fx/catalog")
+    step("workspace page + effects catalogue", "Cinematic Workspace" in page and len(cat.get("transitions") or []) >= 20,
+         f"{len(cat.get('transitions') or [])} transitions")
+    main_tl = call(f"/api/projects/{p.id}")["timeline"]
+    c0 = main_tl["clips"][0]
+    n0 = len(main_tl["clips"])
+    cut = round((float(c0["in"]) + float(c0["out"])) / 2, 3)
+    after = call(f"/api/projects/{p.id}/op", {"op": "split", "clip": c0["id"], "args": {"at": cut}, "branch": "main"})
+    undone = call(f"/api/projects/{p.id}/op", {"op": "undo", "branch": "main"})
+    redone = call(f"/api/projects/{p.id}/op", {"op": "redo", "branch": "main"})
+    step("local edit (split) with undo/redo", len(after["clips"]) == n0 + 1 and len(undone["clips"]) == n0 and len(redone["clips"]) == n0 + 1,
+         f"{n0} -> {len(after['clips'])} -> {len(undone['clips'])} -> {len(redone['clips'])} clips")
+    d = wait_job(call(f"/api/projects/{p.id}/render", {"branch": "main", "name": "draft_preview", "draft": True})["job"])
+    step("draft preview render", d["status"] == "done", d.get("error") or d.get("result", {}).get("output"))
+    f = wait_job(call(f"/api/projects/{p.id}/render", {"branch": "main", "name": "final"})["job"])
+    step("final render", f["status"] == "done", f.get("error") or f.get("result", {}).get("output"))
+    e = wait_job(call(f"/api/projects/{p.id}/export", {"render": f["result"]["output"], "codec": "h264", "quality": "balanced"})["job"])
+    ver = (e.get("result") or {}).get("verified", (e.get("result") or {}).get("ok"))
+    step("export with verification", e["status"] == "done" and (e.get("result") or {}).get("output") and ver is not False,
+         e.get("error") or {k: (e.get("result") or {}).get(k) for k in ("output", "verified", "ok", "checks")})
     Path("e2e_report.json").write_text(json.dumps(report, indent=1, ensure_ascii=False), encoding="utf-8")
     print(json.dumps(report, indent=1, ensure_ascii=False))
 
