@@ -1,0 +1,187 @@
+{
+ "demo": "5 - AI video generation",
+ "status": "GPU-READY, UNVERIFIED (no GPU in this container)",
+ "hardware": {
+  "cpu_count": 4,
+  "ram_gb": 15.7,
+  "ram_free_gb": 15.0,
+  "disk_free_gb": 4.0,
+  "gpus": [],
+  "best_vram_gb": null,
+  "cuda": false,
+  "vulkan": false,
+  "vulkan_devices": [],
+  "tier": "cpu"
+ },
+ "jobs": [
+  {
+   "task": "image_to_video",
+   "model": "wan22-ti2v-5b",
+   "licence_class": "foss",
+   "requirements": {
+    "gpu": true,
+    "vram_gb": 24.0,
+    "ram_gb": null,
+    "disk_gb": null,
+    "models": [
+     "wan22-ti2v-5b"
+    ],
+    "est_s": null,
+    "vram_source": "registry"
+   },
+   "runs_here": false,
+   "why_not": [
+    "needs a GPU; none detected (nvidia-smi / torch CUDA)",
+    "needs 24.0 GB VRAM; best device has 0 GB"
+   ],
+   "manifest_valid": true,
+   "request_valid": true,
+   "result": {
+    "status": "deferred",
+    "error": {
+     "code": "RESOURCE_EXHAUSTED",
+     "message": "needs a GPU; none detected (nvidia-smi / torch CUDA); needs 24.0 GB VRAM; best device has 0 GB",
+     "retryable": true
+    }
+   },
+   "result_valid": true,
+   "next": {
+    "retry_manifest": {
+     "schema": "nexus.RenderJobManifest/1",
+     "job_id": "gen_20261113_76ad390a",
+     "kind": "generate.i2v",
+     "inputs": [
+      {
+       "uri": "file:///tmp/a2-demo5/demo5_still.png",
+       "role": "input",
+       "bytes": 520592,
+       "sha256": "2c538d0a6d98850ac514194640f6d37bcff134a4f00bad0da9fd04e60b0db4df"
+      }
+     ],
+     "settings": {
+      "task": "image_to_video",
+      "model": "wan22-ti2v-5b",
+      "prompt": "Slow orbital pan over the cloud bands of Earth at dusk, cinematic",
+      "licence": {
+       "class": "foss",
+       "weights_licence": "Apache-2.0",
+       "commercial_use": "yes",
+       "conditions": null,
+       "source_url": "https://huggingface.co/Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+       "read_on": "2026-11-12"
+      },
+      "frames": 81,
+      "fps": 16,
+      "steps": 30
+     },
+     "outputs": [
+      {
+       "uri": "gen_20261113_76ad390a.mp4",
+       "role": "output"
+      }
+     ],
+     "requirements": {
+      "gpu": true,
+      "vram_gb": 24.0,
+      "ram_gb": null,
+      "disk_gb": null,
+      "models": [
+       "wan22-ti2v-5b"
+      ],
+      "est_s": null,
+      "vram_source": "registry"
+     }
+    }
+   }
+  },
+  {
+   "task": "text_to_video",
+   "model": "wan21-t2v-1.3b",
+   "licence_class": "foss",
+   "requirements": {
+    "gpu": true,
+    "vram_gb": 8.19,
+    "ram_gb": null,
+    "disk_gb": null,
+    "models": [
+     "wan21-t2v-1.3b"
+    ],
+    "est_s": null,
+    "vram_source": "registry"
+   },
+   "runs_here": false,
+   "why_not": [
+    "needs a GPU; none detected (nvidia-smi / torch CUDA)",
+    "needs 8.19 GB VRAM; best device has 0 GB"
+   ],
+   "manifest_valid": true,
+   "request_valid": true,
+   "result": {
+    "status": "deferred",
+    "error": {
+     "code": "RESOURCE_EXHAUSTED",
+     "message": "needs a GPU; none detected (nvidia-smi / torch CUDA); needs 8.19 GB VRAM; best device has 0 GB",
+     "retryable": true
+    }
+   },
+   "result_valid": true,
+   "next": {
+    "retry_manifest": {
+     "schema": "nexus.RenderJobManifest/1",
+     "job_id": "gen_20261113_0fe83cb6",
+     "kind": "generate.t2v",
+     "inputs": [],
+     "settings": {
+      "task": "text_to_video",
+      "model": "wan21-t2v-1.3b",
+      "prompt": "Slow orbital pan over the cloud bands of Earth at dusk, cinematic",
+      "licence": {
+       "class": "foss",
+       "weights_licence": "Apache-2.0",
+       "commercial_use": "yes",
+       "conditions": "Card: 'We claim no rights over your generated contents'; usual lawful-use clause",
+       "source_url": "https://huggingface.co/Wan-AI/Wan2.1-T2V-1.3B",
+       "read_on": "2026-11-12"
+      },
+      "frames": 81,
+      "fps": 16,
+      "steps": 30
+     },
+     "outputs": [
+      {
+       "uri": "gen_20261113_0fe83cb6.mp4",
+       "role": "output"
+      }
+     ],
+     "requirements": {
+      "gpu": true,
+      "vram_gb": 8.19,
+      "ram_gb": null,
+      "disk_gb": null,
+      "models": [
+       "wan21-t2v-1.3b"
+      ],
+      "est_s": null,
+      "vram_source": "registry"
+     }
+    }
+   }
+  }
+ ],
+ "classification_guard": {
+  "classification": "animated-still",
+  "reasons": [
+   "frames are global-transform-of-one-still (residual 2.098 vs motion 27.427)"
+  ],
+  "evidence": {
+   "still_motion": {
+    "frames": 90,
+    "residual": 2.098,
+    "motion": 27.427,
+    "verdict": "global-transform-of-one-still"
+   }
+  }
+ },
+ "protocol": "On an authorised GPU worker: python scripts/gpu_video_bench.py --model wan22-ti2v-5b --mode i2v --image <still> --frames 81 --steps 30 --clip ; returns time, VRAM, temporal SSIM/flow-warp error, CLIP prompt score.",
+ "never_claimed": "No generated video exists from this machine; CPU video generation produced noise (K-19)."
+}

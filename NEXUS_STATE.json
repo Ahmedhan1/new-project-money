@@ -3,99 +3,85 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-13T11:54:18Z",
+ "updated": "2026-11-13T17:31:45Z",
  "git": {
-  "branch": "claude/hopeful-allen-luubcy",
-  "commit": "a0345f4",
-  "subject": "Pin the three-account integration result to exact SHAs and make it reproducible",
+  "branch": "integration/final-release",
+  "commit": "87b9bd0",
+  "subject": "Final gate at b59050d recorded: 977 passed / 0 failed / 13 skipped, apply.sh x2 idempotent, break probe 35/35, fresh clone 18/18, production 12/12",
   "dirty_files": 0,
-  "upstream": "origin/claude/hopeful-allen-luubcy",
+  "upstream": "origin/integration/final-release",
   "unpushed_commits": 1
  },
  "current_task": {
-  "id": "QLT-1",
-  "title": "Creative quality pass: measured rubric + series writer on the script schema + research/visual relevance",
+  "id": "UX-1",
+  "title": "UI - storage/backup page, job stages + resume (done); onboarding, video preview player, friendlier errors (open)",
   "status": "in_progress",
-  "next": "1) Series visuals - derive the image query from the bible's location LOOK text (generic nouns), not its fictional name, and allow reuse of an image for a repeated location. 2) Repair off-bible locations instead of only reporting them. 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Scored rubric in the QA report."
+  "next": "Commit the Playwright smoke test; add an in-app video player on the project page; first-run checklist on the home page."
  },
  "next_tasks": [
   {
-   "id": "ACC1-INTEGRATION",
+   "id": "A2-0",
    "priority": 1,
-   "title": "Three-account shared-contracts integration (nexus/contracts/{cloud,media}.py + shared __init__)",
-   "status": "in_progress",
-   "next": "Linux done at A1 f9d8f11 / A2 d979df1 / A3 62414bf: 862 passed, 0 failed + live production smoke. Remaining: Windows CI + clean-machine E2E on the merged tree once runners work; rerun at current heads at merge time."
-  },
-  {
-   "id": "QLT-1",
-   "priority": 1,
-   "title": "Creative quality pass: measured rubric + series writer on the script schema + research/visual relevance",
-   "status": "in_progress",
-   "next": "1) Series visuals - derive the image query from the bible's location LOOK text (generic nouns), not its fictional name, and allow reuse of an image for a repeated location. 2) Repair off-bible locations instead of only reporting them. 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Scored rubric in the QA report."
-  },
-  {
-   "id": "AUD-1",
-   "priority": 1,
-   "title": "Voice mastering chain, ambience/SFX helpers, scene-to-scene continuity QA (level, colour, brightness jumps)",
+   "title": "Account 2 integration contract (schemas + validator) and licensed benchmark media set",
    "status": "tested",
-   "next": "A properly licensed Arabic voice is still missing (LANG-1)."
+   "next": "Account 1 to confirm RenderExecutionRequest/Result against its worker interface."
   },
   {
-   "id": "FX-1",
+   "id": "A2-A",
    "priority": 1,
-   "title": "Effects, transition library, animated word captions, procedural SFX in the renderer",
+   "title": "Agent A: multi-track timeline, opacity keyframes, tracked masks, resumable render, EDL/OTIO, renderer benchmark + perf port",
    "status": "tested",
-   "next": "Wire the remaining builders (chroma key, masks, split screen, freeze frames, credits roll, audio-reactive overlay) and real J/L-cut audio overlaps - task FX-2."
+   "next": "Owner review of Demo 3; renderer on the owner's Windows PC."
   },
   {
-   "id": "GRW-1",
+   "id": "A2-ASSETS",
    "priority": 1,
-   "title": "Growth: shorts extractor, retention rubric + auto retention pass, hook/title variants, reference-video style profile",
+   "title": "Professional asset library: catalog, lazy licence-checked install, previews, apply to clip/timeline, new effects/transitions/LUTs/overlays/sounds/fonts",
    "status": "tested",
-   "next": "Extended by GRW-2."
+   "next": "Owner: listen to the generated sounds/beds; pick favourites."
+  },
+  {
+   "id": "A2-B",
+   "priority": 1,
+   "title": "Agent B: visual embeddings, semantic B-roll, 14 creative profiles, reference-style profiles, director coherence, shorts titles",
+   "status": "tested",
+   "next": "Better titles (K-23); OCR-class text detection (K-25)."
+  },
+  {
+   "id": "A2-C",
+   "priority": 1,
+   "title": "Agent C: audio benchmark, noise-reduction comparison, dialogue chain v2, sound-design engine, audio QA (sync)",
+   "status": "tested",
+   "next": "A2-AUDIO-REVIEW (owner listening)."
   }
  ],
  "tasks": {
-  "total": 60,
+  "total": 94,
   "by_status": {
-   "verified": 23,
-   "tested": 12,
-   "blocked": 5,
-   "deferred": 1,
-   "planned": 16,
-   "in_progress": 3
+   "verified": 26,
+   "tested": 42,
+   "blocked": 9,
+   "planned": 14,
+   "implemented": 2,
+   "in_progress": 1
   },
   "registry": "nexus/registry/tasks.yaml"
  },
  "tests": {
   "fast": {
-   "summary": "428 passed, 0 failed, 4 skipped",
+   "summary": "977 passed, 0 failed, 13 skipped",
    "ok": true,
    "date": "2026-11-13",
    "platform": "Linux",
    "python": "3.13.18"
   },
   "integration": {
-   "summary": "862 passed, 0 failed, 12 skipped at A1 f9d8f11 / A2 d979df1 / A3 62414bf (local Linux (cloud container); not run: Windows CI on the merged tree, Windows clean-machine E2E on the merged tree, GitHub-hosted Linux CI on the merged tree) - docs/results/integration/heads-f9d8f11-d979df1-62414bf.json"
+   "summary": "977 passed, 0 failed, 13 skipped at A1 813967e / A2 387b9da / A3 d0d37a9 (local Linux (cloud container); not run: GitHub-hosted CI (Linux, Windows), windows-e2e on a clean Windows VM, windows-installer.yml (installer build, silent install, uninstall)) - docs/results/integration/final-b59050d.json"
   }
  },
  "jobs": {
-  "counts": {
-   "cancelled": 3,
-   "done": 29,
-   "running": 1
-  },
-  "active": [
-   {
-    "id": "job_fb9b1b1159",
-    "kind": "backup",
-    "status": "running",
-    "stage": "backup-verify",
-    "worker": "embedded-vm-585",
-    "retries": 0,
-    "recovery": null
-   }
-  ]
+  "counts": {},
+  "active": []
  },
  "blockers": [
   {
@@ -104,47 +90,58 @@
    "why": "Needs the user to create/authorise a free account (Backblaze B2 without a card, or Google Drive) and run `rclone config`. Never done by an agent."
   },
   {
-   "id": "GEN-2",
-   "title": "AI video generation (text/image-to-video clips)",
-   "why": "No GPU on the build machine and no authorised free GPU account. compute.SimulatedRemoteGPU is a simulation, not a provider."
+   "id": "WIN-2",
+   "title": "Single Windows installer NEXUS_VIDEO_AI_Setup.exe (embedded Python + FFmpeg, per-user, System page start/stop/restart/update/backup)",
+   "why": "Owner: GitHub Actions does not start any job (account-level billing/spending block, 0 billable ms) and no Windows build machine is available to agents. Not built, not installed, not verified."
   },
   {
    "id": "PUB-1",
    "title": "Platform upload via official APIs (YouTube first)",
-   "why": "Needs the user's own OAuth client + explicit authorisation for each platform. Today NEXUS produces upload packages only."
+   "why": "Owner's Google OAuth client + one private upload (docs/ACCOUNT3_YOUTUBE_OWNER_VALIDATION.md)."
   },
   {
    "id": "ANA-1",
    "title": "Analytics + monetisation intelligence from real platform data",
-   "why": "Same OAuth authorisation as PUB-1. The revenue ledger exists but holds only manual entries."
+   "why": "No owner analytics data yet (OAuth or one owner export)."
+  },
+  {
+   "id": "A3-INT",
+   "title": "Three-account integration (A1 -> A2 -> A3, then integration/contracts_v1/apply.sh)",
+   "why": "Owner merge approval (agents never merge)."
+  },
+  {
+   "id": "A3-NATIVE",
+   "title": "Native-language review of ar-EG, ar-Gulf, hi and zh lines",
+   "why": "Owner supplies native reviewers; agents never mark output reviewed."
+  },
+  {
+   "id": "A3-COMPETITION",
+   "title": "Competition and saturation signals in market research (YouTube supply)",
+   "why": "Owner's YouTube Data API key."
   },
   {
    "id": "ACC1-HOSTING",
    "title": "Deploy the control plane on an owner-approved zero-cost host",
    "why": "Owner decision (host and exposure need explicit approval; no public deployment without it)."
+  },
+  {
+   "id": "A2-AUDIO-REVIEW",
+   "title": "Owner listens to the audio reviewer package and records a verdict per item",
+   "why": "Blocked by owner (a person must listen)."
   }
  ],
  "backup": {
-  "last": {
-   "ts": 1794471742.665457,
-   "ok": true,
-   "copies": 1,
-   "warning": null,
-   "destinations": [
-    {
-     "name": "local",
-     "ok": true,
-     "snapshot": "20261112-082221-a033"
-    }
-   ]
-  },
+  "last": null,
   "restore_drill": null
  },
  "environment": {
   "models_installed": [
+   "llm-qwen3-4b",
    "mt-madlad400-3b",
+   "voice:ar_JO-kareem-medium",
    "voice:de_DE-thorsten-medium",
    "voice:en_US-joe-medium",
+   "voice:en_US-ljspeech-medium",
    "voice:es_ES-davefx-medium",
    "voice:fr_FR-siwis-medium",
    "voice:ru_RU-denis-medium",

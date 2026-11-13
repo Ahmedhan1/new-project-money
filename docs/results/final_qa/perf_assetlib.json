@@ -1,0 +1,38 @@
+{
+ "schema": "nexus.PerfBench/1",
+ "what": "GET /api/library payload (catalog + summary + categories + optional_future)",
+ "assets": 182,
+ "runs": 3,
+ "before_s": {
+  "median": 17.6211,
+  "runs": [
+   17.2852,
+   17.6211,
+   17.7647
+  ]
+ },
+ "after_s": {
+  "median": 0.0043,
+  "runs": [
+   0.0099,
+   0.0041,
+   0.0043
+  ]
+ },
+ "speedup": 4097.9,
+ "identical_output": true,
+ "invalidation": {
+  "edited_asset": "effect.film_grain",
+  "name_after_edit": "QA renamed asset",
+  "reloaded": true,
+  "unchanged_before_edit": true
+ },
+ "concurrency": {
+  "threads": 16,
+  "identical": 16,
+  "of": 16
+ },
+ "libyaml": true,
+ "fix": "nexus/assetlib/__init__.py _registry(): cache the parsed YAML keyed by (mtime_ns, size); use CSafeLoader when available",
+ "owner": "Account 2 (nexus/assetlib) via Account 1 integration"
+}

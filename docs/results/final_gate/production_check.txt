@@ -1,0 +1,15 @@
+deployment mode: production  (NEXUS_ENV=production enables the production profile)
+[OK  ] owner_token        set, 43 chars
+[OK  ] vault_key          injected, valid Fernet key
+[OK  ] vault_key_offdisk  no key file in NEXUS_HOME
+[OK  ] vault_readable     0 secret(s), 0 undecryptable
+[OK  ] public_origin      https://nexus.example.test
+[OK  ] bind_loopback      bind 127.0.0.1
+[OK  ] trusted_proxies    127.0.0.1
+[OK  ] database           schema v2
+[OK  ] disk               9.4 GiB free (minimum 2)
+[OK  ] backup_offsite     offsite
+[OK  ] backup_encryption  no remote destination
+[OK  ] single_instance    free
+
+READY: every required production gate passes

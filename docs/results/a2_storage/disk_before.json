@@ -1,0 +1,843 @@
+{
+ "label": "before",
+ "measured_at": "2026-11-13T09:56:53Z",
+ "machine": "shared cloud development container",
+ "disk": {
+  "filesystem_size_gb": 270.6,
+  "free_gb": 3.09,
+  "note": "the container's writable allowance is smaller than the filesystem; 'free' is what is really writable"
+ },
+ "total_listed_gb": 28.21,
+ "locations": [
+  {
+   "path": "/home/user/new-project-money/.nexus/models",
+   "category": "model weights",
+   "owner": "NEXUS install (scripts/setup.sh)",
+   "purpose": "Whisper, Piper, LLM, MADLAD, SigLIP, faces - used by the app and heavy tests",
+   "decision": "keep",
+   "exists": true,
+   "bytes": 6956572948,
+   "files": 54,
+   "media_bytes": 0,
+   "largest": [
+    [
+     2950208329,
+     "/home/user/new-project-money/.nexus/models/madlad400-3b/model.bin"
+    ],
+    [
+     2497280256,
+     "/home/user/new-project-money/.nexus/models/llm/Qwen3-4B-Q4_K_M.gguf"
+    ],
+    [
+     483546902,
+     "/home/user/new-project-money/.nexus/models/whisper-small/model.bin"
+    ],
+    [
+     111475220,
+     "/home/user/new-project-money/.nexus/models/visual/siglip-base-patch16-224/text_model_quantized.onnx"
+    ],
+    [
+     99499129,
+     "/home/user/new-project-money/.nexus/models/visual/siglip-base-patch16-224/vision_model_quantized.onnx"
+    ]
+   ]
+  },
+  {
+   "path": "/home/user/new-project-money/.nexus/benchmarks",
+   "category": "benchmark media",
+   "owner": "Account 2 (scripts/benchmarks/media.yaml)",
+   "purpose": "licensed NASA/Prelinger benchmark set with provenance; heavy tests and demos read it",
+   "decision": "keep",
+   "exists": true,
+   "bytes": 1043468442,
+   "files": 20,
+   "media_bytes": 1043458696,
+   "largest": [
+    [
+     270769008,
+     "/home/user/new-project-money/.nexus/benchmarks/documentary_long/source.mp4"
+    ],
+    [
+     153037265,
+     "/home/user/new-project-money/.nexus/benchmarks/broll/source.mp4"
+    ],
+    [
+     111743639,
+     "/home/user/new-project-money/.nexus/benchmarks/documentary/source.mp4"
+    ],
+    [
+     109664802,
+     "/home/user/new-project-money/.nexus/benchmarks/panel/source.mp4"
+    ],
+    [
+     106844765,
+     "/home/user/new-project-money/.nexus/benchmarks/podcast/source.mp4"
+    ]
+   ]
+  },
+  {
+   "path": "/home/user/new-project-money/.nexus/test-home",
+   "category": "test home",
+   "owner": "tests/conftest.py",
+   "purpose": "NEXUS_HOME of the fast suite; projects/cache accumulate between runs",
+   "decision": "clean-generated",
+   "exists": true,
+   "bytes": 384352247,
+   "files": 1069,
+   "media_bytes": 356729330,
+   "largest": [
+    [
+     26530309,
+     "/home/user/new-project-money/.nexus/test-home/models/speaker/voxceleb_resnet34_LM.onnx"
+    ],
+    [
+     10509424,
+     "/home/user/new-project-money/.nexus/test-home/cache/music/documentary_7b4a82830201.wav"
+    ],
+    [
+     10507484,
+     "/home/user/new-project-money/.nexus/test-home/cache/music/inspiring_59138c2ac441.wav"
+    ],
+    [
+     10496078,
+     "/home/user/new-project-money/.nexus/test-home/projects/prj_d7b6905e8b/work/programme_C-chronological-doc.wav"
+    ],
+    [
+     10496078,
+     "/home/user/new-project-money/.nexus/test-home/projects/prj_d7b6905e8b/work/programme_A-story.wav"
+    ]
+   ]
+  },
+  {
+   "path": "/home/user/new-project-money/.nexus/cache",
+   "category": "render cache",
+   "owner": "dev NEXUS_HOME",
+   "purpose": "segment/overlay cache of the development home",
+   "decision": "keep (small, bounded by diskman)",
+   "exists": true,
+   "bytes": 1297297,
+   "files": 10,
+   "media_bytes": 1294893,
+   "largest": [
+    [
+     584850,
+     "/home/user/new-project-money/.nexus/cache/segments/seg_0d70c2d212d6835d5e65.mp4"
+    ],
+    [
+     531631,
+     "/home/user/new-project-money/.nexus/cache/segments/seg_86ebb4d4833f06846d0a.mp4"
+    ],
+    [
+     35684,
+     "/home/user/new-project-money/.nexus/cache/segments/seg_e40e9079a93454491874.mp4"
+    ],
+    [
+     34949,
+     "/home/user/new-project-money/.nexus/cache/overlays/25c78fa1c51d3a7d.png"
+    ],
+    [
+     34692,
+     "/home/user/new-project-money/.nexus/cache/overlays/1a506c2e453e4117.png"
+    ]
+   ]
+  },
+  {
+   "path": "/home/user/new-project-money/.nexus/projects",
+   "category": "projects",
+   "owner": "dev NEXUS_HOME",
+   "purpose": "development projects",
+   "decision": "keep",
+   "exists": true,
+   "bytes": 4301950,
+   "files": 26,
+   "media_bytes": 4279739,
+   "largest": [
+    [
+     739404,
+     "/home/user/new-project-money/.nexus/projects/prj_5e2e169f99/publish/tiktok/en/video.mp4"
+    ],
+    [
+     640428,
+     "/home/user/new-project-money/.nexus/projects/prj_5e2e169f99/renders/v2.mp4"
+    ],
+    [
+     630776,
+     "/home/user/new-project-money/.nexus/projects/prj_5e2e169f99/renders/v1.mp4"
+    ],
+    [
+     619573,
+     "/home/user/new-project-money/.nexus/projects/prj_5e2e169f99/work/programme_video.mp4"
+    ],
+    [
+     560581,
+     "/home/user/new-project-money/.nexus/projects/prj_5e2e169f99/work/programme_v2.mp4"
+    ]
+   ]
+  },
+  {
+   "path": "/home/user/new-project-money/.nexus/assets",
+   "category": "asset library",
+   "owner": "dev NEXUS_HOME",
+   "purpose": "installed LUTs/assets",
+   "decision": "keep",
+   "exists": true,
+   "bytes": 663567,
+   "files": 5,
+   "media_bytes": 0,
+   "largest": [
+    [
+     132716,
+     "/home/user/new-project-money/.nexus/assets/luts/_builtin_bleach_bypass.cube"
+    ],
+    [
+     132714,
+     "/home/user/new-project-money/.nexus/assets/luts/_builtin_teal_orange.cube"
+    ],
+    [
+     132714,
+     "/home/user/new-project-money/.nexus/assets/luts/_builtin_rec709_lift.cube"
+    ],
+    [
+     132712,
+     "/home/user/new-project-money/.nexus/assets/luts/_builtin_warm_film.cube"
+    ],
+    [
+     132711,
+     "/home/user/new-project-money/.nexus/assets/luts/_builtin_identity.cube"
+    ]
+   ]
+  },
+  {
+   "path": "/home/user/new-project-money/.venv",
+   "category": "python environment",
+   "owner": "developer",
+   "purpose": "virtualenv with requirements.txt",
+   "decision": "keep",
+   "exists": true,
+   "bytes": 1277096579,
+   "files": 15224,
+   "media_bytes": 697463,
+   "largest": [
+    [
+     80834041,
+     "/home/user/new-project-money/.venv/lib/python3.13/site-packages/ctranslate2.libs/libctranslate2-211e4d4e.so.4.9.0"
+    ],
+    [
+     70500369,
+     "/home/user/new-project-money/.venv/lib/python3.13/site-packages/cv2/cv2.abi3.so"
+    ],
+    [
+     69194473,
+     "/home/user/new-project-money/.venv/lib/python3.13/site-packages/ctranslate2/_ext.cpython-313-x86_64-linux-gnu.so"
+    ],
+    [
+     40801408,
+     "/home/user/new-project-money/.venv/lib/python3.13/site-packages/pyglm/glm.cpython-313-x86_64-linux-gnu.so"
+    ],
+    [
+     38982937,
+     "/home/user/new-project-money/.venv/lib/python3.13/site-packages/opencv_python_headless.libs/libopenblasp-r0-59ffcd50.3.15.so"
+    ]
+   ]
+  },
+  {
+   "path": "/home/user/new-project-money/.git",
+   "category": "git",
+   "owner": "repository",
+   "purpose": "history",
+   "decision": "keep",
+   "exists": true,
+   "bytes": 16332248,
+   "files": 1253,
+   "media_bytes": 0,
+   "largest": [
+    [
+     2404948,
+     "/home/user/new-project-money/.git/objects/pack/pack-48bb87eb1b18882fff0c5d841842f98e0e2882ca.pack"
+    ],
+    [
+     1984116,
+     "/home/user/new-project-money/.git/objects/pack/pack-46bed9e4b0746bc827de09199bc5b3071c9b6242.pack"
+    ],
+    [
+     1932033,
+     "/home/user/new-project-money/.git/objects/pack/pack-452552fcc4a423e5190a59133d86d533a864600a.pack"
+    ],
+    [
+     1160417,
+     "/home/user/new-project-money/.git/objects/pack/pack-13a349041e10c62b241e36c6f9aba07fcfae6672.pack"
+    ],
+    [
+     510097,
+     "/home/user/new-project-money/.git/objects/f0/89e3b66fb0d7196a790c8f742c58b50fb88025"
+    ]
+   ]
+  },
+  {
+   "path": "/root/.cache/pip",
+   "category": "package cache",
+   "owner": "pip",
+   "purpose": "downloaded wheels; re-downloadable",
+   "decision": "delete (pip cache purge)",
+   "exists": true,
+   "bytes": 3788860323,
+   "files": 907,
+   "media_bytes": 0,
+   "largest": [
+    [
+     539167086,
+     "/root/.cache/pip/http-v2/b/e/c/d/b/becdbfb2aa239ec1ae9cc24364afbc6631bed4219baa360c0ba4e232.body"
+    ],
+    [
+     519150073,
+     "/root/.cache/pip/http-v2/e/3/5/f/e/e35fee96c7b2a777c55a93f3568c256f558e7834dab1aeb1f15a0c25.body"
+    ],
+    [
+     404870805,
+     "/root/.cache/pip/http-v2/8/0/4/a/f/804af9c15943af4000ee30b428b81ebec11f363aa8ea7e2461e4fdc0.body"
+    ],
+    [
+     285674620,
+     "/root/.cache/pip/http-v2/e/5/9/3/1/e59319fcb194c34662c1c82ad1e682325dda09c9b8bf3bae602851a4.body"
+    ],
+    [
+     227913465,
+     "/root/.cache/pip/http-v2/6/e/0/0/f/6e00f3714e15dcfe36aee4ab4de53c3b2d0d9857ee9cc69634373c65.body"
+    ]
+   ]
+  },
+  {
+   "path": "/root/.cache/uv",
+   "category": "package cache",
+   "owner": "uv",
+   "purpose": "uv wheel cache; re-downloadable",
+   "decision": "keep (small)",
+   "exists": true,
+   "bytes": 156278729,
+   "files": 9333,
+   "media_bytes": 0,
+   "largest": [
+    [
+     36966048,
+     "/root/.cache/uv/archive-v0/TCL23vaPhCA2WF8G/08ae81f72d5a2b5fa9e0__mypyc.cpython-313-x86_64-linux-gnu.so"
+    ],
+    [
+     24125280,
+     "/root/.cache/uv/archive-v0/1v0gBAMTwIMv8JSF/ruff-0.16.9.data/scripts/ruff"
+    ],
+    [
+     14389392,
+     "/root/.cache/uv/archive-v0/h_a6esLAXkcROVPz/cryptography/hazmat/bindings/_rust.abi3.so"
+    ],
+    [
+     4714016,
+     "/root/.cache/uv/archive-v0/PwwDXsp7yFUPslL9/30fcd23745efe32ce681__mypyc.cpython-313-x86_64-linux-gnu.so"
+    ],
+    [
+     3190208,
+     "/root/.cache/uv/archive-v0/xSgP4MD4RBCIno3c/pyright/dist/dist/pyright-internal.js"
+    ]
+   ]
+  },
+  {
+   "path": "/tmp/claude-0/-home-user-new-project-money/91b14cf7-0302-55fa-92c2-d116c04e0293/scratchpad",
+   "category": "agent scratch",
+   "owner": "this agent session",
+   "purpose": "benchmark homes and renders of the Account 2 render benchmark (results in docs/results/a2_render_bench.json)",
+   "decision": "delete media + homes",
+   "exists": true,
+   "bytes": 6776164218,
+   "files": 959,
+   "media_bytes": 6774142984,
+   "largest": [
+    [
+     91116354,
+     "/tmp/claude-0/-home-user-new-project-money/91b14cf7-0302-55fa-92c2-d116c04e0293/scratchpad/bench/new_serial.mp4"
+    ],
+    [
+     91116354,
+     "/tmp/claude-0/-home-user-new-project-money/91b14cf7-0302-55fa-92c2-d116c04e0293/scratchpad/bench/new2_serial.mp4"
+    ],
+    [
+     91116354,
+     "/tmp/claude-0/-home-user-new-project-money/91b14cf7-0302-55fa-92c2-d116c04e0293/scratchpad/bench/new1_serial.mp4"
+    ],
+    [
+     91116354,
+     "/tmp/claude-0/-home-user-new-project-money/91b14cf7-0302-55fa-92c2-d116c04e0293/scratchpad/bench/final4_serial.mp4"
+    ],
+    [
+     91116354,
+     "/tmp/claude-0/-home-user-new-project-money/91b14cf7-0302-55fa-92c2-d116c04e0293/scratchpad/bench/final3_serial.mp4"
+    ]
+   ]
+  },
+  {
+   "path": "/tmp/a2-d",
+   "category": "workstream workdir",
+   "owner": "Account 2 Agent D",
+   "purpose": "generation/enhancement bench + a 928 MB test venv (results in ACCOUNT2_MODEL_BENCHMARKS.md)",
+   "decision": "delete (results recorded)",
+   "exists": true,
+   "bytes": 2906893679,
+   "files": 40986,
+   "media_bytes": 192891896,
+   "largest": [
+    [
+     646813304,
+     "/tmp/a2-d/hf/hub/blobs/c3/c3dac80dfd8d0030e72beced670d4e59b44ca38825b6c1efc38ef9cc6772b8d2"
+    ],
+    [
+     440280512,
+     "/tmp/a2-d/genenv/torch/lib/libtorch_cpu.so"
+    ],
+    [
+     246144864,
+     "/tmp/a2-d/hf/hub/blobs/96/96271847fb2d7a61129327e50a97d19a2ffccd328382efd50fc1a732a9874ad8"
+    ],
+    [
+     167335342,
+     "/tmp/a2-d/hf/hub/blobs/5f/5f7c5eb464e5a0b83940b0ede47019c83507f05fd84fd938855f25c6fa83a426"
+    ],
+    [
+     134621556,
+     "/tmp/a2-d/hf/hub/blobs/9c/9c954cd2720ce3c79251975387c7afb58d4618a6fb1b7926aa0136b1b3209293"
+    ]
+   ]
+  },
+  {
+   "path": "/tmp/a2-agent-a",
+   "category": "workstream workdir",
+   "owner": "Account 2 Agent A",
+   "purpose": "renderer bench homes and frame grabs (results in a2_render_bench.json)",
+   "decision": "delete (results recorded)",
+   "exists": true,
+   "bytes": 811860213,
+   "files": 1486,
+   "media_bytes": 794100019,
+   "largest": [
+    [
+     21520844,
+     "/tmp/a2-agent-a/smoke/cache/music/calm_9d4174234195.wav"
+    ],
+    [
+     21520844,
+     "/tmp/a2-agent-a/bench_home6/cache/music/calm_9d4174234195.wav"
+    ],
+    [
+     21520844,
+     "/tmp/a2-agent-a/bench_home5/cache/music/calm_9d4174234195.wav"
+    ],
+    [
+     21520844,
+     "/tmp/a2-agent-a/bench_home4/cache/music/calm_9d4174234195.wav"
+    ],
+    [
+     21520844,
+     "/tmp/a2-agent-a/bench_home2/cache/music/calm_9d4174234195.wav"
+    ]
+   ]
+  },
+  {
+   "path": "/tmp/a2-c",
+   "category": "workstream workdir",
+   "owner": "Account 2 Agent C",
+   "purpose": "audio acceptance workdir (results in a2_audio_acceptance.json)",
+   "decision": "delete (results recorded)",
+   "exists": true,
+   "bytes": 658020158,
+   "files": 472,
+   "media_bytes": 627697889,
+   "largest": [
+    [
+     103683174,
+     "/tmp/a2-c/accept/podcast_full_after.wav"
+    ],
+    [
+     103680102,
+     "/tmp/a2-c/accept/panel_full_after.wav"
+    ],
+    [
+     86403174,
+     "/tmp/a2-c/accept/interview_full_after.wav"
+    ],
+    [
+     69998694,
+     "/tmp/a2-c/accept/walktalk_full_after.wav"
+    ],
+    [
+     69113838,
+     "/tmp/a2-c/accept/ad_full_after.wav"
+    ]
+   ]
+  },
+  {
+   "path": "/tmp/a2-demos",
+   "category": "demo home",
+   "owner": "Account 2 integrator",
+   "purpose": "Demo 1/2/4 projects, final renders, audio review package",
+   "decision": "clean-generated (keep finals + review package)",
+   "exists": true,
+   "bytes": 858833721,
+   "files": 1090,
+   "media_bytes": 853036754,
+   "largest": [
+    [
+     270769008,
+     "/tmp/a2-demos/projects/prj_0b2c46b91f/media/00_source.mp4"
+    ],
+    [
+     133365349,
+     "/tmp/a2-demos/projects/prj_0b2c46b91f/renders/demo1_documentary.mp4"
+    ],
+    [
+     89068085,
+     "/tmp/a2-demos/projects/prj_fececf1b0d/media/00_source.mp4"
+    ],
+    [
+     75862223,
+     "/tmp/a2-demos/projects/prj_1d648d20c1/media/00_source.mp4"
+    ],
+    [
+     40808240,
+     "/tmp/a2-demos/cache/music/documentary_8ce7a7572bca.wav"
+    ]
+   ]
+  },
+  {
+   "path": "/tmp/a2-demo3",
+   "category": "demo home",
+   "owner": "Account 2 integrator",
+   "purpose": "Demo 3 first run (rejected: mask region)",
+   "decision": "delete (superseded by a2-demo3b)",
+   "exists": true,
+   "bytes": 594513252,
+   "files": 55,
+   "media_bytes": 582333273,
+   "largest": [
+    [
+     153037265,
+     "/tmp/a2-demo3/projects/prj_d381041002/media/02_source.mp4"
+    ],
+    [
+     111743639,
+     "/tmp/a2-demo3/projects/prj_d381041002/media/04_source.mp4"
+    ],
+    [
+     89068085,
+     "/tmp/a2-demo3/projects/prj_d381041002/media/00_source.mp4"
+    ],
+    [
+     88393284,
+     "/tmp/a2-demo3/projects/prj_d381041002/media/03_source.mp4"
+    ],
+    [
+     75862223,
+     "/tmp/a2-demo3/projects/prj_d381041002/media/01_source.mp4"
+    ]
+   ]
+  },
+  {
+   "path": "/tmp/a2-demo3b",
+   "category": "demo home",
+   "owner": "Account 2 integrator",
+   "purpose": "Demo 3 accepted run (docs/results/a2_demos/demo3_advanced.json)",
+   "decision": "clean-generated (keep final)",
+   "exists": true,
+   "bytes": 596464653,
+   "files": 55,
+   "media_bytes": 584284607,
+   "largest": [
+    [
+     153037265,
+     "/tmp/a2-demo3b/projects/prj_e62faf28d8/media/02_source.mp4"
+    ],
+    [
+     111743639,
+     "/tmp/a2-demo3b/projects/prj_e62faf28d8/media/04_source.mp4"
+    ],
+    [
+     89068085,
+     "/tmp/a2-demo3b/projects/prj_e62faf28d8/media/00_source.mp4"
+    ],
+    [
+     88393284,
+     "/tmp/a2-demo3b/projects/prj_e62faf28d8/media/03_source.mp4"
+    ],
+    [
+     75862223,
+     "/tmp/a2-demo3b/projects/prj_e62faf28d8/media/01_source.mp4"
+    ]
+   ]
+  },
+  {
+   "path": "/tmp/a2-demo5",
+   "category": "demo home",
+   "owner": "Account 2 integrator",
+   "purpose": "Demo 5 deferred GPU jobs",
+   "decision": "keep (small)",
+   "exists": true,
+   "bytes": 733210,
+   "files": 2,
+   "media_bytes": 733210,
+   "largest": [
+    [
+     520592,
+     "/tmp/a2-demo5/demo5_still.png"
+    ],
+    [
+     212618,
+     "/tmp/a2-demo5/demo5_kenburns.mp4"
+    ]
+   ]
+  },
+  {
+   "path": "/tmp/nx-smoke",
+   "category": "smoke home",
+   "owner": "earlier sessions",
+   "purpose": "release-candidate smoke runs",
+   "decision": "delete (results recorded)",
+   "exists": true,
+   "bytes": 692121702,
+   "files": 54,
+   "media_bytes": 16186415,
+   "largest": [
+    [
+     483546902,
+     "/tmp/nx-smoke/models/whisper-small/model.bin"
+    ],
+    [
+     63221984,
+     "/tmp/nx-smoke/models/piper/en_US-joe-medium.onnx"
+    ],
+    [
+     63221984,
+     "/tmp/nx-smoke/models/piper/de_DE-thorsten-medium.onnx"
+    ],
+    [
+     63201294,
+     "/tmp/nx-smoke/models/piper/ar_JO-kareem-medium.onnx"
+    ],
+    [
+     2515685,
+     "/tmp/nx-smoke/w/work/programme_out.mp4"
+    ]
+   ]
+  },
+  {
+   "path": "/tmp/nx-ws",
+   "category": "smoke home",
+   "owner": "earlier sessions",
+   "purpose": "workspace UI smoke runs",
+   "decision": "delete (results recorded)",
+   "exists": true,
+   "bytes": 202934154,
+   "files": 94,
+   "media_bytes": 176233957,
+   "largest": [
+    [
+     23481288,
+     "/tmp/nx-ws/projects/prj_d24a983dce/media/00_explainer75.mp4"
+    ],
+    [
+     23481288,
+     "/tmp/nx-ws/backups/blobs/4c/4c9eafc4bc5714d5feca77661fd1a5caab6a95f2536a35e3d11d6352f40ef87a"
+    ],
+    [
+     18999461,
+     "/tmp/nx-ws/projects/prj_d24a983dce/renders/main_draft_22924.mp4"
+    ],
+    [
+     18123194,
+     "/tmp/nx-ws/projects/prj_d24a983dce/work/programme_main_draft_2605.mp4"
+    ],
+    [
+     18123194,
+     "/tmp/nx-ws/projects/prj_d24a983dce/work/programme_main_draft_2453.mp4"
+    ]
+   ]
+  },
+  {
+   "path": "/tmp/nx-director",
+   "category": "smoke home",
+   "owner": "earlier sessions",
+   "purpose": "director smoke runs",
+   "decision": "delete (results recorded)",
+   "exists": true,
+   "bytes": 48916826,
+   "files": 102,
+   "media_bytes": 48763229,
+   "largest": [
+    [
+     10348878,
+     "/tmp/nx-director/projects/prj_d12e443100/work/programme_director_master.wav"
+    ],
+    [
+     9864332,
+     "/tmp/nx-director/cache/music/tense_88013f2243bc.wav"
+    ],
+    [
+     3608724,
+     "/tmp/nx-director/projects/prj_d12e443100/renders/director_master.mp4"
+    ],
+    [
+     3084878,
+     "/tmp/nx-director/projects/prj_d12e443100/work/programme_director_tiktok-short-1.wav"
+    ],
+    [
+     1167635,
+     "/tmp/nx-director/projects/prj_d12e443100/renders/director_tiktok-short-1.mp4"
+    ]
+   ]
+  },
+  {
+   "path": "/tmp/a2-full",
+   "category": "test home",
+   "owner": "Account 2 integrator",
+   "purpose": "three-account merge test home",
+   "decision": "delete (results in a2_three_account_check.json)",
+   "exists": true,
+   "bytes": 32501083,
+   "files": 18,
+   "media_bytes": 5886535,
+   "largest": [
+    [
+     26530309,
+     "/tmp/a2-full/models/speaker/voxceleb_resnet34_LM.onnx"
+    ],
+    [
+     4186896,
+     "/tmp/a2-full/cache/music/documentary_9c71f8c27df4.wav"
+    ],
+    [
+     503553,
+     "/tmp/a2-full/cache/pieces/audio_73f2a121fbd99144808b.m4a"
+    ],
+    [
+     377303,
+     "/tmp/a2-full/cache/segments/seg_e588ef3e523f39d55c90.mp4"
+    ],
+    [
+     225135,
+     "/tmp/a2-full/cache/segments/seg_28c94375b065b21939c3.mp4"
+    ]
+   ]
+  },
+  {
+   "path": "/tmp/a2-merge-home",
+   "category": "test home",
+   "owner": "Account 2 integrator",
+   "purpose": "three-account merge test home",
+   "decision": "delete (results recorded)",
+   "exists": true,
+   "bytes": 32501083,
+   "files": 18,
+   "media_bytes": 5886535,
+   "largest": [
+    [
+     26530309,
+     "/tmp/a2-merge-home/models/speaker/voxceleb_resnet34_LM.onnx"
+    ],
+    [
+     4186896,
+     "/tmp/a2-merge-home/cache/music/documentary_9c71f8c27df4.wav"
+    ],
+    [
+     503553,
+     "/tmp/a2-merge-home/cache/pieces/audio_73f2a121fbd99144808b.m4a"
+    ],
+    [
+     377303,
+     "/tmp/a2-merge-home/cache/segments/seg_6348e4f9fffdc532418b.mp4"
+    ],
+    [
+     225135,
+     "/tmp/a2-merge-home/cache/segments/seg_94713e90e9c4ad3c1584.mp4"
+    ]
+   ]
+  },
+  {
+   "path": "/tmp/a2-trial-home",
+   "category": "test home",
+   "owner": "Account 2 integrator",
+   "purpose": "trial home",
+   "decision": "delete",
+   "exists": true,
+   "bytes": 32501081,
+   "files": 18,
+   "media_bytes": 5886535,
+   "largest": [
+    [
+     26530309,
+     "/tmp/a2-trial-home/models/speaker/voxceleb_resnet34_LM.onnx"
+    ],
+    [
+     4186896,
+     "/tmp/a2-trial-home/cache/music/documentary_9c71f8c27df4.wav"
+    ],
+    [
+     503553,
+     "/tmp/a2-trial-home/cache/pieces/audio_73f2a121fbd99144808b.m4a"
+    ],
+    [
+     377303,
+     "/tmp/a2-trial-home/cache/segments/seg_af7de80b6417250ed5f5.mp4"
+    ],
+    [
+     225135,
+     "/tmp/a2-trial-home/cache/segments/seg_c2eaf62fa286398abfc3.mp4"
+    ]
+   ]
+  },
+  {
+   "path": "/tmp/pytest-of-root",
+   "category": "test outputs",
+   "owner": "pytest",
+   "purpose": "tmp_path directories kept from the last 3 runs (rendered test videos)",
+   "decision": "delete; pytest now keeps only failed runs' tmp dirs",
+   "exists": true,
+   "bytes": 309548038,
+   "files": 1802,
+   "media_bytes": 273481119,
+   "largest": [
+    [
+     14656771,
+     "/tmp/pytest-of-root/pytest-0/test_one_factory_short_renders0/src.mp4"
+    ],
+    [
+     10108505,
+     "/tmp/pytest-of-root/pytest-0/test_edit_my_video_end_to_end0/talk.mp4"
+    ],
+    [
+     10108505,
+     "/tmp/pytest-of-root/pytest-0/test_edit_my_video_end_to_end0/home/projects/prj_1ce79cbcfc/media/00_talk.mp4"
+    ],
+    [
+     10108505,
+     "/tmp/pytest-of-root/pytest-0/test_edit_my_video_end_to_end0/home/backups/blobs/09/0924d2426aeb91f2124cbea008d3a248d8016990372da2a55cd66a077bb766d3"
+    ],
+    [
+     10108505,
+     "/tmp/pytest-of-root/pytest-0/test_destination_selector_shar0/talk.mp4"
+    ]
+   ]
+  },
+  {
+   "path": "/tmp/explainer75.mp4",
+   "category": "temporary media",
+   "owner": "Account 2 integrator",
+   "purpose": "reference excerpt for Demo 4 (re-cut from the benchmark media)",
+   "decision": "delete",
+   "exists": true,
+   "bytes": 23481288,
+   "files": 1,
+   "media_bytes": 23481288,
+   "largest": [
+    [
+     23481288,
+     "/tmp/explainer75.mp4"
+    ]
+   ]
+  }
+ ]
+}

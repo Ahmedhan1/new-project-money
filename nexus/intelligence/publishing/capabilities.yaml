@@ -1,0 +1,130 @@
+# Account 3 / agent E - API reality per destination (what an app can actually do), complementing the media specs in
+# nexus/registry/platforms.yaml (which this file does NOT duplicate: capabilities.matrix() merges both).
+#
+# kind: documented  = stated on the first-party page in `source`, read on `verified`
+#       unverified  = not confirmed on a first-party page; the note says what is missing
+# Every value here was read on the page cited. Nothing is inferred from third-party blogs.
+
+schema_version: 1
+verified: "2026-11-12"
+
+sources:
+  yt_insert: &yt_insert https://developers.google.com/youtube/v3/docs/videos/insert
+  yt_quota: &yt_quota https://developers.google.com/youtube/v3/determine_quota_cost
+  yt_resumable: &yt_resumable https://developers.google.com/youtube/v3/guides/using_resumable_upload_protocol
+  yt_metrics: &yt_metrics https://developers.google.com/youtube/analytics/metrics
+  yt_reports: &yt_reports https://developers.google.com/youtube/analytics/reference/reports/query
+  google_native: &google_native https://developers.google.com/identity/protocols/oauth2/native-app
+  tt_start: &tt_start https://developers.tiktok.com/doc/content-posting-api-get-started
+  tt_direct: &tt_direct https://developers.tiktok.com/doc/content-posting-api-reference-direct-post
+  tt_video_obj: &tt_video_obj https://developers.tiktok.com/doc/tiktok-api-v2-video-object
+  ig_publishing: &ig_publishing https://developers.facebook.com/docs/instagram-platform/content-publishing
+  ig_insights: &ig_insights https://developers.facebook.com/docs/instagram-platform/reference/instagram-media/insights
+  fb_video_api: &fb_video_api https://developers.facebook.com/docs/video-api/guides/publishing
+  fb_reels_api: &fb_reels_api https://developers.facebook.com/docs/video-api/guides/reels-publishing
+  fb_video_insights: &fb_video_insights https://developers.facebook.com/docs/graph-api/reference/video/video_insights/
+  sc_ads_api: &sc_ads_api https://developers.snap.com/api/marketing-api/Ads-API/introduction
+  sc_profile_api: &sc_profile_api https://developers.snap.com/api/marketing-api/Public-Profile-API/GetStarted
+  sc_web: &sc_web https://help.snapchat.com/hc/en-us/articles/7012293789972-How-do-I-submit-a-Snap-to-Spotlight-from-the-web
+
+platforms:
+  youtube:
+    adapter: youtube           # real adapter, official API
+    adapter_status: implemented_untested_live   # request flow tested against recorded fixtures; no live upload done
+    upload:
+      endpoint: {value: "POST https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status", kind: documented, source: *yt_resumable, verified: "2026-11-12"}
+      protocol: {value: "initiate (X-Upload-Content-Length/-Type) -> 200 + Location session URI -> PUT bytes -> 201; on interruption PUT 'Content-Range: bytes */TOTAL' -> 308 + Range; retry 500/502/503/504 with exponential backoff (honour Retry-After); 404 = session expired, restart", kind: documented, source: *yt_resumable, verified: "2026-11-12"}
+      scopes: {value: ["https://www.googleapis.com/auth/youtube.upload"], kind: documented, source: *yt_insert, verified: "2026-11-12", note: "any of youtube.upload, youtube, youtubepartner, youtube.force-ssl authorises videos.insert; NEXUS asks for the narrowest"}
+      max_file_bytes: {value: 256000000000, kind: documented, source: *yt_insert, verified: "2026-11-12"}
+      mime: {value: ["video/*", "application/octet-stream"], kind: documented, source: *yt_insert, verified: "2026-11-12"}
+      unverified_app_visibility: {value: "not restricted", kind: documented, source: *yt_insert, verified: "2026-11-12", note: "the page reads 'Videos uploaded from unverified API projects are not restricted to private viewing mode.' NEXUS still uploads privacyStatus=private unless the owner approved public"}
+      app_review: {value: "none required for the owner's own Google Cloud project; more quota via the quota extension form", kind: documented, source: *yt_quota, verified: "2026-11-12"}
+      thumbnail: {value: "thumbnails.set (custom thumbnails need a verified channel, platforms.yaml yt_thumbnails)", kind: documented, source: *yt_quota, verified: "2026-11-12"}
+    quota:
+      value: {daily_units: 10000, videos_insert: "1 unit per call in a separate 'Video Uploads' bucket limited to 100 calls/day", thumbnails_set: 50, videos_list: 1}
+      kind: documented
+      source: *yt_quota
+      verified: "2026-11-12"
+      note: "the older figure '1600 units per videos.insert' is NOT what the current pages state; both the quota-cost page and videos.insert page say 100 uploads/day at 1 unit each in their own bucket"
+    oauth:
+      value: {flow: "installed app, loopback redirect http://127.0.0.1:<port>, PKCE S256", auth_endpoint: "https://accounts.google.com/o/oauth2/v2/auth", token_endpoint: "https://oauth2.googleapis.com/token", oob: "no longer supported"}
+      kind: documented
+      source: *google_native
+      verified: "2026-11-12"
+    analytics:
+      value: {endpoint: "GET https://youtubeanalytics.googleapis.com/v2/reports", required: [ids, startDate, endDate, metrics], scopes: ["https://www.googleapis.com/auth/yt-analytics.readonly", "https://www.googleapis.com/auth/youtube.readonly"], metrics: [views, estimatedMinutesWatched, averageViewDuration, averageViewPercentage, audienceWatchRatio, relativeRetentionPerformance, subscribersGained, subscribersLost, likes, comments, shares], retention: "dimensions=elapsedVideoTimeRatio, one video per request", impressions_ctr: "not on the metrics page read - import from the YouTube Studio export"}
+      kind: documented
+      source: *yt_metrics
+      verified: "2026-11-12"
+      note: "reports.query page (yt_reports) says requests now require youtube.readonly; averageViewDuration excludes looping clips since 2021-12-13"
+    default_visibility: private
+
+  youtube_shorts:
+    same_as: youtube
+    adapter: youtube
+    adapter_status: implemented_untested_live
+    note: "same endpoint; classification as a Short follows the media rules in platforms.yaml (vertical/square, <= 180 s)"
+    default_visibility: private
+
+  tiktok:
+    adapter: tiktok
+    adapter_status: requires_approved_app
+    upload:
+      endpoint: {value: "POST https://open.tiktokapis.com/v2/post/publish/video/init/ (then PUT chunks to upload_url, poll /v2/post/publish/status/fetch/)", kind: documented, source: *tt_start, verified: "2026-11-12", note: "init URL quoted from the get-started page; the status endpoint is in the direct-post reference (tt_direct, read by platforms.yaml)"}
+      scopes: {value: ["video.publish"], kind: documented, source: *tt_start, verified: "2026-11-12"}
+      unverified_app_visibility: {value: "private only (SELF_ONLY) until audited", kind: documented, source: *tt_start, verified: "2026-11-12", note: "'All content posted by unaudited clients will be restricted to private viewing mode.'"}
+      app_review: {value: "Content Posting API product + video.publish scope approval; audit to lift the private-only restriction (https://developers.tiktok.com/application/content-posting-api)", kind: documented, source: *tt_start, verified: "2026-11-12"}
+    quota: {value: null, kind: unverified, note: "no daily posting cap stated on the get-started page"}
+    analytics: {value: {api: "Display API video object", fields: [view_count, like_count, comment_count, share_count]}, kind: documented, source: *tt_video_obj, verified: "2026-11-12", note: "no watch time/retention -> TikTok Studio CSV export"}
+    default_visibility: private
+
+  instagram_reels:
+    adapter: meta_instagram
+    adapter_status: requires_approved_app
+    upload:
+      endpoint: {value: "POST /{ig-user-id}/media (media_type=REELS, video_url or upload_type=resumable) -> rupload.facebook.com/ig-api-upload/<ver>/<container> -> GET /<container>?fields=status_code -> POST /{ig-user-id}/media_publish", kind: documented, source: *ig_publishing, verified: "2026-11-12"}
+      scopes: {value: {instagram_login: [instagram_business_basic, instagram_business_content_publish], facebook_login: [instagram_basic, instagram_content_publish, pages_read_engagement]}, kind: documented, source: *ig_publishing, verified: "2026-11-12"}
+      account: {value: "Instagram professional account; linked Page must not require Page Publishing Authorization", kind: documented, source: *ig_publishing, verified: "2026-11-12"}
+      app_review: {value: "Advanced or Standard Access level; review process not described on the page read", kind: documented, source: *ig_publishing, verified: "2026-11-12"}
+      unverified_app_visibility: {value: "no private/draft mode: media_publish publishes", kind: documented, source: *ig_publishing, verified: "2026-11-12", note: "hence the adapter never calls media_publish without approval == approved_by_owner"}
+      status_codes: {value: [IN_PROGRESS, FINISHED, PUBLISHED, ERROR, EXPIRED], kind: documented, source: *ig_publishing, verified: "2026-11-12"}
+    quota: {value: "100 API-published posts per account per 24 h (carousel section says 50); check GET /{ig-user-id}/content_publishing_limit", kind: documented, source: *ig_publishing, verified: "2026-11-12"}
+    analytics: {value: {api: "Instagram media insights", metrics: [views, reach, ig_reels_avg_watch_time, reels_skip_rate, likes, comments, shares, saved, total_interactions]}, kind: documented, source: *ig_insights, verified: "2026-11-12", note: "professional (business/creator) account required"}
+    default_visibility: draft
+
+  instagram_feed:
+    same_as: instagram_reels
+    adapter: meta_instagram
+    adapter_status: requires_approved_app
+    default_visibility: draft
+
+  facebook:
+    adapter: meta_facebook
+    adapter_status: requires_approved_app
+    upload:
+      endpoint: {value: "POST /{page-id}/videos (Video API); reels: POST /{page-id}/video_reels (upload_phase start/finish)", kind: documented, source: *fb_video_api, verified: "2026-11-12"}
+      scopes: {value: [pages_show_list, pages_read_engagement, pages_manage_posts], kind: documented, source: *fb_video_api, verified: "2026-11-12", note: "Page access token; user with CREATE_CONTENT on the Page"}
+      app_review: {value: "Meta app review for the Page permissions", kind: documented, source: *fb_video_api, verified: "2026-11-12"}
+      unverified_app_visibility: {value: "Pages only; API reels publish publicly", kind: documented, source: *fb_reels_api, verified: "2026-11-12"}
+    quota: {value: "30 API-published reels per Page per 24 h", kind: documented, source: *fb_reels_api, verified: "2026-11-12"}
+    analytics: {value: {endpoint: "GET /{video-id}/video_insights", metrics: [total_video_views, total_video_avg_time_watched, total_video_view_total_time, total_video_retention_graph], permissions: [read_insights, pages_manage_engagement], limits: "Page videos only; last 2 years"}, kind: documented, source: *fb_video_insights, verified: "2026-11-12"}
+    default_visibility: draft
+
+  snapchat_spotlight:
+    adapter: snapchat_manual
+    adapter_status: manual_export_only
+    upload:
+      endpoint: {value: null, kind: unverified, note: "no public organic Spotlight upload endpoint found. Public Profile API is 'currently allowlist only' (scope snapchat-profile-api, OAuth app via Ads Manager) and its get-started page documents reading, not posting"}
+      manual: {value: "profile.snapchat.com web upload, 'Spotlight Snaps'", kind: documented, source: *sc_web, verified: "2026-11-12"}
+      app_review: {value: "Public Profile API: allowlist via Snap point of contact", kind: documented, source: *sc_profile_api, verified: "2026-11-12"}
+    quota: {value: null, kind: unverified, note: "n/a (manual)"}
+    analytics: {value: "Marketing (Ads) API reports ad performance only; organic stats via Public Profile API for allowlisted profiles; otherwise in-app Insights / manual entry", kind: documented, source: *sc_ads_api, verified: "2026-11-12"}
+    default_visibility: draft
+
+# Differences found against nexus/registry/platforms.yaml (raised as integration requests; this package never edits it).
+corrections:
+  - {platform: youtube, field: analytics_api, registry_says: "metric names not read this session", correct: "metrics verified on yt_metrics (views, estimatedMinutesWatched, averageViewDuration, averageViewPercentage, audienceWatchRatio, subscribersGained, ...); endpoint youtubeanalytics.googleapis.com/v2/reports; impressions/CTR not on the metrics page", source: *yt_metrics}
+  - {platform: youtube, field: upload_api, registry_says: "no thumbnail cost / scope", correct: "add scope youtube.upload, thumbnails.set = 50 units, resumable protocol (yt_resumable)", source: *yt_quota}
+  - {platform: facebook, field: analytics_api, registry_says: null, correct: "GET /{video-id}/video_insights with total_video_views, total_video_avg_time_watched, total_video_retention_graph (Page videos only, 2 years)", source: *fb_video_insights}
+  - {platform: snapchat_spotlight, field: upload_api, registry_says: null, correct: "still no organic upload API, but note the allowlist-only Public Profile API (scope snapchat-profile-api) and that the Marketing API is ads-only", source: *sc_profile_api}
+  - {platform: instagram_reels, field: upload_api, registry_says: "no PPA / resumable note", correct: "resumable upload only with Facebook Login for Business; Page Publishing Authorization blocks publishing; container EXPIRED after 24 h", source: *ig_publishing}

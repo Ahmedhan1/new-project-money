@@ -8,8 +8,15 @@ from . import create, db, llm, project as prj, qa
 SYSTEM = "You are a showrunner and screenwriter. You follow the requested output format exactly, with no extra commentary."
 
 
+_KEYS = "AUDIO|CHARACTER|CLIFFHANGER|EVENT|GENRE|LOCATION|LOGLINE|RULE|SCENE|SHOT|SUMMARY|THEME|TITLE|VISUAL"
+# A small model sometimes writes two records on one line ("... rusting fishing nets LOCATION: Lunar Reef | ..."): the
+# second record used to be swallowed into the first one's text (Test F bible lost its second location).
+_INLINE_KEY = re.compile(rf"(?<=\S)[ \t]+(?=\**(?:{_KEYS})\**\s*\d*\s*:)")
+
+
 def _fields(raw: str) -> dict[str, list[str]]:
     """Parse 'KEY: value' lines (keys may repeat). Plain text is far more reliable than JSON on a small local model."""
+    raw = _INLINE_KEY.sub("\n", raw)
     out: dict[str, list[str]] = {}
     for m in re.finditer(r"^\s*\**([A-Z][A-Z_ ]{2,20}?)\**\s*\d*\s*:\s*(.+)$", raw, re.M):
         out.setdefault(m.group(1).strip().upper().replace(" ", "_"), []).append(m.group(2).strip(" *"))
@@ -57,6 +64,73 @@ def _bible_text(b: dict) -> str:
     canon = "\n".join(f"- (ep {e['episode']}) {e['event']}" for e in b["canon"]) or "- none yet"
     return (f"SERIES: {b['title']} ({b['genre']})\nLOGLINE: {b['logline']}\nWORLD RULES:\n" + "\n".join(f"- {r}" for r in b["world_rules"])
             + f"\nCHARACTERS:\n{chars}\nLOCATIONS:\n{locs}\nCANONICAL EVENTS SO FAR:\n{canon}")
+
+
+# ------------------------------------------------------------------ locations (QLT-1)
+_LOOK_STOP = set("with and the a an of in on at under over its their his her by from into through near beside lit full "
+                 "very old new some many few each every one two three".split())
+
+
+def _words(text: str) -> list[str]:
+    return re.findall(r"[^\W\d_]+", text.lower())
+
+
+def location_for(b: dict, name: str) -> dict | None:
+    """The bible location a scene's location string refers to: exact name, then containment, then shared words."""
+    n = (name or "").strip().lower()
+    if not n:
+        return None
+    locs = b.get("locations") or []
+    for l in locs:
+        if l["name"].strip().lower() == n:
+            return l
+    for l in locs:
+        ln = l["name"].strip().lower()
+        if ln and (ln in n or n in ln):
+            return l
+    want = {w for w in _words(n) if len(w) > 2 and w not in _LOOK_STOP}
+    best = max(locs, key=lambda l: len(want & set(_words(l["name"]))), default=None)
+    return best if best is not None and want & set(_words(best["name"])) else None
+
+
+def visual_query_for(b: dict, loc: dict | None, fallback: str = "") -> str:
+    """A photo search phrase for a location built from its LOOK text (generic nouns such as 'misty pine valley'), never
+    from its fictional name ('Hollow of Ashveil' finds nothing, or something unrelated). Words of character and
+    location names are removed, so the query only describes what the place looks like."""
+    if not loc:
+        return fallback
+    names = {w for c in b.get("characters") or [] for w in _words(c.get("name", ""))}
+    names |= {w for l in b.get("locations") or [] for w in _words(l.get("name", ""))}
+    words = [w for w in _words(loc.get("look", "")) if len(w) > 2 and w not in _LOOK_STOP and w not in names]
+    out: list[str] = []
+    for w in words:
+        if w not in out:
+            out.append(w)
+    return " ".join(out[:4]) or fallback
+
+
+def repair_locations(b: dict, ep: dict) -> list[dict]:
+    """Scenes set in a place the bible does not know are moved to the bible location they describe best (shared words
+    with its name and look, from the scene's location and narration); with no overlap at all, to the location used
+    by the nearest earlier scene, else the bible's first location. Every change is recorded on the scene
+    (`location_repaired_from`) and returned, so the reviewer sees it - nothing is silently rewritten."""
+    locs = b.get("locations") or []
+    if not locs:
+        return []
+    repairs, prev = [], None
+    for i, sc in enumerate(ep.get("scenes") or []):
+        loc = location_for(b, sc.get("location", ""))
+        if loc is None:
+            want = {w for w in _words(sc.get("location", "") + " " + sc.get("narration", "")) if len(w) > 3 and w not in _LOOK_STOP}
+            scores = [len(want & {w for w in _words(l["name"] + " " + l.get("look", "")) if len(w) > 3}) for l in locs]
+            top = max(range(len(locs)), key=lambda k: scores[k])
+            loc = locs[top] if scores[top] > 0 else (prev or locs[0])
+            reason = "shared words with the bible location" if scores[top] > 0 else ("previous scene's location" if prev else "first bible location")
+            repairs.append({"scene": i + 1, "from": sc.get("location", ""), "to": loc["name"], "reason": reason})
+            sc["location_repaired_from"] = sc.get("location", "")
+            sc["location"] = loc["name"]
+        prev = loc
+    return repairs
 
 
 def plan_season(b: dict, n: int) -> list[dict]:
@@ -133,7 +207,13 @@ def next_episode(series_id: str, scenes: int = 4, rounds: int = 3) -> tuple[dict
     best, feedback = None, ""
     for attempt in range(rounds):
         ep = write_episode(b, number, scenes, feedback)
+        off = [sc.get("location", "") for sc in ep["scenes"] if location_for(b, sc.get("location", "")) is None]
+        repairs = repair_locations(b, ep)
         review = continuity_review(b, ep)
+        if repairs:  # recorded, never hidden: the writer still gets the off-bible names as feedback on the next attempt
+            review["checks"].append(qa._c("off-bible locations repaired", True, f"{len(repairs)} scene(s) moved to bible locations: "
+                                          + "; ".join(f"scene {r['scene']}: {r['from']!r} -> {r['to']!r}" for r in repairs), "minor"))
+            review["checks"].append(qa._c("writer used only bible locations", False, f"not in bible before repair: {off}", "minor"))
         failed = [c for c in review["checks"] if not c["ok"]]  # minor findings (e.g. off-bible locations) are fed back too
         feedback = "\n".join(f"- {c['check']}: {c['detail']}" for c in failed)
         fails = sum(c["severity"] != "minor" for c in failed)
@@ -158,7 +238,11 @@ def produce_episode(b: dict, ep: dict, review: dict, size=(1280, 720)) -> dict:
         scenes.append({"narration": f"Previously on {b['title']}. {prev['summary']}", "on_screen_text": "Previously", "visual_query": ""})
     # Fiction has no photos of its characters, but its places exist: each scene gets a licensed establishing image of
     # its location (people-free search terms), instead of a gradient title card.
-    scenes += [{"narration": s["narration"], "on_screen_text": s["on_screen_text"] or s["location"], "visual_query": s["location"]} for s in ep["scenes"]]
+    # The query describes what the place LOOKS like (bible look text); repeated locations reuse their image (`reuse_key`).
+    for s in ep["scenes"]:
+        loc = location_for(b, s["location"])
+        scenes.append({"narration": s["narration"], "on_screen_text": s["on_screen_text"] or s["location"],
+                       "visual_query": visual_query_for(b, loc, s["location"]), "reuse_key": f"location:{loc['name']}" if loc else None})
     scenes.append({"narration": ep["cliffhanger"], "on_screen_text": "To be continued", "visual_query": ""})
     script = {"title": f"{b['title']}: {ep['title']}", "topic": b["logline"], "scenes": scenes}
     tl = create.produce(p, script, size=size, style=b["style"], use_stock=True)

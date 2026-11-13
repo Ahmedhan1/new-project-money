@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from pathlib import Path
 import threading
 import time
 import uuid
@@ -85,18 +86,37 @@ def schema_version() -> int:
         return conn().execute("PRAGMA user_version").fetchone()[0]
 
 
+class DatabaseDamaged(RuntimeError):
+    """nexus.db cannot be opened as a database (QA-D2). Carries a plain recovery message instead of a traceback."""
+
+    def __init__(self, path, err):
+        self.path = path
+        super().__init__(
+            f"the NEXUS database {path} is damaged ({err}). Your projects and media files are not affected. "
+            f"Recover it from a verified backup into a new folder: `python -m nexus restore <new folder>` "
+            f"(NEXUS_RESTORE.bat on Windows), then start NEXUS with NEXUS_HOME set to that folder. "
+            f"Or move {Path(path).name} away to start with an empty project list.")
+
+
 def conn() -> sqlite3.Connection:
     global _conn
     with _lock:
         if _conn is None:
             config.ensure_dirs()
-            _conn = sqlite3.connect(config.DB_PATH, check_same_thread=False, timeout=30)
-            _conn.row_factory = sqlite3.Row
-            # WAL + busy timeout: the API and the worker are separate processes sharing this file.
-            _conn.execute("PRAGMA journal_mode=WAL")
-            _conn.execute("PRAGMA busy_timeout=30000")
-            _conn.executescript(SCHEMA)
-            _migrate(_conn)
+            c = sqlite3.connect(config.DB_PATH, check_same_thread=False, timeout=30)
+            try:
+                c.row_factory = sqlite3.Row
+                # WAL + busy timeout: the API and the worker are separate processes sharing this file.
+                c.execute("PRAGMA journal_mode=WAL")
+                c.execute("PRAGMA busy_timeout=30000")
+                c.executescript(SCHEMA)
+                _migrate(c)
+            except sqlite3.DatabaseError as e:
+                c.close()
+                if isinstance(e, sqlite3.OperationalError) and "locked" in str(e).lower():
+                    raise
+                raise DatabaseDamaged(config.DB_PATH, e) from None
+            _conn = c
         return _conn
 
 

@@ -65,6 +65,8 @@ def preflight() -> list[dict]:
     try:
         from . import db
         add("database", True, f"{config.DB_PATH.name} schema v{db.schema_version()}")
+    except db.DatabaseDamaged as e:
+        add("database", False, str(e), "python -m nexus restore <new folder>  (NEXUS_RESTORE.bat)")
     except Exception as e:
         add("database", False, f"{type(e).__name__}: {e}", "restore the database from a backup: NEXUS_RESTORE")
     return out
@@ -193,6 +195,13 @@ def stop(say=print) -> int:
         _pidfile(name).unlink(missing_ok=True)
     say(f"stopped {n} service(s)" if n else "NEXUS was not running")
     return 0
+
+
+def restart(port: int | None = None, open_browser: bool = False, say=print) -> int:
+    """Stop then start (jobs resume from their checkpoints). Used by the System page and `nexus restart`."""
+    stop(say=say)
+    time.sleep(1.0)
+    return start(port=port, open_browser=open_browser, say=say)
 
 
 def service_status() -> dict:

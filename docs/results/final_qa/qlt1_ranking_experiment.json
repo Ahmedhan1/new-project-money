@@ -1,0 +1,191 @@
+{
+ "schema": "nexus.QLT1RankingExperiment/1",
+ "result": "NOT ADOPTED",
+ "base": "9752d919858abdd434501bd13d3a8274a9f41cca",
+ "change_tried": "rank_hits: Unicode letters instead of [a-zA-Z] (+ Arabic al- stripped) so ar/ru/hi hits are ranked, not left in engine order",
+ "finding": "no measurable gain on live ar/ru Wikipedia: mean title coverage of the top page 0.786 before and after (7 topics; 4 timed out); one regression ('озеро Байкал' -> generic page 'Озеро' ranked first) because rank_hits' IDF down-weights the topic's head word when every hit contains it. Reverted; deferred (DEF-QA-3).",
+ "live": {
+  "fixture_ar_top": {
+   "before": "قطار",
+   "after": "الأهرامات المصرية"
+  },
+  "wikipedia_live": {
+   "rows": [
+    {
+     "lang": "ar",
+     "topic": "الأهرامات",
+     "engine_order": [
+      "أهرام الجيزة",
+      "هرم",
+      "طريقة بناء الأهرام المصرية",
+      "مسح الأهرامات"
+     ],
+     "before_top2": [
+      "أهرام الجيزة",
+      "هرم"
+     ],
+     "after_top2": [
+      "أهرام الجيزة",
+      "مسح الأهرامات"
+     ],
+     "before_top_coverage": 0.5,
+     "after_top_coverage": 0.5,
+     "changed": true
+    },
+    {
+     "lang": "ar",
+     "topic": "نهر النيل",
+     "engine_order": [
+      "نهر النيل",
+      "ولاية نهر النيل",
+      "النيل الأزرق",
+      "نهر النيل (كتاب)"
+     ],
+     "before_top2": [
+      "نهر النيل",
+      "ولاية نهر النيل"
+     ],
+     "after_top2": [
+      "نهر النيل",
+      "ولاية نهر النيل"
+     ],
+     "before_top_coverage": 1.0,
+     "after_top_coverage": 1.0,
+     "changed": false
+    },
+    {
+     "lang": "ar",
+     "topic": "سد أسوان العالي",
+     "error": "RemoteUnavailable"
+    },
+    {
+     "lang": "ar",
+     "topic": "الطاقة الشمسية",
+     "error": "RemoteUnavailable"
+    },
+    {
+     "lang": "ar",
+     "topic": "تغير المناخ",
+     "error": "RemoteUnavailable"
+    },
+    {
+     "lang": "ar",
+     "topic": "الخط العربي",
+     "error": "RemoteUnavailable"
+    },
+    {
+     "lang": "ru",
+     "topic": "вакцина иммунитет",
+     "engine_order": [
+      "Инактивированная вакцина",
+      "ДНК-вакцина",
+      "Вакцина против полиомиелита",
+      "Корь"
+     ],
+     "before_top2": [
+      "Инактивированная вакцина",
+      "ДНК-вакцина"
+     ],
+     "after_top2": [
+      "Иммунитет",
+      "Вакцина против полиомиелита"
+     ],
+     "before_top_coverage": 0.5,
+     "after_top_coverage": 0.5,
+     "changed": true
+    },
+    {
+     "lang": "ru",
+     "topic": "озеро Байкал",
+     "engine_order": [
+      "Байкал",
+      "Ветры озера Байкал",
+      "Байкальская нерпа",
+      "Озеро"
+     ],
+     "before_top2": [
+      "Байкал",
+      "Ветры озера Байкал"
+     ],
+     "after_top2": [
+      "Озеро",
+      "Байкал"
+     ],
+     "before_top_coverage": 0.5,
+     "after_top_coverage": 0.5,
+     "changed": true
+    },
+    {
+     "lang": "ru",
+     "topic": "солнечная энергия",
+     "engine_order": [
+      "Солнечная энергия",
+      "Солнечная энергетика",
+      "Энергия",
+      "Солнечная батарея"
+     ],
+     "before_top2": [
+      "Солнечная энергия",
+      "Солнечная энергетика"
+     ],
+     "after_top2": [
+      "Солнечная энергия",
+      "Солнечная энергетика"
+     ],
+     "before_top_coverage": 1.0,
+     "after_top_coverage": 1.0,
+     "changed": false
+    },
+    {
+     "lang": "ru",
+     "topic": "изменение климата",
+     "engine_order": [
+      "Изменение климата",
+      "Глобальное потепление",
+      "Климат",
+      "Изменение климата Арктики"
+     ],
+     "before_top2": [
+      "Изменение климата",
+      "Глобальное потепление"
+     ],
+     "after_top2": [
+      "Изменение климата",
+      "Изменение климата Арктики"
+     ],
+     "before_top_coverage": 1.0,
+     "after_top_coverage": 1.0,
+     "changed": true
+    },
+    {
+     "lang": "ru",
+     "topic": "Транссибирская магистраль",
+     "engine_order": [
+      "Транссибирская магистраль",
+      "Транссибирская магистраль (значения)",
+      "Список остановочных пунктов главного хода Транссибирской магистрали (Москва — Омск)",
+      "Байкало-Амурская магистраль"
+     ],
+     "before_top2": [
+      "Транссибирская магистраль",
+      "Транссибирская магистраль (значения)"
+     ],
+     "after_top2": [
+      "Транссибирская магистраль",
+      "Транссибирская магистраль (значения)"
+     ],
+     "before_top_coverage": 1.0,
+     "after_top_coverage": 1.0,
+     "changed": false
+    }
+   ],
+   "topics": 7,
+   "top2_changed": 4,
+   "mean_top_coverage": {
+    "before": 0.786,
+    "after": 0.786
+   },
+   "coverage": "share of the topic's word stems found in the top page's title"
+  }
+ }
+}

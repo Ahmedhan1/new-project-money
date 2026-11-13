@@ -1,0 +1,767 @@
+{
+ "schema": "nexus.LanguageReadiness/1",
+ "generated": "2026-11-12T22:49:58",
+ "weights": {
+  "transcription": 10,
+  "translation": 15,
+  "subtitle_rendering": 15,
+  "human_reviewed": 15,
+  "tts": 10,
+  "commercial_dubbing_licensed": 10,
+  "lip_sync": 5,
+  "end_to_end_validated": 20
+ },
+ "note": "no native-speaker reviews recorded yet on this machine; OCR packs: ara chi_sim deu eng hin rus (no jpn/kor)",
+ "languages": [
+  {
+   "tag": "en",
+   "name": "English",
+   "score": 87.0,
+   "level": "subtitles_publishable",
+   "dimensions": {
+    "transcription": {
+     "state": "available",
+     "evidence": "whisper-small installed; word error rate not measured for this language here"
+    },
+    "translation": {
+     "state": "n/a",
+     "evidence": "source language"
+    },
+    "subtitle_rendering": {
+     "state": "verified",
+     "evidence": "rendered and read back by OCR: recall 1.0"
+    },
+    "human_reviewed": {
+     "state": "n/a",
+     "evidence": "source language (owner reviews the script)"
+    },
+    "tts": {
+     "state": "available",
+     "evidence": "cleared voice installed: ['en_US-joe-medium', 'en_US-ljspeech-medium']"
+    },
+    "commercial_dubbing_licensed": {
+     "state": "verified",
+     "evidence": "licence read from first-party source: [('en_US-joe-medium', 'dataset CC0; base rdh CC0'), ('en_US-ljspeech-medium', 'LJ Speech public domain')]"
+    },
+    "lip_sync": {
+     "state": "unavailable",
+     "evidence": "no lip-sync model with a cleared commercial licence installed (Account 2 scope)"
+    },
+    "end_to_end_validated": {
+     "state": "verified",
+     "evidence": "research -> script -> render (Demo 4); frames inspected by eye"
+    }
+   },
+   "blockers": [],
+   "terminology": {
+    "terms": 0,
+    "native_review": 0
+   },
+   "review": null
+  },
+  {
+   "tag": "de",
+   "name": "German",
+   "score": 56.0,
+   "level": "draft_needs_native_review",
+   "dimensions": {
+    "transcription": {
+     "state": "available",
+     "evidence": "whisper-small installed; word error rate not measured for this language here"
+    },
+    "translation": {
+     "state": "available",
+     "evidence": "real MT run: QA confidence 0.741, lines needing fix [1, 2, 6]; not native-reviewed"
+    },
+    "subtitle_rendering": {
+     "state": "verified",
+     "evidence": "rendered and read back by OCR: recall 1.0"
+    },
+    "human_reviewed": {
+     "state": "unavailable",
+     "evidence": "no native-speaker review recorded"
+    },
+    "tts": {
+     "state": "verified",
+     "evidence": "voice-over rendered with de_DE-thorsten-medium"
+    },
+    "commercial_dubbing_licensed": {
+     "state": "verified",
+     "evidence": "licence read from first-party source: [('de_DE-thorsten-medium', 'dataset CC0 (Thorsten-Voice); base rdh CC0'), ('de_DE-kerstin-medium', 'dataset CC0; base Hi-Fi TTS CC BY 4.0')]"
+    },
+    "lip_sync": {
+     "state": "unavailable",
+     "evidence": "no lip-sync model with a cleared commercial licence installed (Account 2 scope)"
+    },
+    "end_to_end_validated": {
+     "state": "partial",
+     "evidence": "translate -> QA -> subtitles -> voice-over ran on real text; not human-validated"
+    }
+   },
+   "blockers": [
+    "human_reviewed: no native-speaker review recorded",
+    "end_to_end_validated: translate -> QA -> subtitles -> voice-over ran on real text; not human-validated"
+   ],
+   "terminology": {
+    "terms": 0,
+    "native_review": 0
+   },
+   "review": null
+  },
+  {
+   "tag": "fr",
+   "name": "French",
+   "score": 56.0,
+   "level": "draft_needs_native_review",
+   "dimensions": {
+    "transcription": {
+     "state": "available",
+     "evidence": "whisper-small installed; word error rate not measured for this language here"
+    },
+    "translation": {
+     "state": "available",
+     "evidence": "real MT run: QA confidence 0.813, lines needing fix [1]; not native-reviewed"
+    },
+    "subtitle_rendering": {
+     "state": "verified",
+     "evidence": "rendered and read back by OCR: recall 0.976"
+    },
+    "human_reviewed": {
+     "state": "unavailable",
+     "evidence": "no native-speaker review recorded"
+    },
+    "tts": {
+     "state": "verified",
+     "evidence": "voice-over rendered with fr_FR-siwis-medium"
+    },
+    "commercial_dubbing_licensed": {
+     "state": "verified",
+     "evidence": "licence read from first-party source: [('fr_FR-siwis-medium', 'dataset SIWIS CC BY 4.0; base Hi-Fi TTS CC BY 4.0'), ('fr_FR-mls-medium', 'Multilingual LibriSpeech CC BY 4.0')]"
+    },
+    "lip_sync": {
+     "state": "unavailable",
+     "evidence": "no lip-sync model with a cleared commercial licence installed (Account 2 scope)"
+    },
+    "end_to_end_validated": {
+     "state": "partial",
+     "evidence": "translate -> QA -> subtitles -> voice-over ran on real text; not human-validated"
+    }
+   },
+   "blockers": [
+    "human_reviewed: no native-speaker review recorded",
+    "end_to_end_validated: translate -> QA -> subtitles -> voice-over ran on real text; not human-validated"
+   ],
+   "terminology": {
+    "terms": 0,
+    "native_review": 0
+   },
+   "review": null
+  },
+  {
+   "tag": "ar",
+   "name": "Modern Standard Arabic",
+   "score": 33.0,
+   "level": "draft_needs_native_review",
+   "dimensions": {
+    "transcription": {
+     "state": "available",
+     "evidence": "whisper-small installed; word error rate not measured for this language here"
+    },
+    "translation": {
+     "state": "available",
+     "evidence": "engines ['madlad400-3b', 'router-llm']; no QA'd run for this language yet"
+    },
+    "subtitle_rendering": {
+     "state": "verified",
+     "evidence": "rendered and read back by OCR: recall 1.0"
+    },
+    "human_reviewed": {
+     "state": "unavailable",
+     "evidence": "no native-speaker review recorded"
+    },
+    "tts": {
+     "state": "partial",
+     "evidence": "only voices with commercial use ['no', 'unverified']: ['ar_JO-kareem-medium', 'mms-tts-ara']"
+    },
+    "commercial_dubbing_licensed": {
+     "state": "unavailable",
+     "evidence": "no voice with a verified commercial licence (unverified / non-commercial only)"
+    },
+    "lip_sync": {
+     "state": "unavailable",
+     "evidence": "no lip-sync model with a cleared commercial licence installed (Account 2 scope)"
+    },
+    "end_to_end_validated": {
+     "state": "unavailable",
+     "evidence": "never run end to end for this language"
+    }
+   },
+   "blockers": [
+    "human_reviewed: no native-speaker review recorded",
+    "tts: only voices with commercial use ['no', 'unverified']: ['ar_JO-kareem-medium', 'mms-tts-ara']",
+    "commercial_dubbing_licensed: no voice with a verified commercial licence (unverified / non-commercial only)",
+    "end_to_end_validated: never run end to end for this language"
+   ],
+   "terminology": {
+    "terms": 0,
+    "native_review": 0
+   },
+   "review": null
+  },
+  {
+   "tag": "ar-EG",
+   "name": "Egyptian Arabic",
+   "score": 36.0,
+   "level": "draft_needs_native_review",
+   "dimensions": {
+    "transcription": {
+     "state": "partial",
+     "evidence": "whisper-small: one 'ar' code for all varieties - no dialect label, not measured on dialect speech"
+    },
+    "translation": {
+     "state": "available",
+     "evidence": "real MT run: QA confidence 0.862, lines needing fix [5, 6]; not native-reviewed"
+    },
+    "subtitle_rendering": {
+     "state": "verified",
+     "evidence": "rendered and read back by OCR: recall 1.0"
+    },
+    "human_reviewed": {
+     "state": "unavailable",
+     "evidence": "no native-speaker review recorded"
+    },
+    "tts": {
+     "state": "partial",
+     "evidence": "cleared voice None but the voice-over failed: no commercially cleared voice for ar-EG [ar_JO-kareem-medium (unverified)] - deliver subtitles, or supply a voice you hold the rights to"
+    },
+    "commercial_dubbing_licensed": {
+     "state": "unavailable",
+     "evidence": "no voice with a verified commercial licence (unverified / non-commercial only)"
+    },
+    "lip_sync": {
+     "state": "unavailable",
+     "evidence": "no lip-sync model with a cleared commercial licence installed (Account 2 scope)"
+    },
+    "end_to_end_validated": {
+     "state": "partial",
+     "evidence": "translate -> QA -> subtitles ran on real text; not human-validated"
+    }
+   },
+   "blockers": [
+    "transcription: whisper-small: one 'ar' code for all varieties - no dialect label, not measured on dialect speech",
+    "human_reviewed: no native-speaker review recorded",
+    "tts: cleared voice None but the voice-over failed: no commercially cleared voice for ar-EG [ar_JO-kareem-medium (unverified)] - deliver subtitles, or supply a voice you hold the rights to",
+    "commercial_dubbing_licensed: no voice with a verified commercial licence (unverified / non-commercial only)",
+    "end_to_end_validated: translate -> QA -> subtitles ran on real text; not human-validated"
+   ],
+   "terminology": {
+    "terms": 0,
+    "native_review": 0
+   },
+   "review": null
+  },
+  {
+   "tag": "ar-Gulf",
+   "name": "Gulf Arabic",
+   "score": 31.5,
+   "level": "draft_needs_native_review",
+   "dimensions": {
+    "transcription": {
+     "state": "partial",
+     "evidence": "whisper-small: one 'ar' code for all varieties - no dialect label, not measured on dialect speech"
+    },
+    "translation": {
+     "state": "partial",
+     "evidence": "real MT run: QA confidence 0.606, lines needing fix [1, 2, 4, 6, 7]; not native-reviewed; Gulf output still classifies as MSA (K-15)"
+    },
+    "subtitle_rendering": {
+     "state": "verified",
+     "evidence": "rendered and read back by OCR: recall 0.987"
+    },
+    "human_reviewed": {
+     "state": "unavailable",
+     "evidence": "no native-speaker review recorded"
+    },
+    "tts": {
+     "state": "partial",
+     "evidence": "cleared voice None but the voice-over failed: no commercially cleared voice for ar-Gulf [ar_JO-kareem-medium (unverified)] - deliver subtitles, or supply a voice you hold the rights to"
+    },
+    "commercial_dubbing_licensed": {
+     "state": "unavailable",
+     "evidence": "no voice with a verified commercial licence (unverified / non-commercial only)"
+    },
+    "lip_sync": {
+     "state": "unavailable",
+     "evidence": "no lip-sync model with a cleared commercial licence installed (Account 2 scope)"
+    },
+    "end_to_end_validated": {
+     "state": "partial",
+     "evidence": "translate -> QA -> subtitles ran on real text; not human-validated"
+    }
+   },
+   "blockers": [
+    "transcription: whisper-small: one 'ar' code for all varieties - no dialect label, not measured on dialect speech",
+    "translation: real MT run: QA confidence 0.606, lines needing fix [1, 2, 4, 6, 7]; not native-reviewed; Gulf output still classifies as MSA (K-15)",
+    "human_reviewed: no native-speaker review recorded",
+    "tts: cleared voice None but the voice-over failed: no commercially cleared voice for ar-Gulf [ar_JO-kareem-medium (unverified)] - deliver subtitles, or supply a voice you hold the rights to",
+    "commercial_dubbing_licensed: no voice with a verified commercial licence (unverified / non-commercial only)",
+    "end_to_end_validated: translate -> QA -> subtitles ran on real text; not human-validated"
+   ],
+   "terminology": {
+    "terms": 0,
+    "native_review": 0
+   },
+   "review": null
+  },
+  {
+   "tag": "zh",
+   "name": "Chinese (Simplified)",
+   "score": 49.0,
+   "level": "draft_needs_native_review",
+   "dimensions": {
+    "transcription": {
+     "state": "available",
+     "evidence": "whisper-small installed; word error rate not measured for this language here"
+    },
+    "translation": {
+     "state": "available",
+     "evidence": "real MT run: QA confidence 0.869, lines needing fix [7, 8]; not native-reviewed"
+    },
+    "subtitle_rendering": {
+     "state": "verified",
+     "evidence": "rendered and read back by OCR: recall 1.0"
+    },
+    "human_reviewed": {
+     "state": "unavailable",
+     "evidence": "no native-speaker review recorded"
+    },
+    "tts": {
+     "state": "partial",
+     "evidence": "cleared voice zh_CN-chaowen-medium but the voice-over failed: Error: # channels not specified"
+    },
+    "commercial_dubbing_licensed": {
+     "state": "verified",
+     "evidence": "licence read from first-party source: [('zh_CN-chaowen-medium', 'dataset CC0; base Hi-Fi TTS CC BY 4.0; needs Piper >= 1.5 + g2pW')]"
+    },
+    "lip_sync": {
+     "state": "unavailable",
+     "evidence": "no lip-sync model with a cleared commercial licence installed (Account 2 scope)"
+    },
+    "end_to_end_validated": {
+     "state": "partial",
+     "evidence": "translate -> QA -> subtitles ran on real text; not human-validated"
+    }
+   },
+   "blockers": [
+    "human_reviewed: no native-speaker review recorded",
+    "tts: cleared voice zh_CN-chaowen-medium but the voice-over failed: Error: # channels not specified",
+    "end_to_end_validated: translate -> QA -> subtitles ran on real text; not human-validated"
+   ],
+   "terminology": {
+    "terms": 0,
+    "native_review": 0
+   },
+   "review": null
+  },
+  {
+   "tag": "ru",
+   "name": "Russian",
+   "score": 56.0,
+   "level": "draft_needs_native_review",
+   "dimensions": {
+    "transcription": {
+     "state": "available",
+     "evidence": "whisper-small installed; word error rate not measured for this language here"
+    },
+    "translation": {
+     "state": "available",
+     "evidence": "real MT run: QA confidence 0.881, lines needing fix [6, 7]; not native-reviewed"
+    },
+    "subtitle_rendering": {
+     "state": "verified",
+     "evidence": "rendered and read back by OCR: recall 1.0"
+    },
+    "human_reviewed": {
+     "state": "unavailable",
+     "evidence": "no native-speaker review recorded"
+    },
+    "tts": {
+     "state": "verified",
+     "evidence": "voice-over rendered with ru_RU-denis-medium"
+    },
+    "commercial_dubbing_licensed": {
+     "state": "verified",
+     "evidence": "licence read from first-party source: [('ru_RU-denis-medium', 'dataset CC0; base rdh CC0')]"
+    },
+    "lip_sync": {
+     "state": "unavailable",
+     "evidence": "no lip-sync model with a cleared commercial licence installed (Account 2 scope)"
+    },
+    "end_to_end_validated": {
+     "state": "partial",
+     "evidence": "translate -> QA -> subtitles -> voice-over ran on real text; not human-validated"
+    }
+   },
+   "blockers": [
+    "human_reviewed: no native-speaker review recorded",
+    "end_to_end_validated: translate -> QA -> subtitles -> voice-over ran on real text; not human-validated"
+   ],
+   "terminology": {
+    "terms": 0,
+    "native_review": 0
+   },
+   "review": null
+  },
+  {
+   "tag": "hi",
+   "name": "Hindi",
+   "score": 49.0,
+   "level": "draft_needs_native_review",
+   "dimensions": {
+    "transcription": {
+     "state": "available",
+     "evidence": "whisper-small installed; word error rate not measured for this language here"
+    },
+    "translation": {
+     "state": "available",
+     "evidence": "real MT run: QA confidence 0.841, lines needing fix [3, 6, 8]; not native-reviewed"
+    },
+    "subtitle_rendering": {
+     "state": "verified",
+     "evidence": "rendered and read back by OCR: recall 0.842"
+    },
+    "human_reviewed": {
+     "state": "unavailable",
+     "evidence": "no native-speaker review recorded"
+    },
+    "tts": {
+     "state": "partial",
+     "evidence": "cleared voice kokoro:hi (one of 4 voices in VOICES.md) but the voice-over failed: voice engine kokoro-82m not integrated"
+    },
+    "commercial_dubbing_licensed": {
+     "state": "verified",
+     "evidence": "licence read from first-party source: [('kokoro:hi (one of 4 voices in VOICES.md)', 'Apache-2.0')]"
+    },
+    "lip_sync": {
+     "state": "unavailable",
+     "evidence": "no lip-sync model with a cleared commercial licence installed (Account 2 scope)"
+    },
+    "end_to_end_validated": {
+     "state": "partial",
+     "evidence": "translate -> QA -> subtitles ran on real text; not human-validated"
+    }
+   },
+   "blockers": [
+    "human_reviewed: no native-speaker review recorded",
+    "tts: cleared voice kokoro:hi (one of 4 voices in VOICES.md) but the voice-over failed: voice engine kokoro-82m not integrated",
+    "end_to_end_validated: translate -> QA -> subtitles ran on real text; not human-validated"
+   ],
+   "terminology": {
+    "terms": 0,
+    "native_review": 0
+   },
+   "review": null
+  },
+  {
+   "tag": "es",
+   "name": "Spanish",
+   "score": 56.0,
+   "level": "draft_needs_native_review",
+   "dimensions": {
+    "transcription": {
+     "state": "available",
+     "evidence": "whisper-small installed; word error rate not measured for this language here"
+    },
+    "translation": {
+     "state": "available",
+     "evidence": "real MT run: QA confidence 0.766, lines needing fix [1, 2, 5]; not native-reviewed"
+    },
+    "subtitle_rendering": {
+     "state": "verified",
+     "evidence": "rendered and read back by OCR: recall 0.971"
+    },
+    "human_reviewed": {
+     "state": "unavailable",
+     "evidence": "no native-speaker review recorded"
+    },
+    "tts": {
+     "state": "verified",
+     "evidence": "voice-over rendered with es_ES-davefx-medium"
+    },
+    "commercial_dubbing_licensed": {
+     "state": "verified",
+     "evidence": "licence read from first-party source: [('es_ES-davefx-medium', 'dataset CC0; base rdh CC0'), ('es_ES-sharvard-medium', 'Sharvard CC BY 3.0; base Hi-Fi TTS CC BY 4.0')]"
+    },
+    "lip_sync": {
+     "state": "unavailable",
+     "evidence": "no lip-sync model with a cleared commercial licence installed (Account 2 scope)"
+    },
+    "end_to_end_validated": {
+     "state": "partial",
+     "evidence": "translate -> QA -> subtitles -> voice-over ran on real text; not human-validated"
+    }
+   },
+   "blockers": [
+    "human_reviewed: no native-speaker review recorded",
+    "end_to_end_validated: translate -> QA -> subtitles -> voice-over ran on real text; not human-validated"
+   ],
+   "terminology": {
+    "terms": 0,
+    "native_review": 0
+   },
+   "review": null
+  },
+  {
+   "tag": "pt",
+   "name": "Portuguese (Brazil)",
+   "score": 43.0,
+   "level": "draft_needs_native_review",
+   "dimensions": {
+    "transcription": {
+     "state": "available",
+     "evidence": "whisper-small installed; word error rate not measured for this language here"
+    },
+    "translation": {
+     "state": "available",
+     "evidence": "engines ['madlad400-3b', 'router-llm']; no QA'd run for this language yet"
+    },
+    "subtitle_rendering": {
+     "state": "verified",
+     "evidence": "rendered and read back by OCR: recall 0.972"
+    },
+    "human_reviewed": {
+     "state": "unavailable",
+     "evidence": "no native-speaker review recorded"
+    },
+    "tts": {
+     "state": "partial",
+     "evidence": "cleared voice exists but is not installed: ['pt_BR-cadu-medium']"
+    },
+    "commercial_dubbing_licensed": {
+     "state": "verified",
+     "evidence": "licence read from first-party source: [('pt_BR-cadu-medium', 'dataset CC0; base rdh CC0')]"
+    },
+    "lip_sync": {
+     "state": "unavailable",
+     "evidence": "no lip-sync model with a cleared commercial licence installed (Account 2 scope)"
+    },
+    "end_to_end_validated": {
+     "state": "unavailable",
+     "evidence": "never run end to end for this language"
+    }
+   },
+   "blockers": [
+    "human_reviewed: no native-speaker review recorded",
+    "tts: cleared voice exists but is not installed: ['pt_BR-cadu-medium']",
+    "end_to_end_validated: never run end to end for this language"
+   ],
+   "terminology": {
+    "terms": 0,
+    "native_review": 0
+   },
+   "review": null
+  },
+  {
+   "tag": "tr",
+   "name": "Turkish",
+   "score": 33.0,
+   "level": "draft_needs_native_review",
+   "dimensions": {
+    "transcription": {
+     "state": "available",
+     "evidence": "whisper-small installed; word error rate not measured for this language here"
+    },
+    "translation": {
+     "state": "available",
+     "evidence": "engines ['madlad400-3b', 'router-llm']; no QA'd run for this language yet"
+    },
+    "subtitle_rendering": {
+     "state": "verified",
+     "evidence": "rendered and read back by OCR: recall 0.914"
+    },
+    "human_reviewed": {
+     "state": "unavailable",
+     "evidence": "no native-speaker review recorded"
+    },
+    "tts": {
+     "state": "partial",
+     "evidence": "only voices with commercial use ['no']: ['tr_TR-dfki-medium']"
+    },
+    "commercial_dubbing_licensed": {
+     "state": "unavailable",
+     "evidence": "no voice with a verified commercial licence (unverified / non-commercial only)"
+    },
+    "lip_sync": {
+     "state": "unavailable",
+     "evidence": "no lip-sync model with a cleared commercial licence installed (Account 2 scope)"
+    },
+    "end_to_end_validated": {
+     "state": "unavailable",
+     "evidence": "never run end to end for this language"
+    }
+   },
+   "blockers": [
+    "human_reviewed: no native-speaker review recorded",
+    "tts: only voices with commercial use ['no']: ['tr_TR-dfki-medium']",
+    "commercial_dubbing_licensed: no voice with a verified commercial licence (unverified / non-commercial only)",
+    "end_to_end_validated: never run end to end for this language"
+   ],
+   "terminology": {
+    "terms": 0,
+    "native_review": 0
+   },
+   "review": null
+  },
+  {
+   "tag": "ja",
+   "name": "Japanese",
+   "score": 37.0,
+   "level": "draft_needs_native_review",
+   "dimensions": {
+    "transcription": {
+     "state": "available",
+     "evidence": "whisper-small installed; word error rate not measured for this language here"
+    },
+    "translation": {
+     "state": "available",
+     "evidence": "engines ['madlad400-3b', 'router-llm']; no QA'd run for this language yet"
+    },
+    "subtitle_rendering": {
+     "state": "available",
+     "evidence": "every character has a glyph; no OCR read-back on this machine"
+    },
+    "human_reviewed": {
+     "state": "unavailable",
+     "evidence": "no native-speaker review recorded"
+    },
+    "tts": {
+     "state": "partial",
+     "evidence": "cleared voice exists but is not installed: ['kokoro:jf_alpha']"
+    },
+    "commercial_dubbing_licensed": {
+     "state": "verified",
+     "evidence": "licence read from first-party source: [('kokoro:jf_alpha', 'Apache-2.0')]"
+    },
+    "lip_sync": {
+     "state": "unavailable",
+     "evidence": "no lip-sync model with a cleared commercial licence installed (Account 2 scope)"
+    },
+    "end_to_end_validated": {
+     "state": "unavailable",
+     "evidence": "never run end to end for this language"
+    }
+   },
+   "blockers": [
+    "human_reviewed: no native-speaker review recorded",
+    "tts: cleared voice exists but is not installed: ['kokoro:jf_alpha']",
+    "end_to_end_validated: never run end to end for this language"
+   ],
+   "terminology": {
+    "terms": 0,
+    "native_review": 0
+   },
+   "review": null
+  },
+  {
+   "tag": "ko",
+   "name": "Korean",
+   "score": 27.0,
+   "level": "draft_needs_native_review",
+   "dimensions": {
+    "transcription": {
+     "state": "available",
+     "evidence": "whisper-small installed; word error rate not measured for this language here"
+    },
+    "translation": {
+     "state": "available",
+     "evidence": "engines ['madlad400-3b', 'router-llm']; no QA'd run for this language yet"
+    },
+    "subtitle_rendering": {
+     "state": "available",
+     "evidence": "every character has a glyph; no OCR read-back on this machine"
+    },
+    "human_reviewed": {
+     "state": "unavailable",
+     "evidence": "no native-speaker review recorded"
+    },
+    "tts": {
+     "state": "partial",
+     "evidence": "only voices with commercial use ['no']: ['ko_KR-kss-medium']"
+    },
+    "commercial_dubbing_licensed": {
+     "state": "unavailable",
+     "evidence": "no voice with a verified commercial licence (unverified / non-commercial only)"
+    },
+    "lip_sync": {
+     "state": "unavailable",
+     "evidence": "no lip-sync model with a cleared commercial licence installed (Account 2 scope)"
+    },
+    "end_to_end_validated": {
+     "state": "unavailable",
+     "evidence": "never run end to end for this language"
+    }
+   },
+   "blockers": [
+    "human_reviewed: no native-speaker review recorded",
+    "tts: only voices with commercial use ['no']: ['ko_KR-kss-medium']",
+    "commercial_dubbing_licensed: no voice with a verified commercial licence (unverified / non-commercial only)",
+    "end_to_end_validated: never run end to end for this language"
+   ],
+   "terminology": {
+    "terms": 0,
+    "native_review": 0
+   },
+   "review": null
+  },
+  {
+   "tag": "it",
+   "name": "Italian",
+   "score": 43.0,
+   "level": "draft_needs_native_review",
+   "dimensions": {
+    "transcription": {
+     "state": "available",
+     "evidence": "whisper-small installed; word error rate not measured for this language here"
+    },
+    "translation": {
+     "state": "available",
+     "evidence": "engines ['madlad400-3b', 'router-llm']; no QA'd run for this language yet"
+    },
+    "subtitle_rendering": {
+     "state": "verified",
+     "evidence": "rendered and read back by OCR: recall 0.963"
+    },
+    "human_reviewed": {
+     "state": "unavailable",
+     "evidence": "no native-speaker review recorded"
+    },
+    "tts": {
+     "state": "partial",
+     "evidence": "cleared voice exists but is not installed: ['kokoro:it (one of 2 voices in VOICES.md)']"
+    },
+    "commercial_dubbing_licensed": {
+     "state": "verified",
+     "evidence": "licence read from first-party source: [('kokoro:it (one of 2 voices in VOICES.md)', 'Apache-2.0')]"
+    },
+    "lip_sync": {
+     "state": "unavailable",
+     "evidence": "no lip-sync model with a cleared commercial licence installed (Account 2 scope)"
+    },
+    "end_to_end_validated": {
+     "state": "unavailable",
+     "evidence": "never run end to end for this language"
+    }
+   },
+   "blockers": [
+    "human_reviewed: no native-speaker review recorded",
+    "tts: cleared voice exists but is not installed: ['kokoro:it (one of 2 voices in VOICES.md)']",
+    "end_to_end_validated: never run end to end for this language"
+   ],
+   "terminology": {
+    "terms": 0,
+    "native_review": 0
+   },
+   "review": null
+  }
+ ]
+}

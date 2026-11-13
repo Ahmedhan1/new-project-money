@@ -1,0 +1,821 @@
+{
+ "demo": "2 - shorts factory",
+ "source": {
+  "benchmark": "interview",
+  "page": "https://images.nasa.gov/details/iss061m2627771232_Live_Interviews_Jeanette_Epps_191004",
+  "licence": "public domain (NASA media guidelines)"
+ },
+ "project": "prj_fececf1b0d",
+ "platform": "youtube_shorts",
+ "requested": 8,
+ "built": 8,
+ "selection_s": 0.3,
+ "distinctness": {
+  "max_pairwise_source_overlap": 0.006,
+  "pairs_over_10pct": 0
+ },
+ "endings_terminal": 8,
+ "qa_passed": 8,
+ "shorts": [
+  {
+   "n": 1,
+   "rank": 1,
+   "src_range_s": [
+    59.95,
+    72.39
+   ],
+   "duration": 12.2,
+   "resolution": "1080x1920",
+   "fps": "30/1",
+   "title": "I slept there five nights",
+   "hook": "We tried on our gear and we made sure everything fit.",
+   "ending": "So it was a total of six days and five nights.",
+   "ending_terminal": true,
+   "why_selected": [
+    "rank 1: content_potential 76.6 (hook 0.55, density 1.0, pace 0.871, completeness 0.8, flow 0.826)",
+    "hook: punchy length, first-hand account",
+    "context: ok: no dangling reference, cut-off conclusion, outside qualifier or separated quote detected (English rule set)",
+    "variant natural: starts where the speaker starts; title card from the moment",
+    "no line in the moment is clearly stronger than its opening and safe to show first",
+    "tuned by nexus.platforms.tune('youtube_shorts')",
+    "captions kept clear of the platform UI (bottom 35%, top 15%) [safe_zone: observed (https://adkit.so/tools/safe-zones/youtube, read 2026-11-12)]",
+    "loudness target -14.0 LUFS [loudness_target_lufs: experimental (editorial: NEXUS default, read 2026-11-12)]",
+    "hook timing: first words at 0.1s vs a 1.5s window - ok [hook_window_s: experimental (editorial: growth.PLATFORM_NORMS shorts first_speech_max, read 2026-11-12)]",
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)",
+    "retention rubric 89/100 (editorial heuristics (rules of thumb), not platform data and not a prediction of views)"
+   ],
+   "scores": {
+    "content_potential": 76.6,
+    "hook_strength": 55.0,
+    "pacing": 85.3,
+    "completeness": 80.0,
+    "note": "editorial heuristics measured on the transcript; not a prediction of views or reach",
+    "retention_rubric": 89
+   },
+   "context_check": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)"
+   ],
+   "captions": "pop",
+   "cues": 15,
+   "qa_status": "PASSED_AUTOMATED_CHECKS",
+   "known_issues": [
+    "[minor] subtitle reading speed: 3 cues above 25 chars/s"
+   ],
+   "quality": {
+    "score": 91.6,
+    "verdict": "needs_work",
+    "categories": {
+     "visual": {
+      "score": 91.7,
+      "measured": 15,
+      "failed": 1,
+      "not_measured": 3,
+      "bar": 85.0
+     },
+     "editing": {
+      "score": 88.5,
+      "measured": 13,
+      "failed": 2,
+      "not_measured": 2,
+      "bar": 85.0
+     },
+     "audio": {
+      "score": 96.4,
+      "measured": 11,
+      "failed": 1,
+      "not_measured": 1,
+      "bar": 85.0
+     },
+     "localization": {
+      "score": 86.7,
+      "measured": 9,
+      "failed": 2,
+      "not_measured": 2,
+      "bar": 85.0
+     }
+    }
+   },
+   "caption_safe_area": {
+    "ok": true,
+    "detail": "caption bottom margin 710px (need 672), side margin 97px (need 48), top of block 977px [youtube_shorts safe zone]",
+    "value": 710
+   },
+   "loudness": {
+    "lufs": -14.11,
+    "true_peak": -1.95,
+    "lra": 1.77
+   },
+   "render_s": 48.8,
+   "output": "/tmp/a2-demos/projects/prj_fececf1b0d/renders/demo2_short_01.mp4",
+   "metadata": {
+    "title": "I slept there five nights",
+    "description": "We tried on our gear and we made sure everything fit. And then after that we descended into the cave and we lived there for, I slept there five nights.",
+    "hashtags": [
+     "#Five",
+     "#Nights"
+    ]
+   }
+  },
+  {
+   "n": 2,
+   "rank": 2,
+   "src_range_s": [
+    120.97,
+    144.79
+   ],
+   "duration": 24.23,
+   "resolution": "1080x1920",
+   "fps": "30/1",
+   "title": "The analog to space is that if and when",
+   "hook": "So the analog to space is that if and when we go back to the moon we would do similar things on the moon where we'd have to work together in",
+   "ending": "h other is one of the big things so learning to work together and perform the mission was one of the biggest things that I got out of caves.",
+   "ending_terminal": true,
+   "why_selected": [
+    "rank 2: content_potential 75.6 (hook 0.45, density 0.884, pace 0.808, completeness 1.0, flow 1.0)",
+    "hook: number, curiosity word, claim, filler opening (penalty), first-hand account",
+    "context: ok: no dangling reference, cut-off conclusion, outside qualifier or separated quote detected (English rule set)",
+    "variant natural: starts where the speaker starts; title card from the moment",
+    "no line in the moment is clearly stronger than its opening and safe to show first",
+    "tuned by nexus.platforms.tune('youtube_shorts')",
+    "captions kept clear of the platform UI (bottom 35%, top 15%) [safe_zone: observed (https://adkit.so/tools/safe-zones/youtube, read 2026-11-12)]",
+    "loudness target -14.0 LUFS [loudness_target_lufs: experimental (editorial: NEXUS default, read 2026-11-12)]",
+    "hook timing: first words at 0.1s vs a 1.5s window - ok [hook_window_s: experimental (editorial: growth.PLATFORM_NORMS shorts first_speech_max, read 2026-11-12)]",
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)",
+    "retention rubric 93/100 (editorial heuristics (rules of thumb), not platform data and not a prediction of views)"
+   ],
+   "scores": {
+    "content_potential": 75.6,
+    "hook_strength": 45.0,
+    "pacing": 88.5,
+    "completeness": 100.0,
+    "note": "editorial heuristics measured on the transcript; not a prediction of views or reach",
+    "retention_rubric": 93
+   },
+   "context_check": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)"
+   ],
+   "captions": "pop",
+   "cues": 27,
+   "qa_status": "PASSED_AUTOMATED_CHECKS",
+   "known_issues": [
+    "[minor] subtitle reading speed: 6 cues above 25 chars/s"
+   ],
+   "quality": {
+    "score": 91.4,
+    "verdict": "needs_work",
+    "categories": {
+     "visual": {
+      "score": 91.2,
+      "measured": 14,
+      "failed": 1,
+      "not_measured": 4,
+      "bar": 85.0
+     },
+     "editing": {
+      "score": 92.3,
+      "measured": 13,
+      "failed": 1,
+      "not_measured": 2,
+      "bar": 85.0
+     },
+     "audio": {
+      "score": 96.4,
+      "measured": 11,
+      "failed": 1,
+      "not_measured": 1,
+      "bar": 85.0
+     },
+     "localization": {
+      "score": 80.0,
+      "measured": 9,
+      "failed": 2,
+      "not_measured": 2,
+      "bar": 85.0
+     }
+    }
+   },
+   "caption_safe_area": {
+    "ok": true,
+    "detail": "caption bottom margin 710px (need 672), side margin 97px (need 48), top of block 977px [youtube_shorts safe zone]",
+    "value": 710
+   },
+   "loudness": {
+    "lufs": -14.01,
+    "true_peak": -2.01,
+    "lra": 2.7
+   },
+   "render_s": 93.6,
+   "output": "/tmp/a2-demos/projects/prj_fececf1b0d/renders/demo2_short_02.mp4",
+   "metadata": {
+    "title": "The analog to space is that if and when",
+    "description": "So the analog to space is that if and when we go back to the moon we would do similar things on the moon where we'd have to work together in a high-threat environment as a group, as a team to explore the moon and do research and take care of each other is one of the big things so learning to work together and perform the mission was one of the biggest things that I got out of caves.",
+    "hashtags": [
+     "#Moon",
+     "#Together",
+     "#Work"
+    ]
+   }
+  },
+  {
+   "n": 3,
+   "rank": 3,
+   "src_range_s": [
+    39.95,
+    54.57
+   ],
+   "duration": 14.77,
+   "resolution": "1080x1920",
+   "fps": "30/1",
+   "title": "What we did I arrived there around September 11th",
+   "hook": "So what we did I arrived there around September 11th And we did about five or six days of training on how to repel and ascend in and out of ",
+   "ending": "d we did about five or six days of training on how to repel and ascend in and out of a cave shaft We also visited several caves in Slovenia.",
+   "ending_terminal": true,
+   "why_selected": [
+    "rank 3: content_potential 75.3 (hook 0.35, density 0.904, pace 1.0, completeness 1.0, flow 1.0)",
+    "hook: number, curiosity word, filler opening (penalty), first-hand account",
+    "context: ok: no dangling reference, cut-off conclusion, outside qualifier or separated quote detected (English rule set)",
+    "variant natural: starts where the speaker starts; title card from the moment",
+    "no line in the moment is clearly stronger than its opening and safe to show first",
+    "tuned by nexus.platforms.tune('youtube_shorts')",
+    "captions kept clear of the platform UI (bottom 35%, top 15%) [safe_zone: observed (https://adkit.so/tools/safe-zones/youtube, read 2026-11-12)]",
+    "loudness target -14.0 LUFS [loudness_target_lufs: experimental (editorial: NEXUS default, read 2026-11-12)]",
+    "hook timing: first words at 0.1s vs a 1.5s window - ok [hook_window_s: experimental (editorial: growth.PLATFORM_NORMS shorts first_speech_max, read 2026-11-12)]",
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)",
+    "retention rubric 89/100 (editorial heuristics (rules of thumb), not platform data and not a prediction of views)"
+   ],
+   "scores": {
+    "content_potential": 75.3,
+    "hook_strength": 35.0,
+    "pacing": 100.0,
+    "completeness": 100.0,
+    "note": "editorial heuristics measured on the transcript; not a prediction of views or reach",
+    "retention_rubric": 89
+   },
+   "context_check": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)"
+   ],
+   "captions": "pop",
+   "cues": 14,
+   "qa_status": "PASSED_AUTOMATED_CHECKS",
+   "known_issues": [],
+   "quality": {
+    "score": 94.3,
+    "verdict": "needs_work",
+    "categories": {
+     "visual": {
+      "score": 91.2,
+      "measured": 14,
+      "failed": 1,
+      "not_measured": 4,
+      "bar": 85.0
+     },
+     "editing": {
+      "score": 96.2,
+      "measured": 13,
+      "failed": 1,
+      "not_measured": 2,
+      "bar": 85.0
+     },
+     "audio": {
+      "score": 96.4,
+      "measured": 11,
+      "failed": 1,
+      "not_measured": 1,
+      "bar": 85.0
+     },
+     "localization": {
+      "score": 93.3,
+      "measured": 9,
+      "failed": 1,
+      "not_measured": 2,
+      "bar": 85.0
+     }
+    }
+   },
+   "caption_safe_area": {
+    "ok": true,
+    "detail": "caption bottom margin 710px (need 672), side margin 97px (need 48), top of block 977px [youtube_shorts safe zone]",
+    "value": 710
+   },
+   "loudness": {
+    "lufs": -14.1,
+    "true_peak": -2.03,
+    "lra": 1.59
+   },
+   "render_s": 60.3,
+   "output": "/tmp/a2-demos/projects/prj_fececf1b0d/renders/demo2_short_03.mp4",
+   "metadata": {
+    "title": "What we did I arrived there around September 11th",
+    "description": "So what we did I arrived there around September 11th And we did about five or six days of training on how to repel and ascend in and out of a cave shaft We also visited several caves in Slovenia.",
+    "hashtags": []
+   }
+  },
+  {
+   "n": 4,
+   "rank": 4,
+   "src_range_s": [
+    260.29,
+    282.31
+   ],
+   "duration": 22.43,
+   "resolution": "1080x1920",
+   "fps": "30/1",
+   "title": "We're working parallel on the Orion program",
+   "hook": "So as we start gearing up to start shuttling astronauts more frequently to the International Space Station from the United States, we're wor",
+   "ending": " Moon, along with the Gateway and the Space Launch System that will get us to the Moon and help us to have a permanent presence on the Moon.",
+   "ending_terminal": true,
+   "why_selected": [
+    "rank 4: content_potential 65.0 (hook 0.1, density 0.826, pace 1.0, completeness 1.0, flow 1.0)",
+    "hook: claim, filler opening (penalty), first-hand account",
+    "context: ok: no dangling reference, cut-off conclusion, outside qualifier or separated quote detected (English rule set)",
+    "variant natural: starts where the speaker starts; title card from the moment",
+    "no line in the moment is clearly stronger than its opening and safe to show first",
+    "tuned by nexus.platforms.tune('youtube_shorts')",
+    "captions kept clear of the platform UI (bottom 35%, top 15%) [safe_zone: observed (https://adkit.so/tools/safe-zones/youtube, read 2026-11-12)]",
+    "loudness target -14.0 LUFS [loudness_target_lufs: experimental (editorial: NEXUS default, read 2026-11-12)]",
+    "hook timing: first words at 0.1s vs a 1.5s window - ok [hook_window_s: experimental (editorial: growth.PLATFORM_NORMS shorts first_speech_max, read 2026-11-12)]",
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)",
+    "retention rubric 93/100 (editorial heuristics (rules of thumb), not platform data and not a prediction of views)"
+   ],
+   "scores": {
+    "content_potential": 65.0,
+    "hook_strength": 10.0,
+    "pacing": 100.0,
+    "completeness": 100.0,
+    "note": "editorial heuristics measured on the transcript; not a prediction of views or reach",
+    "retention_rubric": 93
+   },
+   "context_check": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)"
+   ],
+   "captions": "pop",
+   "cues": 23,
+   "qa_status": "PASSED_AUTOMATED_CHECKS",
+   "known_issues": [
+    "[minor] subtitle reading speed: 3 cues above 25 chars/s"
+   ],
+   "quality": {
+    "score": 92.4,
+    "verdict": "needs_work",
+    "categories": {
+     "visual": {
+      "score": 91.2,
+      "measured": 14,
+      "failed": 1,
+      "not_measured": 4,
+      "bar": 85.0
+     },
+     "editing": {
+      "score": 92.3,
+      "measured": 13,
+      "failed": 1,
+      "not_measured": 2,
+      "bar": 85.0
+     },
+     "audio": {
+      "score": 96.4,
+      "measured": 11,
+      "failed": 1,
+      "not_measured": 1,
+      "bar": 85.0
+     },
+     "localization": {
+      "score": 86.7,
+      "measured": 9,
+      "failed": 2,
+      "not_measured": 2,
+      "bar": 85.0
+     }
+    }
+   },
+   "caption_safe_area": {
+    "ok": true,
+    "detail": "caption bottom margin 710px (need 672), side margin 97px (need 48), top of block 977px [youtube_shorts safe zone]",
+    "value": 710
+   },
+   "loudness": {
+    "lufs": -14.01,
+    "true_peak": -1.69,
+    "lra": 4.91
+   },
+   "render_s": 84.4,
+   "output": "/tmp/a2-demos/projects/prj_fececf1b0d/renders/demo2_short_04.mp4",
+   "metadata": {
+    "title": "We're working parallel on the Orion program",
+    "description": "So as we start gearing up to start shuttling astronauts more frequently to the International Space Station from the United States, we're working parallel on the Orion program, which is the program that would take us back to the Moon, along with the Gateway and the Space Launch System that will get us to the Moon and help us to have a permanent presence on the Moon.",
+    "hashtags": [
+     "#InternationalSpaceStation",
+     "#UnitedStates",
+     "#SpaceLaunchSystem",
+     "#Moon",
+     "#Program"
+    ]
+   }
+  },
+  {
+   "n": 5,
+   "rank": 5,
+   "src_range_s": [
+    205.56,
+    229.52
+   ],
+   "duration": 23.57,
+   "resolution": "1080x1920",
+   "fps": "30/1",
+   "title": "I think it'll be quite some time before anyone",
+   "hook": "How long before you find out if you are on the mission for sure?",
+   "ending": "So it would be a couple of years or so before any of us knew.",
+   "ending_terminal": true,
+   "why_selected": [
+    "rank 5: content_potential 64.6 (hook 0.15, density 0.831, pace 0.953, completeness 1.0, flow 0.847)",
+    "hook: question, second person, curiosity word, claim, punchy length, opens on the interviewer's question (speaker labels; capped)",
+    "context: ok: no dangling reference, cut-off conclusion, outside qualifier or separated quote detected (English rule set)",
+    "variant natural: starts where the speaker starts; title card from the moment",
+    "no line in the moment is clearly stronger than its opening and safe to show first",
+    "tuned by nexus.platforms.tune('youtube_shorts')",
+    "captions kept clear of the platform UI (bottom 35%, top 15%) [safe_zone: observed (https://adkit.so/tools/safe-zones/youtube, read 2026-11-12)]",
+    "loudness target -14.0 LUFS [loudness_target_lufs: experimental (editorial: NEXUS default, read 2026-11-12)]",
+    "hook timing: first words at 0.1s vs a 1.5s window - ok [hook_window_s: experimental (editorial: growth.PLATFORM_NORMS shorts first_speech_max, read 2026-11-12)]",
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)",
+    "retention rubric 93/100 (editorial heuristics (rules of thumb), not platform data and not a prediction of views)"
+   ],
+   "scores": {
+    "content_potential": 64.6,
+    "hook_strength": 15.0,
+    "pacing": 91.1,
+    "completeness": 100.0,
+    "note": "editorial heuristics measured on the transcript; not a prediction of views or reach",
+    "retention_rubric": 93
+   },
+   "context_check": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)"
+   ],
+   "captions": "pop",
+   "cues": 26,
+   "qa_status": "PASSED_AUTOMATED_CHECKS",
+   "known_issues": [
+    "[minor] subtitle reading speed: 7 cues above 25 chars/s"
+   ],
+   "quality": {
+    "score": 90.1,
+    "verdict": "needs_work",
+    "categories": {
+     "visual": {
+      "score": 90.3,
+      "measured": 15,
+      "failed": 2,
+      "not_measured": 3,
+      "bar": 85.0
+     },
+     "editing": {
+      "score": 88.5,
+      "measured": 13,
+      "failed": 2,
+      "not_measured": 2,
+      "bar": 85.0
+     },
+     "audio": {
+      "score": 96.4,
+      "measured": 11,
+      "failed": 1,
+      "not_measured": 1,
+      "bar": 85.0
+     },
+     "localization": {
+      "score": 80.0,
+      "measured": 9,
+      "failed": 2,
+      "not_measured": 2,
+      "bar": 85.0
+     }
+    }
+   },
+   "caption_safe_area": {
+    "ok": true,
+    "detail": "caption bottom margin 710px (need 672), side margin 97px (need 48), top of block 977px [youtube_shorts safe zone]",
+    "value": 710
+   },
+   "loudness": {
+    "lufs": -14.07,
+    "true_peak": -1.68,
+    "lra": 2.73
+   },
+   "render_s": 73.8,
+   "output": "/tmp/a2-demos/projects/prj_fececf1b0d/renders/demo2_short_05.mp4",
+   "metadata": {
+    "title": "I think it'll be quite some time before anyone",
+    "description": "How long before you find out if you are on the mission for sure? Well I think it'll be quite some time before anyone finds out if they're on the mission so I would suspect you know as we get closer and closer to 24 2024 probably two years prior 2022 or so someone would find out that they're on the mission.",
+    "hashtags": [
+     "#Mission"
+    ]
+   }
+  },
+  {
+   "n": 6,
+   "rank": 6,
+   "src_range_s": [
+    148.33,
+    201.55
+   ],
+   "duration": 51.63,
+   "resolution": "1080x1920",
+   "fps": "30/1",
+   "title": "Going back to the moon 2024",
+   "hook": "Now this expedition has you better prepared to be on the next mission to the moon happening by 2024 Artemis focusing on keeping a human pres",
+   "ending": "So being the first anything to me bears a lot of responsibility and I'm up for that challenge but at the same time I'm just I'm hopeful.",
+   "ending_terminal": true,
+   "why_selected": [
+    "rank 6: content_potential 62.7 (hook 0.15, density 0.701, pace 1.0, completeness 1.0, flow 0.839)",
+    "hook: question, number, second person, filler opening (penalty), opens on the interviewer's question (speaker labels; capped)",
+    "context: ok: no dangling reference, cut-off conclusion, outside qualifier or separated quote detected (English rule set)",
+    "variant natural: starts where the speaker starts; title card from the moment",
+    "no line in the moment is clearly stronger than its opening and safe to show first",
+    "tuned by nexus.platforms.tune('youtube_shorts')",
+    "captions kept clear of the platform UI (bottom 35%, top 15%) [safe_zone: observed (https://adkit.so/tools/safe-zones/youtube, read 2026-11-12)]",
+    "loudness target -14.0 LUFS [loudness_target_lufs: experimental (editorial: NEXUS default, read 2026-11-12)]",
+    "hook timing: first words at 0.1s vs a 1.5s window - ok [hook_window_s: experimental (editorial: growth.PLATFORM_NORMS shorts first_speech_max, read 2026-11-12)]",
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)",
+    "retention rubric 93/100 (editorial heuristics (rules of thumb), not platform data and not a prediction of views)"
+   ],
+   "scores": {
+    "content_potential": 62.7,
+    "hook_strength": 15.0,
+    "pacing": 93.6,
+    "completeness": 100.0,
+    "note": "editorial heuristics measured on the transcript; not a prediction of views or reach",
+    "retention_rubric": 93
+   },
+   "context_check": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)"
+   ],
+   "captions": "pop",
+   "cues": 53,
+   "qa_status": "PASSED_AUTOMATED_CHECKS",
+   "known_issues": [],
+   "quality": {
+    "score": 92.7,
+    "verdict": "needs_work",
+    "categories": {
+     "visual": {
+      "score": 88.9,
+      "measured": 15,
+      "failed": 2,
+      "not_measured": 3,
+      "bar": 85.0
+     },
+     "editing": {
+      "score": 92.3,
+      "measured": 13,
+      "failed": 2,
+      "not_measured": 2,
+      "bar": 85.0
+     },
+     "audio": {
+      "score": 96.4,
+      "measured": 11,
+      "failed": 1,
+      "not_measured": 1,
+      "bar": 85.0
+     },
+     "localization": {
+      "score": 93.3,
+      "measured": 9,
+      "failed": 1,
+      "not_measured": 2,
+      "bar": 85.0
+     }
+    }
+   },
+   "caption_safe_area": {
+    "ok": true,
+    "detail": "caption bottom margin 710px (need 672), side margin 97px (need 48), top of block 977px [youtube_shorts safe zone]",
+    "value": 710
+   },
+   "loudness": {
+    "lufs": -14.06,
+    "true_peak": -1.68,
+    "lra": 3.34
+   },
+   "render_s": 144.9,
+   "output": "/tmp/a2-demos/projects/prj_fececf1b0d/renders/demo2_short_06.mp4",
+   "metadata": {
+    "title": "Going back to the moon 2024",
+    "description": "Now this expedition has you better prepared to be on the next mission to the moon happening by 2024 Artemis focusing on keeping a human presence on the moon so what does the possibility of being the first woman on the moon mean to you? Well I think I told someone in the past I'm being the first or anything like that is a huge responsibility and it's a huge honor at the same time.",
+    "hashtags": [
+     "#Moon",
+     "#Huge",
+     "#Prepared",
+     "#Responsibility"
+    ]
+   }
+  },
+  {
+   "n": 7,
+   "rank": 7,
+   "src_range_s": [
+    27.67,
+    40.03
+   ],
+   "duration": 12.33,
+   "resolution": "1080x1920",
+   "fps": "30/1",
+   "title": "One of the things that caves",
+   "hook": "What can you tell us about that training and what skills you picked up while there?",
+   "ending": "Well, one of the things that caves does is it's an analog to flying to space and In particular to flying to remote places like the moon.",
+   "ending_terminal": true,
+   "why_selected": [
+    "rank 7: content_potential 54.7 (hook 0.15, density 0.935, pace 0.688, completeness 0.6, flow 0.84)",
+    "hook: question, second person, punchy length, opens on the interviewer's question (speaker labels; capped)",
+    "context: ok: no dangling reference, cut-off conclusion, outside qualifier or separated quote detected (English rule set)",
+    "variant natural: starts where the speaker starts; title card from the moment",
+    "no line in the moment is clearly stronger than its opening and safe to show first",
+    "tuned by nexus.platforms.tune('youtube_shorts')",
+    "captions kept clear of the platform UI (bottom 35%, top 15%) [safe_zone: observed (https://adkit.so/tools/safe-zones/youtube, read 2026-11-12)]",
+    "loudness target -14.0 LUFS [loudness_target_lufs: experimental (editorial: NEXUS default, read 2026-11-12)]",
+    "hook timing: first words at 0.0s vs a 1.5s window - ok [hook_window_s: experimental (editorial: growth.PLATFORM_NORMS shorts first_speech_max, read 2026-11-12)]",
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)",
+    "retention rubric 89/100 (editorial heuristics (rules of thumb), not platform data and not a prediction of views)"
+   ],
+   "scores": {
+    "content_potential": 54.7,
+    "hook_strength": 15.0,
+    "pacing": 74.9,
+    "completeness": 60.0,
+    "note": "editorial heuristics measured on the transcript; not a prediction of views or reach",
+    "retention_rubric": 89
+   },
+   "context_check": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)"
+   ],
+   "captions": "pop",
+   "cues": 15,
+   "qa_status": "PASSED_AUTOMATED_CHECKS",
+   "known_issues": [
+    "[minor] subtitle reading speed: 3 cues above 25 chars/s"
+   ],
+   "quality": {
+    "score": 90.6,
+    "verdict": "needs_work",
+    "categories": {
+     "visual": {
+      "score": 91.7,
+      "measured": 15,
+      "failed": 1,
+      "not_measured": 3,
+      "bar": 85.0
+     },
+     "editing": {
+      "score": 88.5,
+      "measured": 13,
+      "failed": 2,
+      "not_measured": 2,
+      "bar": 85.0
+     },
+     "audio": {
+      "score": 96.4,
+      "measured": 11,
+      "failed": 1,
+      "not_measured": 1,
+      "bar": 85.0
+     },
+     "localization": {
+      "score": 80.0,
+      "measured": 9,
+      "failed": 2,
+      "not_measured": 2,
+      "bar": 85.0
+     }
+    }
+   },
+   "caption_safe_area": {
+    "ok": true,
+    "detail": "caption bottom margin 710px (need 672), side margin 97px (need 48), top of block 977px [youtube_shorts safe zone]",
+    "value": 710
+   },
+   "loudness": {
+    "lufs": -13.88,
+    "true_peak": -2.31,
+    "lra": 2.46
+   },
+   "render_s": 42.7,
+   "output": "/tmp/a2-demos/projects/prj_fececf1b0d/renders/demo2_short_07.mp4",
+   "metadata": {
+    "title": "One of the things that caves",
+    "description": "What can you tell us about that training and what skills you picked up while there? Well, one of the things that caves does is it's an analog to flying to space and In particular to flying to remote places like the moon.",
+    "hashtags": [
+     "#Flying"
+    ]
+   }
+  },
+  {
+   "n": 8,
+   "rank": 8,
+   "src_range_s": [
+    286.6,
+    300.07
+   ],
+   "duration": 12.77,
+   "resolution": "1080x1920",
+   "fps": "30/1",
+   "title": "To me, it's a way to thank my home",
+   "hook": "Corklin High School, Lamoine College, and all of Syracuse is so proud of all you've accomplished in that.",
+   "ending": "Well, to me, it's sort of a way to thank my home.",
+   "ending_terminal": true,
+   "why_selected": [
+    "rank 8: content_potential 53.5 (hook 0.15, density 1.0, pace 0.602, completeness 0.6, flow 0.719)",
+    "hook: second person, claim, opens on the interviewer's question (speaker labels; capped)",
+    "context: ok: no dangling reference, cut-off conclusion, outside qualifier or separated quote detected (English rule set)",
+    "variant natural: starts where the speaker starts; title card from the moment",
+    "tuned by nexus.platforms.tune('youtube_shorts')",
+    "captions kept clear of the platform UI (bottom 35%, top 15%) [safe_zone: observed (https://adkit.so/tools/safe-zones/youtube, read 2026-11-12)]",
+    "loudness target -14.0 LUFS [loudness_target_lufs: experimental (editorial: NEXUS default, read 2026-11-12)]",
+    "hook timing: first words at 0.1s vs a 1.5s window - ok [hook_window_s: experimental (editorial: growth.PLATFORM_NORMS shorts first_speech_max, read 2026-11-12)]",
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)",
+    "retention rubric 89/100 (editorial heuristics (rules of thumb), not platform data and not a prediction of views)"
+   ],
+   "scores": {
+    "content_potential": 53.5,
+    "hook_strength": 15.0,
+    "pacing": 64.9,
+    "completeness": 60.0,
+    "note": "editorial heuristics measured on the transcript; not a prediction of views or reach",
+    "retention_rubric": 89
+   },
+   "context_check": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)"
+   ],
+   "captions": "pop",
+   "cues": 16,
+   "qa_status": "PASSED_AUTOMATED_CHECKS",
+   "known_issues": [
+    "[minor] subtitle reading speed: 2 cues above 25 chars/s"
+   ],
+   "quality": {
+    "score": 91.5,
+    "verdict": "needs_work",
+    "categories": {
+     "visual": {
+      "score": 91.7,
+      "measured": 15,
+      "failed": 1,
+      "not_measured": 3,
+      "bar": 85.0
+     },
+     "editing": {
+      "score": 92.3,
+      "measured": 13,
+      "failed": 2,
+      "not_measured": 2,
+      "bar": 85.0
+     },
+     "audio": {
+      "score": 96.4,
+      "measured": 11,
+      "failed": 1,
+      "not_measured": 1,
+      "bar": 85.0
+     },
+     "localization": {
+      "score": 80.0,
+      "measured": 9,
+      "failed": 2,
+      "not_measured": 2,
+      "bar": 85.0
+     }
+    }
+   },
+   "caption_safe_area": {
+    "ok": true,
+    "detail": "caption bottom margin 710px (need 672), side margin 97px (need 48), top of block 977px [youtube_shorts safe zone]",
+    "value": 710
+   },
+   "loudness": {
+    "lufs": -14.48,
+    "true_peak": -2.31,
+    "lra": 4.27
+   },
+   "render_s": 47.0,
+   "output": "/tmp/a2-demos/projects/prj_fececf1b0d/renders/demo2_short_08.mp4",
+   "metadata": {
+    "title": "To me, it's a way to thank my home",
+    "description": "Corklin High School, Lamoine College, and all of Syracuse is so proud of all you've accomplished in that. What does it mean to you to take your message to your hometown when you have the downtime?",
+    "hashtags": [
+     "#CorklinHighSchool",
+     "#LamoineCollege"
+    ]
+   }
+  }
+ ],
+ "selection_notes": [],
+ "contact_sheet": "demo2_contact.jpg (2 frames per short: 1 s and 60%)",
+ "machine": "shared 4-vCPU container, no GPU",
+ "human_review": "PENDING - hooks, titles and whether each short stands alone need a person"
+}

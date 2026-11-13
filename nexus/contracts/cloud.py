@@ -9,7 +9,7 @@ localization, publishing, analytics) use to submit work and receive artifacts. R
 * Times are UNIX seconds (float, UTC). Sizes are bytes. Checksums are lowercase hex SHA-256.
 
 Export: `contracts.export_schemas("docs/contracts")` writes docs/contracts/*.schema.json (JSON Schema for non-Python
-clients); tests/fast/test_contracts.py fails if a contract changes without re-exporting (and versioning) it.
+clients); tests/fast/test_contracts_cloud.py fails if a contract changes without re-exporting (and versioning) it.
 """
 from __future__ import annotations
 

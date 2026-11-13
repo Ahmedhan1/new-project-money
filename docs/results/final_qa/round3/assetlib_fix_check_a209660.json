@@ -1,0 +1,23 @@
+{
+ "sha": "a209660",
+ "payload_s": {
+  "median": 0.256,
+  "runs": [
+   0.256,
+   0.2568,
+   0.1981
+  ]
+ },
+ "invalidation": {
+  "edited_asset": "effect.film_grain",
+  "name_after_edit": "QA renamed asset",
+  "reloaded": true,
+  "unchanged_before_edit": true
+ },
+ "concurrency": {
+  "threads": 16,
+  "identical": 16,
+  "of": 16
+ },
+ "caller_mutation_isolated": true
+}

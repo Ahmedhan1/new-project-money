@@ -1,0 +1,405 @@
+{
+ "market_report_jwst_en": {
+  "schema": "nexus.MarketAssessment/2",
+  "topic": "James Webb Space Telescope",
+  "language": "en",
+  "date": "2026-11-12",
+  "credibility": {
+   "value": 0.973,
+   "by_tier": {
+    "reference": 3,
+    "primary": 19
+   },
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://en.wikipedia.org/wiki/James_Webb_Space_Telescope",
+     "tier": "reference"
+    },
+    {
+     "id": "s2",
+     "url": "https://en.wikipedia.org/wiki/James_Webb_Space_Telescope_sunshield",
+     "tier": "reference"
+    },
+    {
+     "id": "s3",
+     "url": "https://ar.wikipedia.org/wiki/%D9%85%D9%82%D8%B1%D8%A7%D8%A8_%D8%AC%D9%8A%D9%85%D8%B3_%D9%88%D9%8A%D8%A8_%D8%A7%D9%84%D9%81%D8%B6%D8%A7%D8%A6%D9%8A",
+     "tier": "reference"
+    },
+    {
+     "id": "s4",
+     "url": "https://images.nasa.gov/details/News Conference on the Engineering of the James Webb Space Telescope",
+     "tier": "primary"
+    },
+    {
+     "id": "s5",
+     "url": "https://images.nasa.gov/details/GSFC_20220315_Webb_Alignment_Briefing",
+     "tier": "primary"
+    },
+    {
+     "id": "s6",
+     "url": "https://images.nasa.gov/details/James_Webb_Space_Telescope__An_Overview_1080",
+     "tier": "primary"
+    },
+    {
+     "id": "s7",
+     "url": "https://images.nasa.gov/details/by-the-dozen-nasas-james-webb-space-telescope-mirrors_23938941370_o",
+     "tier": "primary"
+    },
+    {
+     "id": "s8",
+     "url": "https://images.nasa.gov/details/by-the-dozen-nasas-james-webb-space-telescope-mirrors_23607727573_o",
+     "tier": "primary"
+    },
+    {
+     "id": "s9",
+     "url": "https://images.nasa.gov/details/Social_Media_Video_Master_A",
+     "tier": "primary"
+    },
+    {
+     "id": "s10",
+     "url": "https://images.nasa.gov/details/Media Briefings James Webb Space Telescopes First Full Color Images and Data",
+     "tier": "primary"
+    },
+    {
+     "id": "s11",
+     "url": "https://images.nasa.gov/details/First Fulll Color Images and Data from the James Webb Space Telescope",
+     "tier": "primary"
+    },
+    {
+     "id": "s12",
+     "url": "https://images.nasa.gov/details/GSFC_20171208_Archive_e000355",
+     "tier": "primary"
+    },
+    {
+     "id": "s13",
+     "url": "https://images.nasa.gov/details/GSFC_20171208_Archive_e000356",
+     "tier": "primary"
+    },
+    {
+     "id": "s14",
+     "url": "https://images.nasa.gov/details/GSFC_20171208_Archive_e000350",
+     "tier": "primary"
+    },
+    {
+     "id": "s15",
+     "url": "https://images.nasa.gov/details/GSFC_20171208_Archive_e000349",
+     "tier": "primary"
+    },
+    {
+     "id": "s16",
+     "url": "https://images.nasa.gov/details/GSFC_20171208_Archive_e000357",
+     "tier": "primary"
+    },
+    {
+     "id": "s17",
+     "url": "https://images.nasa.gov/details/GSFC_20171208_Archive_e000354",
+     "tier": "primary"
+    },
+    {
+     "id": "s18",
+     "url": "https://images.nasa.gov/details/GSFC_20171208_Archive_e000359",
+     "tier": "primary"
+    },
+    {
+     "id": "s19",
+     "url": "https://images.nasa.gov/details/GSFC_20171208_Archive_e000358",
+     "tier": "primary"
+    },
+    {
+     "id": "s20",
+     "url": "https://images.nasa.gov/details/12987-Worth_the_Wait",
+     "tier": "primary"
+    },
+    {
+     "id": "s21",
+     "url": "https://images.nasa.gov/details/12395-Top_Ten_JWST_Facts_H264",
+     "tier": "primary"
+    },
+    {
+     "id": "s22",
+     "url": "https://images.nasa.gov/details/GSFC_20171208_Archive_e000352",
+     "tier": "primary"
+    }
+   ],
+   "method": "mean publisher tier (primary 1.0, academic 0.9, reference 0.8, established media 0.7, unknown 0.4)"
+  },
+  "cross_source": {
+   "value": 0.0,
+   "confirmed": 0,
+   "claims": 22,
+   "single_source": 22,
+   "conflicts": [],
+   "method": "claims supported by >= 2 different publishers (same-site pages count once)"
+  },
+  "recency": {
+   "newest_days": 1584,
+   "median_days": 3261,
+   "dated_publications": 19,
+   "value": 0.101,
+   "method": "1/(1+median age in years) over sources with a publication date (Wikipedia retrieval dates excluded)"
+  },
+  "geography": {
+   "countries": {
+    "GF": 2
+   },
+   "places": {
+    "Kourou": [
+     "GF"
+    ],
+    "French Guiana": [
+     "GF"
+    ]
+   },
+   "method": "place names in topic + claims resolved to ISO 3166 (pycountry + exonyms)"
+  },
+  "language_demand": {
+   "by_language": [
+    {
+     "lang": "en",
+     "daily_readers": 1260.7,
+     "share": 0.882
+    },
+    {
+     "lang": "de",
+     "daily_readers": 151.1,
+     "share": 0.106
+    },
+    {
+     "lang": "ar",
+     "daily_readers": 17.3,
+     "share": 0.012
+    }
+   ],
+   "method": "mean daily Wikipedia readers of the same article per language edition - a proxy for interest, not video views",
+   "not_measured": [
+    "fr",
+    "hi",
+    "zh",
+    "ru",
+    "es"
+   ]
+  },
+  "competition": {
+   "value": null,
+   "method": "unknown - YouTube Data API not available (no YouTube Data API key (env NEXUS_KEY_YOUTUBE or vault ai/youtube)); never guessed"
+  },
+  "saturation": {
+   "value": null,
+   "method": "unknown until competition (YouTube supply) is measured"
+  },
+  "evidence_coverage": {
+   "value": 0.65,
+   "method": "share of score weight backed by measured evidence"
+  },
+  "uncertainty": {
+   "score": 63.0,
+   "low": 50.1,
+   "high": 70.6,
+   "width": 20.5,
+   "unknown_factors": [
+    "freshness",
+    "competition"
+   ],
+   "method": "score recomputed with each unknown factor at its worst and best value (confidence 0.5)"
+  },
+  "verdict": "indicative only: score range 50.1-70.6; 22 single-source claim(s) need a second source before scripting"
+ },
+ "market_report_ai_ar": {
+  "schema": "nexus.MarketAssessment/2",
+  "topic": "الذكاء الاصطناعي",
+  "language": "ar",
+  "date": "2026-11-12",
+  "credibility": {
+   "value": 0.974,
+   "by_tier": {
+    "reference": 3,
+    "primary": 20
+   },
+   "sources": [
+    {
+     "id": "s1",
+     "url": "https://ar.wikipedia.org/wiki/%D8%B0%D9%83%D8%A7%D8%A1_%D8%A7%D8%B5%D8%B7%D9%86%D8%A7%D8%B9%D9%8A",
+     "tier": "reference"
+    },
+    {
+     "id": "s2",
+     "url": "https://ar.wikipedia.org/wiki/%D8%AA%D8%A7%D8%B1%D9%8A%D8%AE_%D8%A7%D9%84%D8%B0%D9%83%D8%A7%D8%A1_%D8%A7%D9%84%D8%A7%D8%B5%D8%B7%D9%86%D8%A7%D8%B9%D9%8A",
+     "tier": "reference"
+    },
+    {
+     "id": "s3",
+     "url": "https://en.wikipedia.org/wiki/Artificial_intelligence",
+     "tier": "reference"
+    },
+    {
+     "id": "s4",
+     "url": "https://images.nasa.gov/details/Artificial Intelligence Town Hall",
+     "tier": "primary"
+    },
+    {
+     "id": "s5",
+     "url": "https://images.nasa.gov/details/NHQ_2020_0820_AskNASA 205 Beck and Farah",
+     "tier": "primary"
+    },
+    {
+     "id": "s6",
+     "url": "https://images.nasa.gov/details/NHQ202405220016",
+     "tier": "primary"
+    },
+    {
+     "id": "s7",
+     "url": "https://images.nasa.gov/details/NHQ202405220025",
+     "tier": "primary"
+    },
+    {
+     "id": "s8",
+     "url": "https://images.nasa.gov/details/NHQ202405220014",
+     "tier": "primary"
+    },
+    {
+     "id": "s9",
+     "url": "https://images.nasa.gov/details/NHQ202405220017",
+     "tier": "primary"
+    },
+    {
+     "id": "s10",
+     "url": "https://images.nasa.gov/details/NHQ202405220008",
+     "tier": "primary"
+    },
+    {
+     "id": "s11",
+     "url": "https://images.nasa.gov/details/NHQ202405220013",
+     "tier": "primary"
+    },
+    {
+     "id": "s12",
+     "url": "https://images.nasa.gov/details/NHQ202405220021",
+     "tier": "primary"
+    },
+    {
+     "id": "s13",
+     "url": "https://images.nasa.gov/details/NHQ202405220019",
+     "tier": "primary"
+    },
+    {
+     "id": "s14",
+     "url": "https://images.nasa.gov/details/NHQ202405220022",
+     "tier": "primary"
+    },
+    {
+     "id": "s15",
+     "url": "https://images.nasa.gov/details/NHQ202405220010",
+     "tier": "primary"
+    },
+    {
+     "id": "s16",
+     "url": "https://images.nasa.gov/details/NHQ202405220004",
+     "tier": "primary"
+    },
+    {
+     "id": "s17",
+     "url": "https://images.nasa.gov/details/NHQ202405220007",
+     "tier": "primary"
+    },
+    {
+     "id": "s18",
+     "url": "https://images.nasa.gov/details/NHQ202405220023",
+     "tier": "primary"
+    },
+    {
+     "id": "s19",
+     "url": "https://images.nasa.gov/details/NHQ202405220001",
+     "tier": "primary"
+    },
+    {
+     "id": "s20",
+     "url": "https://images.nasa.gov/details/NHQ202405220024",
+     "tier": "primary"
+    },
+    {
+     "id": "s21",
+     "url": "https://images.nasa.gov/details/NHQ202405220009",
+     "tier": "primary"
+    },
+    {
+     "id": "s22",
+     "url": "https://images.nasa.gov/details/NHQ202405220003",
+     "tier": "primary"
+    },
+    {
+     "id": "s23",
+     "url": "https://images.nasa.gov/details/NHQ202405220020",
+     "tier": "primary"
+    }
+   ],
+   "method": "mean publisher tier (primary 1.0, academic 0.9, reference 0.8, established media 0.7, unknown 0.4)"
+  },
+  "cross_source": {
+   "value": 0.0,
+   "confirmed": 0,
+   "claims": 18,
+   "single_source": 18,
+   "conflicts": [],
+   "method": "claims supported by >= 2 different publishers (same-site pages count once)"
+  },
+  "recency": {
+   "newest_days": 904,
+   "median_days": 904.0,
+   "dated_publications": 20,
+   "value": 0.288,
+   "method": "1/(1+median age in years) over sources with a publication date (Wikipedia retrieval dates excluded)"
+  },
+  "geography": {
+   "countries": {},
+   "places": {},
+   "method": "place names in topic + claims resolved to ISO 3166 (pycountry + exonyms)"
+  },
+  "language_demand": {
+   "by_language": [
+    {
+     "lang": "de",
+     "daily_readers": 1150.3,
+     "share": 0.554
+    },
+    {
+     "lang": "ar",
+     "daily_readers": 925.7,
+     "share": 0.446
+    }
+   ],
+   "method": "mean daily Wikipedia readers of the same article per language edition - a proxy for interest, not video views",
+   "not_measured": [
+    "fr",
+    "hi",
+    "zh",
+    "ru",
+    "es"
+   ]
+  },
+  "competition": {
+   "value": null,
+   "method": "unknown - YouTube Data API not available (no YouTube Data API key (env NEXUS_KEY_YOUTUBE or vault ai/youtube)); never guessed"
+  },
+  "saturation": {
+   "value": null,
+   "method": "unknown until competition (YouTube supply) is measured"
+  },
+  "evidence_coverage": {
+   "value": 0.65,
+   "method": "share of score weight backed by measured evidence"
+  },
+  "uncertainty": {
+   "score": 57.8,
+   "low": 45.9,
+   "high": 66.5,
+   "width": 20.6,
+   "unknown_factors": [
+    "freshness",
+    "competition"
+   ],
+   "method": "score recomputed with each unknown factor at its worst and best value (confidence 0.5)"
+  },
+  "verdict": "indicative only: score range 45.9-66.5; 18 single-source claim(s) need a second source before scripting"
+ }
+}

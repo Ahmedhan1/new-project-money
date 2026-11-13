@@ -1,0 +1,170 @@
+{
+ "captured_at": "2026-11-13T13:09:29Z",
+ "kind": "LIVE (owner's Google Drive, disposable media)",
+ "connection": "drive_a",
+ "steps": [
+  {
+   "step": "Drive connections healthy (provider-reported quota)",
+   "ok": true,
+   "health": {
+    "drive_a": {
+     "status": "ok",
+     "detail": "",
+     "quota_source": "provider_api",
+     "used_gb": 2.86,
+     "limit_gb": 15.0
+    },
+    "drive_b": {
+     "status": "ok",
+     "detail": "",
+     "quota_source": "provider_api",
+     "used_gb": 0.75,
+     "limit_gb": 15.0
+    },
+    "drive_c": {
+     "status": "ok",
+     "detail": "",
+     "quota_source": "provider_api",
+     "used_gb": 13.5,
+     "limit_gb": 15.0
+    }
+   }
+  },
+  {
+   "step": "disposable media created (generated test pattern, not owner data; > 2 upload chunks)",
+   "ok": true,
+   "bytes": 20851936,
+   "sha256": "141078faf25a5e4fec17a6861de24c356547d1fb26323ca52a0462d242ce2601"
+  },
+  {
+   "step": "upload interrupted mid-transfer: record failed, local copy kept, nothing released",
+   "ok": true,
+   "state": "failed",
+   "error": "ConnectionError: simulated network drop during the second chunk"
+  },
+  {
+   "step": "transfer kept its resumable session and offset",
+   "ok": true,
+   "sent": 8388608,
+   "size": 20851936
+  },
+  {
+   "step": "resumed the interrupted transfer (same session, did not restart from byte 0)",
+   "ok": true,
+   "first_offset_after_resume": 8388608,
+   "recover": {
+    "processed": 1,
+    "states": {
+     "verified": 1
+    }
+   },
+   "chunks_after_resume": 2,
+   "total_chunks": 3,
+   "verification": "provider_sha256"
+  },
+  {
+   "step": "independent full download is byte-identical (SHA-256) and Drive's md5 matches",
+   "ok": true,
+   "remote_path": "NEXUS/Masters/prj_fc2f8d061c/disposable_archive_test.mp4",
+   "drive_md5": "c87693594093d679b039283614fcc65c",
+   "size": 20851936
+  },
+  {
+   "step": "every file of the deliverable verified (master, thumbnail, manifest)",
+   "ok": true,
+   "files": [
+    [
+     "thumbnail",
+     "disposable_archive_test.thumb.jpg",
+     "verified",
+     "provider_sha256"
+    ],
+    [
+     "project_file",
+     "disposable_archive_test.archive.json",
+     "verified",
+     "provider_sha256"
+    ],
+    [
+     "master",
+     "disposable_archive_test.mp4",
+     "verified",
+     "provider_sha256"
+    ]
+   ]
+  },
+  {
+   "step": "archive manifest lists the master with SHA-256 and recovery instructions",
+   "ok": true,
+   "contract": "A2DailyArchive/v1"
+  },
+  {
+   "step": "Account 1 registry: kind master, retention archive (never auto-cleaned)",
+   "ok": true,
+   "retention": "archive"
+  },
+  {
+   "step": "local final deleted only after a fresh re-verification",
+   "ok": true,
+   "method": "provider_sha256",
+   "reverified_at": 1794575391.3448792,
+   "verified_at": 1794575389.7553763
+  },
+  {
+   "step": "archive browser lists the released video",
+   "ok": true,
+   "entries": 1
+  },
+  {
+   "step": "retrieve: downloaded back, SHA-256 identical",
+   "ok": true,
+   "bytes": 20851936
+  }
+ ],
+ "health": {
+  "drive_a": {
+   "status": "ok",
+   "detail": "",
+   "quota_source": "provider_api",
+   "used_gb": 2.86,
+   "limit_gb": 15.0
+  },
+  "drive_b": {
+   "status": "ok",
+   "detail": "",
+   "quota_source": "provider_api",
+   "used_gb": 0.75,
+   "limit_gb": 15.0
+  },
+  "drive_c": {
+   "status": "ok",
+   "detail": "",
+   "quota_source": "provider_api",
+   "used_gb": 13.5,
+   "limit_gb": 15.0
+  }
+ },
+ "remote_files_left_on_drive": [
+  {
+   "kind": "thumbnail",
+   "path": "NEXUS/Thumbnails/prj_fc2f8d061c/disposable_archive_test.thumb.jpg",
+   "bytes": 16687
+  },
+  {
+   "kind": "project_file",
+   "path": "NEXUS/ProjectFiles/prj_fc2f8d061c/disposable_archive_test.archive.json",
+   "bytes": 1722
+  },
+  {
+   "kind": "master",
+   "path": "NEXUS/Masters/prj_fc2f8d061c/disposable_archive_test.mp4",
+   "bytes": 20851936
+  }
+ ],
+ "final": {
+  "bytes": 20851936,
+  "sha256": "141078faf25a5e4fec17a6861de24c356547d1fb26323ca52a0462d242ce2601"
+ },
+ "temp_home_removed": true,
+ "ok": true
+}

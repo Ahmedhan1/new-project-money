@@ -1,0 +1,104 @@
+{
+ "what": "reference-style demo: structure profile of the explainer and of the 1948 ad benchmarks applied to the interview benchmark (same source, same 120 s target, profile interview_storytelling)",
+ "note": "structure only - no frame, text or sound of a reference is used; numbers from the plans",
+ "runs": {
+  "interview default": {
+   "programme_seconds": 115.633,
+   "clips": 14,
+   "median_shot": 7.18,
+   "max_shot": 13.43,
+   "punch_ins": 5,
+   "cutaways": 0,
+   "notes": [
+    "speakers were detected but none has a name yet: no lower thirds (a role such as 'guest' is never put on screen); set names with diarize.set_name"
+   ]
+  },
+  "interview with explainer structure": {
+   "programme_seconds": 116.807,
+   "clips": 20,
+   "median_shot": 6.7,
+   "max_shot": 7.1,
+   "punch_ins": 8,
+   "cutaways": 0,
+   "notes": [
+    "profile ends on an end card but no title/end_text was given: no end card",
+    "speakers were detected but none has a name yet: no lower thirds (a role such as 'guest' is never put on screen); set names with diarize.set_name",
+    "structure taken from reference 'benchmark:explainer': shot length p10-p90 3.52-50.73s, median 16.916s (2.2 cuts/min); a visual change every 4.8s (median) -> interrupt at most every 7.12s; hook line at 11.3s -> hook window 13.34s; 0.4 cutaways/min (shots without the speaker's face during speech); on-screen text in 58% of frames (edge heuristic): bold captions; sound outside speech 84% of the time -> music on; ending: end_card"
+   ],
+   "applied": {
+    "shot_len": [
+     3.52,
+     50.73
+    ],
+    "shot_len_median": 16.92,
+    "pacing": "steady",
+    "pattern_interrupt_s": 7.12,
+    "hook_window_s": 13.34,
+    "opening": "cold_open",
+    "cutaways_per_min": 0.4,
+    "broll": {
+     "policy": "cutaway"
+    },
+    "captions": {
+     "style": "pop",
+     "position": "middle",
+     "words_per_cue": 3,
+     "uppercase": true
+    },
+    "music": {
+     "enabled": true
+    },
+    "ending": "end_card"
+   },
+   "why": [
+    "shot length p10-p90 3.52-50.73s, median 16.916s (2.2 cuts/min)",
+    "a visual change every 4.8s (median) -> interrupt at most every 7.12s",
+    "hook line at 11.3s -> hook window 13.34s",
+    "0.4 cutaways/min (shots without the speaker's face during speech)",
+    "on-screen text in 58% of frames (edge heuristic): bold captions",
+    "sound outside speech 84% of the time -> music on",
+    "ending: end_card"
+   ]
+  },
+  "interview with ad structure": {
+   "programme_seconds": 116.807,
+   "clips": 24,
+   "median_shot": 5.72,
+   "max_shot": 6.24,
+   "punch_ins": 10,
+   "cutaways": 0,
+   "notes": [
+    "speakers were detected but none has a name yet: no lower thirds (a role such as 'guest' is never put on screen); set names with diarize.set_name",
+    "structure taken from reference 'benchmark:ad': shot length p10-p90 1.04-55.96s, median 6.306s (3.0 cuts/min); first 10 s cut 6/min vs 3/min overall: front-loaded pacing; a visual change every 4.2s (median) -> interrupt at most every 6.25s; hook line at 20.0s -> hook window 15.0s; 1.75 cutaways/min (shots without the speaker's face during speech); sound outside speech 99% of the time -> music on; ending: fade_out"
+   ],
+   "applied": {
+    "shot_len": [
+     1.04,
+     55.96
+    ],
+    "shot_len_median": 6.31,
+    "pacing": "front_loaded",
+    "pattern_interrupt_s": 6.25,
+    "hook_window_s": 15.0,
+    "opening": "cold_open",
+    "cutaways_per_min": 1.75,
+    "broll": {
+     "policy": "cutaway"
+    },
+    "music": {
+     "enabled": true
+    },
+    "ending": "fade_out"
+   },
+   "why": [
+    "shot length p10-p90 1.04-55.96s, median 6.306s (3.0 cuts/min)",
+    "first 10 s cut 6/min vs 3/min overall: front-loaded pacing",
+    "a visual change every 4.2s (median) -> interrupt at most every 6.25s",
+    "hook line at 20.0s -> hook window 15.0s",
+    "1.75 cutaways/min (shots without the speaker's face during speech)",
+    "sound outside speech 99% of the time -> music on",
+    "ending: fade_out"
+   ]
+  }
+ }
+}

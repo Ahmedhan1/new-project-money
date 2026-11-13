@@ -1,0 +1,176 @@
+"""Account 2 Demo 1: a 3-5 minute cinematic documentary from public-domain NASA media, end to end through the engine.
+
+    director (scientific_documentary profile) plans the story from the narration: cold open, chapters, ending
+    -> semantic B-roll (SigLIP-ranked, licence-gated) from a local public-domain library + the NASA library
+    -> post: grade + letterbox from the profile, keyframed push-ins, dialogue clean-up (dialogue_v2_ffmpeg) on every
+       narration clip, procedural documentary music bed with keyframe ducking under speech, captions, title, credits
+    -> render with QA (technical + editing + asset/rights gates), quality score, loudness/true-peak, frame inspection.
+
+Run:  NEXUS_HOME=<dir> python scripts/demos/demo1_documentary.py
+Analyses (whisper + shots + visual) are read from $NEXUS_ANALYSES/<id>.json when present, else computed (slow on CPU).
+Writes docs/results/a2_demos/demo1_documentary.json, demo1_contact.jpg, demo1_editorial_plan.json. Video stays in NEXUS_HOME.
+"""
+from __future__ import annotations
+
+import json
+import os
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from nexus import broll, config, director, project, qa  # noqa: E402
+from nexus.timeline import render  # noqa: E402
+
+B = Path(os.environ.get("NEXUS_BENCH", ROOT / ".nexus" / "benchmarks"))
+AN = Path(os.environ.get("NEXUS_ANALYSES", ROOT / ".nexus" / "analyses"))
+OUT = ROOT / "docs" / "results" / "a2_demos"
+TITLE = "Red Planet: The First Close Look"
+TARGET = float(os.environ.get("DEMO1_TARGET", 225))
+
+
+def src(k: str) -> str:
+    return str(B / k / "source.mp4")
+
+
+def analysis(k: str) -> dict:
+    f = AN / f"{k}.json"
+    if f.exists():
+        return json.loads(f.read_text())
+    from nexus.media import analyze
+    a = analyze.analyze(src(k), transcribe=True)  # whisper + shots + faces + speakers + SigLIP visual layer
+    AN.mkdir(parents=True, exist_ok=True)
+    f.write_text(json.dumps(a, default=str))
+    return a
+
+
+def prov(k: str) -> dict:
+    return json.loads((B / k / "provenance.json").read_text())
+
+
+def remap(d, m: dict):
+    if isinstance(d, dict):
+        return {k: (m.get(v, v) if k == "src" and isinstance(v, str) else remap(v, m)) for k, v in d.items()}
+    if isinstance(d, list):
+        return [remap(x, m) for x in d]
+    return d
+
+
+def main() -> None:
+    config.ensure_dirs()
+    t_all = time.time()
+    DOC = os.environ.get("DEMO1_SOURCE", "documentary_long")
+    doc = analysis(DOC)
+    brief = {"profile": "scientific_documentary", "target_seconds": TARGET, "title": TITLE}
+    t0 = time.time()
+    plan = director.plan({src(DOC): doc}, brief)
+    tl = director.build(plan, (1920, 1080))
+    plan_s = time.time() - t0
+    eplan = director.editorial_plan(plan)
+    (OUT / "demo1_editorial_plan.json").write_text(json.dumps(eplan, indent=1, ensure_ascii=False, default=str))
+
+    # semantic B-roll: local public-domain library (Earth from orbit + the film's own speech-free shots) + NASA library
+    # (the Earth-from-orbit library is not offered: it does not show what a Mars film talks about)
+    local = broll.local_candidates(src(DOC), doc, "public-domain", "NASA/JPL (Mars - The Search Begins)")
+    t0 = time.time()
+    bp = broll.plan(tl, max_share=0.3, sources=("nasa",), local=local, context="Mars planet exploration spacecraft Mariner",
+                    subject=["Mars"])
+    tl, brep = broll.apply(tl, bp)
+    brep["inserts"] = [{k: d.get(k) for k in ("start", "asset", "score", "why", "query", "visual", "lexical", "reasons") if k in d}
+                       for d in bp["decisions"] if d.get("action") == "insert"]
+    broll_s = time.time() - t0
+
+    # post
+    starts, durs = render.clip_starts(tl), [render.clip_duration(c) for c in tl["clips"]]
+    pushed = 0
+    for c, d in sorted(zip(tl["clips"], durs), key=lambda x: -x[1]):
+        if c["type"] == "video" and not c.get("keyframes") and not any(e["type"] == "punch_in" for e in c.get("effects") or []) and pushed < 4:
+            c["keyframes"] = {"scale": [[0, 1.0], [round(d, 2), 1.12, "ease"]]}  # slow push-in on the longest shots
+            pushed += 1
+    for c in tl["clips"]:
+        if c["type"] == "video":
+            c["audio_fx"] = "dialogue_v2_ffmpeg"  # 1970s optical narration track: denoise + speech-band guard + level
+    if not tl["clips"][0].get("text"):
+        tl["clips"][0]["text"] = [{"text": TITLE, "style": "title", "start": 0.6, "end": min(5.0, durs[0] - 0.2), "anim": "rise"}]
+    last = tl["clips"][-1]
+    if last["type"] == "video":
+        last["credits"] = {"title": TITLE, "lines": ["Narration and Mars footage: NASA/JPL, 'Mars - The Search Begins' (public domain)",
+                                                     *[f"{c}" for c in (brep.get("credits") or [])[:4]],
+                                                     "Music: procedural bed generated by NEXUS", "Edited by the NEXUS engine"]}
+    if tl.get("music"):
+        tl["music"]["duck"] = "keyframes"
+        tl["music"]["volume"] = 0.32
+    tl.setdefault("captions", {}).update({"style": tl.get("captions", {}).get("style", "boxed")})
+
+    p = project.Project.create("Account 2 Demo 1 - cinematic documentary", "demo")
+    keys = [DOC]
+    for k in keys:
+        m = p.import_media(src(k))
+        m["rights"] = {"basis": "public-domain", "holder": "NASA", "evidence": prov(k).get("page")}
+    p.save()
+    tl = remap(tl, {src(k): m["path"] for k, m in zip(keys, p.data["media"])})
+    p.save_timeline(tl, f"demo 1: director {plan['profile']} + {brep['inserted']} B-roll + post")
+    t0 = time.time()
+    stats, report = qa.render_with_qa(p, tl, "demo1_documentary", analyses=None)
+    render_s = time.time() - t0
+    out = Path(stats["output"])
+    from nexus import quality
+    from nexus.audio import measure
+    qs = quality.score(out, tl)
+    loud = measure.loudness(measure.decode(out, 48000), 48000)
+
+    # frame inspection: 12 frames across the programme, labelled with the clip's role
+    tl_final = p.timeline()
+    starts, durs = render.clip_starts(tl_final), [render.clip_duration(c) for c in tl_final["clips"]]
+    total = render.total_duration(tl_final)
+    times = [round(total * (i + 0.5) / 12, 2) for i in range(12)]
+    frames = []
+    for i, t in enumerate(times):
+        f = OUT / f"_d1_{i}.png"
+        subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-ss", f"{t:.2f}", "-i", str(out), "-frames:v", "1",
+                        "-vf", "scale=480:-2", str(f)], check=True)
+        k = max(j for j, s in enumerate(starts) if s <= t + 1e-6)
+        c = tl_final["clips"][k]
+        frames.append({"t": t, "clip": k, "type": c["type"], "role": (c.get("notes") or {}).get("role") or (c.get("notes") or {}).get("cut"),
+                       "cutaway": bool(c.get("pip")), "frame": f.name})
+    ins = sum([["-i", str(OUT / fr["frame"])] for fr in frames], [])
+    lay = "|".join(f"{'+'.join(['w0'] * (i % 4)) or '0'}_{'+'.join(['h0'] * (i // 4)) or '0'}" for i in range(len(frames)))
+    subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", *ins, "-filter_complex",
+                    f"xstack=inputs={len(frames)}:layout={lay}", "-q:v", "5", str(OUT / "demo1_contact.jpg")], check=True)
+    for fr in frames:
+        (OUT / fr["frame"]).unlink()
+
+    info = json.loads(subprocess.run(["ffprobe", "-v", "error", "-print_format", "json", "-show_format", "-show_streams", str(out)],
+                                     capture_output=True, text=True).stdout)
+    v = next(s for s in info["streams"] if s["codec_type"] == "video")
+    a = next(s for s in info["streams"] if s["codec_type"] == "audio")
+    res = {"demo": "1 - cinematic documentary", "title": TITLE, "project": p.id, "output": str(out),
+           "duration": float(info["format"]["duration"]), "resolution": f"{v['width']}x{v['height']}", "fps": v["r_frame_rate"],
+           "video_codec": v["codec_name"], "audio_codec": a["codec_name"], "size_mb": round(int(info["format"]["size"]) / 1e6, 2),
+           "timings_s": {"plan": round(plan_s, 1), "broll": round(broll_s, 1), "render_with_qa": round(render_s, 1),
+                         "total": round(time.time() - t_all, 1)},
+           "render": {k: stats.get(k) for k in ("segments", "segments_from_cache", "pieces", "pieces_from_cache", "pipeline", "elapsed")},
+           "director": {"profile": plan["profile"], "target_s": TARGET, **{k: plan["summary"].get(k) for k in
+                        ("programme_seconds", "source_seconds", "kept_seconds", "cold_open") if k in plan["summary"]},
+                        "chapters": plan.get("chapters"), "decisions": len(plan.get("decisions") or []), "notes": plan.get("notes")},
+           "broll": {"inserted": brep.get("inserted"), "share": brep.get("share"), "credits": brep.get("credits"),
+                     "insertions": brep["inserts"],
+                     "source_errors": bp.get("source_errors")},
+           "post": {"push_ins": pushed, "dialogue_cleanup": "dialogue_v2_ffmpeg on every video clip", "music": tl.get("music"),
+                    "captions": tl.get("captions"), "cues": len(tl.get("subtitles") or []), "grade": tl.get("grade")},
+           "loudness": loud, "qa_status": report["status"], "known_issues": report.get("known_issues"),
+           "checks": [f"{'PASS' if c['ok'] else 'FAIL'} {s['stage']}: {c['check']} - {c['detail']}" for s in report["stages"] for c in s["checks"]],
+           "quality": {k: qs.get(k) for k in ("score", "verdict", "categories")},
+           "quality_not_measured": [x["id"] for x in qs.get("not_measured") or []],
+           "frames": frames,
+           "licences": {k: {"page": prov(k).get("page"), "licence": prov(k).get("license") or prov(k).get("licence")} for k in keys},
+           "machine": "shared 4-vCPU container, no GPU",
+           "human_review": "PENDING - storytelling, pacing and audio have not been reviewed by a person"}
+    (OUT / "demo1_documentary.json").write_text(json.dumps(res, indent=1, ensure_ascii=False, default=str))
+    print(json.dumps({k: res[k] for k in ("duration", "resolution", "timings_s", "qa_status", "quality", "loudness")}, indent=1, default=str))
+
+
+if __name__ == "__main__":
+    main()

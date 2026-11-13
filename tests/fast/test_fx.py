@@ -1,6 +1,7 @@
 """FX-1 / PERF-1: the renderer really applies effects, transitions, captions, titles, PiP, overlays, colour correction,
 stabilisation, roles and draft/parallel modes. Every assertion is on rendered output (ffprobe, pixels, audio), built
 from FFmpeg lavfi sources. No models, no network."""
+import re
 import subprocess
 
 import numpy as np
@@ -290,7 +291,7 @@ def test_lut_files_are_validated_and_applied_on_pixels(home, media, tmp_path):
         lut.install(bad)
     def frame(v):
         c = ops.video_clip(media["gray"], 0, 1.0, lut=v) if v else ops.video_clip(media["gray"], 0, 1.0)
-        out = tmp_path / f"l_{str(v).replace('/', '_')[:20]}.mp4"
+        out = tmp_path / f"l_{re.sub(r'[^A-Za-z0-9_.-]', '_', str(v))[:40]}.mp4"  # no ':' etc. (Windows)
         render.render(_tl([c]), out, tmp_path / "w", workers=1)
         raw = subprocess.run(["ffmpeg", "-v", "error", "-ss", "0.5", "-i", str(out), "-frames:v", "1", "-f", "rawvideo",
                               "-pix_fmt", "rgb24", "-"], capture_output=True, check=True).stdout

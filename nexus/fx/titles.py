@@ -14,7 +14,7 @@ from pathlib import Path
 from .. import config
 from ..timeline import text as ttext
 
-ANIMS = ("fade", "slide", "rise", "none")
+ANIMS = ("fade", "slide", "rise", "none", "pop", "spring", "bounce", "zoom")  # pop/spring/bounce/zoom: motion presets
 
 
 def _f(d: dict, k: str, default: float) -> float:
@@ -31,13 +31,15 @@ def title_png(t: dict, W: int, H: int, lang: str) -> Path:
     style = t.get("style") if t.get("style") in ttext.STYLES else "lower_third"
     main, sub = str(t.get("text", "")), str(t.get("subtitle", "") or "")
     lang = t.get("lang", lang)
-    key = hashlib.sha1(f"title|{main}|{sub}|{style}|{W}x{H}|{lang}|v1".encode()).hexdigest()[:16]
+    fp = t.get("font") if isinstance(t.get("font"), str) else None
+    fsig = f"|{fp}|{Path(fp).stat().st_size}" if fp and Path(fp).is_file() else ""
+    key = hashlib.sha1(f"title|{main}|{sub}|{style}|{W}x{H}|{lang}|v1{fsig}".encode()).hexdigest()[:16]
     out = config.CACHE / "overlays" / f"title_{key}.png"
     if out.exists():
         return out
     out.parent.mkdir(parents=True, exist_ok=True)
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    ttext.draw_text_block(img, main, style, lang)
+    ttext.draw_text_block(img, main, style, lang, font_path=fp)
     if sub.strip():
         rel, y_anchor, box, _colour, _bar = ttext.STYLES[style]
         dr = ImageDraw.Draw(img)
@@ -83,6 +85,10 @@ def title_graph(c: dict, W: int, H: int, fps: int, dur: float, lang: str, n_in: 
         chain = "format=rgba"
         if anim != "none":
             chain += f",fade=t=in:st={st:.3f}:d={d:.3f}:alpha=1,fade=t=out:st={en - d:.3f}:d={d:.3f}:alpha=1"
+        if anim in ("pop", "zoom"):  # scale about the frame centre: overshoot (pop) or a gentle 0.85 -> 1 (zoom)
+            u = f"clip((t-{st:.3f})/{d * 1.6:.3f},0,1)"
+            sc = (f"(1+0.25*sin({u}*PI)*(1-{u}))*(0.55+0.45*{u})" if anim == "pop" else f"(0.85+0.15*(1-pow(1-{u},3)))")
+            chain += f",scale=w='trunc(iw*{sc}/2)*2':h='trunc(ih*{sc}/2)*2':eval=frame"
         lines.append(f"[{n_in}:v]{chain}[{tag}p{k}]")
         # eased in/out progress p in [0,1]: 0 = off-screen position, 1 = resting position
         p_in = f"clip((t-{st:.3f})/{d:.3f},0,1)"
@@ -94,6 +100,12 @@ def title_graph(c: dict, W: int, H: int, fps: int, dur: float, lang: str, n_in: 
             x = f"'{sign}*{int(W * 0.5)}*(1-{p})'"
         elif anim == "rise":
             y = f"'{int(H * 0.06)}*(1-{p})'"
+        elif anim == "spring":  # damped oscillation settling on the resting position
+            y = f"'{int(H * 0.12)}*exp(-6*max(t-{st:.3f},0))*cos(14*max(t-{st:.3f},0))'"
+        elif anim == "bounce":  # falls in and bounces twice
+            y = f"'-{int(H * 0.25)}*abs(cos(9*max(t-{st:.3f},0)))*exp(-5*max(t-{st:.3f},0))'"
+        elif anim in ("pop", "zoom"):
+            x, y = "'(W-w)/2'", "'(H-h)/2'"
         lines.append(f"{cur}[{tag}p{k}]overlay=x={x}:y={y}:eval=frame:enable='between(t,{st:.3f},{en:.3f})'[{tag}o{k}]")
         cur = f"[{tag}o{k}]"
         n_in += 1

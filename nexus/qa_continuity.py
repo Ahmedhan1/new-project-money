@@ -14,7 +14,10 @@ Checks (each failed check names the cut time and a `fix` id the correction loop 
      `spans_cuts` on the audio item.
   f) caption continuity: overlapping cues, cues of source speech running into the next scene, and caption gaps at cuts
      that are far larger than the programme's usual gap.
-Cost: one 8 kHz mono audio decode of the whole file plus one short seek per cut for a few 64x36 frames.
+  g) audio (nexus.audio.qa): A/V sync of each clip against its source (cross-correlation, limit one frame),
+     programme loudness/true peak/clipping, speaker-level jumps between adjacent speech segments, silence gaps.
+Cost: one 8 kHz mono audio decode of the whole file plus one short seek per cut for a few 64x36 frames; the audio
+checks add one 48 kHz and one 16 kHz decode of the output and a 2 s source decode per clip (max 12 clips).
 """
 from __future__ import annotations
 
@@ -123,9 +126,10 @@ def _narration(tl: dict) -> list[tuple[float, float, dict]]:
     return out
 
 
-def continuity_review(video_path: str | Path, tl: dict, analyses: dict | None = None) -> dict:
+def continuity_review(video_path: str | Path, tl: dict, analyses: dict | None = None, audio_checks: bool = True) -> dict:
     """`analyses` (optional, {media path: analysis}) supplies detected scenes so cuts between different shots of one
-    source are not mistaken for grading errors."""
+    source are not mistaken for grading errors. `audio_checks` adds the audio checks of nexus.audio.qa (A/V sync per clip
+    against its source, loudness/true peak, clipping, speaker-level jumps, silence gaps)."""
     video_path = Path(video_path)
     checks: list[dict] = []
     clips = tl.get("clips", [])
@@ -248,4 +252,14 @@ def continuity_review(video_path: str | Path, tl: dict, analyses: dict | None = 
         if not bad:
             checks.append(_c("caption continuity across cuts", True, f"{len(cues)} cues, usual gap {med:.2f}s"))
     checks.append(_c("measured", True, f"{len(clips) - 1} cut(s) over {total:.1f}s; audio RMS window 1.5 s, 2 frames each side"))
-    return {"stage": STAGE, "checks": checks, "passed": all(c["ok"] or c["severity"] in ("minor", "info") for c in checks)}
+    out = {"stage": STAGE, "checks": checks}
+    if audio_checks:
+        try:
+            from .audio import qa as aqa
+            ar = aqa.audio_review(video_path, tl, starts, target_lufs=float(tl.get("target_lufs", -14.0)))
+            checks += [c | {"group": "audio"} for c in ar["checks"]]
+            out["audio"] = ar["measurements"]
+        except Exception as e:  # noqa: BLE001 - reported, never silently passed
+            checks.append(_c("audio checks", False, f"audio review failed: {type(e).__name__}: {e}", "minor"))
+    out["passed"] = all(c["ok"] or c["severity"] in ("minor", "info") for c in checks)
+    return out

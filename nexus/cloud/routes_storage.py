@@ -18,6 +18,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel
 
 from ..contracts import MediaIngestionJob, MediaSource
+from ..pathsafe import is_within
 from . import ingest, security
 from .storage import artifacts, connections, get_provider, oauth, provider_infos, transfers
 from .storage.base import NotConfigured, QuotaExceeded, ReauthRequired, StorageError
@@ -233,7 +234,7 @@ def resume_transfer(tid: str):
         raise HTTPException(404, "unknown transfer")
     m = _guard(artifacts.resume_transfer, tid)
     staged = t["local_path"]
-    if staged.startswith(str(ingest.upload_dir())) and os.path.exists(staged):
+    if is_within(staged, ingest.upload_dir()) and os.path.isfile(staged):
         os.unlink(staged)
     return {"transfer": transfers.public(transfers.get(tid)), "artifact": m.model_dump()}
 

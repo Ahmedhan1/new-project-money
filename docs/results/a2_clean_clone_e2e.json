@@ -1,0 +1,76 @@
+{
+ "what": "Clean-clone end-to-end on Linux: fresh git clone of work/account-2-cinematic-engine, fresh venv from requirements-ci.txt only, empty NEXUS_HOME with a non-ASCII path, `python -m nexus serve`, scripts/acceptance/windows_e2e.py through the HTTP API",
+ "commit": "25655a9",
+ "python": "3.13 (container); CI runs 3.12",
+ "date": "2026-11-13",
+ "steps": [
+  {
+   "step": "health",
+   "ok": true,
+   "detail": "{'ok': True, 'version': '0.2.0', 'db_schema': 1, 'jobs': {}}"
+  },
+  {
+   "step": "ffmpeg made a source file with a non-ASCII name",
+   "ok": true,
+   "detail": "clip ünïcode 视频.mp4"
+  },
+  {
+   "step": "project + media under a non-ASCII NEXUS_HOME",
+   "ok": true,
+   "detail": "/tmp/a2-cc-home/dâta 数据/projects/prj_14c2aec1b9/media/00_clip ünïcode 视频.mp4"
+  },
+  {
+   "step": "director job",
+   "ok": true,
+   "detail": "{'sources': 1, 'source_seconds': 20.0, 'programme_seconds': 9.6, 'clips': 4, 'sentences_kept': 4, 'spans_dropped': 5, 'hook': 'Solar panels convert sunlight into electricity.', 'cold_open': False}"
+  },
+  {
+   "step": "editable timeline",
+   "ok": true,
+   "detail": "4 clips, 9.6 s"
+  },
+  {
+   "step": "Arabic/Chinese timeline round trip",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "step": "render job with burned Arabic/Chinese captions",
+   "ok": true,
+   "detail": "91.9"
+  },
+  {
+   "step": "output MP4 is valid",
+   "ok": true,
+   "detail": "9.600000"
+  },
+  {
+   "step": "workspace page + effects catalogue",
+   "ok": true,
+   "detail": "58 transitions"
+  },
+  {
+   "step": "local edit (split) with undo/redo",
+   "ok": true,
+   "detail": "4 -> 5 -> 4 -> 5 clips"
+  },
+  {
+   "step": "draft preview render",
+   "ok": true,
+   "detail": "renders/draft_preview.mp4"
+  },
+  {
+   "step": "final render",
+   "ok": true,
+   "detail": "renders/final.mp4"
+  },
+  {
+   "step": "export with verification",
+   "ok": true,
+   "detail": "{'output': 'exports/final_h264_balanced.mp4', 'verified': None, 'ok': True, 'checks': None}"
+  }
+ ],
+ "quality_of_utf8_render": 91.9,
+ "all_passed": true,
+ "windows": "the same script runs in the 'Windows end-to-end (clean machine)' workflow on windows-latest; the owner's own PC is still untested (K-1)"
+}

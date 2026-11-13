@@ -480,15 +480,24 @@ models:
     read_on: "2026-11-12"
     params_b: 0.5
     repo_gb: 10.0
+    download_gb: 0.99
     min_vram_gb: unverified
-    cpu: {feasible: unmeasured, speed: "unmeasured; smaller UNet than SD1.5 so faster, lower quality", source: unmeasured}
+    min_ram_gb: 4
+    cpu: {feasible: "yes", speed: "measured here (shared 4 vCPU, torch 2.15 CPU fp32, DPM-Solver++, CFG 7.5): 29-33 s per 512x512 image at 8 steps, ~72 s at 20 steps uncontended; 3.6 GB peak RSS. SD 1.5 LCM-LoRA does NOT load (pruned UNet shapes differ)", source: docs/results/account2_generation/bksdm_tiny_cpu_bench.json, seconds_per_output: 31}
     resolution: "512 px"
     runtimes: [diffusers, sdcpp]
     windows: "yes"
     install: low
-    quality: "Lower quality than SD 1.5."
+    quality: "Inspected: 8 steps gives coherent photos (lighthouse on cliff, bicycle on brick wall, bowl of oranges); 4 steps loses the subject; 20 steps duplicated the lighthouse. Below SD 1.5 detail; fine for backgrounds."
     status: candidate
     tier: [cpu]
+    # weight sha256 (HF LFS, rev 0364108e): unet b844aff8..., text_encoder 77795e20..., vae 4fbcf0eb...
+    fetch:
+      - repo: nota-ai/bk-sdm-tiny
+        allow_patterns: [model_index.json, scheduler/scheduler_config.json, "tokenizer/*", text_encoder/config.json,
+                         text_encoder/model.fp16.safetensors, unet/config.json, unet/diffusion_pytorch_model.fp16.safetensors,
+                         vae/config.json, vae/diffusion_pytorch_model.fp16.safetensors]
+    diffusers: {pipeline: StableDiffusionPipeline, variant: fp16, scheduler: DPMSolverMultistepScheduler, steps: 8, guidance: 7.5, native: [512, 512]}
 
   # ------------------------------------------------------------------ inpaint / reference conditioning helpers
   - id: sdxl-inpaint
@@ -587,6 +596,7 @@ models:
     params_b: 5
     repo_gb: 34.2
     min_vram_gb: 24
+    measured: "Runs on Kaggle 2 x T4 15 GB (FP16 transformer sharded 15/15 blocks, BF16-emulated text encoder freed after encoding, tiled FP32 VAE): 1280x704x121 @ 24 fps, 30 steps = 47 min + 21 min decode (docs/results/wan22_5b/t2v720.json)"
     cpu: {feasible: "no", speed: "policy", source: policy}
     resolution: "1280x704, 24 fps"
     max_seconds: 5
@@ -986,6 +996,12 @@ models:
     quality: "Drives a depth-layered parallax ('2.5D') move of a licensed still. The output is NOT generated video."
     status: recommended
     tier: [cpu]
+    onnx_source: "onnx-community/depth-anything-v2-small (Apache-2.0 tag; ONNX export of the -hf weights)"
+    fetch:
+      - repo: onnx-community/depth-anything-v2-small
+        revision: 4472b7362082ad9968fee890ca0f1e5aca36b93d
+        files:
+          - {file: onnx/model.onnx, bytes: 99060839, sha256: afb6a5c28f3b6bf1618c6e43f02073ef9dfdc70e937502d51603e57b0a1df10c}
 
   - id: depth-anything-v2-large
     name: "Depth Anything V2 Base/Large"
@@ -1043,6 +1059,137 @@ models:
     quality: "Sharp metric depth."
     status: rejected
     why: "Research-only licence."
+
+  # ------------------------------------------------------------------ Account 2 Agent D: media-to-media models (nexus/enhance, nexus/vfx)
+  # Exact files pinned by revision + sha256 (read from https://huggingface.co/api/models/<repo>?blobs=true on 2026-11-12).
+  # Fetched only through nexus.generate.downloads.fetch() with the user's consent; none is downloaded automatically.
+  - id: realesr-general-x4v3
+    name: "Real-ESRGAN general x4v3 (SRVGGNetCompact, 1.2 M params) - ONNX graph built locally from the safetensors"
+    tasks: [upscale]
+    hf_repo: OzzyGT/RealESRGAN_general_x4v3
+    weights_licence: "BSD-3-Clause (xinntao/Real-ESRGAN LICENSE; the HF mirror's card links it)"
+    commercial_use: "yes"
+    conditions: "keep the BSD-3 notice; HF repo is a third-party mirror of the official GitHub release file"
+    source_url: https://huggingface.co/OzzyGT/RealESRGAN_general_x4v3
+    licence_url: https://raw.githubusercontent.com/xinntao/Real-ESRGAN/master/LICENSE
+    read_on: "2026-11-12"
+    params_b: 0.0012
+    download_gb: 0.005
+    min_vram_gb: 0
+    cpu: {feasible: "slow", speed: "measured here - docs/ACCOUNT2_MODEL_BENCHMARKS.md", source: docs/ACCOUNT2_MODEL_BENCHMARKS.md}
+    resolution: "x4 (any input)"
+    runtimes: [onnxruntime]
+    windows: "yes"
+    install: low
+    quality: "Removes blur/compression on soft sources; hallucinates texture; can flicker on video. Never recovers real detail."
+    status: recommended
+    tier: [cpu, vram_6_8]
+    fetch:
+      - repo: OzzyGT/RealESRGAN_general_x4v3
+        revision: c00832003bec40a574d2b1cac93dfb3b5e14269f
+        files:
+          - {file: model.safetensors, bytes: 4861584, sha256: 4dd83a0397e4440f8614c3ed7c1fea94451c083702cbd71825615c6b2936a9ff}
+
+  - id: mediapipe-selfie
+    name: "MediaPipe Selfie Segmentation (general 256x256) - ONNX"
+    tasks: [segment]
+    hf_repo: onnx-community/mediapipe_selfie_segmentation
+    weights_licence: "Apache-2.0 (HF tag; google-ai-edge/mediapipe Apache-2.0)"
+    commercial_use: "yes"
+    source_url: https://huggingface.co/onnx-community/mediapipe_selfie_segmentation
+    read_on: "2026-11-12"
+    params_b: 0.0001
+    download_gb: 0.0005
+    min_vram_gb: 0
+    cpu: {feasible: "yes", speed: "measured here - docs/ACCOUNT2_MODEL_BENCHMARKS.md", source: docs/ACCOUNT2_MODEL_BENCHMARKS.md}
+    resolution: "256x256 internal"
+    runtimes: [onnxruntime]
+    windows: "yes"
+    install: low
+    quality: "People only (selfie / talking head); soft edges."
+    status: recommended
+    tier: [cpu]
+    fetch:
+      - repo: onnx-community/mediapipe_selfie_segmentation
+        revision: be49485c8e027524be38591817fc5cd31bd9d00e
+        files:
+          - {file: onnx/model.onnx, bytes: 462352, sha256: 3241ac4ad8aa35bdaf33946776db29f7c283a413aa0b0dacb9483594b4531aad}
+
+  - id: modnet
+    name: "MODNet portrait matting - ONNX"
+    tasks: [segment]
+    hf_repo: Xenova/modnet
+    weights_licence: "Apache-2.0 (HF tag; ZHKKKe/MODNet Apache-2.0)"
+    commercial_use: "yes"
+    source_url: https://huggingface.co/Xenova/modnet
+    read_on: "2026-11-12"
+    params_b: 0.0065
+    download_gb: 0.025
+    min_vram_gb: 0
+    cpu: {feasible: "yes", speed: "measured here - docs/ACCOUNT2_MODEL_BENCHMARKS.md", source: docs/ACCOUNT2_MODEL_BENCHMARKS.md}
+    resolution: "512 px internal (multiple of 32)"
+    runtimes: [onnxruntime]
+    windows: "yes"
+    install: low
+    quality: "Soft alpha matte for portraits; better hair edges than selfie segmentation."
+    status: recommended
+    tier: [cpu]
+    fetch:
+      - repo: Xenova/modnet
+        revision: fa2fa546052fba4c08921230a26cc69a333fca12
+        files:
+          - {file: onnx/model.onnx, bytes: 25888640, sha256: 07c308cf0fc7e6e8b2065a12ed7fc07e1de8febb7dc7839d7b7f15dd66584df9}
+
+  - id: u2netp
+    name: "U^2-Netp salient object segmentation (rembg 'u2netp') - ONNX"
+    tasks: [segment]
+    hf_repo: BritishWerewolf/U-2-Netp
+    weights_licence: "Apache-2.0 (xuebinqin/U-2-Net LICENSE; HF tag apache-2.0, third-party export)"
+    commercial_use: "yes"
+    source_url: https://huggingface.co/BritishWerewolf/U-2-Netp
+    read_on: "2026-11-12"
+    params_b: 0.0011
+    download_gb: 0.0043
+    min_vram_gb: 0
+    cpu: {feasible: "yes", speed: unmeasured, source: unmeasured}
+    resolution: "320 px internal"
+    runtimes: [onnxruntime]
+    windows: "yes"
+    install: low
+    quality: "Generic salient object (products, objects); coarse."
+    status: candidate
+    tier: [cpu]
+    fetch:
+      - repo: BritishWerewolf/U-2-Netp
+        revision: 7112208dbac3a3642496c8d54e2f0f9bb3dc1dc8
+        files:
+          - {file: onnx/model.onnx, bytes: 4574861, sha256: 309c8469258dda742793dce0ebea8e6dd393174f89934733ecc8b14c76f4ddd8}
+
+  - id: clip-vit-b32-laion
+    name: "OpenCLIP ViT-B/32 laion2B-s34B-b79K (prompt-adherence score in benchmarks only)"
+    tasks: [score]
+    hf_repo: laion/CLIP-ViT-B-32-laion2B-s34B-b79K
+    weights_licence: "MIT (HF tag); open_clip code MIT-style"
+    commercial_use: "yes"
+    conditions: "benchmark metric only; OpenAI CLIP weights are NOT used (their card puts any deployed use out of scope)"
+    source_url: https://huggingface.co/laion/CLIP-ViT-B-32-laion2B-s34B-b79K
+    read_on: "2026-11-12"
+    params_b: 0.15
+    download_gb: 0.56
+    min_vram_gb: 0
+    cpu: {feasible: "slow", speed: unmeasured, source: unmeasured}
+    resolution: "224 px"
+    runtimes: [open_clip]
+    windows: "yes"
+    install: medium
+    quality: "Coarse text-image agreement; not a quality judgement."
+    status: candidate
+    tier: [remote]
+    fetch:
+      - repo: laion/CLIP-ViT-B-32-laion2B-s34B-b79K
+        revision: 1a25a446712ba5ee05982a381eed697ef9b435cf
+        files:
+          - {file: open_clip_model.safetensors, bytes: 605143316, sha256: ac4f8c4b88af6d963118cbf40ad93176d092abbedfcb752601ae1866352656e6}
 
 # ------------------------------------------------------------------ runtimes
 runtimes:

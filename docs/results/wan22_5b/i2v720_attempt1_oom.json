@@ -1,0 +1,24 @@
+{
+ "captured_at": "2026-11-13T15:32:52Z",
+ "kind": "LIVE (real Kaggle GPU, real Wan 2.2 TI2V-5B)",
+ "profile": "i2v720",
+ "job_id": "rjob_5b6d09efb6d1",
+ "status": "failed",
+ "error": "OutOfMemoryError: CUDA out of memory. Tried to allocate 1.88 GiB. GPU 0 has a total capacity of 14.56 GiB of which 1.81 GiB is free. Including non-PyTorch memory, this process has 12.75 GiB memory in use. Of the allocated memory 10.61 GiB is allocated by PyTorch, and 2.02 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)",
+ "accelerator": "Tesla T4 x2",
+ "duration_s": 341.591,
+ "worker_metrics": {
+  "peak_rss_mb": 21546.5,
+  "ram_total_gb": 31.35,
+  "gpu_util_max": 100.0,
+  "gpu_util_mean": 1.6,
+  "gpu_mem_used_max_mb": 14627.0,
+  "task_s": 341.591,
+  "per_gpu": null,
+  "load_s": null,
+  "download_s": null
+ },
+ "benchmark": null,
+ "videos": [],
+ "log_tail": "iffusers\": \"0.35.2\", \"transformers\": \"5.20.2\", \"accelerate\": \"1.15.0\", \"safetensors\": \"0.8.0\", \"huggingface_hub\": \"1.33.0\", \"cuda\": \"13.0\"}}\n15:29:07 snapshot Wan-AI/Wan2.2-TI2V-5B-Diffusers@b8fff7315c768468a5333511427288870b2e9635 in 152s\n15:31:19 loaded in 132s: transformer torch.float16 on cuda:0, text encoder gpu-bf16, vae fp32\n15:31:25 text encoder freed: cuda:1 free 14.4 GB\n15:31:26 transformer sharded {'blocks_on_main': 15, 'blocks_on_aux': 15}: free cuda:0 7.0 GB, cuda:1 9.8 GB\n15:31:33 tates=latent_model_input,\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<4 lines>...\n        return_dict=False,\n        ^^^^^^^^^^^^^^^^^^\n    )[0]\n    ^\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1779, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1790, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/usr/local/lib/python3.13/dist-packages/diffusers/models/transformers/transformer_wan.py\", line 663, in forward\n    hidden_states = block(hidden_states, encoder_hidden_states, timestep_proj, rotary_emb)\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1779, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1885, in _call_impl\n    return inner()\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1833, in inner\n    result = forward_call(*args, **kwargs)\n  File \"/usr/local/lib/python3.13/dist-packages/diffusers/models/transformers/transformer_wan.py\", line 462, in forward\n    self.scale_shift_table.unsqueeze(0) + temb.float()\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~\ntorch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.88 GiB. GPU 0 has a total capacity of 14.56 GiB of which 1.81 GiB is free. Including non-PyTorch memory, this process has 12.75 GiB memory in use. Of the allocated memory 10.61 GiB is allocated by PyTorch, and 2.02 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)\n"
+}

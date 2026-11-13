@@ -13,7 +13,7 @@ def create_from_idea(job: jobs.Job) -> dict:
     p = job.params
     out = create.create_video(p["topic"], scenes=p.get("scenes", 5), lang=p.get("lang", "en"), notes=p.get("notes"),
                               size=tuple(p.get("size", (1280, 720))), name=p.get("name"), stage=job.stage, on_project=job.set_project,
-                              preset=p.get("preset"))
+                              preset=p.get("preset"), script=p.get("script"))
     return {"project": out["project"], "status": out["report"]["status"], "issues": out["report"]["known_issues"],
             "title": out["script"]["title"], "output": out["output"]}
 
@@ -35,6 +35,13 @@ def render(job: jobs.Job) -> dict:
     p = prj.Project(a["project"])
     tl = p.timeline(a.get("branch", "main"))
 
+    def preflight():  # refuse before encoding anything when the render cannot finish in the free space
+        from . import diskman
+        est = diskman.estimate_render(tl, bool(a.get("draft")))
+        return {**diskman.preflight(est["required_bytes"], f"render {a['name']}"), "estimate": est}
+
+    job.stage("disk-preflight", preflight)
+
     def run():  # the renderer caches finished segments on disk, so a resumed render only encodes what is missing
         stats, report = qa.render_with_qa(p, tl, a["name"], _analysis(p) or None, draft=bool(a.get("draft")))
         return {"output": str(Path(stats["output"]).relative_to(p.dir)), "status": report["status"], "issues": report["known_issues"],
@@ -45,7 +52,17 @@ def render(job: jobs.Job) -> dict:
     if a.get("draft"):
         return r  # drafts are previews: no quality verdict
     r["quality"] = job.stage("quality-score", lambda: _quality(p, tl, r["output"], a.get("platform")))
+    if a.get("archive") or (a.get("archive") is None and _auto_archive()):
+        # daily output: archive the verified final externally (the local copy is released only after verification)
+        r["archive"] = {"job": jobs.submit("archive", {"project": p.id, "render": r["output"], "kind": a.get("kind", "master")}, p.id)["job"]}
     return r
+
+
+def _auto_archive() -> bool:
+    """Auto-archive only when the owner configured a destination (Account 1 storage rules or archive settings)."""
+    from . import archive, config
+    s = archive.settings()
+    return bool(s.get("auto_archive")) and (bool(s.get("connection_id")) or (config.HOME / "storage_rules.json").exists())
 
 
 def _quality(p, tl: dict, output: str, platform: str | None = None) -> dict:
@@ -66,7 +83,14 @@ def direct_(job: jobs.Job) -> dict:
     from . import director, project as prj
     a = job.params
     p = prj.Project(a["project"])
-    brief = {k: a[k] for k in ("profile", "target_seconds", "instructions", "title", "platforms", "languages", "shorts") if a.get(k) is not None}
+    brief = {k: a[k] for k in ("profile", "target_seconds", "instructions", "title", "platforms", "languages", "shorts", "overrides",
+                               "profile_overrides", "end_text") if a.get(k) is not None}
+    if a.get("reference_profile_id"):  # structure (numbers) of a lawfully supplied reference, never its content
+        from . import reference
+        ref = json.loads((p.dir / "reports" / "references" / f"{a['reference_profile_id']}.json").read_text(encoding="utf-8"))
+        ov = reference.to_overrides(ref)
+        brief["profile_overrides"] = director._merge(brief.get("profile_overrides") or {}, ov["profile_overrides"])
+        brief.setdefault("instructions", None)
     size = tuple(a.get("size") or (1920, 1080))
 
     def plan():
@@ -100,7 +124,15 @@ def direct_(job: jobs.Job) -> dict:
     def add_broll():  # licensed cutaways over the speaker's own audio (nexus/broll.py); network sources can be down
         from . import broll
         tl = p.timeline(a.get("branch", "main"))
-        pl = broll.plan(tl, max_share=float(a.get("broll_share", 0.35)))
+        local = []  # the user's own other files (declared rights) as cutaway candidates, ranked visually when SigLIP is present
+        used = {c.get("src") for c in tl["clips"]}
+        ans = _analysis(p)
+        for m in p.data["media"]:
+            an = ans.get(m["path"])
+            basis = (m.get("rights") or {}).get("basis") if isinstance(m.get("rights"), dict) else None
+            if an and basis in ("owned", "licensed", "public-domain", "generated") and m["path"] not in used:
+                local += broll.local_candidates(m["path"], an, basis, (m.get("rights") or {}).get("holder") or m["name"])
+        pl = broll.plan(tl, max_share=float(a.get("broll_share", 0.35)), local=local or None, subject=a.get("broll_subject") or ())
         new, rep = broll.apply(tl, pl)
         if rep["inserted"]:
             p.save_timeline(new, f"B-roll: {rep['inserted']} licensed cutaways", a.get("branch", "main"))
@@ -319,3 +351,140 @@ def deliver_(job: jobs.Job) -> dict:
     return job.stage("render-check-package", lambda: publish.deliver(p, tl, a["platforms"], a.get("title") or p.name,
                                                                      a.get("description", ""), a.get("lang") or tl.get("lang", "en"),
                                                                      analysis_by_src=_analysis(p) or None))
+
+
+# Account 3 job kinds (registered by import): publish-upload
+from .intelligence.publishing import jobs_handler as _a3_publish  # noqa: E402,F401
+from .intelligence import workflows as _a3_workflows  # noqa: E402,F401
+
+
+@jobs.handler("export")
+def export_(job: jobs.Job) -> dict:
+    """Re-encode a rendered file with chosen export settings (codec/quality/size target) and verify the result."""
+    from . import export, project as prj
+    a = job.params
+    p = prj.Project(a["project"])
+    from .pathsafe import PathEscape, contained
+    try:
+        src = contained(p.dir, a["render"], must_be_file=True)
+    except PathEscape:
+        raise ValueError(f"render not found: {a['render']}") from None
+    ext = {"av1": ".mkv"}.get(a.get("codec", "h264"), ".mp4")
+    out = p.dir / "exports" / f"{src.stem}_{a.get('codec', 'h264')}_{a.get('quality', 'balanced')}{ext}"
+    out.parent.mkdir(parents=True, exist_ok=True)
+
+    def run():
+        rep = export.export(src, out, codec=a.get("codec", "h264"), quality=a.get("quality", "balanced"), width=a.get("width"),
+                            height=a.get("height"), fps=a.get("fps"), max_bytes=a.get("max_bytes"), audio=a.get("audio", "aac"))
+        rep["output"] = str(out.relative_to(p.dir)) if out.exists() else None
+        return rep
+
+    return job.stage("encode-verify", run)
+
+
+@jobs.handler("clip-process")
+def clip_process(job: jobs.Job) -> dict:
+    """Enhancement / VFX on one clip (media-to-media, cached): the clip's src is replaced by the processed segment and
+    the original reference kept in `enhanced_from`, so undo restores it. Saved as a new timeline version."""
+    from . import enhance, project as prj, vfx
+    a = job.params
+    p = prj.Project(a["project"])
+    branch = a.get("branch", "main")
+
+    def run():
+        tl = p.timeline(branch)
+        idx = next(i for i, c in enumerate(tl["clips"]) if c["id"] == a["clip"])
+        op = a["op"]
+        fn = vfx.apply if op in {"replace_background", "tracked_mask"} else enhance.apply
+        tl["clips"][idx] = fn(tl["clips"][idx], op, **(a.get("params") or {}))
+        vid = p.save_timeline(tl, f"{op} on {a['clip']}", branch)
+        return {"project": p.id, "version": vid, "src": tl["clips"][idx]["src"], "op": op}
+
+    return job.stage("process", run)
+
+
+@jobs.handler("model-download")
+def model_download(job: jobs.Job) -> dict:
+    """Fetch model weights only with the consent the user gave in the UI (size and licence shown first)."""
+    from .generate import downloads
+    a = job.params
+    c = downloads.consent(a["model"], a["accepted_gb"], a.get("licence_accepted", False), by="ui")
+    return job.stage("download", lambda: downloads.fetch(a["model"], consent=c))
+
+
+@jobs.handler("reference")
+def reference_(job: jobs.Job) -> dict:
+    """ReferenceStyleProfile from a lawfully supplied reference in the project (structure only, nexus/reference.py)."""
+    import json
+    from . import project as prj, reference
+    a = job.params
+    p = prj.Project(a["project"])
+    m = next(x for x in p.data["media"] if x["id"] == a["media_id"])
+
+    def run():
+        an = _analysis(p).get(m["path"])
+        if an is None:
+            from .media import analyze
+            an = analyze.analyze(m["path"])
+        prof = reference.analyze(m["path"], an, name=a.get("name") or m["name"], rights={"basis": a["rights_basis"]})
+        d = p.dir / "reports" / "references"
+        d.mkdir(parents=True, exist_ok=True)
+        rid = f"ref_{m['id']}"
+        (d / f"{rid}.json").write_text(json.dumps(prof, ensure_ascii=False, default=str), encoding="utf-8")
+        return {"reference_profile_id": rid, "metrics": prof.get("metrics")}
+
+    return job.stage("reference-profile", run)
+
+
+@jobs.handler("visual-install")
+def visual_install(job: jobs.Job) -> dict:
+    from .media import visual
+    return job.stage("download", lambda: {"installed": visual.ensure_model(allow_download=True), **visual.info()})
+
+
+# Account 2 tasks on Account 1's remote workers (render steps on CPU workers, Wan video on GPU workers): registered
+# with Account 1's dispatcher when its package is installed; a no-op on a branch without it.
+from .timeline import remote_render as _remote_render  # noqa: E402
+
+_remote_render.register_account1_tasks()
+
+
+@jobs.handler("asset-install")
+def asset_install(job: jobs.Job) -> dict:
+    """Download (resumable, SHA-256 pinned, licence-checked) one library asset."""
+    from . import assetlib
+    aid = job.params["asset_id"]
+
+    def run():
+        last = [0.0]
+
+        def prog(have, total):
+            if total and have / total - last[0] >= 0.1:
+                last[0] = have / total
+                job.progress(have / total)
+                job.log(f"{aid}: {have}/{total} bytes")
+        rec = assetlib.install(aid, prog)
+        return {"asset_id": aid, "sha256": rec.get("sha256"), "size": rec.get("size")}
+
+    return job.stage("download-verify", run)
+
+
+@jobs.handler("archive")
+def archive_(job: jobs.Job) -> dict:
+    """Daily output: upload the final + metadata through Account 1 storage, verify, then release the local copy."""
+    from . import archive
+    a = job.params
+    return job.stage("archive", lambda: archive.archive_output(a["project"], a["render"], kind=a.get("kind", "master"),
+                                                                release_local=a.get("release_local")))
+
+
+@jobs.handler("archive-retrieve")
+def archive_retrieve(job: jobs.Job) -> dict:
+    from . import archive
+    return job.stage("retrieve", lambda: {"path": str(archive.retrieve(job.params["record"]))})
+
+
+@jobs.handler("archive-recover")
+def archive_recover(job: jobs.Job) -> dict:
+    from . import archive
+    return job.stage("recover", lambda: archive.recover())

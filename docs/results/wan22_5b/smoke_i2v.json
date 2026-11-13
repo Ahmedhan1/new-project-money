@@ -1,0 +1,201 @@
+{
+ "captured_at": "2026-11-13T15:42:55Z",
+ "kind": "LIVE (real Kaggle GPU, real Wan 2.2 TI2V-5B)",
+ "profile": "smoke_i2v",
+ "job_id": "rjob_a3611e323cb4",
+ "status": "succeeded",
+ "error": null,
+ "accelerator": "Tesla T4 x2",
+ "duration_s": 434.091,
+ "worker_metrics": {
+  "peak_rss_mb": 22064.0,
+  "ram_total_gb": 31.35,
+  "gpu_util_max": 100.0,
+  "gpu_util_mean": 12.5,
+  "gpu_mem_used_max_mb": 14359.0,
+  "task_s": 434.091,
+  "per_gpu": [
+   {
+    "index": 0,
+    "util_max": 100.0,
+    "util_mean": 8.8,
+    "smi_mem_used_max_mb": 12405.0
+   },
+   {
+    "index": 1,
+    "util_max": 100.0,
+    "util_mean": 19.8,
+    "smi_mem_used_max_mb": 14359.0
+   }
+  ],
+  "load_s": 131.3,
+  "download_s": 154.0
+ },
+ "benchmark": {
+  "model": "wan22-ti2v-5b",
+  "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+  "revision": "b8fff7315c768468a5333511427288870b2e9635",
+  "licence": "apache-2.0",
+  "diffusers_pinned": "0.35.2",
+  "env": {
+   "gpu_count": 2,
+   "gpus": [
+    {
+     "index": 0,
+     "name": "Tesla T4",
+     "vram_gb": 14.56,
+     "cc": "7.5"
+    },
+    {
+     "index": 1,
+     "name": "Tesla T4",
+     "vram_gb": 14.56,
+     "cc": "7.5"
+    }
+   ],
+   "bf16_native": false,
+   "bf16_matmul_works": true,
+   "versions": {
+    "torch": "2.11.0+cu130",
+    "diffusers": "0.35.2",
+    "transformers": "5.20.2",
+    "accelerate": "1.15.0",
+    "safetensors": "0.8.0",
+    "huggingface_hub": "1.33.0",
+    "cuda": "13.0"
+   }
+  },
+  "strategy": {
+   "transformer": "torch.float16, blocks split {'blocks_on_main': 15, 'blocks_on_aux': 15} across cuda:0/cuda:1",
+   "text_encoder": "gpu-bf16 on cuda:1",
+   "vae": "fp32 on cuda:1 for I2V encode (latents handed to cuda:0) and decode (untiled when it fits, else own first-chunk-aware tiling)",
+   "cpu_offload": false
+  },
+  "download_s": 154.0,
+  "load_s": 131.3,
+  "runs": [
+   {
+    "run": "run0",
+    "mode": "i2v",
+    "prompt": "The cat slowly turns its head toward the camera and blinks while the background gently moves, natural motion.",
+    "image": {
+     "source": "Wan-AI/Wan2.2-TI2V-5B-Diffusers@b8fff7315c768468a5333511427288870b2e9635:examples/i2v_input.JPG",
+     "size": [
+      832,
+      1104
+     ]
+    },
+    "width": 672,
+    "height": 384,
+    "frames": 25,
+    "fps": 24,
+    "steps": 20,
+    "guidance": 5.0,
+    "seed": 11,
+    "scheduler": "UniPCMultistepScheduler",
+    "text_encode_s": 5.3,
+    "generate_s": 51.5,
+    "decode_s": 43.4,
+    "s_per_step_mean": 2.57,
+    "aux_free_gb_before_decode": 6.67,
+    "decode": "untiled",
+    "decode_check": null,
+    "vram": [
+     {
+      "index": 0,
+      "peak_allocated_mb": 5244.5,
+      "peak_reserved_mb": 5346.0
+     },
+     {
+      "index": 1,
+      "peak_allocated_mb": 13772.9,
+      "peak_reserved_mb": 14222.0
+     }
+    ],
+    "quality": {
+     "frames": 25,
+     "mean_luma": 122.2,
+     "min_frame_luma": 121.31,
+     "mean_frame_std": 66.42,
+     "mean_abs_frame_diff": 4.838,
+     "max_abs_frame_diff": 9.095,
+     "first_last_diff": 19.399,
+     "static_pairs": 0,
+     "black": false,
+     "flat": false
+    },
+    "ffprobe": {
+     "programs": [],
+     "streams": [
+      {
+       "codec_name": "h264",
+       "codec_type": "video",
+       "width": 672,
+       "height": 384,
+       "r_frame_rate": "24/1",
+       "nb_frames": "25"
+      }
+     ],
+     "format": {
+      "duration": "1.041667",
+      "size": "403911",
+      "bit_rate": "3102035"
+     }
+    },
+    "artifact": {
+     "name": "wan22_5b_i2v_672x384_25f_run0.mp4",
+     "sha256": "77736937ca85ed4c93fbcfd651cb316a83b03ec4e9baeafea21d737009995448",
+     "size": 403911
+    }
+   }
+  ],
+  "per_gpu": [
+   {
+    "index": 0,
+    "util_max": 100.0,
+    "util_mean": 8.8,
+    "smi_mem_used_max_mb": 12405.0
+   },
+   {
+    "index": 1,
+    "util_max": 100.0,
+    "util_mean": 19.8,
+    "smi_mem_used_max_mb": 14359.0
+   }
+  ]
+ },
+ "videos": [
+  {
+   "name": "wan22_5b_i2v_672x384_25f_run0.mp4",
+   "size": 403911,
+   "sha256": "77736937ca85ed4c93fbcfd651cb316a83b03ec4e9baeafea21d737009995448",
+   "sha256_matches_worker": true,
+   "ffprobe": {
+    "programs": [],
+    "streams": [
+     {
+      "codec_name": "h264",
+      "width": 672,
+      "height": 384,
+      "pix_fmt": "yuv420p",
+      "r_frame_rate": "24/1",
+      "nb_read_frames": "25"
+     }
+    ],
+    "format": {
+     "duration": "1.041667",
+     "size": "403911"
+    }
+   },
+   "motion": {
+    "decoded_frames": 25,
+    "mean_abs_diff": 1.369,
+    "static_pairs": 0,
+    "luma_min": 123.4,
+    "luma_max": 125.4
+   },
+   "local_path": "$NEXUS_HOME/compute/artifacts/rjob_a3611e323cb4/wan22_5b_i2v_672x384_25f_run0.mp4"
+  }
+ ],
+ "log_tail": ""
+}

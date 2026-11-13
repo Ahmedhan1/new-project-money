@@ -1,0 +1,20 @@
+{"note": "SYNTHETIC response-shape fixtures (hand-made, values are not real data). Shapes follow the first-party docs cited in docs/ACCOUNT3_RESEARCH_SOURCES.md; these hosts could not be recorded because they are not declared (GDELT, YouTube, wikimedia.org REST) or no feed is configured.",
+ "gdelt_timelinevolraw": {"query_details": {"title": "\"test topic\""}, "timeline": [{"series": "Article Count", "data": [
+   {"date": "20261006T000000Z", "value": 2, "norm": 1000}, {"date": "20261013T000000Z", "value": 2, "norm": 1000},
+   {"date": "20261020T000000Z", "value": 3, "norm": 1000}, {"date": "20261027T000000Z", "value": 2, "norm": 1000},
+   {"date": "20261105T000000Z", "value": 9, "norm": 1000}, {"date": "20261106T000000Z", "value": 7, "norm": 1000},
+   {"date": "20261107T000000Z", "value": 8, "norm": 1000}, {"date": "20261108T000000Z", "value": 6, "norm": 1000},
+   {"date": "20261109T000000Z", "value": 5, "norm": 1000}, {"date": "20261110T000000Z", "value": 9, "norm": 1000},
+   {"date": "20261111T000000Z", "value": 4, "norm": 1000}]}]},
+ "youtube_search": {"pageInfo": {"totalResults": 1000}, "items": [
+   {"id": {"kind": "youtube#video", "videoId": "vidA"}, "snippet": {"title": "Test topic explained"}},
+   {"id": {"kind": "youtube#video", "videoId": "vidB"}, "snippet": {"title": "Why nobody talks about this"}}]},
+ "youtube_videos": {"items": [
+   {"id": "vidA", "snippet": {"title": "Test topic explained", "publishedAt": "2026-10-30T10:00:00Z", "channelTitle": "Channel A"}, "statistics": {"viewCount": "12000"}},
+   {"id": "vidB", "snippet": {"title": "Why nobody talks about this", "publishedAt": "2025-01-02T10:00:00Z", "channelTitle": "Channel B"}, "statistics": {"viewCount": "800"}}]},
+ "pageviews_rest": {"items": [
+   {"project": "en.wikipedia", "article": "Test_topic", "granularity": "daily", "timestamp": "2026111000", "access": "all-access", "agent": "user", "views": 300},
+   {"project": "en.wikipedia", "article": "Test_topic", "granularity": "daily", "timestamp": "2026111100", "access": "all-access", "agent": "user", "views": 320}]},
+ "rss": "<?xml version=\"1.0\"?><rss version=\"2.0\"><channel><title>Feed</title><item><title>Test topic hits a milestone</title><link>https://example.org/a</link><pubDate>Tue, 10 Nov 2026 08:00:00 GMT</pubDate><description>&lt;p&gt;About the test topic&lt;/p&gt;</description></item><item><title>Unrelated story</title><link>https://example.org/b</link><pubDate>Mon, 09 Nov 2026 08:00:00 GMT</pubDate></item></channel></rss>",
+ "atom": "<?xml version=\"1.0\"?><feed xmlns=\"http://www.w3.org/2005/Atom\"><title>Atom</title><entry><title>Test topic update</title><link href=\"https://example.org/c\"/><updated>2026-11-11T12:00:00Z</updated><summary>Short summary</summary></entry></feed>"
+}

@@ -1,0 +1,246 @@
+{
+ "base": "http://127.0.0.1:<port>",
+ "pages": {
+  "system": {
+   "h": "System & Updates",
+   "chars": 748,
+   "error_text": null,
+   "ms": 3013
+  },
+  "home": {
+   "h": "What do you want to create?",
+   "chars": 1504,
+   "error_text": null,
+   "ms": 3009
+  },
+  "dashboard": {
+   "h": "Dashboard",
+   "chars": 1244,
+   "error_text": null,
+   "ms": 3010
+  },
+  "creator": {
+   "h": "AI Video Creator",
+   "chars": 1043,
+   "error_text": null,
+   "ms": 3011
+  },
+  "projects": {
+   "h": "Project History",
+   "chars": 187,
+   "error_text": null,
+   "ms": 3010
+  },
+  "editor": {
+   "h": "Video Editor",
+   "chars": 668,
+   "error_text": null,
+   "ms": 3009
+  },
+  "remix": {
+   "h": "Video Remix Studio",
+   "chars": 797,
+   "error_text": null,
+   "ms": 3011
+  },
+  "dubbing": {
+   "h": "Voiceover, Dubbing & Subtitles",
+   "chars": 892,
+   "error_text": null,
+   "ms": 3010
+  },
+  "audio": {
+   "h": "Audio Production",
+   "chars": 396,
+   "error_text": null,
+   "ms": 3007
+  },
+  "documentary": {
+   "h": "Documentary Studio",
+   "chars": 369,
+   "error_text": null,
+   "ms": 3007
+  },
+  "animation": {
+   "h": "Animation & Motion Graphics",
+   "chars": 947,
+   "error_text": null,
+   "ms": 3010
+  },
+  "series": {
+   "h": "Film & Series Studio",
+   "chars": 825,
+   "error_text": null,
+   "ms": 3011
+  },
+  "factory": {
+   "h": "Content Factory",
+   "chars": 2487,
+   "error_text": null,
+   "ms": 3014
+  },
+  "publishing": {
+   "h": "Publishing Studio",
+   "chars": 1103,
+   "error_text": null,
+   "ms": 3008
+  },
+  "channels": {
+   "h": "Channels & Business",
+   "chars": 296,
+   "error_text": null,
+   "ms": 3008
+  },
+  "workspace": {
+   "h": "Cinematic Workspace",
+   "chars": 161,
+   "error_text": null,
+   "ms": 3009
+  },
+  "models": {
+   "h": "AI Models & Provider Router",
+   "chars": 4535,
+   "error_text": null,
+   "ms": 3009
+  },
+  "review": {
+   "h": "Review",
+   "chars": 250,
+   "error_text": null,
+   "ms": 3010
+  },
+  "qa": {
+   "h": "Quality Assurance Center",
+   "chars": 195,
+   "error_text": null,
+   "ms": 3007
+  },
+  "assets": {
+   "h": "Asset Library",
+   "chars": 36262,
+   "error_text": null,
+   "ms": 3012
+  },
+  "resources": {
+   "h": "Free Resources & Compute",
+   "chars": 1390,
+   "error_text": null,
+   "ms": 3013
+  },
+  "storage": {
+   "h": "Storage & Backup",
+   "chars": 3276,
+   "error_text": null,
+   "ms": 3010
+  },
+  "tools": {
+   "h": "Deployed Tools & Models",
+   "chars": 6039,
+   "error_text": null,
+   "ms": 3010
+  },
+  "discovery": {
+   "h": "GitHub Discovery",
+   "chars": 14607,
+   "error_text": null,
+   "ms": 3008
+  },
+  "settings": {
+   "h": "Settings",
+   "chars": 194,
+   "error_text": null,
+   "ms": 3009
+  },
+  "a3research": {
+   "h": "Content Research & Opportunities",
+   "chars": 963,
+   "error_text": null,
+   "ms": 3008
+  },
+  "a3refs": {
+   "h": "Creator References",
+   "chars": 2033,
+   "error_text": null,
+   "ms": 3008
+  },
+  "a3strategy": {
+   "h": "Script Studio",
+   "chars": 810,
+   "error_text": null,
+   "ms": 3007
+  },
+  "a3lang": {
+   "h": "Language Studio",
+   "chars": 1349,
+   "error_text": null,
+   "ms": 3008
+  },
+  "a3publish": {
+   "h": "Publishing",
+   "chars": 2379,
+   "error_text": null,
+   "ms": 3010
+  },
+  "a3analytics": {
+   "h": "Analytics & Growth",
+   "chars": 559,
+   "error_text": null,
+   "ms": 3008
+  }
+ },
+ "page_errors": [],
+ "console_errors": [],
+ "failed_requests": [],
+ "http_5xx": [],
+ "screenshots": [
+  "ui_home.png",
+  "ui_creator.png",
+  "ui_editor.png",
+  "ui_publishing.png",
+  "ui_review.png",
+  "ui_storage.png",
+  "ui_a3research.png",
+  "ui_a3publish.png"
+ ],
+ "page_ids": [
+  "system",
+  "home",
+  "dashboard",
+  "creator",
+  "projects",
+  "editor",
+  "remix",
+  "dubbing",
+  "audio",
+  "documentary",
+  "animation",
+  "series",
+  "factory",
+  "publishing",
+  "channels",
+  "workspace",
+  "models",
+  "review",
+  "qa",
+  "assets",
+  "resources",
+  "storage",
+  "tools",
+  "discovery",
+  "settings",
+  "a3research",
+  "a3refs",
+  "a3strategy",
+  "a3lang",
+  "a3publish",
+  "a3analytics"
+ ],
+ "summary": {
+  "pages": 31,
+  "page_errors": 0,
+  "console_errors": 0,
+  "http_5xx": 0,
+  "pages_with_error_text": [],
+  "empty_pages": []
+ }
+}

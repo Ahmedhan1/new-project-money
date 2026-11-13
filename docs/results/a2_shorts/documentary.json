@@ -1,0 +1,170 @@
+{
+ "benchmark": "documentary",
+ "n_requested": 10,
+ "n_built": 7,
+ "elapsed_s": 0.1,
+ "use_llm": false,
+ "overlap_max_share": 0.0,
+ "overlap_mean_share": 0.0,
+ "pairs_over_10pct": 0,
+ "endings_terminal": 7,
+ "with_context_line": 0,
+ "shorts": [
+  {
+   "rank": 1,
+   "start": 94.76,
+   "end": 104.24,
+   "dur": 9.88,
+   "title": "Blanketed by a gigantic dust storm",
+   "platform_title": "Blanketed by a gigantic dust storm",
+   "opening": "When Mariner 9 was placed into an orbit around Mars, it saw a planet one half the size of ",
+   "opening_speaker": "guest",
+   "ending": "ound Mars, it saw a planet one half the size of Earth, blanketed by a gigantic dust storm.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.48)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    94.76,
+    104.24
+   ]
+  },
+  {
+   "rank": 2,
+   "start": 242.69,
+   "end": 254.29,
+   "dur": 12.0,
+   "title": "An infrared instrument continually measures the changes in surface",
+   "platform_title": "An infrared instrument continually measures the changes in surface",
+   "opening": "An infrared instrument continually measures the changes in surface temperatures, ranging f",
+   "opening_speaker": "guest",
+   "ending": " 150 degrees Fahrenheit on the night side to as high as 70 degrees at noon on the equator.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.57)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    242.69,
+    254.29
+   ]
+  },
+  {
+   "rank": 3,
+   "start": 278.42,
+   "end": 289.47,
+   "dur": 9.16,
+   "title": "Two television cameras photograph and map the surface",
+   "platform_title": "Two television cameras photograph and map the surface",
+   "opening": "Two television cameras photograph and map the surface of Mars.",
+   "opening_speaker": "guest",
+   "ending": "In nearly a year of operation, they transmit more than 7 ,000 photographs.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.57)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    278.42,
+    289.47
+   ]
+  },
+  {
+   "rank": 4,
+   "start": 256.96,
+   "end": 266.02,
+   "dur": 9.46,
+   "title": "The height of mountains, the depth",
+   "platform_title": "The height of mountains, the depth",
+   "opening": "The height of mountains, the depth of canyons, and the gases in the Martian atmosphere are",
+   "opening_speaker": "guest",
+   "ending": "tmosphere are measured by invisible radiation in the ultraviolet and infrared wavelengths.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.57)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    256.96,
+    266.02
+   ]
+  },
+  {
+   "rank": 5,
+   "start": 322.1,
+   "end": 334.1,
+   "dur": 10.9,
+   "title": "The second moon, Deimos, is even smaller",
+   "platform_title": "The second moon, Deimos, is even smaller",
+   "opening": "The second moon, Deimos, is even smaller.",
+   "opening_speaker": "guest",
+   "ending": "Primitive chunks of rock battered by meteoroids, their origin is unknown.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.73)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    322.1,
+    334.1
+   ]
+  },
+  {
+   "rank": 6,
+   "start": 225.54,
+   "end": 241.08,
+   "dur": 14.0,
+   "title": "As the spacecraft orbits Mars, the density",
+   "platform_title": "As the spacecraft orbits Mars, the density",
+   "opening": "As the spacecraft orbits Mars, the density of the atmosphere is measured by radio waves as",
+   "opening_speaker": "guest",
+   "ending": "rtian clouds are scanned in the infrared to determine if they are carbon dioxide or water.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.48)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    225.54,
+    241.08
+   ]
+  },
+  {
+   "rank": 7,
+   "start": 153.38,
+   "end": 164.4,
+   "dur": 11.42,
+   "title": "On Mars, the same magic of physics and chemistry",
+   "platform_title": "On Mars, the same magic of physics and chemistry",
+   "opening": "On Mars, the same magic of physics and chemistry created a thin alien atmosphere and provi",
+   "opening_speaker": "guest",
+   "ending": "n atmosphere and provided a source of water on a planet known to be drier than the Sahara.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.39)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    153.38,
+    164.4
+   ]
+  }
+ ],
+ "notes": [],
+ "rejected": 25
+}
