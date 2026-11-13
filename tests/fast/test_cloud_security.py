@@ -137,11 +137,22 @@ def test_cookie_session_and_csrf(app, monkeypatch):
     assert c.post("/api/v1/_probe", headers={"x-nexus-csrf": "1"}).status_code == 200
     assert c.post("/api/v1/_probe", headers={"x-nexus-csrf": "1", "origin": "https://evil.example.com"}).status_code == 403
     assert c.post("/api/v1/_probe", headers={"x-nexus-csrf": "1", "origin": "https://nexus.example.org"}).status_code == 200
-    # forged / expired cookies fail
-    c.cookies.set("nexus_session", "s1.123.deadbeef")
-    assert c.get("/api/v1/_probe").status_code == 401
+    # forged / tampered / expired cookies fail. The jar is cleared first so the request carries ONLY the cookie under
+    # test (httpx keeps the server-set, domain-scoped cookie next to a manually set one, which made this ambiguous).
+    def only(value: str) -> int:
+        c.cookies.clear()
+        c.cookies.set("nexus_session", value)
+        assert list(c.cookies.keys()) == ["nexus_session"] and c.cookies.get("nexus_session") == value
+        return c.get("/api/v1/_probe").status_code
+
+    assert only("s1.123.deadbeef") == 401
+    assert only(cookie[:-1] + ("0" if cookie[-1] != "0" else "1")) == 401           # valid cookie, one signature char changed
     old = security.make_session_value(TOKEN, now=time.time() - security.SESSION_TTL_S - 10)
     assert not security.session_valid(old, TOKEN)
+    assert only(old) == 401
+    c.cookies.clear()
+    assert c.get("/api/v1/_probe").status_code == 401                                 # no cookie, no token: refused
+    assert only(cookie) == 200                                                        # control: the genuine cookie still works
     # rotating the owner token ends every session
     good = security.make_session_value(TOKEN)
     assert security.session_valid(good, TOKEN) and not security.session_valid(good, TOKEN + "x")

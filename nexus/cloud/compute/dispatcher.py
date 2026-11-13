@@ -611,12 +611,56 @@ class Dispatcher:
 
 def _brief(m: dict) -> dict:
     keep = ("encoder", "gpu_encode", "encode_s", "realtime_factor", "chunks_run_this_attempt", "chunks_skipped", "gpu_util_mean", "gpu_util_max",
-            "gpu_mem_used_max_mb", "peak_vram_allocated_mb", "cpu_percent_mean", "input_bytes", "output_bytes", "task_s", "nvenc_available")
+            "gpu_mem_used_max_mb", "peak_vram_allocated_mb", "cpu_percent_mean", "input_bytes", "output_bytes", "task_s", "nvenc_available",
+            "parts_run_this_attempt", "parts_skipped", "items_ok", "items_error", "completion_tokens_per_s", "model_load_s")
     return {k: m[k] for k in keep if k in m}
 
 
+def _record_local(row: dict, out: Path, kind: str, mime: str, provenance: dict) -> ArtifactManifest:
+    a = ArtifactManifest(kind=kind, name=out.name, mime=mime, size=out.stat().st_size, sha256=_sha(out), project_id=row["project_id"],
+                         produced_by_job=row["id"], locations=[ArtifactLocation(provider="local", connection_id="local", ref=str(out.relative_to(config.HOME)),
+                                                                                path=str(out.relative_to(config.HOME)), verified_at=time.time())],
+                         provenance=provenance)
+    db.execute("INSERT OR REPLACE INTO artifacts(id,kind,name,sha256,size,project_id,job_id,manifest,created) VALUES(?,?,?,?,?,?,?,?,?)",
+               (a.artifact_id, a.kind, a.name, a.sha256, a.size, row["project_id"], row["id"], a.model_dump_json(), a.created_at))
+    return a
+
+
+def _join_batch_llm(row: dict, res: WorkerExecutionResult) -> dict:
+    """batch_llm: join the verified part files of ALL attempts (as listed by the final checkpoint) in part order."""
+    cp = last_checkpoint(row["id"])
+    st = (cp.state if cp else {}) or {}
+    files, total = st.get("part_files") or {}, int(st.get("parts_total") or 0)
+    if not total or sorted(int(k) for k in files) != list(range(total)):
+        return {"join": "skipped", "reason": f"have parts {sorted(files)}, expected {total}"}
+    by_sha = {a["sha256"]: a for a in job_artifacts(row["id"]) if a["name"].startswith("batch_llm_part_")}
+    rows = []
+    for i in range(total):
+        f = files[str(i)]
+        a = by_sha.get(f["sha256"])
+        p = artifact_path(a) if a else None
+        if p is None or _sha(p) != f["sha256"]:
+            return {"join": "failed", "reason": f"part {i} ({f['name']}) missing or checksum mismatch"}
+        rows += [json.loads(x) for x in p.read_text(encoding="utf-8").splitlines() if x.strip()]
+    fmt = (json.loads(row["manifest"]).get("params") or {}).get("output_format", "jsonl") if row.get("manifest") else "jsonl"
+    d = compute_dir("artifacts", row["id"])
+    out = d / f"batch_llm_results.{fmt}"
+    if fmt == "json":
+        out.write_text(json.dumps(rows, ensure_ascii=False, indent=1), encoding="utf-8")
+    else:
+        out.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
+    a = _record_local(row, out, "analysis", "application/json" if fmt == "json" else "application/x-ndjson",
+                      {"step": "local join of verified batch_llm parts", "parts": [files[str(i)]["sha256"] for i in range(total)],
+                       "simulated": bool((res.metrics.get("batch_llm") or {}).get("simulated"))})
+    errs = sum(1 for r in rows if r.get("error"))
+    return {"join": "ok", "artifact": a.artifact_id, "sha256": a.sha256, "items": len(rows), "items_error": errs, "parts": total}
+
+
 def postprocess(row: dict, res: WorkerExecutionResult) -> dict | None:
-    """Local steps after a verified success. chunked_transcode: concatenate the verified chunks of ALL attempts."""
+    """Local steps after a verified success. chunked_transcode: concatenate the verified chunks of ALL attempts;
+    batch_llm: join the verified result parts of ALL attempts."""
+    if row["task"] == "batch_llm":
+        return _join_batch_llm(row, res)
     if row["task"] != "chunked_transcode" or not shutil.which("ffmpeg"):
         return None
     chunks = sorted((a for a in job_artifacts(row["id"]) if a["name"].startswith("chunk_")), key=lambda a: a["name"])

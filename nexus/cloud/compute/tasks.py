@@ -25,6 +25,11 @@ TASKS: dict[str, TaskSpec] = {
     "ffmpeg_transcode": TaskSpec(gpu="preferred", description="input -> H.264 MP4 (NVENC when available, else libx264)"),
     "chunked_transcode": TaskSpec(gpu="preferred", resumable=True,
                                   description="N time-chunks -> H.264, checkpoint after each chunk; resumes skipping finished chunks"),
+    # Account 3 request A1-3. Kaggle only: a bounded batch job (model loaded, prompts answered, process exits), never a
+    # serving endpoint, never the owner's own PC (weights are not downloaded there). T4 16 GB: small/medium models only.
+    "batch_llm": TaskSpec(gpu="required", min_vram_gb=0.0, internet=True, resumable=True, providers=("kaggle",),
+                          description="one HF model over a finite JSONL of prompts -> JSONL results; checkpoint per part; "
+                                      "no persistent endpoint"),
 }
 
 

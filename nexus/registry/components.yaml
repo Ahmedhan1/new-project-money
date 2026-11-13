@@ -199,6 +199,21 @@ components:
     hardware: none
     network_hosts: [images-api.nasa.gov, images-assets.nasa.gov]
     status: deployed
+  - id: wikidata
+    name: Wikidata Action API (wbsearchentities / wbgetentities; place-name -> country fallback)
+    kind: service
+    capability: [research, place-resolution]
+    source_url: https://www.wikidata.org/w/api.php
+    license: "structured data CC0 1.0 (Wikidata); no text copied"
+    free_tier: "free, no key, no account"
+    quotas: "unpublished; Wikimedia robot policy: descriptive User-Agent with contact, serial requests, honour 429 and Retry-After; results cached in NEXUS_HOME/cache"
+    commercial_use: "yes (CC0 data)"
+    usage_restrictions: "no bulk crawling; use the dumps for bulk; a generic User-Agent gets HTTP 429"
+    data_retention: "place names queried are sent to Wikimedia"
+    availability: "remote; visual-context check treats an unresolved place as unknown"
+    hardware: none
+    network_hosts: [www.wikidata.org]
+    status: adapter
   - id: rnnoise-models
     name: RNNoise models for FFmpeg arnndn (GregorR/rnnoise-models, 'somnolent-hogwash')
     kind: model
