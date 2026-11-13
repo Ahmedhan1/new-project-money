@@ -195,3 +195,18 @@ uninstall unless the user ticks removal), localhost only. Chosen over PyInstalle
 `python -m nexus` service processes, which an embedded interpreter supports unchanged. Updates only from this
 repository's releases and only after the published SHA-256 matches. Built and tested only on a real Windows VM
 (`windows-installer.yml`); a Linux build is never presented as a Windows verification.
+
+**D-24 A running job always says what it is doing.** Owner report on Windows: `analyze` sat on "running" with no sign of
+life while the first-use Whisper download (~490 MB) ran silently, and `create-from-idea` / `backup` waited behind it.
+Model downloads now report MB so far (and stop after 2 minutes below 1 KB/s, so a retry resumes them instead of hanging),
+transcription reports seconds of audio done, the local LLM says it is writing, and queued jobs say they wait because one
+heavy job runs at a time. Shown live in the Jobs table and written to the job log. Serial heavy jobs are kept (RAM).
+
+**D-25 Heavy text runs on the owner's Kaggle GPU when Kaggle is connected (owner's choice, 2026-11-13).** On a CPU-only
+PC the local script model meant a 2.5 GB download and minutes per script. `llm.chat` now sends the prompt to Account 1's
+existing `batch_llm` Kaggle task (`nexus/remote_llm.py`; one bounded private run, same Qwen3-4B model, no endpoint, no
+billing) and shows its progress on the job. Setting `heavy_compute`: `auto` (default: Kaggle when connected, else local),
+`kaggle` (never download big models here; fails with a clear message if Kaggle is not connected), `local`. The owner
+connects Kaggle once on the System page (token stored in the encrypted vault). The installer now bundles the official
+`kaggle` CLI (run as `python -m kaggle` from the embedded Python). The interface is otherwise unchanged (owner's choice).
+Not moved yet: transcription (Whisper, 490 MB, already on the owner's PC) and translation (MADLAD 3 GB).

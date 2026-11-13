@@ -20,16 +20,33 @@ def catalog() -> dict:
     return yaml.safe_load((config.REGISTRY_DIR / "models.yaml").read_text(encoding="utf-8"))
 
 
-def _fetch(url: str, dest: Path) -> None:
+def _fetch(url: str, dest: Path, label: str | None = None, expected_mb: float | None = None) -> None:
     costguard.check_host(url)
     dest.parent.mkdir(parents=True, exist_ok=True)
     tmp = dest.with_suffix(dest.suffix + ".part")
-    # curl gives resumable downloads (-C -) for multi-GB files.
-    r = subprocess.run(["curl", "-sSL", "--fail", "-C", "-", "-A", config.USER_AGENT, "-o", str(tmp), url],
-                       capture_output=True, text=True)
-    if r.returncode != 0:
-        raise RuntimeError(f"download failed for {url}: {r.stderr.strip()}")
-    tmp.rename(dest)
+    label = label or dest.name
+    # curl gives resumable downloads (-C -) for multi-GB files. Progress is reported to the running job (if any), so the
+    # Jobs table says "downloading model whisper-small: 120 / 490 MB" instead of sitting on "running" with no sign of life.
+    from . import jobs
+    proc = subprocess.Popen(["curl", "-sSL", "--fail", "--speed-limit", "1024", "--speed-time", "120", "-C", "-", "-A", config.USER_AGENT, "-o", str(tmp), url],
+                            stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
+    while True:
+        try:
+            proc.wait(timeout=2)
+            break
+        except subprocess.TimeoutExpired:
+            pass
+        mb = tmp.stat().st_size / 1e6 if tmp.exists() else 0.0
+        if expected_mb:
+            jobs.note(f"downloading {label}: {mb:.0f} / {expected_mb:.0f} MB (first use only)", min(0.99, mb / expected_mb))
+        else:
+            jobs.note(f"downloading {label}: {mb:.0f} MB (first use only)")
+    err = proc.stderr.read() if proc.stderr else ""
+    if proc.returncode != 0:
+        jobs.note(f"downloading {label}: failed")
+        raise RuntimeError(f"download failed for {url}: {err.strip()}")
+    tmp.replace(dest)
+    jobs.note(f"downloading {label}: done")
 
 
 def _revision(repo: str) -> str:
@@ -62,7 +79,9 @@ def ensure_model(name: str) -> Path:
         if free_mb < m["size_mb"] * 1.5 + 2000:
             raise RuntimeError(f"not enough disk for {name}: need ~{m['size_mb']} MB, {free_mb:.0f} MB free")
         for f in missing:
-            _fetch(f"{HF}/{m['repo']}/resolve/main/{f}", d / f)
+            # the weights file is nearly all of size_mb; small config/tokenizer files just show MB so far
+            share = m["size_mb"] if f.endswith((".bin", ".gguf", ".safetensors")) else None
+            _fetch(f"{HF}/{m['repo']}/resolve/main/{f}", d / f, f"model {name} ({f})", share)
         _record(name, {"repo": m["repo"], "revision": _revision(m["repo"]), "license": m["license"],
                        "files": m["files"], "downloaded": time.strftime("%Y-%m-%d"), "path": str(d)})
     return d

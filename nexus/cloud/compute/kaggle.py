@@ -51,13 +51,39 @@ AUTH_RE = re.compile(r"\b401\b|\b403\b|unauthori[sz]ed|forbidden|could not find 
 Runner = Callable[[list, "Path | None", float], "tuple[int, str, str]"]
 
 
+def cli_command() -> list[str]:
+    """The official CLI: `kaggle` on PATH, else `python -m kaggle` from this interpreter (the Windows installer's embedded
+    Python does not put its Scripts folder on PATH)."""
+    if shutil.which("kaggle"):
+        return ["kaggle"]
+    import importlib.util
+    import sys
+    if importlib.util.find_spec("kaggle") is not None:
+        return [sys.executable, "-m", "kaggle"]
+    return []
+
+
+def token_env(tok: str) -> dict:
+    """Environment for the CLI child only. Accepts a Kaggle API token (Settings > API > Create New Token) or the legacy
+    kaggle.json content {"username", "key"}."""
+    t = tok.strip()
+    if t.startswith("{"):
+        try:
+            j = json.loads(t)
+            if j.get("username") and j.get("key"):
+                return {"KAGGLE_USERNAME": str(j["username"]), "KAGGLE_KEY": str(j["key"])}
+        except ValueError:
+            pass
+    return {"KAGGLE_API_TOKEN": t}
+
+
 def _cli_runner(args: list, cwd: Path | None, timeout: float) -> tuple[int, str, str]:
     tok = vault.get(CONNECTION_ID)
     if not tok:
         raise ProviderError("Kaggle is not connected: no 'kaggle_primary' secret in the vault")
-    env = {**os.environ, "KAGGLE_API_TOKEN": tok}
+    env = {**os.environ, **token_env(tok)}
     try:
-        r = subprocess.run(["kaggle", *args], cwd=cwd, env=env, capture_output=True, text=True, timeout=timeout)
+        r = subprocess.run([*cli_command(), *args], cwd=cwd, env=env, capture_output=True, text=True, timeout=timeout)
     except subprocess.TimeoutExpired:
         return 124, "", f"kaggle {args[0]} {args[1] if len(args) > 1 else ''} timed out after {timeout}s"
     return r.returncode, vault.redact(r.stdout), vault.redact(r.stderr)
@@ -91,7 +117,7 @@ class KaggleProvider(Provider):
     # ---- identity / health
     def configured(self) -> tuple[bool, str]:
         if self.run is _cli_runner:
-            if not shutil.which("kaggle"):
+            if not cli_command():
                 return False, "the official kaggle CLI is not installed (pip install kaggle)"
             if not vault.get(CONNECTION_ID):
                 return False, "no Kaggle token stored (vault secret 'kaggle_primary')"

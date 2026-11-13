@@ -199,7 +199,9 @@ def api_jobs():
     for r in rows:
         r["result"] = json.loads(r["result"]) if r["result"] else None
         st = json.loads(r.pop("stages") or "{}")
-        r["stages"] = [{"name": k, "status": v["status"], "seconds": v.get("seconds"), "runs": v.get("runs", 1)} for k, v in st.items()]
+        r["stages"] = [{"name": k, "status": v["status"], "seconds": v.get("seconds"), "runs": v.get("runs", 1),
+                        "note": v.get("note") if v["status"] == "running" else None} for k, v in st.items()]
+        r["note"] = next((s["note"] for s in r["stages"] if s["note"]), None) if r["status"] == "running" else None
     return rows
 
 
@@ -229,6 +231,41 @@ def api_storage():
 class BackupReq(BaseModel):
     drill: bool = True
     to: str | None = None
+
+
+class KaggleConnectReq(BaseModel):
+    token: str
+
+
+class HeavyModeReq(BaseModel):
+    mode: str
+
+
+@app.get("/api/kaggle")
+def api_kaggle():
+    from . import remote_llm
+    return remote_llm.status()
+
+
+@app.post("/api/kaggle/connect")
+def api_kaggle_connect(r: KaggleConnectReq):
+    from . import remote_llm
+    try:
+        return remote_llm.connect(r.token)
+    except (ValueError, RuntimeError) as e:
+        raise HTTPException(400, str(e)) from None
+
+
+@app.post("/api/kaggle/mode")
+def api_kaggle_mode(r: HeavyModeReq):
+    from . import remote_llm
+    if r.mode not in remote_llm.MODES:
+        raise HTTPException(400, f"mode must be one of {remote_llm.MODES}")
+    f = config.HOME / "settings.json"
+    data = json.loads(f.read_text(encoding="utf-8")) if f.exists() else {}
+    data["heavy_compute"] = r.mode
+    f.write_text(json.dumps(data, indent=1), encoding="utf-8")
+    return remote_llm.status()
 
 
 @app.post("/api/backup")

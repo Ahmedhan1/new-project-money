@@ -46,6 +46,10 @@ jobs:
           & "$env:NX\runtime\python.exe" -m nexus start --no-browser
           if ($LASTEXITCODE -ne 0) { throw "start failed" }
           & "$env:NX\runtime\python.exe" -c "import shutil,nexus.config as c; print(c.HOME, shutil.which('ffmpeg')); assert 'NEXUS' in str(c.HOME) and 'ffmpeg' in (shutil.which('ffmpeg') or '')"
+          # heavy steps on the owner's Kaggle GPU need the official CLI inside the installed runtime (no token here)
+          & "$env:NX\runtime\python.exe" -c "from nexus.cloud.compute.kaggle import cli_command; c = cli_command(); print(c); assert c"
+          & "$env:NX\runtime\python.exe" -m kaggle --version
+          if ($LASTEXITCODE -ne 0) { throw "kaggle CLI missing from the installed runtime" }
       - name: End-to-end through the API (installed runtime)
         shell: pwsh
         run: |
