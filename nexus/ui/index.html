@@ -79,7 +79,7 @@ async function dlModel(id,gb){const p=await api(`/api/models/${id}/plan`);
  try{await api(`/api/models/${id}/download`,{accepted_gb:p.total_gb,licence_accepted:true});go("models")}catch(e){alert(e.message)}}
 function poll(el){const t=setInterval(async()=>{if(!document.body.contains(el))return clearInterval(t);el.innerHTML=await jobsBlock()},4000);jobsBlock().then(h=>el.innerHTML=h)}
 // ---- disk + archive panels (Storage page)
-const GB=b=>(b/1073741824).toFixed(2)+" GB";
+const GB=b=>b<1073741824?(b/1048576).toFixed(1)+" MB":(b/1073741824).toFixed(2)+" GB";
 async function diskPanel(el){const r=await api("/api/disk");const st=r.status,u=r.usage,c=u.categories,a=r.archive||{};
  const lab={render_cache:"Render cache (segments, pieces)",media_cache:"Media cache (proxies, thumbnails, generated)",temporary:"Temporary + render work",project_sources:"Project source media",renders:"Final renders + exports",project_other:"Timelines, reports",archive_local:"Archive metadata + thumbnails",assets:"Asset library",models:"Models",benchmarks:"Benchmark media",logs:"Logs",backups:"Backups",database:"Database"};
  el.innerHTML=`<div class="note" style="border-color:${st.level==="ok"?"var(--ok)":st.level==="warning"?"var(--warn)":"var(--bad)"}"><b>${esc(st.level.toUpperCase())}</b> · ${st.free_gb} GB free on ${esc(u.disk.path)} · ${r.active_renders} render(s) running<br>${st.messages.map(esc).join("<br>")}</div>

@@ -27,10 +27,35 @@
    "detail": "1/1 installed assets match their SHA-256. 0 file(s) used by timelines are missing."
   },
   {
-   "step": "exception",
-   "ok": false,
-   "detail": "TimeoutError: Page.wait_for_selector: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"#wal [data-aa]\") to be visible\n"
+   "step": "apply an effect to the selected clip in the workspace",
+   "ok": true,
+   "detail": "[{'type': 'vhs', 'amount': 0.6}]"
+  },
+  {
+   "step": "apply a transition to the whole timeline",
+   "ok": true,
+   "detail": "film_burn"
+  },
+  {
+   "step": "disk dashboard shows free space and categories",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "step": "cleanup dry run lists what can be removed and what is protected",
+   "ok": true,
+   "detail": "0 file(s), 0.00 GB can be removed safely. Never touched: source media, final videos without a verified archive copy, files any timeline uses, active renders, models, backups, secrets. 0 protected file"
+  },
+  {
+   "step": "archive browser shows the destination state",
+   "ok": true,
+   "detail": "Destination: none - Account 1 storage layer is not installed (ModuleNotFoundError: No module named 'nexus.cloud.storage'). Final videos are uploaded through the storage layer, verified by checksum, an"
+  },
+  {
+   "step": "no JavaScript errors",
+   "ok": true,
+   "detail": "[]"
   }
  ],
- "ok": false
+ "ok": true
 }

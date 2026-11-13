@@ -102,18 +102,25 @@ def main() -> int:
             pg.wait_for_selector("#wal [data-aa]", timeout=30000)
             pg.click(".tl div[data-c]")
             pg.wait_for_selector("#wal [data-t=clip]", timeout=30000)
+            def tl_until(pred, timeout=40):
+                t0 = time.time()
+                while time.time() - t0 < timeout:
+                    tl = json.loads(urllib.request.urlopen(f"{base}/api/projects/{pid}").read())["timeline"]
+                    if pred(tl):
+                        return tl, True
+                    time.sleep(0.5)
+                return tl, False
             pg.click("#wal [data-aa='effect.vhs'][data-t=clip]")
-            pg.wait_for_selector("#wal [data-aa]", timeout=30000)
-            tl = json.loads(urllib.request.urlopen(f"{base}/api/projects/{pid}").read())["timeline"]
-            step("apply an effect to the selected clip in the workspace", any(e.get("type") == "vhs" for e in tl["clips"][0].get("effects", [])),
-                 tl["clips"][0].get("effects"))
-            pg.select_option("#wac", "transitions")
-            pg.wait_for_selector("#wal [data-aa='transition.film_burn'][data-t=timeline]", timeout=30000)
-            pg.click("#wal [data-aa='transition.film_burn'][data-t=timeline]")
-            pg.wait_for_selector("#wal [data-aa]", timeout=30000)
+            tl, ok = tl_until(lambda t: any(e.get("type") == "vhs" for e in t["clips"][0].get("effects", [])))
+            step("apply an effect to the selected clip in the workspace", ok, tl["clips"][0].get("effects"))
+            pg.wait_for_selector("#wal [data-t=clip]", timeout=60000)      # page re-rendered with the new version
             time.sleep(1)
-            tl = json.loads(urllib.request.urlopen(f"{base}/api/projects/{pid}").read())["timeline"]
-            step("apply a transition to the whole timeline", tl["clips"][1].get("xfade") == "film_burn", tl["clips"][1].get("xfade"))
+            pg.select_option("#wac", "transitions")
+            pg.wait_for_selector("#wal [data-aa='transition.film_burn'][data-t=timeline]", timeout=60000)
+            pg.click("#wal [data-aa='transition.film_burn'][data-t=timeline]")
+            tl, ok = tl_until(lambda t: t["clips"][1].get("xfade") == "film_burn")
+            step("apply a transition to the whole timeline", ok, tl["clips"][1].get("xfade"))
+            pg.wait_for_selector("#wal [data-aa]", timeout=60000)
             pg.screenshot(path=str(out / "ui_workspace_assets.jpg"), quality=60, type="jpeg")
             # storage page
             pg.evaluate("go('storage')")
