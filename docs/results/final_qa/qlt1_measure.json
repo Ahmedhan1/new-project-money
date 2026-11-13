@@ -1,0 +1,94 @@
+{
+ "schema": "nexus.QLT1Measure/1",
+ "base": "9752d919858abdd434501bd13d3a8274a9f41cca",
+ "head": "9752d919858abdd434501bd13d3a8274a9f41cca",
+ "series": {
+  "input": "docs/results/F_series.json (real Test F bible + 2 episodes, 8 scenes)",
+  "bible_locations_parsed": {
+   "before": 1,
+   "after": 2
+  },
+  "queries_with_fictional_names": {
+   "before": 8,
+   "after": 6,
+   "of": 8
+  },
+  "queries": {
+   "before": [
+    "Lunar Reef",
+    "Seabrook Bay"
+   ],
+   "after": [
+    "Lunar Reef",
+    "sprawling estuary fog draped"
+   ]
+  },
+  "image_searches_per_2_episodes": {
+   "before": 8,
+   "after": 2
+  },
+  "off_bible_scenes": {
+   "before": 6,
+   "after_repair": 0,
+   "repairs": []
+  },
+  "bible_after_parser_fix": [
+   {
+    "name": "Seabrook Bay",
+    "look": "A sprawling estuary with fog-draped piers and rusting fishing nets"
+   },
+   {
+    "name": "Lunar Reef",
+    "look": ""
+   }
+  ],
+  "note": "Lunar Reef's look text was cut by the model's one-line output; with no look it keeps its name as the query.",
+  "commons_live": {
+   "rows": [
+    {
+     "location": "Seabrook Bay",
+     "before": {
+      "query": "Seabrook Bay",
+      "matched_rung": "Seabrook Bay",
+      "rungs_tried": [
+       "Seabrook Bay"
+      ],
+      "hits": 5,
+      "titles": [
+       "Seabrook-park",
+       "Seabrook-homesteadrun",
+       "Seabrook-servicestation",
+       "Seabrook-shops",
+       "Back Bay Boutique in Seabrook Texas"
+      ],
+      "relevant": false
+     },
+     "after": {
+      "query": "sprawling estuary fog draped",
+      "matched_rung": "fog draped",
+      "rungs_tried": [
+       "sprawling estuary fog",
+       "fog draped"
+      ],
+      "hits": 5,
+      "titles": [
+       "Wings spread wide, a Great Hornbill glides through a fog-draped rainforest (Khaoyai national park)",
+       "Dense Fog Drapes Across the Central US (CIRA 2024-01-23 - noarrows0)",
+       "Dense Fog Drapes Across the Central US (CIRA 2024-01-23 - arrows0)",
+       "Valley Fog in Oregon (MODIS 2022-02-12)",
+       "Morning fog over Herring Cove estuary, Ketchikan, Alaska (2026)"
+      ],
+      "relevant": true
+     }
+    }
+   ],
+   "when": "2026-11-13T15:35:16Z",
+   "relevance_proxy": "a returned title shares a 4+ letter word with the location's look text",
+   "relevant": {
+    "before": 0,
+    "after": 1,
+    "of": 1
+   }
+  }
+ }
+}

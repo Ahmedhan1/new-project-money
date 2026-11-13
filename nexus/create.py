@@ -219,6 +219,7 @@ def produce(project, script: dict, *, lang: str = "en", size=(1280, 720), style:
     tl = prj.new_timeline(W, H, lang)
     tl["grade"] = "none"
     gen, used, frames = project.data.setdefault("generated", {}), set(), []
+    reuse: dict[str, dict] = {}  # reuse_key (e.g. a series location) -> the licensed image already chosen for it
     tl["clips"].append(ops.color_clip(2.4, text=[{"text": script["title"], "style": "title"}], fade_in=0.5))
     narr = []
     for i, s in enumerate(script["scenes"]):
@@ -236,14 +237,26 @@ def produce(project, script: dict, *, lang: str = "en", size=(1280, 720), style:
             from .intelligence.quality import scene_plan
             rejected: list = []
             ctx = scene_plan.context_for(script, s)
-            row = (assets.find_image(s["visual_query"], project.id, used, fallbacks=(s.get("on_screen_text", ""), script.get("topic", "")),
-                                     validate=lambda c, ctx=ctx: scene_plan.validate_asset(c, ctx), rejected=rejected)
-                   if use_stock and s.get("visual_query") else None)  # an empty query means "title card on purpose" (recap, cliffhanger)
+            key = s.get("reuse_key")
+            if key and key in reuse:  # same place again: the same establishing image, intentionally (not a duplicate still)
+                row = reuse[key]
+            else:
+                row = (assets.find_image(s["visual_query"], project.id, used, fallbacks=(s.get("on_screen_text", ""), script.get("topic", "")),
+                                         validate=lambda c, ctx=ctx: scene_plan.validate_asset(c, ctx), rejected=rejected)
+                       if use_stock and s.get("visual_query") else None)  # an empty query means "title card on purpose" (recap, cliffhanger)
             plan = {"scene": i, "query": s.get("visual_query"), "rejected": rejected}
+            if key:
+                plan["reuse_key"] = key
+            if row and key and reuse.get(key) is row:
+                plan["reused_for"] = key
             if row:
                 used.add(row["id"])
+                if key:
+                    reuse.setdefault(key, row)
                 img, prov = row["path"], {"license": row["license"], "source": row["source"], "attribution": row["attribution"],
                                           "query": s["visual_query"], "matched_query": row.get("matched_query")}
+                if plan.get("reused_for"):
+                    prov["reused_for"] = plan["reused_for"]
                 plan.update(kind="licensed_photo", source=row.get("url"), title=row.get("title"))
                 clip = ops.image_clip(img, dur, kenburns="in" if i % 2 == 0 else "out", grade=style["grade"], provenance=prov, text=overlay)
             else:

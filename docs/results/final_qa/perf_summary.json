@@ -1,0 +1,160 @@
+{
+ "schema": "nexus.PerfSummary/1",
+ "sha": "9752d919858abdd434501bd13d3a8274a9f41cca",
+ "env": "Linux x86_64 cloud container, 4 vCPU, 15 GiB RAM, Python 3.13.18, FFmpeg 6.1.1, no GPU",
+ "note": "Local measurements on the integration candidate. Each row says how it was measured; nothing is extrapolated.",
+ "rows": [
+  {
+   "area": "Asset Library page (GET /api/library)",
+   "metric": "response time",
+   "baseline": {
+    "median_s": 17.876572,
+    "runs_s": [
+     17.621594,
+     18.402469,
+     17.876572
+    ]
+   },
+   "filtered_baseline": {
+    "runs_s": [
+     9.405248,
+     9.66121,
+     10.113603
+    ],
+    "median_s": 9.66121
+   },
+   "after_proposed_fix": "see perf_assetlib.json: 17.7 s -> 0.004 s median, identical payload",
+   "status": "FAIL (open, fix proposed to the owner of nexus/assetlib)",
+   "defect": "QA-D3"
+  },
+  {
+   "area": "Archive browser (GET /api/archive)",
+   "metric": "response time",
+   "baseline": {
+    "runs_s": [
+     0.005422,
+     0.004662,
+     0.004438
+    ],
+    "median_s": 0.004662
+   },
+   "status": "PASS"
+  },
+  {
+   "area": "Disk dashboard (GET /api/disk)",
+   "metric": "response time",
+   "baseline": {
+    "runs_s": [
+     0.006052,
+     0.006138,
+     0.00588
+    ],
+    "median_s": 0.006052
+   },
+   "status": "PASS"
+  },
+  {
+   "area": "Deployed tools (GET /api/tools)",
+   "metric": "response time",
+   "baseline": {
+    "runs_s": [
+     0.227347,
+     0.237985,
+     0.228667
+    ],
+    "median_s": 0.228667
+   },
+   "status": "PASS"
+  },
+  {
+   "area": "Dashboard / projects / system status",
+   "metric": "response time",
+   "baseline": {
+    "/api/dashboard": {
+     "runs_s": [
+      0.005679,
+      0.0038,
+      0.004191
+     ],
+     "median_s": 0.004191
+    },
+    "/api/projects": {
+     "runs_s": [
+      0.002914,
+      0.002371,
+      0.002103
+     ],
+     "median_s": 0.002371
+    },
+    "/api/v1/system/status": {
+     "runs_s": [
+      0.007567,
+      0.002871,
+      0.002873
+     ],
+     "median_s": 0.002873
+    }
+   },
+   "status": "PASS"
+  },
+  {
+   "area": "Cold start (fresh clone, `python -m nexus serve`, empty home)",
+   "metric": "process start to first /api/health 200",
+   "value_s": 1.1,
+   "status": "PASS"
+  },
+  {
+   "area": "Restart after SIGKILL during a job",
+   "metric": "start to first authenticated 200",
+   "value_s": 1.11,
+   "recovery": "job marked 'worker lost at stage analyze', resumed, finished done",
+   "status": "PASS"
+  },
+  {
+   "area": "Render, 9.6 s timeline 1280x720 (fresh-clone e2e project)",
+   "metric": "job seconds",
+   "cold": {
+    "draft": 4.06,
+    "final": 9.39,
+    "segments_from_cache": 0
+   },
+   "warm": {
+    "runs_job_s": [
+     60.17,
+     6.51,
+     6.65,
+     6.47
+    ],
+    "render_step_s": [
+     24.94,
+     0.4,
+     0.41,
+     0.36
+    ],
+    "segments_from_cache": "5/5 every run",
+    "note": "first warm run was an outlier (60 s) not reproduced in 3 further runs"
+   },
+   "breakdown_warm": {
+    "render_s": 0.4,
+    "render_qa_s": 3.0,
+    "quality_score_s": 3.5
+   },
+   "observation": "with a full cache, QA + quality score are ~90 % of the job; the same output (identical segments) is re-analysed every time",
+   "status": "TESTED (cache works; QA re-run on identical output is an optimisation opportunity, QA-O1)"
+  },
+  {
+   "area": "Fresh-clone install",
+   "metric": "pip install -r requirements-ci.txt in a new venv",
+   "value_s": 47,
+   "packages": 40,
+   "status": "PASS"
+  },
+  {
+   "area": "Full fast suite",
+   "metric": "wall time",
+   "value_s": 588.7,
+   "tests": 962,
+   "status": "PASS"
+  }
+ ]
+}

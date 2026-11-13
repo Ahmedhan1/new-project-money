@@ -1,0 +1,252 @@
+{
+ "base": "http://127.0.0.1:<port>",
+ "pages": {
+  "system": {
+   "h": "System & Updates",
+   "chars": 756,
+   "error_text": null,
+   "ms": 1212
+  },
+  "home": {
+   "h": "What do you want to create?",
+   "chars": 1604,
+   "error_text": null,
+   "ms": 1212
+  },
+  "dashboard": {
+   "h": "Dashboard",
+   "chars": 1332,
+   "error_text": null,
+   "ms": 1209
+  },
+  "creator": {
+   "h": "AI Video Creator",
+   "chars": 1143,
+   "error_text": null,
+   "ms": 1211
+  },
+  "projects": {
+   "h": "Project History",
+   "chars": 222,
+   "error_text": null,
+   "ms": 1209
+  },
+  "editor": {
+   "h": "Video Editor",
+   "chars": 780,
+   "error_text": null,
+   "ms": 1210
+  },
+  "remix": {
+   "h": "Video Remix Studio",
+   "chars": 904,
+   "error_text": null,
+   "ms": 1209
+  },
+  "dubbing": {
+   "h": "Voiceover, Dubbing & Subtitles",
+   "chars": 892,
+   "error_text": null,
+   "ms": 1211
+  },
+  "audio": {
+   "h": "Audio Production",
+   "chars": 396,
+   "error_text": null,
+   "ms": 1207
+  },
+  "documentary": {
+   "h": "Documentary Studio",
+   "chars": 369,
+   "error_text": null,
+   "ms": 1208
+  },
+  "animation": {
+   "h": "Animation & Motion Graphics",
+   "chars": 1047,
+   "error_text": null,
+   "ms": 1209
+  },
+  "series": {
+   "h": "Film & Series Studio",
+   "chars": 925,
+   "error_text": null,
+   "ms": 1210
+  },
+  "factory": {
+   "h": "Content Factory",
+   "chars": 2479,
+   "error_text": null,
+   "ms": 1208
+  },
+  "publishing": {
+   "h": "Publishing Studio",
+   "chars": 1103,
+   "error_text": null,
+   "ms": 1209
+  },
+  "channels": {
+   "h": "Channels & Business",
+   "chars": 296,
+   "error_text": null,
+   "ms": 1209
+  },
+  "workspace": {
+   "h": "Cinematic Workspace",
+   "chars": 173,
+   "error_text": null,
+   "ms": 1209
+  },
+  "models": {
+   "h": "AI Models & Provider Router",
+   "chars": 4535,
+   "error_text": null,
+   "ms": 1211
+  },
+  "review": {
+   "h": "Review",
+   "chars": 257,
+   "error_text": null,
+   "ms": 1210
+  },
+  "qa": {
+   "h": "Quality Assurance Center",
+   "chars": 195,
+   "error_text": null,
+   "ms": 1210
+  },
+  "assets": {
+   "h": "",
+   "chars": 8,
+   "error_text": null,
+   "ms": 1209
+  },
+  "resources": {
+   "h": "Free Resources & Compute",
+   "chars": 1391,
+   "error_text": null,
+   "ms": 1209
+  },
+  "storage": {
+   "h": "Storage & Backup",
+   "chars": 2652,
+   "error_text": null,
+   "ms": 1208
+  },
+  "tools": {
+   "h": "Deployed Tools & Models",
+   "chars": 6134,
+   "error_text": null,
+   "ms": 1211
+  },
+  "discovery": {
+   "h": "GitHub Discovery",
+   "chars": 14607,
+   "error_text": null,
+   "ms": 1210
+  },
+  "settings": {
+   "h": "Settings",
+   "chars": 194,
+   "error_text": null,
+   "ms": 1209
+  },
+  "a3research": {
+   "h": "Content Research & Opportunities",
+   "chars": 1063,
+   "error_text": null,
+   "ms": 1209
+  },
+  "a3refs": {
+   "h": "Creator References",
+   "chars": 1602,
+   "error_text": "[object Object]",
+   "ms": 1209
+  },
+  "a3strategy": {
+   "h": "Script Studio",
+   "chars": 910,
+   "error_text": null,
+   "ms": 1212
+  },
+  "a3lang": {
+   "h": "Language Studio",
+   "chars": 1349,
+   "error_text": null,
+   "ms": 1207
+  },
+  "a3publish": {
+   "h": "Publishing",
+   "chars": 2479,
+   "error_text": null,
+   "ms": 1209
+  },
+  "a3analytics": {
+   "h": "Analytics & Growth",
+   "chars": 559,
+   "error_text": null,
+   "ms": 1208
+  }
+ },
+ "page_errors": [
+  "tools: TypeError: Cannot set properties of null (setting 'onclick')"
+ ],
+ "console_errors": [],
+ "failed_requests": [],
+ "http_5xx": [],
+ "screenshots": [
+  "ui_home.png",
+  "ui_creator.png",
+  "ui_editor.png",
+  "ui_publishing.png",
+  "ui_review.png",
+  "ui_storage.png",
+  "ui_a3research.png",
+  "ui_a3publish.png"
+ ],
+ "page_ids": [
+  "system",
+  "home",
+  "dashboard",
+  "creator",
+  "projects",
+  "editor",
+  "remix",
+  "dubbing",
+  "audio",
+  "documentary",
+  "animation",
+  "series",
+  "factory",
+  "publishing",
+  "channels",
+  "workspace",
+  "models",
+  "review",
+  "qa",
+  "assets",
+  "resources",
+  "storage",
+  "tools",
+  "discovery",
+  "settings",
+  "a3research",
+  "a3refs",
+  "a3strategy",
+  "a3lang",
+  "a3publish",
+  "a3analytics"
+ ],
+ "summary": {
+  "pages": 31,
+  "page_errors": 1,
+  "console_errors": 0,
+  "http_5xx": 0,
+  "pages_with_error_text": [
+   "a3refs:[object Object]"
+  ],
+  "empty_pages": [
+   "assets"
+  ]
+ }
+}
