@@ -1,9 +1,60 @@
 # Three-account integration runs (local branches only — nothing pushed, nothing merged into `main` or any account branch)
 
-Two runs. Run r2 is the current evidence; run r1 is kept because its findings were sent to Account 1.
+Three runs. Run r3 is the current evidence. Runs r2 and r1 are kept for history; r1's findings were sent to Account 1.
 Full-suite results and focused contract results are reported separately and are never added together.
 
-## Run r2 — 2026-11-13, current heads, owner's proposed order
+## Run r3 — 2026-11-13, latest heads, owner's proposed order
+
+| Input | Branch | SHA |
+|---|---|---|
+| base | `main` (origin) | `ec5af11` |
+| Account 1 | `work/account-1-cloud-platform` | `919f158` |
+| Account 2 | `work/account-2-cinematic-engine` | `d979df1` |
+| Account 3 | `work/account-3-intelligence-growth` | `f1835b5e564099aed507ad2b5cb0c79cd8832bcc` (all A3 code; later A3 commits are docs/state only) |
+
+Local branch `integration/contracts-v1-r3b` (not pushed), in order:
+1. merge A1 (`4e6c393`);
+2. merge A2 (`301eabc`);
+3. merge A3 (`2755d79`);
+4. `apply.sh` (`402b15e`).
+
+Conflict resolutions:
+- `tasks.yaml`, `DECISIONS.md`, `MASTER_ROADMAP.md` and `AGENT_WORK_LOG.md`: both sides kept. tasks.yaml ends with 87
+  unique ids.
+- `api.py` and `workflows.py`: both sides kept.
+- `index.html`: the A3 script position with A1's deep-link `go(...)`.
+- Generated files (`NEXUS_STATE.json`, `NEXUS_HANDOFF.md`, `fast_tests.json`): the Account 3 side. The A2 step took
+  Account 1's side, as in r2.
+
+`apply.sh`: **42 passed**. A second run changed nothing and passed again (42).
+
+Cross-account checks on the merged tree (132 passed in one focused run, separate from the full suite):
+- **batch_llm** (`test_intel_batch_llm_integration.py`, 4 tests): an A3 manifest validates against Account 1's pydantic
+  `ProductionJobManifest`. It runs on Account 1's **real dispatcher and worker script** (fake Kaggle CLI, `echo` engine,
+  so no model) and returns all 12 items with checksum-verified artifacts in 3 parts. The summary is labelled
+  `simulated: true` with no persistent endpoint. Resubmission returns the same job. The old shape is refused with a
+  named cause and fails on the worker.
+- **QualityReport → publishing** (`test_intel_a2_publishing_integration.py`, 3 tests):
+  - Account 2's own `qa.approve()` reports go into the release gate. BLOCKED cannot be queued; PASSED allows private
+    only while human approval is PENDING.
+  - Findings are preserved.
+  - Account 2's `classify.manifest()` gives the `ai_generated_imagery` disclosure.
+  - Account 2's `contracts.artifact()` URI resolves.
+- **Shared contracts, Strategy Handoff, GeneratedMediaManifest validation:** `test_contracts_*`, `test_intel_handoff.py`
+  and `test_a2_cross_account.py`.
+- **Disclosure, owner approval and private-only validation:** `test_intel_release_gate.py`,
+  `test_intel_owner_validation.py`, `test_zero_spend_fail_closed.py`.
+- **Renderer dispatch:** covered by Account 2's `test_a2_cross_account.py`. It submits Account 2 render tasks through
+  Account 1's dispatcher; Account 2 owns that path.
+
+Full fast suite (`python -m pytest tests/fast -rs`): __R3_FULL__.
+
+Not run on the merged tree: Windows, the clean-machine e2e, and real renders. CI runs those only after the owner
+approves and pushes the merge. The Account 3 branch's own CI (Linux, Windows, Windows clean-machine e2e) is linked from
+PR #5.
+An earlier r3 attempt on A3 `7572acb` (batch_llm fix only): full suite 779 passed, 8 skipped, 0 failed.
+
+## Run r2 — 2026-11-13, earlier heads (superseded by r3)
 
 | Input | Branch | SHA |
 |---|---|---|
