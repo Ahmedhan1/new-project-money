@@ -68,8 +68,13 @@ def transcribe(path: str | Path, language: str | None = None, words: bool = True
     audio = np.frombuffer(raw, dtype=np.float32)
     segs, info = load().transcribe(audio, language=language, word_timestamps=words, vad_filter=True,
                                    beam_size=5, condition_on_previous_text=False)
+    from .. import jobs
     out = []
+    total = info.duration or 0
+    jobs.note(f"transcribing speech: 0 / {total:.0f} s of audio", None)
     for s in segs:
+        if total:
+            jobs.note(f"transcribing speech: {s.end:.0f} / {total:.0f} s of audio")
         out.append({"start": round(s.start, 3), "end": round(s.end, 3), "text": s.text.strip(),
                     "avg_logprob": round(s.avg_logprob, 3), "no_speech_prob": round(s.no_speech_prob, 3),
                     "words": [{"start": round(w.start, 3), "end": round(w.end, 3), "word": w.word.strip()}

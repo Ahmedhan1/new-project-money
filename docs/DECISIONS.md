@@ -195,3 +195,9 @@ uninstall unless the user ticks removal), localhost only. Chosen over PyInstalle
 `python -m nexus` service processes, which an embedded interpreter supports unchanged. Updates only from this
 repository's releases and only after the published SHA-256 matches. Built and tested only on a real Windows VM
 (`windows-installer.yml`); a Linux build is never presented as a Windows verification.
+
+**D-24 A running job always says what it is doing.** Owner report on Windows: `analyze` sat on "running" with no sign of
+life while the first-use Whisper download (~490 MB) ran silently, and `create-from-idea` / `backup` waited behind it.
+Model downloads now report MB so far (and stop after 2 minutes below 1 KB/s, so a retry resumes them instead of hanging),
+transcription reports seconds of audio done, the local LLM says it is writing, and queued jobs say they wait because one
+heavy job runs at a time. Shown live in the Jobs table and written to the job log. Serial heavy jobs are kept (RAM).

@@ -199,7 +199,9 @@ def api_jobs():
     for r in rows:
         r["result"] = json.loads(r["result"]) if r["result"] else None
         st = json.loads(r.pop("stages") or "{}")
-        r["stages"] = [{"name": k, "status": v["status"], "seconds": v.get("seconds"), "runs": v.get("runs", 1)} for k, v in st.items()]
+        r["stages"] = [{"name": k, "status": v["status"], "seconds": v.get("seconds"), "runs": v.get("runs", 1),
+                        "note": v.get("note") if v["status"] == "running" else None} for k, v in st.items()]
+        r["note"] = next((s["note"] for s in r["stages"] if s["note"]), None) if r["status"] == "running" else None
     return rows
 
 

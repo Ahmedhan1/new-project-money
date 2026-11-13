@@ -49,6 +49,14 @@ def worker_id(role: str = "worker") -> str:
 
 
 _held = threading.local()
+_current = threading.local()  # the job running on this thread, so library code (model downloads) can report progress
+
+
+def note(msg: str, progress: float | None = None) -> None:
+    """Tell the person what the running job is doing right now (e.g. a model download). No-op outside a job."""
+    job = getattr(_current, "job", None)
+    if job is not None:
+        job.note(msg, progress)
 
 
 @contextmanager
@@ -103,6 +111,8 @@ class Job:
         self.params: dict = json.loads(row["params"]) if row.get("params") else {}
         self._stages: dict[str, dict] = json.loads(row["stages"]) if row.get("stages") else {}
         self.log_path = config.LOGS / "jobs" / f"{self.id}.log"
+        self._cur: str | None = None
+        self._last_note = ""
 
     def log(self, msg: str) -> None:
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
@@ -111,6 +121,18 @@ class Job:
 
     def progress(self, p: float) -> None:
         db.execute("UPDATE jobs SET progress=? WHERE id=?", (max(0.0, min(1.0, p)), self.id))
+
+    def note(self, msg: str, progress: float | None = None) -> None:
+        """A short live status line on the current stage (shown in the Jobs table), plus the job log on change."""
+        if self._cur and self._cur in self._stages:
+            self._stages[self._cur]["note"] = msg
+            self._save(self._cur)
+        if progress is not None:
+            self.progress(progress)
+        head = msg.split(":")[0]
+        if head != self._last_note.split(":")[0] or msg.endswith(("done", "failed")):
+            self.log(msg)
+        self._last_note = msg
 
     def set_project(self, pid: str) -> None:
         self.project_id = pid
@@ -130,6 +152,7 @@ class Job:
             return st["output"]
         runs = (st or {}).get("runs", 0) + 1
         self._stages[name] = {"status": "running", "started": time.time(), "runs": runs}
+        self._cur = name
         self._save(name)
         self.log(f"stage {name}: start (run {runs})")
         t0 = time.time()
@@ -280,6 +303,7 @@ def run_job(job: Job) -> str:
             db.execute("UPDATE jobs SET heartbeat=? WHERE id=? AND status='running'", (time.time(), job.id))
 
     threading.Thread(target=beat, daemon=True).start()
+    _current.job = job
     try:
         fn = HANDLERS.get(job.kind)
         if fn is None:
@@ -311,6 +335,7 @@ def run_job(job: Job) -> str:
         return "queued"
     finally:
         stop.set()
+        _current.job = None
 
 
 def schedule_backup(now: float | None = None) -> str | None:
