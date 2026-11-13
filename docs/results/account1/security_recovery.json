@@ -1,0 +1,37 @@
+{
+ "ok": true,
+ "date": "2026-11-12T17:00:56Z",
+ "commit": "aa0dbfd",
+ "platform": "Linux",
+ "python": "3.13.18",
+ "checks": {
+  "vault_survives_restart": {
+   "ok": true,
+   "detail": "new interpreter decrypted the stored secret"
+  },
+  "corrupted_key_fails_closed": {
+   "ok": true,
+   "detail": "get=None, health vault={'ok': False, 'key_source': 'file', 'secrets': 0, 'undecryptable': 0, 'error': 'ValueError'}"
+  },
+  "wrong_env_key_fails_closed": {
+   "ok": true,
+   "detail": "NEXUS_VAULT_KEY set to another key"
+  },
+  "missing_key_fails_closed_and_backup_restores": {
+   "ok": true,
+   "detail": "deleted vault.key -> get None + health undecryptable=1; restored key backup -> value back"
+  },
+  "migration_from_v1": {
+   "ok": true,
+   "detail": "schema 1 -> 2, cloud tables present, old rows kept"
+  },
+  "migration_from_v0": {
+   "ok": true,
+   "detail": "schema 0 -> 2, cloud tables present, old rows kept"
+  },
+  "redaction_in_events": {
+   "ok": true,
+   "detail": "upload failed with [secret:drive_a.refresh] and [redacted-token]"
+  }
+ }
+}

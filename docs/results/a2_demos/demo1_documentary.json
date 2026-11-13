@@ -1,0 +1,357 @@
+{
+ "demo": "1 - cinematic documentary",
+ "title": "Red Planet: The First Close Look",
+ "project": "prj_0b2c46b91f",
+ "output": "/tmp/a2-demos/projects/prj_0b2c46b91f/renders/demo1_documentary.mp4",
+ "duration": 228.3,
+ "resolution": "1920x1080",
+ "fps": "30/1",
+ "video_codec": "h264",
+ "audio_codec": "aac",
+ "size_mb": 133.37,
+ "timings_s": {
+  "plan": 1.2,
+  "broll": 2.3,
+  "render_with_qa": 396.2,
+  "total": 540.7
+ },
+ "render": {
+  "segments": 35,
+  "segments_from_cache": 0,
+  "pieces": 41,
+  "pieces_from_cache": 0,
+  "pipeline": "pieces",
+  "elapsed": 327.99
+ },
+ "director": {
+  "profile": "scientific_documentary",
+  "target_s": 225.0,
+  "programme_seconds": 228.34,
+  "source_seconds": 900.07,
+  "cold_open": true,
+  "chapters": [
+   {
+    "t": 0.0,
+    "topic": 12,
+    "label": "pick much make",
+    "merged": [
+     "mars own year",
+     "life concept question",
+     "photograph shape surface"
+    ]
+   },
+   {
+    "t": 82.203,
+    "topic": 11,
+    "label": "before chang due",
+    "merged": [
+     "dune field mars",
+     "great plateau mile",
+     "old alive flagstaff"
+    ]
+   },
+   {
+    "t": 182.673,
+    "topic": 19,
+    "label": "lava flow see"
+   }
+  ],
+  "decisions": 242,
+  "notes": [
+   "speakers were detected but none has a name yet: no lower thirds (a role such as 'guest' is never put on screen); set names with diarize.set_name"
+  ]
+ },
+ "broll": {
+  "inserted": 9,
+  "share": 0.245,
+  "credits": [
+   "NASA (JPL) - A Change of Direction",
+   "NASA (JPL) - Concept for Mars Volcanic Emission Life Scout",
+   "NASA (JPL) - Gully Activity in Triolet Crater",
+   "NASA (JPL) - Mars Obliquity Cycle Illustration",
+   "NASA (JPL) - Observed Spectral Classes TES",
+   "NASA (JPL) - Surface Textures",
+   "NASA (JPL) - The Importance of Nested Scales of Observations, Large Scales",
+   "NASA/JPL (Mars - The Search Begins)"
+  ],
+  "insertions": [
+   {
+    "start": 26.2,
+    "asset": "nasa:PIA11714",
+    "score": 0.0508,
+    "why": "'Mars Obliquity Cycle Illustration': visual match 0.051 (SigLIP cosine of the spoken text and the picture); public domain (NASA media; no endorsement implied)"
+   },
+   {
+    "start": 40.067,
+    "asset": "local:source#0",
+    "score": 0.0938,
+    "why": "'a rocket or spacecraft': visual match 0.070 (SigLIP cosine of the spoken text and the picture); lexical bonus +0.024 (spacecraft); public-domain"
+   },
+   {
+    "start": 51.117,
+    "asset": "nasa:PIA07085",
+    "score": 0.092,
+    "why": "'Concept for Mars Volcanic Emission Life Scout': visual match 0.044 (SigLIP cosine of the spoken text and the picture); lexical bonus +0.048 (life, concept); public domain (NASA media; no endorsement implied)"
+   },
+   {
+    "start": 75.869,
+    "asset": "nasa:PIA04506",
+    "score": 0.1018,
+    "why": "'Surface Textures': visual match 0.078 (SigLIP cosine of the spoken text and the picture); lexical bonus +0.024 (surface); public domain (NASA media; no endorsement implied)"
+   },
+   {
+    "start": 108.682,
+    "asset": "nasa:PIA02062",
+    "score": 0.1077,
+    "why": "'Observed Spectral Classes TES': visual match 0.084 (SigLIP cosine of the spoken text and the picture); lexical bonus +0.024 (observed); public domain (NASA media; no endorsement implied)"
+   },
+   {
+    "start": 115.682,
+    "asset": "nasa:PIA17275",
+    "score": 0.0611,
+    "why": "'The Importance of Nested Scales of Observations, Large Scales': visual match 0.061 (SigLIP cosine of the spoken text and the picture); public domain (NASA media; no endorsement implied)"
+   },
+   {
+    "start": 135.022,
+    "asset": "local:source#10",
+    "score": 0.0665,
+    "why": "'a night scene': visual match 0.067 (SigLIP cosine of the spoken text and the picture); public-domain"
+   },
+   {
+    "start": 143.872,
+    "asset": "nasa:PIA04041",
+    "score": 0.0783,
+    "why": "'Acidalia Planitia': visual match 0.079 (SigLIP cosine of the spoken text and the picture); lexical bonus +0.009 (windblown); similar to an earlier cutaway (cosine 0.851): -0.010; public domain (NASA media; no endorsement implied)"
+   },
+   {
+    "start": 157.599,
+    "asset": "nasa:PIA06700",
+    "score": 0.0698,
+    "why": "'A Change of Direction': visual match 0.055 (SigLIP cosine of the spoken text and the picture); lexical bonus +0.024 (directions); similar to an earlier cutaway (cosine 0.844): -0.009; public domain (NASA media; no endorsement implied)"
+   },
+   {
+    "start": 171.505,
+    "asset": "nasa:PIA25708",
+    "score": 0.1024,
+    "why": "'Gully Activity in Triolet Crater': visual match 0.084 (SigLIP cosine of the spoken text and the picture); lexical bonus +0.018 (fracture, across); public domain (NASA media; no endorsement implied)"
+   },
+   {
+    "start": 182.672,
+    "asset": "nasa:PIA19400",
+    "score": 0.0975,
+    "why": "'Sunset in Mars Gale Crater': visual match 0.074 (SigLIP cosine of the spoken text and the picture); lexical bonus +0.024 (sunset crater); public domain (NASA media; no endorsement implied)"
+   },
+   {
+    "start": 202.882,
+    "asset": "nasa:PIA24659",
+    "score": 0.0575,
+    "why": "'Aram Chaos - False Color': visual match 0.055 (SigLIP cosine of the spoken text and the picture); lexical bonus +0.009 (interior); similar to an earlier cutaway (cosine 0.830): -0.006; public domain (NASA media; no endorsement implied)"
+   },
+   {
+    "start": 217.339,
+    "asset": "nasa:PIA00381",
+    "score": 0.0963,
+    "why": "'First Photograph Taken On Mars Surface': visual match 0.078 (SigLIP cosine of the spoken text and the picture); lexical bonus +0.024 (photographs); similar to an earlier cutaway (cosine 0.831): -0.006; public domain (NASA media; no endorsement implied)"
+   }
+  ],
+  "source_errors": {}
+ },
+ "post": {
+  "push_ins": 4,
+  "dialogue_cleanup": "dialogue_v2_ffmpeg on every video clip",
+  "music": {
+   "src": "/tmp/a2-demos/cache/music/documentary_8ce7a7572bca.wav",
+   "volume": 0.32,
+   "duck": "keyframes",
+   "mood": "documentary"
+  },
+  "captions": {
+   "style": "classic",
+   "position": "bottom"
+  },
+  "cues": 98,
+  "grade": "documentary"
+ },
+ "loudness": {
+  "lufs": -14.17,
+  "lra": 2.54,
+  "true_peak": -1.91
+ },
+ "qa_status": "PASSED_AUTOMATED_CHECKS",
+ "known_issues": [],
+ "checks": [
+  "PASS 2-assets: provenance 00_source.mp4 - {'basis': 'public-domain', 'holder': 'NASA', 'evidence': 'https://images.nasa.gov/details/Mars%20-%20The%20Search%20Begins%20Documentary'} / user upload",
+  "PASS 2-assets: duplicate stills - none",
+  "PASS 4-editing: cut length - no flash cuts",
+  "PASS 4-editing: pacing - 35 shots, mean 6.5s, longest 11.8s",
+  "PASS 4-editing: subtitle sync - 98 cues inside programme",
+  "PASS 5-technical: file integrity (full decode) - decodes cleanly",
+  "PASS 5-technical: video track present - ok",
+  "PASS 5-technical: audio track present - ok",
+  "PASS 5-technical: codec - h264/yuv420p",
+  "PASS 5-technical: resolution - 1920x1080 (expected 1920x1080)",
+  "PASS 5-technical: aspect ratio - 1.778",
+  "PASS 5-technical: frame rate - 30.0 fps",
+  "PASS 5-technical: black frames - none beyond intentional fades",
+  "PASS 5-technical: frozen frames - none",
+  "PASS 5-technical: duration matches timeline - 228.30s vs timeline 228.34s",
+  "PASS 5-technical: A/V stream length - video 228.30s, audio 228.30s",
+  "PASS 5-technical: audio channels - 2 ch @ 48000 Hz",
+  "PASS 5-technical: loudness - -14.03 LUFS (target -14.0 +/-1.5)",
+  "PASS 5-technical: clipping / true peak - true peak -1.92 dBTP (limit -1.0)",
+  "PASS 5-technical: dead air - none",
+  "PASS 5-technical: subtitle timing - 98 cues, 0 out of range, 0 overlapping",
+  "PASS 5-technical: subtitle reading speed - 2 cues above 25 chars/s"
+ ],
+ "quality": {
+  "score": 91.6,
+  "verdict": "needs_work",
+  "categories": {
+   "visual": {
+    "score": 84.7,
+    "measured": 15,
+    "failed": 3,
+    "not_measured": 3,
+    "bar": 85.0
+   },
+   "editing": {
+    "score": 94.2,
+    "measured": 13,
+    "failed": 2,
+    "not_measured": 2,
+    "bar": 85.0
+   },
+   "audio": {
+    "score": 92.0,
+    "measured": 10,
+    "failed": 1,
+    "not_measured": 2,
+    "bar": 85.0
+   },
+   "localization": {
+    "score": 100.0,
+    "measured": 9,
+    "failed": 0,
+    "not_measured": 2,
+    "bar": 85.0
+   }
+  }
+ },
+ "quality_not_measured": [
+  "audio.speech_music_balance",
+  "editing.subtitle_sync",
+  "localization.coverage",
+  "visual.subject_consistency",
+  "visual.generative_artifacts",
+  "visual.content_relevance",
+  "localization.translation_accuracy",
+  "audio.voice_naturalness",
+  "editing.storytelling"
+ ],
+ "frames": [
+  {
+   "t": 9.51,
+   "clip": 1,
+   "type": "video",
+   "role": "continuous",
+   "cutaway": true,
+   "frame": "_d1_0.png"
+  },
+  {
+   "t": 28.54,
+   "clip": 4,
+   "type": "video",
+   "role": "hard_cut",
+   "cutaway": true,
+   "frame": "_d1_1.png"
+  },
+  {
+   "t": 47.57,
+   "clip": 6,
+   "type": "video",
+   "role": "continuous",
+   "cutaway": true,
+   "frame": "_d1_2.png"
+  },
+  {
+   "t": 66.6,
+   "clip": 8,
+   "type": "video",
+   "role": "hard_cut",
+   "cutaway": false,
+   "frame": "_d1_3.png"
+  },
+  {
+   "t": 85.63,
+   "clip": 13,
+   "type": "video",
+   "role": "crossfade",
+   "cutaway": false,
+   "frame": "_d1_4.png"
+  },
+  {
+   "t": 104.66,
+   "clip": 16,
+   "type": "video",
+   "role": "continuous",
+   "cutaway": true,
+   "frame": "_d1_5.png"
+  },
+  {
+   "t": 123.68,
+   "clip": 18,
+   "type": "video",
+   "role": "continuous",
+   "cutaway": true,
+   "frame": "_d1_6.png"
+  },
+  {
+   "t": 142.71,
+   "clip": 21,
+   "type": "video",
+   "role": "continuous",
+   "cutaway": true,
+   "frame": "_d1_7.png"
+  },
+  {
+   "t": 161.74,
+   "clip": 24,
+   "type": "video",
+   "role": "continuous",
+   "cutaway": true,
+   "frame": "_d1_8.png"
+  },
+  {
+   "t": 180.77,
+   "clip": 27,
+   "type": "video",
+   "role": "crossfade",
+   "cutaway": false,
+   "frame": "_d1_9.png"
+  },
+  {
+   "t": 199.8,
+   "clip": 30,
+   "type": "video",
+   "role": "continuous",
+   "cutaway": true,
+   "frame": "_d1_10.png"
+  },
+  {
+   "t": 218.82,
+   "clip": 33,
+   "type": "video",
+   "role": "hard_cut",
+   "cutaway": false,
+   "frame": "_d1_11.png"
+  }
+ ],
+ "licences": {
+  "documentary_long": {
+   "page": "https://images.nasa.gov/details/Mars%20-%20The%20Search%20Begins%20Documentary",
+   "licence": "NASA media - generally not copyrighted in the US (NASA media usage guidelines apply)"
+  }
+ },
+ "machine": "shared 4-vCPU container, no GPU",
+ "human_review": "PENDING - storytelling, pacing and audio have not been reviewed by a person"
+}

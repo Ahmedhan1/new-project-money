@@ -6,10 +6,37 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 VERSION = "0.2.0"
-HOME = Path(os.environ.get("NEXUS_HOME", ROOT / ".nexus"))
+
+
+def installed() -> dict | None:
+    """The Windows installer writes ROOT/install.json ({"version", "data_dir"}); a source checkout has none."""
+    f = ROOT / "install.json"
+    if not f.is_file():
+        return None
+    import json
+    try:
+        return json.loads(f.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
+def _default_home() -> Path:
+    # Installed app: user data lives outside the program folder (survives uninstall/upgrade; per user, no admin).
+    inst = installed()
+    if inst:
+        if inst.get("data_dir"):
+            return Path(os.path.expandvars(inst["data_dir"]))
+        return Path(os.environ.get("LOCALAPPDATA") or Path.home() / "AppData" / "Local") / "NEXUS" / "data"
+    return ROOT / ".nexus"
+
+
+HOME = Path(os.environ.get("NEXUS_HOME") or _default_home())
+if installed() and (ROOT / "ffmpeg" / "ffmpeg.exe").is_file() and str(ROOT / "ffmpeg") not in os.environ.get("PATH", ""):
+    os.environ["PATH"] = str(ROOT / "ffmpeg") + os.pathsep + os.environ.get("PATH", "")  # the bundled FFmpeg wins
 MODELS = HOME / "models"
 PROJECTS = HOME / "projects"
-CACHE = HOME / "cache"
+# Working storage (render segments, pieces, proxies, temp files) can live on a faster/bigger local disk.
+CACHE = Path(os.environ["NEXUS_WORK_DIR"]) if os.environ.get("NEXUS_WORK_DIR") else HOME / "cache"
 ASSETS = HOME / "assets"
 DB_PATH = HOME / "nexus.db"
 LOGS = HOME / "logs"
@@ -22,7 +49,8 @@ def set_home(path: str | Path) -> None:
     """Point every data path at another NEXUS_HOME (tests, restore drills, relocated installs)."""
     global HOME, MODELS, PROJECTS, CACHE, ASSETS, DB_PATH, LOGS, RUN, BACKUPS
     HOME = Path(path)
-    MODELS, PROJECTS, CACHE, ASSETS = HOME / "models", HOME / "projects", HOME / "cache", HOME / "assets"
+    MODELS, PROJECTS, ASSETS = HOME / "models", HOME / "projects", HOME / "assets"
+    CACHE = Path(os.environ["NEXUS_WORK_DIR"]) if os.environ.get("NEXUS_WORK_DIR") else HOME / "cache"
     DB_PATH, LOGS, RUN, BACKUPS = HOME / "nexus.db", HOME / "logs", HOME / "run", HOME / "backups"
 
 

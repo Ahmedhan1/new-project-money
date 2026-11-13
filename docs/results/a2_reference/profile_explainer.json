@@ -1,0 +1,129 @@
+{
+ "schema": "nexus.ReferenceStyleProfile/1",
+ "name": "benchmark:explainer",
+ "source": {
+  "uri": "file:///home/user/new-project-money/.nexus/benchmarks/explainer/source.mp4",
+  "duration": 300.067,
+  "analysed_fps": 2.0
+ },
+ "metrics": {
+  "duration": 300.067,
+  "shot_length": {
+   "n": 12,
+   "mean": 25.008,
+   "median": 16.916,
+   "p10": 3.523,
+   "p90": 50.733,
+   "std": 23.253
+  },
+  "cuts_per_min": 2.2,
+  "first_3s": {
+   "cuts": 0,
+   "speech_s": 0,
+   "text_frames_share": 0.0,
+   "motion": 0.0057,
+   "first_speech_s": null
+  },
+  "first_10s": {
+   "cuts": 0,
+   "speech_s": 0,
+   "text_frames_share": 0.3,
+   "motion": 0.0164,
+   "first_speech_s": null
+  },
+  "hook": {
+   "t": 11.34,
+   "score": 0.7000000000000001,
+   "first_speech_s": 11.34
+  },
+  "shot_types": {
+   "close-up": 0.333,
+   "medium": 0.667
+  },
+  "shot_type_changes_per_min": 1.6,
+  "scene_variety": 0.167,
+  "visual_density": {
+   "motion": 0.0458,
+   "edges": 0.0919
+  },
+  "cutaways_per_min": 0.4,
+  "on_screen_text_share": 0.585,
+  "on_screen_text_method": "edge-density heuristic per frame band (not OCR) + SigLIP zero-shot 'text or a title card' / 'a chart or diagram' shots",
+  "speech_share": 0.598,
+  "music_bed_share": 0.842,
+  "audio_accents_per_min": 10.4,
+  "pattern_interrupt_s": {
+   "n": 28,
+   "mean": 10.717,
+   "median": 4.75,
+   "p10": 1.196,
+   "p90": 27.45,
+   "std": 13.547
+  },
+  "ending": {
+   "speech_ends_before_s": 24.04,
+   "text_share": 1.0,
+   "motion": 0.0197,
+   "fade_to_black": false,
+   "kind": "end_card"
+  },
+  "thumbnail_candidates": [
+   {
+    "t": 120.75,
+    "score": 0.654,
+    "why": [
+     "face 0.35 of the height at x=0.50"
+    ]
+   },
+   {
+    "t": 61.75,
+    "score": 0.612,
+    "why": [
+     "face 0.32 of the height at x=0.47"
+    ]
+   },
+   {
+    "t": 11.75,
+    "score": 0.588,
+    "why": [
+     "face 0.25 of the height at x=0.63"
+    ]
+   }
+  ],
+  "wpm": 95.8,
+  "elapsed_s": 15.7
+ },
+ "structure": [
+  {
+   "t0": 0.0,
+   "t1": 3.0,
+   "role": "first_3s"
+  },
+  {
+   "t0": 0.0,
+   "t1": 10.0,
+   "role": "first_10s"
+  },
+  {
+   "t0": 11.34,
+   "t1": 18.1,
+   "role": "hook"
+  },
+  {
+   "t0": 292.07,
+   "t1": 300.07,
+   "role": "ending:end_card"
+  }
+ ],
+ "rights": {
+  "basis": "public-domain",
+  "source": "https://images.nasa.gov/details/ARC-20140529-AAV3515-NASA-Explains-Cold-Zone-Above-Tropics",
+  "licence": "NASA media - generally not copyrighted in the US (NASA media usage guidelines apply)",
+  "kept": "numbers and timestamps only; no frames, text or sound of the reference"
+ },
+ "method": {
+  "visual": "siglip-base-patch16-224-int8",
+  "faces": true,
+  "text": "edge-density heuristic per frame band (not OCR) + SigLIP zero-shot 'text or a title card' / 'a chart or diagram' shots"
+ }
+}

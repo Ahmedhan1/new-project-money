@@ -69,3 +69,48 @@ def test_subtitle_cues_break_at_sentence_and_clause_boundaries():
     assert any(t.endswith("designed for?") for t in texts) and texts[-1].endswith("immunology.")
     assert cues[0]["start"] == 0.0 and abs(cues[-1]["end"] - 12.0) < 0.01 and all(a["end"] <= b["start"] + 1e-6 for a, b in zip(cues, cues[1:]))
     assert [c["text"] for c in subs.cues_from_text("Short line.", 0, 2)] == ["Short line."]
+
+
+def test_a_title_on_a_near_black_card_is_an_intended_still():
+    from nexus import quality
+    tl = {"clips": [{"id": "a", "type": "color", "duration": 3.0, "color": "0x0b1020", "text": [{"text": "Into the Cave"}]},
+                    {"id": "b", "type": "color", "duration": 2.0, "color": "black"}]}
+    spans = quality._intended_spans(tl, ("card",))
+    assert spans == [(0.0, 3.0)]                     # the titled card is by design; a bare black clip is not
+
+
+def _speechy(path, gain_change: bool):
+    """Amplitude-modulated noise in 1.6 s 'phrases' with 0.5 s pauses; optionally the second half 14 dB quieter
+    in the middle of a phrase (a real level jump)."""
+    import subprocess
+    expr = "1.5*sin(2*PI*5*t)*sin(2*PI*5*t)*lt(mod(t,2.1),1.6)"
+    if gain_change:
+        expr = f"({expr})*if(lt(t,5.2),1,0.2)"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "color=c=gray:s=160x90:r=10:d=10",
+                    "-f", "lavfi", "-i", "anoisesrc=d=10:c=pink:a=0.5:r=48000:seed=7",
+                    "-filter_complex", f"[1:a]volume='{expr}':eval=frame[a]", "-map", "0:v", "-map", "[a]",
+                    "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", str(path)], check=True)
+    return path
+
+
+def test_pauses_between_phrases_are_not_level_jumps_but_a_gain_change_is(home, tmp_path):
+    from nexus import quality
+    def jumps(p):
+        r = quality.score(p)
+        c = next((x for x in r.get("failed", []) if x["id"] == "audio.level_jumps"), None)
+        return c
+    assert jumps(_speechy(tmp_path / "a.mp4", False)) is None
+    assert jumps(_speechy(tmp_path / "b.mp4", True)) is not None
+
+
+def test_language_qa_is_folded_into_the_score_not_reported_as_crashed(home, tmp_path):
+    """The hook called localize.qa (a module) and every report said "localize.qa raised: 'module' object is not callable"."""
+    import subprocess
+    from nexus import quality
+    v = tmp_path / "c.mp4"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "testsrc2=s=320x180:r=25:d=3", "-f", "lavfi", "-i",
+                    "sine=f=300:d=3", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", str(v)], check=True)
+    tl = {"lang": "en", "width": 320, "height": 180, "fps": 25, "clips": [{"id": "a", "type": "video", "src": str(v), "in": 0, "out": 3}],
+          "audio": [], "subtitles": [{"start": 0.2, "end": 2.0, "text": "A short caption."}]}
+    r = quality.score(v, tl=tl, lang="en")
+    assert not any(m["id"] == "localization.ext" for m in r["not_measured"])

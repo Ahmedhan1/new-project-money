@@ -1,0 +1,193 @@
+{
+ "captured_at": "2026-11-13T13:39:49Z",
+ "kind": "LIVE (real Kaggle GPU, real Wan 2.2 TI2V-5B)",
+ "profile": "smoke",
+ "job_id": "rjob_3ea658eeb829",
+ "status": "succeeded",
+ "error": null,
+ "accelerator": "Tesla T4 x2",
+ "duration_s": 421.413,
+ "worker_metrics": {
+  "peak_rss_mb": 22196.0,
+  "ram_total_gb": 31.35,
+  "gpu_util_max": 100.0,
+  "gpu_util_mean": 13.4,
+  "gpu_mem_used_max_mb": 14187.0,
+  "task_s": 421.413,
+  "per_gpu": [
+   {
+    "index": 0,
+    "util_max": 100.0,
+    "util_mean": 15.0,
+    "smi_mem_used_max_mb": 12969.0
+   },
+   {
+    "index": 1,
+    "util_max": 100.0,
+    "util_mean": 15.0,
+    "smi_mem_used_max_mb": 14187.0
+   }
+  ],
+  "load_s": 132.0,
+  "download_s": 154.1
+ },
+ "benchmark": {
+  "model": "wan22-ti2v-5b",
+  "repo": "Wan-AI/Wan2.2-TI2V-5B-Diffusers",
+  "revision": "b8fff7315c768468a5333511427288870b2e9635",
+  "licence": "apache-2.0",
+  "diffusers_pinned": "0.35.2",
+  "env": {
+   "gpu_count": 2,
+   "gpus": [
+    {
+     "index": 0,
+     "name": "Tesla T4",
+     "vram_gb": 14.56,
+     "cc": "7.5"
+    },
+    {
+     "index": 1,
+     "name": "Tesla T4",
+     "vram_gb": 14.56,
+     "cc": "7.5"
+    }
+   ],
+   "bf16_native": false,
+   "bf16_matmul_works": true,
+   "versions": {
+    "torch": "2.11.0+cu130",
+    "diffusers": "0.35.2",
+    "transformers": "5.20.2",
+    "accelerate": "1.15.0",
+    "safetensors": "0.8.0",
+    "huggingface_hub": "1.33.0",
+    "cuda": "13.0"
+   }
+  },
+  "strategy": {
+   "transformer": "torch.float16 on cuda:0",
+   "text_encoder": "gpu-bf16 on cuda:1",
+   "vae": "fp32 encode on cuda:0, untiled fp32 decode on cuda:1 (text encoder freed after encoding)",
+   "cpu_offload": false
+  },
+  "download_s": 154.1,
+  "load_s": 132.0,
+  "runs": [
+   {
+    "run": "run0",
+    "mode": "t2v",
+    "prompt": "A red fox trots through fresh snow in a birch forest at sunrise, its breath visible in the cold air; the camera tracks alongside at low height, soft golden backlight, shallow depth of field, cinematic, natural motion.",
+    "image": null,
+    "width": 672,
+    "height": 384,
+    "frames": 25,
+    "fps": 24,
+    "steps": 20,
+    "guidance": 5.0,
+    "seed": 7,
+    "scheduler": "UniPCMultistepScheduler",
+    "text_encode_s": 5.2,
+    "generate_s": 48.6,
+    "decode_s": 42.1,
+    "s_per_step_mean": 2.43,
+    "aux_free_gb_before_decode": 11.75,
+    "vram": [
+     {
+      "index": 0,
+      "peak_allocated_mb": 12623.4,
+      "peak_reserved_mb": 12822.0
+     },
+     {
+      "index": 1,
+      "peak_allocated_mb": 9887.0,
+      "peak_reserved_mb": 14054.0
+     }
+    ],
+    "quality": {
+     "frames": 25,
+     "mean_luma": 186.25,
+     "min_frame_luma": 184.06,
+     "mean_frame_std": 73.51,
+     "mean_abs_frame_diff": 14.673,
+     "max_abs_frame_diff": 20.935,
+     "first_last_diff": 40.649,
+     "static_pairs": 0,
+     "black": false,
+     "flat": false
+    },
+    "ffprobe": {
+     "programs": [],
+     "streams": [
+      {
+       "codec_name": "h264",
+       "codec_type": "video",
+       "width": 672,
+       "height": 384,
+       "r_frame_rate": "24/1",
+       "nb_frames": "25"
+      }
+     ],
+     "format": {
+      "duration": "1.041667",
+      "size": "456487",
+      "bit_rate": "3505819"
+     }
+    },
+    "artifact": {
+     "name": "wan22_5b_t2v_672x384_25f_run0.mp4",
+     "sha256": "45fce8752c3ff20bbe9719fc40e2936813ffd04116af574a4ae022eb701dd33d",
+     "size": 456487
+    }
+   }
+  ],
+  "per_gpu": [
+   {
+    "index": 0,
+    "util_max": 100.0,
+    "util_mean": 15.0,
+    "smi_mem_used_max_mb": 12969.0
+   },
+   {
+    "index": 1,
+    "util_max": 100.0,
+    "util_mean": 15.0,
+    "smi_mem_used_max_mb": 14187.0
+   }
+  ]
+ },
+ "videos": [
+  {
+   "name": "wan22_5b_t2v_672x384_25f_run0.mp4",
+   "size": 456487,
+   "sha256": "45fce8752c3ff20bbe9719fc40e2936813ffd04116af574a4ae022eb701dd33d",
+   "sha256_matches_worker": true,
+   "ffprobe": {
+    "programs": [],
+    "streams": [
+     {
+      "codec_name": "h264",
+      "width": 672,
+      "height": 384,
+      "pix_fmt": "yuv420p",
+      "r_frame_rate": "24/1",
+      "nb_read_frames": "25"
+     }
+    ],
+    "format": {
+     "duration": "1.041667",
+     "size": "456487"
+    }
+   },
+   "motion": {
+    "decoded_frames": 25,
+    "mean_abs_diff": 5.784,
+    "static_pairs": 0,
+    "luma_min": 185.2,
+    "luma_max": 189.8
+   },
+   "local_path": "$NEXUS_HOME/compute/artifacts/rjob_3ea658eeb829/wan22_5b_t2v_672x384_25f_run0.mp4"
+  }
+ ],
+ "log_tail": ""
+}

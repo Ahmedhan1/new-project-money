@@ -1,0 +1,192 @@
+# NEXUS professional asset library (nexus/assetlib). Edited by hand; validated by tests/fast/test_a2_assetlib.py.
+#
+# kind:
+#   builtin    a renderer feature (effect, transition, motion/title preset): nothing to download, always available
+#   generated  made on this machine by nexus/assetlib/generators.py (own work, CC0-1.0) when installed
+#   download   fetched on demand from `url`, checked against the pinned `sha256` (resumable, licence-gated)
+#   pack       a pinned archive; selected members are extracted
+# The 58 FFmpeg xfade transitions and the extended transitions are added to the catalog from nexus/fx/transitions.py
+# (assetlib._transition_entries) so the two can never disagree.
+version: 1
+policy:
+  # licences NEXUS may install (commercial use + modification allowed). Anything else is listed as an optional
+  # future resource and never downloaded.
+  allowed_licenses: [CC0-1.0, OFL-1.1, Apache-2.0, MIT, CC-BY-4.0, PD-USGov, NEXUS-AGPL-3.0]
+  attribution_required: [CC-BY-4.0]
+  bundle_license_text: [OFL-1.1, Apache-2.0, MIT]
+defaults:
+  generated: {license: CC0-1.0, author: "NEXUS (generated locally)", commercial_use: true, attribution: "none required",
+              source_url: "https://github.com/Ahmedhan1/new-project-money/blob/main/nexus/assetlib/generators.py"}
+  builtin: {license: NEXUS-AGPL-3.0, author: "NEXUS renderer (FFmpeg filters)", commercial_use: true, attribution: "none required",
+            source_url: "https://github.com/Ahmedhan1/new-project-money/blob/main/nexus/fx/effects.py"}
+assets:
+  # ---------------------------------------------------------------- effects (builtin renderer looks)
+  - {id: effect.film_grain, name: Film grain, category: effects, kind: builtin, apply: {effect: {type: grain, amount: 10}}, description: "Temporal luma grain like 16/35 mm stock."}
+  - {id: effect.glow, name: Glow, category: effects, kind: builtin, apply: {effect: {type: glow, amount: 0.35, radius: 10}}, description: "Soft screen-blended halo over the whole picture."}
+  - {id: effect.bloom, name: Bloom, category: effects, kind: builtin, apply: {effect: {type: bloom, amount: 0.45, threshold: 175, radius: 14}}, description: "Only highlights above a threshold bleed light, like lens bloom."}
+  - {id: effect.motion_blur, name: Motion blur, category: effects, kind: builtin, apply: {effect: {type: motion_blur, frames: 3}}, description: "Blends neighbouring frames for a long-shutter look."}
+  - {id: effect.vignette, name: Vignette, category: effects, kind: builtin, apply: {effect: {type: vignette}}, description: "Darkened corners that draw the eye to the centre."}
+  - {id: effect.chromatic_aberration, name: Chromatic aberration, category: effects, kind: builtin, apply: {effect: {type: chromatic_aberration, amount: 3}}, description: "Red/blue fringes from an imperfect lens."}
+  - {id: effect.light_leak, name: Light leak, category: effects, kind: builtin, apply: {effect: {type: light_leak, amount: 0.5, color: "#FF9A3C"}}, description: "A warm, slowly moving flare washing in from the edge of frame."}
+  - {id: effect.light_leak_cool, name: Light leak (cool), category: effects, kind: builtin, apply: {effect: {type: light_leak, amount: 0.45, color: "#3CC8FF"}}, description: "Cool cyan variant of the light leak."}
+  - {id: effect.lens_distortion, name: Lens distortion, category: effects, kind: builtin, apply: {effect: {type: lens_distortion, k1: -0.15, k2: 0.02}}, description: "Barrel distortion of a wide lens."}
+  - {id: effect.camera_shake, name: Camera shake, category: effects, kind: builtin, apply: {effect: {type: shake}}, description: "Handheld jitter (existing renderer effect)."}
+  - {id: effect.glitch, name: Glitch, category: effects, kind: builtin, apply: {effect: {type: glitch, amount: 10}}, description: "Short RGB split + noise bursts (existing renderer effect)."}
+  - {id: effect.vhs, name: VHS, category: effects, kind: builtin, apply: {effect: {type: vhs, amount: 0.6}}, description: "Chroma bleed, soft picture, tape noise and scanlines."}
+  - {id: effect.film_burn, name: Film burn, category: effects, kind: builtin, apply: {effect: {type: film_burn, duration: 1.2}}, description: "Overexposed orange burn near the end of the clip."}
+  - {id: effect.blur, name: Blur, category: effects, kind: builtin, apply: {effect: {type: blur, amount: 14}}, description: "Gaussian blur for a time window (existing renderer effect)."}
+  - {id: effect.depth_of_field, name: Depth of field, category: effects, kind: builtin, apply: {process: depth_of_field}, description: "Background blur from a depth estimate (VFX processor; runs on a processed copy of the clip)."}
+  - {id: effect.particles, name: Particles, category: effects, kind: builtin, apply: {process: particles}, description: "Procedural dust/snow/sparks (VFX processor)."}
+  - {id: effect.sharpen, name: Sharpen, category: effects, kind: builtin, apply: {effect: {type: sharpen, amount: 0.6}}, description: "Unsharp mask; sharpens existing detail (never invents it)."}
+  - {id: effect.denoise, name: Denoise, category: effects, kind: builtin, apply: {effect: {type: denoise, strength: 3}}, description: "Spatio-temporal noise reduction (hqdn3d)."}
+  - {id: effect.finish, name: Professional finish, category: effects, kind: builtin, apply: {effect: {type: finish, amount: 0.5}}, description: "Light sharpening, fine grain and a subtle vignette in one step."}
+  - {id: effect.letterbox, name: Letterbox 2.39, category: effects, kind: builtin, apply: {effect: {type: letterbox, ratio: 2.39}}, description: "Scope bars drawn into the picture."}
+  - {id: effect.punch_in, name: Punch-in emphasis, category: effects, kind: builtin, apply: {effect: {type: punch_in}}, description: "Quick zoom-in on a beat (existing renderer effect)."}
+
+  # ---------------------------------------------------------------- motion graphics (builtin presets)
+  - {id: motion.ken_burns_in, name: Ken Burns in, category: animations, kind: builtin, apply: {keyframes: {scale: [[0, 1.0, ease], [-1, 1.15, ease]]}}, description: "Slow push into a still or a shot."}
+  - {id: motion.ken_burns_out, name: Ken Burns out, category: animations, kind: builtin, apply: {keyframes: {scale: [[0, 1.15, ease], [-1, 1.0, ease]]}}, description: "Slow pull back."}
+  - {id: motion.camera_push, name: Camera push, category: animations, kind: builtin, apply: {keyframes: {scale: [[0, 1.0, ease], [-1, 1.08, ease]]}}, description: "Subtle dolly-in feel on interviews."}
+  - {id: motion.camera_pull, name: Camera pull, category: animations, kind: builtin, apply: {keyframes: {scale: [[0, 1.08, ease], [-1, 1.0, ease]]}}, description: "Subtle dolly-out."}
+  - {id: motion.pan_drift, name: Pan drift (parallax-style), category: animations, kind: builtin, apply: {keyframes: {scale: [[0, 1.12, linear], [-1, 1.12, linear]], x: [[0, 0.3, ease], [-1, 0.7, ease]]}}, description: "Lateral drift across a zoomed frame. True multi-plane parallax needs a depth split (not built)."}
+  - {id: motion.emphasis_punch, name: Animated emphasis, category: animations, kind: builtin, apply: {effect: {type: punch_in}}, description: "Punch-in on the beat for emphasis."}
+  - {id: motion.title_pop, name: Title pop (bounce in), category: animations, kind: builtin, apply: {title_anim: pop}, description: "Scale-in with overshoot."}
+  - {id: motion.title_spring, name: Title spring, category: animations, kind: builtin, apply: {title_anim: spring}, description: "Damped spring settle."}
+  - {id: motion.title_bounce, name: Title bounce, category: animations, kind: builtin, apply: {title_anim: bounce}, description: "Falls in and bounces."}
+  - {id: motion.title_fade_scale, name: Fade and scale, category: animations, kind: builtin, apply: {title_anim: zoom}, description: "Fade while scaling 0.85 to 1."}
+  - {id: motion.title_slide, name: Title slide, category: animations, kind: builtin, apply: {title_anim: slide}, description: "Slides in from the side."}
+  - {id: motion.title_rise, name: Title rise (text reveal), category: animations, kind: builtin, apply: {title_anim: rise}, description: "Rises into place while fading in."}
+  - {id: motion.captions_word_by_word, name: Word-by-word captions, category: animations, kind: builtin, apply: {captions: {style: pop, words_per_cue: 3}}, description: "2-4 words per cue, scale-in pop, current word highlighted."}
+  - {id: motion.captions_karaoke, name: Karaoke captions, category: animations, kind: builtin, apply: {captions: {style: karaoke}}, description: "Whole line, words light up as spoken."}
+
+  # ---------------------------------------------------------------- LUTs (generated .cube, 33^3)
+  - {id: lut.cinematic, name: Cinematic, category: luts, kind: generated, gen: lut, params: {look: cinematic}, ext: .cube, description: "Warm highlights, cool shadows, gentle S-curve, slightly muted."}
+  - {id: lut.warm_film, name: Warm film, category: luts, kind: generated, gen: lut, params: {look: warm_film}, ext: .cube, description: "Golden film stock warmth."}
+  - {id: lut.cool_cinematic, name: Cool cinematic, category: luts, kind: generated, gen: lut, params: {look: cool_cinematic}, ext: .cube, description: "Blue-steel thriller look."}
+  - {id: lut.documentary, name: Documentary, category: luts, kind: generated, gen: lut, params: {look: documentary}, ext: .cube, description: "Natural, lightly desaturated, lifted blacks."}
+  - {id: lut.vintage, name: Vintage, category: luts, kind: generated, gen: lut, params: {look: vintage}, ext: .cube, description: "Faded, yellowed print."}
+  - {id: lut.black_white, name: Black and white, category: luts, kind: generated, gen: lut, params: {look: black_white}, ext: .cube, description: "Panchromatic-weighted monochrome with contrast."}
+  - {id: lut.luxury_commercial, name: Luxury commercial, category: luts, kind: generated, gen: lut, params: {look: luxury_commercial}, ext: .cube, description: "Rich colour, gold-touched highlights."}
+  - {id: lut.natural_skin, name: Natural skin tones, category: luts, kind: generated, gen: lut, params: {look: natural_skin}, ext: .cube, description: "Protects skin hues while calming greens and blues."}
+  - {id: lut.teal_orange, name: Teal and orange, category: luts, kind: generated, gen: lut, params: {look: teal_orange}, ext: .cube, description: "Blockbuster complementary split."}
+  - {id: lut.soft_contrast, name: Soft contrast, category: luts, kind: generated, gen: lut, params: {look: soft_contrast}, ext: .cube, description: "Low-contrast, gentle roll-off."}
+  - {id: lut.high_contrast, name: High contrast, category: luts, kind: generated, gen: lut, params: {look: high_contrast}, ext: .cube, description: "Punchy blacks and whites."}
+  - {id: lut.bleach_bypass, name: Bleach bypass, category: luts, kind: generated, gen: lut, params: {look: bleach_bypass}, ext: .cube, description: "Silver-retained desaturated contrast."}
+  - {id: lut.day_for_night, name: Day for night, category: luts, kind: generated, gen: lut, params: {look: day_for_night}, ext: .cube, description: "Dark blue moonlight from daylight footage."}
+  - {id: lut.sepia, name: Sepia, category: luts, kind: generated, gen: lut, params: {look: sepia}, ext: .cube, description: "Toned monochrome."}
+
+  # ---------------------------------------------------------------- frames and overlays (generated RGBA PNG)
+  - {id: frame.cinematic_239, name: Cinematic border 2.39, category: frames, kind: generated, gen: overlay, params: {kind: letterbox, ratio: 2.39}, ext: .png, description: "Scope letterbox as an overlay layer."}
+  - {id: frame.cinematic_185, name: Cinematic border 1.85, category: frames, kind: generated, gen: overlay, params: {kind: letterbox, ratio: 1.85}, ext: .png, description: "Flat widescreen bars."}
+  - {id: frame.film_35mm, name: 35 mm film frame, category: frames, kind: generated, gen: overlay, params: {kind: film_frame}, ext: .png, description: "Sprocket holes and rounded gate."}
+  - {id: frame.viewfinder, name: Camera viewfinder, category: frames, kind: generated, gen: overlay, params: {kind: viewfinder}, ext: .png, description: "REC dot, corner marks, centre cross, thirds, battery."}
+  - {id: frame.vignette, name: Vignette frame, category: frames, kind: generated, gen: overlay, params: {kind: vignette_frame}, ext: .png, description: "Dark edge falloff as a layer."}
+  - {id: overlay.lower_third_bar, name: Lower third bar, category: overlays, kind: generated, gen: overlay, params: {kind: lower_third_bar}, ext: .png, description: "Dark bar with an accent stripe for names."}
+  - {id: overlay.location_tag, name: Documentary location tag, category: overlays, kind: generated, gen: overlay, params: {kind: location_tag}, ext: .png, description: "Top-left tag plate for place and date."}
+  - {id: overlay.callout_circle, name: Callout circle, category: overlays, kind: generated, gen: overlay, params: {kind: callout_circle}, ext: .png, description: "Highlight ring."}
+  - {id: overlay.callout_arrow, name: Callout arrow, category: overlays, kind: generated, gen: overlay, params: {kind: callout_arrow}, ext: .png, description: "Pointer arrow."}
+  - {id: overlay.callout_box, name: Callout box, category: overlays, kind: generated, gen: overlay, params: {kind: callout_box}, ext: .png, description: "Rounded highlight box."}
+  - {id: overlay.social_safe_zone, name: Social vertical layout, category: overlays, kind: generated, gen: overlay, params: {kind: social_safe_zone, w: 1080, h: 1920}, ext: .png, description: "9:16 title band and caption band inside the Shorts/TikTok safe area."}
+  - {id: overlay.split_frame, name: Split-screen divider, category: overlays, kind: generated, gen: overlay, params: {kind: split_frame}, ext: .png, description: "Centre divider for side-by-side layouts."}
+  - {id: overlay.typography_grid, name: Typography layout, category: titles, kind: generated, gen: overlay, params: {kind: typography_grid}, ext: .png, description: "Headline, rule and kicker on a grid (edit the text in the template)."}
+
+  # ---------------------------------------------------------------- templates (generated JSON timeline fragments)
+  - {id: template.lower_third_basic, name: Lower third, category: templates, kind: generated, gen: template, params: {name: lower_third_basic}, ext: .json, description: "Name + role title on the selected clip."}
+  - {id: template.lower_third_documentary, name: Documentary lower third, category: templates, kind: generated, gen: template, params: {name: lower_third_documentary}, ext: .json, description: "Location/date title with the bar overlay."}
+  - {id: template.title_card_center, name: Animated title card, category: titles, kind: generated, gen: template, params: {name: title_card_center}, ext: .json, description: "Inserts a 3 s title card before the clip."}
+  - {id: template.chapter_card, name: Chapter card, category: titles, kind: generated, gen: template, params: {name: chapter_card}, ext: .json, description: "Black card with chapter title."}
+  - {id: template.quote_card, name: Quote card, category: titles, kind: generated, gen: template, params: {name: quote_card}, ext: .json, description: "Pull-quote card."}
+  - {id: template.end_card, name: End card, category: titles, kind: generated, gen: template, params: {name: end_card}, ext: .json, description: "Closing card with a call to action."}
+  - {id: template.credits_roll, name: End credits roll, category: titles, kind: generated, gen: template, params: {name: credits_roll}, ext: .json, description: "Rolling credits on black."}
+  - {id: template.social_vertical, name: Social vertical, category: templates, kind: generated, gen: template, params: {name: social_vertical}, ext: .json, description: "Reframes to 9:16 with word-by-word captions and the safe-zone layout."}
+
+  # ---------------------------------------------------------------- sound effects (generated WAV, 48 kHz)
+  - {id: sfx.whoosh, name: Whoosh, category: sound_effects, kind: generated, gen: sound, params: {kind: whoosh}, ext: .wav, description: "Air sweep for transitions."}
+  - {id: sfx.reverse_whoosh, name: Reverse whoosh, category: sound_effects, kind: generated, gen: sound, params: {kind: reverse_whoosh}, ext: .wav, description: "Builds into a cut."}
+  - {id: sfx.impact, name: Impact, category: sound_effects, kind: generated, gen: sound, params: {kind: impact}, ext: .wav, description: "Punchy hit."}
+  - {id: sfx.cinematic_hit, name: Cinematic hit, category: sound_effects, kind: generated, gen: sound, params: {kind: cinematic_hit}, ext: .wav, description: "Boom with transient and long tail."}
+  - {id: sfx.braam, name: Braam, category: sound_effects, kind: generated, gen: sound, params: {kind: braam}, ext: .wav, description: "Low brassy swell for trailers."}
+  - {id: sfx.sub_drop, name: Sub drop, category: sound_effects, kind: generated, gen: sound, params: {kind: sub_drop}, ext: .wav, description: "Falling sub-bass."}
+  - {id: sfx.riser, name: Riser, category: sound_effects, kind: generated, gen: sound, params: {kind: riser}, ext: .wav, description: "Tension build."}
+  - {id: sfx.swell, name: Swell, category: sound_effects, kind: generated, gen: sound, params: {kind: swell}, ext: .wav, description: "Soft rising pad swell."}
+  - {id: sfx.glitch_stutter, name: Glitch stutter, category: sound_effects, kind: generated, gen: sound, params: {kind: glitch_stutter}, ext: .wav, description: "Digital stutter for glitch transitions."}
+  - {id: sfx.camera_shutter, name: Camera shutter, category: sound_effects, kind: generated, gen: sound, params: {kind: camera_shutter}, ext: .wav, description: "Two-blade shutter click."}
+  - {id: sfx.typewriter, name: Typewriter, category: sound_effects, kind: generated, gen: sound, params: {kind: typewriter}, ext: .wav, description: "Key clicks for text reveals."}
+  - {id: sfx.ui_click, name: UI click, category: sound_effects, kind: generated, gen: sound, params: {kind: click}, ext: .wav, description: "Interface click."}
+  - {id: sfx.ui_pop, name: UI pop, category: sound_effects, kind: generated, gen: sound, params: {kind: pop}, ext: .wav, description: "Bubble pop for captions and icons."}
+  - {id: sfx.ui_notification, name: UI notification, category: sound_effects, kind: generated, gen: sound, params: {kind: ui_notification}, ext: .wav, description: "Two-tone chime."}
+  - {id: sfx.ui_swipe, name: UI swipe, category: sound_effects, kind: generated, gen: sound, params: {kind: ui_swipe}, ext: .wav, description: "Short swipe."}
+  - {id: sfxpack.retro_synth_50, name: "50 retro / synth SFX (pack)", category: sound_effects, kind: pack,
+     url: "https://opengameart.org/sites/default/files/50-CC0-retro-synth-SFX.zip",
+     sha256: db9370bfbe228d1fc3912ec455ad358129eeec593169fc02701ff48d888db9cb, size: 1938142, members: "*.ogg",
+     source_url: "https://opengameart.org/content/50-cc0-retro-synth-sfx", author: rubberduck (OpenGameArt.org),
+     license: CC0-1.0, commercial_use: true, attribution: "none required (credit appreciated: rubberduck)",
+     description: "Power-ups, coins, lasers, beeps and explosions (UI and game-style sounds)."}
+
+  # ---------------------------------------------------------------- ambience, nature, beds (generated WAV)
+  - {id: ambience.room_tone, name: Room tone, category: sound_effects, kind: generated, gen: ambience, params: {kind: room}, ext: .wav, description: "Quiet interior air to fill cuts."}
+  - {id: ambience.outdoor, name: Outdoor air, category: sound_effects, kind: generated, gen: ambience, params: {kind: outdoor}, ext: .wav, description: "Light outdoor bed."}
+  - {id: ambience.city, name: City hum, category: sound_effects, kind: generated, gen: ambience, params: {kind: city}, ext: .wav, description: "Distant traffic rumble."}
+  - {id: ambience.nature_birds, name: Nature (synthetic birds), category: sound_effects, kind: generated, gen: ambience, params: {kind: nature}, ext: .wav, description: "Air with sparse synthesised chirps (not a field recording)."}
+  - {id: ambience.rain, name: Rain, category: sound_effects, kind: generated, gen: ambience, params: {kind: rain}, ext: .wav, description: "Steady rain with drops."}
+  - {id: ambience.wind, name: Wind, category: sound_effects, kind: generated, gen: ambience, params: {kind: wind}, ext: .wav, description: "Gusting wind."}
+  - {id: ambience.ocean, name: Ocean waves, category: sound_effects, kind: generated, gen: ambience, params: {kind: ocean}, ext: .wav, description: "Slow wave wash."}
+  - {id: ambience.stream, name: Stream, category: sound_effects, kind: generated, gen: ambience, params: {kind: stream}, ext: .wav, description: "Running water."}
+  - {id: music.documentary_bed, name: Documentary bed, category: music, kind: generated, gen: music, params: {mood: documentary}, ext: .wav, description: "Slow minor pads for narration."}
+  - {id: music.calm_bed, name: Calm bed, category: music, kind: generated, gen: music, params: {mood: calm}, ext: .wav, description: "Gentle major pads."}
+  - {id: music.tense_bed, name: Tension bed, category: music, kind: generated, gen: music, params: {mood: tense}, ext: .wav, description: "Dark suspense pads."}
+  - {id: music.inspiring_bed, name: Inspiring bed, category: music, kind: generated, gen: music, params: {mood: inspiring}, ext: .wav, description: "Uplifting progression."}
+  - {id: music.upbeat_bed, name: Upbeat bed, category: music, kind: generated, gen: music, params: {mood: upbeat}, ext: .wav, description: "Faster bright progression."}
+
+  # ---------------------------------------------------------------- fonts (downloaded, SIL OFL 1.1, google/fonts @ 3e56677)
+  - {id: font.bebas_neue, name: Bebas Neue, category: fonts, kind: download, url: "https://raw.githubusercontent.com/google/fonts/3e5667764ccfea32ce0c3d58a3a4756de890adc1/ofl/bebasneue/BebasNeue-Regular.ttf",
+     sha256: 08e4623805102d819f58601e46e345648846075e363b2ceb23313c2d1c83ec73, size: 61400, ext: .ttf,
+     license_url: "https://raw.githubusercontent.com/google/fonts/3e5667764ccfea32ce0c3d58a3a4756de890adc1/ofl/bebasneue/OFL.txt",
+     license_sha256: 72082f6cb4d04be2ecf7cc7d9e1e7d73787f0af8a5a278a47cade70c16b78341, author: Dharma Type, license: OFL-1.1,
+     source_url: "https://github.com/google/fonts/tree/3e5667764ccfea32ce0c3d58a3a4756de890adc1/ofl/bebasneue", commercial_use: true,
+     attribution: "none in videos; keep OFL.txt with the font if you redistribute the font file", description: "Tall condensed display caps for titles."}
+  - {id: font.montserrat, name: Montserrat, category: fonts, kind: download, url: "https://raw.githubusercontent.com/google/fonts/3e5667764ccfea32ce0c3d58a3a4756de890adc1/ofl/montserrat/Montserrat%5Bwght%5D.ttf",
+     sha256: 0f7b311b2f3279e4eef9b2f968bcdbab6e28f4daeb1f049f4f278a902bcd82f7, size: 744936, ext: .ttf,
+     license_url: "https://raw.githubusercontent.com/google/fonts/3e5667764ccfea32ce0c3d58a3a4756de890adc1/ofl/montserrat/OFL.txt",
+     license_sha256: 8b7141c03fa4f8d44e6345d5d4931709290f0f67875e452e95ac1fd3a027802e, author: The Montserrat Project Authors, license: OFL-1.1,
+     source_url: "https://github.com/google/fonts/tree/3e5667764ccfea32ce0c3d58a3a4756de890adc1/ofl/montserrat", commercial_use: true,
+     attribution: "none in videos; keep OFL.txt with the font if you redistribute the font file", description: "Geometric sans for lower thirds and captions."}
+  - {id: font.oswald, name: Oswald, category: fonts, kind: download, url: "https://raw.githubusercontent.com/google/fonts/3e5667764ccfea32ce0c3d58a3a4756de890adc1/ofl/oswald/Oswald%5Bwght%5D.ttf",
+     sha256: 5b38c246e255a12f5712d640d56bcced0472466fc68983d2d0410ec0457c2817, size: 172088, ext: .ttf,
+     license_url: "https://raw.githubusercontent.com/google/fonts/3e5667764ccfea32ce0c3d58a3a4756de890adc1/ofl/oswald/OFL.txt",
+     license_sha256: 0fd731a904b729a4e02eaf5e8ebd06783edd9abe400e8882760160230675b652, author: The Oswald Project Authors, license: OFL-1.1,
+     source_url: "https://github.com/google/fonts/tree/3e5667764ccfea32ce0c3d58a3a4756de890adc1/ofl/oswald", commercial_use: true,
+     attribution: "none in videos; keep OFL.txt with the font if you redistribute the font file", description: "Condensed news-style sans."}
+  - {id: font.playfair_display, name: Playfair Display, category: fonts, kind: download, url: "https://raw.githubusercontent.com/google/fonts/3e5667764ccfea32ce0c3d58a3a4756de890adc1/ofl/playfairdisplay/PlayfairDisplay%5Bwght%5D.ttf",
+     sha256: c40f2293766a503bc70cce9e512ef844a4ccb7cbcde792fe2ea31d191917d8d6, size: 300724, ext: .ttf,
+     license_url: "https://raw.githubusercontent.com/google/fonts/3e5667764ccfea32ce0c3d58a3a4756de890adc1/ofl/playfairdisplay/OFL.txt",
+     license_sha256: 566be814f8e96e93dfa16101331557eb6b5467e9e03f627c0910fe93ca12300e, author: The Playfair Project Authors, license: OFL-1.1,
+     source_url: "https://github.com/google/fonts/tree/3e5667764ccfea32ce0c3d58a3a4756de890adc1/ofl/playfairdisplay", commercial_use: true,
+     attribution: "none in videos; keep OFL.txt with the font if you redistribute the font file", description: "High-contrast serif for luxury and documentary titles."}
+  - {id: font.anton, name: Anton, category: fonts, kind: download, url: "https://raw.githubusercontent.com/google/fonts/3e5667764ccfea32ce0c3d58a3a4756de890adc1/ofl/anton/Anton-Regular.ttf",
+     sha256: a4ba3a92350ebb031da0cb47630ac49eb265082ca1bc0450442f4a83ab947cab, size: 170812, ext: .ttf,
+     license_url: "https://raw.githubusercontent.com/google/fonts/3e5667764ccfea32ce0c3d58a3a4756de890adc1/ofl/anton/OFL.txt",
+     license_sha256: ee67e6ee22790b7929f1a3769ca2801d565c64b5a9096942c1adf5596de9c9e4, author: Vernon Adams, license: OFL-1.1,
+     source_url: "https://github.com/google/fonts/tree/3e5667764ccfea32ce0c3d58a3a4756de890adc1/ofl/anton", commercial_use: true,
+     attribution: "none in videos; keep OFL.txt with the font if you redistribute the font file", description: "Heavy impact display face for social captions."}
+  - {id: font.inter, name: Inter, category: fonts, kind: download, url: "https://raw.githubusercontent.com/google/fonts/3e5667764ccfea32ce0c3d58a3a4756de890adc1/ofl/inter/Inter%5Bopsz,wght%5D.ttf",
+     sha256: 29160a80ff49ddcab2c97711247e08b1fab27a484a329ce8b813d820dc559031, size: 876576, ext: .ttf,
+     license_url: "https://raw.githubusercontent.com/google/fonts/3e5667764ccfea32ce0c3d58a3a4756de890adc1/ofl/inter/OFL.txt",
+     license_sha256: 5b9321a4298cfeb6b34354164a1c3afc3db114569984c502b9b35d988fd58c57, author: The Inter Project Authors, license: OFL-1.1,
+     source_url: "https://github.com/google/fonts/tree/3e5667764ccfea32ce0c3d58a3a4756de890adc1/ofl/inter", commercial_use: true,
+     attribution: "none in videos; keep OFL.txt with the font if you redistribute the font file", description: "Neutral UI sans; very readable captions."}
+  - {id: font.noto_sans_arabic, name: Noto Sans Arabic, category: fonts, kind: download, url: "https://raw.githubusercontent.com/google/fonts/3e5667764ccfea32ce0c3d58a3a4756de890adc1/ofl/notosansarabic/NotoSansArabic%5Bwdth,wght%5D.ttf",
+     sha256: 63111b5b2e074dd48cc67692e0a2726d86ee94c1c37fe8598257b7b4e87e869e, size: 844676, ext: .ttf,
+     license_url: "https://raw.githubusercontent.com/google/fonts/3e5667764ccfea32ce0c3d58a3a4756de890adc1/ofl/notosansarabic/OFL.txt",
+     license_sha256: 07fc70bfeb985cc1a87a8587d0a0c80bab11c86c9dc3fd95b6f0cb332f983e96, author: The Noto Project Authors, license: OFL-1.1,
+     source_url: "https://github.com/google/fonts/tree/3e5667764ccfea32ce0c3d58a3a4756de890adc1/ofl/notosansarabic", commercial_use: true,
+     attribution: "none in videos; keep OFL.txt with the font if you redistribute the font file", description: "Arabic titles and captions (RTL shaping by libraqm/libass)."}
+
+# Resources considered and NOT installed (licence or access does not meet the policy) - listed so nobody re-adds them blindly.
+optional_future:
+  - {name: Kenney UI Audio, license: CC0-1.0, why: "licence fits, but the download link is generated by the site's JavaScript; no pinned direct URL", url: "https://kenney.nl/assets/ui-audio"}
+  - {name: Wikimedia Commons CC0 field recordings, license: "CC0 / PD per file", why: "per-file licence must be read through the Commons API, which rate-limits (HTTP 429) from shared cloud IPs; add from the owner's PC", url: "https://commons.wikimedia.org"}
+  - {name: NASA audio library, license: PD-USGov, why: "items are hours-long launch/press recordings; would need trimming to be a useful SFX; use assets.search_images-style ingestion instead", url: "https://images.nasa.gov"}
+  - {name: Freesound.org, license: "CC0 / CC-BY / CC-BY-NC per file", why: "needs an API key (an account) and many files are NC (non-commercial) - owner decision", url: "https://freesound.org"}
+  - {name: "Commercial LUT/transition packs (Motion Array, Envato, etc.)", license: proprietary/subscription, why: "paid or subscription - excluded by the zero-spend rule", url: ""}
+  - {name: "RocketStock / Video Copilot free packs", license: "custom free licence with redistribution limits", why: "licence terms need owner review before bundling", url: ""}

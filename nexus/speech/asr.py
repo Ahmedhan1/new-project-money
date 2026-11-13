@@ -28,6 +28,36 @@ def unload() -> None:
     gc.collect()
 
 
+def merge_split_tokens(words: list[dict]) -> list[dict]:
+    """Whisper splits hyphenated tokens ('160', '-meter'; 'T', '-38'): merge them into one word spanning both."""
+    out: list[dict] = []
+    for w in words:
+        t = str(w.get("word", "")).strip()
+        if out and t.startswith("-") and len(t) > 1 and str(out[-1]["word"])[-1:].isalnum():
+            out[-1] = {**out[-1], "word": out[-1]["word"] + t, "end": w["end"]}
+        else:
+            out.append(dict(w))
+    return out
+
+
+def normalize_segment(s: dict) -> dict:
+    """Merge split hyphen tokens in a segment's words and text ('160 -meter' -> '160-meter')."""
+    import re
+    s = dict(s)
+    if s.get("words"):
+        ws = merge_split_tokens(s["words"])
+        prev_end = float(s.get("start", 0)) if ws else 0.0
+        for w in ws:  # zero-length words (Whisper gives some) borrow up to 120 ms from the gap before them
+            if float(w["end"]) - float(w["start"]) < 0.02:
+                w["start"] = round(max(prev_end, float(w["end"]) - 0.12), 3)
+                if float(w["end"]) - float(w["start"]) < 0.02:
+                    w["end"] = round(float(w["start"]) + 0.08, 3)
+            prev_end = float(w["end"])
+        s["words"] = ws
+    s["text"] = re.sub(r"(?<=[A-Za-z0-9]) -(?=[A-Za-z0-9])", "-", s.get("text", ""))
+    return s
+
+
 def transcribe(path: str | Path, language: str | None = None, words: bool = True) -> dict:
     """Returns {language, duration, segments:[{start,end,text,words:[{start,end,word}]}]}."""
     costguard.authorize("faster-whisper", "transcribe")
@@ -44,6 +74,7 @@ def transcribe(path: str | Path, language: str | None = None, words: bool = True
                     "avg_logprob": round(s.avg_logprob, 3), "no_speech_prob": round(s.no_speech_prob, 3),
                     "words": [{"start": round(w.start, 3), "end": round(w.end, 3), "word": w.word.strip()}
                               for w in (s.words or [])]})
+    out = [normalize_segment(s) for s in out]
     elapsed = time.time() - t0
     if info.duration:
         db.metric("asr_rtf", elapsed / info.duration)  # <1 means faster than realtime

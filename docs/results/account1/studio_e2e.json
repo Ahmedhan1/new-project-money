@@ -1,0 +1,186 @@
+{
+ "base": "http://127.0.0.1:<free port>",
+ "sections": {
+  "dash": {
+   "title": "Dashboard",
+   "errors": [],
+   "notes": [],
+   "buttons": 6,
+   "ms": 42
+  },
+  "accounts": {
+   "title": "Connected accounts",
+   "errors": [],
+   "notes": [],
+   "buttons": 6,
+   "ms": 537
+  },
+  "notifications": {
+   "title": "Notifications",
+   "errors": [],
+   "notes": [],
+   "buttons": 3,
+   "ms": 63
+  },
+  "scheduler": {
+   "title": "Scheduler",
+   "errors": [],
+   "notes": [],
+   "buttons": 8,
+   "ms": 74
+  },
+  "jobs": {
+   "title": "Job queue",
+   "errors": [],
+   "notes": [],
+   "buttons": 0,
+   "ms": 60
+  },
+  "library": {
+   "title": "Media library",
+   "errors": [],
+   "notes": [],
+   "buttons": 0,
+   "ms": 67
+  },
+  "review": {
+   "title": "Review & approval",
+   "errors": [],
+   "notes": [],
+   "buttons": 1,
+   "ms": 42
+  },
+  "compute": {
+   "title": "Compute providers",
+   "errors": [],
+   "notes": [],
+   "buttons": 1,
+   "ms": 74
+  },
+  "storage": {
+   "title": "Drive & storage",
+   "errors": [],
+   "notes": [],
+   "buttons": 5,
+   "ms": 70
+  },
+  "health": {
+   "title": "Provider health",
+   "errors": [],
+   "notes": [],
+   "buttons": 0,
+   "ms": 81
+  },
+  "resources": {
+   "title": "Resource monitor",
+   "errors": [],
+   "notes": [],
+   "buttons": 0,
+   "ms": 249
+  },
+  "logs": {
+   "title": "Logs",
+   "errors": [],
+   "notes": [],
+   "buttons": 1,
+   "ms": 67
+  },
+  "checkpoints": {
+   "title": "Checkpoints",
+   "errors": [],
+   "notes": [],
+   "buttons": 0,
+   "ms": 67
+  },
+  "security": {
+   "title": "Security",
+   "errors": [],
+   "notes": [
+    "Secret values are never returned by any API; the vault is encrypted at rest.",
+    "Disconnect a storage account from Connected accounts; that revokes and deletes its stored token."
+   ],
+   "buttons": 2,
+   "ms": 67
+  },
+  "config": {
+   "title": "System configuration",
+   "errors": [],
+   "notes": [],
+   "buttons": 1,
+   "ms": 65
+  }
+ },
+ "page_errors": [],
+ "console_errors": [
+  "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+  "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+ ],
+ "failed_requests": [],
+ "http_errors": [],
+ "steps": [
+  "login screen shown (token mode)",
+  "wrong token rejected",
+  "logged in",
+  "opened every section",
+  "scheduler settings saved (demo plan probe / ffmpeg_transcode, 2 masters x 2 shorts)",
+  "scheduler started: running \u00b7 masters 0/2 \u00b7 shorts 0/4",
+  "scheduler paused",
+  "scheduler resumed",
+  "notifications marked read",
+  "library thumbnail rendered; stream endpoint answers Range 206",
+  "mobile light layout",
+  "signed out; data API answers 401"
+ ],
+ "screenshots": [
+  {
+   "file": "studio_scheduler.png",
+   "bytes": 154025
+  },
+  {
+   "file": "studio_library.png",
+   "bytes": 97596
+  },
+  {
+   "file": "studio_dashboard.png",
+   "bytes": 126203
+  },
+  {
+   "file": "studio_mobile_light.png",
+   "bytes": 69785
+  }
+ ],
+ "cookie": {
+  "httpOnly": true,
+  "sameSite": "Strict",
+  "secure": false
+ },
+ "token_visible_to_js": false,
+ "after_start": "running \u00b7 masters 0/2 \u00b7 shorts 0/4",
+ "after_start_note": "",
+ "library": {
+  "imgs": [
+   320,
+   320
+  ],
+  "videos": 0,
+  "full_links": [
+   "Open full resolution",
+   "Open full resolution"
+  ]
+ },
+ "stream_range": {
+  "status": 206,
+  "range": "bytes 0-99/436031",
+  "len": 100
+ },
+ "mobile": {
+  "scrollW": 390,
+  "innerW": 390,
+  "bg": "rgb(245, 247, 251)"
+ },
+ "after_logout_status": 401,
+ "seconds": 3.8,
+ "server_tracebacks": 0,
+ "fixtures": "remote_jobs rows with provider 'fixture', two checkpoints, one failed-job event, one info notification, and a local ffmpeg-made thumbnail + 2 s master; everything else is live server state",
+ "date": "2026-11-12"
+}

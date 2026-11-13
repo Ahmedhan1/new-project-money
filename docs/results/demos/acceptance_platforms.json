@@ -1,0 +1,292 @@
+{
+ "collected_utc": "2026-11-12T13:23:18Z",
+ "demo": 3,
+ "what": "platform adaptations (aspect, safe zones, framing, limits) from one master",
+ "job": "job_081978a27c",
+ "status": "done",
+ "stages": {
+  "render-check-package": {
+   "status": "done",
+   "seconds": 1015.586,
+   "runs": 1
+  }
+ },
+ "groups": [
+  {
+   "platforms": [
+    "youtube",
+    "facebook"
+   ],
+   "video": "publish/render_0_1920x1080/en/video.mp4",
+   "duration": 244.666667,
+   "size": "1920x1080",
+   "tuning": [
+    "no safe-zone data for youtube: caption placement unchanged [safe_zone: unverified]",
+    "loudness target -14.0 LUFS [loudness_target_lufs: experimental (editorial: NEXUS default (render.py target_lufs), read 2026-11-12)]",
+    "hook timing: first words at 0.107s vs a 5.0s window - ok [hook_window_s: experimental (editorial: growth.PLATFORM_NORMS youtube first_speech_max, read 2026-11-12)]"
+   ],
+   "file_size_fix": null,
+   "verify": {
+    "ok": true,
+    "failed": []
+   },
+   "file": {
+    "video": "h264 1920x1080",
+    "video_s": 244.666667,
+    "audio": "aac",
+    "audio_s": 244.667,
+    "bytes": 89240384
+   },
+   "sha256": "6d3cc46bd70c4333644144f10be4d54979c570f5fa464817fb07e1fb0bf95706",
+   "frame_sheet": "docs/results/demos/acceptance_platform_youtube_facebook.jpg"
+  },
+  {
+   "platforms": [
+    "instagram_feed"
+   ],
+   "video": "publish/render_1_1080x1350/en/video.mp4",
+   "duration": 244.666667,
+   "size": "1080x1350",
+   "tuning": [
+    "reframed 1920x1080 -> 1080x1350 [resolution_recommended: observed (https://www.socialpilot.co/instagram-marketing/instagram-video-size, read 2026-11-12)]; 43 clip(s) cropped on the tracked face; clips keep their subject focus",
+    "captions kept clear of the platform UI (bottom 10%, top 10%) [safe_zone: experimental (editorial: keep text inside the centre 1:1 square that the grid shows (documented crop, ig_media), read 2026-11-12)]",
+    "loudness target -14.0 LUFS [loudness_target_lufs: experimental (editorial: NEXUS default, read 2026-11-12)]",
+    "hook timing: first words at 0.107s vs a 1.5s window - ok [hook_window_s: experimental (editorial: growth.PLATFORM_NORMS reels first_speech_max, read 2026-11-12)]"
+   ],
+   "file_size_fix": null,
+   "verify": {
+    "ok": true,
+    "failed": []
+   },
+   "file": {
+    "video": "h264 1080x1350",
+    "video_s": 244.666667,
+    "audio": "aac",
+    "audio_s": 244.667,
+    "bytes": 73370309
+   },
+   "sha256": "4102ea2e9938a92ceb484212bf4e8534a34a7f25e510e230ae531e59a4d05a3a",
+   "frame_sheet": "docs/results/demos/acceptance_platform_instagram_feed.jpg"
+  },
+  {
+   "platforms": [
+    "tiktok"
+   ],
+   "video": "publish/render_2_1080x1920/en/video.mp4",
+   "duration": 244.666667,
+   "size": "1080x1920",
+   "tuning": [
+    "reframed 1920x1080 -> 1080x1920 [resolution_recommended: observed (https://reap.video/blog/short-form-video-safe-zones, read 2026-11-12)]; 43 clip(s) cropped on the tracked face; clips keep their subject focus",
+    "captions kept clear of the platform UI (bottom 30%, top 15%) [safe_zone: observed (https://reap.video/blog/short-form-video-safe-zones, read 2026-11-12)]",
+    "loudness target -14.0 LUFS [loudness_target_lufs: experimental (editorial: NEXUS default, read 2026-11-12)]",
+    "hook timing: first words at 0.107s vs a 1.0s window - ok [hook_window_s: experimental (editorial: growth.PLATFORM_NORMS tiktok first_speech_max, read 2026-11-12)]"
+   ],
+   "file_size_fix": null,
+   "verify": {
+    "ok": true,
+    "failed": []
+   },
+   "file": {
+    "video": "h264 1080x1920",
+    "video_s": 244.666667,
+    "audio": "aac",
+    "audio_s": 244.667,
+    "bytes": 103050677
+   },
+   "sha256": "f4872557357af9d16f1fd10f3a1a8838ffe5b5b02b2e93fd9ed3af97f246d75e",
+   "frame_sheet": "docs/results/demos/acceptance_platform_tiktok.jpg"
+  }
+ ],
+ "packages": {
+  "youtube": {
+   "title": "Inside the cave: training for Artemis",
+   "description": "We went down about a 160-meter shaft in this Lepayama, the cave, and then we hiked in probably about a good two to 300 meters and we found a flat sandy area and that's unusual in caves because usually you don't find a bunch of sand in a relatively flat area.",
+   "description_source": "draft from the programme's first sentence - edit before posting",
+   "hashtags": [
+    "#InternationalSpaceStation",
+    "#NASA",
+    "#UnitedStates",
+    "#SpaceLaunchSystem",
+    "#NeutralBuoyancyLab"
+   ],
+   "caption_text": "Inside the cave: training for Artemis\n\nWe went down about a 160-meter shaft in this Lepayama, the cave, and then we hiked in probably about a good two to 300 meters and we found a flat sandy area and that's unusual in caves because usually you don't find a bunch of sand in a relatively flat area.\n\n#InternationalSpaceStation #NASA #UnitedStates #SpaceLaunchSystem #NeutralBuoyancyLab",
+   "check_ok": true,
+   "checks": [
+    [
+     "aspect_recommended",
+     true,
+     "aspect_recommended: documented (https://support.google.com/y"
+    ],
+    [
+     "duration_max",
+     true,
+     "duration_max_s: documented (https://support.google.com/youtu"
+    ],
+    [
+     "file_size",
+     true,
+     "max_file_bytes: documented (https://support.google.com/youtu"
+    ],
+    [
+     "video_codec",
+     true,
+     "video_codec: documented (https://support.google.com/youtube/"
+    ],
+    [
+     "fps",
+     true,
+     "fps: documented (https://support.google.com/youtube/answer/1"
+    ]
+   ]
+  },
+  "facebook": {
+   "title": "Inside the cave: training for Artemis",
+   "description": "We went down about a 160-meter shaft in this Lepayama, the cave, and then we hiked in probably about a good two to 300 meters and we found a flat sandy area and that's unusual in caves because usually you don't find a bunch of sand in a relatively flat area.",
+   "description_source": "draft from the programme's first sentence - edit before posting",
+   "hashtags": [
+    "#InternationalSpaceStation",
+    "#NASA",
+    "#UnitedStates",
+    "#SpaceLaunchSystem",
+    "#NeutralBuoyancyLab"
+   ],
+   "caption_text": "Inside the cave: training for Artemis\n\nWe went down about a 160-meter shaft in this Lepayama, the cave, and then we hiked in probably about a good two to 300 meters and we found a flat sandy area and that's unusual in caves because usually you don't find a bunch of sand in a relatively flat area.\n\n#InternationalSpaceStation #NASA #UnitedStates #SpaceLaunchSystem #NeutralBuoyancyLab",
+   "check_ok": true,
+   "checks": [
+    [
+     "aspect_recommended",
+     true,
+     "aspect_recommended: experimental (editorial: keep the long-f"
+    ],
+    [
+     "duration_max",
+     true,
+     "duration_max_s: observed (https://www.facebook.com/business/"
+    ],
+    [
+     "file_size",
+     true,
+     "max_file_bytes: observed (https://www.facebook.com/business/"
+    ],
+    [
+     "video_codec",
+     true,
+     "video_codec: observed (https://developers.facebook.com/docs/"
+    ],
+    [
+     "fps",
+     true,
+     "fps: observed (https://developers.facebook.com/docs/video-ap"
+    ]
+   ]
+  },
+  "instagram_feed": {
+   "title": "Inside the cave: training for Artemis",
+   "description": "We went down about a 160-meter shaft in this Lepayama, the cave, and then we hiked in probably about a good two to 300 meters and we found a flat sandy area and that's unusual in caves because usually you don't find a bunch of sand in a relatively flat area.",
+   "description_source": "draft from the programme's first sentence - edit before posting",
+   "hashtags": [
+    "#InternationalSpaceStation",
+    "#NASA",
+    "#UnitedStates",
+    "#SpaceLaunchSystem",
+    "#NeutralBuoyancyLab"
+   ],
+   "caption_text": "Inside the cave: training for Artemis\n\nWe went down about a 160-meter shaft in this Lepayama, the cave, and then we hiked in probably about a good two to 300 meters and we found a flat sandy area and that's unusual in caves because usually you don't find a bunch of sand in a relatively flat area.\n\n#InternationalSpaceStation #NASA #UnitedStates #SpaceLaunchSystem #NeutralBuoyancyLab",
+   "check_ok": true,
+   "checks": [
+    [
+     "aspect",
+     true,
+     "aspect_accepted: documented (https://developers.facebook.com"
+    ],
+    [
+     "aspect_recommended",
+     true,
+     "aspect_recommended: observed (https://www.socialpilot.co/ins"
+    ],
+    [
+     "duration_max",
+     true,
+     "duration_max_s: documented (https://developers.facebook.com/"
+    ],
+    [
+     "duration_min",
+     true,
+     "duration_min_s: documented (https://developers.facebook.com/"
+    ],
+    [
+     "file_size",
+     true,
+     "max_file_bytes: documented (https://developers.facebook.com/"
+    ],
+    [
+     "video_codec",
+     true,
+     "video_codec: documented (https://developers.facebook.com/doc"
+    ],
+    [
+     "fps",
+     true,
+     "fps: documented (https://developers.facebook.com/docs/instag"
+    ]
+   ]
+  },
+  "tiktok": {
+   "title": "Inside the cave: training for Artemis",
+   "description": "We went down about a 160-meter shaft in this Lepayama, the cave, and then we hiked in probably about a good two to 300 meters and we found a flat sandy area and that's unusual in caves because usually you don't find a bunch of sand in a relatively flat area.",
+   "description_source": "draft from the programme's first sentence - edit before posting",
+   "hashtags": [
+    "#InternationalSpaceStation",
+    "#NASA",
+    "#UnitedStates",
+    "#SpaceLaunchSystem",
+    "#NeutralBuoyancyLab"
+   ],
+   "caption_text": "Inside the cave: training for Artemis\n\nWe went down about a 160-meter shaft in this Lepayama, the cave, and then we hiked in probably about a good two to 300 meters and we found a flat sandy area and that's unusual in caves because usually you don't find a bunch of sand in a relatively flat area.\n\n#InternationalSpaceStation #NASA #UnitedStates #SpaceLaunchSystem #NeutralBuoyancyLab",
+   "check_ok": true,
+   "checks": [
+    [
+     "aspect",
+     true,
+     "aspect_accepted: unverified"
+    ],
+    [
+     "aspect_recommended",
+     true,
+     "aspect_recommended: documented (https://ads.tiktok.com/help/"
+    ],
+    [
+     "resolution_min",
+     true,
+     "resolution_min: documented (https://developers.tiktok.com/do"
+    ],
+    [
+     "duration_max",
+     true,
+     "duration_max_s: documented (https://developers.tiktok.com/do"
+    ],
+    [
+     "file_size",
+     true,
+     "max_file_bytes: documented (https://developers.tiktok.com/do"
+    ],
+    [
+     "video_codec",
+     true,
+     "video_codec: documented (https://developers.tiktok.com/doc/c"
+    ],
+    [
+     "fps",
+     true,
+     "fps: documented (https://developers.tiktok.com/doc/content-p"
+    ]
+   ]
+  }
+ },
+ "note": "nothing was uploaded; packages are for manual upload (no account authorisation)",
+ "inspection": {
+  "9:16": "face centred and fully in frame on every sampled frame; captions at ~62% height, above the bottom 30% UI zone; cutaway full frame",
+  "4:5": "face in the upper third; captions at ~78% height, inside the centre 1:1 square the grid shows",
+  "16:9": "source framing; captions in the lower title-safe area"
+ }
+}

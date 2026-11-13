@@ -32,6 +32,19 @@ PLATFORMS = {
 AUTO_PUBLISH = {p: "not implemented - manual upload package only" for p in PLATFORMS}
 
 
+def _platform_texts(tl: dict, title: str, description: str, n_tags: int) -> tuple[str, list[str]]:
+    """(description, hashtags) for a package. Hashtags come from what is said in the programme (entities and repeated
+    words, growth.hashtags); without a description from the user, the programme's opening sentences are used."""
+    from . import growth
+    spoken = " ".join(q["text"] for q in tl.get("subtitles") or [])
+    desc = description.strip()
+    if not desc and spoken:
+        first = re.split(r"(?<=[.!?])\s+", spoken.strip())[0]
+        desc = first if len(first) <= 280 else first[:279].rsplit(" ", 1)[0].rstrip(",;:") + "…"
+        desc = desc[:1].upper() + desc[1:]
+    return desc, growth.hashtags(f"{title}. {spoken}", n_tags)
+
+
 def _hashtags(title: str, script: dict | None, n: int) -> list[str]:
     words = re.findall(r"[A-Za-z]{4,}", title + " " + " ".join(s.get("on_screen_text", "") for s in (script or {}).get("scenes", [])))
     seen, out = set(), []
@@ -82,7 +95,7 @@ def package(project, tl: dict, platform: str, title: str, description: str = "",
             "technical_qa": "passed" if tech["passed"] else [c["detail"] for c in tech["checks"] if not c["ok"]], "notes": notes,
             "auto_publish": AUTO_PUBLISH[platform], "upload": "manual - open the platform's upload page and use the files in this folder",
             "human_approval": "PENDING"}
-    (d / "metadata.json").write_text(json.dumps(meta, indent=1, ensure_ascii=False))
+    (d / "metadata.json").write_text(json.dumps(meta, indent=1, ensure_ascii=False), encoding="utf-8")
     return meta
 
 
@@ -121,3 +134,144 @@ def business_summary(channel_id: str) -> dict:
     return {"actual_revenue": sum(r["amount"] for r in rows if r["kind"] == "actual"),
             "estimated_revenue": sum(r["amount"] for r in rows if r["kind"] == "estimate"),
             "expenses": 0.0, "note": "No income is guaranteed. Estimates are projections, not earnings.", "entries": rows}
+
+
+# ------------------------------------------------------------------ destination selector (nexus/platforms.py)
+def _limit_text(text: str, chars: int | None = None, utf8_bytes: int | None = None) -> str:
+    text = text.replace("<", "").replace(">", "") if utf8_bytes else text
+    if chars and len(text) > chars:
+        text = text[: max(0, chars - 1)].rstrip() + "…"
+    while utf8_bytes and len(text.encode("utf-8")) > utf8_bytes:
+        text = text[:-2].rstrip() + "…"
+    return text
+
+
+def deliver(project, tl: dict, destinations: list[str], title: str, description: str = "", lang: str = "en",
+            on_group=None, analysis_by_src: dict | None = None) -> dict:
+    """One master -> every selected destination. Destinations that can share a render share it (platforms.deliverables);
+    each destination still gets its own package: tuned timeline notes, file check against its limits, title/description/
+    hashtags within its limits, caption sidecars, cover frame and a MANUAL_UPLOAD.md. Nothing is uploaded."""
+    from . import platforms
+    from .timeline.render import total_duration as _td
+    groups = platforms.deliverables(destinations, duration=_td(tl), fps=int(tl.get("fps", 30)))
+    out: dict = {"groups": [], "packages": {}}
+    for gi, g in enumerate(groups):
+        lead = g["platforms"][0]
+        ptl, notes = platforms.tune(tl, lead, analysis_by_src)
+        gdir = project.dir / "publish" / f"render_{gi}_{ptl['width']}x{ptl['height']}" / lang
+        gdir.mkdir(parents=True, exist_ok=True)
+        video = gdir / "video.mp4"
+        stats = render.render(ptl, video, project.dir / "work")
+        from . import export as _export
+        caps = [platforms.get(n)["v"].get("max_file_bytes") for n in g["platforms"]]
+        cap = min([c for c in caps if c] or [0]) or None
+        size_fix = None
+        if cap and video.stat().st_size > cap:  # re-encode under the strictest file-size limit of the group
+            fixed = video.with_name("video_sized.mp4")
+            r = _export.export(video, fixed, codec="h264", quality="high", max_bytes=int(cap * 0.97))
+            if r.get("ok"):
+                fixed.replace(video)
+            size_fix = {"limit": cap, "ok": bool(r.get("ok")), "reason": r.get("reason")}
+        ver = _export.verify(video, {"codec": "h264", "audio": True, "width": ptl["width"], "height": ptl["height"]})
+        out["groups"].append({"platforms": g["platforms"], "video": str(video.relative_to(project.dir)), "duration": stats["duration"],
+                              "size": f"{ptl['width']}x{ptl['height']}", "tuning": notes, "file_size_fix": size_fix,
+                              "verify": {"ok": ver.get("ok"), "failed": [c.get("id") for c in ver.get("checks", []) if not c.get("ok")]}})
+        for name in g["platforms"]:
+            prof = platforms.get(name)
+            v = prof["v"]
+            d = project.dir / "publish" / name / lang
+            d.mkdir(parents=True, exist_ok=True)
+            chk = platforms.check(video, name)
+            chk["export_verify"] = out["groups"][-1]["verify"]
+            chk["ok"] = bool(chk["ok"] and ver.get("ok"))
+            desc_in, tags = _platform_texts(tl, title, description, min(int(v.get("hashtags_max") or 5), 5))
+            cap_limit = v.get("caption_max_chars") or v.get("caption_max_utf16")
+            meta = {"platform": name, "display": prof["display"], "language": lang, "video": str(video.relative_to(project.dir)),
+                    "shared_render_with": [x for x in g["platforms"] if x != name],
+                    "title": _limit_text(title, v.get("title_max_chars")),
+                    "description": _limit_text(desc_in, v.get("description_max_chars"), v.get("description_max_bytes")),
+                    "description_source": "yours" if description.strip() else "draft from the programme's first sentence - edit before posting",
+                    "hashtags": tags, "check": chk, "tuning": notes, "captions": stats["sidecars"],
+                    "music_policy": v.get("music_policy"), "upload_api": v.get("upload_api"),
+                    "auto_publish": "not performed: needs your own authorised app/account for this platform",
+                    "human_approval": "PENDING", "built": time.strftime("%Y-%m-%dT%H:%M:%S")}
+            meta["caption_text"] = _limit_text("\n\n".join(x for x in (meta["title"], meta["description"], " ".join(tags)) if x).strip(),
+                                               int(cap_limit) if cap_limit else 5000)
+            (d / "caption.txt").write_text(meta["caption_text"] + "\n", encoding="utf-8")  # the upload steps say "paste caption.txt"
+            vw, vh = ptl["width"], ptl["height"]
+            meta["cover"] = str(thumbnail(str(video), title, d / "cover.jpg", (1280, 720) if vw > vh else (720, 1280), lang=lang).relative_to(project.dir))
+            steps = v.get("manual_upload") or ["Open the platform's upload page and use the files in this folder."]
+            (d / "MANUAL_UPLOAD.md").write_text(
+                f"# Upload to {prof['display']}\n\nVideo: `{meta['video']}` · cover: `{meta['cover']}`\n\n"
+                + "\n".join(f"{k + 1}. {s}" for k, s in enumerate(steps))
+                + f"\n\n## Check against {prof['display']} limits\n"
+                + "\n".join(f"- [{'x' if c['ok'] else ' '}] {c['id']}: {c['value']} (limit {c['limit']}; {c['basis']})" for c in chk["checks"])
+                + (f"\n\n## Music\n{v['music_policy']}\n" if v.get("music_policy") else "\n")
+                + "\nNEXUS did not upload anything. Approve the video yourself before posting.\n", encoding="utf-8")
+            (d / "metadata.json").write_text(json.dumps(meta, indent=1, ensure_ascii=False, default=str), encoding="utf-8")
+            out["packages"][name] = {k: meta[k] for k in ("video", "title", "shared_render_with", "cover")} | {"ok": chk["ok"],
+                                                                                                         "folder": str(d.relative_to(project.dir))}
+        if on_group:
+            on_group(gi + 1, len(groups))
+    out["renders"] = len(groups)
+    out["destinations"] = len(destinations)
+    return out
+
+
+# ------------------------------------------------------------------ multilingual subtitle package
+def _reviewed(project, lang: str) -> bool:
+    """All caption lines of the localised branch approved by a reviewer (nexus.review)."""
+    from . import review
+    try:
+        return review.lines(project.timeline(lang))["native_review_done"]
+    except KeyError:
+        return False
+
+
+def subtitle_package(project, branch: str = "main", langs: list[str] | None = None, source_lang: str = "en") -> dict:
+    """Bundle the subtitle sidecars of every localised render (<branch>_<lang>.srt/.vtt) with a manifest that separates
+    SUBTITLE readiness (automated language QA) from DUB readiness (a voice whose commercial licence is verified) and
+    states the native-review requirement. Writes publish/subtitles/<branch>/ + a zip. Uploads nothing."""
+    import hashlib
+    import zipfile
+    from .speech import packs
+    rdir, out = project.dir / "renders", project.dir / "publish" / "subtitles" / branch
+    out.mkdir(parents=True, exist_ok=True)
+    found = sorted({p.stem[len(branch) + 1:] for p in rdir.glob(f"{branch}_*.srt")})
+    langs = [x for x in (langs or found) if x in found]
+    rows = []
+    for lang in langs:
+        qa_file = project.dir / "reports" / f"{branch}_{lang}.qa.json"
+        qa_rep = json.loads(qa_file.read_text(encoding="utf-8")) if qa_file.exists() else {}
+        p = packs.get(lang) or {}
+        voices = (p.get("tts") or {}).get("voices") or []
+        files = {}
+        for ext in ("srt", "vtt"):
+            src = rdir / f"{branch}_{lang}.{ext}"
+            if src.exists():
+                dst = out / f"{lang}.{ext}"
+                dst.write_bytes(src.read_bytes())
+                files[ext] = {"file": dst.name, "sha256": hashlib.sha256(dst.read_bytes()).hexdigest()}
+        issues = qa_rep.get("known_issues") or []
+        rows.append({"lang": lang, "name": p.get("name", lang), "direction": p.get("direction"), "files": files,
+                     "subtitle_ready": qa_rep.get("status") == "PASSED_AUTOMATED_CHECKS",
+                     "qa_status": qa_rep.get("status", "no QA report"), "qa_issues": issues,
+                     # every machine translation needs a native reviewer before it is called commercially ready; the
+                     # pack flag (dialect profiles) additionally marks languages where even the MT model is weak
+                     "native_review_required": lang != source_lang or bool(p.get("needs_native_review")),
+                     "weak_mt_profile": bool(p.get("needs_native_review")),
+                     "native_review_done": _reviewed(project, lang),
+                     "dub_ready_voice": next((v["id"] for v in voices if v.get("commercial_use") == "yes"), None),
+                     "dub_note": None if any(v.get("commercial_use") == "yes" for v in voices) else
+                     "no voice with a verified commercial licence - subtitles only"})
+    manifest = {"project": project.id, "branch": branch, "source_lang": source_lang, "built": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                "languages": rows, "commercially_ready": [r["lang"] for r in rows if r["subtitle_ready"] and r["native_review_done"]],
+                "note": "commercially_ready = automated checks passed AND every line approved by a reviewer (nexus.review). "
+                "subtitle_ready alone means automated checks passed, not a quality guarantee."}
+    (out / "manifest.json").write_text(json.dumps(manifest, indent=1, ensure_ascii=False), encoding="utf-8")
+    z = out.with_suffix(".zip")
+    with zipfile.ZipFile(z, "w", zipfile.ZIP_DEFLATED) as zf:
+        for f in sorted(out.iterdir()):
+            zf.write(f, f.name)
+    return {"folder": str(out.relative_to(project.dir)), "zip": str(z.relative_to(project.dir)), "languages": len(rows),
+            "subtitle_ready": [r["lang"] for r in rows if r["subtitle_ready"]], "manifest": manifest}

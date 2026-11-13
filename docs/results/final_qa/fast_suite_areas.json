@@ -1,0 +1,55 @@
+{
+ "source": "fast suite junit on candidate 9752d91 (sha256 0b68257f05e9f8ff1e943812742f6a6217f13ebdb140599877542c3403d44bf4)",
+ "note": "one test belongs to exactly one area (first matching rule); these are slices of the same 962-test run, not separate runs",
+ "areas": {
+  "security/auth/API": {
+   "tests": 154,
+   "failed": 0,
+   "skipped": 0,
+   "seconds": 16.2
+  },
+  "jobs/recovery/checkpoints": {
+   "tests": 31,
+   "failed": 0,
+   "skipped": 0,
+   "seconds": 11.4
+  },
+  "cloud compute/storage/Kaggle/Drive": {
+   "tests": 62,
+   "failed": 0,
+   "skipped": 0,
+   "seconds": 55.1
+  },
+  "renderer/director/audio/VFX/export": {
+   "tests": 268,
+   "failed": 0,
+   "skipped": 8,
+   "seconds": 298.4
+  },
+  "asset library/archive/disk": {
+   "tests": 61,
+   "failed": 0,
+   "skipped": 1,
+   "seconds": 113.9
+  },
+  "account 3 intelligence/research/growth/localization/publishing": {
+   "tests": 283,
+   "failed": 0,
+   "skipped": 0,
+   "seconds": 20.5
+  },
+  "contracts": {
+   "tests": 35,
+   "failed": 0,
+   "skipped": 0,
+   "seconds": 0.1
+  },
+  "other": {
+   "tests": 68,
+   "failed": 0,
+   "skipped": 0,
+   "seconds": 68.5
+  }
+ },
+ "files": 91
+}

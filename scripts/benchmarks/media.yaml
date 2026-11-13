@@ -1,0 +1,15 @@
+# Account 2 benchmark set: licensed source material for the cinematic engine (docs/ACCOUNT2_QUALITY_REPORT.md).
+# NASA: media produced by NASA is generally not subject to copyright in the US; NASA's media guidelines apply
+# (no implied endorsement; NASA insignia rules). Internet Archive Prelinger items are used only when the item's own
+# licenseurl says public domain. Each fetched file gets provenance.json next to it. Clips are cut to `max_s`.
+items:
+  - {id: interview, kind: talking-head interview, source: nasa, nasa_id: iss061m2627771232_Live_Interviews_Jeanette_Epps_191004, rendition: medium, max_s: 300}
+  - {id: panel, kind: multi-speaker interview, source: nasa, nasa_id: "NHQ_2020_0826_WOMEN IN SPACE", rendition: medium, start_s: 120, max_s: 360}
+  - {id: podcast, kind: podcast, source: nasa, nasa_id: jsc2021m000179_Houston_We_Have_a_Podcast-Artemis_Flight_Directors-MP4, rendition: medium, start_s: 60, max_s: 360}
+  - {id: walktalk, kind: vlog / walk-and-talk, source: nasa, nasa_id: KSC-20200508-MH-GEB03_0001-Booster_Processing_Walk_and_Talk-3248689, rendition: medium, max_s: 300}
+  - {id: documentary, kind: documentary, source: nasa, nasa_id: Mars - The Search Begins Documentary, rendition: medium, max_s: 360}
+  - {id: documentary_long, kind: documentary (long-form, for the 3-5 min Demo 1), source: nasa, nasa_id: Mars - The Search Begins Documentary, rendition: medium, max_s: 900}
+  - {id: explainer, kind: educational explanation, source: nasa, nasa_id: ARC-20140529-AAV3515-NASA-Explains-Cold-Zone-Above-Tropics, rendition: medium, max_s: 300}
+  - {id: broll, kind: b-roll rich cinematic / moving subjects, source: nasa, nasa_id: jsc2022m000172_Earth_in_4K_Expedition_65_Edition, rendition: large, max_s: 240}
+  - {id: ad, kind: product advertisement, source: archive, archive_id: ClassicT1948_6, max_s: 240}
+  - {id: industrial, kind: documentary / moving subjects (vintage), source: archive, archive_id: Designfo1956, max_s: 300}

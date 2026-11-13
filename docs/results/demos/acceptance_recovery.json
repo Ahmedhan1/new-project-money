@@ -1,0 +1,107 @@
+{
+ "collected_utc": "2026-11-12T13:08:50Z",
+ "demo": 7,
+ "what": "hard-kill (SIGKILL) the app during real production jobs, restart, verify resume",
+ "jobs": [
+  {
+   "job": "job_bd870edda6",
+   "kind": "render",
+   "status": "done",
+   "retries": 1,
+   "recovery": "worker embedded-vm-12609 lost at stage 'render-qa'; resumed from last checkpoint",
+   "stages": {
+    "render-qa": {
+     "status": "done",
+     "seconds": 272.68,
+     "runs": 2
+    },
+    "quality-score": {
+     "status": "done",
+     "seconds": 139.225,
+     "runs": 1
+    }
+   },
+   "segments": 44,
+   "segments_from_cache": 41
+  },
+  {
+   "job": "job_cc28f57412",
+   "kind": "render",
+   "status": "done",
+   "retries": 1,
+   "recovery": "worker embedded-vm-18617 lost at stage 'render-qa'; resumed from last checkpoint",
+   "stages": {
+    "render-qa": {
+     "status": "done",
+     "seconds": 317.222,
+     "runs": 2
+    },
+    "quality-score": {
+     "status": "done",
+     "seconds": 149.715,
+     "runs": 1
+    }
+   },
+   "segments": 44,
+   "segments_from_cache": 44
+  },
+  {
+   "job": "job_b9f09d6ec2",
+   "kind": "deliver",
+   "status": "done",
+   "retries": 2,
+   "recovery": "worker embedded-vm-2591 lost at stage 'render-check-package'; resumed from last checkpoint",
+   "stages": {
+    "render-check-package": {
+     "status": "done",
+     "seconds": 831.725,
+     "runs": 3
+    }
+   },
+   "segments": null,
+   "segments_from_cache": null
+  },
+  {
+   "job": "job_be5a886840",
+   "kind": "shorts",
+   "status": "done",
+   "retries": 1,
+   "recovery": "worker embedded-vm-24164 lost at stage 'render-and-score'; resumed from last checkpoint",
+   "stages": {
+    "select-and-build": {
+     "status": "done",
+     "seconds": 0.556,
+     "runs": 1
+    },
+    "render-and-score": {
+     "status": "done",
+     "seconds": 811.831,
+     "runs": 2
+    }
+   },
+   "segments": null,
+   "segments_from_cache": null
+  },
+  {
+   "job": "job_43acd887f2",
+   "kind": "shorts",
+   "status": "done",
+   "retries": 1,
+   "recovery": "worker embedded-vm-6250 lost at stage 'render-and-score'; resumed from last checkpoint",
+   "stages": {
+    "select-and-build": {
+     "status": "done",
+     "seconds": 0.492,
+     "runs": 1
+    },
+    "render-and-score": {
+     "status": "done",
+     "seconds": 603.384,
+     "runs": 2
+    }
+   },
+   "segments": null,
+   "segments_from_cache": null
+  }
+ ]
+}

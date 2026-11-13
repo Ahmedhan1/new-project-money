@@ -28,7 +28,7 @@ def _alive(name: str) -> dict | None:
     if not f.exists():
         return None
     try:
-        info = json.loads(f.read_text())
+        info = json.loads(f.read_text(encoding="utf-8"))
         p = psutil.Process(info["pid"])
         if p.is_running() and p.status() != psutil.STATUS_ZOMBIE and abs(p.create_time() - info["started"]) < 5:
             return info
@@ -65,13 +65,37 @@ def preflight() -> list[dict]:
     try:
         from . import db
         add("database", True, f"{config.DB_PATH.name} schema v{db.schema_version()}")
+    except db.DatabaseDamaged as e:
+        add("database", False, str(e), "python -m nexus restore <new folder>  (NEXUS_RESTORE.bat)")
     except Exception as e:
         add("database", False, f"{type(e).__name__}: {e}", "restore the database from a backup: NEXUS_RESTORE")
     return out
 
 
+LOG_MAX_BYTES, LOG_KEEP = 20 << 20, 5
+
+
+def rotate_log(log: Path, max_bytes: int = LOG_MAX_BYTES, keep: int = LOG_KEEP) -> bool:
+    """Size-based rotation at service start: name.log -> name.log.1 -> ... -> name.log.<keep> (oldest dropped).
+    Service logs never grow without bound and the last `keep` generations stay available for diagnosis."""
+    try:
+        if not log.exists() or log.stat().st_size < max_bytes:
+            return False
+        oldest = log.with_name(f"{log.name}.{keep}")
+        oldest.unlink(missing_ok=True)
+        for i in range(keep - 1, 0, -1):
+            src = log.with_name(f"{log.name}.{i}")
+            if src.exists():
+                os.replace(src, log.with_name(f"{log.name}.{i + 1}"))
+        os.replace(log, log.with_name(f"{log.name}.1"))
+        return True
+    except OSError:
+        return False
+
+
 def _spawn(name: str, args: list[str], env: dict) -> dict:
     log = config.LOGS / f"{name}.log"
+    rotate_log(log)
     f = open(log, "ab")
     kw: dict = {"creationflags": 0x00000008 | 0x00000200 | 0x08000000} if os.name == "nt" else {"start_new_session": True}  # detached, no console
     p = subprocess.Popen([sys.executable, "-m", "nexus", *args], cwd=str(config.ROOT), stdout=f, stderr=subprocess.STDOUT,
@@ -171,6 +195,13 @@ def stop(say=print) -> int:
         _pidfile(name).unlink(missing_ok=True)
     say(f"stopped {n} service(s)" if n else "NEXUS was not running")
     return 0
+
+
+def restart(port: int | None = None, open_browser: bool = False, say=print) -> int:
+    """Stop then start (jobs resume from their checkpoints). Used by the System page and `nexus restart`."""
+    stop(say=say)
+    time.sleep(1.0)
+    return start(port=port, open_browser=open_browser, say=say)
 
 
 def service_status() -> dict:

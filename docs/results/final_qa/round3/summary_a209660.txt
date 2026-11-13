@@ -1,0 +1,12 @@
+SKIPPED [1] tests/fast/test_a2_archive.py:165: Account 1 storage is present on this tree (covered by test_a2_cross_account)
+SKIPPED [1] tests/fast/test_a2_edl.py:95: opentimelineio not installed (optional)
+SKIPPED [1] tests/fast/test_audio_post.py:50: no local TTS voice to make a speech fixture (FileNotFoundError)
+SKIPPED [1] tests/fast/test_b2_broll_visual.py:131: SigLIP int8 ONNX files not on this machine (opt-in download)
+SKIPPED [1] tests/fast/test_b2_visual.py:91: SigLIP int8 ONNX files not on this machine (opt-in download)
+SKIPPED [1] tests/fast/test_b2_visual.py:115: SigLIP int8 ONNX files not on this machine (opt-in download)
+SKIPPED [1] tests/fast/test_c2_dialogue.py:47: no local Piper voice to make a real speech fixture
+SKIPPED [2] tests/fast/test_diarize_faces.py:103: no local voices/speaker model for a two-voice fixture (FileNotFoundError)
+981 passed, 9 skipped, 3 warnings in 578.95s (0:09:38)
+EXIT 0
+All checks passed!
+ruff 0

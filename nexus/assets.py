@@ -64,7 +64,12 @@ def search_commons(query: str, n: int = 5, min_width: int = 1000) -> list[dict]:
                     "url": ii.get("descriptionurl"), "file_url": ii.get("thumburl") or ii.get("url"),
                     "creator": _strip_html(m.get("Artist", {}).get("value", ""))[:120], "source": "wikimedia-commons",
                     "license": lic, "license_version": ver, "license_url": m.get("LicenseUrl", {}).get("value"),
-                    "width": w, "height": h, "kind": "image"})
+                    "width": w, "height": h, "kind": "image",
+                    # kept for the visual-context gate (geography / period / maps): nexus/intelligence/quality/visual_context.py
+                    "description": _strip_html(m.get("ImageDescription", {}).get("value", ""))[:600],
+                    "categories": (m.get("Categories", {}).get("value") or "").replace("|", ", ")[:600],
+                    "date": _strip_html(m.get("DateTimeOriginal", {}).get("value", ""))[:40],
+                    "object_name": _strip_html(m.get("ObjectName", {}).get("value", ""))[:200]})
         if len(out) >= n:
             break
     return out
@@ -128,7 +133,8 @@ def query_ladder(query: str, fallbacks: tuple[str, ...] = ()) -> list[str]:
     return out[:6]
 
 
-def find_image(query: str, project_id: str | None = None, exclude: set[str] | None = None, fallbacks: tuple[str, ...] = ()) -> dict | None:
+def find_image(query: str, project_id: str | None = None, exclude: set[str] | None = None, fallbacks: tuple[str, ...] = (),
+               validate=None, rejected: list | None = None) -> dict | None:
     """Best usable image for a query (downloads it). None when nothing suitable/reachable is found.
     The row carries `matched_query` so reviews can see how far the search had to be simplified."""
     down: set[str] = set()
@@ -147,6 +153,12 @@ def find_image(query: str, project_id: str | None = None, exclude: set[str] | No
         for c in cands:
             if exclude and c["id"] in exclude:
                 continue
+            if validate is not None:  # context gate BEFORE download: a keyword match alone never qualifies an image
+                verdict = validate(c)
+                if not verdict["ok"]:
+                    if rejected is not None:
+                        rejected.append({"id": c["id"], "title": c.get("title"), "url": c.get("url"), "query": q, "findings": verdict["findings"]})
+                    continue
             row = acquire(c)
             if row and _usable_image(row["path"]):
                 if project_id:

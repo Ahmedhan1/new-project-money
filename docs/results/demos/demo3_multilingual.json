@@ -1,0 +1,155 @@
+{
+ "demo": 3,
+ "what": "Demo 1 master localised into 7 languages (+ English source) with the real MADLAD-400 3B model on CPU, subtitles burned, through the localize job",
+ "why_subtitles": "the speaker is a real person: replacing her voice with synthetic speech would misrepresent her; dubbing is used for narration (licence-gated)",
+ "languages": {
+  "de": {
+   "render": "renders/main_de.mp4",
+   "status": "NEEDS_FIXES",
+   "issues": [
+    "[minor] numbers preserved [de]: numbers missing/changed in lines [(4, ['2022', '2024'])] (may be spelled out - verify)",
+    "[major] no added/dropped content [de]: lines [4, 8, 12] are much longer/shorter than the source - possible invented or missing content",
+    "[minor] native-speaker review [de]: REQUIRED before publishing - machine translation can still miss nuance and tone",
+    "[minor] back-translation [de]: back-translation not run (ModuleNotFoundError: local LLM unavailable) - meaning was not cross-checked",
+    "[minor] subtitles reading_speed [de]: 6 cue(s) above 17 chars/s",
+    "[minor] subtitle reading speed: 3 cues above 25 chars/s"
+   ],
+   "sample": {
+    "source": "process, which is a long time?",
+    "target": "Prozess, das ist eine lange Zeit?"
+   },
+   "lines": 12,
+   "mode": "subtitles (original voice kept)",
+   "rerun_after_mt_fix": {
+    "job": "job_074b200fc8",
+    "status": "PASSED_AUTOMATED_CHECKS",
+    "remaining_minor": [
+     "native-speaker review required",
+     "back-translation not run (no local LLM)",
+     "5 cues above 17 chars/s"
+    ]
+   }
+  },
+  "fr": {
+   "render": "renders/main_fr.mp4",
+   "status": "PASSED_AUTOMATED_CHECKS",
+   "issues": [
+    "[minor] numbers preserved [fr]: numbers missing/changed in lines [(4, ['24'])] (may be spelled out - verify)",
+    "[minor] native-speaker review [fr]: REQUIRED before publishing - machine translation can still miss nuance and tone",
+    "[minor] back-translation [fr]: back-translation not run (ModuleNotFoundError: local LLM unavailable) - meaning was not cross-checked",
+    "[minor] subtitles reading_speed [fr]: 7 cue(s) above 17 chars/s",
+    "[minor] subtitle reading speed: 3 cues above 25 chars/s"
+   ],
+   "sample": {
+    "source": "process, which is a long time?",
+    "target": "Le processus, qui est un long moment ?"
+   },
+   "lines": 12,
+   "mode": "subtitles (original voice kept)"
+  },
+  "ar-EG": {
+   "render": "renders/main_ar-EG.mp4",
+   "status": "PASSED_AUTOMATED_CHECKS",
+   "issues": [
+    "[minor] native-speaker review [ar-EG]: REQUIRED before publishing - machine translation can still miss nuance and tone",
+    "[minor] back-translation [ar-EG]: back-translation not run (ModuleNotFoundError: local LLM unavailable) - meaning was not cross-checked",
+    "[minor] subtitles native_review [ar-EG]: Rule-based adaptation layer: MADLAD-400 output (arz, else MSA) followed by word/phrase substitutions for common function words and expressions. It produces recognisably Egyptian function words, not native-quality Egyptian writing: verb morphology, word order, idiom and register are mostly left as the MT produced them. A native Egyptian reviewer must approve every line before publishing.",
+    "[minor] subtitles voice_licence [ar-EG]: no voice with a verified commercial licence: subtitles only unless you supply a licensed voice"
+   ],
+   "sample": {
+    "source": "process, which is a long time?",
+    "target": "العملية دي، اللي هي عملية طويلة؟"
+   },
+   "lines": 12,
+   "mode": "subtitles (original voice kept)"
+  },
+  "ar-Gulf": {
+   "render": "renders/main_ar-Gulf.mp4",
+   "status": "NEEDS_FIXES",
+   "issues": [
+    "[major] no added/dropped content [ar-Gulf]: lines [8] are much longer/shorter than the source - possible invented or missing content",
+    "[major] Gulf Arabic dialect markers: 2% of words are typical Gulf Arabic forms - reads as MSA",
+    "[minor] native-speaker review [ar-Gulf]: REQUIRED before publishing - machine translation can still miss nuance and tone",
+    "[minor] back-translation [ar-Gulf]: back-translation not run (ModuleNotFoundError: local LLM unavailable) - meaning was not cross-checked",
+    "[minor] subtitles reading_speed [ar-Gulf]: 3 cue(s) above 17 chars/s",
+    "[minor] subtitles native_review [ar-Gulf]: Rule-based adaptation layer over MSA machine translation (no Gulf Arabic MT model exists in the stack). It swaps common function words and expressions for Gulf forms; grammar, verb morphology, idiom and register remain MSA-like, and Gulf varieties differ between countries. This is not native-quality Gulf writing. A native Gulf reviewer must approve every line before publishing.",
+    "[minor] subtitles voice_licence [ar-Gulf]: no voice with a verified commercial licence: subtitles only unless you supply a licensed voice",
+    "[minor] subtitle reading speed: 2 cues above 25 chars/s"
+   ],
+   "sample": {
+    "source": "process, which is a long time?",
+    "target": "هل تستغرق هذي العملية وقتاً طويلاً؟"
+   },
+   "lines": 12,
+   "mode": "subtitles (original voice kept)"
+  },
+  "zh": {
+   "render": "renders/main_zh.mp4",
+   "status": "NEEDS_FIXES",
+   "issues": [
+    "[major] no code-switching [zh]: wrong-script words after retries: {10: ['SpaceX']}",
+    "[minor] numbers preserved [zh]: numbers missing/changed in lines [(4, ['24'])] (may be spelled out - verify)",
+    "[major] no added/dropped content [zh]: lines [1, 2, 3, 4, 5, 6, 9, 10, 11, 12] are much longer/shorter than the source - possible invented or missing content",
+    "[minor] native-speaker review [zh]: REQUIRED before publishing - machine translation can still miss nuance and tone",
+    "[minor] back-translation [zh]: back-translation not run (ModuleNotFoundError: local LLM unavailable) - meaning was not cross-checked"
+   ],
+   "sample": {
+    "source": "process, which is a long time?",
+    "target": "过程，这是很长一段时间？"
+   },
+   "lines": 12,
+   "mode": "subtitles (original voice kept)"
+  },
+  "ru": {
+   "render": "renders/main_ru.mp4",
+   "status": "NEEDS_FIXES",
+   "issues": [
+    "[major] no code-switching [ru]: wrong-script words after retries: {10: ['SpaceX', 'Boeing']}",
+    "[minor] native-speaker review [ru]: REQUIRED before publishing - machine translation can still miss nuance and tone",
+    "[minor] back-translation [ru]: back-translation not run (ModuleNotFoundError: local LLM unavailable) - meaning was not cross-checked",
+    "[minor] subtitles reading_speed [ru]: 5 cue(s) above 17 chars/s"
+   ],
+   "sample": {
+    "source": "process, which is a long time?",
+    "target": "Процесс, который занимает много времени?"
+   },
+   "lines": 12,
+   "mode": "subtitles (original voice kept)"
+  },
+  "hi": {
+   "render": "renders/main_hi.mp4",
+   "status": "PASSED_AUTOMATED_CHECKS",
+   "issues": [
+    "[minor] native-speaker review [hi]: REQUIRED before publishing - machine translation can still miss nuance and tone",
+    "[minor] back-translation [hi]: back-translation not run (ModuleNotFoundError: local LLM unavailable) - meaning was not cross-checked",
+    "[minor] subtitles voice_licence [hi]: no voice with a verified commercial licence: subtitles only unless you supply a licensed voice"
+   ],
+   "sample": {
+    "source": "process, which is a long time?",
+    "target": "प्रक्रिया, जो एक लंबा समय है?"
+   },
+   "lines": 12,
+   "mode": "subtitles (original voice kept)"
+  }
+ },
+ "voice_licences": {
+  "cleared": [
+   "en",
+   "de",
+   "fr",
+   "zh",
+   "ru",
+   "es",
+   "pt"
+  ],
+  "not_cleared": {
+   "ar/ar-EG/ar-Gulf": "ar_JO-kareem unverified",
+   "hi": "unverified/no"
+  }
+ },
+ "fixed_after": "German QA found a truncation at '24.', a repetition loop and an added sentence; fixed in speech/mt.py (9911a8d); re-run passed automated checks",
+ "not_proven": [
+  "translation accuracy beyond automated checks (no native reviewers)",
+  "back-translation (no local LLM in this container)"
+ ]
+}

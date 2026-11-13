@@ -1,0 +1,89 @@
+{
+ "demo": "3 - advanced editing",
+ "project": "prj_e62faf28d8",
+ "output": "/tmp/a2-demo3b/projects/prj_e62faf28d8/renders/demo3_advanced.mp4",
+ "duration": 53.033,
+ "size_mb": 18.45,
+ "wall_seconds": 59.5,
+ "render": {
+  "segments": 9,
+  "segments_from_cache": 0,
+  "pieces": 15,
+  "pieces_from_cache": 0,
+  "pipeline": "pieces",
+  "elapsed": 45.77
+ },
+ "qa_status": "PASSED_AUTOMATED_CHECKS",
+ "known_issues": [],
+ "sections": [
+  {
+   "t": 3.72,
+   "capability": "letterbox 2.39 + teal/orange grade + animated title",
+   "frame": "_d3_0.png"
+  },
+  {
+   "t": 8.92,
+   "capability": "circle-open transition + keyframed push-in/pan",
+   "frame": "_d3_1.png"
+  },
+  {
+   "t": 15.66,
+   "capability": "0.5x slow motion + film grain",
+   "frame": "_d3_2.png"
+  },
+  {
+   "t": 22.44,
+   "capability": "opacity keyframes + moving (keyframed) blur mask + dialogue chain",
+   "frame": "_d3_3.png"
+  },
+  {
+   "t": 28.32,
+   "capability": "three-way split screen (thirds)",
+   "frame": "_d3_4.png"
+  },
+  {
+   "t": 32.7,
+   "capability": "freeze frame with flash",
+   "frame": "_d3_5.png"
+  },
+  {
+   "t": 40.82,
+   "capability": "rotation keyframes + perspective correction",
+   "frame": "_d3_6.png"
+  },
+  {
+   "t": 49.04,
+   "capability": "speed ramp + golden-hour look + rolling credits",
+   "frame": "_d3_7.png"
+  }
+ ],
+ "checks": [
+  "PASS 2-assets: provenance 02_source.mp4 - {'basis': 'public-domain', 'holder': 'NASA', 'evidence': 'https://images.nasa.gov/details/jsc2022m000172_Earth_in_4K_Expedition_65_Edition'} / user upload",
+  "PASS 2-assets: provenance 00_source.mp4 - {'basis': 'public-domain', 'holder': 'NASA', 'evidence': 'https://images.nasa.gov/details/iss061m2627771232_Live_Interviews_Jeanette_Epps_191004'} / user upload",
+  "PASS 2-assets: provenance 01_source.mp4 - {'basis': 'public-domain', 'holder': 'NASA', 'evidence': 'https://images.nasa.gov/details/KSC-20200508-MH-GEB03_0001-Booster_Processing_Walk_and_Talk-3248689'} / user upload",
+  "PASS 2-assets: provenance 03_source.mp4 - {'basis': 'public-domain', 'holder': 'NASA', 'evidence': 'https://images.nasa.gov/details/ARC-20140529-AAV3515-NASA-Explains-Cold-Zone-Above-Tropics'} / user upload",
+  "PASS 2-assets: provenance 04_source.mp4 - {'basis': 'public-domain', 'holder': 'NASA', 'evidence': 'https://images.nasa.gov/details/Mars%20-%20The%20Search%20Begins%20Documentary'} / user upload",
+  "PASS 2-assets: duplicate stills - none",
+  "PASS 4-editing: cut length - no flash cuts",
+  "PASS 4-editing: pacing - 8 shots, mean 6.6s, longest 10.5s",
+  "PASS 4-editing: subtitle sync - 2 cues inside programme",
+  "PASS 5-technical: file integrity (full decode) - decodes cleanly",
+  "PASS 5-technical: video track present - ok",
+  "PASS 5-technical: audio track present - ok",
+  "PASS 5-technical: codec - h264/yuv420p",
+  "PASS 5-technical: resolution - 1280x720 (expected 1280x720)",
+  "PASS 5-technical: aspect ratio - 1.778",
+  "PASS 5-technical: frame rate - 30.0 fps",
+  "PASS 5-technical: black frames - none beyond intentional fades",
+  "PASS 5-technical: frozen frames - none",
+  "PASS 5-technical: duration matches timeline - 53.03s vs timeline 53.04s",
+  "PASS 5-technical: A/V stream length - video 53.00s, audio 53.03s",
+  "PASS 5-technical: audio channels - 2 ch @ 48000 Hz",
+  "PASS 5-technical: loudness - -14.18 LUFS (target -14.0 +/-1.5)",
+  "PASS 5-technical: clipping / true peak - true peak -1.48 dBTP (limit -1.0)",
+  "PASS 5-technical: dead air - none",
+  "PASS 5-technical: subtitle timing - 2 cues, 0 out of range, 0 overlapping",
+  "PASS 5-technical: subtitle reading speed - 0 cues above 25 chars/s"
+ ],
+ "machine": "shared 4-vCPU container, no GPU (other agents running)"
+}

@@ -3,78 +3,80 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-12T05:34:11Z",
+ "updated": "2026-11-13T17:31:45Z",
  "git": {
-  "branch": "claude/intelligent-faraday-y28cx1",
-  "commit": "c39c8c9",
-  "subject": "Record Tests D and F passing, automatic backups, updated task registry and reports",
-  "dirty_files": 8,
-  "upstream": "origin/claude/intelligent-faraday-y28cx1",
-  "unpushed_commits": 0
+  "branch": "integration/final-release",
+  "commit": "87b9bd0",
+  "subject": "Final gate at b59050d recorded: 977 passed / 0 failed / 13 skipped, apply.sh x2 idempotent, break probe 35/35, fresh clone 18/18, production 12/12",
+  "dirty_files": 0,
+  "upstream": "origin/integration/final-release",
+  "unpushed_commits": 1
  },
  "current_task": {
-  "id": "QLT-1",
-  "title": "Creative quality pass: measured rubric + series writer on the script schema + research/visual relevance",
+  "id": "UX-1",
+  "title": "UI - storage/backup page, job stages + resume (done); onboarding, video preview player, friendlier errors (open)",
   "status": "in_progress",
-  "next": "1) Series visuals - derive the image query from the bible's location LOOK text (generic nouns), not its fictional name, and allow reuse of an image for a repeated location. 2) Repair off-bible locations instead of only reporting them. 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Scored rubric in the QA report."
+  "next": "Commit the Playwright smoke test; add an in-app video player on the project page; first-run checklist on the home page."
  },
  "next_tasks": [
   {
-   "id": "QLT-1",
+   "id": "A2-0",
    "priority": 1,
-   "title": "Creative quality pass: measured rubric + series writer on the script schema + research/visual relevance",
-   "status": "in_progress",
-   "next": "1) Series visuals - derive the image query from the bible's location LOOK text (generic nouns), not its fictional name, and allow reuse of an image for a repeated location. 2) Repair off-bible locations instead of only reporting them. 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Scored rubric in the QA report."
-  },
-  {
-   "id": "WIN-1",
-   "priority": 1,
-   "title": "One-click Windows launchers (SETUP/START/STOP/STATUS/DOCTOR/BACKUP/RESTORE/CHECKPOINT/RESUME/UPDATE)",
-   "status": "implemented",
-   "next": "Run NEXUS_SETUP.bat and NEXUS_START.bat on the user's Windows machine; fix whatever fails (likely llama-cpp-python wheel, espeak-ng, Blender path)."
-  },
-  {
-   "id": "STO-1",
-   "priority": 1,
-   "title": "Federated storage adapter (local + rclone backends) with zero-spend eligibility and free-allowance caps",
+   "title": "Account 2 integration contract (schemas + validator) and licensed benchmark media set",
    "status": "tested",
-   "next": "Verify against one real remote (Backblaze B2 or Google Drive) once the user authorises an account - see STO-3."
+   "next": "Account 1 to confirm RenderExecutionRequest/Result against its worker interface."
   },
   {
-   "id": "UX-1",
-   "priority": 2,
-   "title": "UI - storage/backup page, job stages + resume (done); onboarding, video preview player, friendlier errors (open)",
-   "status": "in_progress",
-   "next": "Commit the Playwright smoke test; add an in-app video player on the project page; first-run checklist on the home page."
-  },
-  {
-   "id": "JOB-2",
-   "priority": 2,
-   "title": "Move remaining in-process API jobs onto the durable ledger (analyze, remix, series, film, animate, package)",
+   "id": "A2-A",
+   "priority": 1,
+   "title": "Agent A: multi-track timeline, opacity keyframes, tracked masks, resumable render, EDL/OTIO, renderer benchmark + perf port",
    "status": "tested",
-   "next": "Verify analyze, remix and package handlers with real models (they are covered by heavy tests A, B, G only through the library, not through the job handlers)."
+   "next": "Owner review of Demo 3; renderer on the owner's Windows PC."
+  },
+  {
+   "id": "A2-ASSETS",
+   "priority": 1,
+   "title": "Professional asset library: catalog, lazy licence-checked install, previews, apply to clip/timeline, new effects/transitions/LUTs/overlays/sounds/fonts",
+   "status": "tested",
+   "next": "Owner: listen to the generated sounds/beds; pick favourites."
+  },
+  {
+   "id": "A2-B",
+   "priority": 1,
+   "title": "Agent B: visual embeddings, semantic B-roll, 14 creative profiles, reference-style profiles, director coherence, shorts titles",
+   "status": "tested",
+   "next": "Better titles (K-23); OCR-class text detection (K-25)."
+  },
+  {
+   "id": "A2-C",
+   "priority": 1,
+   "title": "Agent C: audio benchmark, noise-reduction comparison, dialogue chain v2, sound-design engine, audio QA (sync)",
+   "status": "tested",
+   "next": "A2-AUDIO-REVIEW (owner listening)."
   }
  ],
  "tasks": {
-  "total": 28,
+  "total": 94,
   "by_status": {
-   "verified": 6,
-   "tested": 3,
-   "blocked": 4,
-   "implemented": 1,
-   "deferred": 1,
-   "planned": 11,
-   "in_progress": 2
+   "verified": 26,
+   "tested": 42,
+   "blocked": 9,
+   "planned": 14,
+   "implemented": 2,
+   "in_progress": 1
   },
   "registry": "nexus/registry/tasks.yaml"
  },
  "tests": {
   "fast": {
-   "summary": "32 passed, 0 failed, 0 skipped",
+   "summary": "977 passed, 0 failed, 13 skipped",
    "ok": true,
-   "date": "2026-11-12",
+   "date": "2026-11-13",
    "platform": "Linux",
    "python": "3.13.18"
+  },
+  "integration": {
+   "summary": "977 passed, 0 failed, 13 skipped at A1 813967e / A2 387b9da / A3 d0d37a9 (local Linux (cloud container); not run: GitHub-hosted CI (Linux, Windows), windows-e2e on a clean Windows VM, windows-installer.yml (installer build, silent install, uninstall)) - docs/results/integration/final-b59050d.json"
   }
  },
  "jobs": {
@@ -88,19 +90,44 @@
    "why": "Needs the user to create/authorise a free account (Backblaze B2 without a card, or Google Drive) and run `rclone config`. Never done by an agent."
   },
   {
-   "id": "GEN-2",
-   "title": "AI video generation (text/image-to-video clips)",
-   "why": "No GPU on the build machine and no authorised free GPU account. compute.SimulatedRemoteGPU is a simulation, not a provider."
+   "id": "WIN-2",
+   "title": "Single Windows installer NEXUS_VIDEO_AI_Setup.exe (embedded Python + FFmpeg, per-user, System page start/stop/restart/update/backup)",
+   "why": "Owner: GitHub Actions does not start any job (account-level billing/spending block, 0 billable ms) and no Windows build machine is available to agents. Not built, not installed, not verified."
   },
   {
    "id": "PUB-1",
    "title": "Platform upload via official APIs (YouTube first)",
-   "why": "Needs the user's own OAuth client + explicit authorisation for each platform. Today NEXUS produces upload packages only."
+   "why": "Owner's Google OAuth client + one private upload (docs/ACCOUNT3_YOUTUBE_OWNER_VALIDATION.md)."
   },
   {
    "id": "ANA-1",
    "title": "Analytics + monetisation intelligence from real platform data",
-   "why": "Same OAuth authorisation as PUB-1. The revenue ledger exists but holds only manual entries."
+   "why": "No owner analytics data yet (OAuth or one owner export)."
+  },
+  {
+   "id": "A3-INT",
+   "title": "Three-account integration (A1 -> A2 -> A3, then integration/contracts_v1/apply.sh)",
+   "why": "Owner merge approval (agents never merge)."
+  },
+  {
+   "id": "A3-NATIVE",
+   "title": "Native-language review of ar-EG, ar-Gulf, hi and zh lines",
+   "why": "Owner supplies native reviewers; agents never mark output reviewed."
+  },
+  {
+   "id": "A3-COMPETITION",
+   "title": "Competition and saturation signals in market research (YouTube supply)",
+   "why": "Owner's YouTube Data API key."
+  },
+  {
+   "id": "ACC1-HOSTING",
+   "title": "Deploy the control plane on an owner-approved zero-cost host",
+   "why": "Owner decision (host and exposure need explicit approval; no public deployment without it)."
+  },
+  {
+   "id": "A2-AUDIO-REVIEW",
+   "title": "Owner listens to the audio reviewer package and records a verdict per item",
+   "why": "Blocked by owner (a person must listen)."
   }
  ],
  "backup": {
@@ -115,6 +142,10 @@
    "voice:de_DE-thorsten-medium",
    "voice:en_US-joe-medium",
    "voice:en_US-ljspeech-medium",
+   "voice:es_ES-davefx-medium",
+   "voice:fr_FR-siwis-medium",
+   "voice:ru_RU-denis-medium",
+   "voice:zh_CN-chaowen-medium",
    "whisper-small"
   ],
   "data_home": "NEXUS_HOME (default: ./.nexus, never committed)"

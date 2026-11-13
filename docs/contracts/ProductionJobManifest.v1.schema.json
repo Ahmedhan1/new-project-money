@@ -1,0 +1,125 @@
+{
+ "additionalProperties": false,
+ "description": "A unit of remote work. Account 2/3 modules set `task` to their own registered task name.",
+ "properties": {
+  "contract": {
+   "const": "ProductionJobManifest/v1",
+   "default": "ProductionJobManifest/v1",
+   "title": "Contract",
+   "type": "string"
+  },
+  "job_id": {
+   "title": "Job Id",
+   "type": "string"
+  },
+  "task": {
+   "description": "registered task name, e.g. 'probe', 'ffmpeg_transcode', 'render_timeline', 'translate'",
+   "title": "Task",
+   "type": "string"
+  },
+  "owner_account": {
+   "default": "account1",
+   "enum": [
+    "account1",
+    "account2",
+    "account3"
+   ],
+   "title": "Owner Account",
+   "type": "string"
+  },
+  "project_id": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Project Id"
+  },
+  "params": {
+   "additionalProperties": true,
+   "title": "Params",
+   "type": "object"
+  },
+  "inputs": {
+   "description": "artifact ids the worker needs",
+   "items": {
+    "type": "string"
+   },
+   "title": "Inputs",
+   "type": "array"
+  },
+  "output_destination": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "description": "storage connection_id for results",
+   "title": "Output Destination"
+  },
+  "requires": {
+   "additionalProperties": true,
+   "description": "e.g. {'gpu': true, 'vram_gb': 12}",
+   "title": "Requires",
+   "type": "object"
+  },
+  "priority": {
+   "default": 5,
+   "description": "0 = most urgent",
+   "maximum": 9,
+   "minimum": 0,
+   "title": "Priority",
+   "type": "integer"
+  },
+  "max_runtime_s": {
+   "default": 3600,
+   "exclusiveMinimum": 0,
+   "title": "Max Runtime S",
+   "type": "number"
+  },
+  "max_retries": {
+   "default": 2,
+   "maximum": 10,
+   "minimum": 0,
+   "title": "Max Retries",
+   "type": "integer"
+  },
+  "preferred_providers": {
+   "items": {
+    "type": "string"
+   },
+   "title": "Preferred Providers",
+   "type": "array"
+  },
+  "idempotency_key": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "description": "same key = same job; resubmission returns the existing one",
+   "title": "Idempotency Key"
+  },
+  "created_at": {
+   "title": "Created At",
+   "type": "number"
+  }
+ },
+ "required": [
+  "task"
+ ],
+ "title": "ProductionJobManifest",
+ "type": "object"
+}

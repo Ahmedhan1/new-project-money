@@ -11,9 +11,35 @@ def _ts(t: float, sep: str = ",") -> str:
     return f"{h:02d}:{m:02d}:{s:02d}{sep}{int(round((t - int(t)) * 1000)) % 1000:03d}"
 
 
-def cues_from_transcript(segments: list[dict], max_chars: int = 42, max_dur: float = 5.0) -> list[dict]:
-    """Split whisper segments into readable cues using word timestamps."""
+def join_words(words) -> str:
+    """Join word tokens; Whisper's split tokens such as "160 -meter" are glued back ("160-meter")."""
+    out = ""
+    for w in words:
+        t = str(w["word"] if isinstance(w, dict) else w).strip()
+        if not t:
+            continue
+        if out and (t.startswith("-") and out[-1].isalnum() or t in (",", ".", "?", "!", ";", ":")):
+            out += t
+        else:
+            out = f"{out} {t}" if out else t
+    return out
+
+
+SENT_END = ".!?\u061f\u06d4\u2026\u3002\uff01\uff1f"
+
+
+def cues_from_transcript(segments: list[dict], max_chars: int = 42, max_dur: float = 5.0,
+                         breaks: list[float] | None = None, pause: float = 0.6) -> list[dict]:
+    """Split whisper segments into readable cues using word timestamps.
+
+    A cue also ends at a pause (> `pause` s), at a programme cut in `breaks` (a caption never spans a shot change or a
+    title card), and after a sentence end once it holds a few words (a sentence never shares a cue with the next one)."""
     cues: list[dict] = []
+    bk = sorted(breaks or [])
+
+    def crosses(a: float, b: float) -> bool:
+        return any(a < t <= b for t in bk)
+
     for seg in segments:
         words = seg.get("words") or []
         if not words:
@@ -21,14 +47,20 @@ def cues_from_transcript(segments: list[dict], max_chars: int = 42, max_dur: flo
             continue
         cur: list[dict] = []
         for w in words:
-            trial = " ".join(x["word"] for x in cur + [w])
-            if cur and (len(trial) > max_chars or w["end"] - cur[0]["start"] > max_dur):
-                cues.append({"start": cur[0]["start"], "end": cur[-1]["end"], "text": " ".join(x["word"] for x in cur)})
-                cur = []
+            if cur:
+                trial = join_words(cur + [w])
+                prev = cur[-1]
+                text = join_words(cur)
+                end_sent = text[-1:] in SENT_END and len(text) >= max_chars * 0.35
+                clause = text[-1:] in ",;:\u060c" and len(text) >= max_chars * 0.7
+                if (len(trial) > max_chars or w["end"] - cur[0]["start"] > max_dur or w["start"] - prev["end"] > pause
+                        or crosses(prev["end"], w["start"] + 1e-3) or end_sent or clause):
+                    cues.append({"start": cur[0]["start"], "end": cur[-1]["end"], "text": text})
+                    cur = []
             cur.append(w)
         if cur:
-            cues.append({"start": cur[0]["start"], "end": cur[-1]["end"], "text": " ".join(x["word"] for x in cur)})
-    return fix_timing(cues)
+            cues.append({"start": cur[0]["start"], "end": cur[-1]["end"], "text": join_words(cur)})
+    return fix_timing(cues, breaks=bk)
 
 
 def cues_from_text(text: str, start: float, end: float, max_chars: int = 42) -> list[dict]:
@@ -56,10 +88,19 @@ def cues_from_text(text: str, start: float, end: float, max_chars: int = 42) -> 
     return cues
 
 
-def fix_timing(cues: list[dict], min_dur: float = 0.7, gap: float = 0.04) -> list[dict]:
+def fix_timing(cues: list[dict], min_dur: float = 0.7, gap: float = 0.04, linger: float = 0.5, target_cps: float = 17.0,
+               breaks: list[float] | None = None) -> list[dict]:
+    """Minimum duration, no overlaps, and reading time: a cue faster than `target_cps` may stay up to `linger` s into
+    the following silence (never past the next cue or a cut in `breaks`)."""
     cues = sorted((dict(c) for c in cues if c["text"].strip()), key=lambda c: c["start"])
+    bk = sorted(breaks or [])
     for i, c in enumerate(cues):
         nxt = cues[i + 1]["start"] if i + 1 < len(cues) else None
+        d = c["end"] - c["start"]
+        if d > 0 and len(c["text"]) / d > target_cps:
+            want = c["start"] + len(c["text"]) / target_cps
+            limit = min([t for t in bk if t > c["end"] + 1e-3] or [c["end"] + linger])
+            c["end"] = max(c["end"], min(want, c["end"] + linger, limit))
         if c["end"] - c["start"] < min_dur:
             c["end"] = c["start"] + min_dur
         if nxt is not None and c["end"] > nxt - gap:

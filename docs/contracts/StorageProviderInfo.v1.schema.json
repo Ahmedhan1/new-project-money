@@ -1,0 +1,61 @@
+{
+ "additionalProperties": false,
+ "description": "Static description of a StorageProvider implementation (the behaviour contract is nexus.cloud.storage.StorageProvider).",
+ "properties": {
+  "contract": {
+   "const": "StorageProvider/v1",
+   "default": "StorageProvider/v1",
+   "title": "Contract",
+   "type": "string"
+  },
+  "provider": {
+   "title": "Provider",
+   "type": "string"
+  },
+  "display": {
+   "title": "Display",
+   "type": "string"
+  },
+  "capabilities": {
+   "items": {
+    "enum": [
+     "upload",
+     "resumable_upload",
+     "download",
+     "list",
+     "delete",
+     "move",
+     "checksum",
+     "versions",
+     "quota",
+     "folders"
+    ],
+    "type": "string"
+   },
+   "title": "Capabilities",
+   "type": "array"
+  },
+  "max_connections": {
+   "default": 1,
+   "title": "Max Connections",
+   "type": "integer"
+  },
+  "billing_required": {
+   "default": false,
+   "title": "Billing Required",
+   "type": "boolean"
+  },
+  "notes": {
+   "default": "",
+   "title": "Notes",
+   "type": "string"
+  }
+ },
+ "required": [
+  "provider",
+  "display",
+  "capabilities"
+ ],
+ "title": "StorageProviderInfo",
+ "type": "object"
+}

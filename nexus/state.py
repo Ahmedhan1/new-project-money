@@ -149,6 +149,16 @@ def build_state(phase: str | None = None) -> dict:
     fast = _read_json(ROOT / "docs" / "results" / "fast_tests.json")
     if fast:
         tests = {**tests, "fast": fast}
+    # The latest pinned three-account integration result (docs/results/integration/*.json) is a different tree from
+    # this branch, so it is reported beside the branch's own suite, with its exact input SHAs.
+    integ = sorted((ROOT / "docs" / "results" / "integration").glob("*.json"), key=lambda p: p.stat().st_mtime)
+    ir = _read_json(integ[-1]) if integ else None
+    if ir and isinstance(ir.get("results", {}).get("fast_suite"), dict):
+        fs, ins = ir["results"]["fast_suite"], ir.get("inputs", {})
+        shas = " / ".join(f"A{k[-1]} {v.get('sha', '')[:7]}" for k, v in ins.items())
+        tests = {**tests, "integration": {"summary": f"{fs['passed']} passed, {fs['failed']} failed, {fs['skipped']} skipped "
+                                          f"at {shas} (local {ir.get('environment', {}).get('os', '')}; "
+                                          f"not run: {', '.join(ir.get('not_run', [])) or 'nothing'}) - {integ[-1].relative_to(ROOT).as_posix()}"}}
     cur = next((t for t in tasks if t["status"] == "in_progress"), nxt[0] if nxt else None)
     return {
         "schema_version": SCHEMA_VERSION,

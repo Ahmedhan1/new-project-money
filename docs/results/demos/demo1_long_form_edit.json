@@ -1,0 +1,199 @@
+{
+ "demo": 1,
+ "what": "Long-form interview -> directed edit (interview_natural, 90 s target) through API + durable jobs + UI",
+ "source": {
+  "title": "Artemis Interviews with NASA Astronaut Jeanette Epps - October 4, 2019",
+  "nasa_id": "iss061m2627771232_Live_Interviews_Jeanette_Epps_191004",
+  "url": "https://images.nasa.gov/details/iss061m2627771232_Live_Interviews_Jeanette_Epps_191004",
+  "duration_s": 1165.6,
+  "resolution": "1280x720",
+  "rights": "NASA-produced media, generally not subject to US copyright; used under NASA media usage guidelines (no endorsement implied)"
+ },
+ "plan_summary": {
+  "sources": 1,
+  "source_seconds": 1165.6,
+  "programme_seconds": 87.167,
+  "clips": 18,
+  "sentences_kept": 10,
+  "spans_dropped": 430,
+  "hook": "We had each person had tents and in our little camp the temperature was always about six degrees um sea so it's pretty cold um there's alway",
+  "cold_open": true
+ },
+ "notes": [
+  "speaker turns unknown (no diarisation labels in the analysis): J-cuts on speaker change were not used and lower thirds carry no names"
+ ],
+ "decisions": {
+  "total": 460,
+  "by_kind": {
+   "clip": 18,
+   "compression": 96,
+   "dead_air": 181,
+   "filler": 9,
+   "filler_gap": 8,
+   "opening": 1,
+   "pause": 68,
+   "pleasantry": 69,
+   "sentence": 10
+  }
+ },
+ "renders": {
+  "v1": {
+   "file": "renders/demo1_interview_natural_90s.mp4",
+   "quality": {
+    "score": 87.5,
+    "grade": "B",
+    "verdict": "needs_work",
+    "verdict_reasons": [
+     "major check failed: localization.coverage"
+    ],
+    "categories": {
+     "visual": 88.9,
+     "editing": 91.1,
+     "audio": 89.3,
+     "localization": 75.0
+    },
+    "failed": [
+     {
+      "id": "visual.sharpness",
+      "level": "warn",
+      "detail": "median blur 0.50 over 16 detailed frames"
+     },
+     {
+      "id": "visual.banding",
+      "level": "warn",
+      "detail": "17% of flat tile pairs show a small step"
+     },
+     {
+      "id": "visual.continuity",
+      "level": "warn",
+      "detail": "audio level jump at 43.03s: -20.3 dB -> -13.6 dB (+6.7 dB) across a hard cut"
+     },
+     {
+      "id": "visual.repeated_imagery",
+      "level": "fail",
+      "detail": "11 of 13 shots repeat earlier imagery"
+     },
+     {
+      "id": "audio.level_jumps",
+      "level": "fail",
+      "detail": "10 unexplained >10 dB jump(s) at [1.6, 2.0, 19.2, 25.6]s"
+     },
+     {
+      "id": "audio.noise_floor",
+      "level": "fail",
+      "detail": "median -45.1 dBFS over 15.9s of pauses"
+     },
+     {
+      "id": "editing.ending",
+      "level": "fail",
+      "detail": "last 0.25 s at -32.2 dBFS vs programme -12.9 dBFS; last word ends at the cut"
+     },
+     {
+      "id": "editing.caption_speed",
+      "level": "warn",
+      "detail": "90th percentile 21.5 chars/s over 35 cues (max 31.0)"
+     },
+     {
+      "id": "editing.caption_line_length",
+      "level": "warn",
+      "detail": "longest line ~42 chars"
+     },
+     {
+      "id": "localization.coverage",
+      "level": "fail",
+      "detail": "7% of 1077.5s source speech has a target cue"
+     }
+    ],
+    "not_measured": [
+     "localization.ext",
+     "visual.subject_consistency",
+     "visual.generative_artifacts",
+     "visual.content_relevance",
+     "localization.translation_accuracy",
+     "audio.voice_naturalness",
+     "editing.storytelling"
+    ]
+   }
+  },
+  "v2_after_fixes": {
+   "file": "renders/demo1_interview_natural_90s_v2.mp4",
+   "quality": {
+    "score": 92.0,
+    "grade": "A",
+    "verdict": "pass",
+    "verdict_reasons": [
+     "major check below its bar: visual.sharpness, visual.continuity, editing.caption_speed"
+    ],
+    "categories": {
+     "visual": 88.9,
+     "editing": 94.2,
+     "audio": 89.3,
+     "localization": 100.0
+    },
+    "failed": [
+     {
+      "id": "visual.sharpness",
+      "level": "warn",
+      "detail": "median blur 0.50 over 16 detailed frames"
+     },
+     {
+      "id": "visual.banding",
+      "level": "warn",
+      "detail": "17% of flat tile pairs show a small step"
+     },
+     {
+      "id": "visual.continuity",
+      "level": "warn",
+      "detail": "audio level jump at 81.23s: -12.9 dB -> -18.9 dB (-6.0 dB) across a hard cut"
+     },
+     {
+      "id": "visual.repeated_imagery",
+      "level": "fail",
+      "detail": "11 of 13 shots repeat earlier imagery"
+     },
+     {
+      "id": "audio.level_jumps",
+      "level": "fail",
+      "detail": "10 unexplained >10 dB jump(s) at [0.4, 1.6, 2.0, 19.2]s"
+     },
+     {
+      "id": "audio.noise_floor",
+      "level": "fail",
+      "detail": "median -43.7 dBFS over 13.7s of pauses"
+     },
+     {
+      "id": "editing.caption_speed",
+      "level": "warn",
+      "detail": "90th percentile 21.5 chars/s over 35 cues (max 31.0)"
+     },
+     {
+      "id": "editing.caption_line_length",
+      "level": "warn",
+      "detail": "longest line ~42 chars"
+     }
+    ],
+    "not_measured": [
+     "editing.subtitle_sync",
+     "localization.coverage",
+     "localization.ext",
+     "visual.subject_consistency",
+     "visual.generative_artifacts",
+     "visual.content_relevance",
+     "localization.translation_accuracy",
+     "audio.voice_naturalness",
+     "editing.storytelling"
+    ]
+   }
+  }
+ },
+ "fixes_between": [
+  "voice_level chain: level-matched passages at cuts",
+  "quality stage no longer compares an edit with the whole source transcript"
+ ],
+ "duration_s": 87.17,
+ "not_proven": [
+  "music/sound design beyond a procedural bed",
+  "B-roll: the source is a single locked-off camera",
+  "speaker labels (no diarisation model)"
+ ]
+}

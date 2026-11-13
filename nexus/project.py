@@ -4,6 +4,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import os
 import shutil
 import time
 from pathlib import Path
@@ -48,14 +49,37 @@ class Project:
         db.execute("UPDATE projects SET data=?, name=? WHERE id=?", (json.dumps(self.data, ensure_ascii=False), self.name, self.id))
 
     # ---- media (originals preserved, read-only)
-    def import_media(self, src: str | Path) -> dict:
+    def discard(self) -> None:
+        """Remove a project that never became usable (a failed first upload): its row and its folder."""
+        db.execute("DELETE FROM projects WHERE id=?", (self.id,))
+        shutil.rmtree(self.dir, ignore_errors=True)
+
+    def import_media(self, src: str | Path, move: bool = False) -> dict:
+        """Copy (or, with move=True, move) a source file into the project, atomically: it is written under a temporary
+        name and renamed into place, so a crash or a full disk never leaves a truncated original (QA-D4)."""
         src = Path(src)
-        sha = hashlib.sha256(src.read_bytes()).hexdigest()
+        h = hashlib.sha256()  # streamed: sources can be many GB
+        with src.open("rb") as f:
+            for block in iter(lambda: f.read(1 << 20), b""):
+                h.update(block)
+        sha = h.hexdigest()
         for m in self.data["media"]:
             if m["sha256"] == sha:
                 return m
         dest = self.dir / "media" / f"{len(self.data['media']):02d}_{src.name}"
-        shutil.copy2(src, dest)
+        part = dest.with_name(dest.name + ".part")
+        try:
+            if move:
+                try:
+                    os.replace(src, part)          # same filesystem: no second copy, no extra space
+                except OSError:
+                    shutil.copy2(src, part)
+            else:
+                shutil.copy2(src, part)
+            os.replace(part, dest)
+        except BaseException:
+            part.unlink(missing_ok=True)
+            raise
         dest.chmod(0o444)
         m = {"id": f"m{len(self.data['media'])}", "name": src.name, "path": str(dest), "sha256": sha, "rights": "user-supplied"}
         self.data["media"].append(m)
@@ -70,7 +94,7 @@ class Project:
         b = self._branch(branch)
         b["versions"] = b["versions"][: b["head"] + 1]  # a new edit discards the redo tail
         vid = f"{branch}-{len(b['versions']):03d}-{int(time.time() * 1000) % 100000}"
-        (self.dir / "timelines" / f"{vid}.json").write_text(json.dumps(tl, indent=1, ensure_ascii=False))
+        (self.dir / "timelines" / f"{vid}.json").write_text(json.dumps(tl, indent=1, ensure_ascii=False), encoding="utf-8")
         b["versions"].append({"id": vid, "note": note, "ts": time.time()})
         b["head"] = len(b["versions"]) - 1
         self.save()
@@ -82,7 +106,7 @@ class Project:
             if b["head"] < 0:
                 raise KeyError(f"no timeline on branch {branch}")
             vid = b["versions"][b["head"]]["id"]
-        return json.loads((self.dir / "timelines" / f"{vid}.json").read_text())
+        return json.loads((self.dir / "timelines" / f"{vid}.json").read_text(encoding="utf-8"))
 
     def undo(self, branch: str = "main") -> dict:
         b = self._branch(branch)

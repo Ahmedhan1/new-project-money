@@ -1,0 +1,153 @@
+{
+ "date": "2026-11-13",
+ "destination": "Account 1 GoogleDriveProvider -> Account 1 FakeGoogle (local HTTP)",
+ "steps": [
+  {
+   "step": "owner-authorised destination (drive_a) configured",
+   "ok": true
+  },
+  {
+   "step": "timeline built from library assets",
+   "ok": true,
+   "assets": [
+    "lut.cinematic",
+    "effect.light_leak",
+    "transition.film_burn",
+    "frame.cinematic_239",
+    "sfx.whoosh",
+    "music.documentary_bed",
+    "template.end_card"
+   ],
+   "versions": 8
+  },
+  {
+   "step": "render job (disk preflight + QA + quality)",
+   "ok": true,
+   "status": "done",
+   "output": "renders/daily_2026_11_13.mp4",
+   "qa": "PASSED_AUTOMATED_CHECKS",
+   "preflight": {
+    "duration_s": 18.0,
+    "final_bytes": 5150000,
+    "intermediate_bytes": 19330000,
+    "required_bytes": 94600000,
+    "draft": false
+   },
+   "error": ""
+  },
+  {
+   "step": "render job started the archive job (auto_archive with a configured destination)",
+   "ok": true,
+   "archive_job": "job_fa7d9fdafe"
+  },
+  {
+   "step": "archive job: every file uploaded and verified",
+   "ok": true,
+   "records": [
+    {
+     "id": "arc_j_8222f70c53_master_b1be6b5ef3c08e93",
+     "kind": "master",
+     "name": "daily_2026_11_13.mp4",
+     "size": 5375081,
+     "state": "verified",
+     "error": null
+    },
+    {
+     "id": "arc_j_8222f70c53_thumbnail_1daa2472d1530d27",
+     "kind": "thumbnail",
+     "name": "daily_2026_11_13.thumb.jpg",
+     "size": 14190,
+     "state": "verified",
+     "error": null
+    },
+    {
+     "id": "arc_j_8222f70c53_project_file_0ed1368820f68aee",
+     "kind": "project_file",
+     "name": "daily_2026_11_13.qa.json",
+     "size": 4674,
+     "state": "verified",
+     "error": null
+    },
+    {
+     "id": "arc_j_8222f70c53_project_file_9305fabe7c26faea",
+     "kind": "project_file",
+     "name": "daily_2026_11_13.quality.json",
+     "size": 12933,
+     "state": "verified",
+     "error": null
+    },
+    {
+     "id": "arc_j_8222f70c53_project_file_a6d9ceb84c85c636",
+     "kind": "project_file",
+     "name": "daily_2026_11_13.archive.json",
+     "size": 4684,
+     "state": "verified",
+     "error": null
+    }
+   ],
+   "error": ""
+  },
+  {
+   "step": "archived bytes are the rendered output (SHA-256 recorded before upload)",
+   "ok": true,
+   "sha256": "b1be6b5ef3c08e9306b8401a3faf445127b413fba0018f177d3d5bec86b9bbb0"
+  },
+  {
+   "step": "Drive holds exactly one copy with the same SHA-256",
+   "ok": true,
+   "drive_path": "NEXUS/Masters/prj_8222f70c53/daily_2026_11_13.mp4",
+   "verification": "provider_sha256"
+  },
+  {
+   "step": "local final deleted only after verification (state released)",
+   "ok": true,
+   "events": [
+    "queued",
+    "uploading (attempt 1, transfer a2arc_b1be6b5ef3c08e9306b8401a)",
+    "uploaded to drive_a NEXUS/Masters/prj_8222f70c53/daily_2026_11_13.mp4",
+    "verified by provider_sha256",
+    "local copy deleted after re-verification (provider_sha256); the archive copy is the permanent one"
+   ]
+  },
+  {
+   "step": "Account 1 artifact registry: kind master, retention archive (never cleaned automatically)",
+   "ok": true
+  },
+  {
+   "step": "project record carries the archive reference",
+   "ok": true,
+   "manifest_record": "arc_j_8222f70c53_project_file_a6d9ceb84c85c636"
+  },
+  {
+   "step": "small local metadata kept (thumbnail, manifest)",
+   "ok": true,
+   "kept": [
+    "daily_2026_11_13.archive.json",
+    "daily_2026_11_13.thumb.jpg"
+   ]
+  },
+  {
+   "step": "browse shows the archived video",
+   "ok": true
+  },
+  {
+   "step": "retrieve: downloaded back, SHA-256 identical",
+   "ok": true,
+   "path": "/tmp/nexus-daily-y0paglj8/projects/prj_8222f70c53/renders/daily_2026_11_13.mp4"
+  }
+ ],
+ "source": "lavfi test pattern",
+ "final": {
+  "name": "daily_2026_11_13.mp4",
+  "bytes": 5375081,
+  "sha256": "b1be6b5ef3c08e9306b8401a3faf445127b413fba0018f177d3d5bec86b9bbb0"
+ },
+ "disk": {
+  "renders_bytes_after_render_before_release": null,
+  "renders_bytes_before": 0,
+  "renders_bytes_after_release": 0,
+  "render_cache_bytes_after_release": 451508
+ },
+ "seconds": 130.2,
+ "ok": true
+}

@@ -123,14 +123,17 @@ def editing_review(tl: dict) -> dict:
     checks.append(_c("cut length", not short, "no flash cuts" if not short else f"clips under 0.5s: {short}", "major"))
     longest = max(durs) if durs else 0
     checks.append(_c("pacing", longest <= 45 or len(durs) == 1, f"{len(durs)} shots, mean {total / max(len(durs), 1):.1f}s, longest {longest:.1f}s", "minor"))
+    narration = [a for a in tl.get("audio", []) if a.get("role", "narration") == "narration"]  # sfx/ambience may overlap freely
     for a in tl.get("audio", []):
         if not Path(a["src"]).exists():
-            checks.append(_c("narration media", False, f"missing {a['src']}"))
+            checks.append(_c("audio media", False, f"missing {a['src']}"))
+    for a in narration:
+        if not Path(a["src"]).exists():
             continue
         end = a.get("start", 0) + ff.duration(a["src"])
         checks.append(_c(f"narration fits ({Path(a['src']).name})", end <= total + 0.3, f"ends {end:.2f}s / programme {total:.2f}s", fix="extend-scene"))
-    if tl.get("audio"):
-        spans = sorted((a.get("start", 0), a.get("start", 0) + ff.duration(a["src"])) for a in tl["audio"] if Path(a["src"]).exists())
+    if narration:
+        spans = sorted((a.get("start", 0), a.get("start", 0) + ff.duration(a["src"])) for a in narration if Path(a["src"]).exists())
         clash = [1 for x, y in zip(spans, spans[1:]) if y[0] < x[1] - 0.05]
         checks.append(_c("narration overlap", not clash, "no overlapping narration" if not clash else f"{len(clash)} overlaps"))
     cues = tl.get("subtitles", [])
@@ -157,8 +160,11 @@ def dub_review(audio_path: str | Path, intended_text: str, lang: str, threshold:
     from .speech import asr
     t = asr.transcribe(audio_path, language=lang.split("-")[0], words=False)
     sim = text_similarity(intended_text, t["text"])
+    # On a line of a few words one misheard name decides the ratio ("Für Boeing" heard as "Für Boehling" = 50%):
+    # short lines are reported as minor so a listener checks them, not counted as a failed dub.
+    sev = "major" if len(intended_text.split()) >= 4 else "minor"
     return _c(f"dub intelligibility [{lang}]", sim >= threshold,
-              f"Whisper heard {sim:.0%} of the script words back" + ("" if sim >= threshold else f": \"{t['text'][:90]}\""), "major",
+              f"Whisper heard {sim:.0%} of the script words back" + ("" if sim >= threshold else f": \"{t['text'][:90]}\""), sev,
               fix="resynthesize") | {"similarity": sim, "heard": t["text"]}
 
 
@@ -188,18 +194,24 @@ def approve(project_dir: Path, name: str, stages: list[dict], extra: dict | None
               "known_issues": [f"[{c['severity']}] {c['check']}: {c['detail']}" for c in critical + major + minor],
               "stages": stages, **(extra or {})}
     (project_dir / "reports").mkdir(parents=True, exist_ok=True)
-    (project_dir / "reports" / f"{name}.qa.json").write_text(json.dumps(report, indent=1, ensure_ascii=False))
+    (project_dir / "reports" / f"{name}.qa.json").write_text(json.dumps(report, indent=1, ensure_ascii=False), encoding="utf-8")
     db.metric("qa_pass", 1.0 if status == "PASSED_AUTOMATED_CHECKS" else 0.0, output=name)
     return report
 
 
-def expectation(tl: dict) -> dict:
-    return {"width": tl["width"], "height": tl["height"], "fps": tl.get("fps", 30), "duration": total_duration(tl),
+def expectation(tl: dict, draft: bool = False) -> dict:
+    """What a render of `tl` must measure. A draft is rendered smaller on purpose (render._size), so it is judged
+    against the draft geometry instead of being reported as a broken full-size render."""
+    W, H = tl["width"], tl["height"]
+    if draft:
+        from .timeline import render
+        W, H, _ = render._size(tl, True)
+    return {"width": W, "height": H, "fps": tl.get("fps", 30), "duration": total_duration(tl),
             "target_lufs": tl.get("target_lufs", -14.0), "subtitles": tl.get("subtitles") or None}
 
 
 def render_with_qa(project, tl: dict, name: str, analyses: dict | None = None, max_rounds: int = 3,
-                   extra_stages: list[dict] | None = None, extra: dict | None = None) -> tuple[dict, dict]:
+                   extra_stages: list[dict] | None = None, extra: dict | None = None, draft: bool = False) -> tuple[dict, dict]:
     """Render, review, apply targeted corrections, re-check. Returns (render stats, approval report)."""
     from . import edit
     from .timeline import render, subs
@@ -207,10 +219,10 @@ def render_with_qa(project, tl: dict, name: str, analyses: dict | None = None, m
     corrections = []
     stats: dict = {}
     for rnd in range(max_rounds):
-        stats = render.render(tl, out, project.dir / "work")
+        stats = render.render(tl, out, project.dir / "work", draft=draft)
         known = {m["path"]: {"license": m.get("rights", "user-supplied"), "source": "user upload"} for m in project.data.get("media", [])}
         known.update(project.data.get("generated", {}))
-        stages = [asset_review(tl, known), editing_review(tl), technical_review(out, expectation(tl))]
+        stages = [asset_review(tl, known), editing_review(tl), technical_review(out, expectation(tl, draft))]
         fixes = {c["fix"] for s in stages for c in s["checks"] if not c["ok"] and c.get("fix") and c["severity"] != "minor"}
         if not fixes or rnd == max_rounds - 1:
             break

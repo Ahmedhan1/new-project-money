@@ -1,0 +1,193 @@
+{
+ "steps": [
+  {
+   "step": "health",
+   "ok": true,
+   "detail": "{'ok': True, 'version': '0.2.0', 'db_schema': 2, 'jobs': {}}"
+  },
+  {
+   "step": "ffmpeg made a source file with a non-ASCII name",
+   "ok": true,
+   "detail": "clip ünïcode 视频.mp4"
+  },
+  {
+   "step": "project + media under a non-ASCII NEXUS_HOME",
+   "ok": true,
+   "detail": "<NEXUS_HOME (non-ASCII)>/projects/prj_f4833476ad/media/00_clip ünïcode 视频.mp4"
+  },
+  {
+   "step": "director job",
+   "ok": true,
+   "detail": "{'sources': 1, 'source_seconds': 20.0, 'programme_seconds': 9.6, 'clips': 4, 'sentences_kept': 4, 'spans_dropped': 5, 'hook': 'Solar panels convert sunlight into electricity.', 'cold_open': False}"
+  },
+  {
+   "step": "editable timeline",
+   "ok": true,
+   "detail": "4 clips, 9.6 s"
+  },
+  {
+   "step": "Arabic/Chinese timeline round trip",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "step": "render job with burned Arabic/Chinese captions",
+   "ok": true,
+   "detail": "91.9"
+  },
+  {
+   "step": "output MP4 is valid",
+   "ok": true,
+   "detail": "9.600000"
+  },
+  {
+   "step": "workspace page + effects catalogue",
+   "ok": true,
+   "detail": "76 transitions"
+  },
+  {
+   "step": "local edit (split) with undo/redo",
+   "ok": true,
+   "detail": "4 -> 5 -> 4 -> 5 clips"
+  },
+  {
+   "step": "draft preview render",
+   "ok": true,
+   "detail": "renders/draft_preview.mp4"
+  },
+  {
+   "step": "final render",
+   "ok": true,
+   "detail": "renders/final.mp4"
+  },
+  {
+   "step": "export with verification",
+   "ok": true,
+   "detail": "{'output': 'exports/final_h264_balanced.mp4', 'verify_ok': True, 'failed': []}"
+  },
+  {
+   "step": "asset library catalog with licences",
+   "ok": true,
+   "detail": "182 assets"
+  },
+  {
+   "step": "install a generated LUT + rendered preview",
+   "ok": true,
+   "detail": "<NEXUS_HOME (non-ASCII)>/assets/luts/lut.cinematic.cube"
+  },
+  {
+   "step": "render with a custom transition + library LUT",
+   "ok": true,
+   "detail": "renders/with_assets.mp4"
+  },
+  {
+   "step": "disk dashboard + cleanup dry run",
+   "ok": true,
+   "detail": "9.4 GB free, 0 cleanable files"
+  },
+  {
+   "step": "archive browser answers (no destination configured -> nothing is deleted)",
+   "ok": true,
+   "detail": "{'name': 'account1', 'external': False, 'detail': 'local: LocalProvider root <NEXUS_HOME (non-ASCII)>/storage/local is inside NEXUS_HOME', 'usage': {'connection_id': 'local', 'limit': 270553174016.0, 'used': 260457230336.0, 'remaining': 10095943680.0, 'source': 'measured'}}"
+  }
+ ],
+ "quality": {
+  "score": 91.9,
+  "grade": "A",
+  "verdict": "needs_work",
+  "verdict_reasons": [
+   "major check failed: localization.script, localization.ext.script"
+  ],
+  "categories": {
+   "visual": 91.7,
+   "editing": 100.0,
+   "audio": 100.0,
+   "localization": 62.5
+  },
+  "failed": [
+   {
+    "id": "visual.blockiness",
+    "level": "fail",
+    "severity": "minor",
+    "detail": "block-edge ratio 2.85",
+    "fix": "raise-bitrate"
+   },
+   {
+    "id": "visual.repeated_imagery",
+    "level": "fail",
+    "severity": "minor",
+    "detail": "2 of 4 shots repeat earlier imagery",
+    "fix": "replace-repeated-shot"
+   },
+   {
+    "id": "localization.script",
+    "level": "fail",
+    "severity": "major",
+    "detail": "1 cue(s) not in arabic script, 0 identical to the source transcript",
+    "fix": "retranslate"
+   },
+   {
+    "id": "localization.ext.script",
+    "level": "fail",
+    "severity": "major",
+    "detail": "cues [1] are mostly not in Arab script (untranslated?)",
+    "fix": "language-review"
+   },
+   {
+    "id": "localization.ext.voice_licence",
+    "level": "fail",
+    "severity": "minor",
+    "detail": "no voice with a verified commercial licence: subtitles only unless you supply a licensed voice",
+    "fix": "language-review"
+   }
+  ],
+  "not_measured": [
+   {
+    "id": "audio.speech_music_balance",
+    "why": "music present but no narration/dialogue item to compare (source-clip speech has no role)",
+    "critical": false
+   },
+   {
+    "id": "editing.subtitle_sync",
+    "why": "no transcript/analysis to align cues with speech",
+    "critical": false
+   },
+   {
+    "id": "localization.coverage",
+    "why": "no source transcript to compare cue coverage against",
+    "critical": false
+   },
+   {
+    "id": "visual.subject_consistency",
+    "why": "face/subject identity across shots needs a face or subject-embedding model",
+    "critical": false
+   },
+   {
+    "id": "visual.generative_artifacts",
+    "why": "artefacts of generative video/image models need a learned detector or a human",
+    "critical": false
+   },
+   {
+    "id": "visual.content_relevance",
+    "why": "whether the picture matches what is said needs a vision-language model or a human",
+    "critical": false
+   },
+   {
+    "id": "localization.translation_accuracy",
+    "why": "meaning-level translation accuracy needs a bilingual reviewer (or a model-based metric)",
+    "critical": true
+   },
+   {
+    "id": "audio.voice_naturalness",
+    "why": "naturalness of synthetic voices needs listening tests (MOS) or a learned predictor",
+    "critical": false
+   },
+   {
+    "id": "editing.storytelling",
+    "why": "story, argument and emotional arc are creative judgements for a human",
+    "critical": false
+   }
+  ],
+  "note": "Automated measurements of technical and editorial craft. Not a prediction of audience performance; creative quality still needs a human."
+ }
+}

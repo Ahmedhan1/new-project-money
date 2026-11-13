@@ -75,8 +75,9 @@ def test_worker_killed_mid_job_resumes_without_repeating_stages(home):
         p.wait()
     j = jobs.get(jid)
     assert j["status"] == "running" and j["stage"] == "b" and j["stages"]["a"]["status"] == "done"
-    assert jobs.recover(stale_after=3600) == {"requeued": [], "failed": [], "interrupted": []}   # fresh heartbeat: left alone
-    rec = jobs.recover(stale_after=0)
+    # The heartbeat is still fresh, but the worker's process is gone: recovered at once, not after STALE_S (a fast app
+    # restart used to leave a killed render 'running' until the next idle moment).
+    rec = jobs.recover(stale_after=3600)
     assert rec["requeued"] == [jid]
     assert "lost at stage 'b'" in jobs.get(jid)["recovery"]
     subprocess.run([sys.executable, "-c", WORKER], env=_env(home), check=True, timeout=120)       # a brand-new worker process
@@ -85,6 +86,59 @@ def test_worker_killed_mid_job_resumes_without_repeating_stages(home):
     ran = {n: len((home / f"ran_{n}").read_text()) for n in "abc"}
     assert ran == {"a": 1, "b": 2, "c": 1}, ran                 # a was NOT repeated; only the interrupted stage re-ran
     assert "restored from checkpoint" in Path(j["log"]).read_text()
+
+
+def test_fresh_heartbeat_of_a_live_worker_is_left_alone(home):
+    jid = jobs.submit("crash-test", {"n": 1})["job"]
+    assert jobs.claim(jobs.worker_id()).id == jid                      # this (live) process holds it
+    assert jobs.recover(stale_after=3600)["requeued"] == []
+    db.execute("UPDATE jobs SET worker='worker-other-machine-123' WHERE id=?", (jid,))
+    assert jobs.recover(stale_after=3600)["requeued"] == []           # remote worker: only the heartbeat can tell
+    assert jobs.recover(stale_after=0)["requeued"] == [jid]
+
+
+def test_a_killed_but_unreaped_worker_counts_as_dead(home):
+    p = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])
+    wid = f"worker-{jobs.socket.gethostname()}-{p.pid}"
+    assert jobs._local_worker_dead(wid) is False
+    p.kill()
+    time.sleep(0.3)                  # killed, not yet waited for: a zombie, which psutil.pid_exists reports as alive
+    try:
+        assert jobs._local_worker_dead(wid) is True
+    finally:
+        p.wait()
+    assert jobs._local_worker_dead(wid) is True
+
+
+def test_watchdog_recovers_while_the_worker_is_busy(home, monkeypatch):
+    import threading
+    monkeypatch.setattr(jobs, "STALE_S", 0.2)
+    dead = jobs.submit("crash-test", {"n": 1})["job"]
+    db.execute("UPDATE jobs SET status='running', worker='worker-x-1', heartbeat=? WHERE id=?", (time.time() - 99, dead))
+    gate, stop = threading.Event(), threading.Event()
+
+    @jobs.handler("slow-test")
+    def slow(job):
+        gate.wait(10)
+        return {}
+
+    jobs.submit("slow-test", {})
+    db.execute("UPDATE jobs SET status='done' WHERE id=?", (dead,))   # keep the dead job out of the first claim
+    th = threading.Thread(target=jobs.run_worker, kwargs={"stop": stop, "poll": 0.05}, daemon=True)
+    th.start()
+    t0 = time.time()
+    while (jobs.get(next(r["id"] for r in db.query("SELECT id FROM jobs WHERE kind='slow-test'")))["status"] != "running"):
+        assert time.time() - t0 < 10
+        time.sleep(0.05)
+    db.execute("UPDATE jobs SET status='running' WHERE id=?", (dead,))   # now its worker dies while the other job runs
+    t0 = time.time()
+    while jobs.get(dead)["status"] == "running":
+        assert time.time() - t0 < 5, "watchdog did not recover the dead job while the worker was busy"
+        time.sleep(0.05)
+    assert jobs.get(dead)["status"] in ("queued", "running") and "lost" in jobs.get(dead)["recovery"]
+    stop.set()
+    gate.set()
+    th.join(10)
 
 
 def test_in_process_jobs_of_a_dead_app_are_flagged_not_left_running(home):
@@ -173,3 +227,25 @@ def test_backups_are_scheduled_automatically(home):
     (home / "settings.json").write_text(json.dumps({"backup_every_hours": 0}))
     db.execute("DELETE FROM jobs")
     assert jobs.schedule_backup(now=t.time() + 99 * 3600) is None   # user switched it off
+
+
+
+def test_heavy_lock_is_reentrant_in_a_thread_and_exclusive_across_threads(home):
+    """A job handler holds the lock; code it calls that guards itself again must not deadlock (found on a real
+    research job: the worker waited on its own lock for 18 minutes). Another thread must still wait."""
+    import threading
+    import time as t
+    order = []
+    with jobs.heavy_lock():
+        with jobs.heavy_lock():          # same thread: immediate
+            order.append("nested")
+
+        def other():
+            with jobs.heavy_lock():
+                order.append("other")
+        th = threading.Thread(target=other)
+        th.start()
+        t.sleep(0.3)
+        order.append("outer-still-held")
+    th.join(5)
+    assert order == ["nested", "outer-still-held", "other"]

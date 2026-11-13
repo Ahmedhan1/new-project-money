@@ -22,6 +22,7 @@ import threading
 import time
 import traceback
 from contextlib import contextmanager
+from pathlib import Path
 from typing import Any, Callable
 
 from . import config, db
@@ -32,9 +33,13 @@ STALE_S = 30.0
 ACTIVE = ("queued", "running")
 
 
-def handler(kind: str):
+LIGHT: set[str] = set()  # network-bound kinds (uploads, API polling) that must not wait for the CPU-heavy lock
+
+
+def handler(kind: str, heavy: bool = True):
     def deco(fn):
         HANDLERS[kind] = fn
+        (LIGHT.discard if heavy else LIGHT.add)(kind)
         return fn
     return deco
 
@@ -43,9 +48,22 @@ def worker_id(role: str = "worker") -> str:
     return f"{role}-{socket.gethostname()}-{os.getpid()}"
 
 
+_held = threading.local()
+
+
 @contextmanager
 def heavy_lock():
-    """One heavy job at a time on this machine, across processes (API thread and worker process)."""
+    """One heavy job at a time on this machine, across processes (API thread and worker process).
+
+    Re-entrant within a thread: a job handler already runs inside the lock, and library code that also guards its own
+    heavy calls (e.g. the Account 3 research brief calling the local LLM) must not wait on itself."""
+    if getattr(_held, "depth", 0):
+        _held.depth += 1
+        try:
+            yield
+        finally:
+            _held.depth -= 1
+        return
     config.ensure_dirs()
     f = open(config.RUN / "heavy.lock", "a+")
     try:
@@ -61,8 +79,10 @@ def heavy_lock():
         else:
             import fcntl
             fcntl.flock(f, fcntl.LOCK_EX)
+        _held.depth = 1
         yield
     finally:
+        _held.depth = 0
         try:
             if os.name == "nt":
                 import msvcrt
@@ -113,7 +133,14 @@ class Job:
         self._save(name)
         self.log(f"stage {name}: start (run {runs})")
         t0 = time.time()
-        out = fn()
+        try:
+            out = fn()
+        except BaseException as e:  # QA-D8: a failed stage is recorded as failed, not left 'running'
+            self._stages[name] = {"status": "failed", "started": t0, "finished": time.time(), "runs": runs,
+                                  "error": public_error(e)}
+            self._save(name)
+            self.log(f"stage {name}: failed ({type(e).__name__})")
+            raise
         out = json.loads(json.dumps(out, ensure_ascii=False, default=str))  # what a resumed run will see
         el = round(time.time() - t0, 3)
         self._stages[name] = {"status": "done", "started": t0, "finished": time.time(), "seconds": el, "runs": runs, "output": out}
@@ -165,12 +192,36 @@ def claim(wid: str) -> Job | None:
     return Job(db.query("SELECT * FROM jobs WHERE id=?", (rows[0][0],))[0])
 
 
+def _local_worker_dead(wid: str | None) -> bool:
+    """True when `wid` names a worker process on this machine that no longer exists.
+
+    A fast restart (app killed and started again within STALE_S) leaves a fresh-looking heartbeat behind; checking the
+    worker's process id lets recovery act at once instead of waiting for the heartbeat to age.
+    """
+    if not wid or "-" not in wid:
+        return False
+    head, _, pid = wid.rpartition("-")
+    if not pid.isdigit() or not head.endswith("-" + socket.gethostname()):
+        return False
+    if int(pid) == os.getpid():
+        return False
+    try:
+        import psutil
+        try:  # a killed process can linger briefly as an unreaped zombie: that is still a dead worker
+            return psutil.Process(int(pid)).status() == psutil.STATUS_ZOMBIE
+        except psutil.NoSuchProcess:
+            return True
+    except Exception:  # noqa: BLE001 - without psutil fall back to the heartbeat rule
+        return False
+
+
 def recover(stale_after: float = STALE_S, api_worker: str | None = None) -> dict:
-    """Re-queue durable jobs whose worker stopped heartbeating; flag lost in-process jobs. Safe to call any time."""
+    """Re-queue durable jobs whose worker stopped heartbeating (or whose local process is gone); flag lost in-process
+    jobs. Safe to call any time."""
     now = time.time()
     out = {"requeued": [], "failed": [], "interrupted": []}
     for r in db.query("SELECT id,stage,retries,max_retries,heartbeat,worker FROM jobs WHERE status='running' AND durable=1"):
-        if r["heartbeat"] and now - r["heartbeat"] < stale_after:
+        if r["heartbeat"] and now - r["heartbeat"] < stale_after and not _local_worker_dead(r["worker"]):
             continue
         n = (r["retries"] or 0) + 1
         note = f"worker {r['worker']} lost at stage '{r['stage'] or 'start'}'"
@@ -191,6 +242,35 @@ def recover(stale_after: float = STALE_S, api_worker: str | None = None) -> dict
     return out
 
 
+class PermanentJobError(RuntimeError):
+    """An input problem that a retry cannot fix (raise it, or let _permanent() classify the error)."""
+
+
+_PERMANENT_HINTS = ("invalid data found when processing input", "moov atom not found", "could not find codec parameters",
+                    "end of file", "no such file or directory", "unsupported file type", "not a video", "corrupt")
+
+
+def _permanent(e: BaseException) -> bool:
+    """Deterministic input errors are not retried (QA-D8: a corrupt upload was analysed three times)."""
+    if isinstance(e, (LookupError, PermanentJobError)):
+        return True
+    from .media import ff
+    if isinstance(e, ff.FFError):
+        txt = (str(e) + " " + str(getattr(e, "stderr_tail", "") or "")).lower()
+        return any(h in txt for h in _PERMANENT_HINTS)
+    return False
+
+
+def public_error(e: BaseException) -> str:
+    """What API clients see: the error type and message, absolute paths replaced, no traceback (the full traceback is
+    in the job's log file)."""
+    msg = f"{type(e).__name__}: {e}".splitlines()[0] if str(e) else type(e).__name__
+    for root, label in ((str(config.HOME), "<NEXUS_HOME>"), (str(config.ROOT), "<app>"), (str(Path.home()), "~")):
+        if root and root not in ("/", "."):
+            msg = msg.replace(root, label)
+    return msg[:400]
+
+
 def run_job(job: Job) -> str:
     """Execute one claimed job. Returns its final status."""
     stop = threading.Event()
@@ -204,20 +284,27 @@ def run_job(job: Job) -> str:
         fn = HANDLERS.get(job.kind)
         if fn is None:
             raise LookupError(f"no handler registered for job kind '{job.kind}'")
-        with heavy_lock():
+        if job.kind in LIGHT:
             result = fn(job)
+        else:
+            with heavy_lock():
+                result = fn(job)
         db.execute("UPDATE jobs SET status='done', progress=1, finished=?, result=? WHERE id=?",
                    (time.time(), json.dumps(result, default=str, ensure_ascii=False), job.id))
         job.log("job done")
         return "done"
     except Exception as e:
-        err = f"{type(e).__name__}: {e}\n{traceback.format_exc()[-1500:]}"
-        job.log(f"job error: {err}")
+        job.log(f"job error: {type(e).__name__}: {e}\n{traceback.format_exc()[-3000:]}")   # full detail stays in the log
+        err = public_error(e)
         row = db.query("SELECT retries,max_retries FROM jobs WHERE id=?", (job.id,))[0]
         n = (row["retries"] or 0) + 1
-        if isinstance(e, LookupError) or n > (row["max_retries"] or 0):
+        permanent = _permanent(e)
+        if permanent or n > (row["max_retries"] or 0):
+            # a permanent input error is not retried, so the retry counter stays where it was (0 on a first attempt)
             db.execute("UPDATE jobs SET status='failed', finished=?, retries=?, error=?, recovery=? WHERE id=?",
-                       (time.time(), n, err, "fix the cause, then `nexus jobs retry <id>` (finished stages are kept)", job.id))
+                       (time.time(), (row["retries"] or 0) if permanent else n, err,
+                        "the input cannot be processed: replace the file, then `nexus jobs retry <id>`" if permanent
+                        else "fix the cause, then `nexus jobs retry <id>` (finished stages are kept)", job.id))
             return "failed"
         db.execute("UPDATE jobs SET status='queued', retries=?, error=?, recovery=? WHERE id=?",
                    (n, err, f"attempt {n} failed; retrying from last checkpoint", job.id))
@@ -247,15 +334,42 @@ def schedule_backup(now: float | None = None) -> str | None:
     return submit("backup", {"drill": False, "scheduled": True}, max_retries=0)["job"]
 
 
+def schedule_archive_recovery() -> str | None:
+    """Archive uploads interrupted by a crash or waiting for a retry are resumed by an 'archive-recover' job (one at a
+    time). Nothing happens when no record needs it."""
+    try:
+        from . import archive
+        now = time.time()
+        due = [r for r in archive.records() if r["state"] in ("queued", "uploading", "uploaded")
+               or (r["state"] == "failed" and r.get("next_retry", 0) <= now and r.get("attempts", 0) < archive.settings()["max_attempts"])]
+    except Exception:  # noqa: BLE001
+        return None
+    if not due or db.query("SELECT id FROM jobs WHERE kind IN ('archive-recover','archive') AND status IN ('queued','running')"):
+        return None
+    return submit("archive-recover", {})["job"]
+
+
 def run_worker(stop: threading.Event | None = None, poll: float = 1.0, once: bool = False, role: str = "worker") -> None:
     from . import workflows  # noqa: F401  (registers the production handlers)
     wid = worker_id(role)
-    last_recover = 0.0
-    while not (stop and stop.is_set()):
-        if time.time() - last_recover > STALE_S:
-            recover()
-            schedule_backup()
-            last_recover = time.time()
+    recover()
+    schedule_backup()
+    schedule_archive_recovery()
+    # Recovery runs on its own thread: a worker busy with a long render must not delay re-queuing a job whose worker
+    # died (found in the crash-recovery demo, where a killed render stayed 'running' behind a 10-minute dub job).
+    halt = stop or threading.Event()
+
+    def watchdog():
+        while not halt.wait(STALE_S):
+            try:
+                recover()
+                schedule_backup()
+                schedule_archive_recovery()
+            except Exception:  # noqa: BLE001 - a locked database must not kill the watchdog
+                pass
+
+    threading.Thread(target=watchdog, daemon=True, name=f"nexus-recover-{role}").start()
+    while not halt.is_set():
         job = claim(wid)
         if job is None:
             if once:

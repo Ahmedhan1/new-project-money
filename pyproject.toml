@@ -14,4 +14,7 @@ ignore = ["E741"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# rendered test videos are large: keep tmp_path directories only for FAILED tests, and only from the last run
+tmp_path_retention_count = 1
+tmp_path_retention_policy = "failed"
 markers = ["heavy: needs downloaded models and minutes of CPU (tests/test_*.py A-I); not run in CI"]

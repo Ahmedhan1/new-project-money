@@ -17,7 +17,7 @@ HF = "https://huggingface.co"
 
 @functools.lru_cache(maxsize=1)
 def catalog() -> dict:
-    return yaml.safe_load((config.REGISTRY_DIR / "models.yaml").read_text())
+    return yaml.safe_load((config.REGISTRY_DIR / "models.yaml").read_text(encoding="utf-8"))
 
 
 def _fetch(url: str, dest: Path) -> None:
@@ -42,14 +42,14 @@ def _revision(repo: str) -> str:
 
 def _record(name: str, info: dict) -> None:
     p = config.MODELS / "installed.json"
-    data = json.loads(p.read_text()) if p.exists() else {}
+    data = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
     data[name] = info
     p.write_text(json.dumps(data, indent=2))
 
 
 def installed() -> dict:
     p = config.MODELS / "installed.json"
-    return json.loads(p.read_text()) if p.exists() else {}
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
 
 
 def ensure_model(name: str) -> Path:
@@ -68,8 +68,26 @@ def ensure_model(name: str) -> Path:
     return d
 
 
+def _pack_voice(name: str) -> dict | None:
+    """A voice declared in a language pack (nexus/registry/languages.yaml) but not in the legacy catalog."""
+    from .speech import packs
+    for tag, p in packs.packs().items():
+        for v in (p.get("tts") or {}).get("voices") or []:
+            if v.get("id") == name and v.get("engine", "piper") == "piper":
+                return {"lang": tag.split("-")[0], "path": v["path"], "gender": v.get("gender"), "license": v.get("licence"),
+                        "commercial": v.get("commercial_use") == "yes", "attribution": v.get("attribution")}
+    return None
+
+
+def voice_meta(name: str) -> dict:
+    v = catalog()["voices"].get(name) or _pack_voice(name)
+    if v is None:
+        raise KeyError(f"unknown voice {name}")
+    return v
+
+
 def ensure_voice(name: str) -> Path:
-    v = catalog()["voices"][name]
+    v = voice_meta(name)
     config.ensure_dirs()
     d = config.MODELS / "piper"
     onnx = d / f"{name}.onnx"

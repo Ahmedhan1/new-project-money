@@ -17,6 +17,14 @@ _tr = None
 _sp = None
 
 
+def target_tag(lang: str) -> str:
+    """MADLAD target tag: the legacy table, else the language pack's mt.target (packs list only tags MADLAD supports)."""
+    if lang in TAGS:
+        return TAGS[lang]
+    from . import packs
+    return packs.pack(lang)["mt"]["target"]
+
+
 def load():
     global _tr, _sp
     if _tr is None:
@@ -36,7 +44,17 @@ def unload() -> None:
 
 
 def _sentences(text: str) -> list[str]:
-    return [s for s in re.split(r"(?<=[.!?؟。])\s+", text.strip()) if s]
+    """Sentence split that does not break after a number ("dem 24. Jahr", ordinals in German/Russian) and treats an
+    ellipsis as a sentence end."""
+    return [s for s in re.split(r"(?<=[!?؟。…])\s+|(?<=(?<!\d)\.)\s+", text.strip()) if s]
+
+
+_REPEAT = re.compile(r"\b(\w+(?:\s+\w+){1,5})([,;]?\s+\1\b)+", re.U)
+
+
+def collapse_repeats(text: str) -> str:
+    """'eine lange Zeit, eine lange Zeit' -> 'eine lange Zeit' (decoder loops shorter than no_repeat_ngram_size)."""
+    return _REPEAT.sub(r"\1", text)
 
 
 # Typical character-length ratio target/source for spoken text; well above it means invented content.
@@ -48,13 +66,13 @@ def too_long(src: str, tgt: str, lang: str) -> bool:
 
 
 def _decode(tr, sp, lines: list[str], lang: str, **kw) -> list[str]:
-    toks = [sp.encode(f"<2{TAGS[lang]}> {l}", out_type=str) for l in lines]
+    toks = [sp.encode(f"<2{target_tag(lang)}> {l}", out_type=str) for l in lines]
     res = tr.translate_batch(toks, max_batch_size=4, **kw)
     out = []
     for src, r in zip(lines, res):
         txt = sp.decode_pieces(r.hypotheses[0]).strip()
         # The model sometimes appends a paraphrase of the same sentence; never return more sentences than the source had.
-        out.append(" ".join(_sentences(txt)[:max(1, len(_sentences(src)))]))
+        out.append(collapse_repeats(" ".join(_sentences(txt)[:max(1, len(_sentences(src)))])))
     return out
 
 

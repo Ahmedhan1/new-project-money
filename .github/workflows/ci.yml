@@ -26,9 +26,9 @@ jobs:
           cache: pip
           cache-dependency-path: requirements-ci.txt
       - run: python -m pip install -q -r requirements-ci.txt
-      - name: FFmpeg + rclone (Linux only; the launcher/rclone tests skip themselves where a tool is missing)
+      - name: FFmpeg + rclone + script fonts + Tesseract (Linux only; the launcher/rclone tests skip themselves where a tool is missing)
         if: runner.os == 'Linux'
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg rclone
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg rclone fonts-noto-core fonts-noto-cjk fonts-dejavu-core tesseract-ocr tesseract-ocr-ara tesseract-ocr-chi-sim tesseract-ocr-hin tesseract-ocr-rus tesseract-ocr-deu
       - name: FFmpeg (Windows) - so the one-command launcher is exercised on the user's real platform
         if: runner.os == 'Windows'
         run: choco install ffmpeg -y --no-progress

@@ -30,3 +30,11 @@ rclone.conf
 .nexus-restored*/
 .nexus-old/
 .ruff_cache/
+
+# agent worktrees (local only)
+.claude/worktrees/
+# credentials (Account 1 security model)
+*.secret
+kaggle.json
+client_secret*.json
+.env

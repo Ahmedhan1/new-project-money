@@ -1,0 +1,26 @@
+{
+ "date": "2026-11-13",
+ "account2_head": "1b2df1d (work/account-2-asset-library-storage)",
+ "runs": [
+  {
+   "tree": "three accounts: PR #3 branch claude/hopeful-allen-luubcy @ a889cd8 (already contains Account 1 f9d8f11 via PR #4) + Account 2 follow-up @ 1b2df1d + Account 3 work/account-3-intelligence-growth @ 62414bf, then integration/contracts_v1/apply.sh (its focused check: 42 passed)",
+   "result": "923 passed, 0 failed, 12 skipped",
+   "conflict_resolution": "code conflicts only between Accounts 1/2 and Account 3 (nexus/api.py, nexus/workflows.py, nexus/ui/index.html), resolved as a union: Account 1 app setup + Account 3 router mount; Account 2 handlers + Account 3 job imports; one go() call after Account 3's UI script, with Account 1's deep-link behaviour. Project-memory files taken from the PR #3 side for the run. Local only, not pushed."
+  },
+  {
+   "tree": "Account 2 follow-up alone @ 1b2df1d",
+   "result": "402 passed, 0 failed, 7 skipped"
+  },
+  {
+   "tree": "Account 1 origin/work/account-1-cloud-platform @ f9d8f11 + Account 2 @ 1b2df1d; shared-contracts layout applied by hand (contracts.py -> contracts/cloud.py, Account 3's contracts__init__.py); project-memory files from Account 1",
+   "result": "622 passed, 0 failed, 10 skipped",
+   "code_conflicts": "none"
+  },
+  {
+   "tree": "superseded: Account 1 @ 919f158 + Account 2 @ 849a11b",
+   "result": "603 passed, 0 failed, 10 skipped"
+  }
+ ],
+ "account1_storage_tests": "tests/fast/test_a2_archive_account1.py 5/5 passed on the merged tree (incl. NEXUS_LOCAL_STORAGE same/separate volume)",
+ "not_run": "GitHub Actions Linux/Windows CI and windows-e2e (account-level Actions outage: jobs end in ~2 s without steps)"
+}

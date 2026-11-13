@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 
 
@@ -18,6 +19,22 @@ def _start(a):
 def _stop(a):
     from . import launcher
     return launcher.stop()
+
+
+def _import_home(a):
+    from . import migrate
+    try:
+        r = migrate.import_home(a.src)
+    except migrate.ImportRefused as e:
+        print(f"not imported: {e}")
+        return 1
+    print(f"imported {', '.join(r['copied'])} from {r['from']} into {r['to']}")
+    return 0
+
+
+def _restart(a):
+    from . import launcher
+    return launcher.restart(getattr(a, "port", None), open_browser=False)
 
 
 def _status(a):
@@ -121,7 +138,7 @@ def _verify(a):
 def _restore(a):
     from . import backup
     r = backup.restore(_open_dest(a.src), a.target, a.snapshot, backup.passphrase())
-    _p({k: r[k] for k in ("ok", "snapshot", "target", "files_restored", "files_expected", "problems", "paths_rewritten", "use")})
+    _p({k: r[k] for k in ("ok", "snapshot", "target", "files_restored", "files_expected", "problems", "paths_rewritten", "vault", "use")})
     print("references:", {k: (len(v) if isinstance(v, list) else v) for k, v in r["references"].items()})
     return 0 if r["ok"] else 1
 
@@ -177,7 +194,49 @@ def _profile(a):
         print(f"{r['name'][14:]:<44} n={r['n']:<3} avg {r['avg']:8.1f}s  min {r['mn']:8.1f}s  max {r['mx']:8.1f}s")
 
 
-_OPS = {"start": _start, "stop": _stop, "status": _status, "worker": _worker, "jobs": _jobs, "backup": _backup, "verify": _verify,
+def _vault_key(a):
+    """Offline vault-key backup. The key is never printed: export writes it to a file the owner chooses."""
+    import json as _j
+    from . import vault
+    try:
+        if a.action == "fingerprint":
+            print(_j.dumps({"active_fingerprint": vault.key_fingerprint(),
+                            "source": "NEXUS_VAULT_KEY" if os.environ.get("NEXUS_VAULT_KEY") else "NEXUS_HOME/secrets/vault.key"}))
+            return 0
+        if a.action == "export":
+            if not a.to:
+                print("vault-key export needs --to <path on a removable drive or password-manager import folder>")
+                return 2
+            print(_j.dumps(vault.export_key(a.to)))
+            print("Store this file offline (not in NEXUS_HOME, not in a backup destination, not in Git), label it with the "
+                  "fingerprint, then check it with: python -m nexus vault-key verify --from-file <path>")
+            return 0
+        if a.action == "verify":
+            if not a.from_file:
+                print("vault-key verify needs --from-file <offline copy>")
+                return 2
+            r = vault.verify_key_file(a.from_file)
+            print(_j.dumps(r))
+            return 0 if r["matches_active_key"] else 1
+    except (ValueError, FileExistsError, OSError) as e:
+        print(f"refused: {e}")
+        return 1
+    return 2
+
+
+def _production_check(a):
+    from .cloud import production
+    rows = production.checks(a.host)
+    print(f"deployment mode: {production.mode()}  (NEXUS_ENV=production enables the production profile)")
+    for c in rows:
+        tag = "OK  " if c["ok"] else ("FAIL" if c["required"] else "WARN")
+        print(f"[{tag}] {c['check']:<18} {c['detail']}" + (f"\n       fix: {c['fix']}" if c["fix"] else ""))
+    bad = [c for c in rows if c["required"] and not c["ok"]]
+    print(f"\n{'READY: every required production gate passes' if not bad else f'NOT READY: {len(bad)} required gate(s) fail'}")
+    return 0 if not bad else 1
+
+
+_OPS = {"vault-key": _vault_key, "production-check": _production_check, "start": _start, "stop": _stop, "restart": _restart, "import-home": _import_home, "status": _status, "worker": _worker, "jobs": _jobs, "backup": _backup, "verify": _verify,
         "restore": _restore, "storage": _storage, "checkpoint": _checkpoint, "resume": _resume, "tasks": _tasks, "profile": _profile}
 
 
@@ -191,6 +250,16 @@ def main() -> None:
     st.add_argument("--port", type=int, default=None)
     st.add_argument("--no-browser", action="store_true")
     sub.add_parser("stop", help="stop the app (running jobs resume from their checkpoint next start)")
+    ih = sub.add_parser("import-home", help="copy an earlier NEXUS data folder into this install (never overwrites)")
+    ih.add_argument("--from", dest="src", required=True)
+    rs = sub.add_parser("restart", help="stop then start the app services (no browser)")
+    rs.add_argument("--port", type=int)
+    vk = sub.add_parser("vault-key", help="offline vault-key backup: fingerprint | export --to PATH | verify --from-file PATH")
+    vk.add_argument("action", choices=["fingerprint", "export", "verify"])
+    vk.add_argument("--to")
+    vk.add_argument("--from-file", dest="from_file")
+    pc = sub.add_parser("production-check", help="production deployment gates (NEXUS_ENV=production), no secret values")
+    pc.add_argument("--host", help="the bind address the service will use (default: settings.json host)")
     sub.add_parser("status", help="services, jobs, backups, git state, next development tasks")
     sub.add_parser("worker", help="run a production worker (durable job ledger)")
     j = sub.add_parser("jobs", help="production job ledger")
@@ -228,15 +297,34 @@ def main() -> None:
     k.add_argument("--target", type=int, default=5)
     k.add_argument("--languages", type=int, default=2)
     k.add_argument("--gpu-hours-week", type=float, default=0)
+    from . import cli_a2  # Account 2 tools: disk, library, archive
+    cli_a2.add_parsers(sub)
     a = ap.parse_args()
+    try:
+        _dispatch(a)
+    except Exception as e:  # QA-D2: a damaged database is a plain message with the recovery command, not a traceback
+        from .db import DatabaseDamaged
+        if isinstance(e, DatabaseDamaged):
+            print(f"NEXUS cannot open its database.\n{e}", file=sys.stderr)
+            sys.exit(3)
+        raise
 
+
+def _dispatch(a):
     if a.cmd == "serve":
         import uvicorn
         from . import config
         st_ = config.settings()
         host, port = a.host or st_["host"], a.port or st_["port"]
-        print(f"NEXUS running at http://{host}:{port}  (local only, zero spend)")
-        uvicorn.run("nexus.api:app", host=host, port=port, log_level="warning")
+        from .cloud import production
+        os.environ.setdefault("NEXUS_BIND_HOST", str(host))   # the production gate checks the address really used
+        prod = production.is_production()
+        print(f"NEXUS running at http://{host}:{port}  ({'PRODUCTION profile' if prod else 'local only'}, zero spend)")
+        # One process (rate limits, poller and the SQLite ledger are per process; see nexus/cloud/instance.py).
+        # proxy_headers=False: X-Forwarded-* are interpreted by nexus.cloud.security against NEXUS_TRUSTED_PROXIES only.
+        # SIGTERM/SIGINT -> graceful shutdown: in-flight requests get up to 30 s, then the lifespan exit stops the loops.
+        uvicorn.run("nexus.api:app", host=host, port=port, log_level="info" if prod else "warning", workers=1,
+                    proxy_headers=False, server_header=False, timeout_graceful_shutdown=30)
     elif a.cmd in _OPS:
         sys.exit(_OPS[a.cmd](a) or 0)
     elif a.cmd == "doctor":
@@ -291,6 +379,14 @@ def main() -> None:
         for r in c_["profiles"]:
             print(f"{r['profile']:<22} {r['minutes_per_master_all_versions']:>6} min/master  max {r['max_per_day']:>3}/day  {'OK ' if r['meets_target'] else 'NO '} bottleneck: {r['bottleneck']}")
         print("\n".join("- " + v for v in c_["verdict"]))
+
+
+def _a2_ops() -> None:
+    from . import cli_a2
+    _OPS.update(cli_a2.OPS)
+
+
+_a2_ops()
 
 
 if __name__ == "__main__":

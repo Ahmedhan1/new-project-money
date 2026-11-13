@@ -1,0 +1,251 @@
+{
+ "base": "http://127.0.0.1:<port>",
+ "pages": {
+  "system": {
+   "h": "System & Updates",
+   "chars": 748,
+   "error_text": null,
+   "ms": 1211
+  },
+  "home": {
+   "h": "What do you want to create?",
+   "chars": 1472,
+   "error_text": null,
+   "ms": 1209
+  },
+  "dashboard": {
+   "h": "Dashboard",
+   "chars": 1208,
+   "error_text": null,
+   "ms": 1211
+  },
+  "creator": {
+   "h": "AI Video Creator",
+   "chars": 1011,
+   "error_text": null,
+   "ms": 1210
+  },
+  "projects": {
+   "h": "Project History",
+   "chars": 187,
+   "error_text": null,
+   "ms": 1209
+  },
+  "editor": {
+   "h": "Video Editor",
+   "chars": 636,
+   "error_text": null,
+   "ms": 1211
+  },
+  "remix": {
+   "h": "Video Remix Studio",
+   "chars": 765,
+   "error_text": null,
+   "ms": 1208
+  },
+  "dubbing": {
+   "h": "",
+   "chars": 8,
+   "error_text": null,
+   "ms": 1211
+  },
+  "audio": {
+   "h": "Voiceover, Dubbing & Subtitles",
+   "chars": 892,
+   "error_text": null,
+   "ms": 1207
+  },
+  "documentary": {
+   "h": "Documentary Studio",
+   "chars": 369,
+   "error_text": null,
+   "ms": 1210
+  },
+  "animation": {
+   "h": "Animation & Motion Graphics",
+   "chars": 915,
+   "error_text": null,
+   "ms": 1211
+  },
+  "series": {
+   "h": "Film & Series Studio",
+   "chars": 793,
+   "error_text": null,
+   "ms": 1209
+  },
+  "factory": {
+   "h": "Content Factory",
+   "chars": 2487,
+   "error_text": null,
+   "ms": 1211
+  },
+  "publishing": {
+   "h": "Publishing Studio",
+   "chars": 1103,
+   "error_text": null,
+   "ms": 1208
+  },
+  "channels": {
+   "h": "Channels & Business",
+   "chars": 296,
+   "error_text": null,
+   "ms": 1208
+  },
+  "workspace": {
+   "h": "Cinematic Workspace",
+   "chars": 161,
+   "error_text": null,
+   "ms": 1209
+  },
+  "models": {
+   "h": "AI Models & Provider Router",
+   "chars": 4535,
+   "error_text": null,
+   "ms": 1209
+  },
+  "review": {
+   "h": "Review",
+   "chars": 250,
+   "error_text": null,
+   "ms": 1210
+  },
+  "qa": {
+   "h": "Quality Assurance Center",
+   "chars": 195,
+   "error_text": null,
+   "ms": 1209
+  },
+  "assets": {
+   "h": "",
+   "chars": 8,
+   "error_text": null,
+   "ms": 1208
+  },
+  "resources": {
+   "h": "Free Resources & Compute",
+   "chars": 1390,
+   "error_text": null,
+   "ms": 1208
+  },
+  "storage": {
+   "h": "Storage & Backup",
+   "chars": 2507,
+   "error_text": null,
+   "ms": 1206
+  },
+  "tools": {
+   "h": "Deployed Tools & Models",
+   "chars": 6039,
+   "error_text": null,
+   "ms": 1209
+  },
+  "discovery": {
+   "h": "GitHub Discovery",
+   "chars": 14607,
+   "error_text": null,
+   "ms": 1210
+  },
+  "settings": {
+   "h": "Settings",
+   "chars": 194,
+   "error_text": null,
+   "ms": 1221
+  },
+  "a3research": {
+   "h": "Content Research & Opportunities",
+   "chars": 970,
+   "error_text": null,
+   "ms": 1217
+  },
+  "a3refs": {
+   "h": "Creator References",
+   "chars": 1509,
+   "error_text": "[object Object]",
+   "ms": 1209
+  },
+  "a3strategy": {
+   "h": "Script Studio",
+   "chars": 817,
+   "error_text": null,
+   "ms": 1209
+  },
+  "a3lang": {
+   "h": "Language Studio",
+   "chars": 1349,
+   "error_text": null,
+   "ms": 1209
+  },
+  "a3publish": {
+   "h": "Publishing",
+   "chars": 2386,
+   "error_text": null,
+   "ms": 1210
+  },
+  "a3analytics": {
+   "h": "Analytics & Growth",
+   "chars": 559,
+   "error_text": null,
+   "ms": 1209
+  }
+ },
+ "page_errors": [],
+ "console_errors": [],
+ "failed_requests": [],
+ "http_5xx": [],
+ "screenshots": [
+  "ui_home.png",
+  "ui_creator.png",
+  "ui_editor.png",
+  "ui_publishing.png",
+  "ui_review.png",
+  "ui_storage.png",
+  "ui_a3research.png",
+  "ui_a3publish.png"
+ ],
+ "page_ids": [
+  "system",
+  "home",
+  "dashboard",
+  "creator",
+  "projects",
+  "editor",
+  "remix",
+  "dubbing",
+  "audio",
+  "documentary",
+  "animation",
+  "series",
+  "factory",
+  "publishing",
+  "channels",
+  "workspace",
+  "models",
+  "review",
+  "qa",
+  "assets",
+  "resources",
+  "storage",
+  "tools",
+  "discovery",
+  "settings",
+  "a3research",
+  "a3refs",
+  "a3strategy",
+  "a3lang",
+  "a3publish",
+  "a3analytics"
+ ],
+ "summary": {
+  "pages": 31,
+  "page_errors": 0,
+  "console_errors": 0,
+  "http_5xx": 0,
+  "pages_with_error_text": [
+   "a3refs:[object Object]"
+  ],
+  "empty_pages": [
+   "dubbing",
+   "assets"
+  ]
+ }
+}

@@ -1,0 +1,433 @@
+{
+ "demo": "account3-publishing",
+ "ran_at": "2026-11-12T17:19:19",
+ "source": "no render under NEXUS_HOME/projects; 6 s ffmpeg testsrc2 clips generated (no speech; demo transcript text below)",
+ "transcript_used": "Solar panels lose efficiency when they get hot. Solar panels work best when they stay cool, which is why installers leave an air gap behind them. Cleaning solar panels twice a year keeps output steady.",
+ "credential_backend": "env",
+ "destinations": {
+  "youtube": {
+   "manifest_id": "pub_000bb32edd",
+   "deduplicated": false,
+   "visibility": "private",
+   "approval": "pending",
+   "status": "draft",
+   "idempotency_key": "4392c24d2a21f820…",
+   "package_dir": "a3_data/publishing_demo/packages/youtube",
+   "text_source": "deterministic (router off)",
+   "title": "Why solar panels hate heat",
+   "tags": [
+    "#Panels",
+    "#Solar"
+   ],
+   "thumbnail_text": "WHY SOLAR PANELS HATE",
+   "caption_placement": {
+    "band": [
+     0.7,
+     0.9
+    ],
+    "basis": "no safe zone documented; lower-third default (editorial)"
+   },
+   "packaging_checks_ok": true,
+   "file_check_ok": true,
+   "file_check_failed": [],
+   "adapter": "youtube",
+   "adapter_status": "implemented_untested_live",
+   "status_after_run": "failed",
+   "blocked": {
+    "code": "credentials_missing",
+    "message": "missing credentials: pub.youtube.demo.client_id, pub.youtube.demo.client_secret, pub.youtube.demo.refresh_token (backend: env)",
+    "owner_action": [
+     "1. In https://console.cloud.google.com create (or pick) YOUR OWN project; it costs nothing and needs no card for this API.",
+     "2. APIs & Services > Library: enable 'YouTube Data API v3' and 'YouTube Analytics API'.",
+     "3. OAuth consent screen: External, add your Google account as a test user (or publish the app).",
+     "4. Credentials > Create credentials > OAuth client ID > Application type 'Desktop app'. Keep the client ID + secret private.",
+     "5. Run: python -m nexus.intelligence.publishing.youtube_oauth --label demo  (paste the client ID/secret when asked, sign in with the channel's account in the browser that opens).",
+     "6. Without Account 1's vault, set environment variables instead: NEXUS_PUB_YOUTUBE_DEMO_CLIENT_ID, NEXUS_PUB_YOUTUBE_DEMO_CLIENT_SECRET, NEXUS_PUB_YOUTUBE_DEMO_REFRESH_TOKEN.",
+     "7. Register the account: engine.connect_account('youtube', 'demo', secret_ref='pub.youtube.demo.refresh_token').",
+     "NEXUS uploads as PRIVATE unless you approve a manifest yourself (approval = 'approved_by_owner')."
+    ]
+   },
+   "remote": null
+  },
+  "youtube_shorts": {
+   "manifest_id": "pub_42be674aee",
+   "deduplicated": true,
+   "visibility": "private",
+   "approval": "pending",
+   "status": "failed",
+   "idempotency_key": "882bb7aae922e7da…",
+   "package_dir": "a3_data/publishing_demo/packages/youtube_shorts",
+   "text_source": "router:local-llamacpp/qwen3-4b-q4km",
+   "title": "Why solar panels hate heat",
+   "tags": [
+    "#efficiency",
+    "#cleaning"
+   ],
+   "thumbnail_text": "Keep panels cool",
+   "caption_placement": {
+    "band": [
+     0.15,
+     0.65
+    ],
+    "anchor_y": 0.57,
+    "x_margin": [
+     0.044,
+     0.178
+    ],
+    "basis": "platforms.yaml safe_zone (observed)"
+   },
+   "packaging_checks_ok": true,
+   "file_check_ok": true,
+   "file_check_failed": [],
+   "adapter": "youtube",
+   "adapter_status": "implemented_untested_live",
+   "status_after_run": "failed",
+   "blocked": {
+    "code": "credentials_missing",
+    "message": "missing credentials: pub.youtube.demo.client_id, pub.youtube.demo.client_secret, pub.youtube.demo.refresh_token (backend: env)",
+    "owner_action": [
+     "1. In https://console.cloud.google.com create (or pick) YOUR OWN project; it costs nothing and needs no card for this API.",
+     "2. APIs & Services > Library: enable 'YouTube Data API v3' and 'YouTube Analytics API'.",
+     "3. OAuth consent screen: External, add your Google account as a test user (or publish the app).",
+     "4. Credentials > Create credentials > OAuth client ID > Application type 'Desktop app'. Keep the client ID + secret private.",
+     "5. Run: python -m nexus.intelligence.publishing.youtube_oauth --label demo  (paste the client ID/secret when asked, sign in with the channel's account in the browser that opens).",
+     "6. Without Account 1's vault, set environment variables instead: NEXUS_PUB_YOUTUBE_DEMO_CLIENT_ID, NEXUS_PUB_YOUTUBE_DEMO_CLIENT_SECRET, NEXUS_PUB_YOUTUBE_DEMO_REFRESH_TOKEN.",
+     "7. Register the account: engine.connect_account('youtube', 'demo', secret_ref='pub.youtube.demo.refresh_token').",
+     "NEXUS uploads as PRIVATE unless you approve a manifest yourself (approval = 'approved_by_owner')."
+    ]
+   },
+   "remote": null
+  },
+  "tiktok": {
+   "manifest_id": "pub_b1096aa079",
+   "deduplicated": false,
+   "visibility": "private",
+   "approval": "pending",
+   "status": "draft",
+   "idempotency_key": "8c9ad836ff553fec…",
+   "package_dir": "a3_data/publishing_demo/packages/tiktok",
+   "text_source": "deterministic (router off)",
+   "title": "",
+   "tags": [
+    "#Panels",
+    "#Solar"
+   ],
+   "thumbnail_text": "WHY SOLAR PANELS HATE",
+   "caption_placement": {
+    "band": [
+     0.15,
+     0.7
+    ],
+    "anchor_y": 0.62,
+    "x_margin": [
+     0.1,
+     0.15
+    ],
+    "basis": "platforms.yaml safe_zone (observed)"
+   },
+   "packaging_checks_ok": true,
+   "file_check_ok": true,
+   "file_check_failed": [],
+   "adapter": "tiktok",
+   "adapter_status": "requires_approved_app",
+   "status_after_run": "failed",
+   "blocked": {
+    "code": "requires_approved_app",
+    "message": "tiktok: publishing needs the owner's own developer app approved by the platform; NEXUS has not verified this flow against a live account",
+    "owner_action": [
+     "Register an app at https://developers.tiktok.com, add the Content Posting API product.",
+     "Get the video.publish scope approved; the creator authorises the app via Login Kit.",
+     "Until TikTok audits the app, every post is private (SELF_ONLY).",
+     "Store the user access token in the vault under the account's secret_ref, then connect_account(..., app_approved=True)."
+    ]
+   },
+   "remote": null
+  },
+  "instagram_reels": {
+   "manifest_id": "pub_8b44fcd0c8",
+   "deduplicated": false,
+   "visibility": "draft",
+   "approval": "pending",
+   "status": "draft",
+   "idempotency_key": "e5a2f228e49f39a1…",
+   "package_dir": "a3_data/publishing_demo/packages/instagram_reels",
+   "text_source": "deterministic (router off)",
+   "title": "",
+   "tags": [
+    "#Panels",
+    "#Solar"
+   ],
+   "thumbnail_text": "WHY SOLAR PANELS HATE",
+   "caption_placement": {
+    "band": [
+     0.14,
+     0.65
+    ],
+    "anchor_y": 0.57,
+    "x_margin": [
+     0.06,
+     0.06
+    ],
+    "basis": "platforms.yaml safe_zone (observed)"
+   },
+   "packaging_checks_ok": true,
+   "file_check_ok": true,
+   "file_check_failed": [],
+   "adapter": "meta_instagram",
+   "adapter_status": "requires_approved_app",
+   "status_after_run": "failed",
+   "blocked": {
+    "code": "requires_approved_app",
+    "message": "instagram_reels: publishing needs the owner's own developer app approved by the platform; NEXUS has not verified this flow against a live account",
+    "owner_action": [
+     "Use an Instagram professional (business/creator) account.",
+     "Create a Meta app with instagram_business_content_publish (Instagram Login) or instagram_content_publish + pages_read_engagement (Facebook Login); obtain Advanced Access through Meta app review.",
+     "Resumable uploads need Facebook Login for Business; otherwise the video must be at a public URL (video_url).",
+     "Store the access token in the vault, set the account's external_id to the IG user id, connect_account(..., app_approved=True)."
+    ]
+   },
+   "remote": null
+  },
+  "instagram_feed": {
+   "manifest_id": "pub_602ac2a393",
+   "deduplicated": false,
+   "visibility": "draft",
+   "approval": "pending",
+   "status": "draft",
+   "idempotency_key": "7e97c7f2a4167efb…",
+   "package_dir": "a3_data/publishing_demo/packages/instagram_feed",
+   "text_source": "deterministic (router off)",
+   "title": "",
+   "tags": [
+    "#Panels",
+    "#Solar"
+   ],
+   "thumbnail_text": "WHY SOLAR PANELS HATE",
+   "caption_placement": {
+    "band": [
+     0.1,
+     0.9
+    ],
+    "anchor_y": 0.82,
+    "x_margin": [
+     0.0,
+     0.0
+    ],
+    "basis": "platforms.yaml safe_zone (experimental)"
+   },
+   "packaging_checks_ok": true,
+   "file_check_ok": true,
+   "file_check_failed": [],
+   "adapter": "meta_instagram",
+   "adapter_status": "requires_approved_app",
+   "status_after_run": "failed",
+   "blocked": {
+    "code": "requires_approved_app",
+    "message": "instagram_reels: publishing needs the owner's own developer app approved by the platform; NEXUS has not verified this flow against a live account",
+    "owner_action": [
+     "Use an Instagram professional (business/creator) account.",
+     "Create a Meta app with instagram_business_content_publish (Instagram Login) or instagram_content_publish + pages_read_engagement (Facebook Login); obtain Advanced Access through Meta app review.",
+     "Resumable uploads need Facebook Login for Business; otherwise the video must be at a public URL (video_url).",
+     "Store the access token in the vault, set the account's external_id to the IG user id, connect_account(..., app_approved=True)."
+    ]
+   },
+   "remote": null
+  },
+  "facebook": {
+   "manifest_id": "pub_51b661395b",
+   "deduplicated": false,
+   "visibility": "draft",
+   "approval": "pending",
+   "status": "draft",
+   "idempotency_key": "7ed2c56d9cd70060…",
+   "package_dir": "a3_data/publishing_demo/packages/facebook",
+   "text_source": "deterministic (router off)",
+   "title": "Why solar panels hate heat",
+   "tags": [
+    "#Panels",
+    "#Solar"
+   ],
+   "thumbnail_text": "WHY SOLAR PANELS HATE",
+   "caption_placement": {
+    "band": [
+     0.7,
+     0.9
+    ],
+    "basis": "no safe zone documented; lower-third default (editorial)"
+   },
+   "packaging_checks_ok": true,
+   "file_check_ok": true,
+   "file_check_failed": [],
+   "adapter": "meta_facebook",
+   "adapter_status": "requires_approved_app",
+   "status_after_run": "failed",
+   "blocked": {
+    "code": "requires_approved_app",
+    "message": "facebook: publishing needs the owner's own developer app approved by the platform; NEXUS has not verified this flow against a live account",
+    "owner_action": [
+     "Facebook Pages only. Create a Meta app with pages_show_list, pages_read_engagement, pages_manage_posts and pass Meta app review.",
+     "Store the Page access token in the vault; external_id = Page id; connect_account(..., app_approved=True)."
+    ]
+   },
+   "remote": null
+  },
+  "snapchat_spotlight": {
+   "manifest_id": "pub_8589057c0e",
+   "deduplicated": false,
+   "visibility": "draft",
+   "approval": "pending",
+   "status": "draft",
+   "idempotency_key": "4181d7f8feb30bca…",
+   "package_dir": "a3_data/publishing_demo/packages/snapchat_spotlight",
+   "text_source": "deterministic (router off)",
+   "title": "",
+   "tags": [
+    "#Panels",
+    "#Solar"
+   ],
+   "thumbnail_text": "WHY SOLAR PANELS HATE",
+   "caption_placement": {
+    "band": [
+     0.15,
+     0.7
+    ],
+    "anchor_y": 0.62,
+    "x_margin": [
+     0.1,
+     0.15
+    ],
+    "basis": "platforms.yaml safe_zone (experimental)"
+   },
+   "packaging_checks_ok": true,
+   "file_check_ok": true,
+   "file_check_failed": [],
+   "adapter": "snapchat_manual",
+   "adapter_status": "manual_export_only",
+   "status_after_run": "failed",
+   "blocked": {
+    "code": "manual_only",
+    "message": "Snapchat Spotlight has no public organic upload API (Public Profile API is allowlist-only); upload the package manually",
+    "owner_action": [
+     "Open the package folder /home/user/new-project-money/.nexus/a3_data/publishing_demo/packages/snapchat_spotlight and follow MANUAL_UPLOAD.md",
+     "https://profile.snapchat.com > upload > 'Spotlight Snaps'"
+    ]
+   },
+   "remote": null
+  }
+ },
+ "youtube_quota_ledger": {
+  "day": "2026-11-12",
+  "videos_insert_calls": 0,
+  "videos_insert_limit": 100,
+  "units": 0,
+  "units_limit": 10000,
+  "basis": "local ledger of calls NEXUS made; the Cloud console is authoritative"
+ },
+ "real_upload_happened": false,
+ "statement": "NO real upload happened: no owner credentials are configured; every adapter stopped before any network call and recorded what the owner must do.",
+ "analytics_import": {
+  "file": "tests/fast/fixtures_publishing/youtube_studio_table.csv",
+  "note": "SYNTHETIC fixture shaped like a YouTube Studio 'Table data' export; numbers are test data, not metrics",
+  "imported": 2,
+  "skipped": [
+   {
+    "row": 2,
+    "reason": "total row"
+   }
+  ],
+  "unmapped_columns": [],
+  "map_verified": false,
+  "records": [
+   {
+    "schema": "nexus.AnalyticsRecord/1",
+    "platform": "youtube",
+    "video_id": "dQw4w9WgXcQ",
+    "date": "2026-10-01..2026-10-31",
+    "metrics": {
+     "duration_s": 312,
+     "views": 1000,
+     "watch_minutes": 1992.0,
+     "avg_view_duration_s": 119,
+     "avg_view_pct": 38.2,
+     "subscribers_net": 10,
+     "impressions": 15000,
+     "impressions_ctr_pct": 4.5
+    },
+    "source": "csv:youtube_studio",
+    "imported": 1794504209.3940594,
+    "project_id": "demo-publishing",
+    "title": "Example video one",
+    "published": "Oct 3, 2026"
+   },
+   {
+    "schema": "nexus.AnalyticsRecord/1",
+    "platform": "youtube",
+    "video_id": "abcDEF12345",
+    "date": "2026-10-01..2026-10-31",
+    "metrics": {
+     "duration_s": 58,
+     "views": 234,
+     "watch_minutes": 438.0,
+     "avg_view_duration_s": 112,
+     "subscribers_net": 2,
+     "impressions": 5000
+    },
+    "source": "csv:youtube_studio",
+    "imported": 1794504209.3941321,
+    "project_id": "demo-publishing",
+    "title": "Example video two",
+    "published": "Oct 10, 2026"
+   }
+  ]
+ },
+ "registry_diff": [
+  {
+   "platform": "youtube",
+   "field": "analytics_api",
+   "registry_says": "metric names not read this session",
+   "correct": "metrics verified on yt_metrics (views, estimatedMinutesWatched, averageViewDuration, averageViewPercentage, audienceWatchRatio, subscribersGained, ...); endpoint youtubeanalytics.googleapis.com/v2/reports; impressions/CTR not on the metrics page",
+   "source": "https://developers.google.com/youtube/analytics/metrics",
+   "origin": "capabilities.yaml corrections"
+  },
+  {
+   "platform": "youtube",
+   "field": "upload_api",
+   "registry_says": "no thumbnail cost / scope",
+   "correct": "add scope youtube.upload, thumbnails.set = 50 units, resumable protocol (yt_resumable)",
+   "source": "https://developers.google.com/youtube/v3/determine_quota_cost",
+   "origin": "capabilities.yaml corrections"
+  },
+  {
+   "platform": "facebook",
+   "field": "analytics_api",
+   "registry_says": null,
+   "correct": "GET /{video-id}/video_insights with total_video_views, total_video_avg_time_watched, total_video_retention_graph (Page videos only, 2 years)",
+   "source": "https://developers.facebook.com/docs/graph-api/reference/video/video_insights/",
+   "origin": "capabilities.yaml corrections"
+  },
+  {
+   "platform": "snapchat_spotlight",
+   "field": "upload_api",
+   "registry_says": null,
+   "correct": "still no organic upload API, but note the allowlist-only Public Profile API (scope snapchat-profile-api) and that the Marketing API is ads-only",
+   "source": "https://developers.snap.com/api/marketing-api/Public-Profile-API/GetStarted",
+   "origin": "capabilities.yaml corrections"
+  },
+  {
+   "platform": "instagram_reels",
+   "field": "upload_api",
+   "registry_says": "no PPA / resumable note",
+   "correct": "resumable upload only with Facebook Login for Business; Page Publishing Authorization blocks publishing; container EXPIRED after 24 h",
+   "source": "https://developers.facebook.com/docs/instagram-platform/content-publishing",
+   "origin": "capabilities.yaml corrections"
+  },
+  {
+   "platform": "snapchat_spotlight",
+   "field": "analytics_api",
+   "registry_says": null,
+   "correct": "documented in capabilities.yaml (see api.analytics)",
+   "origin": "automatic diff"
+  }
+ ],
+ "seconds": 250.3
+}

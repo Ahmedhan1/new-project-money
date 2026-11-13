@@ -97,7 +97,7 @@ def _repo(b: StorageBackend, pw: str | None, create: bool) -> tuple[dict, bytes 
         t = Path(d) / "repo.json"
         if b.exists("repo.json"):
             b.get("repo.json", t)
-            repo = json.loads(t.read_text())
+            repo = json.loads(t.read_text(encoding="utf-8"))
         elif create:
             repo = {"format": FORMAT, "created": time.time(), "encrypted": bool(pw)}
             if pw:
@@ -152,6 +152,13 @@ def collect(tiers: list[str], tmp: Path) -> list[dict]:
             add(tmp / "nexus.db", "state", "nexus.db")
         for n in ("settings.json", "storage.json"):
             add(H / n, "state")
+        # Vault entries (Drive/Kaggle connection credentials, worker-token hashes) are already Fernet-encrypted at rest.
+        # They are backed up as ciphertext; the vault KEY never is (vault_key_excluded): a backup copy alone can never
+        # decrypt them. The key is backed up offline by the owner (docs/ACCOUNT1_DISASTER_RECOVERY.md).
+        sec = H / "secrets"
+        if sec.is_dir():
+            for f in sorted(sec.glob("*.secret")):
+                add(f, "state")
         add(config.MODELS / "installed.json", "state")  # the model manifest, not the weights
     per_project = {"metadata": ("timelines", "reports"), "production": ("audio",), "originals": ("media",), "exports": ("renders",)}
     for tier in TIERS:
@@ -437,9 +444,37 @@ def restore(b: StorageBackend, target: str | Path, sid: str | None = None, pw: s
                 bad.append(f"{f['path']}: {e}")
     rewritten = relocate(target, m["home"])
     refs = check_references(target)
-    return {"ok": not bad and refs.get("ok", False), "snapshot": sid, "target": str(target), "files_restored": n, "files_expected": len(m["files"]),
+    leaked = [f["path"] for f in m["files"] if Path(f["path"]).name == "vault.key"]
+    if leaked:
+        bad.append("snapshot contains a vault key file (it must never be backed up): " + ", ".join(leaked))
+    return {"ok": not bad and refs.get("ok", False), "vault": vault_check(target), "snapshot": sid, "target": str(target), "files_restored": n, "files_expected": len(m["files"]),
             "problems": bad, "paths_rewritten": rewritten, "references": refs, "seconds": round(time.time() - t0, 2),
             "use": f"set NEXUS_HOME={target} (or move it over the old data folder after checking it) and start NEXUS"}
+
+
+def vault_check(home: Path, key: bytes | None = None) -> dict:
+    """Can the restored vault entries be decrypted? Uses NEXUS_VAULT_KEY (or the given key); never reads a key file
+    from the restored tree and never returns a value. `undecryptable` > 0 with a key present means it is the wrong key."""
+    sec = Path(home) / "secrets"
+    files = sorted(sec.glob("*.secret")) if sec.is_dir() else []
+    key = key or (os.environ.get("NEXUS_VAULT_KEY") or "").encode() or None
+    out = {"secrets": len(files), "key_available": bool(key), "decryptable": None, "undecryptable": None,
+           "key_file_in_restore": (sec / "vault.key").exists()}
+    if not files or not key:
+        return out
+    from cryptography.fernet import Fernet, InvalidToken
+    try:
+        fk = Fernet(key)
+    except ValueError:
+        return {**out, "key_available": False, "error": "the provided vault key is not a valid Fernet key"}
+    ok = 0
+    for f in files:
+        try:
+            fk.decrypt(json.loads(f.read_text(encoding="utf-8"))["v"].encode())
+            ok += 1
+        except (InvalidToken, KeyError, ValueError):
+            pass
+    return {**out, "decryptable": ok, "undecryptable": len(files) - ok}
 
 
 def restore_drill(only: str | None = None) -> dict:

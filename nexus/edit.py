@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from . import project as prj
 from .timeline import ops, subs
-from .timeline.render import clip_duration, clip_starts
+from .timeline.render import clip_duration, clip_starts, total_duration
 
 
 def _speech_ranges(an: dict, pad: float = 0.15, max_gap: float = 0.6) -> list[dict]:
@@ -98,12 +98,16 @@ def retime_subtitles(tl: dict, analyses: dict[str, dict]) -> dict:
         if c["type"] != "video" or not an or not an.get("transcript") or c.get("mute"):
             continue
         sp = float(c.get("speed", 1.0))
-        words = [w for s in an["transcript"]["segments"] for w in s["words"] if c["in"] - 0.05 <= w["start"] and w["end"] <= c["out"] + 0.25]
+        # a word belongs to the clip that contains its midpoint: a word on a cut is captioned once, not in both clips
+        words = [w for s in an["transcript"]["segments"] for w in s["words"] if c["in"] <= (w["start"] + w["end"]) / 2 < c["out"]]
         local = subs.cues_from_transcript([{"start": 0, "end": 0, "text": "", "words": words}]) if words else []
         end_of_clip = start + clip_duration(c)
         for q in local:
             s0 = start + (q["start"] - c["in"]) / sp
             cues.append({"start": round(max(start, s0), 3), "end": round(min(end_of_clip, start + (q["end"] - c["in"]) / sp), 3),
                          "text": q["text"]})
-    tl["subtitles"] = subs.fix_timing([q for q in cues if q["end"] > q["start"]])
+    total = total_duration(tl)
+    fixed = subs.fix_timing([q for q in cues if q["end"] > q["start"]], breaks=[st for st in clip_starts(tl)[1:]])
+    # fix_timing stretches very short cues to a minimum length; never past the end of the programme
+    tl["subtitles"] = [{**q, "end": round(min(q["end"], total), 3)} for q in fixed if q["start"] < total - 0.05]
     return tl

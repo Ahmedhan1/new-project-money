@@ -1,0 +1,65 @@
+{
+ "kind": "three-account integration result",
+ "date": "2026-11-13",
+ "inputs": {
+  "account1": {
+   "sha": "f9d8f1131788d5848594bb78c61bff3b86d400e1",
+   "branch": "work/account-1-cloud-platform",
+   "note": "same tree as PR #3 merge commit b54c952 (PR #4)"
+  },
+  "account2": {
+   "sha": "d979df1e390abc48e79a7e6645229968a5b94107",
+   "branch": "work/account-2-cinematic-engine",
+   "note": "PR #7 (work/account-2-asset-library-storage, stacked on PR #6) is NOT included"
+  },
+  "account3": {
+   "sha": "62414bf1c69e0b81f53accc791e2c5d2bae65c81",
+   "branch": "work/account-3-intelligence-growth",
+   "note": "includes batch_llm manifest fix 7572acb"
+  }
+ },
+ "procedure": "scripts/integration/integrate_heads.sh A1 A2 A3 <dir> <branch>: fresh worktree at A1, merge A2, merge A3 (keep-both resolutions), integration/contracts_v1/apply.sh",
+ "merged_commit_local": "0881dff1cbbae4b96f07b09c60feac0f86128b57",
+ "merged_tree": "b962b4e915f5bc11d72f163e57934e0a8d98b8e9",
+ "reproduced": "second run of the checked-in script produced the identical tree b962b4e",
+ "pushed": false,
+ "environment": {
+  "os": "Linux (cloud container)",
+  "python": "3.13.18",
+  "deps": "venv from merged requirements-ci.txt",
+  "requirements_ci_sha256": "cba808aa708a70ffb3def09baee744c97198d409cfcf28b2deeb53470b997210"
+ },
+ "results": {
+  "apply_sh_focused_contract_tests": {
+   "passed": 42,
+   "failed": 0
+  },
+  "fast_suite": {
+   "tests": 874,
+   "passed": 862,
+   "failed": 0,
+   "errors": 0,
+   "skipped": 12,
+   "seconds": 411.9,
+   "junit_sha256": "4d21d5b408c85814805e46bb43a962d01f9861816928bb509f7fe27bbe411c71"
+  },
+  "skip_reasons": [
+   "SigLIP int8 ONNX files not on this machine (opt-in download)",
+   "no local Piper voice to make a real speech fixture",
+   "no local TTS voice to make a speech fixture (FileNotFoundError)",
+   "no local voices/speaker model for a two-voice fixture (FileNotFoundError)",
+   "opentimelineio not installed (optional)",
+   "rclone not installed",
+   "tesseract not installed"
+  ],
+  "batch_llm_cross_account": "test_intel_batch_llm_integration.py + test_intel_batch_manifest.py + test_production.py + test_cloud_security.py: 61 passed",
+  "production_smoke": "live serve with NEXUS_ENV=production on the merged tree: unconfigured exit 1; configured 12/12 gates READY; /health/ready 200; owner routes 401 anon / 200 token; /docs 401; second instance refused; SIGTERM graceful + audited; off-home backup + restore drill verified; 0 secret occurrences in logs/backups; wrong vault key -> NOT READY"
+ },
+ "not_run": [
+  "Windows CI on the merged tree",
+  "Windows clean-machine E2E on the merged tree",
+  "GitHub-hosted Linux CI on the merged tree"
+ ],
+ "why_not_run": "GitHub Actions jobs for this repository fail before any step starts (steps=null, no runner) since ~10:50 UTC 2026-11-13; account-level, not code",
+ "release_gate": "NOT PASSED: this is a local Linux result only; PR #3 does not contain A2/A3; merge order and Windows runs pending owner"
+}

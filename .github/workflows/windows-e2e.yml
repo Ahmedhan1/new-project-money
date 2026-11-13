@@ -1,0 +1,59 @@
+name: Windows end-to-end (clean machine)
+# Runs the REAL launchers on a fresh GitHub-hosted Windows VM: NEXUS_SETUP.bat -SkipModels -> NEXUS_START.bat ->
+# API end-to-end (project, director job, render, Arabic/Chinese captions under a non-ASCII data folder) -> NEXUS_BACKUP.bat
+# (verified backup + restore drill) -> NEXUS_STOP.bat. This is a clean Windows VM, NOT the owner's laptop.
+# Windows minutes count double on private repositories: it runs only when launchers/scripts/workflows change, on main,
+# or on demand.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    paths: ["NEXUS_*.bat", "scripts/**", ".github/workflows/windows-e2e.yml", "nexus/launcher.py", "requirements.txt"]
+permissions:
+  contents: read
+jobs:
+  windows-e2e:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    env:
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Data folder with a non-ASCII path (the UTF-8 bug class)
+        shell: pwsh
+        run: Add-Content -Path $env:GITHUB_ENV -Value "NEXUS_HOME=$env:RUNNER_TEMP\NEXUS dâta 数据" -Encoding utf8
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: FFmpeg (the owner's setup installs it with winget; runners use chocolatey)
+        run: choco install ffmpeg -y --no-progress
+      - name: NEXUS_SETUP.bat -SkipModels (venv + all requirements, as on the owner's PC)
+        shell: cmd
+        run: echo.| NEXUS_SETUP.bat -SkipModels
+      - name: NEXUS_START.bat (preflight, worker + API, health check)
+        shell: cmd
+        run: echo.| NEXUS_START.bat --no-browser
+      - name: End-to-end through the API
+        shell: cmd
+        run: .venv\Scripts\python.exe scripts\acceptance\windows_e2e.py
+      - name: NEXUS_STATUS.bat
+        shell: cmd
+        run: echo.| NEXUS_STATUS.bat
+      - name: NEXUS_BACKUP.bat (verified backup + restore drill)
+        shell: cmd
+        run: echo.| NEXUS_BACKUP.bat
+      - name: NEXUS_STOP.bat
+        if: always()
+        shell: cmd
+        run: echo.| NEXUS_STOP.bat
+      - name: Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-e2e-report
+          path: |
+            e2e_report.json
+            ${{ runner.temp }}/NEXUS*/logs/**
+          if-no-files-found: ignore
+          retention-days: 7

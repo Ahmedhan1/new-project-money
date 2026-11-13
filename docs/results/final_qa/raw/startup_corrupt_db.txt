@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import nexus.api
+  File "/home/user/qa_cand/nexus/api.py", line 90, in <module>
+    jobs.recover(api_worker="")
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/user/qa_cand/nexus/jobs.py", line 215, in recover
+    for r in db.query("SELECT id,stage,retries,max_retries,heartbeat,worker FROM jobs WHERE status='running' AND durable=1"):
+             ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/qa_cand/nexus/db.py", line 120, in query
+    return [dict(r) for r in conn().execute(sql, args).fetchall()]
+                             ~~~~^^
+  File "/home/user/qa_cand/nexus/db.py", line 96, in conn
+    _conn.execute("PRAGMA journal_mode=WAL")
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.DatabaseError: file is not a database

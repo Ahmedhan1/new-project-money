@@ -125,8 +125,12 @@ def test_corruption_and_missing_objects_are_detected(home, tmp_path):
     storage.save_destinations([_dest("disk2", tmp_path / "disk2")])
     assert backup.run_backup()["ok"]
     b = storage.open_destination(storage.destinations()[0])
-    blobs = sorted((tmp_path / "disk2" / "blobs").rglob("*"), key=lambda f: f.stat().st_size if f.is_file() else 0)
-    big = blobs[-1]
+    # corrupt the MEDIA file's blob (content-addressed by SHA-256). Picking "the largest blob" broke once the database
+    # grew past the media file: the database changes between backups, so its old blob can never self-heal.
+    import hashlib
+    sha = hashlib.sha256(b"original camera footage " * 4000).hexdigest()
+    big = tmp_path / "disk2" / "blobs" / sha[:2] / sha
+    assert big.is_file()
     data = bytearray(big.read_bytes())
     data[100] ^= 0xFF                                                         # silent bit rot, same size
     big.write_bytes(data)

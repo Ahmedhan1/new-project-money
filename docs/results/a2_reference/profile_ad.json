@@ -1,0 +1,130 @@
+{
+ "schema": "nexus.ReferenceStyleProfile/1",
+ "name": "benchmark:ad",
+ "source": {
+  "uri": "file:///home/user/new-project-money/.nexus/benchmarks/ad/source.mp4",
+  "duration": 240.007,
+  "analysed_fps": 2.0
+ },
+ "metrics": {
+  "duration": 240.007,
+  "shot_length": {
+   "n": 13,
+   "mean": 18.462,
+   "median": 6.306,
+   "p10": 1.041,
+   "p90": 55.956,
+   "std": 22.142
+  },
+  "cuts_per_min": 3.0,
+  "first_3s": {
+   "cuts": 1,
+   "speech_s": 0.71,
+   "text_frames_share": 0.0,
+   "motion": 0.0802,
+   "first_speech_s": 2.29
+  },
+  "first_10s": {
+   "cuts": 1,
+   "speech_s": 7.71,
+   "text_frames_share": 0.0,
+   "motion": 0.0875,
+   "first_speech_s": 2.29
+  },
+  "hook": {
+   "t": 20.03,
+   "score": 0.55,
+   "first_speech_s": 2.29
+  },
+  "shot_types": {
+   "close-up": 0.077,
+   "medium": 0.077,
+   "wide": 0.846
+  },
+  "shot_type_changes_per_min": 0.75,
+  "scene_variety": 0.308,
+  "visual_density": {
+   "motion": 0.0634,
+   "edges": 0.05
+  },
+  "cutaways_per_min": 1.75,
+  "on_screen_text_share": 0.106,
+  "on_screen_text_method": "edge-density heuristic per frame band (not OCR) + SigLIP zero-shot 'text or a title card' / 'a chart or diagram' shots",
+  "speech_share": 0.568,
+  "music_bed_share": 0.992,
+  "audio_accents_per_min": 6.0,
+  "pattern_interrupt_s": {
+   "n": 25,
+   "mean": 9.6,
+   "median": 4.17,
+   "p10": 1.228,
+   "p90": 21.488,
+   "std": 13.682
+  },
+  "ending": {
+   "speech_ends_before_s": 61.54,
+   "text_share": 0.0,
+   "motion": 0.0487,
+   "fade_to_black": false,
+   "kind": "fade_out"
+  },
+  "thumbnail_candidates": [
+   {
+    "t": 80.25,
+    "score": 0.507,
+    "why": [
+     "sharpness, colour, exposure"
+    ]
+   },
+   {
+    "t": 106.25,
+    "score": 0.466,
+    "why": [
+     "sharpness, colour, exposure"
+    ]
+   },
+   {
+    "t": 177.25,
+    "score": 0.46,
+    "why": [
+     "sharpness, colour, exposure"
+    ]
+   }
+  ],
+  "wpm": 102.7,
+  "elapsed_s": 3.5
+ },
+ "structure": [
+  {
+   "t0": 0.0,
+   "t1": 3.0,
+   "role": "first_3s"
+  },
+  {
+   "t0": 0.0,
+   "t1": 10.0,
+   "role": "first_10s"
+  },
+  {
+   "t0": 20.03,
+   "t1": 23.39,
+   "role": "hook"
+  },
+  {
+   "t0": 232.01,
+   "t1": 240.01,
+   "role": "ending:fade_out"
+  }
+ ],
+ "rights": {
+  "basis": "public-domain",
+  "source": "https://archive.org/details/ClassicT1948_6",
+  "licence": "Public Domain (item licenseurl)",
+  "kept": "numbers and timestamps only; no frames, text or sound of the reference"
+ },
+ "method": {
+  "visual": "siglip-base-patch16-224-int8",
+  "faces": true,
+  "text": "edge-density heuristic per frame band (not OCR) + SigLIP zero-shot 'text or a title card' / 'a chart or diagram' shots"
+ }
+}
