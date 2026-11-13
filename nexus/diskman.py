@@ -93,7 +93,7 @@ def save_settings(new: dict) -> dict:
 # ------------------------------------------------------------------ measuring
 def _walk(root: Path) -> tuple[int, int]:
     total = n = 0
-    if not root.exists():
+    if not root.exists() or root.is_symlink():  # a linked folder (e.g. shared models) is not stored here
         return 0, 0
     if root.is_file():
         return root.stat().st_size, 1

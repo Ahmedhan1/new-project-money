@@ -83,6 +83,7 @@ def test_cut_connection_resumes_the_same_drive_session_without_duplicates(drive)
     r2 = archive.get(rec["id"])
     assert r2["state"] == "verified", r2.get("last_error")
     assert len(_drive_masters(drive)) == 1
+    assert "resumed the interrupted transfer" in " ".join(e[1] for e in r2["events"])   # same Drive session continued
 
 
 def test_remote_copy_damaged_after_archive_blocks_local_deletion(drive):
