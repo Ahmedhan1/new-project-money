@@ -6,6 +6,7 @@ scenedetect[opencv-headless]
 pillow
 numpy
 scipy>=1.11.2,<2  # nexus/audio DSP (filters, STFT, resampling); binary wheels for Python 3.12 on Linux and Windows
+onnxruntime>=1.17,<2  # CPU inference: Real-ESRGAN upscale, matting, SigLIP visual understanding (no GPU, no model downloads in CI)
 piper-tts
 huggingface_hub
 arabic-reshaper
