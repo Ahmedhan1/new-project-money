@@ -740,14 +740,35 @@ def score_results(raw: dict) -> dict:
     return out
 
 
+REASONING_PREAMBLE = re.compile(r"^\s*(okay|ok|hmm+|alright|let me|let's|we are|we need|first,|so,? i need|i need to)\b", re.I)
+LEAK_LIMIT = 0.3
+_V2_VALID = b2.valid_run
+
+
+def valid_run(m: dict) -> tuple[bool, str]:
+    """V2 rule (mostly empty answers) + reasoning leak: a non-thinking run whose answers start with visible reasoning
+    ("Okay, so I need to...") measured the harness (the thinking switch was not honoured, answers were cut at the
+    token cap), not the model."""
+    ok, why = _V2_VALID(m)
+    if not ok:
+        return ok, why
+    rows = m.get("rows") or []
+    if not (m.get("spec") or {}).get("think"):
+        leaked = sum(1 for r in rows if REASONING_PREAMBLE.match(r.get("text") or ""))
+        if leaked / max(1, len(rows)) > LEAK_LIMIT:
+            return False, (f"{leaked}/{len(rows)} answers start with visible reasoning (thinking switch not honoured; answers "
+                           "truncated at the token cap) - harness issue, not a quality measurement")
+    return True, why
+
+
 def routing(scored: dict) -> dict:
-    """V2 routing over V3 capabilities. Dialect adaptation ALWAYS requires a native reviewer, whatever it scores."""
-    saved = b2.TASK_CAPS
+    """V2 routing over V3 capabilities, valid runs only. Dialect adaptation ALWAYS requires a native reviewer."""
+    saved, saved_valid = b2.TASK_CAPS, b2.valid_run
     try:
-        b2.TASK_CAPS = TASK_CAPS
+        b2.TASK_CAPS, b2.valid_run = TASK_CAPS, valid_run
         r = b2.routing(scored)
     finally:
-        b2.TASK_CAPS = saved
+        b2.TASK_CAPS, b2.valid_run = saved, saved_valid
     r["dialect_adaptation"]["requires_human_review"] = True
     for t, x in r.items():
         top = x["ranking"][:2]

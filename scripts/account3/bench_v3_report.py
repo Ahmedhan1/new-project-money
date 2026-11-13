@@ -22,8 +22,9 @@ def main() -> None:
     n = Counter(it["cap"] for it in bench_v3.taskset())
     full = {k: v for k, v in d["models"].items() if k not in d.get("incomplete", {})}
     rows = []
-    for k, m in sorted(full.items(), key=lambda x: -x[1]["overall"]):
-        ok, why = bench_v2.valid_run(m)
+    invalid = {k: bench_v3.valid_run(m)[1] for k, m in full.items() if not bench_v3.valid_run(m)[0]}
+    for k, m in sorted(full.items(), key=lambda x: (x[0] in invalid, -x[1]["overall"])):
+        ok, why = bench_v3.valid_run(m)
         spec = bench_v2.MODELS.get(k, {})
         cells = []
         for c in caps:
@@ -47,6 +48,7 @@ def main() -> None:
 context 4 096 tokens (8 192 for long-context items). Free Kaggle GPU quota only; no paid endpoint was touched.
 Items and scoring rules: `nexus/intelligence/model_router/bench_v3.py` (docstring lists every rule). Raw outputs: {runs};
 scored: `docs/results/account3/models_bench_v3.json`. Incomplete runs (excluded from the table): {inc}.
+Invalid runs (shown last, excluded from routing): {"; ".join(f"{k}: {v}" for k, v in invalid.items()) or "none"}.
 
 Reproduce: `python -m nexus.intelligence.model_router.bench_v3 kernel --models A,B --out DIR --slug SLUG`, push with
 `scripts/account3/kaggle_cli.py kernels push -p DIR`, then `scripts/account3/bench_v3_score.py OUT raw_*.json` and

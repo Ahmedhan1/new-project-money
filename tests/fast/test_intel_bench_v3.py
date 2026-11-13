@@ -159,3 +159,15 @@ def test_degenerate_outputs_earn_almost_nothing(junk):
             assert sum(xs) / len(xs) <= 0.29, (cap, junk)
         else:
             assert sum(xs) / len(xs) <= 0.12, (cap, junk, sum(xs) / len(xs))
+
+
+def test_visible_reasoning_in_a_non_thinking_run_invalidates_it():
+    from nexus.intelligence.model_router import bench_v3 as b3
+    leak = {"spec": {"think": False}, "rows": [{"text": "Okay, so I need to translate this..."}] * 4 + [{"text": "Bonjour."}] * 6}
+    ok, why = b3.valid_run(leak)
+    assert not ok and "visible reasoning" in why
+    assert b3.valid_run({**leak, "spec": {"think": True}})[0]           # thinking models are judged on their stripped answer
+    assert b3.valid_run({"spec": {}, "rows": [{"text": "Bonjour."}] * 10})[0]
+    scored = {"good": {"capabilities": {c: 0.5 for c in b3.CAPS + ["dialect"]}, "ci95": {}, "rows": [{"text": "x"}], "spec": {}},
+              "leaky": {**leak, "capabilities": {c: 0.9 for c in b3.CAPS + ["dialect"]}, "ci95": {}}}
+    assert {x["best"] for x in b3.routing(scored).values()} == {"good"}

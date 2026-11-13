@@ -1,4 +1,33 @@
-# Account 3 — open-weight model benchmark V2 (Kaggle GPUs)
+# Account 3 — open-weight model benchmarks
+
+> **Current benchmark: V3** (`docs/ACCOUNT3_MODEL_BENCHMARKS_V3.md`). It has 184 items, at least 15 per capability, and 8
+> models ran on the authorised free Kaggle T4 worker on 2026-11-13 (kernels a/b/c, every item answered, no errors).
+> V2 below is kept as history.
+>
+> What V3 shows, and its limits:
+> - **No routed task has a best model that is separable from the second.** Every 95 % interval overlaps. The six valid
+>   non-thinking runs score 0.805–0.84 overall, which is a tie on this item set.
+> - **Ceiling effects.** `conflicts` is 1.00 for every valid model and translation (chrF-gated) is about 0.95. Those
+>   items no longer discriminate, so harder items are needed before choosing between models.
+> - **Dialect is weak everywhere.** Egyptian marker scores are at most 0.60 and Gulf at most 0.31, and both are lexicon
+>   proxies. Dialect output always requires a native reviewer.
+> - **qwen3-4b (no thinking) is an invalid run, not a weak model.** 79 of 184 answers start with visible reasoning
+>   ("Okay, so I need to…"): Ollama did not honour the thinking switch, and the answers were cut at the token cap.
+>   `bench_v3.valid_run` now detects this and excludes such runs from routing. The V2 row for qwen3-4b below
+>   (summarization 0.0, instruction 0.0) has the same signature and should be read the same way.
+> - **qwen3-4b-think** returned 68/184 empty answers: it spent its budget thinking. It counts as valid (under the 50 %
+>   rule) but is degraded.
+> - These are rule-based scores on one fixed item set. They are not production-grade quality claims. Critical tasks keep
+>   `requires_human_review`, and low-scoring outputs stay drafts.
+>
+> Account 1 `batch_llm` path:
+> - `bench_v2.account1_manifest` and `bench_v3 account1` now emit one ProductionJobManifest per model, with the prompts
+>   inline (D-17).
+> - That path has been tested on Account 1's real dispatcher with the echo engine only.
+> - These V3 numbers come from A3's own Kaggle kernels (Ollama, GGUF), not from batch_llm, whose transformers engine
+>   loads fp16 weights. Models above 24 GiB fp16 (ministral-3-14b, glm-4.7-flash) are not batch_llm-eligible.
+
+## V2 (Kaggle GPUs, 2026-11-12)
 
 **What ran:** 36 auto-scored items, identical for every model (`nexus/intelligence/model_router/bench_v2.py`), on
 Account 1's Kaggle worker (2× NVIDIA T4, 15 GB each) through Ollama with GGUF **Q4_K_M** weights, temperature 0,
