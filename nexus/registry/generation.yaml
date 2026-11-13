@@ -596,6 +596,7 @@ models:
     params_b: 5
     repo_gb: 34.2
     min_vram_gb: 24
+    measured: "Runs on Kaggle 2 x T4 15 GB (FP16 transformer sharded 15/15 blocks, BF16-emulated text encoder freed after encoding, tiled FP32 VAE): 1280x704x121 @ 24 fps, 30 steps = 47 min + 21 min decode (docs/results/wan22_5b/t2v720.json)"
     cpu: {feasible: "no", speed: "policy", source: policy}
     resolution: "1280x704, 24 fps"
     max_seconds: 5

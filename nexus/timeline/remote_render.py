@@ -110,5 +110,5 @@ def register_account1_tasks() -> bool:
         return False
     T.register(TASK_RENDER, T.TaskSpec(gpu="no", resumable=True, description="Account 2: compiled FFmpeg render steps -> master.mp4"))
     T.register(TASK_WAN, T.TaskSpec(gpu="required", min_vram_gb=WAN_MIN_VRAM_GB, internet=True,
-                                    description="Account 2: Wan text/image-to-video on a GPU worker (GPU-READY, UNVERIFIED)"))
+                                    description="Account 2: Wan 2.2 TI2V-5B text/image-to-video on a GPU worker (verified on Kaggle T4 x2, docs/results/wan22_5b)"))
     return True

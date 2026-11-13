@@ -165,12 +165,11 @@ tasks:
   - id: GEN-2
     priority: 3
     title: "AI video generation (text/image-to-video clips)"
-    status: blocked
-    blocked_by: "No GPU on the build machine and no authorised free GPU account. compute.SimulatedRemoteGPU is a simulation, not a provider."
+    status: tested
     acceptance: "A 3-5 s generated clip is produced on an authorised free GPU worker and inserted into a timeline with provenance."
-    test: "End-to-end on a real Kaggle session."
-    next: "Needs the user's Kaggle account (free, phone-verified) - then implement the real job hand-off in compute.KaggleWorker."
-    evidence: "AnimateDiff on 4 CPU cores ran (docs/results/t2v_cpu_bench.json) but the output is noise at feasible settings: CPU is not usable for video generation."
+    test: "End-to-end on a real Kaggle session: python scripts/acceptance/wan22_5b_live.py --profile t2v720"
+    next: "Generation is real (A2-GPU: Wan 2.2 TI2V-5B 720p on Kaggle T4 x2). Remaining: insert a generated clip into a timeline from the UI (generation job -> timeline clip with its GeneratedMediaManifest)."
+    evidence: "docs/results/wan22_5b/t2v720.json + media/t2v_1280x704_121f_24fps.mp4; CPU is not usable (docs/results/t2v_cpu_bench.json)."
   - id: GEN-3
     priority: 3
     title: "VFX basics (background removal/keying, masks, compositing) and enhancement (stabilise, upscale, interpolate)"
@@ -734,11 +733,12 @@ tasks:
     next: "A2-GPU."
   - id: A2-GPU
     priority: 2
-    title: "Run Wan 2.1 T2V-1.3B once on an authorised GPU worker (Account 1 task a2_wan_video) and classify the result"
-    status: blocked
+    title: "Run Wan 2.2 TI2V-5B on the authorised GPU worker (task a2_wan_video) and classify the result"
+    status: verified
     acceptance: "A real model output on a named GPU, classified generated-video by the guard, with WorkerExecutionResult metrics."
     test: "Account 1 dispatcher with an authorised GPU provider; scripts/gpu_video_bench.py"
-    next: "Blocked by owner: authorise a free GPU worker (Kaggle/Colab/own GPU). No paid compute."
+    evidence: "docs/results/wan22_5b/t2v720.json (Kaggle T4 x2, 1280x704, 121 frames @ 24 fps, 30 steps, rjob_620150232fa9, sha256 26c351fd...), smoke T2V/I2V + shard/tiled-decode check (44.55 dB vs reference); Account 2 guard classifies it generated-video (independent motion): t2v720_generated_media_manifest.json"
+    next: "720p I2V (i2v720 profile) - see docs/FINAL_RELEASE_REPORT.md section 4."
   - id: A2-AUDIO-REVIEW
     priority: 2
     title: "Owner listens to the audio reviewer package and records a verdict per item"

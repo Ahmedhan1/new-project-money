@@ -6,8 +6,8 @@
 # Execution strategy (measured on Kaggle T4 x2, not assumed): `enable_model_cpu_offload()` keeps modules on ONE GPU.
 # Instead: (1) the UMT5-XXL text encoder (~11 GB, BF16 - emulated on T4, probed with a real matmul first) encodes every
 # prompt on cuda:1 and is then freed; (2) the 5B transformer (FP16: T4/sm_75 has no native BF16; BF16 on sm_80+) is
-# layer-sharded, blocks 0-14 on cuda:0 and 15-29 on cuda:1; (3) the VAE (FP32) encodes the I2V image on cuda:0 and
-# decodes on cuda:1, untiled when it fits, else with our first-chunk-aware spatial tiling (diffusers 0.35.2's
+# layer-sharded, blocks 0-14 on cuda:0 and 15-29 on cuda:1; (3) the VAE (FP32) lives on cuda:1: it encodes the I2V
+# image there (latents handed to cuda:0) and decodes there, untiled when it fits, else with our first-chunk-aware spatial tiling (diffusers 0.35.2's
 # tiled_decode drops first_chunk and unpatchify for the Wan 2.2 VAE and crashes). NaN/Inf, black or flat output is a
 # failure and is never exported. No silent fallback to the 1.3B model.
 
@@ -254,6 +254,21 @@ def task_a2_wan_video(ctx: Context) -> dict:
     gc.collect()
     torch.cuda.empty_cache()
     ctx.log(f"text encoder freed: cuda:{dev_aux.index} free {torch.cuda.mem_get_info(dev_aux)[0] / 2 ** 30:.1f} GB")
+    if n > 1:
+        # the VAE lives on cuda:1 for the whole job; the I2V image encode runs there and its latent distribution is
+        # handed back to cuda:0 (measured: an fp32 720p encode on cuda:0 left ~2 GB of allocator cache and the first
+        # I2V denoising step ran out of memory, rjob_5b6d09efb6d1)
+        from diffusers.models.autoencoders.vae import DiagonalGaussianDistribution
+        from diffusers.models.modeling_outputs import AutoencoderKLOutput
+        vae.to(dev_aux)
+        _enc = vae.encode
+
+        def _encode_on_aux(x, return_dict=True):
+            d = DiagonalGaussianDistribution(_enc(x.to(dev_aux)).latent_dist.parameters.to(dev_main))
+            torch.cuda.empty_cache()
+            return AutoencoderKLOutput(latent_dist=d) if return_dict else (d,)
+        vae.encode = _encode_on_aux
+        torch.cuda.empty_cache()
     shard = None
     if n > 1 and ctx.params.get("shard", True):
         shard = _wan_shard(tr, dev_main, dev_aux)
@@ -274,7 +289,7 @@ def task_a2_wan_video(ctx: Context) -> dict:
             torch.cuda.reset_peak_memory_stats(i)
         pe, ne = embeds[k]
         pe, ne = pe.to(dev_main, tdtype), (ne.to(dev_main, tdtype) if ne is not None else None)
-        vae.to(dev_main)
+        vae.to(dev_main if n == 1 else dev_aux)
         g = torch.Generator(device=dev_main).manual_seed(seed)
         g_t = _t.time()
         step_times = []
@@ -338,13 +353,13 @@ def task_a2_wan_video(ctx: Context) -> dict:
         done[key] = res
         ctx.checkpoint(f"wan-{key}", {"done": done})
         ctx.log(f"{key}: {mode} {W}x{H}x{F} {steps} steps gen {gen_s:.0f}s decode {dec_s:.0f}s motion {q['mean_abs_frame_diff']}")
-        vae.to(dev_main)
+        vae.to(dev_main if n == 1 else dev_aux)
         torch.cuda.empty_cache()
     peak.halt.set()
     peak.join(timeout=3)
     bench = {"model": ctx.params["model"], "repo": repo, "revision": rev, "licence": "apache-2.0", "diffusers_pinned": _WAN_DIFFUSERS,
              "env": env, "strategy": {"transformer": f"{tdtype}, " + (f"blocks split {shard} across {dev_main}/{dev_aux}" if shard else f"on {dev_main}"), "text_encoder": te_mode + (f" on {dev_aux}" if te_mode == "gpu-bf16" else ""),
-                                      "vae": f"fp32 encode on {dev_main}, fp32 decode on {dev_aux} (untiled when it fits, else own first-chunk-aware tiling)", "cpu_offload": False},
+                                      "vae": f"fp32 on {dev_aux} for I2V encode (latents handed to {dev_main}) and decode (untiled when it fits, else own first-chunk-aware tiling)", "cpu_offload": False},
              "download_s": round(dl_s, 1), "load_s": round(load_s, 1), "runs": results, "per_gpu": peak.summary(n)}
     ctx.write_json_artifact("wan_benchmark.json", bench)
     return {"model": ctx.params["model"], "gpu": env["gpus"][0]["name"], "gpu_count": n, "load_s": round(load_s, 1),
