@@ -2,10 +2,14 @@
 
 Account 2 (cinematic engine) provides the **analysis, editing, rendering, audio and visual-processing engine**.
 Account 3 (research, AI provider routing, localisation, publishing, growth analytics) builds on it and must not
-re-implement it. Branch: `work/account-2-cinematic-engine` (PR #6, draft, not merged).
+re-implement it. Branch: `work/account-2-cinematic-engine` (PR #6, not merged). Verified against Account 3 head `24b3f71`
+(PR #5) and Account 1 head `b2517b2` (PR #4) on a local, unpushed three-account merge.
 
 ## 1. The contract you talk to
-`nexus/contracts/__init__.py` + `docs/ACCOUNT2_CONTRACTS.md`. Build documents with `contracts.make(Name, **fields)`,
+`nexus/contracts/media.py` (Account 2's module in the agreed shared package; the package `__init__` from your
+`integration/contracts_v1/apply.sh` re-exports it) + `docs/ACCOUNT2_CONTRACTS.md`. `apply.sh` works unchanged on this
+branch (its `git mv` of `__init__.py` is skipped because `media.py` already exists); 41 contract/handoff tests pass on the
+merged tree. Build documents with `contracts.make(Name, **fields)`,
 validate inbound ones with `contracts.validate(doc)`. All documents carry `"schema": "nexus.<Name>/1"`.
 
 | You produce (Account 3 → Account 2) | Document | How Account 2 uses it |
@@ -26,7 +30,11 @@ validate inbound ones with `contracts.validate(doc)`. All documents carry `"sche
 
 ## 2. Endpoints Account 3 will call
 Editing/publishing-relevant (all jobs are durable; poll `GET /api/jobs`):
-- Direction: `GET /api/director/profiles`, `POST /api/projects/{id}/direct`, `GET /api/projects/{id}/plan`
+- Direction: `GET /api/director/profiles` (14 profiles with hook window, shot length, interrupt spacing, cutaways/min, title
+  style), `POST /api/projects/{id}/direct` (`overrides`, `profile_overrides`, `end_text`, `reference_profile_id`,
+  `broll_subject`), `GET /api/projects/{id}/plan` (decision `id`, `confidence`, `reason`)
+- Reference style: `POST /api/projects/{id}/reference {media_id, rights_basis}` -> ReferenceStyleProfile (structure only),
+  `GET /api/projects/{id}/references`; visual model: `GET /api/visual/info`, `POST /api/visual/install` (consent)
 - Shorts & retention: `POST /api/projects/{id}/shorts`, `GET /api/projects/{id}/retention`, `POST .../retention/apply`, `POST /api/hooks`
 - Platforms & delivery: `GET /api/platforms`, `GET /api/platforms/profiles`, `POST /api/projects/{id}/deliver` (16:9 / 4:5 / 9:16 packages, caption.txt, manual upload steps — Account 2 never uploads)
 - Export: `GET /api/export/profiles`, `POST /api/projects/{id}/export` (codec/quality/size target, verified)
@@ -50,6 +58,16 @@ Editing/publishing-relevant (all jobs are durable; poll `GET /api/jobs`):
   `scripts/gpu_video_bench.py` on Account 1's GPU worker to verify (Demo 5 evidence: `docs/results/a2_demos/demo5_generation.json`).
 - Lip-sync, a licensed Arabic/Hindi voice, native-speaker translation review, platform upload/analytics (OAuth, Account 3/owner).
 - Human creative review of any demo.
+
+## 4b. Requests to Account 3 (owned by Account 3; not changed by Account 2)
+- **Publishing gate**: `nexus/intelligence/publishing/engine.py` `create()`/`approve()` never read Account 2's
+  `QualityReport`. Refuse (or warn) when `status` is `BLOCKED` or `human_approval` is not approved for the artifact.
+- **AI-content disclosure**: no mapping from `GeneratedMediaManifest.classification` (`generated-video`, `generated-image`,
+  `animated-still`) to the platform's synthetic/altered-content label exists in publishing metadata.
+- Market style findings for the director: send `ReferenceStyleProfile.metrics` (or `profile_overrides`) - the director
+  applies numbers only.
+- Tested on the merged tree: an Account 2 `ArtifactRef` is accepted by `engine.create()` and stays non-public until the
+  owner approves (`tests/fast/test_a2_cross_account.py`).
 
 ## 5. Rules that carry over
 - Zero spend: every tool/model is declared in `nexus/registry/components.yaml`; `costguard` refuses undeclared hosts.

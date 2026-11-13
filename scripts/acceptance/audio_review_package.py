@@ -3,9 +3,10 @@ human-approval field per item. Nothing here approves anything: every item starts
 
     python scripts/acceptance/audio_review_package.py [--master <Demo 1 master.mp4>]
 
-Writes docs/results/a2_audio_review/: <id>_before.ogg / <id>_after.ogg (dialogue only, 20 s, Opus 96 kb/s),
-programme_mix.ogg (Demo 1 master excerpt: narration + music + effects as mixed), review.json (measurements, chain steps,
-automated artefact notes, approval fields) and REVIEW.md (the listening sheet).
+Audio (never committed - the repository keeps no media): $NEXUS_HOME/review/a2_audio/<id>_before.ogg / <id>_after.ogg
+(dialogue only, 20 s, Opus 96 kb/s) and programme_mix.ogg (Demo 1 master excerpt as mixed).
+Committed: docs/results/a2_audio_review/review.json (measurements, chain steps, automated artefact notes, approval
+fields) and REVIEW.md (the listening sheet). Needs the benchmark media: python scripts/benchmarks/fetch_media.py
 """
 from __future__ import annotations
 
@@ -53,9 +54,12 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--master", help="Demo 1 master to excerpt as the programme-mix sample")
     a = ap.parse_args()
+    from nexus import config
     from nexus.audio import dialogue as G
     from nexus.audio import measure as M
     OUT.mkdir(parents=True, exist_ok=True)
+    AUD = config.HOME / "review" / "a2_audio"
+    AUD.mkdir(parents=True, exist_ok=True)
     rows = []
     for k, start in ITEMS.items():
         src = BENCH / k / "source.mp4"
@@ -65,9 +69,9 @@ def main() -> int:
         y, rep = G.process(x, SR, target_lufs=-16.0)
         el = time.time() - t0
         for tag, sig in (("before", x), ("after", y)):
-            w = OUT / f"{k}_{tag}.wav"
+            w = AUD / f"{k}_{tag}.wav"
             M.write_wav(w, sig, SR)
-            ogg(w, OUT / f"{k}_{tag}.ogg")
+            ogg(w, AUD / f"{k}_{tag}.ogg")
         b, f = ({kk: rep[s].get(kk) for kk in KEYS} for s in ("before", "after"))
         steps = [c["step"] for c in rep["chain"] if c["applied"]]
         rows.append({"id": k, "kind": "dialogue only", "source": prov.get("page"), "licence": "public domain",
@@ -79,9 +83,9 @@ def main() -> int:
         print(k, rep["material"], steps, flush=True)
     if a.master and Path(a.master).exists():
         x = M.decode(a.master, SR, 2, 40.0, 25.0)
-        w = OUT / "programme_mix.wav"
+        w = AUD / "programme_mix.wav"
         M.write_wav(w, x, SR)
-        ogg(w, OUT / "programme_mix.ogg")
+        ogg(w, AUD / "programme_mix.ogg")
         lo = M.loudness(M.decode(a.master, SR), SR)
         rows.append({"id": "programme_mix", "kind": "programme mix (Demo 1 master 40-65 s: cleaned narration + ducked music)",
                      "files": ["programme_mix.ogg"], "measurements_whole_master": lo,
@@ -90,10 +94,14 @@ def main() -> int:
                      "human_review": {"status": "PENDING_OWNER_REVIEW", "reviewer": None, "date": None, "verdict": None, "comments": None}})
     doc = {"what": "audio reviewer package - before/after excerpts for human listening", "created_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
            "status": "PENDING_OWNER_REVIEW", "note": "No person has listened to these files yet. Automated measurements are not approval.",
+           "audio_folder": "$NEXUS_HOME/review/a2_audio (regenerate: python scripts/acceptance/audio_review_package.py --master <demo1 master>)",
            "how_to_review": "Play each pair on headphones and on a phone speaker; fill human_review (verdict: approve / approve-with-notes / reject).",
            "items": rows}
     (OUT / "review.json").write_text(json.dumps(doc, indent=1, default=lambda v: float(v) if isinstance(v, np.floating) else str(v)))
     md = ["# Audio listening sheet (Account 2)", "", "Status: **PENDING OWNER REVIEW**. Nobody has listened to these files yet.", "",
+          "The audio is not in Git (no media in the repository). Generate it on your PC (about 1 minute after the benchmark",
+          "media is fetched): `python scripts/benchmarks/fetch_media.py` then `python scripts/acceptance/audio_review_package.py`",
+          "(add `--master <Demo 1 master.mp4>` for the programme-mix sample). Files appear in `%NEXUS_HOME%/review/a2_audio/`.", "",
           "| Item | Files | Chain applied | Before → after (LUFS / SNR dB) | Check for | Verdict |", "|---|---|---|---|---|---|"]
     for r in rows:
         if r["kind"] == "dialogue only":

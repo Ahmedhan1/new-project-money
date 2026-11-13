@@ -6,13 +6,62 @@
  "candidates": "NASA Image and Video Library search results for the sentence terms (Openverse excluded: it timed out in this container); visual mode also offered 7 low-speech shots of the local 'broll' and 'documentary' benchmarks (none was chosen)",
  "labelling": "one person-equivalent pass by the agent, looking at each chosen picture next to its sentence on the contact sheets in this folder. R = the picture shows the subject or setting the sentence talks about; P = on the programme's topic and plausible as a cutaway but not the specific thing said (e.g. a temperature map for a sentence about temperatures in the tropopause); N = unrelated, a text slate, a talking head, or the source video itself. Not blind, single labeller: treat as indicative.",
  "results": {
-  "lexical": {"opportunities": 28, "inserted": 18, "R": 5, "P": 5, "N": 8, "precision_strict": 0.278, "precision_lenient": 0.556,
-              "N_examples": ["Soyuz crew portrait for cave training", "black text slate for 'analog to space'", "cleanroom workers for 'minus 110 degrees'", "Mars terrain for 'ozone layer absorbs UV'", "the explainer video itself for 'tropopause'"]},
-  "visual": {"opportunities": 28, "inserted": 18, "R": 10, "P": 7, "N": 1, "precision_strict": 0.556, "precision_lenient": 0.944,
-             "N_examples": ["a press-release text slate for 'we arrived there around September 11th'"],
-             "R_examples": ["lunar pits for 'caves help you prepare to go to the moon'", "ozone-hole maps for 'ozone layer'", "atmosphere limb from orbit for 'atmosphere is divided into layers'", "solar energetic particle diagram for 'the sun's radiation'"]}
+  "lexical": {
+   "opportunities": 28,
+   "inserted": 18,
+   "R": 5,
+   "P": 5,
+   "N": 8,
+   "precision_strict": 0.278,
+   "precision_lenient": 0.556,
+   "N_examples": [
+    "Soyuz crew portrait for cave training",
+    "black text slate for 'analog to space'",
+    "cleanroom workers for 'minus 110 degrees'",
+    "Mars terrain for 'ozone layer absorbs UV'",
+    "the explainer video itself for 'tropopause'"
+   ],
+   "recall_strict": 0.179,
+   "recall_lenient": 0.357,
+   "denominators": {
+    "precision": "18 inserts",
+    "recall": "28 opportunities"
+   }
+  },
+  "visual": {
+   "opportunities": 28,
+   "inserted": 18,
+   "R": 10,
+   "P": 7,
+   "N": 1,
+   "precision_strict": 0.556,
+   "precision_lenient": 0.944,
+   "N_examples": [
+    "a press-release text slate for 'we arrived there around September 11th'"
+   ],
+   "R_examples": [
+    "lunar pits for 'caves help you prepare to go to the moon'",
+    "ozone-hole maps for 'ozone layer'",
+    "atmosphere limb from orbit for 'atmosphere is divided into layers'",
+    "solar energetic particle diagram for 'the sun's radiation'"
+   ],
+   "recall_strict": 0.357,
+   "recall_lenient": 0.607,
+   "denominators": {
+    "precision": "18 inserts",
+    "recall": "28 opportunities"
+   }
+  }
  },
- "first_visual_run_before_the_not_broll_gate": {"inserted": 21, "R": 11, "P": 6, "N": 4, "precision_strict": 0.524, "precision_lenient": 0.81,
-   "fix": "pictures that read as 'a person talking to the camera' / 'people in a television studio' / 'a slide of text' better than the spoken text are rejected (NOT_BROLL)"},
- "cost": "visual ranking embeds every candidate preview once (~0.2 s each on 2 threads, cached) and each sentence (~0.09 s)"
+ "first_visual_run_before_the_not_broll_gate": {
+  "inserted": 21,
+  "R": 11,
+  "P": 6,
+  "N": 4,
+  "precision_strict": 0.524,
+  "precision_lenient": 0.81,
+  "fix": "pictures that read as 'a person talking to the camera' / 'people in a television studio' / 'a slide of text' better than the spoken text are rejected (NOT_BROLL)"
+ },
+ "cost": "visual ranking embeds every candidate preview once (~0.2 s each on 2 threads, cached) and each sentence (~0.09 s)",
+ "recall_definition": "share of the 28 opportunities that received a relevant cutaway (R; lenient R+P); computed from the same labels by the integrator"
 }
