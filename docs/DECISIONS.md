@@ -60,3 +60,15 @@ runs 1-3). Image classification (SigLIP) is optional evidence, never downloaded 
 **D-15 (Account 3) Benchmarked remote models are batch-only.** Kaggle T4 runs measured 10 open-weight models; valid ones
 are recorded as `availability: batch_only` profiles. Interactive routing stays local. Critical tasks below their
 quality bar return `requires_human_review`; dialect output is always reviewed (best measured 0.52).
+
+**D-16 (Account 3) Zero-spend gate fails closed.** The router previously refused only `payment_method_required is True`.
+That let the string `unverified` (Groq, Mistral) through once the owner authorised a provider and added a key. Now:
+- A hosted provider is eligible only when its catalogue entry says the boolean `false` and has a dated `verified`.
+- The model must be listed in the catalogue, or carry the free suffix.
+- Authorisation must be the boolean `true`, a key must be present, and an enforceable quota must exist: documented
+  rpm/rpd/tpm/tpd, or the owner's `daily_requests`.
+- The facts are re-read from the catalogue, so a caller-supplied entry cannot loosen them (quotas take the stricter value).
+- An unknown `hosting` value is treated as hosted.
+- `costguard.check_host(..., free_tier_provider=, model=)` no longer trusts the name. It re-runs the full gate through
+  `router.hosted_call_allowed` and refuses if that gate fails or cannot be evaluated.
+- Regression tests: `tests/fast/test_zero_spend_fail_closed.py` (no network; sockets trapped).

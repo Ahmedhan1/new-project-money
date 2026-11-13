@@ -126,13 +126,78 @@ def _breaker_open(pid: str) -> bool:
     return bool(b and b["fails"] >= BREAKER_FAILS and time.time() - b["since"] < BREAKER_COOLDOWN)
 
 
+def _pid(entry: dict) -> str:
+    return str(entry.get("provider", entry.get("id")))
+
+
 def zero_spend_block(entry: dict) -> str | None:
-    """Static zero-spend gate: services needing a card or without any free quota are never used."""
-    if entry.get("payment_method_required") is True:
-        return f"{entry.get('provider', entry.get('id'))}: requires a payment method - never used (zero spend)"
+    """Static zero-spend gate, FAIL CLOSED: a provider is usable only when its payment-method requirement is explicitly
+    declared `false` (the YAML boolean). Missing, null, "unverified", malformed or true values all refuse; so does a
+    provider without any free quota."""
+    pm = entry.get("payment_method_required", None)
+    if pm is not False:
+        if pm is True:
+            return f"{_pid(entry)}: requires a payment method - never used (zero spend)"
+        return (f"{_pid(entry)}: payment-method requirement is {pm!r}, not verified false - never used (zero spend, fail closed)")
     if entry.get("free_quota") == "none":
-        return f"{entry.get('provider', entry.get('id'))}: no free quota exists - never used (zero spend)"
+        return f"{_pid(entry)}: no free quota exists - never used (zero spend)"
     return None
+
+
+LOCAL_HOSTING = ("in_process", "owner_worker")
+QUOTA_KEYS = ("rpm", "rpd", "tpm", "tpd")
+
+
+def _num(v) -> float | None:
+    return float(v) if isinstance(v, (int, float)) and not isinstance(v, bool) and v > 0 else None
+
+
+def hosted_free_facts(entry: dict) -> tuple[dict | None, str]:
+    """Re-derive a hosted_free entry's zero-spend facts from the CATALOGUE, never from the caller's dict: a crafted entry
+    (or a bare provider name) cannot claim `payment_method_required: false`, a free model or bigger quotas.
+    Returns (facts, "ok") or (None, refusal). Facts = catalogue provider + the effective (strictest) quotas."""
+    pid = _pid(entry)
+    cat = reg.providers().get(pid)
+    if not cat:
+        return None, f"{pid}: not a catalogued provider - hosted calls refused (zero spend, fail closed)"
+    if cat.get("hosting") != "hosted_free":
+        return None, f"{pid}: catalogued as '{cat.get('hosting')}', not hosted_free - refused"
+    # the catalogue must say false; an entry that carries its own value (eligibility() already requires it) must agree
+    for src in (cat, *([entry] if "payment_method_required" in entry or "free_quota" in entry else [])):
+        if blocked := zero_spend_block({**src, "provider": pid}):
+            return None, blocked
+    if not str(cat.get("verified") or "").startswith("20"):
+        return None, f"{pid}: catalogue facts not verified against first-party docs (verified: {cat.get('verified')!r}) - refused"
+    model = entry.get("model")
+    listed = {m.get("model") for m in cat.get("models") or []}
+    suffix = cat.get("free_model_suffix")
+    if suffix:
+        if not str(model).endswith(suffix):
+            return None, f"{pid}: {model} is not a free variant"
+    elif model not in listed:
+        return None, f"{pid}: model {model!r} is not a catalogued free model of this provider - refused"
+    quotas = {}
+    cq, eq = cat.get("quotas") or {}, entry.get("quotas") or {}
+    for k in QUOTA_KEYS:
+        vals = [v for v in (_num(cq.get(k)), _num(eq.get(k))) if v is not None]
+        if vals:
+            quotas[k] = min(vals)  # an entry may tighten a documented quota, never loosen it
+    s = provider_settings(pid)
+    if not quotas and not _num(s.get("daily_requests")):
+        return None, (f"{pid}: no documented numeric quota - set settings.json ai_providers.{pid}.daily_requests "
+                      "before it can be used (quotas must be enforceable)")
+    return {**cat, "quotas": quotas}, "ok"
+
+
+def hosted_call_allowed(pid: str, model: str | None) -> tuple[bool, str]:
+    """Used by the cost guard's free-tier exception: the full static + owner gate for one (provider, model) call,
+    computed from the catalogue and settings only (the caller supplies names, nothing else)."""
+    if not model:
+        return False, f"{pid}: no model named - free-tier exception refused"
+    facts, why = hosted_free_facts({"provider": pid, "model": model})
+    if not facts:
+        return False, why
+    return eligibility({**facts, "provider": pid, "model": model}, "public")
 
 
 def eligibility(entry: dict, privacy: str, need_tokens: int = 0) -> tuple[bool, str]:
@@ -140,22 +205,29 @@ def eligibility(entry: dict, privacy: str, need_tokens: int = 0) -> tuple[bool, 
     pid = entry["provider"]
     if PRIVACY_RANK[privacy] > PRIVACY_RANK[entry["privacy"]]:
         return False, f"{pid}: data class '{privacy}' may not leave for a '{entry['hosting']}' provider"
-    if blocked := zero_spend_block(entry):
+    cat_hosting = reg.providers().get(pid, {}).get("hosting")
+    local = entry.get("hosting") in LOCAL_HOSTING and cat_hosting in (None, *LOCAL_HOSTING)
+    if local:  # this machine / the owner's own server: nothing can bill; only an explicit card/no-quota flag refuses
+        if entry.get("payment_method_required") is True:
+            return False, f"{pid}: requires a payment method - never used (zero spend)"
+        if entry.get("free_quota") == "none":
+            return False, f"{pid}: no free quota exists - never used (zero spend)"
+    elif blocked := zero_spend_block(entry):  # anything else (hosted, unknown hosting) must be verified false
         return False, blocked
     s = provider_settings(pid)
     if s.get("disabled"):
         return False, f"{pid}: disabled by the owner"
     if entry["hosting"] == "owner_worker" and not s.get("base_url"):
         return False, f"{pid}: no endpoint configured (settings.json ai_providers.{pid}.base_url)"
-    if entry["hosting"] == "hosted_free":
-        if not s.get("authorized"):
+    if not local:
+        facts, why = hosted_free_facts(entry)
+        if not facts:
+            return False, why
+        if s.get("authorized") is not True:
             return False, f"{pid}: not authorised by the owner (settings.json ai_providers.{pid}.authorized)"
         if not api_key(pid):
             return False, f"{pid}: no API key (env NEXUS_KEY_{pid.upper().replace('-', '_')} or vault ai.{pid})"
-        suffix = entry.get("free_model_suffix")
-        if suffix and not entry["model"].endswith(suffix):
-            return False, f"{pid}: {entry['model']} is not a free variant"
-        q = entry.get("quotas") or {}
+        q = facts["quotas"]
         if q.get("rpd") and _usage_today(pid) >= int(q["rpd"] * 0.9):
             return False, f"{pid}: 90 % of the daily free quota used"
         if q.get("rpm") and _usage_last_minute(pid) >= q["rpm"]:

@@ -52,25 +52,26 @@ def server():
     s.shutdown()
 
 
-def test_privacy_class_decides_who_may_see_the_data(settings):
-    settings({"ai_providers": {"groq": {"authorized": True}, "owner-openai-compatible": {"base_url": "http://127.0.0.1:9/v1"}}})
-    es = [_entry("groq", "big", hosting="hosted_free", privacy="public", q=9), _entry("owner-openai-compatible", "mid", q=6),
+def test_privacy_class_decides_who_may_see_the_data(settings, verified_free_provider):
+    settings({"ai_providers": {"test-free": {"authorized": True}, "owner-openai-compatible": {"base_url": "http://127.0.0.1:9/v1"}}})
+    es = [_entry("test-free", "big", hosting="hosted_free", privacy="public", q=9, payment_method_required=False), _entry("owner-openai-compatible", "mid", q=6),
           _entry("local-llamacpp", "small", hosting="in_process", privacy="private", q=4, kind="x")]
     import os
-    os.environ["NEXUS_KEY_GROQ"] = "test-key"
+    os.environ["NEXUS_KEY_TEST_FREE"] = "test-key"
     try:
         pub, _ = router.candidates("scriptwriting", "public", es)
-        assert [e["provider"] for e in pub] == ["groq", "owner-openai-compatible", "local-llamacpp"]   # strongest first for heavy tasks
+        assert [e["provider"] for e in pub] == ["test-free", "owner-openai-compatible", "local-llamacpp"]   # strongest first for heavy tasks
         priv, why = router.candidates("scriptwriting", "private", es)
         assert [e["provider"] for e in priv] == ["local-llamacpp"] and any("may not leave" in w for w in why)
         light, _ = router.candidates("title_generation", "public", [*es[:2], {**es[1], "model": "f", "speed": "fast"}])
         assert light[0]["speed"] == "fast"                                                     # light tasks: fastest adequate model
     finally:
-        del os.environ["NEXUS_KEY_GROQ"]
+        del os.environ["NEXUS_KEY_TEST_FREE"]
 
 
 def test_hosted_free_needs_authorisation_key_free_model_and_quota(settings, monkeypatch):
-    e = _entry("openrouter-free", "qwen/x:free", hosting="hosted_free", privacy="public", free_model_suffix=":free", quotas={"rpd": 10, "rpm": 100})
+    e = _entry("openrouter-free", "qwen/x:free", hosting="hosted_free", privacy="public", free_model_suffix=":free", quotas={"rpd": 10, "rpm": 100},
+               payment_method_required=False)
     settings({})
     assert "not authorised" in router.eligibility(e, "public")[1]
     settings({"ai_providers": {"openrouter-free": {"authorized": True}}})
@@ -117,14 +118,23 @@ def test_unknown_task_and_privacy_rejected(settings):
         router.complete("general", "x", privacy="secret", entries=[])
 
 
-def test_cost_guard_free_tier_exception_is_narrow():
+def test_cost_guard_free_tier_exception_is_narrow(settings, verified_free_provider, monkeypatch):
+    url = "https://free.test.invalid/v1/chat/completions"
     with pytest.raises(costguard.CostGuardError):
-        costguard.check_host("https://api.groq.com/openai/v1/chat/completions")                  # still blocked by default
-    assert costguard.check_host("https://api.groq.com/openai/v1/chat/completions", free_tier_provider="groq") == "groq"
+        costguard.check_host(url)                                                             # blocked by default
+    with pytest.raises(costguard.CostGuardError, match="not authorised"):
+        costguard.check_host(url, free_tier_provider="test-free", model="m")                  # a name alone vouches for nothing
+    settings({"ai_providers": {"test-free": {"authorized": True}}})
+    monkeypatch.setenv("NEXUS_KEY_TEST_FREE", "dummy")
+    assert costguard.check_host(url, free_tier_provider="test-free", model="m") == "test-free"
+    with pytest.raises(costguard.CostGuardError, match="not a catalogued free model"):
+        costguard.check_host(url, free_tier_provider="test-free", model="paid-model")
+    with pytest.raises(costguard.CostGuardError, match="no model"):
+        costguard.check_host(url, free_tier_provider="test-free")
     with pytest.raises(costguard.CostGuardError):
-        costguard.check_host("https://api.openai.com/v1/chat/completions", free_tier_provider="groq")   # cannot borrow the exception
+        costguard.check_host("https://api.openai.com/v1/chat/completions", free_tier_provider="test-free", model="m")  # cannot borrow
     with pytest.raises(costguard.CostGuardError):
-        costguard.check_host("https://api.groq.com/x", free_tier_provider="gemini")
+        costguard.check_host(url, free_tier_provider="gemini", model="m")
 
 
 def test_catalogue_entries_are_complete_and_map_to_account1():

@@ -6,13 +6,17 @@
 # privacy:   max data class the provider may receive: private (user media / unreleased work), internal, public
 # quality:   0-10 per capability; `source: estimate` until model_router.bench measured it here - measured values are
 #            stored as db metrics `ai_quality.<cap>` and override these numbers automatically.
-# payment_method_required: true  -> the router NEVER routes there (zero-spend rule: no card-requiring service)
-#                          "unverified" -> the first-party docs do not say; the owner sees it at sign-up and decides
+# payment_method_required: FAIL CLOSED - a hosted provider is routable ONLY when this is the YAML boolean `false`,
+#                          backed by a dated first-party check in `verified`. true, "unverified", missing, null or any
+#                          other value -> never routed, and the cost guard's free-tier exception refuses it too.
+#                          Groq and Mistral stay "unverified" (= disabled) until their no-card free access is verified.
 # free_quota: none        -> there is no zero-cost path at all; never routed
 # quotas:    documented numbers only (rpm, rpd, tpm, tpd); missing = not published. The owner can always set stricter
 #            limits in settings.json: ai_providers.<id>.{daily_requests, daily_tokens}.
-# A hosted_free provider is used only when ALL hold: owner authorised it (settings.json ai_providers.<id>.authorized),
-# its API key is present (env NEXUS_KEY_<ID> or the vault), the model is a free model, and today's quota is not spent.
+# A hosted_free provider is used only when ALL hold (re-checked from THIS file, never from a caller's dict): payment
+# method verified false, `verified` is a date, the model is listed below (or carries free_model_suffix), the owner
+# authorised it (settings.json ai_providers.<id>.authorized: true), its API key is present (env NEXUS_KEY_<ID> or the
+# vault), an enforceable quota exists (a documented rpm/rpd/tpm/tpd here, or the owner's daily_requests) and is not spent.
 checked: "2026-11-12"
 providers:
   - id: local-llamacpp

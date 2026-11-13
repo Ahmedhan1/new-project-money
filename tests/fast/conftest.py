@@ -34,3 +34,20 @@ def pytest_sessionfinish(session, exitstatus):
     out.write_text(json.dumps({"summary": f"{n['passed']} passed, {n['failed'] + n['error']} failed, {n['skipped']} skipped",
                                "ok": exitstatus == 0, "date": time.strftime("%Y-%m-%d"), "platform": platform.system(),
                                "python": platform.python_version()}, indent=1) + "\n")
+
+
+@pytest.fixture()
+def verified_free_provider(monkeypatch):
+    """A catalogue with one extra hosted_free provider whose zero-spend facts are verified (payment method false, dated
+    verification, numeric quotas, listed models). Real providers stay as catalogued. No network is ever touched."""
+    from nexus import costguard
+    from nexus.intelligence import capability_registry as reg
+    real = reg.providers
+    fake = {"id": "test-free", "name": "verified free test provider", "kind": "openai_compatible", "hosting": "hosted_free",
+            "base_url": "https://free.test.invalid/v1", "host": "free.test.invalid", "privacy": "public", "commercial_use": "yes",
+            "payment_method_required": False, "verified": "2026-11-13 (test fixture)",
+            "quotas": {"rpm": 30, "rpd": 1000, "tpm": 8000, "tpd": 200000},
+            "models": [{"model": m} for m in ("big", "m", "free-model")]}
+    monkeypatch.setattr(reg, "providers", lambda: {**real(), "test-free": fake})
+    monkeypatch.setitem(costguard.FREE_TIER_HOSTS, "free.test.invalid", "test-free")
+    return fake

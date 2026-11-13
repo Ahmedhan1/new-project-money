@@ -63,18 +63,18 @@ def test_card_or_no_free_quota_is_never_routed_even_when_authorised(settings, mo
         router.complete("general", "x", privacy="public", entries=[card, noquota])
 
 
-def test_token_budget_context_quota_and_owner_limits(settings, monkeypatch):
+def test_token_budget_context_quota_and_owner_limits(settings, monkeypatch, verified_free_provider):
     settings({"ai_providers": {"owner-openai-compatible": {"base_url": "http://127.0.0.1:9/v1", "daily_tokens": 1000},
-                               "groq": {"authorized": True}}})
-    monkeypatch.setenv("NEXUS_KEY_GROQ", "k")
+                               "test-free": {"authorized": True}}})
+    monkeypatch.setenv("NEXUS_KEY_TEST_FREE", "k")
     small = _entry("owner-openai-compatible", "tiny", context=512)
     assert "do not fit" in router.eligibility(small, "internal", need_tokens=900)[1]
     assert router.eligibility(small, "internal", need_tokens=400) == (True, "ok")
     db.metric("ai_request", 1.0, provider="owner-openai-compatible", model="tiny", day=__import__("time").strftime("%Y-%m-%d"), tokens=800)
     assert "owner daily token limit" in router.eligibility(small, "internal", need_tokens=300)[1]
-    g = _entry("groq", "m", hosting="hosted_free", privacy="public", quotas={"tpm": 8000, "tpd": 10000})
+    g = _entry("test-free", "m", hosting="hosted_free", privacy="public", quotas={"tpm": 8000, "tpd": 10000}, payment_method_required=False)
     assert "per-minute token limit" in router.eligibility(g, "public", need_tokens=9000)[1]
-    db.metric("ai_request", 1.0, provider="groq", model="m", day=__import__("time").strftime("%Y-%m-%d"), tokens=8900)
+    db.metric("ai_request", 1.0, provider="test-free", model="m", day=__import__("time").strftime("%Y-%m-%d"), tokens=8900)
     assert "daily free token quota" in router.eligibility(g, "public", need_tokens=200)[1]
 
 

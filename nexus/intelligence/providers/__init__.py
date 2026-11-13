@@ -38,7 +38,7 @@ def openai_chat(entry: dict, prompt: str, system: str, schema: dict | None, max_
     from ..model_router.router import api_key
     url = _base_url(entry) + "/chat/completions"
     if entry["hosting"] == "hosted_free":
-        costguard.check_host(url, free_tier_provider=entry["provider"])
+        costguard.check_host(url, free_tier_provider=entry["provider"], model=entry.get("model"))
     elif not url.startswith(("http://127.0.0.1", "http://localhost", "http://[::1]")):
         costguard.check_host(url)  # an owner worker on another machine must be a declared host
     # prompt_suffix: per-model switch from the catalogue, e.g. Qwen3's " /no_think" (reasoning off: 3-5x faster on CPU)
