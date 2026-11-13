@@ -387,7 +387,7 @@ def render_segment(c: dict, tl: dict, cache: Path, draft: bool = False, threads:
         tmp.unlink(missing_ok=True)
         raise ff.FFError(f"clip {c.get('id')}: FFmpeg produced an empty segment (in={c.get('in')}, out={c.get('out')}, "
                          f"src={c.get('src')})")
-    os.replace(tmp, out)
+    ff.publish(tmp, out)
     if notes:
         out.with_suffix(".notes.json").write_text(json.dumps(notes))
     return out, False
@@ -612,7 +612,7 @@ def _finish_pieces(tl: dict, out: Path, workdir: Path, segs: list[Path], layers:
         tmp = final_audio.with_suffix(f".{threading.get_ident()}.tmp.m4a")
         ff.run([*inputs, "-filter_complex", ";".join(fc), "-map", "[aout]", "-vn", *config.ACODEC, "-t", f"{dur:.6f}", tmp],
                op="final-audio")
-        os.replace(tmp, final_audio)
+        ff.publish(tmp, final_audio)
         wav.unlink(missing_ok=True)
         return False
 
@@ -640,7 +640,7 @@ def _finish_pieces(tl: dict, out: Path, workdir: Path, segs: list[Path], layers:
     part = out.with_name(out.stem + ".partial" + (out.suffix or ".mp4"))
     ff.run(["-f", "concat", "-safe", "0", "-i", lst, "-i", final_audio, "-map", "0:v", "-map", "1:a", "-c", "copy",
             "-t", f"{dur:.6f}", "-movflags", "+faststart", part], op="final-mux")
-    os.replace(part, out)  # atomic: an interrupted render never leaves a truncated programme at `out`
+    ff.publish(part, out, cached=False)  # atomic: an interrupted render never leaves a truncated programme at `out`
     timings["final"] = round(time.time() - t2, 2)
     sidecars = {}
     if tl.get("subtitles"):
@@ -785,7 +785,7 @@ def render(tl: dict, out: Path, workdir: Path, on_progress=None, draft: bool = F
     part = out.with_name(out.stem + ".partial" + (out.suffix or ".mp4"))
     ff.run([*inputs, *oargs, "-filter_complex", ";".join(fc), *vmap, "-map", "[aout]", *vcodec, *config.ACODEC, "-t", f"{dur:.3f}",
             "-movflags", "+faststart", part], op="final-mix")
-    os.replace(part, out)  # atomic: an interrupted render never leaves a truncated programme at `out`
+    ff.publish(part, out, cached=False)  # atomic: an interrupted render never leaves a truncated programme at `out`
     sidecars = {}
     if tl.get("subtitles"):
         sidecars["srt"] = str(subs.write_srt(tl["subtitles"], out.with_suffix(".srt")))

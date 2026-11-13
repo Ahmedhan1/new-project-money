@@ -344,3 +344,26 @@ def analyze_pass(path: str | Path, *, black_min: float = 0.5, freeze_min: float 
 def extract_audio(path: str | Path, out: Path, rate: int = 16000) -> Path:
     run(["-i", path, "-vn", "-ac", "1", "-ar", rate, "-c:a", "pcm_s16le", out], op="extract-audio")
     return out
+
+
+def publish(tmp: Path, out: Path, cached: bool = True, tries: int = 20) -> Path:
+    """Atomically move a finished temp file into place. On Windows a rename onto a file another thread or process has
+    open (a second render worker that produced the same content-addressed cache file, an antivirus scan, a probe)
+    fails with PermissionError: retry briefly, and for cache files (`cached`, same key = same content) accept the copy
+    that is already there."""
+    tmp, out = Path(tmp), Path(out)
+    for k in range(tries):
+        try:
+            os.replace(tmp, out)
+            return out
+        except PermissionError:
+            if cached and out.exists() and out.stat().st_size > 0:
+                try:
+                    tmp.unlink()
+                except OSError:
+                    pass
+                return out
+            time.sleep(0.05 * (k + 1))
+    os.replace(tmp, out)  # last attempt raises the real error
+    return out
+

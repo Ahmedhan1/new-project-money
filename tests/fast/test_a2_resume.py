@@ -87,3 +87,23 @@ def test_checkpoint_of_another_timeline_is_not_resumed(tmp_path, changed):
     a.done("segments", "seg_x", False)
     b = resume.Checkpoint(tmp_path, tmp_path / "o.mp4", {"clips": [2]} if changed else tl, False)
     assert b.data["resumed"] is (not changed)
+
+
+def test_publish_accepts_an_existing_cache_file_when_the_rename_is_refused(tmp_path, monkeypatch):
+    """Windows: os.replace onto a cache file another worker has open raises PermissionError (CI run 43394820291)."""
+    import os
+
+    from nexus.media import ff
+    out, tmp = tmp_path / "seg_x.mp4", tmp_path / "seg_x.1.tmp.mp4"
+    out.write_bytes(b"done by another worker")
+    tmp.write_bytes(b"same content")
+    real = os.replace
+
+    def refuse(a, b):
+        raise PermissionError(5, "Access is denied")
+    monkeypatch.setattr(os, "replace", refuse)
+    assert ff.publish(tmp, out) == out and out.read_bytes() == b"done by another worker" and not tmp.exists()
+    tmp.write_bytes(b"x")
+    with pytest.raises(PermissionError):  # a final output (not a cache file) is never silently kept
+        ff.publish(tmp, tmp_path / "final.mp4", cached=False, tries=2)
+    monkeypatch.setattr(os, "replace", real)

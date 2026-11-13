@@ -114,7 +114,7 @@ def build(pc: dict, segs: list[Path], tl: dict, cache: Path, W: int, H: int, tot
     n = pc["frames"]
     if pc["kind"] == "body" and pc.get("full") and not burn:
         ff.run(["-i", segs[pc["clip"]], "-map", "0:v", "-c", "copy", "-an", "-movflags", "+faststart", tmp], op="piece-copy")
-        tmp.replace(out)
+        ff.publish(tmp, out)
         return out, False
     args: list = []
     fc: list[str] = []
@@ -156,7 +156,7 @@ def build(pc: dict, segs: list[Path], tl: dict, cache: Path, W: int, H: int, tot
             "-g", fps * 2, "-video_track_timescale", "90000", "-movflags", "+faststart", tmp],
            op="piece-xfade" if pc["kind"] == "xf" else "piece-burn" if burn else "piece-trim")
     out.with_suffix(".ass").unlink(missing_ok=True)
-    tmp.replace(out)
+    ff.publish(tmp, out)
     return out, False
 
 
