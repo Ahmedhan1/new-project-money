@@ -16,7 +16,7 @@ import sys
 import urllib.request
 from pathlib import Path
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 
 from .. import config
 from . import audit, security
@@ -33,10 +33,13 @@ def _detached(args: list[str]) -> None:
 
 
 @router.get("/status")
-def status():
+def status(request: Request):
     from .. import launcher
     import shutil
-    return {"version": config.VERSION, "installed": config.installed(), "home": str(config.HOME), "services": launcher.service_status(),
+    sv = launcher.service_status()
+    # this request is being answered, so the API is up whether or not the launcher started it (e.g. `nexus serve`)
+    sv.update(api=True, healthy=True, url=str(request.base_url).rstrip("/"))
+    return {"version": config.VERSION, "installed": config.installed(), "home": str(config.HOME), "services": sv,
             "python": sys.version.split()[0], "ffmpeg": bool(shutil.which("ffmpeg")), "platform": sys.platform}
 
 
@@ -68,6 +71,9 @@ def check_update(fetch=_get_json) -> dict:
     try:
         rel = fetch(RELEASES)
     except Exception as e:  # noqa: BLE001
+        if getattr(e, "code", None) == 404:  # no release published yet, or the repository is private (no anonymous access)
+            return {"current": config.VERSION, "available": False,
+                    "error": "no published release found (none yet, or the repository is private); install updates manually"}
         return {"current": config.VERSION, "available": False, "error": f"{type(e).__name__}: {e}"[:200]}
     tag = rel.get("tag_name") or ""
     assets = {a["name"]: a["browser_download_url"] for a in rel.get("assets") or []}

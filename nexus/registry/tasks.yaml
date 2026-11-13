@@ -75,12 +75,13 @@ tasks:
     next: "Owner runs NEXUS_SETUP/NEXUS_START on their own PC (GPU drivers, antivirus, real models)."
   - id: WIN-2
     priority: 3
-    title: "Packaged Windows app (evaluate Tauri shell vs PyInstaller vs portable Python)"
-    status: deferred
+    title: "Single Windows installer NEXUS_VIDEO_AI_Setup.exe (embedded Python + FFmpeg, per-user, System page start/stop/restart/update/backup)"
+    status: blocked
     deps: [WIN-1]
-    acceptance: "A single installer/portable folder that needs no pre-installed Python."
-    test: "Install on a clean VM."
-    next: "Only after WIN-1 is verified. Recommended path - portable embedded Python + the existing .bat launchers (see docs/DECISIONS.md D-6)."
+    blocked_by: "Owner: GitHub Actions does not start any job (account-level billing/spending block, 0 billable ms) and no Windows build machine is available to agents. Not built, not installed, not verified."
+    acceptance: "On a clean Windows VM: the installer from windows-installer.yml installs without Python, launches, passes the API e2e and backup drill, uninstalls keeping user data; .exe + .sha256 attached to a release."
+    test: ".github/workflows/windows-installer.yml (build.ps1 -> silent install -> e2e -> drill -> uninstall); pytest tests/fast/test_system_routes.py (sources, routes, import, update SHA-256 check)"
+    next: "Restore Actions, run windows-installer.yml (workflow_dispatch), fix what fails, then tag v0.3.0 to publish."
   - id: CI-1
     priority: 2
     title: "GitHub Actions CI - lint + fast tests on Linux and Windows, secret scan, no models"
@@ -775,9 +776,9 @@ tasks:
   - id: A2-ARCHIVE
     priority: 1
     title: "Daily output archive through Account 1 storage: verified upload, crash-safe resume, release local copy only after verification, browse + retrieve"
-    status: tested
+    status: verified
     deps: [A2-INT]
     acceptance: "Final videos stay in external storage; local deletion only after checksum verification; failed uploads keep the only copy."
     test: "pytest tests/fast/test_a2_archive.py tests/fast/test_a2_archive_account1.py (needs Account 1); scripts/acceptance/daily_archive_e2e.py"
-    evidence: "docs/DAILY_OUTPUT_ARCHIVE.md; docs/ASSET_STORAGE_INTEGRATION_RESULTS.md; docs/results/a2_storage/daily_archive_e2e.json"
-    next: "Owner: one live archive to drive_a (K-28)."
+    evidence: "docs/results/a2_storage/daily_archive_live.json (LIVE drive_a, disposable media, 12/12: interrupted upload resumed at byte 8388608, provider SHA-256 + independent byte-identical download, release only after fresh re-verification, browse, retrieve); daily_archive_e2e.json (fake Drive, full render path)"
+    next: "Done. The three disposable test files stay in drive_a NEXUS/Masters/prj_* (owner may delete them)."

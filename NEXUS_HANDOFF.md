@@ -58,22 +58,15 @@ Sessions 4-6 (2026-11-12), all on a real 19.4-min public-domain NASA interview (
 - Upload/analytics: blocked on the owner's OAuth (`PUB-1`, `ANA-1`). Off-machine backup: blocked on an account (`STO-3`).
 - Defects: `docs/KNOWN_ISSUES.md`. Plan: `docs/MASTER_ROADMAP.md` (section 9 = next stage). Log: `docs/AGENT_WORK_LOG.md`.
 
-## Account 3 — intelligence layer (PR #5, Draft)
-`nexus/intelligence/` (API `/api/a3/*`). Verdict and status: `docs/ACCOUNT3_EXECUTION_REPORT.md`; integration:
-`integration/contracts_v1/RESULT.md`; owner steps: `docs/ACCOUNT3_YOUTUBE_OWNER_VALIDATION.md`.
-
-## Account 2 (cinematic engine) - read before touching editing/render/audio/director/generation
-- Branch `work/account-2-cinematic-engine`, PR #6 (open, not merged). Audit: `docs/ACCOUNT2_FINAL_RELEASE_AUDIT.md`;
-  measured results: `docs/ACCOUNT2_QUALITY_REPORT.md`; guide: `docs/ACCOUNT2_EDITING_GUIDE.md`.
-- Contracts: Account 2 owns `nexus/contracts/media.py` only; read its version as `contracts.media.VERSION`.
-- Demos: `scripts/demos/demo{1,2,3,4,5}_*.py` (need `.nexus/benchmarks` from `scripts/benchmarks/fetch_media.py` and
-  analyses in `.nexus/analyses`, computed on first run). Audio listening sheet: `docs/results/a2_audio_review/REVIEW.md`.
-- Owner-blocked: A2-AUDIO-REVIEW (listen), A2-GPU (authorise a free GPU worker), K-1 (own Windows PC).
-- Follow-up branch `work/account-2-asset-library-storage`, PR #7 (draft, base PR #6): asset library (`nexus/assetlib`,
-  `registry/asset_library.yaml`), disk manager (`nexus/diskman.py`, `nexus disk`), daily archive on Account 1 storage
-  (`nexus/archive.py`, `nexus archive`). Docs: `docs/STORAGE_ARCHITECTURE.md`, `DISK_MANAGEMENT.md`,
-  `DAILY_OUTPUT_ARCHIVE.md`, `ASSET_*.md`, `ASSET_STORAGE_INTEGRATION_RESULTS.md`. Never delete a final whose archive
-  record is not `released`; never add remote retention without owner approval.
+## Final integration (branch `integration/final-release`) - Accounts 1+2+3 in one tree
+RC `813967e` + A3 PR #5 + A2 PR #6 + A2 PR #7 + `apply.sh`. Status, SHAs, evidence: `docs/FINAL_RELEASE_REPORT.md`.
+- Account 3 (`nexus/intelligence/`, `/api/a3/*`): `docs/ACCOUNT3_EXECUTION_REPORT.md`, `integration/contracts_v1/RESULT.md`.
+- Account 2 engine: `docs/ACCOUNT2_FINAL_RELEASE_AUDIT.md`, `ACCOUNT2_QUALITY_REPORT.md`, `ACCOUNT2_EDITING_GUIDE.md`; owns
+  `nexus/contracts/media.py`. Asset library `nexus/assetlib`, disk manager `nexus/diskman.py`, daily archive
+  `nexus/archive.py` (docs `STORAGE_ARCHITECTURE.md`, `DISK_MANAGEMENT.md`, `DAILY_OUTPUT_ARCHIVE.md`). Never delete a
+  final whose archive record is not `released`.
+- Wan 2.2 TI2V-5B: `nexus/cloud/worker_kit/tasks/a2_wan_video.py`, `scripts/acceptance/wan22_5b_live.py`, evidence
+  `docs/results/wan22_5b/`. Windows installer: `installer/windows/` + `.github/workflows/windows-installer.yml`.
 
 ## Where things are
 | Thing | Path |
@@ -105,11 +98,9 @@ python -m pytest tests/test_d_create.py                          # heavy tests: 
 0. Account 1 production (owner only): approve a host (recommended: own machine + Tailscale Serve, private), inject
    `NEXUS_API_TOKEN` / `NEXUS_VAULT_KEY` / `NEXUS_BACKUP_PASSPHRASE` on it, `python -m nexus vault-key export` to an
    offline drive, publish the OAuth consent screen, run `production-check` + one backup/restore drill there.
-1. Run `NEXUS_SETUP.bat` + `NEXUS_START.bat` on their Windows PC and report what fails (`WIN-1`).
-1b. Approve or reject merges (agents never merge). Name the guest speaker in the Review page.
-1c. On a GPU machine (or their own free Kaggle notebook): `python scripts/gpu_video_bench.py` (`GEN-2`).
-2. Authorise one free backup destination (Backblaze B2 without a card, Google Drive, or a second disk) (`STO-3`).
-3. Free Kaggle account for GPU jobs (`GEN-2`); platform OAuth apps for upload/analytics (`PUB-1`, `ANA-1`).
+1. Restore GitHub Actions (account billing / spending limit), then run `windows-installer.yml` and install the
+   resulting `NEXUS_VIDEO_AI_Setup.exe` on their own PC (`WIN-2`). Name the guest speaker in the Review page.
+2. Platform OAuth apps for upload/analytics (`PUB-1`, `ANA-1`).
 4. Decide on a LICENSE (none committed; `docs/DECISIONS.md` D-10).
 
 ## Notes for the next agent
