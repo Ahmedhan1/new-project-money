@@ -359,3 +359,20 @@ best (see ACCOUNT3_MODEL_BENCHMARKS.md); and the native-review workflow is the a
 a machine suggestion can never overwrite a reviewer's term; `/language/check` applies the memory automatically.
 `language/review.py` + `/api/a3/language/review`: queue lines with their QA findings, record approve / correct / reject
 with a reviewer label, corrected terms flow into the memory, stats feed the readiness score. Nothing leaves the machine.
+
+### Per-output language gate (publishing, 2026-11-13)
+`publishing/release_gate.language()` evaluates every localized output before publishing. It records:
+- language and dialect (`ar` + `EG` gives `ar-EG`, and `ar` + `Gulf` gives `ar-Gulf`; other dialects are refused);
+- the translation QA, terminology and OCR/glyph results;
+- voice licence and consent;
+- whether native review is required;
+- the reviewer approval state: not_submitted, pending, rejected, invalid or approved.
+
+Native review is required for every non-source language that has not met the readiness bar (≥ 20 reviewed lines at
+≥ 90 % acceptance). It is **always** required for ar-EG, ar-Gulf, hi and zh. Approval comes only from
+`language/review.record()` for **the same variety**: an approved ar-Gulf line never clears an ar-EG output.
+
+Without a reviewer the output stays a draft: a private upload is allowed and public publishing is blocked. A voice
+without a cleared licence, or with consent problems, blocks every upload. Tests: `tests/fast/test_intel_release_gate.py`
+(language section). No native reviewer has reviewed any line yet, so every language other than en is
+`draft_needs_native_review` today.

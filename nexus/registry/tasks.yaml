@@ -569,6 +569,30 @@ tasks:
     test: "pytest tests/fast/test_intel_bench_v3.py; python scripts/account3/bench_v3_score.py ...; python scripts/account3/bench_v3_report.py"
     evidence: "docs/ACCOUNT3_MODEL_BENCHMARKS_V3.md (run status stated there)"
     next: "Use the measured V3 capabilities for routing once the run is complete; dialect stays human-reviewed."
+  - id: A3-BATCH
+    priority: 1
+    title: "Account 1 batch_llm manifests: one job per model, prompts inline, old shape refused (D-17)"
+    status: tested
+    acceptance: "Generated manifest validates against Account 1's ProductionJobManifest, runs on Account 1's real dispatcher + worker script, returns every item with verified artifacts, is idempotent; invalid manifests fail with a named cause."
+    test: "pytest tests/fast/test_intel_batch_manifest.py; on the merged tree also tests/fast/test_intel_batch_llm_integration.py"
+    evidence: "integration/contracts_v1/RESULT.md run r3 (echo engine through FakeKaggleCLI; simulated label checked)"
+    next: "A real-model batch_llm run with the V3 items on the Kaggle worker (owner/Account 1 operation; Kaggle config unchanged)."
+  - id: A3-RELEASE
+    priority: 1
+    title: "Release gate: QualityReport, AI-content disclosure and per-output language review decide upload / public (D-18)"
+    status: tested
+    acceptance: "No upload without a passing QualityReport for the exact file; public needs human QA approval, same-variety native review and the disclosure decision; adapters send the platform's AI field; no platform claimed live-verified."
+    test: "pytest tests/fast/test_intel_release_gate.py tests/fast/test_intel_publishing.py tests/fast/test_intel_owner_validation.py"
+    evidence: "docs/ACCOUNT3_PUBLISHING_RELEASE_GATE.md"
+    next: "Owner: OAuth client + one private upload with owner_validation (docs/ACCOUNT3_YOUTUBE_OWNER_VALIDATION.md)."
+  - id: A3-ANALYTICS2
+    priority: 2
+    title: "Analytics data origin, normalisation, duplicates, invalid values, reconciliation (D-19)"
+    status: tested
+    acceptance: "Every record labelled with its origin; simulated rows never conclude experiments; nothing invented or guessed."
+    test: "pytest tests/fast/test_intel_analytics_quality.py tests/fast/test_intel_growth.py"
+    evidence: "tests only (no owner analytics exist)"
+    next: "Owner export or API import after the first private upload (ANA-1); verify the CSV column maps against a real export."
   - id: A3-INT
     priority: 1
     title: "Three-account integration (A1 -> A2 -> A3, then integration/contracts_v1/apply.sh)"
@@ -577,7 +601,7 @@ tasks:
     acceptance: "Merged tree: full fast suite green, apply.sh focused tests green, CI green on Linux and Windows."
     test: "Follow integration/contracts_v1/RESULT.md (run r2 recipe)."
     evidence: "integration/contracts_v1/RESULT.md"
-    next: "Owner approves; the integrator repeats run r2 on the then-current heads."
+    next: "Owner approves; the integrator repeats run r3 (integration/contracts_v1/RESULT.md) on the then-current heads."
   - id: A3-NATIVE
     priority: 2
     title: "Native-language review of ar-EG, ar-Gulf, hi and zh lines"

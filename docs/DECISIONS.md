@@ -72,3 +72,26 @@ That let the string `unverified` (Groq, Mistral) through once the owner authoris
 - `costguard.check_host(..., free_tier_provider=, model=)` no longer trusts the name. It re-runs the full gate through
   `router.hosted_call_allowed` and refuses if that gate fails or cannot be evaluated.
 - Regression tests: `tests/fast/test_zero_spend_fail_closed.py` (no network; sockets trapped).
+
+**D-17 (Account 3) batch_llm jobs carry one model and the prompts.** `bench_v2.account1_manifest` used to send
+`params.models` (a list), `items` as a count and `runtime: "ollama"`. Account 1's `batch_llm` rejects that shape on the
+worker. It now emits one ProductionJobManifest/v1 per model:
+- `params.model` is a Hugging Face repo;
+- `params.items` is the prompt list;
+- the engine is transformers, vllm or echo;
+- the idempotency key is computed over the params, and the job is Kaggle only.
+
+`batch_jobs.validate_manifest` refuses the old shape with a message naming the field. Models whose fp16 weights exceed
+24 GiB (2x T4) are listed as not eligible, never silently dropped. Ollama stays inside A3's own benchmark kernels and is
+never a batch_llm engine.
+
+**D-18 (Account 3) A finished render is not a publishable result.** Publishing needs Account 2's QualityReport for that
+exact file: `PASSED_AUTOMATED_CHECKS`, no critical finding, and a matching checksum. Public or unlisted also needs human
+QA approval (`human_approval` starting with APPROVED), native review for the same language variety where required, and
+the owner's disclosure decision where the platform asks for a judgement (YouTube realism). Unknown provenance is
+disclosed as AI. Content is labelled non-AI only on an owner attestation with no AI records. A platform that cannot
+carry a required label and has no private mode (Facebook /videos) refuses AI content.
+
+**D-19 (Account 3) Analytics rows carry their origin.** Every record is real_platform_data, user_uploaded_data,
+public_benchmark_data or simulated_test_data. Simulated rows never conclude an experiment, and fixtures and demos say
+simulated. Ambiguous dates (01/02/2026) and publish times without a stated time zone are not guessed.

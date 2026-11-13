@@ -360,12 +360,14 @@ class CsvReq(BaseModel):
     text: str
     period: str | None = None
     project_id: str | None = None
+    origin: str = "user_uploaded_data"   # real owner export unless stated otherwise
+    tz: str | None = None              # the export's time zone (IANA), for publish times
 
 
 @router.post("/analytics/import")
 def analytics_import(r: CsvReq):
     try:
-        return _mod("publishing.analytics").import_csv(r.text, r.kind, r.period, r.project_id)
+        return _mod("publishing.analytics").import_csv(r.text, r.kind, r.period, r.project_id, origin=r.origin, tz=r.tz)
     except Exception as ex:
         raise HTTPException(422, str(ex))
 

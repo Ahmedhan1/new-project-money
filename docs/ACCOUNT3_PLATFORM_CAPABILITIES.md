@@ -69,6 +69,17 @@ records them as configuration (`QUOTA` in `adapters/youtube.py`), so a change is
 - Durable recovery: `@jobs.handler("publish-upload")` registered in `nexus/intelligence/publishing/jobs_handler.py`.
   YouTube resumable session URIs are saved in the manifest, so a recovered job resumes the same upload session.
 
+### Release gate and disclosure (2026-11-13)
+`enqueue()` and `run_one()` refuse any upload unless `release_gate.evaluate()` passes:
+- Account 2's QualityReport for this exact output (`PASSED_AUTOMATED_CHECKS`, no critical finding, checksum OK);
+- a decidable AI-content disclosure;
+- the language state.
+
+Public or unlisted also needs human QA approval, native review for the same variety and, on YouTube, the owner's
+realism decision. Adapters send the disclosure field: YouTube `status.containsSyntheticMedia`, TikTok `post_info.is_aigc`,
+Instagram `is_ai_generated`. Facebook /videos cannot carry one and refuses AI content. Details:
+`docs/ACCOUNT3_PUBLISHING_RELEASE_GATE.md`.
+
 ## 3. Adapters
 
 | Adapter | Status | What it does |
@@ -94,18 +105,23 @@ values left absent - nothing is filled in). Upsert key = (platform, video_id, da
 | Piece | Status | Evidence |
 |---|---|---|
 | Capability matrix (7 destinations) | implemented, tested | `nexus/intelligence/publishing/capabilities.yaml`, `docs/results/account3/publishing_capability_matrix.json` |
-| Engine: approval gate, idempotency, queue, schedule, backoff, history, durable job kind | implemented, tested (fast) | `tests/fast/test_intel_publishing.py` (22 tests) |
+| Engine: approval gate, idempotency, queue, schedule, backoff, history, durable job kind | implemented, tested (fast) | `tests/fast/test_intel_publishing.py` |
 | YouTube adapter + OAuth helper | implemented, tested against recorded responses; **not verified live** (no owner credentials) | resumable + resume-after-503 tests; demo stops at `credentials_missing` |
 | TikTok / Instagram / Facebook adapters | request flow written, **gated, never run live** | demo stops at `requires_approved_app` |
 | Snapchat | manual package only | demo stops at `manual_only` |
 | Packaging | tested; one real router call (local Qwen3-4B, privacy internal) in the demo, deterministic elsewhere | `publishing_demo.json` -> `youtube_shorts.text_source` |
-| Analytics import | YouTube API parsing tested on documented response shapes; CSV maps **not verified against real exports** (`map_verified: false`) | `tests/fast/fixtures_publishing/` (synthetic, labelled) |
+| Analytics import | YouTube API parsing tested on documented response shapes; CSV maps **not verified against real exports** (`map_verified: false`); every record labelled `data_origin` (real_platform_data / user_uploaded_data / public_benchmark_data / simulated_test_data); dates normalised, publish times to UTC only with a stated zone, duplicates / invalid values reported, Total-row and API-vs-export reconciliation | `tests/fast/test_intel_analytics_quality.py`, `tests/fast/fixtures_publishing/` (synthetic, labelled) |
+| Release gate (QualityReport, disclosure, language) | tested; Account 2's validator used on the merged tree | `tests/fast/test_intel_release_gate.py` |
+| Owner private YouTube validation | ready for owner authorization; mock-tested only | `tests/fast/test_intel_owner_validation.py`, `docs/ACCOUNT3_YOUTUBE_OWNER_VALIDATION.md` |
+| Provider readiness | no platform is real-provider verified | `capabilities.readiness()`, `GET /api/a3/platforms/readiness` |
 
 Demo (`NEXUS_HOME=... python scripts/account3/publishing_demo.py`, ~4-5 min, mostly the one local LLM call under
 `jobs.heavy_lock()`): no render existed under `.nexus/projects`, so 6 s ffmpeg test clips (16:9, 9:16, 4:5) were used;
 7 private/draft manifests + packages (cover.jpg, caption.txt, metadata.json, MANUAL_UPLOAD.md under
 `NEXUS_HOME/a3_data/publishing_demo/packages/`); every adapter stopped before any network call with an owner-action
-message; a second run deduplicated the identical YouTube Shorts manifest. **No real upload happened.**
+message; a second run deduplicated the identical YouTube Shorts manifest. **No real upload happened.** That demo predates the
+release gate; re-run today, it stops earlier with `release gate: no QualityReport attached` because the test clips
+have no Account 2 QA.
 
 Credentials without the vault: `NEXUS_PUB_YOUTUBE_<LABEL>_CLIENT_ID`, `..._CLIENT_SECRET`, `..._REFRESH_TOKEN`.
 
