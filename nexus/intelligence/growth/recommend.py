@@ -154,13 +154,18 @@ def next_experiments(patterns: list[dict], platform: str = "youtube", max_n: int
     return out
 
 
+def _origin(res: dict) -> dict:
+    """Where the experiment's numbers came from (D-19): copied into the evidence so a reader sees real vs simulated."""
+    return {"data_origin": res.get("data_origin") or ["unlabelled"], "real_data": bool(res.get("real_data"))}
+
+
 def from_experiment(exp: dict) -> list[dict]:
     res = exp.get("results") or {}
     target = "account3" if exp["variable"] in PACKAGING else "account2"
     if res.get("verdict") != "winner":
         text = (f"Experiment {exp['id']} ({exp['variable']}): {res.get('verdict', 'not evaluated')} - no variant is declared better. "
                 + "; ".join(f"{c['variant']} vs {c['control']}: effect {c['effect']} CI {c['ci']} ({c['why']})" for c in res.get("comparisons") or []))
-        return [_rec("experiment_result", text, [_ev("experiment evaluation", experiment_id=exp["id"], verdict=res.get("verdict"))], 0.1,
+        return [_rec("experiment_result", text, [_ev("experiment evaluation", experiment_id=exp["id"], verdict=res.get("verdict"), **_origin(res))], 0.1,
                      target, experiment_id=exp["id"])]
     win = res["winner"]
     params = next((v.get("params") or {} for v in exp["variants"] if v["id"] == win), {})
@@ -169,7 +174,7 @@ def from_experiment(exp: dict) -> list[dict]:
             f"n={c['n']} {exp.get('sample_unit')}). Adopt it as the default for {exp['platform']} and re-test in 8-12 weeks.")
     extra = {"production": {"director_overrides": params}} if target == "account2" else {"packaging": params}
     return [_rec("experiment_result", text, [_ev("experiment evaluation", experiment_id=exp["id"], comparison=c["variant"], effect=c["effect"],
-                                                  ci95=c["ci"], p_adjusted=c["p_adjusted"], n=c["n"])],
+                                                  ci95=c["ci"], p_adjusted=c["p_adjusted"], n=c["n"], **_origin(res))],
                  min(0.9, exp.get("confidence") or 0.5), target, experiment_id=exp["id"], **extra)]
 
 

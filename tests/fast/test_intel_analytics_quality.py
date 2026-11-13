@@ -80,3 +80,6 @@ def test_simulated_rows_never_conclude_an_experiment():
     r = ex.evaluate(e, rows)
     assert r["results"]["real_data"] is False and r["results"]["data_origin"] == ["simulated_test_data"]
     assert r["status"] not in ("concluded", "inconclusive") and "SIMULATED" in r["results"]["note"]
+    from nexus.intelligence.growth import recommend
+    ev = recommend.from_experiment(r)[0]["evidence"][0]                       # the recommendation says where its data came from
+    assert ev["data_origin"] == ["simulated_test_data"] and ev["real_data"] is False
