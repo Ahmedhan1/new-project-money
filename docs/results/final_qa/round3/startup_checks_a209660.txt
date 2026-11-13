@@ -1,0 +1,15 @@
+--- doctor on damaged DB (exit 3)
+[OK ] FFmpeg                                               ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers
+[OK ] faster-whisper + Systran/faster-whisper-small        1.2.1
+[OK ] PySceneDetect                                        0.7.3
+[OK ] Piper TTS (OHF-Voice/piper1-gpl) + voices            1.8.0
+--- serve on damaged DB (exit 3)
+NEXUS running at http://127.0.0.1:8895  (local only, zero spend)
+NEXUS cannot open its database.
+the NEXUS database <temp home>/nexus.db is damaged (file is not a database). Your projects and media files are not affected. Recover it from a verified backup into a new folder: `python -m nexus restore <new folder>` (NEXUS_RESTORE.bat on Windows), then start NEXUS with NEXUS_HOME set to that folder. Or move nexus.db away to start with an empty project list.
+--- doctor without ffmpeg
+[BAD] FFmpeg                                               unavailable: FileNotFoundError
+[BAD] NEXUS motion graphics (Pillow + FFmpeg)              unavailable: needs ffmpeg
+[BAD] RNNoise models for FFmpeg arnndn (GregorR/rnnoise-models, 'somnolent-hogwash') unavailable: needs ffmpeg
+Recommended: {"asr": "whisper-small int8", "llm": "Qwen3-4B Q4", "mt": "MADLAD-400 3B int8", "video_generation": "not feasible locally - remote free GPU or stills/motion graphics", "max_parallel_heavy_jobs": 1}
+[BAD] ffmpeg           not found on PATH  -> run NEXUS_SETUP (installs FFmpeg) or install it and reopen the terminal

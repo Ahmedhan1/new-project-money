@@ -2,8 +2,8 @@
  "schema": "nexus.FinalQASummary/1",
  "date": "2026-11-13",
  "qa_owner": "Account 3 (independent QA / performance)",
- "verdict": "NOT READY FOR RELEASE",
- "verdict_reason": "The integrated product works end to end on Linux (fresh clone, real Chromium, crash recovery, path containment). Four major defects remain open (owner lock-out by anonymous traffic, startup on a damaged database, disk-full upload leaves a truncated file, Asset Library 17.7 s per request); GitHub Actions starts no job, so no CI, Windows E2E or Windows installer exists for this candidate. Round 2 on 4a3dd6f reproduces every open finding; 80e04fc is not yet integrated; 720p I2V has no successful run.",
+ "verdict": "NOT READY FOR RELEASE (no open FAIL on Linux; BLOCKED on owner actions)",
+ "verdict_reason": "Round 3 on a209660: QA-D1..D10 independently verified fixed and QA-D11 integrated; fast suite 981/9/0, cross-account 157, apply.sh idempotent, break probe 36/36, UI 31 pages clean, clean-machine e2e 18/18 (Linux). Remaining: Windows installer/CI/E2E BLOCKED (Actions starts no job), Wan 720p I2V not verified (smoke I2V after fix succeeded with very low motion), owner-only validations BLOCKED.",
  "inputs": {
   "integration_candidate": {
    "branch": "integration/final-release",
@@ -181,6 +181,54 @@
    "skipped": 9,
    "seconds": 578.6,
    "junit_sha256": "a927f170b7e7f5410a34d4c8c9897963b158240d8741abadde68086a2fdb968f"
+  },
+  "round3_a209660": {
+   "ruff": "clean",
+   "fast_suite": {
+    "tests": 990,
+    "passed": 981,
+    "failed": 0,
+    "skipped": 9,
+    "seconds": 579.0,
+    "junit_sha256": "50036371d50d304ed4be24aad10afa04cd473bcf70a110b741808228882e175d"
+   },
+   "cross_account": {
+    "files": 15,
+    "passed": 157,
+    "junit_sha256": "1e58d1b107d7d569feb41608b333436686ca0db23373a4cc52fc0e33eee45c71"
+   },
+   "apply_sh_twice": {
+    "passed": [
+     42,
+     42
+    ],
+    "changed": 0
+   },
+   "break_probe": {
+    "passed": 36,
+    "failed": 0
+   },
+   "ui_all_pages": {
+    "pages": 31,
+    "page_errors": 0,
+    "console_errors": 0,
+    "http_5xx": 0,
+    "blank": 0,
+    "wait_ms": 3000
+   },
+   "clean_machine_e2e_linux": {
+    "steps": 18,
+    "passed": 18
+   },
+   "assetlib": {
+    "payload_median_s": 0.256,
+    "invalidation": true,
+    "threads_identical": "16/16",
+    "caller_mutation_isolated": true
+   },
+   "damaged_db": "doctor/serve: plain message + restore command, exit 3, no traceback",
+   "disk_full": "HTTP 507, nothing written, no project",
+   "evidence": "docs/results/final_qa/round3/"
   }
  },
  "areas": [
@@ -198,9 +246,9 @@
   },
   {
    "area": "Authentication, sessions, CSRF",
-   "status": "FAIL",
+   "status": "PASS",
    "evidence": "break_probe.json",
-   "notes": "QA-D1 major open; QA-D6, QA-D7 minor open. Core protections pass: anonymous 401, CSRF 403, foreign Origin 403, tampered/expired session 401, /docs and system stop refused"
+   "notes": "fixed by Account 1, verified by QA on a209660 (round 3); QA-D1 major open; QA-D6, QA-D7 minor open. Core protections pass: anonymous 401, CSRF 403, foreign Origin 403, tampered/expired session 401, /docs and system stop refused"
   },
   {
    "area": "Paths, symlinks, uploads, request limits",
@@ -216,15 +264,15 @@
   },
   {
    "area": "Startup failure handling",
-   "status": "FAIL",
+   "status": "PASS",
    "evidence": "raw/startup_corrupt_db.txt, raw/doctor_without_ffmpeg.txt",
-   "notes": "QA-D2 major (damaged DB: traceback, no guidance; `nexus restore` does recover). Missing FFmpeg is reported clearly (QA-D9 minor)"
+   "notes": "fixed by Account 1, verified by QA on a209660 (round 3); QA-D2 major (damaged DB: traceback, no guidance; `nexus restore` does recover). Missing FFmpeg is reported clearly (QA-D9 minor)"
   },
   {
    "area": "Disk exhaustion",
-   "status": "FAIL",
+   "status": "PASS",
    "evidence": "40 MB tmpfs home",
-   "notes": "QA-D4 major: HTTP 500, orphan project, truncated 4.6 MB copy of an 18 MB upload"
+   "notes": "fixed by Account 1, verified by QA on a209660 (round 3); QA-D4 major: HTTP 500, orphan project, truncated 4.6 MB copy of an 18 MB upload"
   },
   {
    "area": "Production profile",
@@ -240,15 +288,15 @@
   },
   {
    "area": "Asset Library, archive, disk",
-   "status": "FAIL",
+   "status": "PASS",
    "evidence": "perf_assetlib.json",
-   "notes": "functional tests pass (61); QA-D3 major performance: /api/library 17.7 s per request, page blank meanwhile; proposed fix measured 0.004 s with identical output"
+   "notes": "fixed by Account 1, verified by QA on a209660 (round 3); functional tests pass (61); QA-D3 major performance: /api/library 17.7 s per request, page blank meanwhile; proposed fix measured 0.004 s with identical output"
   },
   {
    "area": "Browser UI",
-   "status": "FAIL",
+   "status": "PASS",
    "evidence": "ui_all_pages_candidate.json",
-   "notes": "QA-D5 minor: late async render overwrites the page the user moved to; QA-D11 (A3) fixed in 80e04fc"
+   "notes": "fixed by Account 1, verified by QA on a209660 (round 3); QA-D5 minor: late async render overwrites the page the user moved to; QA-D11 (A3) fixed in 80e04fc"
   },
   {
    "area": "Account 3 intelligence, research, growth, localization, publishing",
@@ -278,7 +326,7 @@
    "area": "Wan 2.2 TI2V-5B generation",
    "status": "TESTED",
    "evidence": "docs/results/wan22_5b/*.json + contact sheets",
-   "notes": "720p T2V real and on-prompt (rjob_620150232fa9, 1280x704x121 @ 24 fps, sha 26c351fd..., contact sheet); 720p I2V NOT verified: only an OOM failure, no post-fix run (4a3dd6f); MP4s not in the repo (QA-W1)"
+   "notes": "720p T2V real and on-prompt; I2V after the VAE fix succeeded at smoke size (rjob_a3611e323cb4) with very low motion (1.37); 720p I2V not verified; MP4s not in the repo"
   },
   {
    "area": "Google Drive daily archive",
@@ -343,6 +391,7 @@
  "signoff": "docs/FINAL_QA_SIGNOFF.md",
  "tested_shas": {
   "round1": "9752d919858abdd434501bd13d3a8274a9f41cca",
-  "round2": "4a3dd6f8e30c6766cddb18ec88afe1230be7b846"
+  "round2": "4a3dd6f8e30c6766cddb18ec88afe1230be7b846",
+  "round3": "a2096606d0908fc7e040eecd8030e6f47d049b7f"
  }
 }

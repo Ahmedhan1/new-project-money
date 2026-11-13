@@ -181,8 +181,19 @@ def main() -> None:
         err = str((row or {}).get("error") or "")
         probe("ux", "failed job error is a plain message (no traceback, no server paths)", False, "Traceback" in err or a.home in err,
               "the API returns the Python traceback and absolute paths to the client", severity_if_fail="minor")
-        probe("recovery", "an undecodable file is not retried", 0, int((row or {}).get("retries") or 0),
-              "deterministic input errors are retried like transient ones", severity_if_fail="minor")
+        import ast
+        stages = (row or {}).get("stages")
+        if isinstance(stages, str):
+            try:
+                stages = ast.literal_eval(stages)
+            except (ValueError, SyntaxError):
+                stages = []
+        runs = max([int(st.get("runs") or 0) for st in stages or []] or [0])
+        probe("recovery", "an undecodable file is run once (not retried)", 1, runs,
+              f"stage runs (the 'retries' field counts attempts: {(row or {}).get('retries')}); deterministic input errors must not be retried",
+              severity_if_fail="minor")
+        probe("recovery", "the failed stage is recorded as failed", "failed",
+              next((st.get("status") for st in stages or []), None), severity_if_fail="minor")
     probe("server", "server still healthy after the probes", 200, req(base, "GET", "/api/projects", headers=bearer)[0], severity_if_fail="critical")
 
     # --- brute force lockout

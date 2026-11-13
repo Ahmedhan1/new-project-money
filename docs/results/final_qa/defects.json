@@ -2,13 +2,14 @@
  "schema": "nexus.QADefects/1",
  "sha": [
   "9752d91",
-  "4a3dd6f"
+  "4a3dd6f",
+  "a209660"
  ],
  "defects": [
   {
    "id": "QA-D1",
    "severity": "major",
-   "status": "open",
+   "status": "fixed, verified by QA on a209660",
    "owner": "Account 1",
    "files": [
     "nexus/cloud/security.py (check, _fail_auth, _rate_check)"
@@ -21,12 +22,13 @@
    "reproduced_at": [
     "9752d91",
     "4a3dd6f"
-   ]
+   ],
+   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f"
   },
   {
    "id": "QA-D2",
    "severity": "major",
-   "status": "open",
+   "status": "fixed, verified by QA on a209660",
    "owner": "Account 1",
    "files": [
     "nexus/db.py (connection setup)",
@@ -40,12 +42,14 @@
    "reproduced_at": [
     "9752d91"
    ],
-   "note_4a3dd6f": "code unchanged in 4a3dd6f; not re-run"
+   "note_4a3dd6f": "code unchanged in 4a3dd6f; not re-run",
+   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f",
+   "residual": "`nexus serve` prints 'NEXUS running at ...' before it stops with the damaged-database message (cosmetic)"
   },
   {
    "id": "QA-D3",
    "severity": "major (performance)",
-   "status": "open (fix measured)",
+   "status": "fixed, verified by QA on a209660",
    "owner": "Account 2 module, Account 1 integration",
    "files": [
     "nexus/assetlib/__init__.py _registry()"
@@ -58,12 +62,13 @@
    "reproduced_at": [
     "9752d91",
     "4a3dd6f"
-   ]
+   ],
+   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f"
   },
   {
    "id": "QA-D4",
    "severity": "major (data integrity)",
-   "status": "open",
+   "status": "fixed, verified by QA on a209660",
    "owner": "Account 1",
    "files": [
     "nexus/api.py api_upload",
@@ -77,12 +82,14 @@
    "reproduced_at": [
     "9752d91"
    ],
-   "note_4a3dd6f": "code unchanged in 4a3dd6f; not re-run"
+   "note_4a3dd6f": "code unchanged in 4a3dd6f; not re-run",
+   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f",
+   "residual": "only the refusal path was live-tested (preflight reserves ~287 MB for 18 MB); a write failure after a passed preflight is covered by Account 1 unit tests only"
   },
   {
    "id": "QA-D5",
    "severity": "minor",
-   "status": "open",
+   "status": "fixed, verified by QA on a209660",
    "owner": "Account 1 / Account 2 (shared nexus/ui/index.html)",
    "files": [
     "nexus/ui/index.html go() and async page renderers"
@@ -95,12 +102,13 @@
    "reproduced_at": [
     "9752d91",
     "4a3dd6f"
-   ]
+   ],
+   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f"
   },
   {
    "id": "QA-D6",
    "severity": "minor",
-   "status": "open",
+   "status": "fixed, verified by QA on a209660",
    "owner": "Account 1",
    "files": [
     "nexus/cloud/security.py close_session / session_valid"
@@ -112,12 +120,13 @@
    "reproduced_at": [
     "9752d91",
     "4a3dd6f"
-   ]
+   ],
+   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f"
   },
   {
    "id": "QA-D7",
    "severity": "minor",
-   "status": "open",
+   "status": "fixed, verified by QA on a209660",
    "owner": "Account 1",
    "files": [
     "nexus/cloud/security.py session_valid (legacy branch)"
@@ -129,12 +138,13 @@
    "reproduced_at": [
     "9752d91",
     "4a3dd6f"
-   ]
+   ],
+   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f"
   },
   {
    "id": "QA-D8",
    "severity": "minor",
-   "status": "open",
+   "status": "fixed, verified by QA on a209660",
    "owner": "Account 1",
    "files": [
     "nexus/jobs.py"
@@ -146,12 +156,13 @@
    "reproduced_at": [
     "9752d91",
     "4a3dd6f"
-   ]
+   ],
+   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f"
   },
   {
    "id": "QA-D9",
    "severity": "minor",
-   "status": "open",
+   "status": "fixed, verified by QA on a209660",
    "owner": "Account 1",
    "files": [
     "doctor / tools registry"
@@ -163,12 +174,13 @@
    "reproduced_at": [
     "9752d91"
    ],
-   "note_4a3dd6f": "code unchanged in 4a3dd6f; not re-run"
+   "note_4a3dd6f": "code unchanged in 4a3dd6f; not re-run",
+   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f"
   },
   {
    "id": "QA-D10",
    "severity": "minor (test quality)",
-   "status": "open",
+   "status": "fixed, verified by QA on a209660",
    "owner": "Account 1/2",
    "files": [
     "scripts/acceptance/windows_e2e.py step 'export with verification'"
@@ -180,12 +192,13 @@
    "reproduced_at": [
     "9752d91"
    ],
-   "note_4a3dd6f": "code unchanged in 4a3dd6f; not re-run"
+   "note_4a3dd6f": "code unchanged in 4a3dd6f; not re-run",
+   "verified_fixed_at": "a2096606d0908fc7e040eecd8030e6f47d049b7f"
   },
   {
    "id": "QA-D11",
    "severity": "minor",
-   "status": "fixed on PR #5 (80e04fc); NOT yet in integration 4a3dd6f (reproduced there)",
+   "status": "fixed and integrated (80e04fc in a209660), verified by QA",
    "owner": "Account 3",
    "files": [
     "nexus/ui/intelligence.js"
@@ -250,7 +263,7 @@
    "severity": "quality",
    "status": "open",
    "owner": "Account 1/2",
-   "summary": "Wan smoke clips move and are temporally stable, but prompt adherence is weak at 672x384x25: the fox is an unrecognisable dark shape, no tracking camera; the I2V cat does not turn or blink"
+   "summary": "Wan smoke clips move and are temporally stable, but prompt adherence is weak at 672x384x25: the fox is an unrecognisable dark shape, no tracking camera; the I2V cat does not turn or blink | update a209660: 720p T2V is on-prompt; post-fix I2V smoke has very low motion (1.37)"
   },
   {
    "id": "QA-W3",
@@ -262,7 +275,7 @@
   {
    "id": "QA-W4",
    "severity": "minor",
-   "status": "open",
+   "status": "fixed by Account 1 (pinned 0fad780); not run on a GPU by QA",
    "owner": "Account 2",
    "summary": "wan21-t2v-1.3b has no pinned revision in _WAN_REPOS (selectable only explicitly; no silent fallback found)"
   },

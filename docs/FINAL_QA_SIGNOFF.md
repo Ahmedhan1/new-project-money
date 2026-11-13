@@ -1,30 +1,50 @@
 # Final QA, performance and release validation (independent QA: Account 3)
 
-Date 2026-11-13. **Tested SHAs.** Round 1 used integration candidate `9752d91`. Round 2 used the current integration head
-`4a3dd6f8e30c6766cddb18ec88afe1230be7b846`, the base of PR #9, which adds Wan 720p evidence and an I2V VAE change.
-Every finding below names the SHA it was reproduced on. No QA finding is closed from code inspection: a defect is
-marked fixed only after it is reproduced as gone on a tested SHA. Machine-readable summary: `docs/results/final_qa_summary.json`. Defects: `docs/results/final_qa/defects.json`.
+Date 2026-11-13. **Tested SHAs.**
+- Round 1: candidate `9752d91`.
+- Round 2: `4a3dd6f`.
+- **Round 3 (current): `a2096606d0908fc7e040eecd8030e6f47d049b7f`**, which is `integration/final-release` with PR #9,
+  the PR #5 follow-up (`80e04fc`) and Account 1's QA-D1 to D10 fixes.
+
+Every finding names the SHA it was reproduced on. A defect is marked fixed only when it is reproduced as gone on a
+tested SHA, never from code inspection. Machine-readable summary: `docs/results/final_qa_summary.json`. Defects:
+`docs/results/final_qa/defects.json`. Round 3 evidence: `docs/results/final_qa/round3/`.
+
 Status words: **PASS** (tested and verified with evidence), **TESTED** (automated checks pass; live or human validation
 remains), **BLOCKED** (needs an owner credential, resource or approval), **DEFERRED** (accepted for later), **FAIL** (a
 reproducible defect remains). Independent results are listed separately and never added together.
 
-## Verdict: NOT READY FOR RELEASE
+## Verdict (round 3, `a209660`): NOT READY FOR RELEASE — no open FAIL on Linux; release BLOCKED on owner actions
 
-The integrated product works end to end on Linux:
-- a fresh clone installs and starts;
-- the real-Chromium UI loads every page;
-- a SIGKILL mid-job recovers;
-- path, symlink and upload attacks are refused;
-- 953 of 962 fast tests pass, and the other 9 are skipped (optional assets only).
+**All ten QA defects (QA-D1 to D10) are independently verified as fixed on `a209660`**, and QA-D11 (A3) is integrated.
+Nothing open remains a FAIL on Linux. The release still cannot be signed off as production-ready:
+- **Windows (BLOCKED).** The deliverable is a Windows single-file product, but `NEXUS_VIDEO_AI_Setup.exe` has not been
+  built or installed, and GitHub Actions starts no job, so there is no CI, no Windows E2E and no update/rollback test.
+- **Wan 2.2 720p I2V (not verified).** There is no successful run after the VAE change; 720p T2V is evidenced.
+- **Owner-only validation (BLOCKED)**, listed in §9b: provider OAuth, native-language review, real analytics, the audio
+  and creative review, and merge approval.
 
-The release is still not ready, for two reasons:
-- **Four major defects are open.** Each has a reproduction and a fix recommendation:
-  - QA-D1: anonymous traffic locks the owner out;
-  - QA-D2: a damaged database stops startup with a traceback;
-  - QA-D3: the Asset Library takes 17.7 s per request;
-  - QA-D4: a full disk during upload leaves a truncated file and an orphan project.
-- **Windows is unverified.** GitHub Actions starts no job, so no CI run, Windows E2E or Windows installer exists for
-  this candidate.
+### Round 3 results on `a209660` (local Linux; separate runs, never added together)
+| Check | Result | Evidence (`round3/`) |
+|---|---|---|
+| `ruff check .` | clean | `summary_a209660.txt` |
+| Full fast suite | **981 passed, 9 skipped, 0 failed** of 990 (579.0 s). The same 9 skips as before (optional assets). It includes Account 1's new QA regression tests | junit sha256 `50036371…175d` |
+| Cross-account and contract set (15 files, including the QA-D11 test) | **157 passed** | junit `1e58d1b1…5c71` |
+| `apply.sh` twice | 42 passed, then 42 passed, 0 files changed | — |
+| Break-test (`scripts/qa/break_probe.py`) | **36 passed, 0 failed**. QA-D1 (owner token accepted after 11 anonymous requests), D6 (logout revokes a copied cookie), D7 (raw-token cookie refused) and D8 (plain error, one run, stage `failed`) all pass. The earlier protections still hold | `break_probe_a209660.json` |
+| QA-D2, damaged `nexus.db` | `nexus doctor` and `nexus serve` print "database … is damaged … `python -m nexus restore <new folder>`" and exit 3, with no traceback. Minor leftover: `serve` prints "NEXUS running at …" before it stops | `startup_checks_a209660.txt` |
+| QA-D3, Asset Library | payload 0.26 s median (was 17.6 to 17.8 s). A registry edit is seen on the next call; 16/16 identical results from concurrent callers; a caller mutating its result does not affect the next caller | `assetlib_fix_check_a209660.json` |
+| QA-D4, full disk (40 MB tmpfs, 18 MB upload ×2) | HTTP 507 with a plain message, no file written, no project created, server healthy. The space check reserves about 287 MB for an 18 MB upload, so a write failure *after* the check passes could not be produced live; that path is covered by Account 1's unit tests only | — |
+| QA-D5, navigation race | Storage → Home shows Home | `nav_race_a209660.txt` |
+| QA-D9, doctor without FFmpeg | motion graphics and RNNoise reported `[BAD] … needs ffmpeg` | `startup_checks_a209660.txt` |
+| QA-D10, E2E export assertion | the clean-machine E2E on Linux passes **18/18**, and the export step now requires `verify_ok: True` | `clean_machine_e2e_a209660.json` |
+| QA-D11, `a3refs` | renders without `[object Object]` | `ui_all_pages_a209660.json` |
+| UI, all 31 pages, real Chromium (3 s per page) | 0 page errors, 0 console errors, 0 HTTP 5xx, no blank page. At 1.2 s per page, run while the full suite loaded the CPU, three pages were still loading; at 3 s all render | `ui_all_pages_a209660.json` |
+| QA-W4 | `wan21-t2v-1.3b` pinned (by Account 1; the code was not re-run on a GPU) | — |
+
+### Earlier rounds (history)
+In round 1 (`9752d91`) and round 2 (`4a3dd6f`), the same programme found and reproduced QA-D1 to D10. Those results
+and the defect descriptions follow below, unchanged, as the record of what was fixed.
 
 ## 1. Inputs and environment
 | Input | SHA |
@@ -41,7 +61,7 @@ each with a fresh temporary `NEXUS_HOME`. The QA branch's own changes were teste
 
 ## 2. Test programme
 
-### Round 2, on `4a3dd6f` (current integration head)
+### Round 2, on `4a3dd6f`
 Each line is a separate run; the counts are never added together. Evidence is in `docs/results/final_qa/round2/`.
 | Check | Result |
 |---|---|
@@ -103,17 +123,17 @@ Full reproductions, files and fixes are in `docs/results/final_qa/defects.json`.
 
 | Id | Severity | Status | Owner | Summary |
 |---|---|---|---|---|
-| QA-D1 | major | open | A1 | anonymous requests count as failed logins; the owner's valid token then gets 429 for the window |
-| QA-D2 | major | open | A1 | a damaged `nexus.db` gives a traceback at startup and in doctor, with no recovery hint (`nexus restore` works) |
-| QA-D3 | major (perf) | open, fix measured | A2 module / A1 | `/api/library` takes 17.7 s per request (the YAML is parsed 183× per call); the cache fix gives 0.004 s with identical output |
-| QA-D4 | major (data) | open | A1 | a full disk during upload gives HTTP 500, an orphan project and a truncated copy |
-| QA-D5 | minor | open | A1/A2 UI | a late async page render overwrites the page the user moved to |
-| QA-D6 | minor | open | A1 | logout does not revoke a copied session cookie (valid up to 12 h) |
-| QA-D7 | minor | open | A1 | a legacy cookie holding the raw token is accepted with no expiry |
-| QA-D8 | minor | open | A1 | a failed job's error carries a traceback and absolute paths; undecodable input is retried 3×; the stage stays `running` |
-| QA-D9 | minor | open | A1 | without FFmpeg, doctor still reports "motion graphics (Pillow + FFmpeg)" as OK |
-| QA-D10 | minor (test) | open | A1/A2 | the E2E export step reads keys export() never returns, so it passes when they are None |
-| QA-D11 | minor | **fixed** `80e04fc` (PR #5) | A3 | Creator References printed `[object Object]` |
+| QA-D1 | major |  **fixed, verified `a209660`**  | A1 | anonymous requests count as failed logins; the owner's valid token then gets 429 for the window |
+| QA-D2 | major |  **fixed, verified `a209660`**  | A1 | a damaged `nexus.db` gives a traceback at startup and in doctor, with no recovery hint (`nexus restore` works) |
+| QA-D3 | major (perf) |  **fixed, verified `a209660`** (0.26 s)  | A2 module / A1 | `/api/library` takes 17.7 s per request (the YAML is parsed 183× per call); the cache fix gives 0.004 s with identical output |
+| QA-D4 | major (data) |  **fixed, verified `a209660`** (refusal path)  | A1 | a full disk during upload gives HTTP 500, an orphan project and a truncated copy |
+| QA-D5 | minor |  **fixed, verified `a209660`**  | A1/A2 UI | a late async page render overwrites the page the user moved to |
+| QA-D6 | minor |  **fixed, verified `a209660`**  | A1 | logout does not revoke a copied session cookie (valid up to 12 h) |
+| QA-D7 | minor |  **fixed, verified `a209660`**  | A1 | a legacy cookie holding the raw token is accepted with no expiry |
+| QA-D8 | minor |  **fixed, verified `a209660`**  | A1 | a failed job's error carries a traceback and absolute paths; undecodable input is retried 3×; the stage stays `running` |
+| QA-D9 | minor |  **fixed, verified `a209660`**  | A1 | without FFmpeg, doctor still reports "motion graphics (Pillow + FFmpeg)" as OK |
+| QA-D10 | minor (test) |  **fixed, verified `a209660`**  | A1/A2 | the E2E export step reads keys export() never returns, so it passes when they are None |
+| QA-D11 | minor | **fixed, verified `a209660`** (`80e04fc` integrated) | A3 | Creator References printed `[object Object]` |
 | QA-D12 | major (content) | **fixed** (QA branch) | A3 | a series bible with two records on one line lost the second location (the real Test F bible) |
 | QA-D13 | major (content) | **fixed** (QA branch) | A3 | QLT-1: fictional-name image queries, repeated searches, off-bible locations only reported |
 | QA-D14 | minor | deferred | A3 | non-Latin research ranking stays in the search engine's order; the measured variant did not help |
@@ -148,19 +168,21 @@ Performance (`perf_summary.json`, `perf_assetlib.json`):
 | Restart after SIGKILL | 1.11 s |
 | 9.6 s 720p render | cold 9.4 s; warm (5/5 segments from cache) 6.5 s, of which 0.4 s is render and ~6 s is QA and the quality score (QA-O1). One warm run took 60 s; 3 further runs did not reproduce it |
 
-## 6. Wan 2.2 TI2V-5B: independent review of Account 1's evidence (as of `4a3dd6f`)
+## 6. Wan 2.2 TI2V-5B: independent review of Account 1's evidence (as of `a209660`)
 | Check | Finding |
 |---|---|
 | Model identity | `Wan-AI/Wan2.2-TI2V-5B-Diffusers` at revision `b8fff7315c768468a5333511427288870b2e9635` in every successful record. The worker selects it by explicit key, with no fallback path; the 1.3B entry is separate and unpinned (QA-W4). No 14B model and no paid provider appear |
 | Real GPU | Kaggle T4 × 2 on every job (sm 7.5, 14.56 GiB each), with per-GPU memory and utilisation recorded. Not echo, not CPU, not a still |
 | **720p T2V** (`rjob_620150232fa9`) | **succeeded**: 1280×704, 121 frames at 24 fps, 30 steps, h264; the local SHA-256 equals the worker's (`26c351fd…2e1f`). Generation 2,835 s, decode 1,264 s (own tiling), job 4,455 s (74 min). Peak allocated GPU0 12.9 GB / GPU1 9.7 GB; mean utilisation 34 % / 61 %. No static pairs, not black, not flat. Contact sheet: a recognisable red fox trotting through snow in a sunlit birch forest, with the camera moving alongside, temporally consistent and on prompt |
 | **720p I2V** | **not verified.** `rjob_5b6d09efb6d1` failed with CUDA OOM on GPU0. `i2v720.json` is that same failed attempt. The VAE-placement change in `4a3dd6f` has **no successful post-fix run yet**, so there is no I2V MP4 to inspect |
+| **I2V after the VAE fix, smoke size** (`rjob_a3611e323cb4`, in `a209660`) | **succeeded** at 672×384, 25 frames. This is a new job: different timings and hash (`77736937…`), and the memory profile changed as the fix intends (GPU0 peak 5.2 GB vs 12.8 GB before). It used the same seed as the pre-fix run, so the frame statistics are nearly identical (decoded motion 1.369 vs 1.366). **Motion is very low**: mean decoded frame difference 1.37, against 3.97 for the 720p T2V clip, and the cat does not turn or blink as prompted. The record replaced the pre-fix `smoke_i2v.json` (the earlier job `rjob_c1ad61c90bb8` is still in git history) |
 | Smoke runs (672×384, 25 f) | T2V and I2V succeeded. Prompt adherence was weak at that size (QA-W2) |
 | MP4 files | not in the repository. `tasks.yaml` cites `media/t2v_1280x704_121f_24fps.mp4`, which does not exist in the tree. QA could inspect only the contact sheets and the ffprobe and hash records, not the video itself (QA-W1) |
 | Motion metrics | two different numbers per clip: worker 13.74 vs local decoded 3.97 at 720p (QA-W3) |
 
-Verdict: **720p T2V is evidenced as real, valid, moving and on-prompt** (from records and the contact sheet). **720p I2V
-is not**: it needs a successful post-fix run and its MP4 inspected. Speed: about 74 min of T4×2 time per 5 s 720p
+Verdict: **720p T2V is evidenced as real, valid, moving and on-prompt** (from records and the contact sheet).
+**I2V works mechanically after the fix at smoke size, but with very little motion. 720p I2V is still not verified**: it
+needs a successful post-fix 720p run, and its MP4 inspected for real motion. Speed: about 74 min of T4×2 time per 5 s 720p
 clip.
 
 ## 7. Real providers (evidence review; QA has no owner credentials and re-ran nothing live)
@@ -242,14 +264,13 @@ A finding closes only when it is reproduced as gone on the new exact integration
 7. QA-D11: `a3refs` must show hook text once PR #5 `80e04fc` is integrated. Keep `tests/fast/test_intel_ui_pattern_library.py`.
 
 ## 10. For Account 1 (integration owner)
-Merge `work/final-qa-performance` (QLT-1 improvements, rubric, regression tests, QA scripts and evidence) and PR #5
-`80e04fc`. Then fix or accept the items below, and re-run the full suite and `scripts/qa/break_probe.py`:
-- QA-D1, QA-D2 and QA-D4 (owner: Account 1);
-- QA-D3 (Account 2, through Account 1);
-- QA-D5 to QA-D10.
+Round 3 (`a209660`): QA-D1 to D10 are verified fixed and QA-D11 is integrated. To merge from this branch: the round 2
+and round 3 report, the evidence under `docs/results/final_qa/round2|round3/`, and the updated QA scripts (break probe
+reads stage runs; the UI check takes `WAIT_MS`; the Asset Library check covers invalidation, threads and mutation).
+None of it touches product code.
 
-The release needs, in addition:
-- Actions restored by the owner;
-- the Windows plan in §8 executed;
-- a successful post-fix Wan 720p I2V run, with its MP4 available for inspection;
-- the owner's approval.
+Still open before a production release:
+- Owner: restore GitHub Actions, then build the Windows installer and run the §8 plan.
+- Account 1 / Account 2: a successful post-fix **720p** I2V run with real motion, and its MP4 kept for inspection.
+- Cosmetic: `nexus serve` should not print "NEXUS running at …" when the database check then stops it.
+- Owner: the items in §9b, and merge approval.
