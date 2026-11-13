@@ -133,6 +133,20 @@ def artifact(path: str | Path, role: str = "", media_type: str = "", hash_it: bo
     return {k: v for k, v in ref.items() if v is not None}
 
 
+def local_path(uri: str) -> Path | None:
+    """Local file of an ArtifactRef uri: file:///C:/x/a.mp4 -> C:\\x\\a.mp4 on Windows, file:///x/a.mp4 -> /x/a.mp4 on
+    POSIX; None for a non-file URI (nexus://, https://). A bare path is returned as-is."""
+    from urllib.parse import urlparse
+    from urllib.request import url2pathname
+    if not uri:
+        return None
+    if uri.startswith("file:"):
+        return Path(url2pathname(urlparse(uri).path))
+    if "://" in uri:
+        return None
+    return Path(uri)
+
+
 def new_id(prefix: str) -> str:
     return f"{prefix}_{time.strftime('%Y%m%d')}_{uuid.uuid4().hex[:8]}"
 

@@ -90,7 +90,7 @@ def _exec_image(m: dict) -> tuple[list, dict]:
     from . import image
     s = m["settings"]
     out = m["outputs"][0]["uri"]
-    out = out[7:] if out.startswith("file://") else out
+    out = str(contracts.media.local_path(out)) if out.startswith("file:") else out
     r = image(s.get("prompt") or "", out, size=tuple(s.get("size") or (512, 512)), seed=int(s.get("seed", 1)),
               steps=s.get("steps"), model_id=s["model"], allow_noncommercial=s.get("licence", {}).get("class") != "foss")
     return [{**contracts.artifact(r["path"], role="output", media_type="image/png"), "provenance": r["provenance"]}], \
@@ -134,7 +134,7 @@ def consume(res: dict, manifest: dict, local_root: str | Path | None = None) -> 
     s = manifest["settings"]
     for o in res["outputs"]:
         uri = o.get("uri", "")
-        path = Path(uri[7:]) if uri.startswith("file://") else (Path(local_root) / Path(uri).name if local_root else None)
+        path = contracts.media.local_path(uri) if uri.startswith("file:") else (Path(local_root) / Path(uri).name if local_root else None)
         prov = {"model": s["model"], "task": s["task"], **(o.get("provenance") or {}), **(res["metrics"].get("provenance") or {})}
         if path is None or not path.exists():
             # a remote artefact we cannot inspect yet: record it, but never as generated video without seeing frames

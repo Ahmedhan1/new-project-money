@@ -73,7 +73,7 @@ def main() -> None:
                      "captions": (tl.get("captions") or {}).get("style"), "cues": len(tl.get("subtitles") or []),
                      "qa_status": rep["status"], "known_issues": rep.get("known_issues"),
                      "quality": {kk: qs.get(kk) for kk in ("score", "verdict", "categories")},
-                     "caption_safe_area": safe, "loudness": {kk: loud.get(kk) for kk in ("integrated", "true_peak", "lra") if kk in loud} or loud,
+                     "caption_safe_area": safe, "loudness": {kk: loud.get(kk) for kk in ("lufs", "true_peak", "lra")},
                      "render_s": round(time.time() - t1, 1), "output": str(out),
                      "metadata": {"title": it.get("title"), "description": it.get("description"), "hashtags": it.get("hashtags")}})
         for q, t in enumerate((1.0, float(info["format"]["duration"]) * 0.6)):

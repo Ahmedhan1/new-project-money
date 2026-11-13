@@ -94,3 +94,57 @@ New keys in this work package:
 piece / audio mix (`stats["resumed"]`, `stats["checkpoint"]["reused"]`). For a remote worker,
 `nexus.timeline.resume.execution_result(request_id, stats=..., error=..., checkpoint=...)` builds the
 `RenderExecutionResult` for Account 1.
+
+## Director: explainable edits (agent B)
+- `POST /api/projects/{id}/direct` with `profile` (14 editorial profiles from `GET /api/director/profiles`: hook window,
+  median shot length, pattern-interrupt interval, cutaways/min, title style, end structure; legacy names are aliases),
+  `target_seconds`, `title`, `instructions`, `broll`, `end_text` (only your words), `profile_overrides` (any profile
+  parameter), `reference_profile_id` and `overrides`:
+  `{"keep": [decision ids], "drop": [...], "opening": id, "no_lift": true, "reject_cutaways": [...]}`.
+- `GET /api/projects/{id}/plan`: every decision with `id`, `confidence` (0-1), `reason`, `text`. Decisions under 0.55 are
+  highlighted in the editor; each row has Keep / Drop / Use as opening / Reject cutaway, applied on the next "Direct".
+- What it does on real material (docs/results/a2_director/): openings never start on "Yes,"/"And"/a pronoun with no
+  referent (standalone lines are moved to the front), endings never on a question or fragment, mid-sentence diarisation
+  flips repaired, duplicate takes collapsed to the best one, nothing padded when the source is short.
+
+## B-roll (agent B)
+- Ranked by what the picture shows (SigLIP image-text similarity, Apache-2.0, 213 MB opt-in install from the editor),
+  plus a small keyword bonus; penalties for imagery already used, for the speaker's own look and for repeating the same
+  shot type/motion. Licence gate first; talking heads, studio shots and text slates are rejected as cutaways.
+- Candidates: NASA library, Openverse (CC), and your own project files with declared rights (`owned`, `licensed`,
+  `public-domain`, `generated`): their low-speech shots become local candidates.
+- Measured on a hand-labelled set (28 sentences, 18 inserts, one non-blind labeller): strict 28% -> 56%, lenient 56% -> 94%.
+  Demo 1 still showed one off-topic NASA result (Houston infrared under "carbon dioxide or water"): check cutaways.
+
+## Reference style (agent B + integration)
+- `POST /api/projects/{id}/reference {media_id, rights_basis}` (owned / licensed / public-domain / commentary; anything
+  else is refused) measures STRUCTURE only: shot-length statistics, cuts/min, first 3 s / 10 s, hook timing, shot-type
+  changes, visual density, cutaways/min, on-screen text share (edge heuristic, not OCR), speech/music-bed share, audio
+  accents/min, pattern-interrupt spacing, ending kind, colour (luma, contrast, saturation, colourfulness, warmth,
+  monochrome share) and transitions (hard cut / gradual / fade through black, measured at 12 fps around each cut).
+- Pass the returned `reference_profile_id` to Direct: the numbers become profile overrides (shot lengths, pacing, hook
+  window, cutaway rate, caption style, music on/off, grade, crossfade policy, ending). No frame, word or sound of the
+  reference is used. Demo 4 compares the reference with the rendered result metric by metric.
+
+## Shorts (agent B)
+- `POST /api/projects/{id}/shorts`: moments that open on a question or a standalone line and end on a finished
+  statement; a context line is added when a short opens on an answer; vertical crop follows the recorded face position;
+  captions are placed inside the platform's safe zone. Distinctness on six benchmarks: max pairwise source overlap 0.6%.
+- Titles: deterministic titles are complete thoughts only about half the time (Demo 2: "One of the things that caves");
+  edit them before publishing. Optional local-LLM titles are checked against the clip's own words.
+
+## Audio (agent C)
+- Per clip `audio_fx: "dialogue_v2_ffmpeg"` (editor: Dialogue clean-up) or programme-wide; per item `gain_db`, `pan`
+  (-1..1, constant power); music `duck: "keyframes"` dips the bed under caption/narration spans without sidechain pumping.
+- Loudness: programme normalised to `target_lufs` (default -14), true peak <= -1 dBTP. A/V sync measured per clip.
+- Listening sheet for a person: docs/results/a2_audio_review/REVIEW.md. **No human has approved any audio yet.**
+
+## Enhancement and VFX (agent D)
+- `POST /api/projects/{id}/clips/{clip}/process {op, params}` (ops from `GET /api/effects`): upscale (lanczos / Real-ESRGAN:
+  invents plausible detail, never "recovers" it), frame interpolation, denoise, deblock, film look, HDR tone map,
+  background replacement (MODNet/U2-Net/MediaPipe, consent-gated downloads), tracked mask, particles, depth of field.
+  The clip keeps `enhanced_from`, so Undo restores the original.
+
+## Remote rendering (Account 1 workers)
+- Timelines of plain cuts can be compiled for Account 1's CPU workers (`nexus/timeline/remote_render.py`, task
+  `a2_render_steps`); anything with effects, layers, captions or music renders locally. See ACCOUNT2_HANDOFF_TO_ACCOUNT1.md.

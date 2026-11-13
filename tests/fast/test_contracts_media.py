@@ -29,3 +29,11 @@ def test_missing_wrong_type_and_semantic_errors():
 def test_nested_artifact_refs_are_checked():
     errs = C.validate({"schema": "nexus.ArtifactManifest/1", "producer": "x", "artifacts": [{"uri": "file:///a", "bytes": "big"}]})
     assert errs == ["ArtifactManifest.artifacts[0].ArtifactRef.bytes must be int, got str"]
+
+
+def test_local_path_round_trips_file_uris(tmp_path):
+    from nexus.contracts import media
+    f = tmp_path / "a b#1.mp4"
+    f.write_bytes(b"x")
+    assert media.local_path(f.resolve().as_uri()) == f.resolve()
+    assert media.local_path(str(f)) == f and media.local_path("nexus://project/x/master") is None and media.local_path("") is None

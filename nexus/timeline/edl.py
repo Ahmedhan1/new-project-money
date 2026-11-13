@@ -240,9 +240,9 @@ def from_otio(doc: dict) -> dict:
             c.update(type="color", duration=round((own + tail) / fps, 6), color=(ref.get("parameters") or {}).get("color", "0x000000"))
         else:
             url = ref.get("target_url", "")
-            src = url[7:] if url.startswith("file://") else url
             from urllib.parse import unquote
-            src = unquote(src)
+            from ..contracts import media as _media
+            src = str(_media.local_path(url)) if url.startswith("file:") else unquote(url)  # Windows-safe file URI
             if c.get("type") == "image":
                 c.update(src=src, duration=round((own + tail) / fps, 6))
             else:

@@ -95,7 +95,7 @@ def guard(doc: dict, path: str | Path | None = None) -> dict:
         local = path
         if local is None:
             uri = (doc.get("output") or {}).get("uri", "")
-            local = uri[7:] if uri.startswith("file://") else None
+            local = str(contracts.media.local_path(uri)) if uri.startswith("file:") else None
         got = classify(prov, path=local)
         if got["classification"] != "generated-video":
             raise ClassificationError(f"manifest claims generated-video but the evidence says {got['classification']}: "
