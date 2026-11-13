@@ -3,14 +3,14 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-13T11:50:38Z",
+ "updated": "2026-11-13T11:59:01Z",
  "git": {
   "branch": "work/account-3-intelligence-growth",
-  "commit": "4486de4",
-  "subject": "Merge PR base claude/hopeful-allen-luubcy (a889cd8, Account 1 final review) into Account 3",
-  "dirty_files": 1,
+  "commit": "fae6d38",
+  "subject": "Account 3 task 'next' texts shortened: headroom under the 1,500-word handoff limit on the three-account tree",
+  "dirty_files": 7,
   "upstream": "origin/work/account-3-intelligence-growth",
-  "unpushed_commits": 2
+  "unpushed_commits": 3
  },
  "current_task": {
   "id": "QLT-1",

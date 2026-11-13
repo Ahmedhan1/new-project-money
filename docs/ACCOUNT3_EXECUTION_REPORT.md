@@ -203,7 +203,7 @@ Kaggle CLI, echo engine). It checks:
 - A2-1 and A2-2 (Account 2).
 - Merge approval.
 
-Test, CI and integration numbers for the final commit: `integration/contracts_v1/RESULT.md` (run r4) and PR #5.
+Test, CI and integration numbers for the final commit: `integration/contracts_v1/RESULT.md` (run r4b) and PR #5.
 
 # Release sign-off (2026-11-13, later)
 No new features. This round reconciled PR #5 with its base and re-verified everything on the latest heads.
@@ -211,7 +211,9 @@ No new features. This round reconciled PR #5 with its base and re-verified every
 ## PR mergeability
 PR #5's base is `claude/hopeful-allen-luubcy`, not `main`. It now contains Account 1's final head `f9d8f11` via PR #4.
 The A3 branch was 98 commits ahead and 54 behind, with merge base `c93847d`. The base was **merged into** the A3 branch
-(`5034c8d`): no rebase, no force-push, nothing merged into the base or `main`.
+(`5034c8d`): no rebase, no force-push, nothing merged into the base or `main`. The base then gained Account 1's
+final-review commit `a889cd8` (docs and state only), which was merged the same way (`4486de4`). Only the generated
+state block conflicted there.
 - Nine files conflicted. Every side was kept (details in `ACCOUNT3_HANDOFF_TO_INTEGRATION.md`).
 - A file-level check confirmed nothing was lost: every file that differs from the base is one Account 3 changed. Only the
   11 files both sides edited contain combined content.
@@ -226,7 +228,7 @@ The A3 branch was 98 commits ahead and 54 behind, with merge base `c93847d`. The
 
 ## Results (local Linux; not GitHub CI)
 - A3 branch alone: full fast suite 723 passed, 5 skipped, 0 failed. Ruff clean.
-- Run r4 (A1 `f9d8f11`, A2 `d979df1`, A3 `0d9d1de`):
+- Run r4b (base `a889cd8` containing A1 `f9d8f11`, A2 `d979df1`, A3 `fae6d38`):
   - full fast suite 867 passed, 8 skipped, 0 failed;
   - focused cross-account run 209 passed;
   - `apply.sh` 42 passed, idempotent.
