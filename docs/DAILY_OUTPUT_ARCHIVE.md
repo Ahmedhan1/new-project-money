@@ -32,7 +32,7 @@ Account 1 (`nexus/cloud/storage`).
 | Remote copy corrupted (verification fails) | `failed`, local kept; the retry re-uploads (Account 1's location check rejects the bad copy) |
 | Remote copy damaged later, before release | re-verification at release fails: local kept, record `failed` |
 | Local file edited after archiving | release refused ("differs from the archived bytes") |
-| Archive on the same disk (Account 1 LocalProvider in NEXUS_HOME) | verified, but release refused: no space gained, still one disk |
+| Archive on the same disk (Account 1 LocalProvider inside NEXUS_HOME, or its configured root `NEXUS_LOCAL_STORAGE` on the same device as the final) | verified, but release refused: no space gained, still one disk; no setting overrides this |
 | No storage layer (Account 2 branch without Account 1) | `ArchiveUnavailable`; outputs stay local, nothing deleted |
 
 A worker re-queues interrupted or due uploads automatically (`jobs.schedule_archive_recovery`, an `archive-recover` job).
@@ -50,7 +50,8 @@ cleanup deletes only `temporary` artifacts; archive uploads are stored with rete
 
 ## Settings (`NEXUS_HOME/archive/settings.json`)
 `connection_id` (e.g. `drive_a`; default: Account 1's placement order) · `auto_archive` true · `release_local_after_verify`
-true · `allow_same_disk` false · `max_attempts` 8.
+true · `max_attempts` 8. There is **no same-disk override**: `save_settings` rejects `allow_same_disk`, and a hand-edited
+value is ignored.
 
 ## Tests
 - `tests/fast/test_a2_archive.py` (mock destination, Account 2 alone): verified upload then release then retrieve; failed

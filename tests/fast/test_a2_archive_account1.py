@@ -108,3 +108,21 @@ def test_account1_local_provider_on_the_same_disk_is_not_external(home):
     r = archive.archive_output(p.id, "renders/daily_001.mp4")
     assert r["verified"] and not r["released"] and "not external" in r["release_refused"]
     assert out.exists()
+
+
+def test_configured_local_storage_root_same_and_separate_volume(home, tmp_path, monkeypatch):
+    """Account 1's LocalProvider honours NEXUS_LOCAL_STORAGE; the archive uses that real root and its device."""
+    ext_root = tmp_path / "usb_drive" / "nexus"
+    monkeypatch.setenv("NEXUS_LOCAL_STORAGE", str(ext_root))
+    archive.use_target(None)
+    archive.save_settings({"connection_id": "local"})
+    p = prj.Project.create("usb")
+    out = _render(p)
+    r = archive.archive_output(p.id, "renders/daily_001.mp4")
+    assert r["verified"] and not r["released"] and "same disk" in r["release_refused"] and out.exists()
+    assert any(ext_root in f.parents for f in ext_root.rglob("*.mp4"))               # the copy went to the configured root
+    real = archive._device
+    monkeypatch.setattr(archive, "_device", lambda q: 4242 if str(ext_root) in str(q) else real(q))  # a second volume
+    rec = archive.release(r["records"][0]["id"])
+    assert rec["state"] == "released" and not out.exists()
+    assert archive.retrieve(rec["id"]) == out and out.exists()

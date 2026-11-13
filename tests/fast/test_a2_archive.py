@@ -182,3 +182,42 @@ def test_release_path_guard(dest, tmp_path):
     with pytest.raises(archive.ArchiveError, match="refusing"):
         archive.release(rec["id"])
     assert Path(elsewhere).exists()
+
+
+def test_no_same_disk_override_exists_and_local_final_stays(home, tmp_path):
+    """Regression (owner review on PR #7): a same-disk archive must never release the local final, with no setting to
+    turn that off."""
+    with pytest.raises(archive.ArchiveError, match="no same-disk override"):
+        archive.save_settings({"allow_same_disk": True})
+    assert "allow_same_disk" not in archive.settings()
+    f = archive.config.HOME / "archive" / "settings.json"
+    f.parent.mkdir(parents=True, exist_ok=True)
+    f.write_text('{"allow_same_disk": true}', encoding="utf-8")           # hand-edited settings file is ignored too
+    assert "allow_same_disk" not in archive.settings()
+    t = archive.MockTarget(tmp_path / "same", external=False)
+    archive.use_target(t)
+    try:
+        p = prj.Project.create("override")
+        out = _render(p)
+        r = archive.archive_output(p.id, "renders/daily_001.mp4")
+        assert r["verified"] and not r["released"] and out.exists()
+        with pytest.raises(archive.ArchiveError, match="not external"):
+            archive.release(r["records"][0]["id"])
+        assert out.exists() and archive.get(r["records"][0]["id"])["state"] == "verified"
+    finally:
+        archive.use_target(None)
+
+
+def test_local_root_external_compares_real_devices(home, tmp_path, monkeypatch):
+    inside = archive.config.HOME / "storage" / "local"
+    inside.mkdir(parents=True)
+    assert archive._local_root_external("local", inside, None)[0] is False          # inside NEXUS_HOME
+    outside = tmp_path / "other_folder_same_volume"
+    outside.mkdir()
+    final = archive.config.PROJECTS / "p" / "renders" / "x.mp4"
+    ok, why = archive._local_root_external("local", outside, final)
+    assert ok is False and "same disk" in why                                         # same volume: not external
+    real = archive._device
+    monkeypatch.setattr(archive, "_device", lambda p: 999 if str(outside) in str(p) else real(p))
+    ok, why = archive._local_root_external("local", outside, final)
+    assert ok is True and "another disk" in why                                        # separate volume

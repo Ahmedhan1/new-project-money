@@ -32,7 +32,7 @@ from typing import Protocol
 from . import config, db
 
 KIND = "a2_archive"
-DEFAULTS = {"connection_id": None, "auto_archive": True, "release_local_after_verify": True, "allow_same_disk": False,
+DEFAULTS = {"connection_id": None, "auto_archive": True, "release_local_after_verify": True,
             "max_attempts": 8, "retention": {"enabled": False, "note": "remote retention is not implemented; archived "
                                                                       "daily videos are kept until the owner deletes them"}}
 VIDEO_KINDS = ("master", "short")
@@ -78,6 +78,9 @@ def save_settings(new: dict) -> dict:
     if "retention" in new and (new["retention"] or {}).get("enabled"):
         raise ArchiveError("remote retention (automatic deletion of archived videos) is not available; it needs a separate "
                            "owner-approved change")
+    if "allow_same_disk" in new:
+        raise ArchiveError("there is no same-disk override: a local final is released only when its archive copy is on "
+                           "another disk or provider")
     bad = [k for k in new if k not in DEFAULTS or k == "retention"]
     if bad:
         raise ArchiveError(f"unknown archive settings: {bad}")
@@ -93,7 +96,9 @@ def save_settings(new: dict) -> dict:
 class Target(Protocol):
     name: str
 
-    def external(self) -> tuple[bool, str]: ...
+    def external(self, local: Path | None = None) -> tuple[bool, str]:
+        """True only when the archive copy does not live on the same device as `local` (or NEXUS_HOME)."""
+        ...
     def store(self, path: Path, *, kind: str, name: str, project_id: str | None, transfer_id: str, mime: str,
               provenance: dict) -> dict: ...
     def resume(self, transfer_id: str, *, kind: str, name: str, project_id: str | None) -> dict | None: ...
@@ -126,18 +131,20 @@ class Account1Target:
         return {"artifact_id": m.artifact_id, "connection_id": lo.connection_id, "provider": lo.provider, "ref": lo.ref,
                 "path": lo.path, "size": m.size, "sha256": m.sha256}
 
-    def external(self) -> tuple[bool, str]:
-        from .cloud.storage import connections
-        cid = self.cid or (self._a().rules().get("order") or ["local"])[0]
+    def _cid(self) -> str:
+        return self.cid or (self._a().rules().get("order") or ["local"])[0]
+
+    def external(self, local: Path | None = None) -> tuple[bool, str]:
+        from .cloud.storage import connections, get_provider
+        cid = self._cid()
         kind = connections.provider_of(cid)
         if kind != "local":
             return True, f"{cid} ({kind})"
-        root = config.HOME / "storage" / "local"
-        try:
-            same = os.stat(root if root.exists() else config.HOME).st_dev == os.stat(config.HOME).st_dev
-        except OSError:
-            same = True
-        return (not same), f"{cid}: Account 1 LocalProvider at {root} ({'same disk as NEXUS_HOME' if same else 'another disk'})"
+        try:  # the provider's REAL root (Account 1 honours NEXUS_LOCAL_STORAGE), not an assumed path
+            root = Path(get_provider(cid).root)
+        except Exception as e:  # noqa: BLE001 - unknown root: never treat as external
+            return False, f"{cid}: LocalProvider root unknown ({type(e).__name__}: {e})"
+        return _local_root_external(cid, root, local)
 
     def store(self, path, *, kind, name, project_id, transfer_id, mime, provenance):
         a = self._a()
@@ -196,9 +203,31 @@ class Account1Target:
 
     def usage(self):
         from .cloud.storage import get_provider
-        cid = self.cid or (self._a().rules().get("order") or ["local"])[0]
+        cid = self._cid()
         q = get_provider(cid).quota()
         return {"connection_id": cid, "limit": q.limit, "used": q.used, "remaining": q.remaining, "source": q.source}
+
+
+def _device(path: Path) -> int:
+    """Device id of the nearest existing ancestor of `path` (tests replace this to simulate a second volume)."""
+    p = Path(path)
+    while not p.exists() and p != p.parent:
+        p = p.parent
+    return os.stat(p).st_dev
+
+
+def _local_root_external(cid: str, root: Path, local: Path | None) -> tuple[bool, str]:
+    ref = Path(local) if local is not None else config.HOME
+    rr, hr = root.resolve(), config.HOME.resolve()
+    if rr == hr or hr in rr.parents:
+        return False, f"{cid}: LocalProvider root {rr} is inside NEXUS_HOME"
+    try:
+        same = _device(rr) == _device(ref) or _device(rr) == _device(config.HOME)
+    except OSError as e:
+        return False, f"{cid}: cannot compare devices ({e})"
+    if same:
+        return False, f"{cid}: LocalProvider root {rr} is on the same disk as {ref}"
+    return True, f"{cid}: LocalProvider root {rr} is on another disk"
 
 
 def _tmpdir() -> str:
@@ -346,7 +375,7 @@ def recover(t: Target | None = None, now: float | None = None) -> dict:
 
 def release(rid: str, t: Target | None = None) -> dict:
     """Delete the local copy of an archived final video. Refuses unless: state verified, the destination is external
-    (or allow_same_disk), the remote copy re-verifies NOW, and the local bytes equal the archived bytes."""
+    (always required: there is no override), the remote copy re-verifies NOW, and the local bytes equal the archived bytes."""
     r = get(rid)
     if r is None:
         raise ArchiveError(f"unknown archive record {rid}")
@@ -357,11 +386,11 @@ def release(rid: str, t: Target | None = None) -> dict:
     if r["kind"] not in VIDEO_KINDS:
         raise ArchiveError("only final videos are released; thumbnails, reports and manifests stay local (small)")
     t = t or target()
-    ext, why = t.external()
-    if not ext and not settings()["allow_same_disk"]:
+    local = Path(r["local_path"])
+    ext, why = t.external(local)
+    if not ext:
         raise ArchiveError(f"the archive copy is not external ({why}); deleting the local copy would not free space and would "
                            "leave a single disk holding the video")
-    local = Path(r["local_path"])
     v = t.verify(r["remote"], r["sha256"], local if local.exists() else None)
     if not v["ok"]:
         r["state"] = "failed"
@@ -520,7 +549,8 @@ def summary() -> dict:
            "local_bytes": local_bytes, "archived_bytes": remote_bytes, "settings": settings()}
     try:
         t = target()
-        out["destination"] = {"name": t.name, "external": t.external()[0], "detail": t.external()[1]}
+        ext, why = t.external()
+        out["destination"] = {"name": t.name, "external": ext, "detail": why}
         try:
             out["destination"]["usage"] = t.usage()
         except Exception as e:  # noqa: BLE001
@@ -572,7 +602,7 @@ class MockTarget:
     def _put_index(self, ix: dict) -> None:
         (self.root / "index.json").write_text(json.dumps(ix, indent=1))
 
-    def external(self):
+    def external(self, local=None):
         return self._external, f"mock destination at {self.root}"
 
     def _ref(self, sha: str) -> dict:
