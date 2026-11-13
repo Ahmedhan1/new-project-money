@@ -1,0 +1,196 @@
+{
+ "what": "director coherence runs (plan + build, no render) on six benchmark media types; contact sheet = source frame at the middle of every programme clip (B = in-source cutaway, P = punch-in reframe crop)",
+ "machine": "shared 4-vCPU container",
+ "runs": {
+  "documentary": {
+   "profile": "scientific_documentary",
+   "target": 120.0,
+   "source_seconds": 360.07,
+   "programme_seconds": 114.486,
+   "clips": 17,
+   "median_shot": 7.04,
+   "max_shot": 11.9,
+   "cutaways": 2,
+   "punch_ins": 0,
+   "cold_open": true,
+   "speakers": [
+    "guest"
+   ],
+   "opening_text": "For almost two months, scientists could see only blurred pictures of the top of the storm or the ice and snow of the South Pole shining dimly through the dust. and several dark spots, apparently mountain peaks protruding up through",
+   "ending_text": "ensure that the entire Martian surface will be mapped. This shadow on the surface of Mars is cast by one of its two moons, Phobos, only about 13 miles long. This is the face of Mars photographed by earlier mariners.",
+   "decision_kinds": {
+    "broll": 2,
+    "clip": 15,
+    "compression": 9,
+    "dead_air": 34,
+    "ending": 1,
+    "filler": 1,
+    "filler_gap": 1,
+    "opening": 2,
+    "pause": 2,
+    "pleasantry": 12,
+    "sentence": 18
+   },
+   "notes": [
+    "speakers were detected but none has a name yet: no lower thirds (a role such as 'guest' is never put on screen); set names with diarize.set_name"
+   ]
+  },
+  "explainer": {
+   "profile": "educational_explainer",
+   "target": 120.0,
+   "source_seconds": 300.07,
+   "programme_seconds": 123.353,
+   "clips": 25,
+   "median_shot": 5.14,
+   "max_shot": 7.78,
+   "cutaways": 0,
+   "punch_ins": 12,
+   "cold_open": true,
+   "speakers": [
+    "narrator"
+   ],
+   "opening_text": "Most of the ozone in our atmosphere is found up here in the stratosphere. The Earth's atmosphere is divided into layers the lowest at the lowest layer is what we call the troposphere and temperatures decrease as you go upward",
+   "ending_text": "And because you have very little absorption of UV here, it just gets cold. So that's why you have a tropopause between the stratosphere and the troposphere because here's where you absorb energy and up here's where you absorb energy.",
+   "decision_kinds": {
+    "clip": 25,
+    "compression": 9,
+    "dead_air": 22,
+    "filler": 1,
+    "filler_gap": 1,
+    "opening": 2,
+    "pause": 5,
+    "pleasantry": 1,
+    "sentence": 16
+   },
+   "notes": [
+    "speakers were detected but none has a name yet: no lower thirds (a role such as 'guest' is never put on screen); set names with diarize.set_name"
+   ]
+  },
+  "interview": {
+   "profile": "interview_storytelling",
+   "target": 120.0,
+   "source_seconds": 300.07,
+   "programme_seconds": 115.633,
+   "clips": 14,
+   "median_shot": 7.18,
+   "max_shot": 13.43,
+   "cutaways": 0,
+   "punch_ins": 5,
+   "cold_open": false,
+   "speakers": [
+    "guest"
+   ],
+   "opening_text": "We tried on our gear and we made sure everything fit. And then after that we descended into the cave and we lived there for, I slept there five nights. So it was a total of six days and five",
+   "ending_text": "vehicles that are being developed to take astronauts to the International Space Station. And one is being developed by SpaceX and the other is being developed by Boeing. Well, to me, it's sort of a way to thank my home.",
+   "decision_kinds": {
+    "best_take": 1,
+    "clip": 14,
+    "compression": 7,
+    "dead_air": 35,
+    "duplicate_take": 1,
+    "opening": 2,
+    "pause": 1,
+    "pleasantry": 23,
+    "sentence": 13
+   },
+   "notes": [
+    "speakers were detected but none has a name yet: no lower thirds (a role such as 'guest' is never put on screen); set names with diarize.set_name"
+   ]
+  },
+  "panel": {
+   "profile": "news_analysis",
+   "target": 120.0,
+   "source_seconds": 360.17,
+   "programme_seconds": 119.403,
+   "clips": 28,
+   "median_shot": 4.32,
+   "max_shot": 6.27,
+   "cutaways": 0,
+   "punch_ins": 0,
+   "cold_open": true,
+   "speakers": [
+    "S1",
+    "S2",
+    "S3"
+   ],
+   "opening_text": "Recently, we added inclusion as one of our agency's core values. Stephanie is a veteran of three space flights and has logged more than 42 days in space. I know that you have lots of questions for Stephanie and I",
+   "ending_text": "Node 2 to the International Space Station, and it was wonderful to see their leadership, how they jointly brought the crews together, and how we were able to do a contingency spacewalk and work together with the mission control team.",
+   "decision_kinds": {
+    "clip": 28,
+    "compression": 25,
+    "dead_air": 43,
+    "filler": 3,
+    "filler_gap": 3,
+    "opening": 2,
+    "pause": 15,
+    "pleasantry": 5,
+    "sentence": 14
+   },
+   "notes": [
+    "speakers were detected but none has a name yet: no lower thirds (a role such as 'guest' is never put on screen); set names with diarize.set_name"
+   ]
+  },
+  "podcast": {
+   "profile": "podcast_edit",
+   "target": 120.0,
+   "source_seconds": 360.13,
+   "programme_seconds": 112.673,
+   "clips": 18,
+   "median_shot": 6.02,
+   "max_shot": 11.09,
+   "cutaways": 0,
+   "punch_ins": 7,
+   "cold_open": false,
+   "speakers": [
+    "guest"
+   ],
+   "opening_text": "at the end of this month, it'll be 36 years I've been working in mission control. I started as a shuttle flight controller in the instrumentation and communications officer position. We have that same position in the Artemis program now.",
+   "ending_text": "a lot of experience in stations, right, with their mirror space station. And their experience really, they brought a lot to the table. And we do things differently, but it was just great to have each other to lean on.",
+   "decision_kinds": {
+    "clip": 18,
+    "compression": 13,
+    "dead_air": 66,
+    "ending": 1,
+    "filler": 15,
+    "filler_gap": 4,
+    "opening": 3,
+    "pause": 10,
+    "pleasantry": 49,
+    "sentence": 18
+   },
+   "notes": [
+    "speakers were detected but none has a name yet: no lower thirds (a role such as 'guest' is never put on screen); set names with diarize.set_name"
+   ]
+  },
+  "walktalk": {
+   "profile": "travel_vlog",
+   "target": 90.0,
+   "source_seconds": 243.1,
+   "programme_seconds": 92.03,
+   "clips": 36,
+   "median_shot": 2.56,
+   "max_shot": 4.1,
+   "cutaways": 10,
+   "punch_ins": 7,
+   "cold_open": true,
+   "speakers": [
+    "narrator"
+   ],
+   "opening_text": "Today we're going to walk you around and let you see how we're going to process the segments once they're arriving here at KSC. We will roll the railcars into the rotation facility here, right here on these railroad tracks.",
+   "ending_text": "built here at Kennedy Space Center. We will make the aft motor segment to the aft skirt. Once that is completed, we have the aft motor assembly. This will be the first piece of hardware stacked on the mobile launcher.",
+   "decision_kinds": {
+    "broll": 10,
+    "clip": 26,
+    "compression": 4,
+    "dead_air": 17,
+    "opening": 2,
+    "pause": 2,
+    "pleasantry": 2,
+    "sentence": 15
+   },
+   "notes": [
+    "speakers were detected but none has a name yet: no lower thirds (a role such as 'guest' is never put on screen); set names with diarize.set_name"
+   ]
+  }
+ }
+}

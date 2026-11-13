@@ -1,0 +1,192 @@
+{
+ "benchmark": "interview",
+ "n_requested": 10,
+ "n_built": 8,
+ "elapsed_s": 0.2,
+ "use_llm": false,
+ "overlap_max_share": 0.006,
+ "overlap_mean_share": 0.0002,
+ "pairs_over_10pct": 0,
+ "endings_terminal": 8,
+ "with_context_line": 0,
+ "shorts": [
+  {
+   "rank": 1,
+   "start": 59.95,
+   "end": 72.39,
+   "dur": 12.2,
+   "title": "I slept there five nights",
+   "platform_title": "I slept there five nights",
+   "opening": "We tried on our gear and we made sure everything fit.",
+   "opening_speaker": "guest",
+   "ending": "So it was a total of six days and five nights.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    59.95,
+    72.39
+   ]
+  },
+  {
+   "rank": 2,
+   "start": 120.97,
+   "end": 144.79,
+   "dur": 24.22,
+   "title": "The analog to space is that if and when",
+   "platform_title": "The analog to space is that if and when",
+   "opening": "So the analog to space is that if and when we go back to the moon we would do similar thin",
+   "opening_speaker": "guest",
+   "ending": "rk together and perform the mission was one of the biggest things that I got out of caves.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    120.97,
+    144.79
+   ]
+  },
+  {
+   "rank": 3,
+   "start": 39.95,
+   "end": 54.57,
+   "dur": 14.76,
+   "title": "What we did I arrived there around September 11th",
+   "platform_title": "What we did I arrived there around September 11th",
+   "opening": "So what we did I arrived there around September 11th And we did about five or six days of ",
+   "opening_speaker": "guest",
+   "ending": " to repel and ascend in and out of a cave shaft We also visited several caves in Slovenia.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    39.95,
+    54.57
+   ]
+  },
+  {
+   "rank": 4,
+   "start": 260.29,
+   "end": 282.31,
+   "dur": 22.42,
+   "title": "We're working parallel on the Orion program",
+   "platform_title": "We're working parallel on the Orion program",
+   "opening": "So as we start gearing up to start shuttling astronauts more frequently to the Internation",
+   "opening_speaker": "guest",
+   "ending": " System that will get us to the Moon and help us to have a permanent presence on the Moon.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    260.29,
+    282.31
+   ]
+  },
+  {
+   "rank": 5,
+   "start": 205.56,
+   "end": 229.52,
+   "dur": 23.58,
+   "title": "I think it'll be quite some time before anyone",
+   "platform_title": "I think it'll be quite some time before anyone",
+   "opening": "How long before you find out if you are on the mission for sure?",
+   "opening_speaker": "interviewer",
+   "ending": "So it would be a couple of years or so before any of us knew.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    205.56,
+    229.52
+   ]
+  },
+  {
+   "rank": 6,
+   "start": 148.33,
+   "end": 201.55,
+   "dur": 51.64,
+   "title": "Going back to the moon 2024",
+   "platform_title": "Going back to the moon 2024",
+   "opening": "Now this expedition has you better prepared to be on the next mission to the moon happenin",
+   "opening_speaker": "interviewer",
+   "ending": "of responsibility and I'm up for that challenge but at the same time I'm just I'm hopeful.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    148.33,
+    201.55
+   ]
+  },
+  {
+   "rank": 7,
+   "start": 27.67,
+   "end": 40.03,
+   "dur": 12.32,
+   "title": "One of the things that caves",
+   "platform_title": "One of the things that caves",
+   "opening": "What can you tell us about that training and what skills you picked up while there?",
+   "opening_speaker": "interviewer",
+   "ending": "s an analog to flying to space and In particular to flying to remote places like the moon.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    27.67,
+    40.03
+   ]
+  },
+  {
+   "rank": 8,
+   "start": 286.6,
+   "end": 300.067,
+   "dur": 12.75,
+   "title": "To me, it's a way to thank my home",
+   "platform_title": "To me, it's a way to thank my home",
+   "opening": "Corklin High School, Lamoine College, and all of Syracuse is so proud of all you've accomp",
+   "opening_speaker": "interviewer",
+   "ending": "Well, to me, it's sort of a way to thank my home.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    286.6,
+    300.067
+   ]
+  }
+ ],
+ "notes": [],
+ "rejected": 25
+}

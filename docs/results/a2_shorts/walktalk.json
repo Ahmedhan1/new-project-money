@@ -1,0 +1,82 @@
+{
+ "benchmark": "walktalk",
+ "n_requested": 10,
+ "n_built": 3,
+ "elapsed_s": 0.2,
+ "use_llm": false,
+ "overlap_max_share": 0.0,
+ "overlap_mean_share": 0.0,
+ "pairs_over_10pct": 0,
+ "endings_terminal": 3,
+ "with_context_line": 0,
+ "shorts": [
+  {
+   "rank": 1,
+   "start": 36.55,
+   "end": 55.71,
+   "dur": 19.32,
+   "title": "Next, now that we have the rail car",
+   "platform_title": "Next, now that we have the rail car",
+   "opening": "Next, now that we have the rail car in our facility, the next operation we have to perform",
+   "opening_speaker": "narrator",
+   "ending": "use a single crane lift to lift the cover off and place it on this dolly that's behind me.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.57)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    36.55,
+    55.71
+   ]
+  },
+  {
+   "rank": 2,
+   "start": 18.54,
+   "end": 34.86,
+   "dur": 15.9,
+   "title": "Today we're going to walk you around and let",
+   "platform_title": "Today we're going to walk you around and let",
+   "opening": "Today we're going to walk you around and let you see how we're going to process the segmen",
+   "opening_speaker": "narrator",
+   "ending": "ll roll the railcars into the rotation facility here, right here on these railroad tracks.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.51)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    18.54,
+    34.86
+   ]
+  },
+  {
+   "rank": 3,
+   "start": 98.87,
+   "end": 125.27,
+   "dur": 25.2,
+   "title": "Once that is completed",
+   "platform_title": "Once that is completed",
+   "opening": "Once that is completed, we have a transporter that will come pick it up and move it to our",
+   "opening_speaker": "narrator",
+   "ending": "The next piece of hardware to be made is the aft exit cone.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.55)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    98.87,
+    125.27
+   ]
+  }
+ ],
+ "notes": [],
+ "rejected": 2
+}
