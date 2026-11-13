@@ -358,3 +358,35 @@ def test_safe_production_mode_gpu_jobs_wait_queued_without_an_authorised_gpu_wor
     s = D.status(jid)
     assert s["status"] == "queued" and s["attempts"] == 0
     assert "kaggle" in s["error"] and "workers/register" in s["error"]
+
+
+def test_control_plane_restart_adopts_the_running_remote_job_without_a_second_push(home, tmp_path):
+    """Control-plane crash while a Kaggle job runs: a NEW Dispatcher (fresh process state, same DB) finds the job by its
+    remote ref, polls it to completion and verifies the outputs. No second push, no attempt spent."""
+    fake = FakeKaggleCLI(tmp_path / "kaggle_remote")
+    hold = {"on": True}
+
+    def runner(args, cwd, timeout):
+        if args[:2] == ["kernels", "status"] and hold["on"]:
+            fake.calls.append(list(args))
+            return 0, f'{args[2]} has status "KernelWorkerStatus.RUNNING"', ""
+        return fake(args, cwd, timeout)
+
+    vault.put("kaggle_primary", FAKE_TOKEN)
+    d1 = dsp.Dispatcher({"kaggle": KaggleProvider(runner=runner), "local": LocalProvider()}, poll_min=0, poll_max=0)
+    row, _ = d1.submit(ProductionJobManifest(task="probe", requires={"providers": ["kaggle"]}, max_runtime_s=120))
+    d1.tick()
+    d1.tick()
+    r = dsp._row(row["id"])
+    assert r["status"] == "running" and r["attempts"] == 1 and r["remote_ref"]
+    del d1                                                                    # the control plane dies here
+    hold["on"] = False
+    d2 = dsp.Dispatcher({"kaggle": KaggleProvider(runner=runner), "local": LocalProvider()}, poll_min=0, poll_max=0)
+    dsp.set_dispatcher(d2)
+    try:
+        r = d2.run_until_done(row["id"], timeout=120, interval=0.05)
+    finally:
+        dsp.set_dispatcher(None)
+    assert r["status"] == "succeeded" and r["attempts"] == 1, r["error"]
+    assert len([c for c in fake.calls if c[:2] == ["kernels", "push"]]) == 1
+    assert [a["name"] for a in dsp.job_artifacts(row["id"])] == ["probe.json"]

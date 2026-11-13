@@ -14,6 +14,7 @@ head (`NEXUS_STATE.json` → `git.head`).
 | Read a source file stored in Drive without downloading to the owner's PC | `inputs: [artifact_id]`; the control plane fetches it into its cache, large inputs travel as a private Kaggle dataset | real-verified (Demo E, 49.9 MB) |
 | Write results to a chosen Drive account | `output_destination: "drive_b"` or the storage rules by kind | real-verified (Demo E) |
 | Declare an AI provider (translation, TTS, LLM...) | `AIProviderCapability/v1` | contract only: Account 3 implements the providers |
+| Run an open-weight LLM over a batch of prompts | task `batch_llm` (§7) | real-verified (Kaggle T4, Qwen2.5-0.5B-Instruct) |
 | Events / notifications | `nexus.cloud.events.emit(...)` / `notify(...)` | real |
 | Secrets (API keys for your providers) | `nexus.vault.put/get` (encrypted, outside Git) | real |
 
@@ -125,5 +126,52 @@ provider · **NI** not implemented.
 | Owner GPU PC / Colab pull worker | P | API tested; no real remote machine attached (BU) |
 | Permanent HTTPS host | BU | recommendation: Tailscale Funnel on an owner machine |
 | OAuth consent screen in production mode | BU | Testing mode: refresh tokens expire after 7 days |
+| `batch_llm` worker task (Kaggle, bounded batch inference) | RV | Qwen2.5-0.5B-Instruct on T4 x2, 8/8 items (§7) |
+| Wikidata Cost Guard declaration | RV (declaration) | host answers 429 to a generic User-Agent from the dev sandbox (§8) |
 | AI providers (translation, TTS, LLM) | NI | Account 3 |
 | Platform publishing | NI | Account 3, manual approval |
+
+## 7. `batch_llm` (integration request A1-3)
+A bounded, temporary job: one Hugging Face model, one finite list of prompts, one run. The model is loaded inside the
+Kaggle kernel, every prompt is answered, the results come back as verified artifacts and the kernel exits. There is no
+endpoint, port or background process. Routing: `gpu="required"`, `providers=("kaggle",)`. The owner's PC, `user_gpu`
+and Colab are never chosen, and the worker refuses to download weights outside a Kaggle kernel.
+
+```json
+{
+  "contract": "ProductionJobManifest/v1", "task": "batch_llm", "owner_account": "account3",
+  "inputs": ["art_<prompts.jsonl>"],
+  "params": {"model": "Qwen/Qwen2.5-0.5B-Instruct", "model_licence": "Apache-2.0", "engine": "transformers",
+             "max_new_tokens": 256, "max_items": 500, "part_size": 32, "batch_size": 8, "max_model_gb": 8.0,
+             "temperature": 0, "chat_template_kwargs": {"enable_thinking": false}, "output_format": "jsonl"},
+  "max_runtime_s": 7200, "max_retries": 2, "idempotency_key": "a3:batch:<run-id>"
+}
+```
+- Input JSONL line: `{"id", "task"?, "system"?, "prompt", "max_tokens"?}`. Small lists may go inline in `params.items`.
+  Ids must be unique; more than `max_items` (hard cap 5000) is refused, not truncated.
+- Output: the dispatcher joins the verified parts of all attempts into `batch_llm_results.jsonl` (or `.json`). Each row
+  is `{"id", "task", "text", "usage": {"prompt_tokens", "completion_tokens"}, "finish_reason", "latency_s", "error"}`.
+  `postprocess` reports `items` and `items_error`. A per-item error (prompt too long, a generate error after a one-by-one
+  retry) never fails the job.
+- Evidence: `batch_llm_summary.json` (model, engine, `simulated`, counts, tokens/s, limits, `persistent_endpoint: false`).
+- Limits are checked before work starts. The weight size comes from Hub metadata before download (`max_model_gb`; an
+  unknown size is refused). With T4 16 GB and fp16, models up to about 7B fit. `time_budget_s` (default 85 % of
+  `max_runtime_s`) ends the attempt as `lost` after a finished part, and the next attempt resumes from the checkpoint,
+  bounded by `max_retries`.
+- `engine: "vllm"` is used only if the Kaggle image already has vLLM; the task never pip-installs an engine.
+  `engine: "echo"` loads no model. It is the deterministic test engine, and its results are labelled `simulated: true`.
+- **Change needed on Account 3's side:** `bench_v2.account1_manifest` currently sends `params.models` (a list),
+  `params.items` (a count) and `runtime: "ollama"`. `batch_llm` takes one `model` per job and the prompts themselves
+  (JSONL input or `params.items` as a list). Submit one job per model.
+- Kaggle terms: one authorised account (`kaggle_primary`), its own weekly GPU quota, and no rotation. A quota error
+  pauses the provider and the job waits (`quota_exhausted`); it never fails over to paid compute.
+
+## 8. Research hosts (integration request A1-4)
+- `www.wikidata.org` is declared by Account 1 (component `wikidata`, zero cost, CC0 data). Only that host is declared;
+  `query.wikidata.org` (SPARQL) is not. From the dev sandbox (2026-11-13), the API answered **HTTP 429** to a generic
+  User-Agent. Wikimedia requires a descriptive User-Agent with contact details, so `visual_context._wikidata_country`
+  should send one and honour `Retry-After`. Reachability from the owner's PC is **not verified**.
+- `api.gdeltproject.org` stays declared by **Account 3** (`gdelt-doc` on its branch). Account 1 does not duplicate it:
+  `manifest()` keys by id, and `tests/fast/test_costguard_research_hosts.py` requires every id to be unique and at most
+  one component to declare the GDELT host. From the dev sandbox the connection is reset, as Account 3 also reported.
+  Reachability from the owner's PC is **not verified**.

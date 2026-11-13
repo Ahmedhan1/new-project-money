@@ -33,3 +33,15 @@ mode; a JSON schema makes required keys and array lengths impossible to skip. Pr
 
 **D-10 No LICENSE file yet.** Choosing a licence (or keeping the repository private/all-rights-reserved) is the owner's
 decision; noted in the handoff as a pending user decision.
+
+**D-11 `batch_llm` is a bounded batch job on Kaggle, not a model server (Account 1, 2026-11-13).** Kaggle does not allow
+persistent serving, and the owner's PC must not receive multi-GB weights implicitly. So the task loads one model inside
+the kernel, answers a finite JSONL, writes checksum-verified parts with a checkpoint after each part, and exits. Routing
+is `providers=("kaggle",)`. The weight size is checked from Hub metadata before download. `transformers` is the default
+engine because it is preinstalled on Kaggle; vLLM is used only if already present. Ollama was rejected because it runs a
+local server process.
+
+**D-12 Shared contracts: Account 1 adopts the agreed layout only through the integration merge (2026-11-13).**
+`nexus/contracts.py` stays as-is on Account 1's branch. `integration/contracts_v1/apply.sh` moves it to
+`nexus/contracts/cloud.py` during the A1 → A2 → A3 merge. Committing the package layout on Account 1's branch alone would
+collide with Account 2's `nexus/contracts/__init__.py` in the same way.

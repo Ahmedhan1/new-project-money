@@ -477,3 +477,19 @@ tasks:
     acceptance: "Studio reachable over HTTPS with NEXUS_API_TOKEN, no billing enabled."
     test: "Demo A on the chosen host."
     next: "Owner picks a host from the comparison."
+  - id: ACC1-BATCH-LLM
+    priority: 1
+    title: "batch_llm worker task for Account 3 (bounded batch inference on the Kaggle GPU, no serving endpoint)"
+    status: verified
+    acceptance: "A real HF model answers a JSONL of prompts on Kaggle; parts checksum-verified and joined; resumes from checkpoints; never routed to the owner's PC."
+    test: "pytest tests/fast/test_cloud_batch_llm.py; python scripts/acceptance/batch_llm_live.py"
+    evidence: "docs/results/batch_llm_live.json (Qwen2.5-0.5B-Instruct, Tesla T4 x2, 8/8 items, job rjob_877fa89eb0ac)"
+    next: "Account 3 switches bench_v2.account1_manifest to this params schema (model, items JSONL) and adds its batch provider."
+  - id: ACC1-INTEGRATION
+    priority: 1
+    title: "Three-account shared-contracts integration (nexus/contracts/{cloud,media}.py + shared __init__)"
+    status: blocked
+    blocked_by: "Account 2: requirements-ci.txt lacks opencv-python-headless, onnxruntime, scipy (PR #6 CI red on its own head). Owner: merge approval."
+    acceptance: "A1 -> A2 -> A3 merge at exact heads + apply.sh: full fast suite green with CI's dependency set."
+    test: "see docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md section 7"
+    next: "Account 2 declares its dependencies; rerun the integration at the new heads; owner approves the merge order."
