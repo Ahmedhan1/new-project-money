@@ -3,12 +3,12 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-13T08:36:31Z",
+ "updated": "2026-11-13T08:36:37Z",
  "git": {
   "branch": "work/account-1-cloud-platform",
-  "commit": "e9ad5e9",
-  "subject": "State refresh on a clean tree (Account 1 final closure)",
-  "dirty_files": 11,
+  "commit": "f75a33a",
+  "subject": "Account 1 closure round: Kaggle closed (accepted as-is by owner), CI counts reconciled (411/5 CI vs 412/4 dev container), latest-head integration 748 passed, Account 2 unblocked, Account 3 batch_llm interface still open",
+  "dirty_files": 0,
   "upstream": "origin/work/account-1-cloud-platform",
   "unpushed_commits": 0
  },
