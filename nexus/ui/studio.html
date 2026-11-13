@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>NEXUS Remote Studio</title>
+<style>
+:root{--bg:#0c0f17;--panel:#141926;--panel2:#1b2233;--line:#27304a;--text:#e6e9f2;--mute:#8b94ad;--acc:#3ec5ff;--ok:#5fd38a;--warn:#ffb648;--bad:#ff6b81;--btn:#1f6feb;color-scheme:dark}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f5f7fb;--panel:#fff;--panel2:#eef1f7;--line:#d6dbe7;--text:#151a26;--mute:#5b6478;--acc:#0a6fb8;--ok:#1d8a4a;--warn:#a86400;--bad:#c7253e;--btn:#1f6feb;color-scheme:light}}
+:root[data-theme="light"]{--bg:#f5f7fb;--panel:#fff;--panel2:#eef1f7;--line:#d6dbe7;--text:#151a26;--mute:#5b6478;--acc:#0a6fb8;--ok:#1d8a4a;--warn:#a86400;--bad:#c7253e;--btn:#1f6feb;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;min-height:100vh}
+nav{width:224px;flex:none;background:var(--panel);border-right:1px solid var(--line);padding:14px 10px;overflow-y:auto;height:100vh;position:sticky;top:0}
+nav h1{font-size:16px;margin:4px 8px 0;letter-spacing:.06em} nav .sub{margin:0 8px 10px;color:var(--mute);font-size:12px}
+nav h2{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin:12px 8px 4px}
+nav a[data-nav]{display:flex;justify-content:space-between;gap:6px;padding:6px 8px;border-radius:6px;color:var(--text);text-decoration:none;cursor:pointer}
+nav a[data-nav]:hover{background:var(--panel2)} nav a.on{background:var(--panel2);color:var(--acc)}
+nav a[data-nav] .badge{background:var(--bad);color:#fff;border-radius:99px;font-size:10px;padding:0 6px;align-self:center}
+nav .foot{margin:14px 8px 0;display:flex;gap:6px;flex-wrap:wrap}
+main{flex:1;min-width:0;padding:22px 28px 60px;max-width:1280px}
+h2.page{font-size:22px;margin:0 0 4px} p.lead{color:var(--mute);margin:0 0 16px;max-width:80ch}
+h3.sec{margin:22px 0 8px;font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;min-width:0}
+.card h3{margin:0 0 6px;font-size:15px;display:flex;justify-content:space-between;gap:8px;align-items:center} .card p{margin:0;color:var(--mute);font-size:13px}
+.stat b.badv{color:var(--bad)} .stat b{display:block;font-size:24px;font-variant-numeric:tabular-nums} .stat span{color:var(--mute);font-size:12px}
+table{border-collapse:collapse;width:100%;font-size:13px} th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--mute);font-weight:500;font-size:12px} .scroll{overflow-x:auto}
+input,select,textarea,button{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:7px 9px;max-width:100%}
+textarea{width:100%;min-height:64px;font-family:ui-monospace,monospace;font-size:12px}
+button{cursor:pointer;background:var(--btn);border-color:var(--btn);color:#fff} button.sec{background:var(--panel2);border-color:var(--line);color:var(--text)}
+button.danger{background:var(--bad);border-color:var(--bad)} button:disabled{opacity:.5;cursor:default} button.sm{padding:3px 8px;font-size:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin:10px 0} .row>label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mute);flex:1;min-width:130px}
+.row>label.chk{flex-direction:row;align-items:center;gap:6px;flex:0 0 auto;min-width:0;color:var(--text)}
+.tag{display:inline-block;padding:1px 7px;border-radius:99px;font-size:11px;border:1px solid var(--line);color:var(--mute);white-space:nowrap}
+.tag.ok{color:var(--ok);border-color:var(--ok)} .tag.warn{color:var(--warn);border-color:var(--warn)} .tag.bad{color:var(--bad);border-color:var(--bad)}
+pre{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px;overflow:auto;max-height:320px;font-size:12px;white-space:pre-wrap;word-break:break-word}
+.note{border-left:3px solid var(--warn);background:var(--panel);padding:8px 12px;margin:10px 0;color:var(--mute);border-radius:0 8px 8px 0}
+.note.info{border-color:var(--acc)} .note.bad{border-color:var(--bad)}
+.bar{height:8px;background:var(--panel2);border-radius:99px;overflow:hidden;margin:4px 0;border:1px solid var(--line)} .bar i{display:block;height:100%;background:var(--acc)}
+.bar i.warn{background:var(--warn)} .bar i.bad{background:var(--bad)}
+.mute{color:var(--mute)} .small{font-size:12px} .mono{font-family:ui-monospace,monospace;font-size:12px}
+.thumb{width:100%;aspect-ratio:16/9;background:var(--panel2);border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--mute);font-size:12px;overflow:hidden;margin-bottom:8px}
+.thumb img,.thumb video{width:100%;height:100%;object-fit:cover}
+main a{color:var(--acc)}
+#toast{position:fixed;right:16px;bottom:16px;max-width:min(420px,calc(100vw - 32px));z-index:9;display:flex;flex-direction:column;gap:6px}
+#toast div{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--acc);padding:8px 12px;border-radius:6px;box-shadow:0 4px 16px #0005}
+#toast div.bad{border-left-color:var(--bad)}
+.login{max-width:380px;margin:12vh auto;padding:0 16px} .login .card{padding:22px}
+.login input{width:100%}
+@media(max-width:820px){body{flex-direction:column}nav{width:100%;height:auto;position:static;display:flex;flex-wrap:wrap;gap:2px;padding:10px}
+ nav h1,nav .sub{width:100%} nav h2{display:none} nav a[data-nav]{padding:5px 8px;font-size:13px;background:var(--panel2)} main{padding:16px}
+ .row>label{min-width:100%}}
+</style>
+</head>
+<body>
+<nav id="nav" hidden></nav>
+<main id="main"><p class="lead">Loading…</p></main>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+"use strict";
+// NEXUS REMOTE STUDIO. Self-contained (no CDN). The owner token is only ever sent once to POST /api/v1/session, which
+// answers with an HttpOnly cookie; this script never stores it. Full-resolution media is only opened on explicit click.
+const $=(s,e=document)=>e.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const tag=(t,c="")=>`<span class="tag ${c}">${esc(t)}</span>`;
+const OKS=/^(ok|succeeded|done|completed|running|mounted|connected|stored|true|healthy|reachable)$/i, BADS=/(fail|error|lost|unauthor|exhaust|missing|bad|rejected|reauth|unreachable)/i;
+const st=s=>tag(s??"-",OKS.test(String(s))?"ok":BADS.test(String(s))?"bad":"warn");
+const fmtB=b=>{if(b==null||isNaN(b))return"-";const u=["B","KB","MB","GB","TB"];let i=0;b=+b;while(b>=1024&&i<4){b/=1024;i++}return (i?b.toFixed(1):b)+" "+u[i]};
+const fmtT=t=>t?new Date(t*1000).toLocaleString():"-";
+const ago=t=>{if(!t)return"-";const s=Date.now()/1000-t;return s<60?Math.round(s)+" s ago":s<3600?Math.round(s/60)+" min ago":s<86400?(s/3600).toFixed(1)+" h ago":(s/86400).toFixed(1)+" d ago"};
+const dur=s=>s==null?"-":s<90?Math.round(s)+" s":s<5400?Math.round(s/60)+" min":(s/3600).toFixed(1)+" h";
+const bar=(used,total)=>{if(used==null||!total)return`<div class="small mute">limit not exposed</div>`;const p=Math.min(100,100*used/total);return`<div class="bar" title="${p.toFixed(1)}%"><i class="${p>90?"bad":p>75?"warn":""}" style="width:${p}%"></i></div><div class="small mute">${fmtB(used)} of ${fmtB(total)} (${p.toFixed(1)}%)</div>`};
+const table=(rows,cols,empty="Nothing here yet.")=>!rows||!rows.length?`<p class="mute">${esc(empty)}</p>`:`<div class="scroll"><table><tr>${cols.map(c=>`<th>${esc(c[0])}</th>`).join("")}</tr>${rows.map(r=>`<tr>${cols.map(c=>`<td>${c[1](r)}</td>`).join("")}</tr>`).join("")}</table></div>`;
+function toast(msg,bad){const d=document.createElement("div");if(bad)d.className="bad";d.textContent=msg;$("#toast").append(d);setTimeout(()=>d.remove(),6000)}
+
+class AuthError extends Error{}
+class Missing extends Error{}
+// api(): same-origin fetch with the session cookie. 401 -> login screen. 404 on another service's router -> Missing.
+async function api(path,{method="GET",body,form}={}){
+  const o={method,credentials:"same-origin",headers:method==="GET"?{}:{"X-NEXUS-CSRF":"1"}};
+  if(form){o.body=form}else if(body!==undefined){o.headers["Content-Type"]="application/json";o.body=JSON.stringify(body)}
+  const r=await fetch(path,o);
+  let j=null;try{j=await r.json()}catch(e){j=null}
+  if(r.status===401){showLogin(j&&j.detail);throw new AuthError("authentication required")}
+  if(r.status===404&&j&&j.detail==="Not Found")throw new Missing(path);
+  if(!r.ok)throw new Error((j&&(typeof j.detail==="string"?j.detail:JSON.stringify(j.detail)))||r.statusText);
+  return j}
+const post=(p,body={})=>api(p,{method:"POST",body});
+const SVC={compute:"/api/v1/compute",storage:"/api/v1/storage"};
+const NOT_INSTALLED={compute:"Compute service (remote workers: Kaggle, Colab handoff, user GPU) is not installed in this build: /api/v1/compute is not mounted.",
+  storage:"Storage service (Google Drive A/B/C, transfers, ingest) is not installed in this build: /api/v1/storage is not mounted."};
+// svc(): call a sibling service; returns {missing:true} when its router is not mounted in this build.
+async function svc(kind,path,opts){try{return {data:await api(SVC[kind]+path,opts)}}catch(e){if(e instanceof Missing)return {missing:true,msg:NOT_INSTALLED[kind]};throw e}}
+const list=x=>Array.isArray(x)?x:x&&typeof x==="object"?(x.items||x.jobs||x.providers||x.connections||x.files||x.transfers||x.artifacts||x.quotas||[]):[];
+
+const SECTIONS=[["Overview",[["dash","Dashboard"],["accounts","Connected accounts"],["notifications","Notifications"]]],
+ ["Production",[["scheduler","Scheduler"],["jobs","Job queue"],["library","Media library"],["review","Review & approval"]]],
+ ["Infrastructure",[["compute","Compute providers"],["storage","Drive & storage"],["health","Provider health"],["resources","Resource monitor"]]],
+ ["Records",[["logs","Logs"],["checkpoints","Checkpoints"]]],
+ ["Settings",[["security","Security"],["config","System configuration"]]]];
+let current=null, unread=0, timer=null, authMode=null;
+function nav(){const n=$("#nav");n.hidden=false;
+  n.innerHTML=`<h1>NEXUS REMOTE STUDIO</h1><div class="sub">cloud control plane · <a href="/" style="color:var(--acc)">open local app</a></div>`+
+  SECTIONS.map(([g,items])=>`<h2>${g}</h2>`+items.map(([id,name])=>`<a data-nav="${id}" class="${id===current?"on":""}" href="#${id}">${esc(name)}${id==="notifications"&&unread?`<span class="badge">${unread}</span>`:""}</a>`).join("")).join("")+
+  `<div class="foot"><button class="sec sm" data-act="theme">Theme</button>${authMode==="token"?`<button class="sec sm" data-act="logout">Sign out</button>`:""}</div>`}
+function go(id){if(!PAGES[id])id="dash";current=id;if(location.hash!=="#"+id)history.replaceState(null,"","#"+id);nav();render()}
+async function render(quiet){const m=$("#main"),id=current;if(!quiet)m.innerHTML="<p class='lead'>Loading…</p>";
+  try{const html=await PAGES[id]();if(id!==current)return;
+    if(quiet&&m.contains(document.activeElement)&&/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName))return;
+    m.innerHTML=html;AFTER[id]&&AFTER[id]()}
+  catch(e){if(e instanceof AuthError)return;m.innerHTML=`<div class="note bad">Error: ${esc(e.message)}</div>`}}
+function auto(ms){clearInterval(timer);timer=setInterval(()=>{if(!document.hidden&&LIVE.has(current))render(true)},ms)}
+const LIVE=new Set(["dash","jobs","scheduler","logs","resources","notifications"]);
+
+// ---------------------------------------------------------------- login
+function showLogin(detail){clearInterval(timer);$("#nav").hidden=true;
+  $("#main").innerHTML=`<div class="login"><div class="card"><h2 class="page">NEXUS Remote Studio</h2>
+  <p class="lead">This server requires the owner token. It is exchanged once for a secure HttpOnly session cookie and is not stored by this page.</p>
+  <form id="loginf"><div class="row"><label>Owner token<input id="tok" type="password" autocomplete="current-password" required></label></div>
+  <button type="submit" id="loginb">Sign in</button></form><p class="small mute" id="lerr">${esc(detail&&detail!=="owner authentication required"?detail:"")}</p></div></div>`;
+  $("#loginf").onsubmit=async ev=>{ev.preventDefault();const t=$("#tok");const v=t.value;t.value="";$("#loginb").disabled=true;
+    try{const r=await fetch("/api/v1/session",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({token:v})});
+      if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.detail||r.statusText)}boot()}
+    catch(e){$("#lerr").textContent="Sign-in failed: "+e.message;$("#loginb").disabled=false}}}
+
+// ---------------------------------------------------------------- pages
+const PAGES={}, AFTER={};
+const statCard=(v,label,cls="")=>`<div class="card stat"><b class="${cls}">${v}</b><span>${esc(label)}</span></div>`;
+function schedLine(s){const t=s.today||{};return `${st(s.status)}${s.pause_reason?" "+tag(s.pause_reason,"warn"):""} · masters ${t.master?.done??0}/${t.master?.target??0} · shorts ${t.short?.done??0}/${t.short?.target??0}`}
+function etaText(e){if(!e)return"-";if(e.remaining_s===0)return"today's target complete";if(e.remaining_s!=null)return"≈ "+dur(e.remaining_s)+" (measured median)";return e.note||"no history yet"}
+
+PAGES.dash=async()=>{const s=await api("/api/v1/studio/summary");unread=s.notifications_unread;const sc=s.scheduler;
+  const al=await api("/api/v1/alerts").catch(()=>({active:[]}));const qs=s.services.compute?await api("/api/v1/compute/quota").catch(()=>[]):[];
+  return `<h2 class="page">Dashboard</h2><p class="lead">Live state of remote production on this control plane. Refreshes every 5 s.</p>
+  <div class="grid">${statCard(s.jobs.running,"jobs running")}${statCard(s.jobs.queued,"jobs queued")}${statCard(s.jobs.failed_today,"failed today",s.jobs.failed_today?"badv":"")}
+  ${statCard(s.jobs.succeeded_today,"succeeded today")}${statCard(s.notifications_unread,"unread notifications")}${statCard(fmtB(s.storage.artifact_bytes),s.storage.artifacts+" artifacts stored")}</div>
+  <h3 class="sec">Alerts</h3>${(al.active||[]).length?`<div class="card">${al.active.map(a=>`<div>${tag(a.key.split(":")[0],a.key.endsWith(":error")||a.key.startsWith("fails")||a.key.startsWith("transfer")?"bad":"warn")} ${esc(a.title)} <span class="small mute">${ago(a.last)}</span></div>`).join("")}</div>`:`<div class="card small mute">No active alerts (storage, quota, transfers, repeated failures, lost workers are checked every 5 min).</div>`}
+  ${qs.length?`<h3 class="sec">Compute quota</h3><div class="grid">${qs.map(q=>`<div class="card"><h3>${esc(q.provider)} · ${esc(q.resource)}</h3>${q.limit?`<div class="bar"><i class="${q.used/q.limit>0.9?"bad":q.used/q.limit>0.8?"warn":""}" style="width:${Math.min(100,100*(q.used||0)/q.limit)}%"></i></div><div class="small mute">${q.resource.includes("seconds")?((q.used||0)/3600).toFixed(1)+" h of "+(q.limit/3600).toFixed(0)+" h":q.resource.includes("bytes")?fmtB(q.used||0)+" of "+fmtB(q.limit):Math.round(q.used||0)+" of "+Math.round(q.limit)}${q.period?" ("+esc(q.period)+")":""}${q.exhausted?" "+tag("exhausted","bad"):""}</div>`:'<p class="small mute">no known limit</p>'}<div class="small mute">${q.source==="provider_api"?"provider-reported":"estimate: NEXUS measurement vs documented allowance"}</div></div>`).join("")}</div>`:""}
+  <h3 class="sec">Scheduler</h3><div class="card"><div>${schedLine(sc)}</div><div class="small mute">ETA: ${esc(etaText(sc.eta))} · GPU today ${sc.gpu_seconds_today}s · last tick ${ago(sc.last_tick)}${sc.blocked?" · "+esc(sc.blocked):""}</div>
+  ${sc.last_error&&sc.last_error!==sc.blocked?`<div class="note bad">${esc(sc.last_error)}</div>`:""}<div class="row">${schedButtons(sc.status)}</div></div>
+  <h3 class="sec">Services and providers</h3><div class="grid">
+  <div class="card"><h3>Compute ${st(s.services.compute?"mounted":"missing")}</h3><p>${s.services.compute?"/api/v1/compute available":esc(NOT_INSTALLED.compute)}</p></div>
+  <div class="card"><h3>Storage ${st(s.services.storage?"mounted":"missing")}</h3><p>${s.services.storage?"/api/v1/storage available":esc(NOT_INSTALLED.storage)}</p></div>
+  <div class="card"><h3>Control-plane disk</h3>${bar(s.storage.disk.used,s.storage.disk.total)}</div></div>
+  ${table(s.providers,[["Connection",r=>esc(r.label||r.id)],["Provider",r=>esc(r.provider)],["Status",r=>st(r.status)],["Identity",r=>esc(r.identity||"-")],["Last success",r=>ago(r.last_success)],["Last error",r=>esc(r.last_error||"-")]],"No accounts connected yet (Connected accounts).")}
+  <h3 class="sec">Recent remote jobs</h3>${jobTable(s.jobs.recent)}`};
+AFTER.dash=()=>nav();
+
+function schedButtons(status){const b=(a,l,c="sec",dis=false)=>`<button class="${c} sm" data-sched="${a}" ${dis?"disabled":""}>${l}</button>`;
+  return b("start","Start","",status==="running")+b("pause","Pause","sec",!(status==="running"||status==="stopping"))+b("resume","Resume","sec",status!=="paused")+
+    b("stop-after-current","Stop after current","sec",!(status==="running"||status==="paused"))+b("stop","Stop now (safe cancel)","danger",status==="stopped")+b("tick","Run tick now")}
+function jobTable(rows){return table(rows,[["Job",r=>`<a href="#jobs" data-job="${esc(r.id||r.job_id)}" class="mono">${esc(r.id||r.job_id)}</a>`],["Task",r=>esc(r.task)],["Status",r=>st(r.status)],
+  ["Provider",r=>esc([r.provider,r.connection_id].filter(Boolean).join(" / ")||"-")],["Attempts",r=>esc(r.attempts??"-")],["Created",r=>ago(r.created)],["Error",r=>`<span class="small">${esc((r.error||"").slice(0,140))}</span>`]],"No remote jobs yet.")}
+
+// ---- connected accounts
+const DRIVES=["drive_a","drive_b","drive_c"];
+function connCard(c,{storage}){const q=c.quota||{};const reauth=c.reauth_needed||c.status==="unauthorized";
+  return `<div class="card"><h3>${esc(c.label||c.id)} ${st(c.status||"not connected")}</h3>
+  <p>${esc(c.provider||"")} ${c.identity?"· "+esc(c.identity):""}</p>
+  ${c.scopes&&c.scopes.length?`<div class="small mute">scopes: ${c.scopes.map(esc).join(", ")}</div>`:""}
+  ${q.limit!=null||q.used!=null?bar(q.used,q.limit):""}
+  <div class="small mute">last success ${ago(c.last_success)}${c.last_upload?" · last upload "+ago(c.last_upload):""}</div>
+  ${c.last_error?`<div class="small" style="color:var(--bad)">last error: ${esc(c.last_error)}</div>`:""}
+  ${reauth?`<div class="note">Re-authorisation needed.</div>`:""}
+  ${storage?`<div class="row">${(c.status&&c.status!=="not_configured"&&c.status!=="disconnected"&&!reauth)?`<button class="sec sm" data-health="${esc(c.id)}">Check health</button><button class="danger sm" data-disconnect="${esc(c.id)}">Disconnect</button>`:`<button class="sm" data-connect="${esc(c.id)}">${reauth?"Re-authorise":"Connect"}</button>`}</div><div id="dev_${esc(c.id)}"></div>`:""}</div>`}
+PAGES.accounts=async()=>{
+  const [sto,cmp,gh,sum]=await Promise.all([svc("storage","/connections"),svc("compute","/providers"),api("/api/v1/studio/github").catch(e=>({detail:e.message})),api("/api/v1/studio/summary")]);
+  let drives;
+  if(sto.missing){const known=Object.fromEntries(sum.providers.map(p=>[p.id,p]));drives=DRIVES.map(id=>known[id]||{id,label:"Google Drive "+id.slice(-1).toUpperCase(),status:"not_configured"})}
+  else drives=list(sto.data);
+  const prov=cmp.missing?[]:list(cmp.data);const kag=prov.filter(p=>/kaggle/i.test(p.provider||p.id||"")),other=prov.filter(p=>!/kaggle|local/i.test(p.provider||p.id||""));
+  return `<h2 class="page">Connected accounts</h2><p class="lead">Every account NEXUS can use. Identities are shown to you only; tokens are never shown or sent to the browser.</p>
+  <h3 class="sec">Google Drive (storage)</h3>${sto.missing?`<div class="note">${esc(sto.msg)} Showing what the shared database knows.</div>`:""}
+  <div class="grid">${drives.map(c=>connCard(c,{storage:!sto.missing})).join("")}</div>
+  <h3 class="sec">Kaggle (compute, single identity)</h3>${cmp.missing?`<div class="note">${esc(cmp.msg)}</div>`:kag.length?`<div class="grid">${kag.map(providerCard).join("")}</div>`:`<p class="mute">Kaggle is not configured.</p>`}
+  <h3 class="sec">Optional compute: Colab handoff / your own GPU</h3>${cmp.missing?`<p class="mute">Not available without the compute service.</p>`:other.length?`<div class="grid">${other.map(providerCard).join("")}</div>`:`<p class="mute">None configured.</p>`}
+  <h3 class="sec">GitHub (read-only status)</h3><div class="card"><h3>Repository ${st(gh.reachable?"reachable":"unreachable")}</h3>
+  <p class="mono">${esc(gh.remote||"no remote")}${gh.branch?" · branch "+esc(gh.branch):""}</p><div class="small mute">${esc(gh.detail||"")} · checked ${ago(gh.checked_at)}</div>
+  <div class="row"><button class="sec sm" data-act="ghrefresh">Check again</button></div></div>
+  <h3 class="sec">Future providers</h3><p class="mute">Additional storage or compute providers are added as adapters behind the storage/compute services. None beyond the above is configured in this build.</p>`};
+
+// ---- compute
+function providerCard(p){const c=p.capability||p.capabilities||p;const h=p.health||{};const id=p.connection_id||p.id||p.provider;
+  return `<div class="card"><h3>${esc(p.display||p.provider||id)} ${st(h.status||p.status||"unknown")}</h3>
+  <p>${esc(h.identity||p.identity||"")}</p>
+  <div class="small mute">accelerator: ${esc(c.accelerator||"CPU / unknown")}${c.vram_gb?" · "+c.vram_gb+" GB VRAM":""}${c.ram_gb?" · "+c.ram_gb+" GB RAM":""}${c.cpus?" · "+c.cpus+" CPU":""}${c.max_runtime_s?" · max "+dur(c.max_runtime_s):""}</div>
+  <div class="small mute">${c.measured?"measured "+ago(c.measured_at):"not measured yet (run a probe job)"}${(c.frameworks||[]).length?" · "+c.frameworks.map(esc).join(", "):""}</div>
+  ${h.detail||p.detail?`<div class="small">${esc(h.detail||p.detail)}</div>`:""}${h.last_error?`<div class="small" style="color:var(--bad)">${esc(h.last_error)}</div>`:""}
+  ${/kaggle/i.test(p.provider||id)?`<div class="row"><button class="sm" data-act="kverify">Verify Kaggle</button></div>`:""}</div>`}
+PAGES.compute=async()=>{const [pr,q]=await Promise.all([svc("compute","/providers"),svc("compute","/quota")]);
+  if(pr.missing)return `<h2 class="page">Compute providers</h2><div class="note">${esc(pr.msg)}</div><p class="mute">When the compute service is installed, its providers, measured capabilities, quotas and a test-job form appear here.</p>`;
+  const quotas=list(q.data);
+  return `<h2 class="page">Compute providers</h2><p class="lead">Remote workers and their measured capabilities. Quotas are shown as the provider reports them; NEXUS pauses when one is exhausted and never switches accounts to get around a limit.</p>
+  <div class="grid">${list(pr.data).map(providerCard).join("")||"<p class='mute'>No providers.</p>"}</div>
+  <h3 class="sec">Quotas</h3>${quotas.length?`<div class="grid">${quotas.map(x=>`<div class="card"><h3>${esc(x.provider)} · ${esc(x.resource)} ${x.exhausted?tag("exhausted","bad"):""}</h3>${x.limit!=null?`<div class="bar"><i class="${x.used/x.limit>.9?"bad":""}" style="width:${Math.min(100,100*(x.used||0)/x.limit)}%"></i></div>`:""}<div class="small mute">used ${esc(x.used??"?")} of ${esc(x.limit??"not exposed")} ${esc(x.period||"")} · source ${esc(x.source)}</div></div>`).join("")}</div>`:`<p class="mute">No quota reported.</p>`}
+  <h3 class="sec">Submit a job</h3><div class="card"><div class="row"><label>Task<select id="jtask"><option>probe</option><option>ffmpeg_transcode</option></select></label>
+  <label>Priority (0 = most urgent)<input id="jprio" type="number" min="0" max="9" value="5"></label><label>Max retries<input id="jretry" type="number" min="0" max="10" value="2"></label></div>
+  <label class="small mute">Params (JSON)<textarea id="jparams">{}</textarea></label><div class="row"><button data-act="jsubmit">Submit job</button></div></div>`};
+
+// ---- storage
+PAGES.storage=async()=>{const [c,t]=await Promise.all([svc("storage","/connections"),svc("storage","/transfers")]);
+  if(c.missing)return `<h2 class="page">Drive & storage</h2><div class="note">${esc(c.msg)}</div><p class="mute">Storage destinations, quota bars, folders, file lists, uploads, resumable transfers and URL ingest appear here once it is installed.</p>`;
+  const conns=list(c.data);const usable=conns.filter(x=>x.status&&!/not_configured|disconnected/.test(x.status));
+  return `<h2 class="page">Drive & storage</h2><p class="lead">Storage destinations and their quotas. Nothing is downloaded to this browser unless you click it.</p>
+  <div class="grid">${conns.map(x=>`<div class="card"><h3>${esc(x.label||x.id)} ${st(x.status)}</h3><p>${esc(x.identity||x.provider||"")}</p><div id="q_${esc(x.id)}" class="small mute">${x.status&&!/not_configured|disconnected/.test(x.status)?`<button class="sec sm" data-quota="${esc(x.id)}">Load quota</button>`:"not connected"}</div></div>`).join("")}</div>
+  ${usable.length?`<h3 class="sec">Folders and files</h3><div class="card"><div class="row"><label>Destination<select id="sconn">${usable.map(x=>`<option value="${esc(x.id)}">${esc(x.label||x.id)}</option>`).join("")}</select></label>
+  <label>Folder (id or path, empty = NEXUS root)<input id="sfolder"></label><button class="sec" data-act="sfiles">List files</button></div>
+  <div class="row"><label>New folder name<input id="snew" placeholder="e.g. Masters"></label><button class="sec" data-act="smkdir">Create folder</button></div>
+  <div class="row"><label>Upload a file<input id="sfile" type="file"></label><button class="sec" data-act="supload">Upload</button></div><div id="sout"></div></div>`:""}
+  <h3 class="sec">Import media from a URL</h3><div class="card"><div class="row"><label>URL (http/https)<input id="iurl" placeholder="https://…"></label>
+  <label>Rights<select id="irights"><option value="owned">I own it</option><option value="licensed">Licensed to me</option><option value="public_domain">Public domain</option><option value="authorised">Authorised by owner</option></select></label>
+  <label>Store in<select id="idest"><option value="">default</option>${usable.map(x=>`<option value="${esc(x.id)}">${esc(x.label||x.id)}</option>`).join("")}</select></label><button data-act="ingest">Import</button></div><div id="iout"></div></div>
+  <h3 class="sec">Transfers</h3>${table(list(t.data),[["Transfer",r=>`<span class="mono">${esc(r.id)}</span>`],["Account",r=>esc(r.connection_id)],["Direction",r=>esc(r.direction)],["Progress",r=>r.size?bar(r.sent,r.size):fmtB(r.sent)],["Status",r=>st(r.status)],["",r=>/fail|paused|interrupted|error/.test(r.status||"")?`<button class="sm" data-resume="${esc(r.id)}">Resume</button>`:""]],"No transfers.")}`};
+
+// ---- library
+PAGES.library=async()=>{const k=$("#libkind")?.value||"";const a=await api("/api/v1/studio/artifacts"+(k?"?kind="+k:""));
+  const kinds=["","master","short","localized","proxy","thumbnail","source","audio","subtitle","project_file","other"];
+  return `<h2 class="page">Media library</h2><p class="lead">Artifacts produced or imported. Only thumbnails and low-resolution proxies are previewed; full resolution streams only when you click it.</p>
+  <div class="row"><label style="max-width:220px">Kind<select id="libkind">${kinds.map(x=>`<option ${x===k?"selected":""} value="${x}">${x||"all"}</option>`).join("")}</select></label></div>
+  ${a.length?`<div class="grid">${a.map(x=>`<div class="card"><div class="thumb" id="th_${esc(x.id)}">${x.preview&&x.preview.type==="image"?`<img loading="lazy" alt="" src="${esc(x.preview.url)}">`:x.preview?`<button class="sec sm" data-proxy="${esc(x.preview.url)}" data-into="th_${esc(x.id)}">Play low-res preview</button>`:"no preview"}</div>
+   <h3 style="font-size:13px;word-break:break-all">${esc(x.name)}</h3><p>${tag(x.kind)} ${fmtB(x.size)} · ${ago(x.created)}</p>
+   <div class="small mute">${x.locations.map(l=>esc(l.connection_id||l.provider)).join(", ")||"no stored copy"}</div>
+   <div class="row">${x.open.kind==="stream"?`<a href="${esc(x.open.url)}" target="_blank" rel="noopener">Open full resolution</a>`:x.open.kind==="drive"?`<a href="${esc(x.open.url)}" target="_blank" rel="noopener noreferrer">Open in Drive viewer</a>`:""}</div></div>`).join("")}</div>`:`<p class="mute">No artifacts yet. Results of remote jobs and imports appear here.</p>`}`};
+AFTER.library=()=>{$("#libkind").onchange=()=>render()};
+
+// ---- jobs
+let selJob=null;
+PAGES.jobs=async()=>{const r=await svc("compute","/jobs");const rows=r.missing?await api("/api/v1/studio/jobs"):list(r.data);
+  let det="";if(selJob)det=await jobDetail(selJob,r.missing);
+  return `<h2 class="page">Job queue</h2><p class="lead">Remote production jobs: progress, logs, checkpoints. Cancel is safe (the worker checkpoints first).</p>
+  ${r.missing?`<div class="note">${esc(r.msg)} The list below is read from the shared job ledger.</div>`:""}${jobTable(rows)}${det}`};
+async function jobDetail(id,missing){
+  if(!missing){try{const j=await api(SVC.compute+"/jobs/"+encodeURIComponent(id));const job=j.job||j;
+    const cps=j.checkpoints||[],evs=j.events||[];const p=job.progress??(job.result&&job.result.progress);
+    return `<h3 class="sec">Job <span class="mono">${esc(id)}</span> ${st(job.status)}</h3><div class="card">
+    ${p!=null?`<div class="bar"><i style="width:${Math.round(100*(p>1?p/100:p))}%"></i></div>`:""}<div class="small mute">task ${esc(job.task)} · attempts ${esc(job.attempts??"-")} · started ${fmtT(job.started)} · finished ${fmtT(job.finished)}</div>
+    <div class="row"><button class="danger sm" data-cancel="${esc(id)}">Cancel safely</button><button class="sec sm" data-retry="${esc(id)}">Retry</button><button class="sec sm" data-act="closejob">Close</button></div>
+    ${job.error?`<div class="note bad">${esc(job.error)}</div>`:""}<h3 class="sec">Log tail</h3><pre>${esc(j.log_tail||job.log_tail||"(empty)")}</pre>
+    <h3 class="sec">Checkpoints</h3>${table(cps,[["#",c=>esc(c.seq)],["Step",c=>esc(c.step)],["At",c=>fmtT(c.created||c.created_at)]],"No checkpoints.")}
+    <h3 class="sec">Events</h3>${table(evs,[["At",e=>fmtT(e.at)],["Type",e=>st(e.type)],["Message",e=>esc(e.message)]],"No events.")}</div>`}
+    catch(e){if(e instanceof AuthError)throw e;return `<div class="note bad">${esc(e.message)}</div>`}}
+  const [cps,evs]=await Promise.all([api("/api/v1/studio/checkpoints?job_id="+encodeURIComponent(id)),api("/api/v1/events?job_id="+encodeURIComponent(id))]);
+  return `<h3 class="sec">Job <span class="mono">${esc(id)}</span></h3><div class="card"><div class="note">Cancel and retry need the compute service.</div><div class="row"><button class="sec sm" data-act="closejob">Close</button></div>
+  <h3 class="sec">Checkpoints</h3>${table(cps,[["#",c=>esc(c.seq)],["Step",c=>esc(c.step)],["At",c=>fmtT(c.created)]],"No checkpoints.")}
+  <h3 class="sec">Events</h3>${table(evs,[["At",e=>fmtT(e.at)],["Type",e=>st(e.type)],["Message",e=>esc(e.message)]],"No events.")}</div>`}
+
+// ---- scheduler
+const csv=s=>s.split(",").map(x=>x.trim()).filter(Boolean);
+PAGES.scheduler=async()=>{const s=await api("/api/v1/studio/scheduler");const c=s.config;const e=s.eta;
+  const num=(id,label,v,extra="")=>`<label>${label}<input id="${id}" type="number" value="${v??""}" ${extra}></label>`;
+  return `<h2 class="page">Scheduler</h2><p class="lead">Autonomous daily production. Targets become remote jobs; quota or storage exhaustion pauses with a notification and waits for you. State survives restarts. Day boundary: UTC.</p>
+  <div class="card"><h3>Status <span id="schstat">${schedLine(s)}</span></h3><div class="small mute">started ${fmtT(s.started_at)} · last tick ${ago(s.last_tick)} · loop ${s.thread_alive?"running":"not running"} · items done since start ${s.items_done} · GPU today ${s.gpu_seconds_today}s</div>
+  ${s.blocked?`<div class="note">${esc(s.blocked)}</div>`:""}${s.last_error&&s.last_error!==s.blocked?`<div class="note bad">${esc(s.last_error)}</div>`:""}
+  <div class="row">${schedButtons(s.status)}</div></div>
+  <h3 class="sec">ETA (from measured history)</h3><div class="card"><b>${esc(etaText(e))}</b>${table(Object.entries(e.tasks).map(([t,v])=>({t,...v})),[["Task",r=>esc(r.t)],["Remaining",r=>r.remaining],["Median",r=>r.median_s==null?"no history yet":dur(r.median_s)],["Samples",r=>r.samples]],"Nothing remaining today.")}</div>
+  <h3 class="sec">Today's work</h3>${table(s.slots,[["Slot",r=>`<span class="mono small">${esc(r.key)}</span>`],["Kind",r=>esc(r.kind)],["Lang",r=>esc(r.lang)],["Status",r=>st(r.status)],["Step",r=>esc((r.tasks||[])[r.step]||"-")+` (${Math.min(r.step+1,(r.tasks||[]).length)}/${(r.tasks||[]).length})`],["Job",r=>r.job_id?`<a href="#jobs" data-job="${esc(r.job_id)}" class="mono">${esc(r.job_id)}</a>`:"-"],["Attempt",r=>r.attempt+1+(r.retry_at?" · retry "+fmtT(r.retry_at):"")]],"Nothing planned yet: start the scheduler.")}
+  <h3 class="sec">Targets and limits</h3><div class="card"><div class="row">${num("c_dm","Masters per day (per language)",c.daily_masters,"min=0 max=100")}${num("c_spm","Shorts per master",c.shorts_per_master,"min=0 max=50")}
+   <label>Languages (comma)<input id="c_lang" value="${esc(c.languages.join(", "))}"></label><label>Platforms (comma)<input id="c_plat" value="${esc(c.platforms.join(", "))}"></label></div>
+  <div class="row"><label>Resolution<select id="c_res">${["1920x1080","1280x720","3840x2160","1080x1920","1080x1080"].map(r=>`<option ${r===c.resolution?"selected":""}>${r}</option>`).join("")}${["1920x1080","1280x720","3840x2160","1080x1920","1080x1080"].includes(c.resolution)?"":`<option selected>${esc(c.resolution)}</option>`}</select></label>
+   <label>Quality preset<select id="c_q">${["draft","standard","high"].map(r=>`<option ${r===c.quality_preset?"selected":""}>${r}</option>`).join("")}</select></label>
+   ${num("c_max","Max active jobs",c.max_active_jobs,"min=1 max=32")}${num("c_pm","Priority: masters (0-9)",c.priority.master,"min=0 max=9")}${num("c_ps","Priority: shorts (0-9)",c.priority.short,"min=0 max=9")}</div>
+  <div class="row"><label class="chk"><input type="checkbox" id="c_tm" ${c.job_types.includes("master")?"checked":""}> produce masters</label><label class="chk"><input type="checkbox" id="c_ts" ${c.job_types.includes("short")?"checked":""}> produce shorts</label></div>
+  <div class="row"><label>Plan: master tasks (comma, in order)<input id="c_planm" value="${esc(c.plan.master.join(", "))}"></label><label>Plan: short tasks<input id="c_plans" value="${esc(c.plan.short.join(", "))}"></label>
+   <button class="sec sm" data-act="demoplan" title="render_master / render_short arrive with Account 2; these registered tasks run today">Use demo plan (probe / ffmpeg_transcode)</button></div>
+  <label class="small mute">Task params (JSON: task → params)<textarea id="c_tp">${esc(JSON.stringify(c.task_params,null,1))}</textarea></label>
+  <div class="row">${num("c_retry","Max retries per job",c.max_retries,"min=0 max=10")}${num("c_bo","Retry backoff (s, doubles)",c.retry_backoff_s,"min=1")}${num("c_gpu","Max GPU seconds / day (empty = none)",c.max_gpu_seconds_day,"min=0")}
+   ${num("c_sto","Max storage (GB, empty = none)",c.max_storage_bytes==null?"":+(c.max_storage_bytes/2**30).toFixed(3),"min=0 step=any")}</div>
+  <div class="row">${num("c_stopn","Stop after N items (empty = never)",c.stop.max_items,"min=1")}<label>Stop on date (UTC, empty = never)<input id="c_stopd" type="date" value="${c.stop.until?new Date(c.stop.until*1000).toISOString().slice(0,10):""}"></label>${num("c_tick","Tick interval (s)",c.tick_interval_s,"min=5 max=3600")}</div>
+  <div class="row"><button data-act="schsave">Save settings</button><span id="schmsg" class="small mute"></span></div></div>`};
+function readSchedForm(){const n=id=>{const v=$("#"+id).value.trim();return v===""?null:Number(v)};let tp;
+  try{tp=JSON.parse($("#c_tp").value||"{}")}catch(e){throw new Error("Task params is not valid JSON")}
+  const d=$("#c_stopd").value;
+  return {daily_masters:n("c_dm"),shorts_per_master:n("c_spm"),languages:csv($("#c_lang").value),platforms:csv($("#c_plat").value),resolution:$("#c_res").value,
+    quality_preset:$("#c_q").value,max_active_jobs:n("c_max"),priority:{master:n("c_pm"),short:n("c_ps")},
+    job_types:[...($("#c_tm").checked?["master"]:[]),...($("#c_ts").checked?["short"]:[])],plan:{master:csv($("#c_planm").value),short:csv($("#c_plans").value)},task_params:tp,
+    max_retries:n("c_retry"),retry_backoff_s:n("c_bo"),max_gpu_seconds_day:n("c_gpu"),max_storage_bytes:n("c_sto")==null?null:Math.round(n("c_sto")*2**30),
+    stop:{max_items:n("c_stopn"),until:d?Date.parse(d+"T00:00:00Z")/1000:null},tick_interval_s:n("c_tick")}}
+
+// ---- review
+PAGES.review=async()=>`<h2 class="page">Review & approval</h2><p class="lead">Speaker names and roles, translated lines and cutaways are reviewed in the main NEXUS app's Review page. Approving there is what releases a production for publishing.</p>
+  <div class="card"><h3>Review page</h3><p>Opens the existing Review page of the local app in this tab.</p><div class="row"><a href="/#review"><button>Open Review</button></a></div></div>`;
+
+// ---- logs / checkpoints / notifications
+PAGES.logs=async()=>{const ty=$("#lgtype")?.value||"",jb=$("#lgjob")?.value||"";const ev=await api("/api/v1/events?limit=300"+(jb?"&job_id="+encodeURIComponent(jb):""));
+  const rows=ty?ev.filter(e=>e.type.startsWith(ty)):ev;
+  return `<h2 class="page">Logs</h2><p class="lead">Production events from all accounts (secrets are redacted before they are stored).</p>
+  <div class="row"><label style="max-width:220px">Type<select id="lgtype">${["","job.","scheduler.","quota.","storage.","ingest.","worker.","provider."].map(x=>`<option ${x===ty?"selected":""} value="${x}">${x||"all"}</option>`).join("")}</select></label>
+  <label style="max-width:300px">Job id<input id="lgjob" value="${esc(jb)}"></label><button class="sec" data-act="lgfilter">Filter</button></div>
+  ${table(rows,[["At",e=>`<span class="small">${fmtT(e.at)}</span>`],["Type",e=>st(e.type)],["Job",e=>e.job_id?`<a href="#jobs" data-job="${esc(e.job_id)}" class="mono">${esc(e.job_id)}</a>`:"-"],["Message",e=>esc(e.message)]],"No events yet.")}`};
+AFTER.logs=()=>{$("#lgtype").onchange=()=>render()};
+PAGES.checkpoints=async()=>{const c=await api("/api/v1/studio/checkpoints");
+  return `<h2 class="page">Checkpoints</h2><p class="lead">Durable progress saved by remote workers; a retried or resumed job continues from its last checkpoint.</p>
+  ${table(c,[["Job",r=>`<a href="#jobs" data-job="${esc(r.job_id)}" class="mono">${esc(r.job_id)}</a>`],["#",r=>esc(r.seq)],["Step",r=>esc(r.step)],["At",r=>fmtT(r.created)],["State",r=>`<span class="mono small">${esc(JSON.stringify(r.data).slice(0,160))}</span>`]],"No checkpoints yet.")}`};
+PAGES.notifications=async()=>{const n=await api("/api/v1/notifications");unread=n.filter(x=>!x.read).length;
+  return `<h2 class="page">Notifications</h2><p class="lead">${unread} unread. Failures, quota and storage warnings, and scheduler stops appear here.</p>
+  <div class="row"><button class="sec" data-act="readall" ${unread?"":"disabled"}>Mark all read</button></div>
+  ${table(n,[["",r=>r.read?"":tag("new","warn")],["Level",r=>st(r.level==="success"?"ok":r.level==="info"?"info":r.level)],["Title",r=>`<b>${esc(r.title)}</b><div class="small mute">${esc(r.body)}</div>`],["At",r=>`<span class="small">${fmtT(r.at)}</span>`],["",r=>r.read?"":`<button class="sec sm" data-read="${esc(r.id)}">Mark read</button>`]],"No notifications.")}`};
+AFTER.notifications=()=>nav();
+
+// ---- resources / health
+PAGES.resources=async()=>{const r=await api("/api/v1/studio/resources");const h=r.host;
+  return `<h2 class="page">Resource monitor</h2><p class="lead">This control-plane host (measured now) and remote workers (metrics reported in job results).</p>
+  <div class="grid"><div class="card"><h3>CPU</h3><div class="bar"><i class="${h.cpu_percent>90?"bad":""}" style="width:${h.cpu_percent}%"></i></div><div class="small mute">${h.cpu_percent}% of ${h.cpus} CPU${h.load_avg?" · load "+h.load_avg.map(x=>x.toFixed(2)).join(" "):""}</div></div>
+  <div class="card"><h3>Memory</h3>${bar(h.ram.used,h.ram.total)}</div><div class="card"><h3>Disk (NEXUS_HOME)</h3>${bar(h.disk.used,h.disk.total)}</div>
+  <div class="card"><h3>NEXUS process</h3><b>${fmtB(h.process_rss)}</b><div class="small mute">resident memory · host up ${dur(h.uptime_s)}</div></div></div>
+  <h3 class="sec">Remote workers</h3>${table(r.remote_workers,[["Job",x=>`<span class="mono">${esc(x.id)}</span>`],["Task",x=>esc(x.task)],["Provider",x=>esc([x.provider,x.connection_id].filter(Boolean).join(" / "))],["Accelerator",x=>esc(x.accelerator||"-")],["Duration",x=>dur(x.duration_s)],["Metrics",x=>`<span class="mono small">${esc(JSON.stringify(x.metrics).slice(0,200))}</span>`]],"No remote job has reported metrics yet.")}`};
+PAGES.health=async()=>{const [h,cp,sc]=await Promise.all([api("/api/v1/studio/health"),svc("compute","/providers").catch(e=>({err:e.message})),svc("storage","/connections").catch(e=>({err:e.message}))]);
+  return `<h2 class="page">Provider health</h2><p class="lead">Which services are installed, each connection's last known state, and job outcomes per provider.</p>
+  <h3 class="sec">Services</h3>${table(Object.entries(h.routers).map(([k,v])=>({k,v})),[["Router",r=>esc(r.k)],["State",r=>st(r.v==="mounted"?"mounted":"missing")+(r.v==="mounted"?"":` <span class="small mute">${esc(r.v)}</span>`)]])}
+  <div class="small mute">compute probe: ${cp.missing?"not installed":cp.err?esc(cp.err):"ok"} · storage probe: ${sc.missing?"not installed":sc.err?esc(sc.err):"ok"} · scheduler loop ${h.scheduler.thread_alive?"running":"not running"} (${esc(h.scheduler.status)}) · DB schema v${h.db_schema}</div>
+  <h3 class="sec">Connections</h3>${table(h.connections,[["Connection",r=>esc(r.label||r.id)],["Provider",r=>esc(r.provider)],["Status",r=>st(r.status)],["Identity",r=>esc(r.identity||"-")],["Last success",r=>ago(r.last_success)],["Last error",r=>esc(r.last_error||"-")]],"No connections recorded.")}
+  <h3 class="sec">Job outcomes by provider</h3>${table(h.provider_jobs,[["Provider",r=>esc(r.provider)],["Connection",r=>esc(r.connection_id)],["Jobs",r=>r.jobs],["Last success",r=>ago(r.last_success)],["Last failure",r=>ago(r.last_failure)]],"No dispatched jobs yet.")}
+  ${!cp.missing&&!cp.err?`<h3 class="sec">Compute providers (live)</h3><div class="grid">${list(cp.data).map(providerCard).join("")}</div>`:""}`};
+
+// ---- security / config
+PAGES.security=async()=>{const [s,c]=await Promise.all([api("/api/v1/studio/security"),svc("storage","/connections")]);
+  const conns=c.missing?[]:list(c.data).filter(x=>x.status&&!/not_configured|disconnected/.test(x.status));
+  return `<h2 class="page">Security</h2><p class="lead">How this browser is authenticated and which secrets the server holds. Secret values are never sent to the browser.</p>
+  <div class="grid"><div class="card"><h3>Mode ${tag(s.mode,"ok")}</h3><p>${s.mode==="token"?"Owner token required; this browser uses the "+esc(s.authenticated_by)+" session.":"No NEXUS_API_TOKEN: only clients on this machine (loopback) are accepted."}</p></div>
+  <div class="card"><h3>Session cookie</h3><p class="small">${esc(s.cookie.name)} · HttpOnly · SameSite=${esc(s.cookie.samesite)} · Secure · ${s.cookie.max_age_h} h</p>${s.mode==="token"?`<div class="row"><button class="sec sm" data-act="logout">Sign out</button></div>`:""}</div></div>
+  <h3 class="sec">Stored secrets (names only)</h3>${table(s.secrets,[["Name",r=>`<span class="mono">${esc(r.name)}</span>`]],"No secrets stored.")}
+  <h3 class="sec">Disconnect accounts</h3>${c.missing?`<div class="note">${esc(c.msg)}</div>`:conns.length?table(conns,[["Account",r=>esc(r.label||r.id)],["Identity",r=>esc(r.identity||"-")],["",r=>`<button class="danger sm" data-disconnect="${esc(r.id)}">Disconnect</button>`]]):`<p class="mute">No connected storage accounts.</p>`}
+  ${s.notes.map(n=>`<div class="note info">${esc(n)}</div>`).join("")}`};
+PAGES.config=async()=>{const c=await api("/api/v1/studio/config");const s=c.scheduler;
+  const rows=[["Version",c.version],["NEXUS_HOME",c.home],["DB schema",c.db_schema],["Port",c.port],["Embedded worker",c.embedded_worker],["Scheduler loop",c.scheduler_thread],["Owner token mode",c.token_mode],["Missing routers",c.routers_missing.join(", ")||"none"],["Python",c.python],["Platform",c.platform]];
+  return `<h2 class="page">System configuration</h2><p class="lead">Read-only server settings (set through environment variables). Scheduler limits are editable below; targets and the plan are on the Scheduler page.</p>
+  ${table(rows.map(([k,v])=>({k,v})),[["Setting",r=>esc(r.k)],["Value",r=>`<span class="mono">${esc(r.v)}</span>`]])}
+  <h3 class="sec">Scheduler limits</h3><div class="card"><div class="row"><label>Max active jobs<input id="l_max" type="number" min="1" max="32" value="${s.max_active_jobs}"></label>
+  <label>Max GPU seconds / day (empty = none)<input id="l_gpu" type="number" min="0" value="${s.max_gpu_seconds_day??""}"></label>
+  <label>Max storage (GB, empty = none)<input id="l_sto" type="number" min="0" step="any" value="${s.max_storage_bytes==null?"":+(s.max_storage_bytes/2**30).toFixed(3)}"></label>
+  <label>Min free disk (GB)<input id="l_disk" type="number" min="0" step="any" value="${+(s.min_free_disk_bytes/2**30).toFixed(3)}"></label></div>
+  <div class="row"><button data-act="limsave">Save limits</button><span id="limmsg" class="small mute"></span></div></div>`};
+
+// ---------------------------------------------------------------- actions (event delegation; no inline handlers)
+async function act(fn,okMsg){try{const r=await fn();if(okMsg)toast(typeof okMsg==="function"?okMsg(r):okMsg);return r}catch(e){if(!(e instanceof AuthError))toast(e.message,true)}}
+const ACT={
+  theme(){const cur=document.documentElement.dataset.theme||(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");const nxt=cur==="light"?"dark":"light";
+    document.documentElement.dataset.theme=nxt;try{localStorage.setItem("nexus-studio-theme",nxt)}catch(e){}},
+  async logout(){await fetch("/api/v1/studio/logout",{method:"POST",credentials:"same-origin",headers:{"X-NEXUS-CSRF":"1"}});showLogin()},
+  async ghrefresh(){await act(()=>api("/api/v1/studio/github?refresh=true"));render()},
+  async kverify(b){b.disabled=true;await act(()=>post(SVC.compute+"/providers/kaggle/verify"),r=>"Kaggle: "+(r.status||r.detail||"verified"));render()},
+  async jsubmit(){let params;try{params=JSON.parse($("#jparams").value||"{}")}catch(e){return toast("Params is not valid JSON",true)}
+    const r=await act(()=>post(SVC.compute+"/jobs",{task:$("#jtask").value,params,priority:+$("#jprio").value,max_retries:+$("#jretry").value}),r=>"Submitted "+(r.job_id||r.id||""));
+    if(r){selJob=r.job_id||r.id;go("jobs")}},
+  async sfiles(){const c=$("#sconn").value,f=$("#sfolder").value.trim();const r=await act(()=>api(SVC.storage+"/connections/"+encodeURIComponent(c)+"/files"+(f?"?folder="+encodeURIComponent(f):"")));
+    if(r)$("#sout").innerHTML=table(list(r),[["Name",x=>esc(x.name||x.title)],["Type",x=>esc(x.mime||x.mimeType||"")],["Size",x=>fmtB(x.size)],["Modified",x=>esc(x.modified||x.modifiedTime||"")],["",x=>x.id&&(x.web_view||x.webViewLink)?`<a target="_blank" rel="noopener noreferrer" href="${esc(x.web_view||x.webViewLink)}">view</a>`:""]],"Folder is empty.")},
+  async smkdir(){const c=$("#sconn").value,n=$("#snew").value.trim();if(!n)return toast("Folder name required",true);
+    await act(()=>post(SVC.storage+"/connections/"+encodeURIComponent(c)+"/folders",{name:n,parent:$("#sfolder").value.trim()||null}),"Folder created")},
+  async supload(){const f=$("#sfile").files[0];if(!f)return toast("Choose a file first",true);const fd=new FormData();fd.append("file",f);fd.append("connection_id",$("#sconn").value);
+    if($("#sfolder").value.trim())fd.append("folder",$("#sfolder").value.trim());await act(()=>api(SVC.storage+"/uploads",{method:"POST",form:fd}),r=>"Upload started "+(r.transfer_id||r.id||""))},
+  async ingest(){const url=$("#iurl").value.trim();if(!/^https?:\/\//.test(url))return toast("Enter an http(s) URL",true);
+    const r=await act(()=>post(SVC.storage+"/ingest",{source:{kind:"http_url",ref:url,rights:$("#irights").value,declared_by:"owner"},destination:$("#idest").value||null}),r=>"Import "+(r.ingestion_id||r.id)+": "+(r.status||"queued"));
+    if(r)pollIngest(r.ingestion_id||r.id)},
+  async demoplan(){$("#c_planm").value="probe";$("#c_plans").value="ffmpeg_transcode"},
+  async schsave(){let body;try{body=readSchedForm()}catch(e){return toast(e.message,true)}const r=await act(()=>api("/api/v1/studio/scheduler",{method:"PUT",body}),"Scheduler settings saved");if(r)render(true)},
+  async limsave(){const n=id=>{const v=$("#"+id).value.trim();return v===""?null:Number(v)};
+    const body={max_active_jobs:n("l_max"),max_gpu_seconds_day:n("l_gpu"),max_storage_bytes:n("l_sto")==null?null:Math.round(n("l_sto")*2**30),min_free_disk_bytes:Math.round((n("l_disk")||0)*2**30)};
+    const r=await act(()=>api("/api/v1/studio/scheduler",{method:"PUT",body}),"Limits saved");if(r)$("#limmsg").textContent="saved "+new Date().toLocaleTimeString()},
+  async readall(){await act(()=>post("/api/v1/notifications/read",{}));render()},
+  closejob(){selJob=null;render()},
+  lgfilter(){render()}};
+async function pollIngest(id){for(let i=0;i<60;i++){const r=await svc("storage","/ingest/"+encodeURIComponent(id)).catch(()=>null);if(!r||r.missing)return;const d=r.data;
+  const o=$("#iout");if(o)o.innerHTML=`<div class="small">${esc(id)}: ${st(d.status)} ${esc(d.reason||"")}</div>`;if(/stored|rejected|failed/.test(d.status||""))return;await new Promise(z=>setTimeout(z,2000))}}
+async function devicePoll(id,box,interval){for(let i=0;i<120;i++){await new Promise(z=>setTimeout(z,Math.max(5,interval||5)*1000));if(!document.body.contains(box))return;
+  const r=await act(()=>post(SVC.storage+"/connections/"+encodeURIComponent(id)+"/device/poll"));if(!r)return;
+  if(/connected|ok|authorized|authorised/.test(r.status||"")){toast(id+" connected");return render()}
+  if(/denied|expired|failed|error/.test(r.status||"")){box.innerHTML=`<div class="note bad">${esc(r.status)} ${esc(r.detail||"")}</div>`;return}}}
+document.addEventListener("click",async ev=>{const t=ev.target.closest("[data-act],[data-sched],[data-nav],[data-job],[data-connect],[data-disconnect],[data-health],[data-quota],[data-resume],[data-cancel],[data-retry],[data-read],[data-proxy]");if(!t)return;const d=t.dataset;
+  if(d.nav){ev.preventDefault();return go(d.nav)}
+  if(d.job){ev.preventDefault();selJob=d.job;return go("jobs")}
+  if(d.act&&ACT[d.act]){ev.preventDefault();return ACT[d.act](t)}
+  if(d.sched){if(d.sched==="stop"&&!confirm("Stop the scheduler now and ask every active job to cancel safely (it checkpoints first)?"))return;t.disabled=true;
+    const r=await act(()=>post("/api/v1/studio/scheduler/"+d.sched),r=>"Scheduler: "+r.status+(r.blocked?" ("+r.blocked+")":""));t.disabled=false;if(r)render(true);return}
+  if(d.connect){const box=$("#dev_"+CSS.escape(d.connect));const r=await act(()=>post(SVC.storage+"/connections/"+encodeURIComponent(d.connect)+"/device/start"));if(!r)return;
+    const url=r.verification_url||r.verification_uri;box.innerHTML=`<div class="note info">Open <a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(url)}</a> on any device and enter <b class="mono">${esc(r.user_code)}</b>. Waiting for approval…</div>`;
+    return devicePoll(d.connect,box,r.interval)}
+  if(d.disconnect){if(!confirm("Disconnect "+d.disconnect+"? Its stored token is revoked and deleted; files in Drive are not touched."))return;
+    await act(()=>post(SVC.storage+"/connections/"+encodeURIComponent(d.disconnect)+"/disconnect"),"Disconnected "+d.disconnect);return render()}
+  if(d.health){const r=await act(()=>api(SVC.storage+"/connections/"+encodeURIComponent(d.health)+"/health"));if(r)toast(d.health+": "+r.status+(r.detail?" - "+r.detail:""));return}
+  if(d.quota){const r=await act(()=>api(SVC.storage+"/connections/"+encodeURIComponent(d.quota)+"/quota"));if(!r)return;const q=list(r).length?list(r)[0]:r;
+    $("#q_"+CSS.escape(d.quota)).innerHTML=bar(q.used,q.limit)+(q.source?`<div class="small mute">source: ${esc(q.source)}</div>`:"");return}
+  if(d.resume){await act(()=>post(SVC.storage+"/transfers/"+encodeURIComponent(d.resume)+"/resume"),"Transfer resumed");return render()}
+  if(d.cancel){if(!confirm("Cancel job "+d.cancel+"? The worker saves a checkpoint first."))return;await act(()=>post(SVC.compute+"/jobs/"+encodeURIComponent(d.cancel)+"/cancel"),"Cancel requested");return render()}
+  if(d.retry){await act(()=>post(SVC.compute+"/jobs/"+encodeURIComponent(d.retry)+"/retry"),"Retry queued");return render()}
+  if(d.read){await act(()=>post("/api/v1/notifications/read",{ids:[d.read]}));return render()}
+  if(d.proxy){const box=$("#"+CSS.escape(d.into));box.innerHTML=`<video controls autoplay muted playsinline preload="metadata" src="${esc(d.proxy)}"></video>`}});
+window.addEventListener("hashchange",()=>{const id=location.hash.slice(1);if(id&&id!==current&&PAGES[id])go(id)});
+
+async function boot(){try{const t=localStorage.getItem("nexus-studio-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}
+  let a;try{a=await (await fetch("/api/v1/studio/auth",{credentials:"same-origin"})).json()}catch(e){$("#main").innerHTML=`<div class="note bad">Server unreachable: ${esc(e.message)}</div>`;return}
+  authMode=a.token_mode?"token":"loopback";
+  if(!a.authenticated){if(a.token_mode)return showLogin();$("#main").innerHTML=`<div class="note bad">This server has no NEXUS_API_TOKEN and accepts only local (loopback) clients. Open the studio on the server machine, or configure a token.</div>`;return}
+  go(location.hash.slice(1)||"dash");auto(5000)}
+boot();
+</script>
+</body>
+</html>

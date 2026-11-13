@@ -3,14 +3,14 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-13T10:33:08Z",
+ "updated": "2026-11-13T11:19:55Z",
  "git": {
-  "branch": "work/account-3-intelligence-growth",
-  "commit": "211b97f",
-  "subject": "Analytics: a time zone this machine cannot resolve (Windows without tzdata) leaves publish times unconverted instead of raising",
-  "dirty_files": 2,
-  "upstream": "origin/work/account-3-intelligence-growth",
-  "unpushed_commits": 0
+  "branch": "tmp/base-merge-check",
+  "commit": "62414bf",
+  "subject": "Account 3 final closure: batch_llm manifests fixed and dispatcher-tested (D-17); release gate with Account 2 QualityReport, AI disclosure and same-variety language review (D-18); analytics data origin and reconciliation (D-19); owner private YouTube validation path; Bench V3 complete (8 models x 184 items, qwen3-4b invalid); integration r3 on A1 919f158 / A2 d979df1 / A3 f1835b5: 850 passed, 8 skipped, 0 failed. Owner: OAuth client, YouTube key, native reviewers, merge approval; Actions jobs not starting (account-level).",
+  "dirty_files": 120,
+  "upstream": null,
+  "unpushed_commits": null
  },
  "current_task": {
   "id": "QLT-1",
@@ -56,11 +56,11 @@
   }
  ],
  "tasks": {
-  "total": 75,
+  "total": 83,
   "by_status": {
-   "verified": 18,
+   "verified": 24,
    "tested": 30,
-   "blocked": 7,
+   "blocked": 9,
    "deferred": 1,
    "planned": 15,
    "in_progress": 2,
@@ -70,8 +70,8 @@
  },
  "tests": {
   "fast": {
-   "summary": "499 passed, 0 failed, 6 skipped",
-   "ok": true,
+   "summary": "677 passed, 1 failed, 5 skipped",
+   "ok": false,
    "date": "2026-11-13",
    "platform": "Linux",
    "python": "3.13.18"
@@ -116,6 +116,16 @@
    "id": "A3-COMPETITION",
    "title": "Competition and saturation signals in market research (YouTube supply)",
    "why": "Needs the owner's YouTube Data API key (free quota)."
+  },
+  {
+   "id": "ACC1-HOSTING",
+   "title": "Deploy the control plane on an owner-approved zero-cost host",
+   "why": "Owner decision (host and exposure need explicit approval; no public deployment without it)."
+  },
+  {
+   "id": "ACC1-INTEGRATION",
+   "title": "Three-account shared-contracts integration (nexus/contracts/{cloud,media}.py + shared __init__)",
+   "why": "Account 3: bench_v2.account1_manifest at fd71471 still sends params.models / items as a count / runtime ollama (incompatible with batch_llm). Owner: merge approval and order. (Account 2: no open item.)"
   }
  ],
  "backup": {

@@ -1,0 +1,167 @@
+{
+ "collected_utc": "2026-11-12T18:30:56Z",
+ "demo_D_control_plane_crash": {
+  "what": "chunked_transcode (6 chunks, h264_nvenc, NASA public-domain clip via https URL) submitted through POST /api/v1/compute/jobs; the API process was SIGKILLed 7 s after dispatch, down 25 s, restarted; the dispatcher re-attached to the same Kaggle run (attempts stayed 1) and the job succeeded",
+  "kill_utc": "18:29:24",
+  "restart_utc": "18:29:49",
+  "job": {
+   "id": "rjob_798321a0c799",
+   "task": "chunked_transcode",
+   "status": "succeeded",
+   "attempts": 1,
+   "provider": "kaggle",
+   "created": 1794508151.4081624,
+   "started": 1794508156.9585533,
+   "finished": 1794508225.3003569,
+   "accelerator": "Tesla T4 x2",
+   "duration_s": 13.237,
+   "artifacts": [
+    {
+     "name": "chunk_000.mp4",
+     "size": 4298944,
+     "sha256": "0b980fb16ff242a04aa7d26b0e8424667b010400cf488649cf52b5e1612d35cf"
+    },
+    {
+     "name": "chunk_001.mp4",
+     "size": 1895134,
+     "sha256": "4632b42feb02f2b8d9350e62792884164ab9a17a137ee9060fd76ccd2584de3e"
+    },
+    {
+     "name": "chunk_002.mp4",
+     "size": 2250445,
+     "sha256": "a5e6adac92101751df82f2bc993cf1a3fd0494985ac567d08c6a3a145c57fed3"
+    },
+    {
+     "name": "chunk_003.mp4",
+     "size": 2161316,
+     "sha256": "53f82ce46414565d727aa29dd14d2797e9c745010f4f045f6530e75e1f42028a"
+    },
+    {
+     "name": "chunk_004.mp4",
+     "size": 1868852,
+     "sha256": "da0e0a571787e749f2136fc5a525257f645592885e52889946880f54d59a992d"
+    },
+    {
+     "name": "chunk_005.mp4",
+     "size": 1745029,
+     "sha256": "d85d6d70374c583311d988be605056942316c58f84b0eb8f85fc9d7ecc5e66a8"
+    },
+    {
+     "name": "joined.mp4",
+     "size": 14216183,
+     "sha256": "2c850457cc11f8383a689f28f3596ed29faafc5047598ea377b129175da23909"
+    }
+   ],
+   "events": [
+    "job.submitted",
+    "job.dispatched",
+    "job.progress",
+    "job.progress",
+    "job.checkpoint",
+    "job.checkpoint",
+    "job.checkpoint",
+    "job.checkpoint",
+    "job.checkpoint",
+    "job.checkpoint",
+    "job.succeeded"
+   ]
+  },
+  "independent_check": {
+   "joined_mp4": "h264 1280x720, 242.4 s (= source duration), sha256 recomputed locally matches"
+  }
+ },
+ "demo_C_api_probe": {
+  "what": "probe submitted through the running app's HTTP API, background poller dispatched, artifact checksum verified; same idempotency key re-submitted -> same job, created False",
+  "job": {
+   "id": "rjob_eb5d95e87808",
+   "task": "probe",
+   "status": "succeeded",
+   "attempts": 1,
+   "provider": "kaggle",
+   "created": 1794507249.9473825,
+   "started": 1794507254.047925,
+   "finished": 1794507289.769404,
+   "accelerator": "Tesla T4 x2",
+   "duration_s": 2.622,
+   "artifacts": [
+    {
+     "name": "probe.json",
+     "size": 1068,
+     "sha256": "5a9ad9304b462533eeb83e29b23e7cf256656e06a1b107d2443ee30be1ed31ea"
+    }
+   ],
+   "events": [
+    "job.submitted",
+    "job.dispatched",
+    "job.progress",
+    "provider.health",
+    "job.succeeded"
+   ]
+  }
+ },
+ "demo_F_scheduler": {
+  "what": "daily target 1 master + 1 short (demo plan: probe on Kaggle), max_active 1, stop after 2 items",
+  "steps": [
+   "start -> running, ETA from measured median (66 s/probe, 2 samples)",
+   "pause -> no new dispatch for 100 s; the already-running job finished",
+   "simulated quota exhaustion (allowance setting lowered to 0.05 h < 289.5 s measured) -> resume refused, status paused, reason quota, warning notification, no dispatch, no account switching",
+   "allowance restored -> resume -> second job ran -> stop condition reached -> stopped"
+  ],
+  "jobs": [
+   {
+    "id": "rjob_f0568bb1be68",
+    "task": "probe",
+    "status": "succeeded",
+    "attempts": 1,
+    "provider": "kaggle",
+    "created": 1794507723.8742146,
+    "started": 1794507728.8690467,
+    "finished": 1794507765.3442712,
+    "accelerator": "Tesla T4 x2",
+    "duration_s": 3.123,
+    "artifacts": [
+     {
+      "name": "probe.json",
+      "size": 1068,
+      "sha256": "cc80a100d70dc585f7781e8cb4354d5f8274322e332fb73fc638298e9658e23b"
+     }
+    ],
+    "events": [
+     "job.submitted",
+     "job.submitted",
+     "job.dispatched",
+     "job.progress",
+     "provider.health",
+     "job.succeeded"
+    ]
+   },
+   {
+    "id": "rjob_071f23c81da0",
+    "task": "probe",
+    "status": "succeeded",
+    "attempts": 1,
+    "provider": "kaggle",
+    "created": 1794507861.3317611,
+    "started": 1794507863.7235308,
+    "finished": 1794507899.313092,
+    "accelerator": "Tesla T4 x2",
+    "duration_s": 2.784,
+    "artifacts": [
+     {
+      "name": "probe.json",
+      "size": 1069,
+      "sha256": "564567a1ad1b5e19579ea1f0bee9cd11440c004bd37996ff65a05887357a3c74"
+     }
+    ],
+    "events": [
+     "job.submitted",
+     "job.submitted",
+     "job.dispatched",
+     "job.progress",
+     "provider.health",
+     "job.succeeded"
+    ]
+   }
+  ]
+ }
+}

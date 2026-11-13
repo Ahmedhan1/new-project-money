@@ -42,6 +42,26 @@ MIGRATIONS: list[list[str]] = [
         "ALTER TABLE jobs ADD COLUMN recovery TEXT",
         "CREATE INDEX IF NOT EXISTS jobs_status ON jobs(status, created)",
     ],
+    [  # 2: Account 1 cloud platform (remote jobs, checkpoints, events, notifications, artifacts, transfers, scheduler)
+        "CREATE TABLE IF NOT EXISTS cloud_connections(id TEXT PRIMARY KEY, provider TEXT, label TEXT, status TEXT, identity TEXT,"
+        " scopes TEXT, created REAL, updated REAL, last_success REAL, last_error TEXT, data TEXT)",
+        "CREATE TABLE IF NOT EXISTS remote_jobs(id TEXT PRIMARY KEY, task TEXT, owner_account TEXT, project_id TEXT, status TEXT,"
+        " priority INTEGER, provider TEXT, connection_id TEXT, remote_ref TEXT, attempts INTEGER DEFAULT 0, max_retries INTEGER,"
+        " manifest TEXT, result TEXT, error TEXT, created REAL, started REAL, finished REAL, heartbeat REAL, idempotency_key TEXT,"
+        " cancel_requested INTEGER DEFAULT 0)",
+        "CREATE UNIQUE INDEX IF NOT EXISTS remote_jobs_idem ON remote_jobs(idempotency_key) WHERE idempotency_key IS NOT NULL",
+        "CREATE TABLE IF NOT EXISTS remote_checkpoints(job_id TEXT, seq INTEGER, step TEXT, data TEXT, created REAL, PRIMARY KEY(job_id, seq))",
+        "CREATE TABLE IF NOT EXISTS cloud_events(id TEXT PRIMARY KEY, job_id TEXT, type TEXT, message TEXT, data TEXT, at REAL)",
+        "CREATE INDEX IF NOT EXISTS cloud_events_at ON cloud_events(at)",
+        "CREATE TABLE IF NOT EXISTS notifications(id TEXT PRIMARY KEY, level TEXT, title TEXT, body TEXT, source_event TEXT,"
+        " read INTEGER DEFAULT 0, at REAL)",
+        "CREATE TABLE IF NOT EXISTS artifacts(id TEXT PRIMARY KEY, kind TEXT, name TEXT, sha256 TEXT, size INTEGER, project_id TEXT,"
+        " job_id TEXT, manifest TEXT, created REAL)",
+        "CREATE INDEX IF NOT EXISTS artifacts_sha ON artifacts(sha256)",
+        "CREATE TABLE IF NOT EXISTS transfers(id TEXT PRIMARY KEY, connection_id TEXT, direction TEXT, local_path TEXT, remote_ref TEXT,"
+        " session_uri TEXT, size INTEGER, sent INTEGER DEFAULT 0, sha256 TEXT, status TEXT, error TEXT, created REAL, updated REAL)",
+        "CREATE TABLE IF NOT EXISTS scheduler_state(id TEXT PRIMARY KEY, data TEXT, updated REAL)",
+    ],
 ]
 
 

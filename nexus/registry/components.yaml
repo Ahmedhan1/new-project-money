@@ -199,6 +199,21 @@ components:
     hardware: none
     network_hosts: [images-api.nasa.gov, images-assets.nasa.gov]
     status: deployed
+  - id: wikidata
+    name: Wikidata Action API (wbsearchentities / wbgetentities; place-name -> country fallback)
+    kind: service
+    capability: [research, place-resolution]
+    source_url: https://www.wikidata.org/w/api.php
+    license: "structured data CC0 1.0 (Wikidata); no text copied"
+    free_tier: "free, no key, no account"
+    quotas: "unpublished; Wikimedia robot policy: descriptive User-Agent with contact, serial requests, honour 429 and Retry-After; results cached in NEXUS_HOME/cache"
+    commercial_use: "yes (CC0 data)"
+    usage_restrictions: "no bulk crawling; use the dumps for bulk; a generic User-Agent gets HTTP 429"
+    data_retention: "place names queried are sent to Wikimedia"
+    availability: "remote; visual-context check treats an unresolved place as unknown"
+    hardware: none
+    network_hosts: [www.wikidata.org]
+    status: adapter
   - id: rnnoise-models
     name: RNNoise models for FFmpeg arnndn (GregorR/rnnoise-models, 'somnolent-hogwash')
     kind: model
@@ -336,6 +351,23 @@ components:
     availability: "remote, best effort"
     hardware: "typically T4 x2 / P100 16 GB VRAM, ~30 GB RAM"
     network_hosts: [www.kaggle.com]
+    status: adapter
+  - id: google-drive
+    name: Google Drive API v3 (owner's own accounts drive_a/b/c, OAuth scope drive.file)
+    kind: storage
+    capability: [cloud-storage, resumable-upload]
+    source_url: https://developers.google.com/workspace/drive/api
+    license: "Google APIs Terms of Service; files remain the owner's"
+    free_tier: "15 GB per Google account shared with Gmail/Photos; API use free within quotas (no card)"
+    account_required: true
+    payment_method_required: false
+    quotas: "per-project request quotas; storage per account. Google announced Drive API charges only above very high request volumes later in 2026 (re-check before relying on it). Never rotate accounts to get around limits."
+    commercial_use: "owner's own files"
+    usage_restrictions: "minimum scope drive.file; refresh tokens encrypted server-side; disconnect revokes"
+    data_retention: "files live in the owner's Drive; NEXUS keeps only encrypted tokens and manifests"
+    availability: "remote; needs the owner's OAuth client + consent"
+    hardware: none
+    network_hosts: [accounts.google.com, oauth2.googleapis.com, www.googleapis.com]
     status: adapter
   - id: colab-free
     name: Google Colab free tier (manual hand-off only)

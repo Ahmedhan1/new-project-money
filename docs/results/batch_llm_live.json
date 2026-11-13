@@ -1,0 +1,200 @@
+{
+ "captured_at": "2026-11-13T07:21:25Z",
+ "kind": "LIVE (real Kaggle GPU, real model)",
+ "job_id": "rjob_877fa89eb0ac",
+ "status": "succeeded",
+ "error": null,
+ "provider": "kaggle",
+ "accelerator": "Tesla T4 x2",
+ "duration_s": 44.687,
+ "attempts": [
+  {
+   "attempt": 1,
+   "provider": "kaggle",
+   "ref": "<kaggle-user>/nexus-rjob-877fa89eb0ac",
+   "remote_state": "complete",
+   "wall_s": 80.0,
+   "outcome": "succeeded",
+   "duration_s": 44.687,
+   "accelerator": "Tesla T4 x2",
+   "error": null,
+   "artifacts": [
+    "batch_llm_part_0000.a1.jsonl",
+    "batch_llm_part_0001.a1.jsonl",
+    "batch_llm_summary.json"
+   ],
+   "checkpoints_new": [
+    1,
+    2
+   ],
+   "metrics": {
+    "gpu_util_mean": 1.3,
+    "gpu_util_max": 25.0,
+    "gpu_mem_used_max_mb": 909.0,
+    "peak_vram_allocated_mb": 765.9,
+    "cpu_percent_mean": 21.0,
+    "input_bytes": 0,
+    "output_bytes": 2870,
+    "task_s": 44.687,
+    "parts_run_this_attempt": [
+     0,
+     1
+    ],
+    "parts_skipped": [],
+    "items_ok": 8,
+    "items_error": 0,
+    "completion_tokens_per_s": 22.54,
+    "model_load_s": 37.96
+   }
+  }
+ ],
+ "postprocess": {
+  "join": "ok",
+  "artifact": "art_b736538767bd",
+  "sha256": "b566e7ce8f4dd407aace22e2ba34926ea84efd5ea54c71ee284b979563714783",
+  "items": 8,
+  "items_error": 0,
+  "parts": 2
+ },
+ "model": "Qwen/Qwen2.5-0.5B-Instruct",
+ "licence": "Apache-2.0",
+ "metrics": {
+  "batch_llm": {
+   "model": "Qwen/Qwen2.5-0.5B-Instruct",
+   "engine": "transformers",
+   "simulated": false,
+   "items_total": 8,
+   "parts_total": 2
+  },
+  "items_ok": 8,
+  "items_error": 0,
+  "completion_tokens": 115,
+  "completion_tokens_per_s": 22.54,
+  "model_load_s": 37.96,
+  "model_download_bytes": 988097824,
+  "model_weight_bytes": 988097824,
+  "peak_vram_allocated_mb": 765.9,
+  "gpu_util_max": 25.0,
+  "task_s": 44.687
+ },
+ "artifacts": [
+  {
+   "name": "batch_llm_part_0000.a1.jsonl",
+   "size": 926,
+   "sha256": "c61e017ac6f1f9631298323e6927761edd649d10501fb98ebb403d5cb7c996b1"
+  },
+  {
+   "name": "batch_llm_part_0001.a1.jsonl",
+   "size": 912,
+   "sha256": "fe11ae563161dfd47d82fb5bdde24ab1043aa29bcbf41afc591c471a80d29e2c"
+  },
+  {
+   "name": "batch_llm_summary.json",
+   "size": 1032,
+   "sha256": "5622e8b1d33cd3328e4e852544cae075bbc698c0e45ff1eb77ba1cac93da2cfb"
+  },
+  {
+   "name": "batch_llm_results.jsonl",
+   "size": 1838,
+   "sha256": "b566e7ce8f4dd407aace22e2ba34926ea84efd5ea54c71ee284b979563714783"
+  }
+ ],
+ "answers": [
+  {
+   "id": "sum1",
+   "task": "summarization",
+   "text": "The Kaggle notebook ran a batch of prompts on a T4 GPU, wrote the answers to a file, but then exited without completing its tasks.",
+   "usage": {
+    "prompt_tokens": 46,
+    "completion_tokens": 30
+   },
+   "finish_reason": "stop",
+   "latency_s": 0.9212,
+   "error": null
+  },
+  {
+   "id": "tr_ar",
+   "task": "translation",
+   "text": "الفيديو متوفر للنقاش.",
+   "usage": {
+    "prompt_tokens": 29,
+    "completion_tokens": 8
+   },
+   "finish_reason": "stop",
+   "latency_s": 0.9212,
+   "error": null
+  },
+  {
+   "id": "tr_fr",
+   "task": "translation",
+   "text": "Faites uploader le fichier avant jeudi.",
+   "usage": {
+    "prompt_tokens": 28,
+    "completion_tokens": 10
+   },
+   "finish_reason": "stop",
+   "latency_s": 0.9212,
+   "error": null
+  },
+  {
+   "id": "json1",
+   "task": "data_extraction",
+   "text": "[{\"city\": \"Lyon\", \"year\": 2019}]",
+   "usage": {
+    "prompt_tokens": 43,
+    "completion_tokens": 17
+   },
+   "finish_reason": "stop",
+   "latency_s": 0.9212,
+   "error": null
+  },
+  {
+   "id": "title1",
+   "task": "title_generation",
+   "text": "\"Discovering the Sun's Path: How Bees Navigate Using It\"",
+   "usage": {
+    "prompt_tokens": 29,
+    "completion_tokens": 15
+   },
+   "finish_reason": "stop",
+   "latency_s": 0.3544,
+   "error": null
+  },
+  {
+   "id": "math1",
+   "task": "general",
+   "text": "391",
+   "usage": {
+    "prompt_tokens": 29,
+    "completion_tokens": 3
+   },
+   "finish_reason": "stop",
+   "latency_s": 0.3544,
+   "error": null
+  },
+  {
+   "id": "class1",
+   "task": "audience_classification",
+   "text": "adults",
+   "usage": {
+    "prompt_tokens": 37,
+    "completion_tokens": 2
+   },
+   "finish_reason": "stop",
+   "latency_s": 0.3544,
+   "error": null
+  },
+  {
+   "id": "hook1",
+   "task": "hook_generation",
+   "text": "\"Exploring the mysteries of the universe, we find that the sky is indeed blue because it reflects sunlight, which contains all colors of the rainbow.\"",
+   "usage": {
+    "prompt_tokens": 30,
+    "completion_tokens": 30
+   },
+   "finish_reason": "stop",
+   "latency_s": 0.3544,
+   "error": null
+  }
+ ]
+}

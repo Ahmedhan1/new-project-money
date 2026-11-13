@@ -625,3 +625,68 @@ tasks:
     status: tested
     test: "pytest tests/fast/test_intel_ledger.py"
     next: "ANA-1 / PUB-1: owner OAuth client -> first private upload -> first real analytics import."
+  # ------------------------------------------------------------------ Account 1: cloud platform (work/account-1-cloud-platform, PR #4)
+  - id: ACC1-COMPUTE
+    priority: 1
+    title: "Remote GPU compute: Kaggle provider (one account), dispatcher, checkpoints/resume, pull workers"
+    status: verified
+    acceptance: "A real GPU job completes on Kaggle and its artifact checksum is verified; worker loss and control-plane crash both resume."
+    test: "pytest tests/fast/test_cloud_compute.py; NEXUS_LIVE=1 tests/live/test_kaggle_live.py"
+    evidence: "docs/results/account1/kaggle_probe.json, kaggle_transcode.json, kaggle_resume.json, lead_demos.json"
+    next: "Kaggle: CLOSED, accepted as-is by the owner. Optional, owner-side: attach a real owner-GPU / Colab pull worker. A real quota-exhaustion message is observed only if it happens naturally (never forced)."
+  - id: ACC1-STORAGE
+    priority: 1
+    title: "Multi-account storage (Drive A/B/C), resumable transfers, SSRF-safe ingestion"
+    status: verified
+    acceptance: "Three real Drive accounts connected, upload/checksum/quota verified (Demo B)."
+    test: "pytest tests/fast/test_cloud_storage.py tests/fast/test_ingest.py; NEXUS_LIVE_DRIVE=1 tests/live/test_drive_live.py"
+    evidence: "storage_drive_live.json, storage_drive_live_isolation.json (3 real accounts); Demo E Drive A -> Kaggle T4 -> Drive B (lead_demos.json); ingest_live.json"
+    next: "Owner publishes the OAuth consent screen (Testing-mode tokens expire in 7 days). Not yet live: token revocation, Drive backup/restore run."
+  - id: ACC1-STUDIO
+    priority: 1
+    title: "NEXUS Remote Studio + scheduler"
+    status: verified
+    acceptance: "Every control performs a real operation; scheduler runs a real daily target with pause/resume and quota pause."
+    test: "pytest tests/fast/test_scheduler.py tests/fast/test_studio_api.py tests/e2e/test_studio_browser.py"
+    evidence: "studio_*.png, studio_e2e.json, lead_demos.json demo_F_scheduler"
+    next: "Permanent host (owner decision); account-connection flows against real Drive."
+  - id: ACC1-SECURITY
+    priority: 1
+    title: "Vault, owner auth, CSRF, headers, audit, worker tokens, route-auth inventory, threat model"
+    status: verified
+    acceptance: "No secrets in Git; every /api/v1 route authenticated; recovery checks pass."
+    test: "pytest tests/fast/test_cloud_security.py tests/fast/test_production.py tests/fast/test_no_secrets.py tests/fast/test_contracts.py"
+    evidence: "docs/ACCOUNT1_SECURITY_MODEL.md, security_recovery.json (7/7), security_scan.json"
+    next: "Owner: offline vault-key backup (python -m nexus vault-key export/verify, docs/ACCOUNT1_DISASTER_RECOVERY.md section 2). KAGGLE: CLOSED - ACCEPTED AS-IS BY OWNER (residual exposure recorded in ACCOUNT1_SECURITY_MODEL.md section 8). Risk register re-audited in section 7."
+  - id: ACC1-PRODUCTION
+    priority: 1
+    title: "Production profile: startup gates, readiness, single instance, graceful shutdown, limits, vault DR, alerts, runbooks"
+    status: verified
+    acceptance: "NEXUS_ENV=production refuses to start on any failing gate and serves with all gates passing; backups carry vault ciphertext but never the key; restore validates the vault; alerts cover backup/auth/disk/restart."
+    test: "pytest tests/fast/test_production.py tests/fast/test_storage_backup.py"
+    evidence: "docs/ACCOUNT1_PRODUCTION_DEPLOYMENT.md, docs/ACCOUNT1_DISASTER_RECOVERY.md, docs/ACCOUNT1_OAUTH_PRODUCTION_CHECKLIST.md, docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md"
+    next: "Owner: approve a host, inject secrets, offline vault-key backup, publish OAuth consent, run production-check and one backup/restore drill on the host."
+  - id: ACC1-HOSTING
+    priority: 2
+    title: "Deploy the control plane on an owner-approved zero-cost host"
+    status: blocked
+    blocked_by: "Owner decision (host and exposure need explicit approval; no public deployment without it)."
+    acceptance: "python -m nexus production-check prints READY on the host; /api/v1/health/ready 200 through the reverse proxy; no billing enabled."
+    test: "Demo A on the chosen host; docs/ACCOUNT1_PRODUCTION_DEPLOYMENT.md section 9."
+    next: "Owner approves the target (recommended: owner machine + Tailscale Serve, private); then follow docs/ACCOUNT1_PRODUCTION_DEPLOYMENT.md section 4."
+  - id: ACC1-BATCH-LLM
+    priority: 1
+    title: "batch_llm worker task for Account 3 (bounded batch inference on the Kaggle GPU, no serving endpoint)"
+    status: verified
+    acceptance: "A real HF model answers a JSONL of prompts on Kaggle; parts checksum-verified and joined; resumes from checkpoints; never routed to the owner's PC."
+    test: "pytest tests/fast/test_cloud_batch_llm.py; python scripts/acceptance/batch_llm_live.py"
+    evidence: "docs/results/batch_llm_live.json (Qwen2.5-0.5B-Instruct, Tesla T4 x2, 8/8 items, job rjob_877fa89eb0ac)"
+    next: "Account 3 switches bench_v2.account1_manifest to this params schema (model, items JSONL) and adds its batch provider."
+  - id: ACC1-INTEGRATION
+    priority: 1
+    title: "Three-account shared-contracts integration (nexus/contracts/{cloud,media}.py + shared __init__)"
+    status: blocked
+    blocked_by: "Account 3: bench_v2.account1_manifest at fd71471 still sends params.models / items as a count / runtime ollama (incompatible with batch_llm). Owner: merge approval and order. (Account 2: no open item.)"
+    acceptance: "A1 -> A2 -> A3 merge at exact heads + apply.sh: full fast suite green with CI's dependency set."
+    test: "see docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md section 7"
+    next: "Rerun the integration at the newest exact heads after Account 3's manifest fix; owner approves the merge order. Latest run: docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md section 7."

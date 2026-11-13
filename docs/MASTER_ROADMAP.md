@@ -177,3 +177,9 @@ open-weight benchmark on Kaggle with task routing and mandatory human review for
 Next, in order: (1) owner OAuth → first private upload + analytics import; (2) owner approves the merge order
 A1 → A2 → A3 → contracts restructure; (3) Account 1 `batch_llm`; (4) larger benchmark item set and the Nemotron/Qwen
 re-run; (5) native reviewers for ar-EG/ar-Gulf/hi/zh; (6) asset ranking by subject (A2-2).
+## 10. Three-account program (from 2026-11-12)
+Account 1 (cloud platform: remote compute, multi-account storage, ingestion, scheduler, Remote Studio, security) is on
+`work/account-1-cloud-platform` (PR #4). Accounts 2 (editing/rendering/video generation) and 3 (research, translation,
+localization, publishing, analytics, AI providers) start from that branch and integrate through the v1 contracts:
+`docs/ACCOUNT1_HANDOFF_TO_ACCOUNT2.md`. Remaining Account 1 items need the owner: Drive OAuth client + consent (Demo B/E),
+a permanent host (ACC1-HOSTING). Kaggle is closed (accepted as-is by the owner).
