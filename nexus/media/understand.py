@@ -38,7 +38,7 @@ CONCLUDERS = ("that's why", "that is why", "which means", "the point", "in short
 NUMBER_RE = re.compile(r"\d|\b(one|two|three|four|five|six|seven|eight|nine|ten|twenty|hundred|thousand|million|billion|"
                        r"percent|half|double|triple)\b", re.I)
 TERMINAL = (".", "!", "?", "…")
-VERSION = 2  # of the understanding layer; 2 = word-level speaker turn repair (K-17)
+VERSION = 3  # of the understanding layer; 2 = word-level speaker turn repair (K-17); 3 = prompts on role-less labels
 
 
 # ---------------------------------------------------------------- text helpers
@@ -316,11 +316,33 @@ def self_contained(s: dict) -> bool:
         return False  # starts mid-sentence: the transcript split a sentence across segments
     if s.get("prompt_like"):
         return False
-    if toks[0] in BACKREF or toks[0] in PRONOUN or toks[0] in FILLERS_HARD:
+    if toks[0] in BACKREF or toks[0] in PRONOUN or toks[0] in FILLERS_HARD or toks[0] in CONTEXT_OPENERS:
         return False
+    if {"another", "other"} & set(toks[1:3]):
+        return False  # "There's another class ...": the first one was named earlier
+    if re.match(r"^(over|about|around|nearly|almost|some) [\d,. ]+ (are|were|of)\b", s["text"].lower()):
+        return False  # "Over 1,500 are ..." - a count of something named earlier
     if re.search(r"\b(as i (said|mentioned)|like i said|as we saw|above|below|earlier|that one|this one)\b", s["text"], re.I):
         return False
     return True
+
+
+CONTEXT_OPENERS = {"another", "both", "other", "others", "also", "too", "such", "these", "those", "here", "here's", "she", "he",
+                   "him", "her", "his", "hers", "we've", "yes", "no", "yeah", "exactly", "absolutely", "right"}
+
+
+def good_ending(s: dict) -> bool:
+    """A sentence a programme can end on: finished (terminal mark, not a question), starts like a sentence (not a
+    lower-case fragment), at least five words, not an interviewer prompt and not a pleasantry."""
+    t = s["text"].strip()
+    first = t.lstrip("\"'([ ")[:1]
+    toks = tokens(t)
+    trailing = bool(toks) and toks[0] in FRAGMENT_STARTS and len(toks) <= 12  # "With different forms of what is a mission."
+    return (bool(s.get("terminal")) and not t.endswith("?") and len(toks) >= 5 and not (first.isalpha() and first.islower())
+            and not s.get("prompt_like") and substance(t)[0] >= 1.0 and not trailing)
+
+
+FRAGMENT_STARTS = {"with", "of", "for", "from", "in", "on", "at", "by", "about", "to", "into", "like", "than", "as"}
 
 
 def depends_on_previous(s: dict) -> bool:
@@ -341,6 +363,7 @@ def score_sentences(sents: list[dict], fill: list[dict] | None = None) -> None:
         raw.append(sum(math.log1p(tf[w]) * math.log1p(len(docs) / df[w]) for w in set(d)) / max(1, len(set(d))) if d else 0.0)
     top = max(raw or [1.0]) or 1.0
     labelled = any(s.get("speaker") for s in sents)
+    has_host = any(s.get("speaker") == "interviewer" for s in sents)
     dialogue = (not labelled) and dialogue_like(sents)
     for s, r in zip(sents, raw):
         n = max(1, len(s["words"]))
@@ -349,8 +372,10 @@ def score_sentences(sents: list[dict], fill: list[dict] | None = None) -> None:
         # Without speaker labels: a line addressed to someone else (second person, no first person) is most likely the
         # interviewer's/host's prompt, and a concrete first-person line is most likely the guest's own account.
         question = s["text"].rstrip().endswith("?")
-        if labelled:  # real speaker labels (media/diarize.py): the interviewer's lines are the prompts
+        if labelled and has_host:  # real speaker labels with roles (media/diarize.py): the interviewer's lines are the prompts
             s["prompt_like"] = s.get("speaker") == "interviewer"
+        elif labelled:  # labels without roles (panel S1/S2/S3): a question put to someone else is the moderator's prompt
+            s["prompt_like"] = question and bool(SECOND_PERSON & toks)
         else:
             s["prompt_like"] = bool(SELF_INTRO_RE.search(s["text"])) or (
                 dialogue and bool(SECOND_PERSON & toks) and (question or not (FIRST_PERSON & toks)))

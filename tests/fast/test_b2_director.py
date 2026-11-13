@@ -66,3 +66,14 @@ def test_multi_speaker_panel_keeps_answers_and_drops_host_prompts():
     assert {"S1", "S2"} <= set(spk)
     kept = " ".join(d["text"] for d in p["decisions"] if d["action"] == "keep" and d["kind"] == "sentence")
     assert "Welcome back" not in kept
+
+
+def test_programme_never_ends_on_a_question_or_trailing_fragment():
+    an = _analysis([(0.5, SOLAR + " " + BREAD + " What do you think about that? With different forms of bread.")])
+    p = director.plan({"talk.mp4": an}, {"profile": "podcast_edit"})
+    last = [it for it in p["items"] if it["kind"] == "piece"][-1]
+    tail = " ".join(w["word"] for w in last["words"])
+    assert tail.endswith("wheat.") and "?" not in tail
+    assert not und.good_ending({"text": "With different forms of bread.", "terminal": True})
+    assert not und.self_contained({"text": "There's another class called UVC that we measure.", "terminal": True})
+    assert und.self_contained({"text": "Solar panels convert sunlight into electricity.", "terminal": True})

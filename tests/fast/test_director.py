@@ -93,11 +93,18 @@ def test_rhetorical_question_in_a_monologue_stays_a_strong_hook():
 
 
 def test_speaker_labels_switch_off_the_prompt_heuristic():
-    segs, _ = _segments(0.5, "What can you tell us about your training?", speaker="host")
-    an = {"probe": {"duration": 10}, "transcript": {"segments": segs}, "silences": []}
-    sents = u.sentences(an)
+    # labels WITH roles: only the interviewer's lines are prompts; a guest's question is not
+    segs, _ = _segments(0.5, "What can you tell us about your training?", speaker="guest")
+    s2, _ = _segments(9.0, "Thanks for asking about the program.", speaker="interviewer")
+    sents = u.sentences({"probe": {"duration": 20}, "transcript": {"segments": segs + s2}, "silences": []})
     u.score_sentences(sents)
-    assert sents[0]["prompt_like"] is False and sents[0]["speaker"] == "host"
+    assert sents[0]["prompt_like"] is False and sents[0]["speaker"] == "guest" and sents[1]["prompt_like"] is True
+    # labels WITHOUT roles (a panel S1/S2/S3): a question put to "you" is the moderator's prompt, a statement is not
+    segs, _ = _segments(0.5, "What can you tell us about your training?", speaker="S1")
+    s2, _ = _segments(5.0, "You learn to trust the people on your crew every single day.", speaker="S2")
+    sents = u.sentences({"probe": {"duration": 20}, "transcript": {"segments": segs + s2}, "silences": []})
+    u.score_sentences(sents)
+    assert sents[0]["prompt_like"] is True and sents[1]["prompt_like"] is False
 
 
 def test_topic_segmentation_splits_two_topics_and_search_finds_them():

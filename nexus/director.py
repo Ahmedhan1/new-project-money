@@ -403,8 +403,65 @@ def _pieces(t: dict, S: dict, prof: dict, fill_keys: set, decisions: list) -> li
     return pieces
 
 
-LEAD_TRIM = {"yes", "yeah", "no", "well", "so", "okay", "ok", "and", "but", "um", "uh", "oh", "right", "alright", "now",
+LEAD_TRIM = {"yes", "yeah", "no", "well", "so", "okay", "ok", "and", "but", "um", "uh", "oh", "right", "alright", "now", "actually",
              "anyway", "also", "because", "exactly", "absolutely", "sure"}
+
+
+def _coherent_ends(selected: list[dict], pieces: dict, decisions: list, lifted: bool) -> None:
+    """Opening and ending checks on the selected programme (in place):
+    - the first thought must stand alone; otherwise the first one among the next three that does is moved to the front
+      (a pronoun, "another", "both" or a bare count at the very start refers to something the viewer never saw);
+    - the last thought must end on a finished statement (und.good_ending): trailing questions and fragments are dropped,
+      never more than three thoughts, and never the only one."""
+    if not selected:
+        return
+    first = selected[0]
+
+    def stands(sent: dict) -> bool:  # judged after _clean_open's lead-word trim ("Yes, solar panels ..." -> "solar panels ...")
+        ws = sent["text"].split()
+        while len(ws) > 4 and re.sub(r"[^\w']", "", ws[0].lower()) in LEAD_TRIM:
+            ws = ws[1:]
+        txt = " ".join(ws)
+        return und.self_contained({**sent, "text": txt[:1].upper() + txt[1:]})
+    if not lifted and not stands(first["sents"][0]) and not first.get("forced_open"):
+        alt = next((t for t in selected[1:4] if stands(t["sents"][0])), None)
+        if alt is not None:
+            selected.remove(alt)
+            selected.insert(0, alt)
+            _dec(decisions, alt["src"], alt["start"], alt["end"], "lift", "opening",
+                 f"moved to the opening: the planned first line (\"{first['sents'][0]['text'][:50]}\") leans on context the "
+                 "viewer has not seen; this line stands alone", 1.0, confidence=0.6)
+        else:
+            _dec(decisions, first["src"], first["start"], first["end"], "note", "opening",
+                 "the opening line leans on earlier context and no nearby line stands alone: review the opening", 0.0,
+                 confidence=0.3)
+    for _ in range(3):
+        last = selected[-1]
+        if len(selected) < 2 or any(p.startswith("manual") for p in last["protected"]):
+            break
+        tail = [s for s in last["sents"]]
+        if und.good_ending(tail[-1]):
+            break
+        good = [k for k, s in enumerate(tail) if und.good_ending(s)]
+        if good and pieces.get(last["id"]):  # cut the thought after its last finished statement
+            cut_at = tail[good[-1]]["end"]
+            keep = [p for p in pieces[last["id"]] if p["first"] < cut_at]
+            if keep:
+                keep[-1]["words"] = [w for w in keep[-1]["words"] if w["end"] <= cut_at + 1e-6]
+                keep[-1]["last"] = keep[-1]["words"][-1]["end"]
+                keep[-1]["hi"] = min(keep[-1]["hi"], keep[-1]["last"] + 0.6)
+                keep[-1]["out"] = min(keep[-1]["out"], keep[-1]["last"] + PAD_OUT)
+                pieces[last["id"]] = keep
+                for s in tail[good[-1] + 1:]:
+                    _dec(decisions, last["src"], s["start"], s["end"], "drop", "ending",
+                         f"the programme would end on an unfinished line or a question (\"{s['text'][:60]}\")", 0.0,
+                         confidence=0.7, text=s["text"])
+                break
+        selected.remove(last)
+        for s in tail:
+            _dec(decisions, last["src"], s["start"], s["end"], "drop", "ending",
+                 "dropped from the end: the programme would end on an unfinished line or a question", 0.0, confidence=0.7,
+                 text=s["text"])
 
 
 def _clean_open(piece: dict, decisions: list) -> None:
@@ -652,7 +709,7 @@ def plan(analysis_by_src: dict, brief: dict | None = None) -> dict:
         if order and order[0] is hook:
             _dec(decisions, hook["src"], hook["start"], hook["end"], "note", "opening",
                  "the strongest self-contained line already opens the programme", hook["sents"][0].get("hook", 0))
-        elif hook.get("forced_open") or (hook["sents"][0].get("self_contained") and len(hook["sents"]) <= 3
+        elif hook.get("forced_open") or (und.self_contained(hook["sents"][0]) and len(hook["sents"]) <= 3
                                           and "tangent" not in hook["roles"]):
             order.remove(hook)
             order.insert(0, hook)
@@ -727,6 +784,7 @@ def plan(analysis_by_src: dict, brief: dict | None = None) -> dict:
             _dec(decisions, t["src"], s["start"], s["end"], "keep", "sentence", "kept: " + ", ".join(why), s.get("score", 0),
                  text=s["text"], thought=t["id"], speaker=s.get("speaker"),
                  confidence=1.0 if any(p.startswith("manual") for p in t["protected"]) else CONFIDENCE["sentence"])
+    _coherent_ends(selected, pieces, decisions, lifted)
     if selected and pieces.get(selected[0]["id"]):
         _clean_open(pieces[selected[0]["id"]][0], decisions)
     items, est = _layout(selected, pieces, prof, cards, srcs)
