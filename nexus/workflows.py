@@ -416,3 +416,10 @@ def reference_(job: jobs.Job) -> dict:
 def visual_install(job: jobs.Job) -> dict:
     from .media import visual
     return job.stage("download", lambda: {"installed": visual.ensure_model(allow_download=True), **visual.info()})
+
+
+# Account 2 tasks on Account 1's remote workers (render steps on CPU workers, Wan video on GPU workers): registered
+# with Account 1's dispatcher when its package is installed; a no-op on a branch without it.
+from .timeline import remote_render as _remote_render  # noqa: E402
+
+_remote_render.register_account1_tasks()
