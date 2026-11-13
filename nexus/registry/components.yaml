@@ -167,7 +167,7 @@ components:
     data_retention: "query terms are sent to Wikimedia"
     availability: "remote; research falls back to user-supplied notes when unreachable"
     hardware: none
-    network_hosts: [en.wikipedia.org, ar.wikipedia.org, de.wikipedia.org]
+    network_hosts: [en.wikipedia.org, ar.wikipedia.org, de.wikipedia.org, fr.wikipedia.org, hi.wikipedia.org, zh.wikipedia.org, ru.wikipedia.org]
     status: deployed
   - id: openverse
     name: Openverse API (CC-licensed images/audio index)
@@ -274,6 +274,52 @@ components:
     hardware: none
     network_hosts: [commons.wikimedia.org, upload.wikimedia.org, thumb.wikimedia.org]
     status: deployed
+  - id: youtube-data-api
+    name: YouTube Data API v3 + YouTube Analytics API (owner's own Google Cloud project, free quota)
+    kind: platform-api
+    capability: [public-metadata, competition-research, private-upload, channel-analytics]
+    source_url: https://developers.google.com/youtube/v3/getting-started
+    license: "YouTube API Services Terms of Service"
+    free_tier: "default 10,000 quota units/day per project; no billing account needed for the default quota"
+    quotas: "10,000 units/day for most endpoints (videos.list = 1, thumbnails.set = 50); search.list and videos.insert have their own buckets of 100 calls/day (developers.google.com/youtube/v3/determine_quota_cost, read 2026-11-12); every call recorded"
+    account_required: true
+    commercial_use: "yes, under the YouTube API Services Terms"
+    usage_restrictions: "no downloading of video content; uploads from unverified API projects are locked to private until Google's audit"
+    data_retention: "requests go to Google under the owner's project"
+    availability: remote
+    hardware: none
+    network_hosts: [www.googleapis.com, youtubeanalytics.googleapis.com, youtube.googleapis.com, oauth2.googleapis.com]
+    status: adapter
+  - id: wikimedia-pageviews
+    name: Wikimedia Analytics API (Pageviews, AQS)
+    kind: service
+    capability: [demand-signal]
+    source_url: https://doc.wikimedia.org/generated-data-platform/aqs/analytics-api/reference/page-views.html
+    license: "data CC BY-SA 4.0 (per AQS docs), code MIT-0"
+    free_tier: "free, no key"
+    quotas: "unpublished; descriptive User-Agent, serial requests; 429 => back off"
+    commercial_use: "yes (aggregate statistics, attribution)"
+    usage_restrictions: "no bulk crawling"
+    data_retention: "article titles queried are sent to Wikimedia"
+    availability: "remote; falls back to prop=pageviews on the wiki host"
+    hardware: none
+    network_hosts: [wikimedia.org]
+    status: deployed
+  - id: gdelt-doc
+    name: GDELT DOC 2.0 API (news volume timeline)
+    kind: service
+    capability: [news-signal]
+    source_url: https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/
+    license: "GDELT open data; article text belongs to publishers (only counts/links used)"
+    free_tier: "free, no key"
+    quotas: "not published; NEXUS makes 1 call per topic"
+    commercial_use: "unverified - check https://www.gdeltproject.org/about.html#termsofuse"
+    usage_restrictions: "do not store article text"
+    data_retention: "query terms are sent to GDELT"
+    availability: "remote; freshness = unknown when unreachable"
+    hardware: none
+    network_hosts: [api.gdeltproject.org]
+    status: adapter
   - id: github-api
     name: GitHub REST API (public repository metadata)
     kind: service

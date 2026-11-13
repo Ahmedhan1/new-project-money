@@ -155,6 +155,28 @@ for fragments.
 6. **Real video generation** once a GPU is available: Wan 2.1 1.3B T2V first (Apache-2.0, ~8 GB VRAM), then Wan 2.2 5B
    TI2V for animating licensed stills; provenance kind `generated` only for those clips.
 
+
+## 10. Account 3 (intelligence & growth) — status and next steps
+Delivered on `work/account-3-intelligence-growth` (PR #5): see `docs/ACCOUNT3_EXECUTION_REPORT.md` (feature matrix + demos).
+Next, in order:
+1. Owner: Google Cloud project + OAuth client → first private upload (PUB-1) and analytics import (ANA-1); YouTube key for
+   competition signals.
+2. Heavy AI tasks above draft quality: Qwen3 thinking mode for heavy tasks, or Account 1 `batch_llm` on the Kaggle GPU,
+   or one authorised free tier (public data only).
+3. Gulf Arabic generation (K-15): dialect-capable model or human post-edit workflow; apply the localize.py patches in
+   `docs/ACCOUNT3_LANGUAGE_MATRIX.md` (digit groups, sentence truncation, ko/it packs).
+4. Account 2: accept an approved ContentScript verbatim; human review step for hook framing and visual suggestions.
+5. Owner-supplied references for challenge / Arabic educational / vlog formats; OCR + music detection for profiles.
+
+## 11. Account 3 V2 (2026-11-12) — done and next
+Done (tested, evidence in `docs/results/account3/`): visual context gate (geography, period, maps, emblems, subject),
+glyph-coverage fonts + OCR read-back, scene visual plan, factual framing gate, Strategy Handoff with verbatim script,
+shared contracts package (verified on a three-account merge), language readiness + terminology memory + native review,
+creator V2 (14 dimensions, blends), market V2 (credibility, cross-source, uncertainty), first-party analytics ledger,
+open-weight benchmark on Kaggle with task routing and mandatory human review for critical tasks.
+Next, in order: (1) owner OAuth → first private upload + analytics import; (2) owner approves the merge order
+A1 → A2 → A3 → contracts restructure; (3) Account 1 `batch_llm`; (4) larger benchmark item set and the Nemotron/Qwen
+re-run; (5) native reviewers for ar-EG/ar-Gulf/hi/zh; (6) asset ranking by subject (A2-2).
 ## 10. Three-account program (from 2026-11-12)
 Account 1 (cloud platform: remote compute, multi-account storage, ingestion, scheduler, Remote Studio, security) is on
 `work/account-1-cloud-platform` (PR #4). Accounts 2 (editing/rendering/video generation) and 3 (research, translation,

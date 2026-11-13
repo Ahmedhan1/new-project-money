@@ -1,0 +1,117 @@
+# Niche database for market intelligence (agent C). Owner-editable; custom niches: settings.json market.niches_file
+# (a YAML file with the same shape) or market.custom_niches inline. Rules here are editorial defaults, NOT platform
+# policy: monetisation notes are a checklist for a human, never a promise of revenue.
+#   seeds:       starting topics for the trend monitor watchlist
+#   categories:  English Wikipedia categories (existence checked by scripts/account3/market_demo.py, see results JSON)
+#   monetisation: tier = high|medium|low|restricted (editorial default) + sensitive keywords that lower suitability
+#   platform_fit: 0-1 editorial prior per format; preset: Account 2 production preset (registry/presets.yaml)
+version: 1
+default_sensitive: [war, terrorism, shooting, suicide, death toll, massacre, drugs, overdose, weapon, abuse, genocide, tragedy]
+niches:
+  science:
+    label: Science
+    seeds: [Black hole, CRISPR, James Webb Space Telescope, Quantum computing, Climate change]
+    categories: [Category:Science, Category:Physics, Category:Astronomy, Category:Biology]
+    monetisation: {tier: high, notes: "evergreen explainers; avoid medical advice claims"}
+    platform_fit: {youtube_long: 0.8, youtube_shorts: 0.6, tiktok: 0.5}
+    preset: scientific
+  technology:
+    label: Technology
+    seeds: [Large language model, Solid-state battery, RISC-V, Starlink, Fusion power]
+    categories: [Category:Technology, Category:Computing, Category:Artificial intelligence]
+    monetisation: {tier: high, notes: "fast-moving; date every claim"}
+    platform_fit: {youtube_long: 0.8, youtube_shorts: 0.7, tiktok: 0.6}
+    preset: educational
+  education:
+    label: Education
+    seeds: [Photosynthesis, Pythagorean theorem, Water cycle, Plate tectonics]
+    categories: [Category:Education, Category:Learning]
+    monetisation: {tier: medium, notes: "made-for-kids rules may apply if aimed at children - human decision"}
+    platform_fit: {youtube_long: 0.8, youtube_shorts: 0.6, tiktok: 0.5}
+    preset: educational
+  history:
+    label: History
+    seeds: [Library of Alexandria, Silk Road, Abbasid Caliphate, Byzantine Empire, Apollo 11]
+    categories: [Category:History, Category:Ancient history, Category:Middle Ages]
+    monetisation: {tier: medium, notes: "war topics are common - check sensitive keywords"}
+    platform_fit: {youtube_long: 0.9, youtube_shorts: 0.5, tiktok: 0.5}
+    preset: documentary
+  documentary:
+    label: Documentary
+    seeds: [Great Barrier Reef, Amazon rainforest, Antarctica, Deep sea]
+    categories: [Category:Documentary films, Category:Nature]
+    monetisation: {tier: medium, notes: ""}
+    platform_fit: {youtube_long: 0.9, youtube_shorts: 0.4, tiktok: 0.4}
+    preset: documentary
+  business:
+    label: Business
+    seeds: [Inflation, Supply chain, Central bank, Electric vehicle]
+    categories: [Category:Business, Category:Economics, Category:Finance]
+    monetisation: {tier: high, notes: "no investment advice; financial claims need 2 sources"}
+    platform_fit: {youtube_long: 0.8, youtube_shorts: 0.6, tiktok: 0.5}
+    preset: educational
+  lifestyle:
+    label: Lifestyle
+    seeds: [Minimalism, Intermittent fasting, Sleep hygiene, Home gardening]
+    categories: [Category:Lifestyle, Category:Health]
+    monetisation: {tier: medium, notes: "health claims: no medical advice"}
+    platform_fit: {youtube_long: 0.6, youtube_shorts: 0.8, tiktok: 0.8}
+    preset: storytelling
+  travel:
+    label: Travel
+    seeds: [Petra, Kyoto, Iceland, Marrakesh, Cappadocia]
+    categories: [Category:Tourism, Category:Tourist attractions]
+    monetisation: {tier: medium, notes: "user/CC footage needed - production cost is visual material"}
+    platform_fit: {youtube_long: 0.7, youtube_shorts: 0.8, tiktok: 0.8}
+    preset: cinematic
+  sports:
+    label: Sports
+    seeds: [FIFA World Cup, Olympic Games, Marathon, Formula One]
+    categories: [Category:Sports]
+    monetisation: {tier: medium, notes: "match footage is rights-protected: commentary/explainers with own visuals only"}
+    platform_fit: {youtube_long: 0.6, youtube_shorts: 0.8, tiktok: 0.8}
+    preset: news
+  entertainment:
+    label: Entertainment
+    seeds: [Film score, Animation, Video game music]
+    categories: [Category:Entertainment]
+    monetisation: {tier: medium, notes: "no film/TV clips without licence"}
+    platform_fit: {youtube_long: 0.6, youtube_shorts: 0.8, tiktok: 0.9}
+    preset: storytelling
+  human_stories:
+    label: Human stories
+    seeds: [Ibn Battuta, Marie Curie, Katherine Johnson, Alan Turing]
+    categories: [Category:Biographies, Category:People]
+    monetisation: {tier: medium, notes: "living people: privacy and defamation care, human review"}
+    platform_fit: {youtube_long: 0.8, youtube_shorts: 0.6, tiktok: 0.6}
+    preset: storytelling
+  productivity:
+    label: Productivity
+    seeds: [Pomodoro Technique, Getting Things Done, Deep work, Habit]
+    categories: [Category:Productivity, Category:Time management]
+    monetisation: {tier: high, notes: ""}
+    platform_fit: {youtube_long: 0.7, youtube_shorts: 0.8, tiktok: 0.7}
+    preset: educational
+  consumer_awareness:
+    label: Consumer awareness
+    seeds: [Planned obsolescence, Shrinkflation, Dark pattern, Right to repair]
+    categories: [Category:Consumer protection, Category:Consumer behaviour]
+    monetisation: {tier: medium, notes: "naming companies: facts with 2 sources, legal review for accusations"}
+    platform_fit: {youtube_long: 0.8, youtube_shorts: 0.7, tiktok: 0.7}
+    preset: news
+  product_reviews:
+    label: Product reviews
+    seeds: [E-reader, Mechanical keyboard, Air purifier]
+    categories: [Category:Consumer electronics, Category:Home appliances]
+    monetisation: {tier: high, notes: "disclose sponsorship/affiliate links per platform and local law; hands-on testing needed - research alone is not a review"}
+    platform_fit: {youtube_long: 0.8, youtube_shorts: 0.6, tiktok: 0.7}
+    preset: commercial
+  arabic_content:
+    label: Arabic-language content
+    language: ar
+    seeds: [الذكاء الاصطناعي, ابن الهيثم, البتراء, الخوارزمي, رمضان]
+    categories: [تصنيف:علوم, تصنيف:تاريخ, تصنيف:تقنية]
+    category_lang: ar
+    monetisation: {tier: medium, notes: "ad demand per language/region unknown here - no figures assumed"}
+    platform_fit: {youtube_long: 0.8, youtube_shorts: 0.7, tiktok: 0.7}
+    preset: educational

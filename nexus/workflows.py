@@ -13,7 +13,7 @@ def create_from_idea(job: jobs.Job) -> dict:
     p = job.params
     out = create.create_video(p["topic"], scenes=p.get("scenes", 5), lang=p.get("lang", "en"), notes=p.get("notes"),
                               size=tuple(p.get("size", (1280, 720))), name=p.get("name"), stage=job.stage, on_project=job.set_project,
-                              preset=p.get("preset"))
+                              preset=p.get("preset"), script=p.get("script"))
     return {"project": out["project"], "status": out["report"]["status"], "issues": out["report"]["known_issues"],
             "title": out["script"]["title"], "output": out["output"]}
 
@@ -319,3 +319,8 @@ def deliver_(job: jobs.Job) -> dict:
     return job.stage("render-check-package", lambda: publish.deliver(p, tl, a["platforms"], a.get("title") or p.name,
                                                                      a.get("description", ""), a.get("lang") or tl.get("lang", "en"),
                                                                      analysis_by_src=_analysis(p) or None))
+
+
+# Account 3 job kinds (registered by import): publish-upload
+from .intelligence.publishing import jobs_handler as _a3_publish  # noqa: E402,F401
+from .intelligence import workflows as _a3_workflows  # noqa: E402,F401

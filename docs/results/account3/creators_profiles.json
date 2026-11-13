@@ -1,0 +1,1926 @@
+{
+ "date": "2026-11-12",
+ "run": [
+  {
+   "nasa_id": "JPL-20260326-WHATSUf-0001-Whats_Up_April_2026",
+   "ok": true,
+   "bytes": 5812517,
+   "seconds": 198.4
+  },
+  {
+   "nasa_id": "iss061m2627771232_Live_Interviews_Jeanette_Epps_191004",
+   "ok": true,
+   "bytes": 49926173,
+   "seconds": 95.3
+  },
+  {
+   "nasa_id": "KSC-2021110-VP-MWC01-001 CREW3-HIGHLIGHTS-3288522",
+   "ok": true,
+   "bytes": 5949623,
+   "seconds": 14.0
+  },
+  {
+   "nasa_id": "Explore our Home Planet and the Universe With NASA Podcasts",
+   "ok": true,
+   "bytes": 2751434,
+   "seconds": 8.0
+  }
+ ],
+ "formats_not_covered": {
+  "challenge_high_stakes": "no public-domain/CC challenge-format video found on NASA/Commons; not attempted",
+  "arabic_edu_explainer": "no CC-licensed El Daheeh-style item found; the show itself is copyrighted (not downloaded)",
+  "travel_vlog": "not attempted in this run (Commons search not done; time budget)"
+ },
+ "profiles": [
+  {
+   "schema": "nexus.CreatorReferenceProfile/1",
+   "id": "crp_1e86bbb2e8",
+   "source": {
+    "kind": "local_file",
+    "path": "JPL-20260326-WHATSUf-0001-Whats_Up_April_2026.mp4",
+    "sha256": "2a71fa01c634ad35cbddf2268f2a252c39af303946e99d673798247fc7d18c9d",
+    "bytes": 5812517,
+    "rights": "licensed",
+    "licence_url": "https://www.jpl.nasa.gov/jpl-image-use-policy",
+    "origin_url": "https://images.nasa.gov/details/JPL-20260326-WHATSUf-0001-Whats_Up_April_2026",
+    "rendition": "~mobile.mp4 (publisher's smallest full-length rendition)"
+   },
+   "creator": "NASA/JPL-Caltech",
+   "category": "science_explainer",
+   "format": "science_documentary",
+   "duration_s": 137.867,
+   "hook": {
+    "measured": {
+     "first_3s": {
+      "cuts": 1,
+      "speech_onset_s": 0.033,
+      "words": 6,
+      "words_per_s": 2.0,
+      "questions": 0,
+      "question_words": 0,
+      "numbers": 0,
+      "stakes_words": 0,
+      "loudness_lufs": null,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     },
+     "first_5s": {
+      "cuts": 1,
+      "speech_onset_s": 0.033,
+      "words": 11,
+      "words_per_s": 2.2,
+      "questions": 0,
+      "question_words": 0,
+      "numbers": 0,
+      "stakes_words": 0,
+      "loudness_lufs": -15.07,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     },
+     "first_15s": {
+      "cuts": 2,
+      "speech_onset_s": 0.033,
+      "words": 35,
+      "words_per_s": 2.33,
+      "questions": 0,
+      "question_words": 0,
+      "numbers": 1,
+      "stakes_words": 0,
+      "loudness_lufs": -15.45,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     }
+    },
+    "loudness_jump_db": 0.34,
+    "type": {
+     "value": "specific_number",
+     "kind": "interpreted",
+     "confidence": 0.45,
+     "based_on": [
+      "opening.first_15s.numbers"
+     ],
+     "rule": "number spoken in the first 15 s"
+    }
+   },
+   "story": {
+    "pacing_shape": {
+     "value": "front_loaded",
+     "kind": "interpreted",
+     "confidence": 0.5,
+     "based_on": [
+      "pacing_curve"
+     ],
+     "rule": "mean cut rate of slices 0-30 % vs 30-70 % vs 70-100 % (30 % margin)"
+    },
+    "pacing_curve": [
+     {
+      "slice": "0-10%",
+      "start_s": 0.0,
+      "cuts": 1,
+      "cuts_per_min": 4.35
+     },
+     {
+      "slice": "10-20%",
+      "start_s": 13.787,
+      "cuts": 2,
+      "cuts_per_min": 8.7
+     },
+     {
+      "slice": "20-30%",
+      "start_s": 27.573,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "30-40%",
+      "start_s": 41.36,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "40-50%",
+      "start_s": 55.147,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "50-60%",
+      "start_s": 68.933,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "60-70%",
+      "start_s": 82.72,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "70-80%",
+      "start_s": 96.507,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "80-90%",
+      "start_s": 110.293,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "90-100%",
+      "start_s": 124.08,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     }
+    ],
+    "structure": "The video follows a traditional three-act structure, beginning with an introduction to the scientific concept, followed by a detailed explanation of the process, and concluding with a summary or application of the findings.",
+    "structure_kind": "interpreted_by_model",
+    "llm": {
+     "status": "ok",
+     "kind": "interpreted_by_model",
+     "provider": "local-llamacpp",
+     "model": "qwen3-4b-q4km",
+     "data": {
+      "story_structure": "The video follows a traditional three-act structure, beginning with an introduction to the scientific concept, followed by a detailed explanation of the process, and concluding with a summary or application of the findings.",
+      "hook_summary": "The video opens with a visually engaging scene that immediately introduces the topic, using dynamic visuals and a compelling narrative to hook the viewer.",
+      "techniques": [
+       "The use of a slow-motion shot lasting 113.934 seconds to emphasize a key moment in the explanation.",
+       "The transition between shots is carefully timed to maintain a steady pace, with some cuts as short as 2.267 seconds to create tension.",
+       "The pacing slows down significantly in the middle third of the video, with no cuts for 10 seconds, allowing for a detailed exposition.",
+       "The final segment uses a longer shot to wrap up the explanation and leave the viewer with a lasting impression."
+      ],
+      "caveats": [
+       "The video has an underexposed issue in the quality metrics, which may affect the visual clarity.",
+       "The lack of on-screen text due to no OCR model deployment limits the ability to verify the content against the captions.",
+       "The audio has a non-speech share upper bound of 0.092, indicating potential background noise or other non-speech sounds.",
+       "The video's pacing is inconsistent, with some sections being very slow and others more dynamic, which might confuse the viewer."
+      ]
+     },
+     "confidence": 0.35,
+     "note": "model reading of the measurements; not verified"
+    }
+   },
+   "editing": {
+    "cuts_per_min": 1.31,
+    "shots": 4,
+    "mean_shot_s": 34.467,
+    "median_shot_s": 10.833,
+    "longest_shot_s": 113.934,
+    "tempo": {
+     "value": "slow",
+     "kind": "interpreted",
+     "confidence": 0.7,
+     "based_on": [
+      "cuts_per_min"
+     ],
+     "rule": "NEXUS bands: >= 20.0 fast, <= 6.0 slow"
+    }
+   },
+   "visual": {
+    "w": 320,
+    "h": 180,
+    "fps": 15.0,
+    "quality": {
+     "sharpness": 1052.5,
+     "brightness": 35.3,
+     "issues": [
+      "underexposed"
+     ],
+     "method": "ffmpeg+numpy Laplacian variance at 256x144 grey (OpenCV not installed)"
+    },
+    "on_screen_text": "not_measured (no OCR model deployed)"
+   },
+   "audio": {
+    "has_audio": true,
+    "silence_share": 0.008,
+    "non_speech_audio_share_upper_bound": 0.092,
+    "integrated_lufs": -15.39,
+    "lra": 3.5,
+    "music_detection": "not_measured (no music classifier deployed; non-speech share is an upper bound)",
+    "speech_share": 0.899,
+    "wpm_speaking": 166.5,
+    "mode": {
+     "value": "speech_led",
+     "kind": "interpreted",
+     "confidence": 0.65,
+     "based_on": [
+      "speech.speech_share"
+     ],
+     "rule": "speech share >= 0.5"
+    }
+   },
+   "engagement": [
+    {
+     "text": "States specific numbers early",
+     "kind": "interpreted",
+     "based_on": [
+      "opening.first_15s.numbers"
+     ],
+     "confidence": 0.45
+    }
+   ],
+   "packaging": {
+    "title": {
+     "value": "What's Up: April 2026 Skywatching Tips from NASA",
+     "source": "owner_entered"
+    }
+   },
+   "strengths": [
+    {
+     "text": "Visual change within the first 3 s",
+     "kind": "interpreted",
+     "based_on": [
+      "opening.first_3s.cuts"
+     ],
+     "confidence": 0.6
+    },
+    {
+     "text": "Speech starts within the first second",
+     "kind": "interpreted",
+     "based_on": [
+      "opening.first_5s.speech_onset_s"
+     ],
+     "confidence": 0.6
+    }
+   ],
+   "weaknesses": [],
+   "techniques": [
+    {
+     "text": "slow edit tempo (1.31 cuts/min, median shot 10.833 s)",
+     "kind": "interpreted",
+     "based_on": [
+      "cuts_per_min",
+      "median_shot_s"
+     ],
+     "confidence": 0.7
+    },
+    {
+     "text": "pacing shape: front_loaded",
+     "kind": "interpreted",
+     "based_on": [
+      "pacing_curve"
+     ],
+     "confidence": 0.5
+    },
+    {
+     "text": "narration density 166.5 words per speaking minute",
+     "kind": "interpreted",
+     "based_on": [
+      "speech.wpm_speaking"
+     ],
+     "confidence": 0.7
+    }
+   ],
+   "confidence": 0.57,
+   "evidence": [
+    {
+     "source": "owner-stated rights: licensed",
+     "retrieved": "2026-11-12",
+     "url": "https://www.jpl.nasa.gov/jpl-image-use-policy",
+     "kind": "rights"
+    },
+    {
+     "source": "nexus.intelligence.creators.measure (ffmpeg scene/silence/loudness, faster-whisper word timings)",
+     "retrieved": "2026-11-12",
+     "kind": "measurement"
+    },
+    {
+     "source": "publisher licence terms",
+     "retrieved": "2026-11-12",
+     "url": "https://www.jpl.nasa.gov/jpl-image-use-policy",
+     "quote": "JPL images/video 'may be used for any purpose without prior permission' (special cases apply); credit 'Courtesy NASA/JPL-Caltech'.",
+     "kind": "licence"
+    },
+    {
+     "source": "item page + publisher metadata.json",
+     "retrieved": "2026-11-12",
+     "url": "https://images.nasa.gov/details/JPL-20260326-WHATSUf-0001-Whats_Up_April_2026",
+     "quote": "[\"NASA's Jet Propulsion Laboratory\"]",
+     "kind": "licence_check"
+    }
+   ],
+   "measured": {
+    "duration_s": 137.867,
+    "video": {
+     "w": 320,
+     "h": 180,
+     "fps": 15.0
+    },
+    "quality": {
+     "sharpness": 1052.5,
+     "brightness": 35.3,
+     "issues": [
+      "underexposed"
+     ],
+     "method": "ffmpeg+numpy Laplacian variance at 256x144 grey (OpenCV not installed)"
+    },
+    "shots": 4,
+    "cuts_per_min": 1.31,
+    "mean_shot_s": 34.467,
+    "median_shot_s": 10.833,
+    "shortest_shot_s": 2.267,
+    "longest_shot_s": 113.934,
+    "pacing_curve": [
+     {
+      "slice": "0-10%",
+      "start_s": 0.0,
+      "cuts": 1,
+      "cuts_per_min": 4.35
+     },
+     {
+      "slice": "10-20%",
+      "start_s": 13.787,
+      "cuts": 2,
+      "cuts_per_min": 8.7
+     },
+     {
+      "slice": "20-30%",
+      "start_s": 27.573,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "30-40%",
+      "start_s": 41.36,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "40-50%",
+      "start_s": 55.147,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "50-60%",
+      "start_s": 68.933,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "60-70%",
+      "start_s": 82.72,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "70-80%",
+      "start_s": 96.507,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "80-90%",
+      "start_s": 110.293,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "90-100%",
+      "start_s": 124.08,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     }
+    ],
+    "opening": {
+     "first_3s": {
+      "cuts": 1,
+      "speech_onset_s": 0.033,
+      "words": 6,
+      "words_per_s": 2.0,
+      "questions": 0,
+      "question_words": 0,
+      "numbers": 0,
+      "stakes_words": 0,
+      "loudness_lufs": null,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     },
+     "first_5s": {
+      "cuts": 1,
+      "speech_onset_s": 0.033,
+      "words": 11,
+      "words_per_s": 2.2,
+      "questions": 0,
+      "question_words": 0,
+      "numbers": 0,
+      "stakes_words": 0,
+      "loudness_lufs": -15.07,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     },
+     "first_15s": {
+      "cuts": 2,
+      "speech_onset_s": 0.033,
+      "words": 35,
+      "words_per_s": 2.33,
+      "questions": 0,
+      "question_words": 0,
+      "numbers": 1,
+      "stakes_words": 0,
+      "loudness_lufs": -15.45,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     }
+    },
+    "loudness_jump_db": 0.34,
+    "speech": {
+     "available": true,
+     "words": 351,
+     "wpm": 149.7,
+     "wpm_speaking": 166.5,
+     "speech_share": 0.899,
+     "time_to_first_speech_s": 0.033,
+     "word_timing": "spread_from_segments",
+     "language": "en",
+     "questions": 0,
+     "question_words": 9,
+     "numbers": 24,
+     "stakes_words": 1,
+     "caption_mismatch": null,
+     "source": "owner_supplied_captions"
+    },
+    "audio": {
+     "has_audio": true,
+     "silence_share": 0.008,
+     "non_speech_audio_share_upper_bound": 0.092,
+     "integrated_lufs": -15.39,
+     "lra": 3.5,
+     "music_detection": "not_measured (no music classifier deployed; non-speech share is an upper bound)"
+    }
+   },
+   "provenance": {
+    "measured": [
+     "duration_s",
+     "measured",
+     "hook.measured",
+     "editing (numbers)",
+     "story.pacing_curve",
+     "audio (numbers)",
+     "visual (resolution, quality)"
+    ],
+    "interpreted": [
+     "hook.type",
+     "story.pacing_shape",
+     "story.structure",
+     "editing.tempo",
+     "audio.mode",
+     "engagement",
+     "strengths",
+     "weaknesses",
+     "techniques"
+    ],
+    "metadata": [
+     "title"
+    ],
+    "rules": {
+     "fast_cuts_per_min": 20.0,
+     "slow_cuts_per_min": 6.0,
+     "late_speech_s": 5.0,
+     "early_speech_s": 1.0,
+     "long_shot_s": 20.0,
+     "high_silence_share": 0.2,
+     "speech_led_share": 0.5,
+     "spike_factor": 1.5
+    },
+    "not_proof": "interpretations describe structure; they do not show what caused any outcome"
+   }
+  },
+  {
+   "schema": "nexus.CreatorReferenceProfile/1",
+   "id": "crp_071afc5210",
+   "source": {
+    "kind": "local_file",
+    "path": "iss061m2627771232_Live_Interviews_Jeanette_Epps_191004.mp4",
+    "sha256": "31687e6e92252304aa01ccb5f3704b7c6b8b897ecb4612ad937dd8adff3ebe28",
+    "bytes": 49926173,
+    "rights": "public-domain",
+    "licence_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+    "origin_url": "https://images.nasa.gov/details/iss061m2627771232_Live_Interviews_Jeanette_Epps_191004",
+    "rendition": "~mobile.mp4 (publisher's smallest full-length rendition)"
+   },
+   "creator": "NASA JSC",
+   "category": "interview",
+   "format": "interview_podcast",
+   "duration_s": 1165.667,
+   "hook": {
+    "measured": {
+     "first_3s": {
+      "cuts": 0,
+      "speech_onset_s": 0.0,
+      "words": 4,
+      "words_per_s": 1.33,
+      "questions": 0,
+      "question_words": 1,
+      "numbers": 0,
+      "stakes_words": 0,
+      "loudness_lufs": null,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     },
+     "first_5s": {
+      "cuts": 0,
+      "speech_onset_s": 0.0,
+      "words": 8,
+      "words_per_s": 1.6,
+      "questions": 1,
+      "question_words": 1,
+      "numbers": 0,
+      "stakes_words": 0,
+      "loudness_lufs": -28.24,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     },
+     "first_15s": {
+      "cuts": 0,
+      "speech_onset_s": 0.0,
+      "words": 25,
+      "words_per_s": 1.67,
+      "questions": 1,
+      "question_words": 1,
+      "numbers": 0,
+      "stakes_words": 0,
+      "loudness_lufs": -26.46,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     }
+    },
+    "loudness_jump_db": -1.86,
+    "type": {
+     "value": "question",
+     "kind": "interpreted",
+     "confidence": 0.5,
+     "based_on": [
+      "opening.first_15s.questions",
+      "opening.first_15s.question_words"
+     ],
+     "rule": "question marker in the first 15 s of speech"
+    }
+   },
+   "story": {
+    "pacing_shape": {
+     "value": "single_shot_or_undetected_cuts",
+     "kind": "interpreted",
+     "confidence": 0.5,
+     "based_on": [
+      "pacing_curve"
+     ],
+     "rule": "no cuts detected"
+    },
+    "pacing_curve": [
+     {
+      "slice": "0-10%",
+      "start_s": 0.0,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "10-20%",
+      "start_s": 116.567,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "20-30%",
+      "start_s": 233.133,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "30-40%",
+      "start_s": 349.7,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "40-50%",
+      "start_s": 466.267,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "50-60%",
+      "start_s": 582.833,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "60-70%",
+      "start_s": 699.4,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "70-80%",
+      "start_s": 815.967,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "80-90%",
+      "start_s": 932.533,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "90-100%",
+      "start_s": 1049.1,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     }
+    ],
+    "structure": null,
+    "structure_kind": "not_available (rules give pacing shape only)",
+    "llm": {
+     "status": "not_requested"
+    }
+   },
+   "editing": {
+    "cuts_per_min": 0.0,
+    "shots": 1,
+    "mean_shot_s": 1165.667,
+    "median_shot_s": 1165.667,
+    "longest_shot_s": 1165.667,
+    "tempo": {
+     "value": "slow",
+     "kind": "interpreted",
+     "confidence": 0.7,
+     "based_on": [
+      "cuts_per_min"
+     ],
+     "rule": "NEXUS bands: >= 20.0 fast, <= 6.0 slow"
+    }
+   },
+   "visual": {
+    "w": 320,
+    "h": 180,
+    "fps": 15.0,
+    "quality": {
+     "sharpness": 1026.9,
+     "brightness": 90.4,
+     "issues": [],
+     "method": "ffmpeg+numpy Laplacian variance at 256x144 grey (OpenCV not installed)"
+    },
+    "on_screen_text": "not_measured (no OCR model deployed)"
+   },
+   "audio": {
+    "has_audio": true,
+    "silence_share": 0.06,
+    "non_speech_audio_share_upper_bound": 0.0,
+    "integrated_lufs": -26.38,
+    "lra": 5.4,
+    "music_detection": "not_measured (no music classifier deployed; non-speech share is an upper bound)",
+    "speech_share": 1.0,
+    "wpm_speaking": 58.6,
+    "mode": {
+     "value": "speech_led",
+     "kind": "interpreted",
+     "confidence": 0.65,
+     "based_on": [
+      "speech.speech_share"
+     ],
+     "rule": "speech share >= 0.5"
+    }
+   },
+   "engagement": [
+    {
+     "text": "Poses a question in the opening (curiosity gap)",
+     "kind": "interpreted",
+     "based_on": [
+      "opening.first_15s.questions",
+      "opening.first_15s.question_words"
+     ],
+     "confidence": 0.5
+    }
+   ],
+   "packaging": {
+    "title": {
+     "value": "Artemis Interviews with NASA Astronaut Jeanette Epps - October 4, 2019",
+     "source": "owner_entered"
+    }
+   },
+   "strengths": [
+    {
+     "text": "Speech starts within the first second",
+     "kind": "interpreted",
+     "based_on": [
+      "opening.first_5s.speech_onset_s"
+     ],
+     "confidence": 0.6
+    }
+   ],
+   "weaknesses": [],
+   "techniques": [
+    {
+     "text": "slow edit tempo (0.0 cuts/min, median shot 1165.667 s)",
+     "kind": "interpreted",
+     "based_on": [
+      "cuts_per_min",
+      "median_shot_s"
+     ],
+     "confidence": 0.7
+    },
+    {
+     "text": "pacing shape: single_shot_or_undetected_cuts",
+     "kind": "interpreted",
+     "based_on": [
+      "pacing_curve"
+     ],
+     "confidence": 0.5
+    },
+    {
+     "text": "narration density 58.6 words per speaking minute",
+     "kind": "interpreted",
+     "based_on": [
+      "speech.wpm_speaking"
+     ],
+     "confidence": 0.7
+    }
+   ],
+   "confidence": 0.35,
+   "evidence": [
+    {
+     "source": "owner-stated rights: public-domain",
+     "retrieved": "2026-11-12",
+     "url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+     "kind": "rights"
+    },
+    {
+     "source": "nexus.intelligence.creators.measure (ffmpeg scene/silence/loudness, faster-whisper word timings)",
+     "retrieved": "2026-11-12",
+     "kind": "measurement"
+    },
+    {
+     "source": "publisher licence terms",
+     "retrieved": "2026-11-12",
+     "url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+     "quote": "NASA images and video 'generally are not subject to copyright in the United States'; credit NASA.",
+     "kind": "licence"
+    },
+    {
+     "source": "item page + publisher metadata.json",
+     "retrieved": "2026-11-12",
+     "url": "https://images.nasa.gov/details/iss061m2627771232_Live_Interviews_Jeanette_Epps_191004",
+     "kind": "licence_check"
+    }
+   ],
+   "measured": {
+    "duration_s": 1165.667,
+    "video": {
+     "w": 320,
+     "h": 180,
+     "fps": 15.0
+    },
+    "quality": {
+     "sharpness": 1026.9,
+     "brightness": 90.4,
+     "issues": [],
+     "method": "ffmpeg+numpy Laplacian variance at 256x144 grey (OpenCV not installed)"
+    },
+    "shots": 1,
+    "cuts_per_min": 0.0,
+    "mean_shot_s": 1165.667,
+    "median_shot_s": 1165.667,
+    "shortest_shot_s": 1165.667,
+    "longest_shot_s": 1165.667,
+    "pacing_curve": [
+     {
+      "slice": "0-10%",
+      "start_s": 0.0,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "10-20%",
+      "start_s": 116.567,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "20-30%",
+      "start_s": 233.133,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "30-40%",
+      "start_s": 349.7,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "40-50%",
+      "start_s": 466.267,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "50-60%",
+      "start_s": 582.833,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "60-70%",
+      "start_s": 699.4,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "70-80%",
+      "start_s": 815.967,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "80-90%",
+      "start_s": 932.533,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     },
+     {
+      "slice": "90-100%",
+      "start_s": 1049.1,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     }
+    ],
+    "opening": {
+     "first_3s": {
+      "cuts": 0,
+      "speech_onset_s": 0.0,
+      "words": 4,
+      "words_per_s": 1.33,
+      "questions": 0,
+      "question_words": 1,
+      "numbers": 0,
+      "stakes_words": 0,
+      "loudness_lufs": null,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     },
+     "first_5s": {
+      "cuts": 0,
+      "speech_onset_s": 0.0,
+      "words": 8,
+      "words_per_s": 1.6,
+      "questions": 1,
+      "question_words": 1,
+      "numbers": 0,
+      "stakes_words": 0,
+      "loudness_lufs": -28.24,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     },
+     "first_15s": {
+      "cuts": 0,
+      "speech_onset_s": 0.0,
+      "words": 25,
+      "words_per_s": 1.67,
+      "questions": 1,
+      "question_words": 1,
+      "numbers": 0,
+      "stakes_words": 0,
+      "loudness_lufs": -26.46,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     }
+    },
+    "loudness_jump_db": -1.86,
+    "speech": {
+     "available": true,
+     "words": 1134,
+     "wpm": 58.6,
+     "wpm_speaking": 58.6,
+     "speech_share": 1.0,
+     "time_to_first_speech_s": 0.0,
+     "word_timing": "spread_from_segments",
+     "language": "en",
+     "questions": 6,
+     "question_words": 48,
+     "numbers": 33,
+     "stakes_words": 7,
+     "caption_mismatch": {
+      "captions_end_s": 2162.226,
+      "media_duration_s": 1165.667,
+      "note": "captions belong to a different cut of this video; speech fields unreliable"
+     },
+     "source": "owner_supplied_captions"
+    },
+    "audio": {
+     "has_audio": true,
+     "silence_share": 0.06,
+     "non_speech_audio_share_upper_bound": 0.0,
+     "integrated_lufs": -26.38,
+     "lra": 5.4,
+     "music_detection": "not_measured (no music classifier deployed; non-speech share is an upper bound)"
+    }
+   },
+   "provenance": {
+    "measured": [
+     "duration_s",
+     "measured",
+     "hook.measured",
+     "editing (numbers)",
+     "story.pacing_curve",
+     "audio (numbers)",
+     "visual (resolution, quality)"
+    ],
+    "interpreted": [
+     "hook.type",
+     "story.pacing_shape",
+     "story.structure",
+     "editing.tempo",
+     "audio.mode",
+     "engagement",
+     "strengths",
+     "weaknesses",
+     "techniques"
+    ],
+    "metadata": [
+     "title"
+    ],
+    "rules": {
+     "fast_cuts_per_min": 20.0,
+     "slow_cuts_per_min": 6.0,
+     "late_speech_s": 5.0,
+     "early_speech_s": 1.0,
+     "long_shot_s": 20.0,
+     "high_silence_share": 0.2,
+     "speech_led_share": 0.5,
+     "spike_factor": 1.5
+    },
+    "not_proof": "interpretations describe structure; they do not show what caused any outcome"
+   }
+  },
+  {
+   "schema": "nexus.CreatorReferenceProfile/1",
+   "id": "crp_0f60f234b5",
+   "source": {
+    "kind": "local_file",
+    "path": "KSC-2021110-VP-MWC01-001_CREW3-HIGHLIGHTS-3288522.mp4",
+    "sha256": "c257c83f26c636a44696116516e326d1c881d1e5d19007588731e159df5a663f",
+    "bytes": 5949623,
+    "rights": "public-domain",
+    "licence_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+    "origin_url": "https://images.nasa.gov/details/KSC-2021110-VP-MWC01-001%20CREW3-HIGHLIGHTS-3288522",
+    "rendition": "~mobile.mp4 (publisher's smallest full-length rendition)"
+   },
+   "creator": "NASA KSC",
+   "category": "highlights_montage",
+   "format": "event_highlights",
+   "duration_s": 151.0,
+   "hook": {
+    "measured": {
+     "first_3s": {
+      "cuts": 0,
+      "speech_onset_s": 0.0,
+      "words": 14,
+      "words_per_s": 4.67,
+      "questions": 0,
+      "question_words": 0,
+      "numbers": 0,
+      "stakes_words": 0,
+      "loudness_lufs": null,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     },
+     "first_5s": {
+      "cuts": 0,
+      "speech_onset_s": 0.0,
+      "words": 20,
+      "words_per_s": 4.0,
+      "questions": 0,
+      "question_words": 0,
+      "numbers": 2,
+      "stakes_words": 0,
+      "loudness_lufs": -30.74,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     },
+     "first_15s": {
+      "cuts": 5,
+      "speech_onset_s": 0.0,
+      "words": 34,
+      "words_per_s": 2.27,
+      "questions": 0,
+      "question_words": 0,
+      "numbers": 2,
+      "stakes_words": 0,
+      "loudness_lufs": -32.71,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     }
+    },
+    "loudness_jump_db": -1.97,
+    "type": {
+     "value": "specific_number",
+     "kind": "interpreted",
+     "confidence": 0.45,
+     "based_on": [
+      "opening.first_15s.numbers"
+     ],
+     "rule": "number spoken in the first 15 s"
+    }
+   },
+   "story": {
+    "pacing_shape": {
+     "value": "even",
+     "kind": "interpreted",
+     "confidence": 0.5,
+     "based_on": [
+      "pacing_curve"
+     ],
+     "rule": "mean cut rate of slices 0-30 % vs 30-70 % vs 70-100 % (30 % margin)"
+    },
+    "pacing_curve": [
+     {
+      "slice": "0-10%",
+      "start_s": 0.0,
+      "cuts": 5,
+      "cuts_per_min": 19.87
+     },
+     {
+      "slice": "10-20%",
+      "start_s": 15.1,
+      "cuts": 1,
+      "cuts_per_min": 3.97
+     },
+     {
+      "slice": "20-30%",
+      "start_s": 30.2,
+      "cuts": 1,
+      "cuts_per_min": 3.97
+     },
+     {
+      "slice": "30-40%",
+      "start_s": 45.3,
+      "cuts": 3,
+      "cuts_per_min": 11.92
+     },
+     {
+      "slice": "40-50%",
+      "start_s": 60.4,
+      "cuts": 1,
+      "cuts_per_min": 3.97
+     },
+     {
+      "slice": "50-60%",
+      "start_s": 75.5,
+      "cuts": 3,
+      "cuts_per_min": 11.92
+     },
+     {
+      "slice": "60-70%",
+      "start_s": 90.6,
+      "cuts": 3,
+      "cuts_per_min": 11.92
+     },
+     {
+      "slice": "70-80%",
+      "start_s": 105.7,
+      "cuts": 1,
+      "cuts_per_min": 3.97
+     },
+     {
+      "slice": "80-90%",
+      "start_s": 120.8,
+      "cuts": 1,
+      "cuts_per_min": 3.97
+     },
+     {
+      "slice": "90-100%",
+      "start_s": 135.9,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     }
+    ],
+    "structure": null,
+    "structure_kind": "not_available (rules give pacing shape only)",
+    "llm": {
+     "status": "not_requested"
+    }
+   },
+   "editing": {
+    "cuts_per_min": 7.55,
+    "shots": 20,
+    "mean_shot_s": 7.55,
+    "median_shot_s": 5.0,
+    "longest_shot_s": 24.133,
+    "tempo": {
+     "value": "medium",
+     "kind": "interpreted",
+     "confidence": 0.7,
+     "based_on": [
+      "cuts_per_min"
+     ],
+     "rule": "NEXUS bands: >= 20.0 fast, <= 6.0 slow"
+    }
+   },
+   "visual": {
+    "w": 320,
+    "h": 180,
+    "fps": 15.0,
+    "quality": {
+     "sharpness": 1023.3,
+     "brightness": 61.9,
+     "issues": [],
+     "method": "ffmpeg+numpy Laplacian variance at 256x144 grey (OpenCV not installed)"
+    },
+    "on_screen_text": "not_measured (no OCR model deployed)"
+   },
+   "audio": {
+    "has_audio": true,
+    "silence_share": 0.009,
+    "non_speech_audio_share_upper_bound": 0.204,
+    "integrated_lufs": -28.85,
+    "lra": 7.3,
+    "music_detection": "not_measured (no music classifier deployed; non-speech share is an upper bound)",
+    "speech_share": 0.787,
+    "wpm_speaking": 121.6,
+    "mode": {
+     "value": "speech_led",
+     "kind": "interpreted",
+     "confidence": 0.65,
+     "based_on": [
+      "speech.speech_share"
+     ],
+     "rule": "speech share >= 0.5"
+    }
+   },
+   "engagement": [
+    {
+     "text": "States specific numbers early",
+     "kind": "interpreted",
+     "based_on": [
+      "opening.first_15s.numbers"
+     ],
+     "confidence": 0.45
+    },
+    {
+     "text": "Cut-rate spikes later in the video (30-40%, 50-60%, 60-70%) - possible re-engagement beats",
+     "kind": "interpreted",
+     "based_on": [
+      "pacing_curve"
+     ],
+     "confidence": 0.4
+    }
+   ],
+   "packaging": {
+    "title": {
+     "value": "Crew-3 Launch Day Highlights",
+     "source": "owner_entered"
+    }
+   },
+   "strengths": [
+    {
+     "text": "Speech starts within the first second",
+     "kind": "interpreted",
+     "based_on": [
+      "opening.first_5s.speech_onset_s"
+     ],
+     "confidence": 0.6
+    }
+   ],
+   "weaknesses": [
+    {
+     "text": "At least one shot longer than 20 s in an otherwise cut-driven edit",
+     "kind": "interpreted",
+     "based_on": [
+      "longest_shot_s",
+      "cuts_per_min"
+     ],
+     "confidence": 0.4
+    }
+   ],
+   "techniques": [
+    {
+     "text": "medium edit tempo (7.55 cuts/min, median shot 5.0 s)",
+     "kind": "interpreted",
+     "based_on": [
+      "cuts_per_min",
+      "median_shot_s"
+     ],
+     "confidence": 0.7
+    },
+    {
+     "text": "pacing shape: even",
+     "kind": "interpreted",
+     "based_on": [
+      "pacing_curve"
+     ],
+     "confidence": 0.5
+    },
+    {
+     "text": "narration density 121.6 words per speaking minute",
+     "kind": "interpreted",
+     "based_on": [
+      "speech.wpm_speaking"
+     ],
+     "confidence": 0.7
+    }
+   ],
+   "confidence": 0.57,
+   "evidence": [
+    {
+     "source": "owner-stated rights: public-domain",
+     "retrieved": "2026-11-12",
+     "url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+     "kind": "rights"
+    },
+    {
+     "source": "nexus.intelligence.creators.measure (ffmpeg scene/silence/loudness, faster-whisper word timings)",
+     "retrieved": "2026-11-12",
+     "kind": "measurement"
+    },
+    {
+     "source": "publisher licence terms",
+     "retrieved": "2026-11-12",
+     "url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+     "quote": "NASA images and video 'generally are not subject to copyright in the United States'; credit NASA.",
+     "kind": "licence"
+    },
+    {
+     "source": "item page + publisher metadata.json",
+     "retrieved": "2026-11-12",
+     "url": "https://images.nasa.gov/details/KSC-2021110-VP-MWC01-001%20CREW3-HIGHLIGHTS-3288522",
+     "quote": "For copyright and restrictions refer to http://www.nasa.gov/multimedia/guidelines/index.html\n",
+     "kind": "licence_check"
+    }
+   ],
+   "measured": {
+    "duration_s": 151.0,
+    "video": {
+     "w": 320,
+     "h": 180,
+     "fps": 15.0
+    },
+    "quality": {
+     "sharpness": 1023.3,
+     "brightness": 61.9,
+     "issues": [],
+     "method": "ffmpeg+numpy Laplacian variance at 256x144 grey (OpenCV not installed)"
+    },
+    "shots": 20,
+    "cuts_per_min": 7.55,
+    "mean_shot_s": 7.55,
+    "median_shot_s": 5.0,
+    "shortest_shot_s": 2.0,
+    "longest_shot_s": 24.133,
+    "pacing_curve": [
+     {
+      "slice": "0-10%",
+      "start_s": 0.0,
+      "cuts": 5,
+      "cuts_per_min": 19.87
+     },
+     {
+      "slice": "10-20%",
+      "start_s": 15.1,
+      "cuts": 1,
+      "cuts_per_min": 3.97
+     },
+     {
+      "slice": "20-30%",
+      "start_s": 30.2,
+      "cuts": 1,
+      "cuts_per_min": 3.97
+     },
+     {
+      "slice": "30-40%",
+      "start_s": 45.3,
+      "cuts": 3,
+      "cuts_per_min": 11.92
+     },
+     {
+      "slice": "40-50%",
+      "start_s": 60.4,
+      "cuts": 1,
+      "cuts_per_min": 3.97
+     },
+     {
+      "slice": "50-60%",
+      "start_s": 75.5,
+      "cuts": 3,
+      "cuts_per_min": 11.92
+     },
+     {
+      "slice": "60-70%",
+      "start_s": 90.6,
+      "cuts": 3,
+      "cuts_per_min": 11.92
+     },
+     {
+      "slice": "70-80%",
+      "start_s": 105.7,
+      "cuts": 1,
+      "cuts_per_min": 3.97
+     },
+     {
+      "slice": "80-90%",
+      "start_s": 120.8,
+      "cuts": 1,
+      "cuts_per_min": 3.97
+     },
+     {
+      "slice": "90-100%",
+      "start_s": 135.9,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     }
+    ],
+    "opening": {
+     "first_3s": {
+      "cuts": 0,
+      "speech_onset_s": 0.0,
+      "words": 14,
+      "words_per_s": 4.67,
+      "questions": 0,
+      "question_words": 0,
+      "numbers": 0,
+      "stakes_words": 0,
+      "loudness_lufs": null,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     },
+     "first_5s": {
+      "cuts": 0,
+      "speech_onset_s": 0.0,
+      "words": 20,
+      "words_per_s": 4.0,
+      "questions": 0,
+      "question_words": 0,
+      "numbers": 2,
+      "stakes_words": 0,
+      "loudness_lufs": -30.74,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     },
+     "first_15s": {
+      "cuts": 5,
+      "speech_onset_s": 0.0,
+      "words": 34,
+      "words_per_s": 2.27,
+      "questions": 0,
+      "question_words": 0,
+      "numbers": 2,
+      "stakes_words": 0,
+      "loudness_lufs": -32.71,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     }
+    },
+    "loudness_jump_db": -1.97,
+    "speech": {
+     "available": true,
+     "words": 242,
+     "wpm": 95.8,
+     "wpm_speaking": 121.6,
+     "speech_share": 0.787,
+     "time_to_first_speech_s": 0.0,
+     "word_timing": "spread_from_segments",
+     "language": "en",
+     "questions": 0,
+     "question_words": 8,
+     "numbers": 15,
+     "stakes_words": 2,
+     "caption_mismatch": null,
+     "source": "owner_supplied_captions"
+    },
+    "audio": {
+     "has_audio": true,
+     "silence_share": 0.009,
+     "non_speech_audio_share_upper_bound": 0.204,
+     "integrated_lufs": -28.85,
+     "lra": 7.3,
+     "music_detection": "not_measured (no music classifier deployed; non-speech share is an upper bound)"
+    }
+   },
+   "provenance": {
+    "measured": [
+     "duration_s",
+     "measured",
+     "hook.measured",
+     "editing (numbers)",
+     "story.pacing_curve",
+     "audio (numbers)",
+     "visual (resolution, quality)"
+    ],
+    "interpreted": [
+     "hook.type",
+     "story.pacing_shape",
+     "story.structure",
+     "editing.tempo",
+     "audio.mode",
+     "engagement",
+     "strengths",
+     "weaknesses",
+     "techniques"
+    ],
+    "metadata": [
+     "title"
+    ],
+    "rules": {
+     "fast_cuts_per_min": 20.0,
+     "slow_cuts_per_min": 6.0,
+     "late_speech_s": 5.0,
+     "early_speech_s": 1.0,
+     "long_shot_s": 20.0,
+     "high_silence_share": 0.2,
+     "speech_led_share": 0.5,
+     "spike_factor": 1.5
+    },
+    "not_proof": "interpretations describe structure; they do not show what caused any outcome"
+   }
+  },
+  {
+   "schema": "nexus.CreatorReferenceProfile/1",
+   "id": "crp_c54270f4c6",
+   "source": {
+    "kind": "local_file",
+    "path": "Explore_our_Home_Planet_and_the_Universe_With_NASA_Podcasts.mp4",
+    "sha256": "3de0537331d0b4d286e9a5726acce2e89cabfbf11d3d232d5bde5d13cea4f12c",
+    "bytes": 2751434,
+    "rights": "public-domain",
+    "licence_url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+    "origin_url": "https://images.nasa.gov/details/Explore%20our%20Home%20Planet%20and%20the%20Universe%20With%20NASA%20Podcasts",
+    "rendition": "~mobile.mp4 (publisher's smallest full-length rendition)"
+   },
+   "creator": "NASA HQ",
+   "category": "promo",
+   "format": "premium_ad",
+   "duration_s": 62.933,
+   "hook": {
+    "measured": {
+     "first_3s": {
+      "cuts": 1,
+      "speech_onset_s": 0.033,
+      "words": 9,
+      "words_per_s": 3.0,
+      "questions": 0,
+      "question_words": 0,
+      "numbers": 0,
+      "stakes_words": 0,
+      "loudness_lufs": null,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     },
+     "first_5s": {
+      "cuts": 1,
+      "speech_onset_s": 0.033,
+      "words": 15,
+      "words_per_s": 3.0,
+      "questions": 0,
+      "question_words": 0,
+      "numbers": 0,
+      "stakes_words": 0,
+      "loudness_lufs": -18.03,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     },
+     "first_15s": {
+      "cuts": 4,
+      "speech_onset_s": 0.033,
+      "words": 47,
+      "words_per_s": 3.13,
+      "questions": 0,
+      "question_words": 2,
+      "numbers": 0,
+      "stakes_words": 0,
+      "loudness_lufs": -17.92,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     }
+    },
+    "loudness_jump_db": 1.05,
+    "type": {
+     "value": "question",
+     "kind": "interpreted",
+     "confidence": 0.5,
+     "based_on": [
+      "opening.first_15s.questions",
+      "opening.first_15s.question_words"
+     ],
+     "rule": "question marker in the first 15 s of speech"
+    }
+   },
+   "story": {
+    "pacing_shape": {
+     "value": "front_loaded",
+     "kind": "interpreted",
+     "confidence": 0.5,
+     "based_on": [
+      "pacing_curve"
+     ],
+     "rule": "mean cut rate of slices 0-30 % vs 30-70 % vs 70-100 % (30 % margin)"
+    },
+    "pacing_curve": [
+     {
+      "slice": "0-10%",
+      "start_s": 0.0,
+      "cuts": 2,
+      "cuts_per_min": 19.07
+     },
+     {
+      "slice": "10-20%",
+      "start_s": 6.293,
+      "cuts": 1,
+      "cuts_per_min": 9.53
+     },
+     {
+      "slice": "20-30%",
+      "start_s": 12.587,
+      "cuts": 2,
+      "cuts_per_min": 19.07
+     },
+     {
+      "slice": "30-40%",
+      "start_s": 18.88,
+      "cuts": 1,
+      "cuts_per_min": 9.53
+     },
+     {
+      "slice": "40-50%",
+      "start_s": 25.173,
+      "cuts": 2,
+      "cuts_per_min": 19.07
+     },
+     {
+      "slice": "50-60%",
+      "start_s": 31.467,
+      "cuts": 1,
+      "cuts_per_min": 9.53
+     },
+     {
+      "slice": "60-70%",
+      "start_s": 37.76,
+      "cuts": 2,
+      "cuts_per_min": 19.07
+     },
+     {
+      "slice": "70-80%",
+      "start_s": 44.053,
+      "cuts": 2,
+      "cuts_per_min": 19.07
+     },
+     {
+      "slice": "80-90%",
+      "start_s": 50.347,
+      "cuts": 1,
+      "cuts_per_min": 9.53
+     },
+     {
+      "slice": "90-100%",
+      "start_s": 56.64,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     }
+    ],
+    "structure": null,
+    "structure_kind": "not_available (rules give pacing shape only)",
+    "llm": {
+     "status": "not_requested"
+    }
+   },
+   "editing": {
+    "cuts_per_min": 13.35,
+    "shots": 15,
+    "mean_shot_s": 4.196,
+    "median_shot_s": 3.4,
+    "longest_shot_s": 10.666,
+    "tempo": {
+     "value": "medium",
+     "kind": "interpreted",
+     "confidence": 0.7,
+     "based_on": [
+      "cuts_per_min"
+     ],
+     "rule": "NEXUS bands: >= 20.0 fast, <= 6.0 slow"
+    }
+   },
+   "visual": {
+    "w": 320,
+    "h": 180,
+    "fps": 15.0,
+    "quality": {
+     "sharpness": 1234.5,
+     "brightness": 98.9,
+     "issues": [],
+     "method": "ffmpeg+numpy Laplacian variance at 256x144 grey (OpenCV not installed)"
+    },
+    "on_screen_text": "not_measured (no OCR model deployed)"
+   },
+   "audio": {
+    "has_audio": true,
+    "silence_share": 0.051,
+    "non_speech_audio_share_upper_bound": 0.034,
+    "integrated_lufs": -18.95,
+    "lra": 5.4,
+    "music_detection": "not_measured (no music classifier deployed; non-speech share is an upper bound)",
+    "speech_share": 0.916,
+    "wpm_speaking": 164.5,
+    "mode": {
+     "value": "speech_led",
+     "kind": "interpreted",
+     "confidence": 0.65,
+     "based_on": [
+      "speech.speech_share"
+     ],
+     "rule": "speech share >= 0.5"
+    }
+   },
+   "engagement": [
+    {
+     "text": "Poses a question in the opening (curiosity gap)",
+     "kind": "interpreted",
+     "based_on": [
+      "opening.first_15s.questions",
+      "opening.first_15s.question_words"
+     ],
+     "confidence": 0.5
+    }
+   ],
+   "packaging": {
+    "title": {
+     "value": "Explore our Home Planet and the Universe With NASA Podcasts",
+     "source": "owner_entered"
+    }
+   },
+   "strengths": [
+    {
+     "text": "Visual change within the first 3 s",
+     "kind": "interpreted",
+     "based_on": [
+      "opening.first_3s.cuts"
+     ],
+     "confidence": 0.6
+    },
+    {
+     "text": "Speech starts within the first second",
+     "kind": "interpreted",
+     "based_on": [
+      "opening.first_5s.speech_onset_s"
+     ],
+     "confidence": 0.6
+    }
+   ],
+   "weaknesses": [],
+   "techniques": [
+    {
+     "text": "medium edit tempo (13.35 cuts/min, median shot 3.4 s)",
+     "kind": "interpreted",
+     "based_on": [
+      "cuts_per_min",
+      "median_shot_s"
+     ],
+     "confidence": 0.7
+    },
+    {
+     "text": "pacing shape: front_loaded",
+     "kind": "interpreted",
+     "based_on": [
+      "pacing_curve"
+     ],
+     "confidence": 0.5
+    },
+    {
+     "text": "narration density 164.5 words per speaking minute",
+     "kind": "interpreted",
+     "based_on": [
+      "speech.wpm_speaking"
+     ],
+     "confidence": 0.7
+    }
+   ],
+   "confidence": 0.59,
+   "evidence": [
+    {
+     "source": "owner-stated rights: public-domain",
+     "retrieved": "2026-11-12",
+     "url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+     "kind": "rights"
+    },
+    {
+     "source": "nexus.intelligence.creators.measure (ffmpeg scene/silence/loudness, faster-whisper word timings)",
+     "retrieved": "2026-11-12",
+     "kind": "measurement"
+    },
+    {
+     "source": "publisher licence terms",
+     "retrieved": "2026-11-12",
+     "url": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+     "quote": "NASA images and video 'generally are not subject to copyright in the United States'; credit NASA.",
+     "kind": "licence"
+    },
+    {
+     "source": "item page + publisher metadata.json",
+     "retrieved": "2026-11-12",
+     "url": "https://images.nasa.gov/details/Explore%20our%20Home%20Planet%20and%20the%20Universe%20With%20NASA%20Podcasts",
+     "kind": "licence_check"
+    }
+   ],
+   "measured": {
+    "duration_s": 62.933,
+    "video": {
+     "w": 320,
+     "h": 180,
+     "fps": 15.0
+    },
+    "quality": {
+     "sharpness": 1234.5,
+     "brightness": 98.9,
+     "issues": [],
+     "method": "ffmpeg+numpy Laplacian variance at 256x144 grey (OpenCV not installed)"
+    },
+    "shots": 15,
+    "cuts_per_min": 13.35,
+    "mean_shot_s": 4.196,
+    "median_shot_s": 3.4,
+    "shortest_shot_s": 1.267,
+    "longest_shot_s": 10.666,
+    "pacing_curve": [
+     {
+      "slice": "0-10%",
+      "start_s": 0.0,
+      "cuts": 2,
+      "cuts_per_min": 19.07
+     },
+     {
+      "slice": "10-20%",
+      "start_s": 6.293,
+      "cuts": 1,
+      "cuts_per_min": 9.53
+     },
+     {
+      "slice": "20-30%",
+      "start_s": 12.587,
+      "cuts": 2,
+      "cuts_per_min": 19.07
+     },
+     {
+      "slice": "30-40%",
+      "start_s": 18.88,
+      "cuts": 1,
+      "cuts_per_min": 9.53
+     },
+     {
+      "slice": "40-50%",
+      "start_s": 25.173,
+      "cuts": 2,
+      "cuts_per_min": 19.07
+     },
+     {
+      "slice": "50-60%",
+      "start_s": 31.467,
+      "cuts": 1,
+      "cuts_per_min": 9.53
+     },
+     {
+      "slice": "60-70%",
+      "start_s": 37.76,
+      "cuts": 2,
+      "cuts_per_min": 19.07
+     },
+     {
+      "slice": "70-80%",
+      "start_s": 44.053,
+      "cuts": 2,
+      "cuts_per_min": 19.07
+     },
+     {
+      "slice": "80-90%",
+      "start_s": 50.347,
+      "cuts": 1,
+      "cuts_per_min": 9.53
+     },
+     {
+      "slice": "90-100%",
+      "start_s": 56.64,
+      "cuts": 0,
+      "cuts_per_min": 0.0
+     }
+    ],
+    "opening": {
+     "first_3s": {
+      "cuts": 1,
+      "speech_onset_s": 0.033,
+      "words": 9,
+      "words_per_s": 3.0,
+      "questions": 0,
+      "question_words": 0,
+      "numbers": 0,
+      "stakes_words": 0,
+      "loudness_lufs": null,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     },
+     "first_5s": {
+      "cuts": 1,
+      "speech_onset_s": 0.033,
+      "words": 15,
+      "words_per_s": 3.0,
+      "questions": 0,
+      "question_words": 0,
+      "numbers": 0,
+      "stakes_words": 0,
+      "loudness_lufs": -18.03,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     },
+     "first_15s": {
+      "cuts": 4,
+      "speech_onset_s": 0.033,
+      "words": 47,
+      "words_per_s": 3.13,
+      "questions": 0,
+      "question_words": 2,
+      "numbers": 0,
+      "stakes_words": 0,
+      "loudness_lufs": -17.92,
+      "on_screen_text": "not_measured (no OCR model deployed)"
+     }
+    },
+    "loudness_jump_db": 1.05,
+    "speech": {
+     "available": true,
+     "words": 158,
+     "wpm": 150.6,
+     "wpm_speaking": 164.5,
+     "speech_share": 0.916,
+     "time_to_first_speech_s": 0.033,
+     "word_timing": "spread_from_segments",
+     "language": "en",
+     "questions": 0,
+     "question_words": 7,
+     "numbers": 0,
+     "stakes_words": 0,
+     "caption_mismatch": null,
+     "source": "owner_supplied_captions"
+    },
+    "audio": {
+     "has_audio": true,
+     "silence_share": 0.051,
+     "non_speech_audio_share_upper_bound": 0.034,
+     "integrated_lufs": -18.95,
+     "lra": 5.4,
+     "music_detection": "not_measured (no music classifier deployed; non-speech share is an upper bound)"
+    }
+   },
+   "provenance": {
+    "measured": [
+     "duration_s",
+     "measured",
+     "hook.measured",
+     "editing (numbers)",
+     "story.pacing_curve",
+     "audio (numbers)",
+     "visual (resolution, quality)"
+    ],
+    "interpreted": [
+     "hook.type",
+     "story.pacing_shape",
+     "story.structure",
+     "editing.tempo",
+     "audio.mode",
+     "engagement",
+     "strengths",
+     "weaknesses",
+     "techniques"
+    ],
+    "metadata": [
+     "title"
+    ],
+    "rules": {
+     "fast_cuts_per_min": 20.0,
+     "slow_cuts_per_min": 6.0,
+     "late_speech_s": 5.0,
+     "early_speech_s": 1.0,
+     "long_shot_s": 20.0,
+     "high_silence_share": 0.2,
+     "speech_led_share": 0.5,
+     "spike_factor": 1.5
+    },
+    "not_proof": "interpretations describe structure; they do not show what caused any outcome"
+   }
+  }
+ ],
+ "note": "media stored under NEXUS_HOME/a3_refs (not in Git); structure only"
+}

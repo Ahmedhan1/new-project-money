@@ -32,9 +32,13 @@ STALE_S = 30.0
 ACTIVE = ("queued", "running")
 
 
-def handler(kind: str):
+LIGHT: set[str] = set()  # network-bound kinds (uploads, API polling) that must not wait for the CPU-heavy lock
+
+
+def handler(kind: str, heavy: bool = True):
     def deco(fn):
         HANDLERS[kind] = fn
+        (LIGHT.discard if heavy else LIGHT.add)(kind)
         return fn
     return deco
 
@@ -43,9 +47,22 @@ def worker_id(role: str = "worker") -> str:
     return f"{role}-{socket.gethostname()}-{os.getpid()}"
 
 
+_held = threading.local()
+
+
 @contextmanager
 def heavy_lock():
-    """One heavy job at a time on this machine, across processes (API thread and worker process)."""
+    """One heavy job at a time on this machine, across processes (API thread and worker process).
+
+    Re-entrant within a thread: a job handler already runs inside the lock, and library code that also guards its own
+    heavy calls (e.g. the Account 3 research brief calling the local LLM) must not wait on itself."""
+    if getattr(_held, "depth", 0):
+        _held.depth += 1
+        try:
+            yield
+        finally:
+            _held.depth -= 1
+        return
     config.ensure_dirs()
     f = open(config.RUN / "heavy.lock", "a+")
     try:
@@ -61,8 +78,10 @@ def heavy_lock():
         else:
             import fcntl
             fcntl.flock(f, fcntl.LOCK_EX)
+        _held.depth = 1
         yield
     finally:
+        _held.depth = 0
         try:
             if os.name == "nt":
                 import msvcrt
@@ -228,8 +247,11 @@ def run_job(job: Job) -> str:
         fn = HANDLERS.get(job.kind)
         if fn is None:
             raise LookupError(f"no handler registered for job kind '{job.kind}'")
-        with heavy_lock():
+        if job.kind in LIGHT:
             result = fn(job)
+        else:
+            with heavy_lock():
+                result = fn(job)
         db.execute("UPDATE jobs SET status='done', progress=1, finished=?, result=? WHERE id=?",
                    (time.time(), json.dumps(result, default=str, ensure_ascii=False), job.id))
         job.log("job done")

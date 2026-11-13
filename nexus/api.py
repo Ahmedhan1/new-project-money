@@ -73,6 +73,12 @@ async def _owner_guard(request, call_next):
 from .cloud import limits as _limits  # noqa: E402
 
 app.add_middleware(_limits.BodyLimit)
+
+# Account 3 (intelligence, research, publishing, growth): own router + UI script, mounted here only.
+from .intelligence import api as _a3  # noqa: E402
+
+app.include_router(_a3.router)
+app.add_api_route("/ui/intelligence.js", _a3.ui_js, include_in_schema=False)
 UI = Path(__file__).resolve().parent / "ui" / "index.html"
 _q: "queue.Queue[tuple[str, callable]]" = queue.Queue()
 _analyses: dict[str, dict] = {}

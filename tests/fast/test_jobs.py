@@ -227,3 +227,25 @@ def test_backups_are_scheduled_automatically(home):
     (home / "settings.json").write_text(json.dumps({"backup_every_hours": 0}))
     db.execute("DELETE FROM jobs")
     assert jobs.schedule_backup(now=t.time() + 99 * 3600) is None   # user switched it off
+
+
+
+def test_heavy_lock_is_reentrant_in_a_thread_and_exclusive_across_threads(home):
+    """A job handler holds the lock; code it calls that guards itself again must not deadlock (found on a real
+    research job: the worker waited on its own lock for 18 minutes). Another thread must still wait."""
+    import threading
+    import time as t
+    order = []
+    with jobs.heavy_lock():
+        with jobs.heavy_lock():          # same thread: immediate
+            order.append("nested")
+
+        def other():
+            with jobs.heavy_lock():
+                order.append("other")
+        th = threading.Thread(target=other)
+        th.start()
+        t.sleep(0.3)
+        order.append("outer-still-held")
+    th.join(5)
+    assert order == ["nested", "outer-still-held", "other"]

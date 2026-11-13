@@ -1,5 +1,9 @@
 # Decisions
 
+Ids from D-11 up were assigned on separate account branches, so Account 1 and Account 3 both have entries D-11 to D-15.
+Each entry names its account; quote a decision as "D-13 (Account 1)" or "D-13 (Account 3)". Ids are not renumbered, so
+existing references stay valid.
+
 **D-1 Keep the `nexus/` package layout; do not restructure into apps/backend/core/workers.** The suggested tree is a
 target shape for a larger codebase; today it would only move ~6 k lines of working, tested code and break imports for
 no functional gain. New subsystems follow the same separation inside the package (`nexus/storage/`, `jobs.py` vs
@@ -33,6 +37,73 @@ mode; a JSON schema makes required keys and array lengths impossible to skip. Pr
 
 **D-10 No LICENSE file yet.** Choosing a licence (or keeping the repository private/all-rights-reserved) is the owner's
 decision; noted in the handoff as a pending user decision.
+
+**D-11 (Account 3) AI quality bars are soft by default.** Each AI task has a minimum quality (router `TASKS[...]["min_q"]`).
+A 6-item benchmark measured local Qwen3-4B at 3.3/10 on reasoning (thinking off), below the 4 needed for deep research,
+reference interpretation, quality review and analytics interpretation. Failing those tasks outright would stop the
+product on any machine without a GPU or an authorised hosted tier. Decision: when nothing eligible meets the bar, the
+router runs the best eligible model and returns `below_bar` (required vs measured score); the UI shows "draft quality -
+review before use". Callers that must not accept a draft pass `strict=True`. Nothing is ever routed to a paid endpoint or
+past a privacy class to reach the bar.
+
+**D-12 (Account 3) Provider exclusions.** Cerebras (payment method required for API access per its docs, 2026-11-12) and
+Hugging Face Inference Providers (no free credits on free accounts) are excluded by the router's zero-spend gate even if
+authorised. Second local provider: llama.cpp's OpenAI-compatible server with Qwen3-0.6B (Apache-2.0) - proves
+multi-provider routing and failover with no hosted API. Details: `docs/ACCOUNT3_MODEL_COMPARISON.md`.
+
+**D-13 (Account 3) Shared contracts layout.** `nexus.contracts` is a package owned jointly: Account 1 in `cloud.py`
+(pydantic, `contract: "Name/v1"`), Account 2 in `media.py` (dict schemas, `schema: "nexus.Name/1"`), Account 3 in
+`nexus.intelligence.contracts`; the package `__init__` re-exports both original APIs and offers `registry()` +
+`validate_any()`. Chosen over renaming because neither owner's imports change and the collision becomes testable.
+
+**D-14 (Account 3) Visual context gate is metadata-first.** Images are accepted only when their own Commons metadata
+places them (country, then named place), dates them compatibly, is not a map/emblem out of context, and — when the
+scene asks for a structure — names that structure. Found necessary by inspecting four real renders (Demo 4, Demo 10
+runs 1-3). Image classification (SigLIP) is optional evidence, never downloaded during a render.
+
+**D-15 (Account 3) Benchmarked remote models are batch-only.** Kaggle T4 runs measured 10 open-weight models; valid ones
+are recorded as `availability: batch_only` profiles. Interactive routing stays local. Critical tasks below their
+quality bar return `requires_human_review`; dialect output is always reviewed (best measured 0.52).
+
+**D-16 (Account 3) Zero-spend gate fails closed.** The router previously refused only `payment_method_required is True`.
+That let the string `unverified` (Groq, Mistral) through once the owner authorised a provider and added a key. Now:
+- A hosted provider is eligible only when its catalogue entry says the boolean `false` and has a dated `verified`.
+- The model must be listed in the catalogue, or carry the free suffix.
+- Authorisation must be the boolean `true`, a key must be present, and an enforceable quota must exist: documented
+  rpm/rpd/tpm/tpd, or the owner's `daily_requests`.
+- The facts are re-read from the catalogue, so a caller-supplied entry cannot loosen them (quotas take the stricter value).
+- An unknown `hosting` value is treated as hosted.
+- `costguard.check_host(..., free_tier_provider=, model=)` no longer trusts the name. It re-runs the full gate through
+  `router.hosted_call_allowed` and refuses if that gate fails or cannot be evaluated.
+- Regression tests: `tests/fast/test_zero_spend_fail_closed.py` (no network; sockets trapped).
+
+**D-17 (Account 3) batch_llm jobs carry one model and the prompts.** `bench_v2.account1_manifest` used to send
+`params.models` (a list), `items` as a count and `runtime: "ollama"`. Account 1's `batch_llm` rejects that shape on the
+worker. It now emits one ProductionJobManifest/v1 per model:
+- `params.model` is a Hugging Face repo;
+- `params.items` is the prompt list;
+- the engine is transformers, vllm or echo;
+- the idempotency key is computed over the params, and the job is Kaggle only.
+
+`batch_jobs.validate_manifest` refuses the old shape with a message naming the field. Models whose fp16 weights exceed
+24 GiB (2x T4) are listed as not eligible, never silently dropped. Ollama stays inside A3's own benchmark kernels and is
+never a batch_llm engine.
+
+**D-18 (Account 3) A finished render is not a publishable result.** Publishing needs Account 2's QualityReport for that
+exact file: `PASSED_AUTOMATED_CHECKS`, no critical finding, and a matching checksum. Public or unlisted also needs human
+QA approval (`human_approval` starting with APPROVED), native review for the same language variety where required, and
+the owner's disclosure decision where the platform asks for a judgement (YouTube realism). Unknown provenance is
+disclosed as AI. Content is labelled non-AI only on an owner attestation with no AI records. A platform that cannot
+carry a required label and has no private mode (Facebook /videos) refuses AI content.
+
+**D-19 (Account 3) Analytics rows carry their origin.** Every record is real_platform_data, user_uploaded_data,
+public_benchmark_data or simulated_test_data. Simulated rows never conclude an experiment, and fixtures and demos say
+simulated. Ambiguous dates (01/02/2026) and publish times without a stated time zone are not guessed.
+
+**D-20 (Account 3) PR #5 follows its base by merging, never by rebasing (2026-11-13).** The base branch gained
+Account 1's PR #4. Rebasing 98 commits would rewrite a published branch and need a force-push, so the base was merged
+into the A3 branch instead. Every conflict kept both sides; generated files were regenerated. Each later base change
+is handled the same way.
 
 **D-11 `batch_llm` is a bounded batch job on Kaggle, not a model server (Account 1, 2026-11-13).** Kaggle does not allow
 persistent serving, and the owner's PC must not receive multi-GB weights implicitly. So the task loads one model inside

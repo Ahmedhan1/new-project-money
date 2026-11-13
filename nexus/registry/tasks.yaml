@@ -182,26 +182,27 @@ tasks:
     priority: 3
     title: "Platform upload via official APIs (YouTube first)"
     status: blocked
-    blocked_by: "Needs the user's own OAuth client + explicit authorisation for each platform. Today NEXUS produces upload packages only."
-    acceptance: "An approved package is uploaded as private/unlisted to the user's channel through the official API."
-    test: "Upload one unlisted video."
-    next: "Ask the user to create a Google Cloud OAuth client (free); implement resumable upload in publish.py behind costguard."
+    blocked_by: "Owner's Google OAuth client + one private upload (docs/ACCOUNT3_YOUTUBE_OWNER_VALIDATION.md)."
+    acceptance: "An approved package is uploaded as private to the owner's channel through the official API; quota recorded."
+    test: "Owner runs the OAuth helper (nexus/intelligence/publishing/youtube_oauth.py), then Publishing page -> Upload."
+    next: "Owner: create a Google Cloud project (no billing), enable YouTube Data API v3, OAuth client 'Desktop app', then run the helper. TikTok/Instagram/Facebook need approved apps."
   - id: ANA-1
     priority: 3
     title: "Analytics + monetisation intelligence from real platform data"
     status: blocked
     deps: [PUB-1]
-    blocked_by: "Same OAuth authorisation as PUB-1. The revenue ledger exists but holds only manual entries."
-    acceptance: "Views/retention/revenue per video pulled from the platform API and fed into topic selection."
-    test: "Compare with the platform's own dashboard."
-    next: "After PUB-1."
+    blocked_by: "No owner analytics data yet (OAuth or one owner export)."
+    acceptance: "Owner analytics imported; one experiment evaluated; a recommendation traced to the owner's own numbers."
+    test: "Analytics & Growth page: import an export, plan + evaluate an experiment."
+    next: "Owner exports a YouTube Studio CSV (Advanced mode -> Export) and imports it on the Analytics & Growth page."
   - id: RES-1
     priority: 3
     title: "Topic/opportunity research beyond Wikipedia (trends, competitor gaps) and content calendar automation"
-    status: planned
+    status: implemented
     acceptance: "A daily list of ranked topics with sources; calendar fills from it; all sources are free and permitted."
-    test: "Offline fixture of a trends feed."
-    next: "Start with free official feeds (Wikipedia pageviews API, Google Trends RSS); never scrape against ToS."
+    test: "pytest tests/fast/test_intel_market.py; Content Research page"
+    evidence: "Account 3 stream C: multi-source research (Wikipedia + pageviews in 7 languages, NASA, Openverse, GDELT/RSS/YouTube when available), evidence-backed opportunity scoring, trend monitor. docs/results/account3/market_report_*.json"
+    next: "Calendar auto-fill from the trend monitor; GDELT unreachable from the build sandbox (connection reset) - verify on the owner's machine."
   - id: CAP-1
     priority: 2
     title: "Measured five-per-day capacity report on the user's real machine"
@@ -436,6 +437,194 @@ tasks:
     acceptance: "A two-video-track composite and a moving face blur render and pass pixel tests."
     test: "pytest tests/fast/test_fx.py"
     next: "LUT management and face-following crops are done (a06d3e4); masks are static rectangles today."
+  # ------------------------------------------------------------------ Account 3: intelligence, research, publishing, growth
+  - id: A3-ROUTER
+    priority: 1
+    title: "Provider-independent AI model router (privacy classes, quotas, breaker, schema validation, soft quality bar)"
+    status: verified
+    acceptance: "Every Account 3 AI call goes through complete(); works with no hosted API; never reaches a paid endpoint; private data stays local."
+    test: "pytest tests/fast/test_intel_router.py tests/fast/test_intel_models.py"
+    evidence: "Two real local providers (in-process Qwen3-4B + llama.cpp server Qwen3-0.6B) with failover (docs/results/account3/models_routing_demo.json); AI Models page driven in Chromium."
+    next: "Owner GPU worker (vLLM/SGLang on Account 1) or an authorised free tier to lift deep_research etc. above draft quality (D-11)."
+  - id: A3-BENCH
+    priority: 2
+    title: "Reproducible model benchmark (JSON, extraction, reasoning, summarisation, 6-language translation, dialect, titles)"
+    status: tested
+    acceptance: "Scores per model stored and used by the router; repeatable from one command."
+    test: "python -m nexus.intelligence.model_router bench"
+    evidence: "docs/results/account3/models_bench.json (18 items; 4B vs 0.6B)."
+    next: "Superseded by A3-BENCH2/A3-BENCH3 on Kaggle GPUs."
+  - id: A3-CREATORS
+    priority: 2
+    title: "Creator reference intelligence: measured structural profiles, comparison, abstract styles, cited pattern library"
+    status: tested
+    acceptance: "Profiles of lawfully held references are measured, comparable and explainable; styles carry do_not_copy."
+    test: "pytest tests/fast/test_intel_creators.py; Creator References page"
+    evidence: "4 public-domain NASA/JPL references profiled and compared (docs/results/account3/creators_*.json)."
+    next: "Owner-supplied references for challenge / Arabic educational / vlog formats; OCR for on-screen text; music detection."
+  - id: A3-MARKET
+    priority: 2
+    title: "Market intelligence: evidence-backed opportunity scores, cross-checked research briefs, trend monitor"
+    status: tested
+    acceptance: "Reports show every factor's evidence and confidence; missing data stays unknown; no view predictions."
+    test: "pytest tests/fast/test_intel_market.py; Content Research page (real job)"
+    evidence: "docs/results/account3/market_report_jwst_en.json, market_report_ai_ar.json"
+    next: "Competition needs the owner's YouTube key; GDELT reachability on the owner's machine."
+  - id: A3-STRATEGY
+    priority: 2
+    title: "Original strategy: research + style -> original script + storyboard, originality and grounding gates, hand-off to Account 2"
+    status: tested
+    acceptance: "Only original, grounded scripts reach Account 2's create-from-idea job."
+    test: "pytest tests/fast/test_intel_strategy.py; Script Studio"
+    next: "Account 2 to accept an approved ContentScript verbatim (today it is passed as notes/direction)."
+  - id: A3-LANG
+    priority: 2
+    title: "Localisation intelligence: 15-language matrix with verified licences, translation QA, EG/Gulf dialect profiles, dubbing manifests, SRT/VTT/ASS"
+    status: tested
+    acceptance: "QA catches real omissions/additions on real MT; voices gated by licence/consent; dialects distinguishable."
+    test: "pytest tests/fast/test_intel_language.py; Language Studio"
+    evidence: "docs/results/account3/language_demo.json: real errors caught in de/ar/es MT."
+    next: "Gulf Arabic output still classifies as MSA (K-15); native-speaker review; integration patches for localize.py in docs/ACCOUNT3_LANGUAGE_MATRIX.md."
+  - id: A3-PUBLISH
+    priority: 2
+    title: "Publishing engine + platform capability matrix + packaging + analytics import"
+    status: implemented
+    deps: [A3-ROUTER]
+    acceptance: "Private/draft by default, owner approval for public, idempotent, resumable; one real private upload."
+    test: "pytest tests/fast/test_intel_publishing.py; Publishing page"
+    evidence: "docs/results/account3/publishing_demo.json (no real upload - no owner credentials)."
+    next: "PUB-1 (owner OAuth) for the first real private upload."
+  - id: A3-GROWTH
+    priority: 2
+    title: "Growth engine: experiments with power calculation, honest statistics, learning loop, recommendations"
+    status: tested
+    acceptance: "No winner from small samples; every recommendation carries evidence and confidence."
+    test: "pytest tests/fast/test_intel_growth.py; Analytics & Growth page"
+    evidence: "docs/results/account3/growth_demo.json (public CC BY 4.0 dataset, not the owner's channel)."
+    next: "ANA-1: first experiment on the owner's own analytics."
+
+  # ------------------------------------------------------------------ Account 3 V2 (intelligence, real-world quality, integration)
+  - id: A3-QGATES
+    priority: 1
+    title: "Demo 4 defects: visual-context gate (geography/period/maps), glyph-coverage fonts + OCR read-back, scene visual plan (no silent title cards), factual framing gate"
+    status: tested
+    acceptance: "Each Demo 4 defect is rejected by a gate with a regression test, and a new real render shows it."
+    test: "pytest tests/fast/test_intel_quality_gates.py tests/fast/test_intel_market_v2.py; python scripts/account3/demo10_e2e.py"
+    evidence: "docs/results/account3/demo10_e2e.json"
+    next: "Optional local SigLIP classification on the owner's PC."
+  - id: A3-HANDOFF
+    priority: 1
+    title: "Strategy Handoff to Account 2 (EditorialPlan + RenderJobManifest), approved script used verbatim; shared contracts package"
+    status: tested
+    acceptance: "Handoff validates with Account 2's own validator; create_video(script=...) never paraphrases; one nexus.contracts package for all accounts."
+    test: "pytest tests/fast/test_intel_handoff.py; integration/contracts_v1/apply.sh on a three-account merge"
+    evidence: "integration/contracts_v1/RESULT.md (run r2 on the current heads of all three branches); docs/SHARED_CONTRACTS_ARCHITECTURE.md"
+    next: "Pending the owner's merge approval (A3-INT)."
+  - id: A3-BENCH2
+    priority: 2
+    title: "Open-weight model benchmark V2 on Kaggle GPUs (36 items, Qwen/DeepSeek/Mistral/GLM/Nemotron) + task routing"
+    status: tested
+    acceptance: "Every routed task has a measured model; critical tasks below the bar require human review."
+    test: "python scripts/account3/bench_v2_score.py docs/results/account3/models_bench_v2.json <kaggle outputs>"
+    evidence: "docs/results/account3/models_bench_v2.json; docs/ACCOUNT3_MODEL_BENCHMARKS.md"
+    next: "Superseded by A3-BENCH3 (>= 15 items per capability). Qwen3.6-35B-A3B / Qwen3.8-27B: download the text GGUF and ollama create (mmproj pull fails)."
+  - id: A3-CREATORS2
+    acceptance: "Every dimension is a measured number with a method or null with a reason; incompatible references are reported, not averaged."
+    priority: 2
+    title: "Creator intelligence V2: 14 measured dimensions, multi-reference weighted blends with conflict detection"
+    status: tested
+    test: "pytest tests/fast/test_intel_creators_v2.py"
+    evidence: "docs/results/account3/creators_v2.json (4 public-domain references, 14/14 dimensions)"
+    next: "Owner-supplied lawful references for challenge / Arabic educational / vlog formats."
+  - id: A3-MARKET2
+    acceptance: "Unknown factors stay unknown and widen the score interval; single-source claims are counted."
+    priority: 2
+    title: "Market research V2: credibility, cross-publisher verification, recency, geography, language demand, coverage, uncertainty interval"
+    status: tested
+    test: "pytest tests/fast/test_intel_market_v2.py"
+    evidence: "docs/results/account3/market_v2_assessments.json"
+    next: "YouTube key (owner) for competition and saturation."
+  - id: A3-LANG2
+    acceptance: "No language is publishable without native review; every state is backed by evidence."
+    priority: 2
+    title: "Per-language readiness (8 dimensions), terminology memory, native-review workflow"
+    status: tested
+    test: "pytest tests/fast/test_intel_readiness.py"
+    evidence: "docs/results/account3/language_readiness.json"
+    next: "Native reviewers (ar-EG, ar-Gulf, hi, zh); Gulf generation still classifies as MSA (K-15)."
+  - id: A3-ZEROSPEND
+    priority: 1
+    title: "Zero-spend gate fails closed: hosted providers need a verified payment_method_required: false (D-16)"
+    status: tested
+    acceptance: "Missing, null, unverified, malformed or true payment declarations refuse; the cost guard's free-tier exception re-checks the full gate; no network in tests."
+    test: "pytest tests/fast/test_zero_spend_fail_closed.py tests/fast/test_intel_router.py tests/fast/test_intel_models.py"
+    evidence: "Groq and Mistral (unverified) refused even when authorised with a key; OpenRouter :free passes only with authorisation, key and quota."
+    next: "Groq / Mistral stay disabled until their no-card free access is verified from first-party documentation (catalogue change + date)."
+  - id: A3-BENCH3
+    priority: 2
+    title: "Bench V3: 184 items, >= 15 per routed capability (incl. conflicts, Egyptian and Gulf Arabic), deterministic scorers with 95 % intervals"
+    status: tested
+    deps: [A3-BENCH2]
+    acceptance: "Identical inputs for every model; scorers tested on oracle and junk answers; results reported with intervals and separability, never as conclusive rankings."
+    test: "pytest tests/fast/test_intel_bench_v3.py; python scripts/account3/bench_v3_score.py ...; python scripts/account3/bench_v3_report.py"
+    evidence: "docs/ACCOUNT3_MODEL_BENCHMARKS_V3.md (run status stated there)"
+    next: "Use the measured V3 capabilities for routing once the run is complete; dialect stays human-reviewed."
+  - id: A3-BATCH
+    priority: 1
+    title: "Account 1 batch_llm manifests: one job per model, prompts inline, old shape refused (D-17)"
+    status: tested
+    acceptance: "Generated manifest validates against Account 1's ProductionJobManifest, runs on Account 1's real dispatcher + worker script, returns every item with verified artifacts, is idempotent; invalid manifests fail with a named cause."
+    test: "pytest tests/fast/test_intel_batch_manifest.py; on the merged tree also tests/fast/test_intel_batch_llm_integration.py"
+    evidence: "integration/contracts_v1/RESULT.md run r3 (echo engine through FakeKaggleCLI; simulated label checked)"
+    next: "Optional: one real-model batch_llm run (Kaggle config unchanged)."
+  - id: A3-RELEASE
+    priority: 1
+    title: "Release gate: QualityReport, AI-content disclosure and per-output language review decide upload / public (D-18)"
+    status: tested
+    acceptance: "No upload without a passing QualityReport for the exact file; public needs human QA approval, same-variety native review and the disclosure decision; adapters send the platform's AI field; no platform claimed live-verified."
+    test: "pytest tests/fast/test_intel_release_gate.py tests/fast/test_intel_publishing.py tests/fast/test_intel_owner_validation.py"
+    evidence: "docs/ACCOUNT3_PUBLISHING_RELEASE_GATE.md"
+    next: "Owner: OAuth client + one private upload (owner_validation)."
+  - id: A3-ANALYTICS2
+    priority: 2
+    title: "Analytics data origin, normalisation, duplicates, invalid values, reconciliation (D-19)"
+    status: tested
+    acceptance: "Every record labelled with its origin; simulated rows never conclude experiments; nothing invented or guessed."
+    test: "pytest tests/fast/test_intel_analytics_quality.py tests/fast/test_intel_growth.py"
+    evidence: "tests only (no owner analytics exist)"
+    next: "Owner export or API import after the first private upload (ANA-1); verify the CSV column maps against a real export."
+  - id: A3-INT
+    priority: 1
+    title: "Three-account integration (A1 -> A2 -> A3, then integration/contracts_v1/apply.sh)"
+    status: blocked
+    blocked_by: "Owner merge approval (agents never merge)."
+    acceptance: "Merged tree: full fast suite green, apply.sh focused tests green, CI green on Linux and Windows."
+    test: "Follow integration/contracts_v1/RESULT.md (run r4c recipe)."
+    evidence: "integration/contracts_v1/RESULT.md run r4c: A1 f9d8f11, A2 d979df1, A3 2384b95; 867 passed, 8 skipped, 0 failed (local Linux)."
+    next: "Owner restores GitHub Actions and approves the merge; CI (Linux, Windows, Windows e2e) on the exact merged head."
+  - id: A3-NATIVE
+    priority: 2
+    title: "Native-language review of ar-EG, ar-Gulf, hi and zh lines"
+    status: blocked
+    blocked_by: "Owner supplies native reviewers; agents never mark output reviewed."
+    acceptance: "At least 20 reviewed lines per language in the review workflow; readiness recomputed from the reviews."
+    test: "pytest tests/fast/test_intel_readiness.py; Review page"
+    next: "Owner assigns reviewers."
+  - id: A3-COMPETITION
+    priority: 3
+    title: "Competition and saturation signals in market research (YouTube supply)"
+    status: blocked
+    blocked_by: "Owner's YouTube Data API key."
+    acceptance: "Competition and saturation are measured, not unknown, for a real topic."
+    test: "pytest tests/fast/test_intel_market_v2.py; Content Research page"
+    next: "Owner adds the key (vault ai/youtube or env NEXUS_KEY_YOUTUBE)."
+  - id: A3-LEDGER
+    acceptance: "Only NEXUS-uploaded videos carry production features and experiment arms."
+    priority: 3
+    title: "First-party analytics ledger: platform analytics joined to production facts and experiment arms"
+    status: tested
+    test: "pytest tests/fast/test_intel_ledger.py"
+    next: "ANA-1 / PUB-1: owner OAuth client -> first private upload -> first real analytics import."
   # ------------------------------------------------------------------ Account 1: cloud platform (work/account-1-cloud-platform, PR #4)
   - id: ACC1-COMPUTE
     priority: 1

@@ -1,0 +1,690 @@
+{
+ "date": "2026-11-12",
+ "compare": {
+  "kind": "nexus.CreatorComparison/1",
+  "created": 1794503918.4367204,
+  "profiles": [
+   "crp_1e86bbb2e8 (What's Up: April 2026 Skywatching Tips from NASA)",
+   "crp_071afc5210 (Artemis Interviews with NASA Astronaut Jeanette Epps - October 4, 2019)",
+   "crp_0f60f234b5 (Crew-3 Launch Day Highlights)",
+   "crp_c54270f4c6 (Explore our Home Planet and the Universe With NASA Podcasts)"
+  ],
+  "disclaimer": "These are structural patterns observed in a small set of references. Patterns are not proof of causation: nothing here shows that a pattern produced views, retention or any other outcome.",
+  "table": [
+   {
+    "id": "crp_1e86bbb2e8",
+    "format": "science_documentary",
+    "cuts per minute": 1.31,
+    "median shot length (s)": 10.833,
+    "speech share": 0.899,
+    "words per speaking minute": 166.5,
+    "time to first speech (s)": 0.033,
+    "cuts in first 5 s": 1,
+    "silence share": 0.008,
+    "opening loudness jump (dB)": 0.34,
+    "caption_mismatch": false,
+    "hook_type": "specific_number",
+    "pacing_shape": "front_loaded"
+   },
+   {
+    "id": "crp_071afc5210",
+    "format": "interview_podcast",
+    "cuts per minute": 0.0,
+    "median shot length (s)": 1165.667,
+    "speech share": null,
+    "words per speaking minute": null,
+    "time to first speech (s)": null,
+    "cuts in first 5 s": null,
+    "silence share": 0.06,
+    "opening loudness jump (dB)": -1.86,
+    "caption_mismatch": true,
+    "hook_type": "question",
+    "pacing_shape": "single_shot_or_undetected_cuts"
+   },
+   {
+    "id": "crp_0f60f234b5",
+    "format": "event_highlights",
+    "cuts per minute": 7.55,
+    "median shot length (s)": 5.0,
+    "speech share": 0.787,
+    "words per speaking minute": 121.6,
+    "time to first speech (s)": 0.0,
+    "cuts in first 5 s": 0,
+    "silence share": 0.009,
+    "opening loudness jump (dB)": -1.97,
+    "caption_mismatch": false,
+    "hook_type": "specific_number",
+    "pacing_shape": "even"
+   },
+   {
+    "id": "crp_c54270f4c6",
+    "format": "premium_ad",
+    "cuts per minute": 13.35,
+    "median shot length (s)": 3.4,
+    "speech share": 0.916,
+    "words per speaking minute": 164.5,
+    "time to first speech (s)": 0.033,
+    "cuts in first 5 s": 1,
+    "silence share": 0.051,
+    "opening loudness jump (dB)": 1.05,
+    "caption_mismatch": false,
+    "hook_type": "question",
+    "pacing_shape": "front_loaded"
+   }
+  ],
+  "shared_patterns": [
+   {
+    "text": "All references share the same audio mode: speech_led (interpreted).",
+    "cites": [
+     "crp_1e86bbb2e8:audio.mode.value",
+     "crp_071afc5210:audio.mode.value",
+     "crp_0f60f234b5:audio.mode.value",
+     "crp_c54270f4c6:audio.mode.value"
+    ]
+   },
+   {
+    "text": "Similar speech share across references (0.787 to 0.916).",
+    "cites": [
+     "crp_1e86bbb2e8:measured.speech.speech_share",
+     "crp_0f60f234b5:measured.speech.speech_share",
+     "crp_c54270f4c6:measured.speech.speech_share"
+    ]
+   }
+  ],
+  "differences": [
+   {
+    "text": "hook type differs: crp_1e86bbb2e8=specific_number, crp_071afc5210=question, crp_0f60f234b5=specific_number, crp_c54270f4c6=question (interpreted).",
+    "cites": [
+     "crp_1e86bbb2e8:hook.type.value",
+     "crp_071afc5210:hook.type.value",
+     "crp_0f60f234b5:hook.type.value",
+     "crp_c54270f4c6:hook.type.value"
+    ]
+   },
+   {
+    "text": "pacing shape differs: crp_1e86bbb2e8=front_loaded, crp_071afc5210=single_shot_or_undetected_cuts, crp_0f60f234b5=even, crp_c54270f4c6=front_loaded (interpreted).",
+    "cites": [
+     "crp_1e86bbb2e8:story.pacing_shape.value",
+     "crp_071afc5210:story.pacing_shape.value",
+     "crp_0f60f234b5:story.pacing_shape.value",
+     "crp_c54270f4c6:story.pacing_shape.value"
+    ]
+   },
+   {
+    "text": "edit tempo differs: crp_1e86bbb2e8=slow, crp_071afc5210=slow, crp_0f60f234b5=medium, crp_c54270f4c6=medium (interpreted).",
+    "cites": [
+     "crp_1e86bbb2e8:editing.tempo.value",
+     "crp_071afc5210:editing.tempo.value",
+     "crp_0f60f234b5:editing.tempo.value",
+     "crp_c54270f4c6:editing.tempo.value"
+    ]
+   },
+   {
+    "text": "cuts per minute ranges from 0.0 (crp_071afc5210) to 13.35 (crp_c54270f4c6).",
+    "cites": [
+     "crp_1e86bbb2e8:measured.cuts_per_min",
+     "crp_071afc5210:measured.cuts_per_min",
+     "crp_0f60f234b5:measured.cuts_per_min",
+     "crp_c54270f4c6:measured.cuts_per_min"
+    ]
+   },
+   {
+    "text": "median shot length (s) ranges from 3.4 (crp_c54270f4c6) to 1165.667 (crp_071afc5210).",
+    "cites": [
+     "crp_1e86bbb2e8:measured.median_shot_s",
+     "crp_071afc5210:measured.median_shot_s",
+     "crp_0f60f234b5:measured.median_shot_s",
+     "crp_c54270f4c6:measured.median_shot_s"
+    ]
+   },
+   {
+    "text": "words per speaking minute ranges from 121.6 (crp_0f60f234b5) to 166.5 (crp_1e86bbb2e8).",
+    "cites": [
+     "crp_1e86bbb2e8:measured.speech.wpm_speaking",
+     "crp_0f60f234b5:measured.speech.wpm_speaking",
+     "crp_c54270f4c6:measured.speech.wpm_speaking"
+    ]
+   },
+   {
+    "text": "time to first speech (s) ranges from 0.0 (crp_0f60f234b5) to 0.033 (crp_1e86bbb2e8).",
+    "cites": [
+     "crp_1e86bbb2e8:measured.speech.time_to_first_speech_s",
+     "crp_0f60f234b5:measured.speech.time_to_first_speech_s",
+     "crp_c54270f4c6:measured.speech.time_to_first_speech_s"
+    ]
+   },
+   {
+    "text": "cuts in first 5 s ranges from 0 (crp_0f60f234b5) to 1 (crp_1e86bbb2e8).",
+    "cites": [
+     "crp_1e86bbb2e8:measured.opening.first_5s.cuts",
+     "crp_0f60f234b5:measured.opening.first_5s.cuts",
+     "crp_c54270f4c6:measured.opening.first_5s.cuts"
+    ]
+   },
+   {
+    "text": "silence share ranges from 0.008 (crp_1e86bbb2e8) to 0.06 (crp_071afc5210).",
+    "cites": [
+     "crp_1e86bbb2e8:measured.audio.silence_share",
+     "crp_071afc5210:measured.audio.silence_share",
+     "crp_0f60f234b5:measured.audio.silence_share",
+     "crp_c54270f4c6:measured.audio.silence_share"
+    ]
+   },
+   {
+    "text": "opening loudness jump (dB) ranges from -1.97 (crp_0f60f234b5) to 1.05 (crp_c54270f4c6).",
+    "cites": [
+     "crp_1e86bbb2e8:measured.loudness_jump_db",
+     "crp_071afc5210:measured.loudness_jump_db",
+     "crp_0f60f234b5:measured.loudness_jump_db",
+     "crp_c54270f4c6:measured.loudness_jump_db"
+    ]
+   }
+  ],
+  "strongest_opening": {
+   "text": "crp_c54270f4c6 has the strongest opening by the stated measurable criteria (score 3.944 of 7). This ranks opening structure only; it says nothing about how audiences responded.",
+   "cites": [
+    "crp_c54270f4c6:measured.opening.first_3s.cuts",
+    "crp_c54270f4c6:measured.opening.first_5s.words_per_s",
+    "crp_c54270f4c6:measured.speech.time_to_first_speech_s",
+    "crp_c54270f4c6:measured.opening.first_15s.question_words",
+    "crp_c54270f4c6:measured.opening.first_15s.numbers",
+    "crp_c54270f4c6:measured.opening.first_15s.stakes_words",
+    "crp_c54270f4c6:measured.loudness_jump_db"
+   ],
+   "criteria": [
+    "visual change in first 3 s",
+    "words per second in first 5 s",
+    "earlier speech onset",
+    "question words in first 15 s",
+    "numbers in first 15 s",
+    "stakes words in first 15 s",
+    "opening louder than the rest"
+   ],
+   "ranking": [
+    {
+     "id": "crp_c54270f4c6",
+     "score": 3.944,
+     "criteria": [
+      {
+       "criterion": "visual change in first 3 s",
+       "field": "measured.opening.first_3s.cuts",
+       "value": 1,
+       "points": 1.0
+      },
+      {
+       "criterion": "words per second in first 5 s",
+       "field": "measured.opening.first_5s.words_per_s",
+       "value": 3.0,
+       "points": 0.444
+      },
+      {
+       "criterion": "earlier speech onset",
+       "field": "measured.speech.time_to_first_speech_s",
+       "value": 0.033,
+       "points": 0.0
+      },
+      {
+       "criterion": "question words in first 15 s",
+       "field": "measured.opening.first_15s.question_words",
+       "value": 2,
+       "points": 1.0
+      },
+      {
+       "criterion": "numbers in first 15 s",
+       "field": "measured.opening.first_15s.numbers",
+       "value": 0,
+       "points": 0.0
+      },
+      {
+       "criterion": "stakes words in first 15 s",
+       "field": "measured.opening.first_15s.stakes_words",
+       "value": 0,
+       "points": 0.5
+      },
+      {
+       "criterion": "opening louder than the rest",
+       "field": "measured.loudness_jump_db",
+       "value": 1.05,
+       "points": 1.0
+      }
+     ]
+    },
+    {
+     "id": "crp_0f60f234b5",
+     "score": 3.5,
+     "criteria": [
+      {
+       "criterion": "visual change in first 3 s",
+       "field": "measured.opening.first_3s.cuts",
+       "value": 0,
+       "points": 0.0
+      },
+      {
+       "criterion": "words per second in first 5 s",
+       "field": "measured.opening.first_5s.words_per_s",
+       "value": 4.0,
+       "points": 1.0
+      },
+      {
+       "criterion": "earlier speech onset",
+       "field": "measured.speech.time_to_first_speech_s",
+       "value": 0.0,
+       "points": 1.0
+      },
+      {
+       "criterion": "question words in first 15 s",
+       "field": "measured.opening.first_15s.question_words",
+       "value": 0,
+       "points": 0.0
+      },
+      {
+       "criterion": "numbers in first 15 s",
+       "field": "measured.opening.first_15s.numbers",
+       "value": 2,
+       "points": 1.0
+      },
+      {
+       "criterion": "stakes words in first 15 s",
+       "field": "measured.opening.first_15s.stakes_words",
+       "value": 0,
+       "points": 0.5
+      },
+      {
+       "criterion": "opening louder than the rest",
+       "field": "measured.loudness_jump_db",
+       "value": -1.97,
+       "points": 0.0
+      }
+     ]
+    },
+    {
+     "id": "crp_1e86bbb2e8",
+     "score": 2.765,
+     "criteria": [
+      {
+       "criterion": "visual change in first 3 s",
+       "field": "measured.opening.first_3s.cuts",
+       "value": 1,
+       "points": 1.0
+      },
+      {
+       "criterion": "words per second in first 5 s",
+       "field": "measured.opening.first_5s.words_per_s",
+       "value": 2.2,
+       "points": 0.0
+      },
+      {
+       "criterion": "earlier speech onset",
+       "field": "measured.speech.time_to_first_speech_s",
+       "value": 0.033,
+       "points": 0.0
+      },
+      {
+       "criterion": "question words in first 15 s",
+       "field": "measured.opening.first_15s.question_words",
+       "value": 0,
+       "points": 0.0
+      },
+      {
+       "criterion": "numbers in first 15 s",
+       "field": "measured.opening.first_15s.numbers",
+       "value": 1,
+       "points": 0.5
+      },
+      {
+       "criterion": "stakes words in first 15 s",
+       "field": "measured.opening.first_15s.stakes_words",
+       "value": 0,
+       "points": 0.5
+      },
+      {
+       "criterion": "opening louder than the rest",
+       "field": "measured.loudness_jump_db",
+       "value": 0.34,
+       "points": 0.765
+      }
+     ]
+    },
+    {
+     "id": "crp_071afc5210",
+     "score": 0.036,
+     "criteria": [
+      {
+       "criterion": "visual change in first 3 s",
+       "field": "measured.opening.first_3s.cuts",
+       "value": null,
+       "points": 0.0
+      },
+      {
+       "criterion": "words per second in first 5 s",
+       "field": "measured.opening.first_5s.words_per_s",
+       "value": null,
+       "points": 0.0
+      },
+      {
+       "criterion": "earlier speech onset",
+       "field": "measured.speech.time_to_first_speech_s",
+       "value": null,
+       "points": 0.0
+      },
+      {
+       "criterion": "question words in first 15 s",
+       "field": "measured.opening.first_15s.question_words",
+       "value": null,
+       "points": 0.0
+      },
+      {
+       "criterion": "numbers in first 15 s",
+       "field": "measured.opening.first_15s.numbers",
+       "value": null,
+       "points": 0.0
+      },
+      {
+       "criterion": "stakes words in first 15 s",
+       "field": "measured.opening.first_15s.stakes_words",
+       "value": null,
+       "points": 0.0
+      },
+      {
+       "criterion": "opening louder than the rest",
+       "field": "measured.loudness_jump_db",
+       "value": -1.86,
+       "points": 0.036
+      }
+     ]
+    }
+   ]
+  },
+  "adaptable_techniques": [
+   {
+    "text": "Adapt as a pattern (not a copy): slow edit tempo (1.31 cuts/min, median shot 10.833 s)",
+    "cites": [
+     "crp_1e86bbb2e8:cuts_per_min",
+     "crp_1e86bbb2e8:median_shot_s"
+    ]
+   },
+   {
+    "text": "Adapt as a pattern (not a copy): pacing shape: front_loaded",
+    "cites": [
+     "crp_1e86bbb2e8:pacing_curve"
+    ]
+   },
+   {
+    "text": "Adapt as a pattern (not a copy): narration density 166.5 words per speaking minute",
+    "cites": [
+     "crp_1e86bbb2e8:speech.wpm_speaking"
+    ]
+   },
+   {
+    "text": "Adapt as a pattern (not a copy): States specific numbers early",
+    "cites": [
+     "crp_1e86bbb2e8:opening.first_15s.numbers"
+    ]
+   },
+   {
+    "text": "Adapt as a pattern (not a copy): pacing shape: single_shot_or_undetected_cuts",
+    "cites": [
+     "crp_071afc5210:pacing_curve"
+    ]
+   },
+   {
+    "text": "Adapt as a pattern (not a copy): narration density 58.6 words per speaking minute",
+    "cites": [
+     "crp_071afc5210:speech.wpm_speaking"
+    ]
+   },
+   {
+    "text": "Adapt as a pattern (not a copy): Poses a question in the opening (curiosity gap)",
+    "cites": [
+     "crp_071afc5210:opening.first_15s.questions",
+     "crp_071afc5210:opening.first_15s.question_words"
+    ]
+   },
+   {
+    "text": "Adapt as a pattern (not a copy): medium edit tempo (7.55 cuts/min, median shot 5.0 s)",
+    "cites": [
+     "crp_0f60f234b5:cuts_per_min",
+     "crp_0f60f234b5:median_shot_s"
+    ]
+   },
+   {
+    "text": "Adapt as a pattern (not a copy): pacing shape: even",
+    "cites": [
+     "crp_0f60f234b5:pacing_curve"
+    ]
+   },
+   {
+    "text": "Adapt as a pattern (not a copy): narration density 121.6 words per speaking minute",
+    "cites": [
+     "crp_0f60f234b5:speech.wpm_speaking"
+    ]
+   },
+   {
+    "text": "Adapt as a pattern (not a copy): Cut-rate spikes later in the video (30-40%, 50-60%, 60-70%) - possible re-engagement beats",
+    "cites": [
+     "crp_0f60f234b5:pacing_curve"
+    ]
+   },
+   {
+    "text": "Adapt as a pattern (not a copy): narration density 164.5 words per speaking minute",
+    "cites": [
+     "crp_c54270f4c6:speech.wpm_speaking"
+    ]
+   }
+  ],
+  "nexus_should_differently": [
+   {
+    "text": "Avoid: At least one shot longer than 20 s in an otherwise cut-driven edit (seen in crp_0f60f234b5).",
+    "cites": [
+     "crp_0f60f234b5:longest_shot_s",
+     "crp_0f60f234b5:cuts_per_min"
+    ]
+   }
+  ],
+  "original_angle": {
+   "text": "Combine the question opening structure of crp_c54270f4c6 with a 'Challenge / high-stakes format' body structure (Minute 0-1: deliver on the packaging promise; Minutes 1-3: move fast into action; re-engage before attention drops) on an original topic - no reference uses this mix.",
+   "cites": [
+    "crp_c54270f4c6:hook.type.value",
+    "library:challenge_high_stakes.structure",
+    "crp_1e86bbb2e8:category",
+    "crp_071afc5210:category",
+    "crp_0f60f234b5:category",
+    "crp_c54270f4c6:category"
+   ]
+  },
+  "not_compared": []
+ },
+ "style": {
+  "schema": "nexus.CreativeStyleProfile/1",
+  "id": "csp_7422ce15a5",
+  "name": "NASA public references (demo)",
+  "from_references": [
+   "crp_1e86bbb2e8",
+   "crp_071afc5210",
+   "crp_0f60f234b5",
+   "crp_c54270f4c6"
+  ],
+  "pacing": {
+   "cuts_per_min": {
+    "median": 4.43,
+    "min": 0.0,
+    "max": 13.35,
+    "n": 4
+   },
+   "median_shot_s": {
+    "median": 7.917,
+    "min": 3.4,
+    "max": 1165.667,
+    "n": 4
+   },
+   "speech_share": {
+    "median": 0.907,
+    "min": 0.787,
+    "max": 1.0,
+    "n": 4
+   },
+   "wpm_speaking": {
+    "median": 143.05,
+    "min": 58.6,
+    "max": 166.5,
+    "n": 4
+   },
+   "time_to_first_speech_s": {
+    "median": 0.017,
+    "min": 0.0,
+    "max": 0.033,
+    "n": 4
+   },
+   "cuts_first_5s": {
+    "median": 0.5,
+    "min": 0,
+    "max": 1,
+    "n": 4
+   },
+   "curve_cuts_per_min_by_10pct": [
+    10.82,
+    5.55,
+    5.76,
+    5.36,
+    5.76,
+    5.36,
+    7.75,
+    5.76,
+    3.38,
+    0.0
+   ],
+   "kind": "measured (aggregated)"
+  },
+  "hook_patterns": [
+   "question opening",
+   "specific_number opening"
+  ],
+  "structure": [
+   "pacing shape: even",
+   "pacing shape: front_loaded",
+   "pacing shape: single_shot_or_undetected_cuts",
+   "Script built on books and primary sources, reviewed by experts [science_documentary; source: kurzgesagt_process]",
+   "Publish a source sheet for every video [science_documentary; source: kurzgesagt_process]",
+   "Many script drafts to cut unnecessary parts [science_documentary; source: kurzgesagt_process]",
+   "Question-answer blocks; chapters per topic [interview_podcast; source: hypothesis]",
+   "Mood -> product/brand reveal -> end card [premium_ad; source: hypothesis]"
+  ],
+  "visual_rules": [
+   "edit tempo: medium",
+   "edit tempo: slow"
+  ],
+  "audio_rules": [
+   "audio mode: speech_led"
+  ],
+  "do_not_copy": [
+   "Titles, thumbnails and exact wording of any reference",
+   "Catchphrases, intros/outros, recurring segment names",
+   "Logos, music, sound effects, characters, set designs and on-screen personas",
+   "Footage, graphics or frames of any reference",
+   "title: What's Up: April 2026 Skywatching Tips from NASA",
+   "creator identity / branding: NASA/JPL-Caltech",
+   "title: Artemis Interviews with NASA Astronaut Jeanette Epps - October 4, 2019",
+   "creator identity / branding: NASA JSC",
+   "title: Crew-3 Launch Day Highlights",
+   "creator identity / branding: NASA KSC",
+   "title: Explore our Home Planet and the Universe With NASA Podcasts",
+   "creator identity / branding: NASA HQ"
+  ],
+  "note": "abstract structure only; use with original content"
+ },
+ "account2_reference_style": {
+  "schema": "nexus.ReferenceStyleProfile/1",
+  "name": "NASA public references (demo)",
+  "source": {
+   "kind": "account3.CreativeStyleProfile",
+   "id": "csp_7422ce15a5",
+   "references": [
+    "crp_1e86bbb2e8",
+    "crp_071afc5210",
+    "crp_0f60f234b5",
+    "crp_c54270f4c6"
+   ]
+  },
+  "metrics": {
+   "cuts_per_min": {
+    "median": 4.43,
+    "min": 0.0,
+    "max": 13.35,
+    "n": 4
+   },
+   "median_shot_s": {
+    "median": 7.917,
+    "min": 3.4,
+    "max": 1165.667,
+    "n": 4
+   },
+   "speech_share": {
+    "median": 0.907,
+    "min": 0.787,
+    "max": 1.0,
+    "n": 4
+   },
+   "wpm_speaking": {
+    "median": 143.05,
+    "min": 58.6,
+    "max": 166.5,
+    "n": 4
+   },
+   "time_to_first_speech_s": {
+    "median": 0.017,
+    "min": 0.0,
+    "max": 0.033,
+    "n": 4
+   },
+   "cuts_first_5s": {
+    "median": 0.5,
+    "min": 0,
+    "max": 1,
+    "n": 4
+   },
+   "curve_cuts_per_min_by_10pct": [
+    10.82,
+    5.55,
+    5.76,
+    5.36,
+    5.76,
+    5.36,
+    7.75,
+    5.76,
+    3.38,
+    0.0
+   ],
+   "kind": "measured (aggregated)"
+  },
+  "structure": [
+   "pacing shape: even",
+   "pacing shape: front_loaded",
+   "pacing shape: single_shot_or_undetected_cuts",
+   "Script built on books and primary sources, reviewed by experts [science_documentary; source: kurzgesagt_process]",
+   "Publish a source sheet for every video [science_documentary; source: kurzgesagt_process]",
+   "Many script drafts to cut unnecessary parts [science_documentary; source: kurzgesagt_process]",
+   "Question-answer blocks; chapters per topic [interview_podcast; source: hypothesis]",
+   "Mood -> product/brand reveal -> end card [premium_ad; source: hypothesis]",
+   "question opening",
+   "specific_number opening"
+  ],
+  "rights": {
+   "basis": "public-domain",
+   "note": "structure only - no footage or script",
+   "do_not_copy": [
+    "Titles, thumbnails and exact wording of any reference",
+    "Catchphrases, intros/outros, recurring segment names",
+    "Logos, music, sound effects, characters, set designs and on-screen personas",
+    "Footage, graphics or frames of any reference",
+    "title: What's Up: April 2026 Skywatching Tips from NASA",
+    "creator identity / branding: NASA/JPL-Caltech",
+    "title: Artemis Interviews with NASA Astronaut Jeanette Epps - October 4, 2019",
+    "creator identity / branding: NASA JSC",
+    "title: Crew-3 Launch Day Highlights",
+    "creator identity / branding: NASA KSC",
+    "title: Explore our Home Planet and the Universe With NASA Podcasts",
+    "creator identity / branding: NASA HQ"
+   ]
+  }
+ }
+}

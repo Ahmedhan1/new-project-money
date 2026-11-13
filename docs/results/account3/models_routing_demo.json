@@ -1,0 +1,382 @@
+{
+ "date": "2026-11-12 17:49",
+ "steps": [
+  {
+   "step": "explain summarization/internal",
+   "ok": true,
+   "task": "summarization",
+   "privacy": "internal",
+   "capability": "summarization",
+   "min_quality": 3,
+   "ordering": "fastest adequate model first (light task)",
+   "estimated_tokens": 1479,
+   "chosen": {
+    "provider": "owner-openai-compatible",
+    "model": "qwen3-0.6b-q8",
+    "hosting": "owner_worker",
+    "privacy_max": "internal",
+    "quality": 4,
+    "quality_source": "estimate (bench 8.0 on n=1 < 5 items: not used)",
+    "speed": "medium",
+    "licence": "Apache-2.0",
+    "local": true
+   },
+   "ranked": [
+    {
+     "provider": "owner-openai-compatible",
+     "model": "qwen3-0.6b-q8",
+     "hosting": "owner_worker",
+     "privacy_max": "internal",
+     "quality": 4,
+     "quality_source": "estimate (bench 8.0 on n=1 < 5 items: not used)",
+     "speed": "medium",
+     "licence": "Apache-2.0",
+     "local": true
+    },
+    {
+     "provider": "local-llamacpp",
+     "model": "qwen3-4b-q4km",
+     "hosting": "in_process",
+     "privacy_max": "private",
+     "quality": 5,
+     "quality_source": "estimate (bench 7.2 on n=1 < 5 items: not used)",
+     "speed": "slow",
+     "licence": "Apache-2.0",
+     "local": true
+    }
+   ],
+   "excluded": [
+    "groq: data class 'internal' may not leave for a 'hosted_free' provider",
+    "groq: data class 'internal' may not leave for a 'hosted_free' provider",
+    "groq: data class 'internal' may not leave for a 'hosted_free' provider",
+    "cerebras: data class 'internal' may not leave for a 'hosted_free' provider",
+    "gemini: data class 'internal' may not leave for a 'hosted_free' provider",
+    "gemini: data class 'internal' may not leave for a 'hosted_free' provider",
+    "openrouter-free: data class 'internal' may not leave for a 'hosted_free' provider",
+    "mistral-free: data class 'internal' may not leave for a 'hosted_free' provider"
+   ],
+   "answer": "summarization runs on owner-openai-compatible/qwen3-0.6b-q8",
+   "gates": [
+    "privacy class",
+    "zero spend (no card, free quota only, cost guard)",
+    "owner authorisation + key (hosted)",
+    "documented and owner-set quotas",
+    "context / token budget",
+    "circuit breaker",
+    "minimum quality"
+   ],
+   "wall_s": 0.04
+  },
+  {
+   "step": "summarization/internal (real call)",
+   "ok": true,
+   "provider": "owner-openai-compatible",
+   "model": "qwen3-0.6b-q8",
+   "latency_s": 2.104,
+   "text": "The city library will close for renovation from June to August and reopen in September with a new children's wing.",
+   "data": null,
+   "fallbacks": [],
+   "usage": {
+    "prompt_tokens": 52,
+    "completion_tokens": 26,
+    "total_tokens": 78
+   },
+   "wall_s": 2.11
+  },
+  {
+   "step": "data_extraction/private (must stay in-process)",
+   "ok": true,
+   "provider": "local-llamacpp",
+   "model": "qwen3-4b-q4km",
+   "latency_s": 10.672,
+   "text": "{\"name\": \"Amira Nabil\", \"city\": \"Alexandria\"}",
+   "data": {
+    "name": "Amira Nabil",
+    "city": "Alexandria"
+   },
+   "fallbacks": [],
+   "usage": {},
+   "wall_s": 10.68
+  },
+  {
+   "step": "summarization/internal after the owner server stopped (fallback)",
+   "ok": true,
+   "provider": "local-llamacpp",
+   "model": "qwen3-4b-q4km",
+   "latency_s": 3.718,
+   "text": "Bakery opens at 6 AM on Main Street.",
+   "data": null,
+   "fallbacks": [
+    "owner-openai-compatible/qwen3-0.6b-q8: ProviderError: owner-openai-compatible: unreachable (<urlopen error [Errno 111] Connection refused>)",
+    "owner-openai-compatible/qwen3-0.6b-q8: ProviderError: owner-openai-compatible: unreachable (<urlopen error [Errno 111] Connection refused>)"
+   ],
+   "usage": {},
+   "wall_s": 3.72
+  },
+  {
+   "step": "status/public without any hosted key (hosted providers excluded)",
+   "ok": true,
+   "general": {
+    "route": [
+     "local-llamacpp/qwen3-4b-q4km"
+    ],
+    "excluded": [
+     "groq: not authorised by the owner (settings.json ai_providers.groq.authorized)",
+     "groq: not authorised by the owner (settings.json ai_providers.groq.authorized)",
+     "groq: not authorised by the owner (settings.json ai_providers.groq.authorized)",
+     "cerebras: requires a payment method - never used (zero spend)",
+     "gemini: not authorised by the owner (settings.json ai_providers.gemini.authorized)",
+     "gemini: not authorised by the owner (settings.json ai_providers.gemini.authorized)",
+     "openrouter-free: not authorised by the owner (settings.json ai_providers.openrouter-free.authorized)",
+     "mistral-free: not authorised by the owner (settings.json ai_providers.mistral-free.authorized)"
+    ]
+   },
+   "wall_s": 0.01
+  }
+ ],
+ "owner_server": {
+  "base_url": "http://127.0.0.1:8766/v1",
+  "models": [
+   "qwen3-0.6b-q8"
+  ],
+  "weights": "Qwen3-0.6B-Q8_0.gguf",
+  "command": "-m llama_cpp.server --model /home/user/new-project-money/.nexus/models/hf/qwen3-0.6b-gguf/Qwen3-0.6B-Q8_0.gguf --model_alias qwen3-0.6b-q8 --host 127.0.0.1 --port 8766 --n_ctx 4096 --n_threads 4"
+ },
+ "health": [
+  {
+   "provider": "local-llamacpp",
+   "hosting": "in_process",
+   "requests": 17,
+   "mean_latency_s": 58.51,
+   "p50_latency_s": 45.112,
+   "p95_latency_s": 119.795,
+   "last_success": 1794505854.5191264,
+   "failures": 2,
+   "last_failure": 1794504843.4013817,
+   "last_error": "ValueError: invalid structured output: expected an object",
+   "circuit": "closed",
+   "today": 17,
+   "tokens_today": 131,
+   "quotas": {},
+   "owner_limits": {},
+   "zero_spend_blocked": false
+  },
+  {
+   "provider": "owner-openai-compatible",
+   "hosting": "owner_worker",
+   "requests": 1,
+   "mean_latency_s": 2.1,
+   "p50_latency_s": 2.104,
+   "p95_latency_s": 2.104,
+   "last_success": 1794505839.8021605,
+   "failures": 2,
+   "last_failure": 1794505850.8003354,
+   "last_error": "ProviderError: owner-openai-compatible: unreachable (<urlopen error [Errno 111] Connection refused>)",
+   "circuit": "closed",
+   "today": 1,
+   "tokens_today": 78,
+   "quotas": {},
+   "owner_limits": {},
+   "zero_spend_blocked": false
+  }
+ ],
+ "account1_capabilities": [
+  {
+   "contract": "AIProviderCapability/v1",
+   "provider": "local-llamacpp",
+   "connection_id": "a3:local-llamacpp",
+   "tasks": [
+    "analytics_interpretation",
+    "audience_classification",
+    "content_scoring",
+    "data_extraction",
+    "deep_research",
+    "general",
+    "hook_generation",
+    "quality_review",
+    "reference_interpretation",
+    "scriptwriting",
+    "story_planning",
+    "summarization",
+    "title_generation",
+    "topic_ideation",
+    "translation"
+   ],
+   "models": [
+    "qwen3-4b-q4km"
+   ],
+   "local": true,
+   "commercial_use": "yes",
+   "quotas": []
+  },
+  {
+   "contract": "AIProviderCapability/v1",
+   "provider": "owner-openai-compatible",
+   "connection_id": "a3:owner-openai-compatible",
+   "tasks": [],
+   "models": [],
+   "local": true,
+   "commercial_use": "unverified",
+   "quotas": []
+  },
+  {
+   "contract": "AIProviderCapability/v1",
+   "provider": "groq",
+   "connection_id": "a3:groq",
+   "tasks": [
+    "analytics_interpretation",
+    "audience_classification",
+    "content_scoring",
+    "data_extraction",
+    "deep_research",
+    "general",
+    "hook_generation",
+    "quality_review",
+    "reference_interpretation",
+    "scriptwriting",
+    "story_planning",
+    "summarization",
+    "title_generation",
+    "topic_ideation",
+    "translation"
+   ],
+   "models": [
+    "openai/gpt-oss-20b",
+    "openai/gpt-oss-120b",
+    "qwen/qwen3.8-27b"
+   ],
+   "local": false,
+   "commercial_use": "unverified",
+   "quotas": [
+    {
+     "contract": "QuotaStatus/v1",
+     "provider": "groq",
+     "connection_id": "a3:groq",
+     "resource": "api_requests",
+     "limit": 1000.0,
+     "used": 0.0,
+     "period": "daily",
+     "source": "documented",
+     "measured_at": 1794505854.7199366,
+     "exhausted": false
+    },
+    {
+     "contract": "QuotaStatus/v1",
+     "provider": "groq",
+     "connection_id": "a3:groq",
+     "resource": "api_requests",
+     "limit": 30.0,
+     "used": null,
+     "period": "per-minute",
+     "source": "documented",
+     "measured_at": 1794505854.7199392,
+     "exhausted": false
+    }
+   ]
+  },
+  {
+   "contract": "AIProviderCapability/v1",
+   "provider": "gemini",
+   "connection_id": "a3:gemini",
+   "tasks": [
+    "analytics_interpretation",
+    "audience_classification",
+    "content_scoring",
+    "data_extraction",
+    "deep_research",
+    "general",
+    "hook_generation",
+    "quality_review",
+    "reference_interpretation",
+    "scriptwriting",
+    "story_planning",
+    "summarization",
+    "title_generation",
+    "topic_ideation",
+    "translation"
+   ],
+   "models": [
+    "gemini-3.5-flash-lite",
+    "gemini-3.8-flash"
+   ],
+   "local": false,
+   "commercial_use": "unverified",
+   "quotas": []
+  },
+  {
+   "contract": "AIProviderCapability/v1",
+   "provider": "openrouter-free",
+   "connection_id": "a3:openrouter-free",
+   "tasks": [
+    "audience_classification",
+    "content_scoring",
+    "data_extraction",
+    "general",
+    "hook_generation",
+    "summarization",
+    "title_generation",
+    "topic_ideation",
+    "translation"
+   ],
+   "models": [
+    "liquid/lfm-3-1.7b:free"
+   ],
+   "local": false,
+   "commercial_use": "unverified",
+   "quotas": [
+    {
+     "contract": "QuotaStatus/v1",
+     "provider": "openrouter-free",
+     "connection_id": "a3:openrouter-free",
+     "resource": "api_requests",
+     "limit": 50.0,
+     "used": 0.0,
+     "period": "daily",
+     "source": "documented",
+     "measured_at": 1794505854.7200153,
+     "exhausted": false
+    },
+    {
+     "contract": "QuotaStatus/v1",
+     "provider": "openrouter-free",
+     "connection_id": "a3:openrouter-free",
+     "resource": "api_requests",
+     "limit": 20.0,
+     "used": null,
+     "period": "per-minute",
+     "source": "documented",
+     "measured_at": 1794505854.7200167,
+     "exhausted": false
+    }
+   ]
+  },
+  {
+   "contract": "AIProviderCapability/v1",
+   "provider": "mistral-free",
+   "connection_id": "a3:mistral-free",
+   "tasks": [
+    "analytics_interpretation",
+    "audience_classification",
+    "content_scoring",
+    "data_extraction",
+    "deep_research",
+    "general",
+    "hook_generation",
+    "quality_review",
+    "reference_interpretation",
+    "scriptwriting",
+    "story_planning",
+    "summarization",
+    "title_generation",
+    "topic_ideation",
+    "translation"
+   ],
+   "models": [
+    "mistral-small-latest"
+   ],
+   "local": false,
+   "commercial_use": "unverified",
+   "quotas": []
+  }
+ ]
+}

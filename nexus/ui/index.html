@@ -269,7 +269,9 @@ async discovery(m){const c=await api("/api/catalog");const cls=[...new Set(c.map
 async settings(m){m.innerHTML=`<h2 class="page">Settings</h2><div class="row"><label>User mode<select id="mode"><option value="beginner">Beginner: guided, automatic</option><option value="creator">Creator: creative settings</option><option value="professional">Professional: full detail</option></select></label></div>
  <p class="lead">Beginner hides transcripts, research notes and technical detail. Stored in this browser only.</p>`;$("#mode").value=mode;$("#mode").onchange=e=>{mode=e.target.value;localStorage.setItem("nexus-mode",mode)}}
 };
-go((location.hash.slice(1) in PAGES) ? location.hash.slice(1) : "home");  // deep links such as /#review
+</script>
+<script src="/ui/intelligence.js"></script>
+<script>go((location.hash.slice(1) in PAGES) ? location.hash.slice(1) : "home");  // deep links such as /#review
 </script>
 </body>
 </html>

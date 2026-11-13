@@ -17,3 +17,5 @@ manim
 llama-cpp-python
 python-multipart
 cryptography
+fonttools
+pycountry

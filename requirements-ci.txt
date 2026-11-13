@@ -13,3 +13,5 @@ arabic-reshaper
 python-bidi
 pytest
 ruff
+fonttools
+pycountry
