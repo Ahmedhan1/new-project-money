@@ -100,7 +100,7 @@ def test_qa_d8_corrupt_media_fails_once_with_a_plain_error_and_a_failed_stage(ho
     jid = jobs.submit("qa-d8-probe", {}, max_retries=3)["job"]
     jobs.run_worker(once=True)
     r = jobs.get(jid)
-    assert r["status"] == "failed" and r["retries"] == 1                  # not retried: the input cannot change
+    assert r["status"] == "failed" and r["retries"] == 0                  # not retried: the input cannot change
     assert "Traceback" not in r["error"] and str(config.HOME) not in r["error"] and "<NEXUS_HOME>" in r["error"]
     assert r["stages"]["probe"]["status"] == "failed"                     # not left 'running'
     log = (config.LOGS / "jobs" / f"{jid}.log").read_text(encoding="utf-8")

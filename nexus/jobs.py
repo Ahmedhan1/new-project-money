@@ -298,9 +298,13 @@ def run_job(job: Job) -> str:
         err = public_error(e)
         row = db.query("SELECT retries,max_retries FROM jobs WHERE id=?", (job.id,))[0]
         n = (row["retries"] or 0) + 1
-        if _permanent(e) or n > (row["max_retries"] or 0):
+        permanent = _permanent(e)
+        if permanent or n > (row["max_retries"] or 0):
+            # a permanent input error is not retried, so the retry counter stays where it was (0 on a first attempt)
             db.execute("UPDATE jobs SET status='failed', finished=?, retries=?, error=?, recovery=? WHERE id=?",
-                       (time.time(), n, err, "fix the cause, then `nexus jobs retry <id>` (finished stages are kept)", job.id))
+                       (time.time(), (row["retries"] or 0) if permanent else n, err,
+                        "the input cannot be processed: replace the file, then `nexus jobs retry <id>`" if permanent
+                        else "fix the cause, then `nexus jobs retry <id>` (finished stages are kept)", job.id))
             return "failed"
         db.execute("UPDATE jobs SET status='queued', retries=?, error=?, recovery=? WHERE id=?",
                    (n, err, f"attempt {n} failed; retrying from last checkpoint", job.id))
