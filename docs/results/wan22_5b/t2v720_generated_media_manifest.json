@@ -1,0 +1,42 @@
+{
+ "schema": "nexus.GeneratedMediaManifest/1",
+ "model": {
+  "id": "wan22-ti2v-5b"
+ },
+ "task": "text_to_video",
+ "inputs": [],
+ "output": {
+  "uri": "docs/results/wan22_5b/media/t2v_1280x704_121f_24fps.mp4",
+  "role": "output",
+  "bytes": 6144873,
+  "sha256": "26c351fd1427fc9b7a17cccdbbcd47ddbd86b054c3565233b22aeabf0dea2e1f"
+ },
+ "classification": "generated-video",
+ "licence": {
+  "weights_licence": "Apache-2.0",
+  "commercial_use": "yes",
+  "class": "foss",
+  "conditions": null,
+  "source_url": "https://huggingface.co/Wan-AI/Wan2.2-TI2V-5B-Diffusers"
+ },
+ "compute": {
+  "gpu": "Tesla T4 x2 (Kaggle, rjob_620150232fa9)",
+  "provider": "kaggle"
+ },
+ "provenance": {
+  "model": "wan22-ti2v-5b"
+ },
+ "classification_reasons": [
+  "wan22-ti2v-5b output with independent motion"
+ ],
+ "evidence": {
+  "still_motion": {
+   "frames": 96,
+   "residual": 34.827,
+   "motion": 36.114,
+   "verdict": "independent-motion"
+  }
+ },
+ "prompt": "A red fox trots through fresh snow in a birch forest at sunrise",
+ "seconds": 5.04
+}
