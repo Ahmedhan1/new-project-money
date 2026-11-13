@@ -26,8 +26,12 @@ def _prep(text: str) -> tuple[str, dict]:
     return get_display(arabic_reshaper.reshape(text)), {}
 
 
-def font(size: int, lang: str = "en", text: str = "") -> ImageFont.FreeTypeFont:
-    path = config.font_for("ar" if (lang.startswith("ar") or is_rtl(text)) else lang)
+def font(size: int, lang: str = "en", text: str = "", path: str | None = None) -> ImageFont.FreeTypeFont:
+    """`path`: a font file chosen by the user (asset library). Ignored for Arabic/RTL text unless it is the Arabic font."""
+    if path and (not (lang.startswith("ar") or is_rtl(text)) or "arabic" in Path(path).name.lower()) and Path(path).is_file():
+        pass
+    else:
+        path = config.font_for("ar" if (lang.startswith("ar") or is_rtl(text)) else lang)
     kw = {"layout_engine": ImageFont.Layout.RAQM} if _RAQM else {}
     return ImageFont.truetype(path, size, **kw)
 
@@ -95,11 +99,11 @@ STYLES = {
 
 
 def draw_text_block(img: Image.Image, text: str, style: str = "title", lang: str = "en",
-                    accent=(0, 190, 255, 255)) -> None:
+                    accent=(0, 190, 255, 255), font_path: str | None = None) -> None:
     W, H = img.size
     rel, y_anchor, box, colour, bar = STYLES.get(style, STYLES["title"])
     draw = ImageDraw.Draw(img)
-    fnt = font(max(14, int(min(W, H * 16 / 9) * rel)), lang, text)
+    fnt = font(max(14, int(min(W, H * 16 / 9) * rel)), lang, text, font_path)
     lines = wrap(draw, text, fnt, int(W * 0.84))
     asc, desc = fnt.getmetrics()
     lh = int((asc + desc) * 1.18)

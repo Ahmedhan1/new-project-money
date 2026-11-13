@@ -754,3 +754,30 @@ tasks:
     test: "pytest tests/fast; scripts/acceptance/windows_e2e.py on a clean clone; three-account local merge"
     evidence: "docs/ACCOUNT2_FINAL_RELEASE_AUDIT.md; demos 1-5 in docs/results/a2_demos; docs/results/a2_clean_clone_e2e.json; docs/results/a2_three_account_check.json; PR #6"
     next: "Owner review of PR #6 and the demos; merge order A1 -> A2 -> A3 + integration/contracts_v1/apply.sh."
+  - id: A2-ASSETS
+    priority: 1
+    title: "Professional asset library: catalog, lazy licence-checked install, previews, apply to clip/timeline, new effects/transitions/LUTs/overlays/sounds/fonts"
+    status: tested
+    deps: [A2-INT]
+    acceptance: "Every asset has id/licence/author/source/attribution/SHA-256/status; large files on demand; renders change with each asset type; UI browser works."
+    test: "pytest tests/fast/test_a2_assetlib.py; scripts/acceptance/ui_assets_storage_check.py"
+    evidence: "docs/ASSET_LIBRARY_AUDIT.md; docs/ASSET_LICENSES.md (182/182 licence check); docs/results/a2_assets/"
+    next: "Owner: listen to the generated sounds/beds; pick favourites."
+  - id: A2-DISK
+    priority: 1
+    title: "Disk management: usage by category, render preflight, bounded LRU caches, rule-based safe cleanup, log rotation, test tmp retention"
+    status: tested
+    deps: [A2-INT]
+    acceptance: "Renders refused before they start when space is short; cleanup never touches protected files; before/after report of the incident."
+    test: "pytest tests/fast/test_a2_diskman.py"
+    evidence: "docs/DISK_MANAGEMENT.md; docs/results/a2_storage/disk_before.json, disk_after.json"
+    next: "-"
+  - id: A2-ARCHIVE
+    priority: 1
+    title: "Daily output archive through Account 1 storage: verified upload, crash-safe resume, release local copy only after verification, browse + retrieve"
+    status: tested
+    deps: [A2-INT]
+    acceptance: "Final videos stay in external storage; local deletion only after checksum verification; failed uploads keep the only copy."
+    test: "pytest tests/fast/test_a2_archive.py tests/fast/test_a2_archive_account1.py (needs Account 1); scripts/acceptance/daily_archive_e2e.py"
+    evidence: "docs/DAILY_OUTPUT_ARCHIVE.md; docs/ASSET_STORAGE_INTEGRATION_RESULTS.md; docs/results/a2_storage/daily_archive_e2e.json"
+    next: "Owner: one live archive to drive_a (K-28)."

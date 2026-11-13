@@ -152,3 +152,25 @@ steps; richer timelines render locally.
 let an Earth storm through under Mars narration because "storm" matched. `subject` (API `broll_subject`, editor "B-roll
 must show") is required metadata for library pictures; local shots of the user's own files are judged visually.
 
+
+**D-15 Account 2 archives through Account 1's storage layer; no second router.** Daily finals go through
+`artifacts.store_file` (resumable, dedupe, `ArtifactManifest/v1`, retention `archive`). Account 2 owns only the daily-output
+state machine and a *stricter* verification: a local final is deleted only after a positive checksum match (provider
+sha256, provider md5 against the local file, or download + hash), re-checked at release time, on an external destination.
+Missing public operations are requested in `ACCOUNT2_HANDOFF_TO_ACCOUNT1.md`, not patched into Account 1's files.
+
+**D-16 No automatic deletion of archived videos.** Remote retention is not implemented and cannot be enabled from
+settings; a future policy needs an owner-approved change. Same-disk "archives" never release the local copy.
+
+**D-17 Cleanup is rule-based, file-level, plan-then-execute.** No folder is ever deleted wholesale; every candidate is a
+file inside an allowlisted NEXUS_HOME/work directory matched by a named rule, re-validated just before deletion, and a
+changed plan is refused. Protection beats rules (sources, referenced files, finals, active jobs, secrets, models).
+
+**D-18 Asset library: generate first, download only pinned licence-clean files.** LUTs, overlays, sounds, ambiences,
+beds and templates are generated locally (own work, CC0); downloads are limited to pinned OFL fonts (google/fonts @
+3e56677, licence text kept) and one pinned CC0 pack. Anything whose licence or access cannot be pinned is listed under
+`optional_future`. No new dependency (PyAV, ImageMagick, G'MIC, VapourSynth, Blender evaluated, not added).
+
+**D-19 Extended transitions are FFmpeg custom xfade expressions.** One code path (`transitions.filter_for`) for both
+render pipelines; runtime detection of `a0(x,y)` support (FFmpeg >= 6) with a fallback to the nearest built-in transition,
+so a render never fails on an older FFmpeg.

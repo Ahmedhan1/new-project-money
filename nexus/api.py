@@ -627,7 +627,7 @@ def api_fx_catalog():
         luts = lut.list_luts()
     except Exception:  # noqa: BLE001 - a broken LUT folder must not hide the rest of the catalogue
         pass
-    return {"transitions": sorted(transitions.NAMES), "aliases": getattr(transitions, "ALIASES", {}),
+    return {"transitions": sorted(transitions.ALL), "aliases": getattr(transitions, "ALIASES", {}),
             "effects": list(effects.KNOWN), "grades": sorted(post.GRADES), "luts": luts, "caption_styles": list(captions.STYLES),
             "keyframe_props": list(getattr(effects, "KEYFRAME_PROPS", ("x", "y", "scale", "volume"))),
             "fits": ["cover", "contain", "blur"], "mask_keyframe_props": list(getattr(effects, "MASK_KEYFRAME_PROPS", ())),
@@ -1109,3 +1109,234 @@ def api_subtitle_package(pid: str, branch: str = "main"):
     if not r["languages"]:
         raise HTTPException(409, "no localised renders on this branch yet: run Languages first")
     return {k: r[k] for k in ("folder", "zip", "languages", "subtitle_ready")} | {"manifest": r["manifest"]}
+
+
+# ---------------------------------------------------------------- asset library (nexus/assetlib)
+@app.get("/api/library")
+def api_library(category: str | None = None, q: str | None = None, only: str | None = None):
+    from . import assetlib
+    return {"assets": assetlib.catalog(category, q, only), "summary": assetlib.summary(),
+            "categories": sorted(assetlib.CATEGORY_DIRS), "optional_future": assetlib.optional_future()}
+
+
+class LibInstallReq(BaseModel):
+    asset_id: str
+
+
+@app.post("/api/library/install")
+def api_library_install(r: LibInstallReq):
+    """Generated assets are made right away; downloads run as a job (progress in the job log)."""
+    from . import assetlib
+    try:
+        e = assetlib.entry(r.asset_id)
+    except KeyError as ex:
+        raise HTTPException(404, str(ex))
+    if e["kind"] in ("download", "pack"):
+        return jobs.submit("asset-install", {"asset_id": r.asset_id})
+    try:
+        return {"installed": assetlib.install(r.asset_id)}
+    except assetlib.AssetError as ex:
+        raise HTTPException(400, str(ex))
+
+
+@app.post("/api/library/uninstall")
+def api_library_uninstall(r: LibInstallReq):
+    from . import assetlib
+    try:
+        return assetlib.uninstall(r.asset_id)
+    except (assetlib.AssetError, KeyError) as ex:
+        raise HTTPException(409, str(ex))
+
+
+class LibFavReq(BaseModel):
+    asset_id: str
+    on: bool = True
+
+
+@app.post("/api/library/favorite")
+def api_library_favorite(r: LibFavReq):
+    from . import assetlib
+    try:
+        return {"favorites": assetlib.set_favorite(r.asset_id, r.on)}
+    except KeyError as ex:
+        raise HTTPException(404, str(ex))
+
+
+_PREVIEW_LIMIT = None
+
+
+@app.get("/api/library/preview/{asset_id}")
+async def api_library_preview(asset_id: str):
+    """Previews render on first request (FFmpeg). They run on their own 2-thread limiter so a page full of new previews
+    never occupies the shared worker threads that every other API call needs."""
+    import anyio
+
+    from . import assetlib
+    global _PREVIEW_LIMIT
+    if _PREVIEW_LIMIT is None:
+        _PREVIEW_LIMIT = anyio.CapacityLimiter(2)
+    try:
+        path = await anyio.to_thread.run_sync(assetlib.preview, asset_id, limiter=_PREVIEW_LIMIT)
+        return FileResponse(path)
+    except FileNotFoundError as ex:
+        raise HTTPException(404, str(ex))
+    except KeyError as ex:
+        raise HTTPException(404, str(ex))
+    except RuntimeError as ex:
+        raise HTTPException(500, str(ex))
+
+
+@app.get("/api/library/file/{asset_id}")
+def api_library_file(asset_id: str):
+    """The installed file (play a sound, download a LUT)."""
+    from . import assetlib
+    rec = assetlib.installed().get(asset_id)
+    if not rec or not Path(rec["files"][0]).is_file():
+        raise HTTPException(404, "not installed")
+    return FileResponse(rec["files"][0])
+
+
+@app.post("/api/library/verify")
+def api_library_verify():
+    from . import assetlib
+    return assetlib.verify_all() | {"missing": assetlib.missing()}
+
+
+@app.post("/api/library/repair")
+def api_library_repair():
+    from . import assetlib
+    return assetlib.repair_missing()
+
+
+class LibApplyReq(BaseModel):
+    asset_id: str
+    target: str = "clip"
+    clip: str | None = None
+    branch: str = "main"
+    at: float | None = None
+    member: str | None = None
+
+
+@app.post("/api/projects/{pid}/assets/apply")
+def api_library_apply(pid: str, r: LibApplyReq):
+    from . import assetlib
+    _project(pid)
+    try:
+        return assetlib.apply(pid, r.asset_id, r.target, r.clip, r.branch, r.at, r.member)
+    except (assetlib.AssetError, KeyError, ValueError) as ex:
+        raise HTTPException(400, str(ex))
+
+
+@app.post("/api/library/import")
+async def api_library_import(file: UploadFile = File(...), category: str = "overlays", name: str = "", license: str = "",
+                             author: str = "", source_url: str = "", commercial_use: bool = False, attribution: str = ""):
+    """Import a file you own or are licensed to use. Licence fields are required and checked."""
+    from . import assetlib
+    tmp = config.ASSETS / "tmp" / f"upload_{int(time.time() * 1000)}_{Path(file.filename or 'x').name}"
+    tmp.parent.mkdir(parents=True, exist_ok=True)
+    tmp.write_bytes(await file.read())
+    try:
+        return assetlib.import_file(tmp, category=category, name=name or Path(file.filename or "asset").stem, license=license,
+                                    author=author, source_url=source_url, commercial_use=commercial_use, attribution=attribution)
+    except assetlib.AssetError as ex:
+        raise HTTPException(400, str(ex))
+    finally:
+        tmp.unlink(missing_ok=True)
+
+
+class LibExportReq(BaseModel):
+    asset_ids: list[str]
+
+
+@app.post("/api/library/export")
+def api_library_export(r: LibExportReq):
+    from . import assetlib
+    dest = config.ASSETS / "tmp" / f"nexus_assets_{int(time.time())}.zip"
+    try:
+        out = assetlib.export_pack(r.asset_ids, dest)
+    except (assetlib.AssetError, KeyError) as ex:
+        raise HTTPException(400, str(ex))
+    return FileResponse(out["path"], filename=Path(out["path"]).name)
+
+
+# ---------------------------------------------------------------- disk management + daily archive
+@app.get("/api/disk")
+def api_disk():
+    from . import diskman
+    return diskman.report()
+
+
+class DiskSettingsReq(BaseModel):
+    settings: dict
+
+
+@app.post("/api/disk/settings")
+def api_disk_settings(r: DiskSettingsReq):
+    from . import diskman
+    try:
+        return diskman.save_settings(r.settings)
+    except ValueError as ex:
+        raise HTTPException(400, str(ex))
+
+
+class CleanupReq(BaseModel):
+    rules: list[str] | None = None
+    plan_id: str | None = None
+
+
+@app.post("/api/disk/cleanup")
+def api_disk_cleanup(r: CleanupReq):
+    """Without plan_id: a dry run (what would be deleted and why). With the plan_id you were shown: delete exactly that."""
+    from . import diskman
+    try:
+        if not r.plan_id:
+            p = diskman.plan(r.rules)
+            return {**p, "items": p["items"][:500], "dry_run": True}
+        return diskman.execute(r.plan_id, r.rules)
+    except ValueError as ex:
+        raise HTTPException(409, str(ex))
+
+
+@app.get("/api/archive")
+def api_archive(project: str | None = None):
+    from . import archive
+    return {"deliverables": archive.browse(project), "summary": archive.summary()}
+
+
+class ArchiveReq(BaseModel):
+    render: str
+    kind: str = "master"
+    release_local: bool | None = None
+
+
+@app.post("/api/projects/{pid}/archive")
+def api_archive_output(pid: str, r: ArchiveReq):
+    _project(pid)
+    return jobs.submit("archive", {"project": pid, "render": r.render, "kind": r.kind, "release_local": r.release_local}, pid)
+
+
+class ArchiveRecReq(BaseModel):
+    record: str
+
+
+@app.post("/api/archive/retrieve")
+def api_archive_retrieve(r: ArchiveRecReq):
+    from . import archive
+    rec = archive.get(r.record)
+    if not rec:
+        raise HTTPException(404, "unknown archive record")
+    return jobs.submit("archive-retrieve", {"record": r.record}, rec.get("project_id") or "")
+
+
+@app.post("/api/archive/retry")
+def api_archive_retry():
+    return jobs.submit("archive-recover", {})
+
+
+@app.get("/api/archive/thumb/{record}")
+def api_archive_thumb(record: str):
+    from . import archive
+    rows = [x for x in archive.browse() if x["id"] == record]
+    if not rows or not rows[0]["thumbnail"]:
+        raise HTTPException(404, "no thumbnail")
+    return FileResponse(rows[0]["thumbnail"])

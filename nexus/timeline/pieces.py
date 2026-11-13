@@ -108,6 +108,8 @@ def build(pc: dict, segs: list[Path], tl: dict, cache: Path, W: int, H: int, tot
     key = piece_key(pc, segs, burn, enc_sig if (burn or pc["kind"] == "xf" or not pc.get("full")) else "copy")
     out = cache / f"piece_{key}.mp4"
     if out.exists() and out.stat().st_size > 0:
+        from .render import _mark_used
+        _mark_used(out)
         return out, True
     cache.mkdir(parents=True, exist_ok=True)
     tmp = out.with_suffix(f".{threading.get_ident()}.tmp.mp4")
@@ -124,7 +126,8 @@ def build(pc: dict, segs: list[Path], tl: dict, cache: Path, W: int, H: int, tot
         args += ["-i", segs[ci]]
         fc.append(f"[{k}:v]setpts=PTS-STARTPTS,trim=end_frame={n},settb=AVTB,setpts=PTS-STARTPTS[i{k}]")
     if pc["kind"] == "xf":
-        fc.append(f"[i0][i1]xfade=transition={pc['xfade']}:duration={n / fps:.6f}:offset=0,settb=AVTB[x]")
+        from ..fx import transitions
+        fc.append(f"[i0][i1]{transitions.filter_for(pc['xfade'], n / fps, 0)},settb=AVTB[x]")
         last = "[x]"
     else:
         last = "[i0]"

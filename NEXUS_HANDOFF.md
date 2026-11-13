@@ -69,6 +69,11 @@ Sessions 4-6 (2026-11-12), all on a real 19.4-min public-domain NASA interview (
 - Demos: `scripts/demos/demo{1,2,3,4,5}_*.py` (need `.nexus/benchmarks` from `scripts/benchmarks/fetch_media.py` and
   analyses in `.nexus/analyses`, computed on first run). Audio listening sheet: `docs/results/a2_audio_review/REVIEW.md`.
 - Owner-blocked: A2-AUDIO-REVIEW (listen), A2-GPU (authorise a free GPU worker), K-1 (own Windows PC).
+- Follow-up branch `work/account-2-asset-library-storage`, PR #7 (draft, base PR #6): asset library (`nexus/assetlib`,
+  `registry/asset_library.yaml`), disk manager (`nexus/diskman.py`, `nexus disk`), daily archive on Account 1 storage
+  (`nexus/archive.py`, `nexus archive`). Docs: `docs/STORAGE_ARCHITECTURE.md`, `DISK_MANAGEMENT.md`,
+  `DAILY_OUTPUT_ARCHIVE.md`, `ASSET_*.md`, `ASSET_STORAGE_INTEGRATION_RESULTS.md`. Never delete a final whose archive
+  record is not `released`; never add remote retention without owner approval.
 
 ## Where things are
 | Thing | Path |

@@ -277,6 +277,8 @@ def main() -> None:
     k.add_argument("--target", type=int, default=5)
     k.add_argument("--languages", type=int, default=2)
     k.add_argument("--gpu-hours-week", type=float, default=0)
+    from . import cli_a2  # Account 2 tools: disk, library, archive
+    cli_a2.add_parsers(sub)
     a = ap.parse_args()
 
     if a.cmd == "serve":
@@ -347,6 +349,14 @@ def main() -> None:
         for r in c_["profiles"]:
             print(f"{r['profile']:<22} {r['minutes_per_master_all_versions']:>6} min/master  max {r['max_per_day']:>3}/day  {'OK ' if r['meets_target'] else 'NO '} bottleneck: {r['bottleneck']}")
         print("\n".join("- " + v for v in c_["verdict"]))
+
+
+def _a2_ops() -> None:
+    from . import cli_a2
+    _OPS.update(cli_a2.OPS)
+
+
+_a2_ops()
 
 
 if __name__ == "__main__":

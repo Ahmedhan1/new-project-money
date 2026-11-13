@@ -9,7 +9,8 @@ VERSION = "0.2.0"
 HOME = Path(os.environ.get("NEXUS_HOME", ROOT / ".nexus"))
 MODELS = HOME / "models"
 PROJECTS = HOME / "projects"
-CACHE = HOME / "cache"
+# Working storage (render segments, pieces, proxies, temp files) can live on a faster/bigger local disk.
+CACHE = Path(os.environ["NEXUS_WORK_DIR"]) if os.environ.get("NEXUS_WORK_DIR") else HOME / "cache"
 ASSETS = HOME / "assets"
 DB_PATH = HOME / "nexus.db"
 LOGS = HOME / "logs"
@@ -22,7 +23,8 @@ def set_home(path: str | Path) -> None:
     """Point every data path at another NEXUS_HOME (tests, restore drills, relocated installs)."""
     global HOME, MODELS, PROJECTS, CACHE, ASSETS, DB_PATH, LOGS, RUN, BACKUPS
     HOME = Path(path)
-    MODELS, PROJECTS, CACHE, ASSETS = HOME / "models", HOME / "projects", HOME / "cache", HOME / "assets"
+    MODELS, PROJECTS, ASSETS = HOME / "models", HOME / "projects", HOME / "assets"
+    CACHE = Path(os.environ["NEXUS_WORK_DIR"]) if os.environ.get("NEXUS_WORK_DIR") else HOME / "cache"
     DB_PATH, LOGS, RUN, BACKUPS = HOME / "nexus.db", HOME / "logs", HOME / "run", HOME / "backups"
 
 

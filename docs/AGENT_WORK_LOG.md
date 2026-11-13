@@ -132,3 +132,11 @@ auth/disk alerts, log rotation, refusal of credentials in job manifests. 16 new 
 `ACCOUNT1_PRODUCTION_DEPLOYMENT.md`, `ACCOUNT1_DISASTER_RECOVERY.md`, `ACCOUNT1_OAUTH_PRODUCTION_CHECKLIST.md` (Google
 facts re-checked). Fresh local integration at A1 `34a5ba1` + A2 `d979df1` + A3 `fd71471` + `apply.sh`; results in the
 audit §7. Nothing merged, deployed or changed on Account 2/3 branches; no Kaggle change.
+## 2026-11-13 - Account 2 follow-up: asset library, external storage, disk management (branch work/account-2-asset-library-storage)
+| Area | Change | Why | Evidence |
+|---|---|---|---|
+| Disk | inventory before/after the disk-full incident; 15.4 GB of identified, recorded leftovers removed | demo render ran out of space | `docs/results/a2_storage/disk_before.json`, `disk_after.json` |
+| Disk | `nexus/diskman.py`: usage by category, render preflight, LRU cache quota, rule-based plan/execute cleanup, protections, log rotation, `NEXUS_WORK_DIR` | prevent accumulation | `tests/fast/test_a2_diskman.py` |
+| Archive | `nexus/archive.py` on Account 1 storage: verified upload, strict verification, crash recovery, release after verification, retrieve | daily videos must live externally | `test_a2_archive.py`, `test_a2_archive_account1.py`, `daily_archive_e2e.json` |
+| Assets | `nexus/assetlib` + `asset_library.yaml`: 182 assets, licence gate, lazy install, previews, apply; 11 looks, 18 transitions, 14 LUTs, overlays, templates, sounds, fonts | professional asset ecosystem | `test_a2_assetlib.py`, `docs/results/a2_assets/` |
+| UI | Asset Library page, workspace Assets card, Storage page disk + archive panels | owner workflow | `docs/results/a2_assets/ui_check.json` |
