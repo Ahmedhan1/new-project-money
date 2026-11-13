@@ -89,3 +89,25 @@ def test_the_old_shape_is_refused_before_submission_and_fails_on_the_worker(env)
     # Account 1 still refuses it on the worker (the job fails; nothing is retried) - our check names the cause earlier.
     r = d.run_until_done(d.submit(ProductionJobManifest.model_validate(old))[0]["id"], timeout=120, interval=0.05)
     assert r["status"] == "failed"
+
+
+def test_a3_manifest_resumes_from_checkpoint_after_worker_loss_and_routes_to_kaggle_only(env):
+    d, _ = env
+    items = _items(6)
+    m = bj.manifest_for_model("int-4", "qwen3-4b", items, engine="echo", part_size=2, batch_size=2, max_runtime_s=300)
+    assert m["preferred_providers"] == ["kaggle"] and m["max_retries"] >= 1
+    bj.validate_manifest(m)
+    # Account 1's own test hook (the worker is lost after the first part); not part of Account 3's manifest
+    m["params"]["simulate_loss_after_parts"] = 1
+    pm = ProductionJobManifest.model_validate(m)
+    cands, why = dsp.Dispatcher({"local": LocalProvider()}, poll_min=0, poll_max=0).candidates(pm)
+    assert cands == [] and any(w.startswith("kaggle") for w in why)          # never routed to the owner's PC
+    row, _ = d.submit(pm)
+    r = d.run_until_done(row["id"], timeout=180, interval=0.05)
+    assert r["status"] == "succeeded", r["error"]
+    res, rows = _results(r)
+    a1, a2 = res["attempts"][0], res["attempts"][1]
+    assert a1["outcome"] == "lost" and a1["metrics"]["parts_run_this_attempt"] == [0]
+    assert a2["metrics"]["parts_skipped"] == [0] and a2["metrics"]["parts_run_this_attempt"] == [1, 2]
+    assert [x["id"] for x in rows] == [it["id"] for it in items]               # part 0 kept from the lost attempt
+    assert [c["seq"] for c in dsp.checkpoints(row["id"])] == [1, 2, 3]
