@@ -3,14 +3,14 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-13T10:27:07Z",
+ "updated": "2026-11-13T10:27:10Z",
  "git": {
   "branch": "work/account-1-cloud-platform",
-  "commit": "73c0023",
-  "subject": "Account 1: build token-shaped test values at runtime (repository secret scan); handoffs, tasks, decisions D-13..D-15, work log",
-  "dirty_files": 4,
+  "commit": "a559669",
+  "subject": "Account 1 production closure: CI 427/5 Linux+Windows at 73c0023, integration 766 passed at exact heads, audit verdict READY FOR OWNER DEPLOYMENT",
+  "dirty_files": 0,
   "upstream": "origin/work/account-1-cloud-platform",
-  "unpushed_commits": 0
+  "unpushed_commits": 1
  },
  "current_task": {
   "id": "QLT-1",
