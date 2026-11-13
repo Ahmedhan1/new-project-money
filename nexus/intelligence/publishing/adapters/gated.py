@@ -19,6 +19,12 @@ GRAPH_FB = f"https://graph.facebook.com/{GRAPH_VERSION}"
 RUPLOAD_IG = f"https://rupload.facebook.com/ig-api-upload/{GRAPH_VERSION}"
 
 
+def ai_flag(manifest: dict) -> bool:
+    """AI-content flag from the release gate's disclosure. No release check -> True (never silently non-AI)."""
+    d = (manifest.get("release_check") or {}).get("disclosure") or {}
+    return bool(d.get("flag", True))
+
+
 class GatedAdapter(Adapter):
     status = "requires_approved_app"
     review_steps: list[str] = []
@@ -57,7 +63,8 @@ class TikTokAdapter(GatedAdapter):
         size = path.stat().st_size
         privacy = "PUBLIC_TO_EVERYONE" if (manifest["visibility"] == "public" and manifest.get("approval") == "approved_by_owner") else "SELF_ONLY"
         md = manifest["metadata"]
-        body = {"post_info": {"title": md.get("caption") or md.get("title", ""), "privacy_level": privacy},
+        body = {"post_info": {"title": md.get("caption") or md.get("title", ""), "privacy_level": privacy,
+                              "is_aigc": ai_flag(manifest)},
                 "source_info": {"source": "FILE_UPLOAD", "video_size": size, "chunk_size": size, "total_chunk_count": 1}}
         import json
         h = {"Authorization": f"Bearer {self.token(account)}", "Content-Type": "application/json; charset=UTF-8"}
@@ -91,7 +98,8 @@ class InstagramAdapter(GatedAdapter):
         tok, ig = self.token(account), account.get("external_id")
         md = manifest["metadata"]
         params = {"media_type": "REELS", "upload_type": "resumable", "caption": md.get("caption", ""),
-                  "share_to_feed": "true" if manifest["platform"] == "instagram_feed" else "false"}
+                  "share_to_feed": "true" if manifest["platform"] == "instagram_feed" else "false",
+                  "is_ai_generated": "true" if ai_flag(manifest) else "false"}
         r = self.t.request("POST", f"{GRAPH_FB}/{ig}/media", {"Authorization": f"Bearer {tok}"}, b"", params=params)
         classify(r, "instagram container")
         cid = r.json()["id"]
@@ -112,6 +120,13 @@ class InstagramAdapter(GatedAdapter):
 class FacebookAdapter(GatedAdapter):
     platform = "facebook"
     no_private_mode = True
+
+    def preflight(self, manifest, account):
+        if ai_flag(manifest):  # POST /{page-id}/videos has no AI-disclosure field (only the Reels flow documents one)
+            raise AdapterBlocked("disclosure_unsupported", "facebook: the content needs an AI disclosure and this adapter's "
+                                 "endpoint (/videos) cannot set one; publish manually with Meta's AI label",
+                                 ["Upload in Meta Business Suite and apply the AI label by hand"])
+        super().preflight(manifest, account)
     review_steps = ["Facebook Pages only. Create a Meta app with pages_show_list, pages_read_engagement, pages_manage_posts "
                     "and pass Meta app review.", "Store the Page access token in the vault; external_id = Page id; "
                     "connect_account(..., app_approved=True)."]

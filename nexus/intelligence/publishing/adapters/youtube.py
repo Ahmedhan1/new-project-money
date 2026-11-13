@@ -52,7 +52,14 @@ def video_body(manifest: dict) -> dict:
     status = {"privacyStatus": privacy_for(manifest), "selfDeclaredMadeForKids": bool(md.get("made_for_kids", False))}
     if md.get("publish_at") and status["privacyStatus"] == "private" and manifest.get("approval") == "approved_by_owner":
         status["publishAt"] = md["publish_at"]  # scheduled publish needs private + owner approval
+    status["containsSyntheticMedia"] = synthetic_flag(manifest)
     return {"snippet": snippet, "status": status}
+
+
+def synthetic_flag(manifest: dict) -> bool:
+    """status.containsSyntheticMedia from the release gate. No release check -> True (never silently non-AI)."""
+    d = (manifest.get("release_check") or {}).get("disclosure") or {}
+    return bool(d.get("flag", True))
 
 
 class YouTubeAdapter(Adapter):

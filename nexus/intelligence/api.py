@@ -274,13 +274,26 @@ class PubReq(BaseModel):
     visibility: str | None = None
     schedule: str | None = None
     connection_id: str | None = None
+    release: dict | None = None   # quality_report / provenance / disclosure_decision / language (release_gate.py)
+
+
+class ReleaseReq(BaseModel):
+    quality_report: dict | None = None
+    provenance: dict | None = None
+    disclosure_decision: dict | None = None
+    language: dict | None = None
 
 
 @router.post("/publish")
 def publish_create(r: PubReq):
     e = _mod("publishing.engine")
+    rg = _mod("publishing.release_gate")
+    art = {"uri": r.file}
+    p = rg._local(r.file)
+    if p is not None and p.is_file():
+        art.update(sha256=rg.sha256_file(p), bytes=p.stat().st_size)
     try:
-        m = e.create(r.project_id, {"uri": r.file}, r.platform, r.metadata, r.connection_id, r.visibility, r.schedule)
+        m = e.create(r.project_id, art, r.platform, r.metadata, r.connection_id, r.visibility, r.schedule, release=r.release)
     except Exception as ex:  # PublishError and contract violations -> the reason, verbatim
         raise HTTPException(422, str(ex))
     return e.public_view(m)
@@ -310,6 +323,24 @@ def publish_queue(mid: str):
         return jh.submit(mid)
     except Exception as ex:
         raise HTTPException(422, str(ex))
+
+
+@router.post("/publish/{mid}/release")
+def publish_release(mid: str, r: ReleaseReq):
+    """Attach release evidence (QualityReport after human review, disclosure decision, language review record)."""
+    e = _mod("publishing.engine")
+    try:
+        return e.public_view(e.attach_release(mid, **{k: v for k, v in r.model_dump().items() if v is not None}))
+    except Exception as ex:
+        raise HTTPException(422, str(ex))
+
+
+@router.get("/publish/{mid}/release")
+def publish_release_check(mid: str):
+    try:
+        return _mod("publishing.engine").release_check(mid)
+    except Exception as ex:
+        raise HTTPException(404, str(ex))
 
 
 @router.get("/publish/{mid}/history")

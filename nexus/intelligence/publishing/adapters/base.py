@@ -91,7 +91,8 @@ class FakeTransport:
         if params:
             url += ("&" if "?" in url else "?") + urllib.parse.urlencode(params)
         self.calls.append({"method": method, "url": url, "headers": dict(headers or {}),
-                           "body_len": (body[2] if isinstance(body, tuple) else len(body or b""))})
+                           "body_len": (body[2] if isinstance(body, tuple) else len(body or b"")),
+                           "body": bytes(body) if isinstance(body, (bytes, bytearray)) else None})
         if not self.script:
             raise AssertionError(f"unexpected request {method} {url}")
         m, prefix, resp = self.script.pop(0)

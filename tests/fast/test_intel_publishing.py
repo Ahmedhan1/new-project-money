@@ -21,7 +21,17 @@ def clip(home):
 
 
 def _art(p):
-    return {"uri": str(p), "sha256": "a" * 64, "bytes": p.stat().st_size, "media_type": "video/mp4"}
+    import hashlib
+    return {"uri": str(p), "sha256": hashlib.sha256(p.read_bytes()).hexdigest(), "bytes": p.stat().st_size, "media_type": "video/mp4"}
+
+
+def _rel(p, human="PENDING - automated checks never replace a human look at the final video"):
+    """Release evidence in Account 2's real shapes: QualityReport (nexus/qa.py approve) + GeneratedMediaManifest."""
+    qr = {"schema": "nexus.QualityReport/1", "output": p.name, "status": "PASSED_AUTOMATED_CHECKS", "score": 92.0,
+          "stages": [{"stage": "technical", "checks": [{"check": "loudness", "ok": True, "severity": "major", "detail": "-14.1 LUFS"}]}],
+          "human_approval": human}
+    return {"quality_report": qr, "provenance": {"media": [{"classification": "generated-image"}], "audio": [{"kind": "tts"}]},
+            "disclosure_decision": {"by": "owner", "contains_synthetic_media": True, "reason": "generated imagery and TTS"}}
 
 
 def _yt_env(monkeypatch, label="main"):
@@ -53,17 +63,17 @@ def test_registry_diff_lists_corrections():
 # ------------------------------------------------------------------ engine
 def test_manifest_defaults_private_and_idempotent(home, clip):
     md = {"title": "T", "description": "D"}
-    a = engine.create("p1", _art(clip), "youtube", md)
+    a = engine.create("p1", _art(clip), "youtube", md, release=_rel(clip))
     assert a["visibility"] == "private" and a["status"] == "draft" and not C.validate(a)
-    b = engine.create("p1", _art(clip), "youtube", dict(md))
+    b = engine.create("p1", _art(clip), "youtube", dict(md), release=_rel(clip))
     assert b["id"] == a["id"] and b["deduplicated"]
-    c = engine.create("p1", _art(clip), "youtube", {**md, "title": "T2"})
+    c = engine.create("p1", _art(clip), "youtube", {**md, "title": "T2"}, release=_rel(clip))
     assert c["id"] != a["id"]
     assert engine.create("p1", _art(clip), "instagram_reels", md)["visibility"] == "draft"
 
 
 def test_public_requires_owner_approval(home, clip):
-    m = engine.create("p1", _art(clip), "youtube", {"title": "x"}, visibility="public")
+    m = engine.create("p1", _art(clip), "youtube", {"title": "x"}, visibility="public", release=_rel(clip, human="APPROVED by owner"))
     assert m["visibility"] == "private" and m["status"] == "awaiting_approval"
     with pytest.raises(engine.PublishError):
         engine.enqueue(m["id"])
@@ -85,7 +95,7 @@ def test_account_refuses_token_as_reference(home):
 
 def test_missing_credentials_blocks_with_owner_steps(home, clip, monkeypatch):
     acct = engine.connect_account("youtube", "main")
-    m = engine.create("p1", _art(clip), "youtube", {"title": "x"}, connection_id=acct["id"])
+    m = engine.create("p1", _art(clip), "youtube", {"title": "x"}, connection_id=acct["id"], release=_rel(clip))
     engine.enqueue(m["id"])
     out = engine.process()
     assert out[0]["status"] == "failed"
@@ -97,7 +107,10 @@ def test_missing_credentials_blocks_with_owner_steps(home, clip, monkeypatch):
 def test_gated_adapters_refuse_without_approved_app(home, clip):
     for p in ("tiktok", "instagram_reels", "facebook", "snapchat_spotlight"):
         acct = engine.connect_account(p, "main")
-        m = engine.create("p1", _art(clip), p, {"title": "x"}, connection_id=acct["id"])
+        rel = _rel(clip)
+        if p == "facebook":  # the /videos endpoint cannot carry an AI label: only owner-attested non-AI content gets this far
+            rel["provenance"] = {"no_ai_attested_by": "owner"}
+        m = engine.create("p1", _art(clip), p, {"title": "x"}, connection_id=acct["id"], release=rel)
         engine.enqueue(m["id"])
     codes = {m["platform"]: m["tracking"]["blocked"]["code"] for m in engine.process()}
     assert codes == {"tiktok": "requires_approved_app", "instagram_reels": "requires_approved_app",
@@ -107,7 +120,7 @@ def test_gated_adapters_refuse_without_approved_app(home, clip):
 def test_instagram_needs_owner_approval_even_with_app(home, clip, monkeypatch):
     acct = engine.connect_account("instagram_reels", "main", external_id="1784", app_approved=True)
     monkeypatch.setenv(creds.env_name(acct["secret_ref"]), "tok")
-    m = engine.create("p1", _art(clip), "instagram_reels", {"caption": "x"}, connection_id=acct["id"])
+    m = engine.create("p1", _art(clip), "instagram_reels", {"caption": "x"}, connection_id=acct["id"], release=_rel(clip))
     engine.enqueue(m["id"])
     assert engine.process()[0]["tracking"]["blocked"]["code"] == "needs_owner_approval"
 
@@ -129,7 +142,7 @@ class Flaky:
 
 
 def test_retry_with_backoff_then_success(home, clip):
-    m = engine.create("p1", _art(clip), "youtube", {"title": "x"})
+    m = engine.create("p1", _art(clip), "youtube", {"title": "x"}, release=_rel(clip))
     engine.enqueue(m["id"])
     ad = {"youtube": Flaky(1)}
     r = engine.process(now=1000.0, adapters=ad)[0]
@@ -141,7 +154,7 @@ def test_retry_with_backoff_then_success(home, clip):
 
 
 def test_schedule_respected(home, clip):
-    m = engine.create("p1", _art(clip), "youtube", {"title": "x"}, schedule="2030-01-01T00:00:00Z")
+    m = engine.create("p1", _art(clip), "youtube", {"title": "x"}, schedule="2030-01-01T00:00:00Z", release=_rel(clip))
     engine.enqueue(m["id"])
     assert engine.process(now=1.0e9, adapters={"youtube": Flaky(0)}) == []
 
@@ -161,7 +174,7 @@ def test_youtube_resumable_upload_private(home, clip, monkeypatch):
     monkeypatch.setattr("nexus.costguard.check_host", lambda url, **k: "test")
     _yt_env(monkeypatch)
     acct = engine.connect_account("youtube", "main")
-    m = engine.create("p1", _art(clip), "youtube", {"title": "Hello", "description": "d", "tags": ["a"]}, connection_id=acct["id"])
+    m = engine.create("p1", _art(clip), "youtube", {"title": "Hello", "description": "d", "tags": ["a"]}, connection_id=acct["id"], release=_rel(clip))
     engine.enqueue(m["id"])
     sess = "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&upload_id=XYZ"
     t = FakeTransport([_token(),
@@ -182,7 +195,7 @@ def test_youtube_resumes_saved_session_after_5xx(home, clip, monkeypatch):
     monkeypatch.setattr("nexus.costguard.check_host", lambda url, **k: "test")
     _yt_env(monkeypatch)
     acct = engine.connect_account("youtube", "main")
-    m = engine.create("p1", _art(clip), "youtube", {"title": "Hello"}, connection_id=acct["id"])
+    m = engine.create("p1", _art(clip), "youtube", {"title": "Hello"}, connection_id=acct["id"], release=_rel(clip))
     engine.enqueue(m["id"])
     sess = "https://www.googleapis.com/upload/youtube/v3/videos?upload_id=S"
     t1 = FakeTransport([_token(), ("POST", yt.UPLOAD_URL, Response(200, {"Location": sess})), ("PUT", sess, Response(503))])

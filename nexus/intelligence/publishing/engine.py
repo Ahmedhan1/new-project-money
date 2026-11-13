@@ -5,6 +5,10 @@ Safety rules enforced here (and again in each adapter):
   * visibility public/unlisted only with approval == 'approved_by_owner'; default is the platform's private/draft mode
   * same artifact + platform + connection + metadata = same idempotency key = never a second upload
   * owner-action failures (missing credentials, unapproved app, quota) are 'failed' with `blocked` and never auto-retried
+  * release gate (release_gate.py): no upload without a passing Account 2 QualityReport for this exact output, a valid
+    checksum, a decidable AI-content disclosure and an acceptable language state; public/unlisted additionally needs
+    human QA approval, completed native review where required and the owner's disclosure decision where the platform
+    asks for one. Every evaluation is stored in `release_check` and the history.
 """
 from __future__ import annotations
 
@@ -15,7 +19,7 @@ import re
 import time
 
 from .. import contracts as C
-from . import capabilities, creds, store
+from . import capabilities, creds, release_gate, store
 from .adapters.base import AdapterBlocked, PermanentError, TransientError
 
 OWNER_APPROVAL = "approved_by_owner"
@@ -68,8 +72,21 @@ def _event(m: dict, event: str, **detail) -> None:
     m.setdefault("history", []).append({"ts": round(time.time(), 3), "event": event, **detail})
 
 
+RELEASE_KEYS = ("quality_report", "provenance", "disclosure_decision", "language")
+
+
+def _check_release(m: dict, event: str = "release_checked") -> dict:
+    rc = release_gate.evaluate(m)
+    m["release_check"] = rc
+    _event(m, event, upload_ok=rc["upload_ok"], public_ok=rc["public_ok"], blockers=rc["blockers"][:6],
+           public_blockers=rc["public_blockers"][:6], qa=(rc["quality"]["report"] or {}).get("status"),
+           human_approval=(rc["quality"]["report"] or {}).get("human_approval"), disclosure=rc["disclosure"]["categories"],
+           language=rc["language"]["state"], review=rc["language"]["reviewer_approval"])
+    return rc
+
+
 def create(project_id: str, artifact: dict, platform: str, metadata: dict, connection_id: str | None = None,
-           visibility: str | None = None, schedule: str | None = None) -> dict:
+           visibility: str | None = None, schedule: str | None = None, release: dict | None = None) -> dict:
     """New PublishingManifest (or the existing one with the same idempotency key, flagged `deduplicated`)."""
     cap = capabilities.api(platform)
     if not artifact.get("uri"):
@@ -87,8 +104,32 @@ def create(project_id: str, artifact: dict, platform: str, metadata: dict, conne
                idempotency_key=key, history=[])
     m["requested_visibility"] = wanted
     m["tracking"] = {"attempts": 0, "due": None, "remote": None, "last_error": None, "blocked": None, "upload_session": None}
+    m["release"] = {k: (release or {}).get(k) for k in RELEASE_KEYS}
     _event(m, "created", visibility=m["visibility"], requested=wanted)
+    _check_release(m)
     return store.save_manifest(C.check(m))
+
+
+def attach_release(mid: str, **parts) -> dict:
+    """Attach or replace release evidence (a newer QualityReport after human review, the owner's disclosure decision,
+    the language record after native review). Earlier evaluations stay in the history."""
+    m = get(mid)
+    bad = set(parts) - set(RELEASE_KEYS)
+    if bad:
+        raise PublishError(f"unknown release keys {sorted(bad)}; allowed {RELEASE_KEYS}")
+    if m["status"] in ("uploaded", "uploading"):
+        raise PublishError(f"manifest is {m['status']}: release evidence can no longer change")
+    m.setdefault("release", {}).update(parts)
+    _event(m, "release_evidence_attached", keys=sorted(parts))
+    _check_release(m)
+    return store.save_manifest(m)
+
+
+def release_check(mid: str) -> dict:
+    m = get(mid)
+    rc = _check_release(m)
+    store.save_manifest(m)
+    return rc
 
 
 def get(mid: str) -> dict:
@@ -129,6 +170,13 @@ def enqueue(mid: str, schedule: str | None = None) -> dict:
         raise PublishError("public/unlisted needs approval == 'approved_by_owner' first")
     if m["status"] == "awaiting_approval":
         raise PublishError("the owner asked for a public/unlisted post: approve() it, or recreate it as private")
+    rc = _check_release(m)
+    if not rc["upload_ok"]:
+        store.save_manifest(m)
+        raise PublishError("release gate: " + " | ".join(rc["blockers"]))
+    if m["visibility"] in GATED and not rc["public_ok"]:
+        store.save_manifest(m)
+        raise PublishError("release gate (public/unlisted): " + " | ".join(rc["public_blockers"]))
     if schedule:
         m["schedule"] = schedule
     m["status"] = "queued"
@@ -159,9 +207,16 @@ def run_one(mid: str, adapters: dict | None = None, now: float | None = None) ->
         return m
     if m["visibility"] in GATED and m["approval"] != OWNER_APPROVAL:  # defence in depth
         raise PublishError("refusing: public/unlisted without owner approval")
+    tr = m["tracking"]
+    rc = _check_release(m)  # defence in depth: evidence may have changed since enqueue (file edited, report replaced)
+    if not rc["upload_ok"] or (m["visibility"] in GATED and not rc["public_ok"]):
+        why = rc["blockers"] or rc["public_blockers"]
+        tr.update(blocked={"code": "release_gate", "message": " | ".join(why)[:600], "owner_action": why}, last_error="release gate")
+        m["status"] = "failed"
+        _event(m, "blocked", code="release_gate")
+        return store.save_manifest(m)
     adapter = (adapters or {}).get(m["platform"]) or registry.adapter_for(m["platform"])
     acct = get_account(m.get("connection_id"))
-    tr = m["tracking"]
     tr["attempts"] = int(tr.get("attempts", 0)) + 1
     m["status"] = "uploading"
     _event(m, "upload_started", attempt=tr["attempts"], adapter=type(adapter).__name__)

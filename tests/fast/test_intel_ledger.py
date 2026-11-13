@@ -36,8 +36,11 @@ def test_enrich_joins_platform_rows_to_first_party_facts_and_arms(home, tmp_path
     ids = []
     for arm, (title, hook) in {"A": ("How tall is the dam?", "How tall is it? Very."), "B": ("The 111 m dam", "It is 111 m tall.")}.items():
         pid = _project(title, hook, ["photo", "fact_graphic"])
-        m = engine.create(pid, {"uri": str(f), "sha256": "a" * 64, "bytes": 100, "media_type": "video/mp4"}, "youtube",
-                          {"title": title, "experiment": {"id": "exp_t", "arm": arm}})
+        import hashlib
+        qr = {"output": f.name, "status": "PASSED_AUTOMATED_CHECKS", "stages": [], "human_approval": "PENDING"}
+        m = engine.create(pid, {"uri": str(f), "sha256": hashlib.sha256(f.read_bytes()).hexdigest(), "bytes": 100, "media_type": "video/mp4"},
+                          "youtube", {"title": title, "experiment": {"id": "exp_t", "arm": arm}},
+                          release={"quality_report": qr, "provenance": {"audio": [{"kind": "tts"}]}})
         engine.enqueue(m["id"])
         ids.append(engine.process(adapters=ad)[0]["tracking"]["remote"]["remote_id"])
     rows = [{"video_id": ids[0], "platform": "youtube", "metrics": {"views": 10}},
