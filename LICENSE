@@ -1,0 +1,16 @@
+Copyright (c) 2026 Ahmedhan1. All rights reserved.
+
+NEXUS Video AI (this repository, its source code, documentation, assets, scripts, installers and every part of its
+history) is proprietary software.
+
+No licence is granted. Without the prior written permission of the copyright holder you may not use, run, copy,
+modify, merge, publish, distribute, sublicense, sell, deploy, host, or create derivative works of this software or any
+part of it, in source or binary form. Viewing this repository while it is publicly visible does not grant any of these
+rights.
+
+Third-party components keep their own licences. They are listed with their licences in nexus/registry/components.yaml,
+nexus/registry/models.yaml, nexus/registry/asset_library.yaml and docs/ASSET_LICENSES.md, and are not covered by this
+notice.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM THE SOFTWARE OR ITS USE.

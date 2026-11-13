@@ -45,7 +45,7 @@ def main() -> int:
            "## Policy", "", f"- Allowed: {', '.join(assetlib.policy()['allowed_licenses'])}",
            f"- Attribution text required: {', '.join(assetlib.policy()['attribution_required'])}",
            f"- Licence text must travel with the file: {', '.join(assetlib.policy()['bundle_license_text'])}",
-           "- `NEXUS-AGPL-3.0` = renderer features that are part of NEXUS's own code (no separate file).",
+           "- `NEXUS-Proprietary` = renderer features that are part of NEXUS's own code (all rights reserved, see LICENSE; no separate file).",
            "- Generated assets (CC0-1.0) are NEXUS's own work, made on your machine by `nexus/assetlib/generators.py`.", "",
            "## Counts by licence", "", "| Licence | Assets |", "|---|---|"]
     out += [f"| {k} | {v} |" for k, v in sorted(lic.items())]

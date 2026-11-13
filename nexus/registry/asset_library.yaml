@@ -11,13 +11,13 @@ version: 1
 policy:
   # licences NEXUS may install (commercial use + modification allowed). Anything else is listed as an optional
   # future resource and never downloaded.
-  allowed_licenses: [CC0-1.0, OFL-1.1, Apache-2.0, MIT, CC-BY-4.0, PD-USGov, NEXUS-AGPL-3.0]
+  allowed_licenses: [CC0-1.0, OFL-1.1, Apache-2.0, MIT, CC-BY-4.0, PD-USGov, NEXUS-Proprietary]
   attribution_required: [CC-BY-4.0]
   bundle_license_text: [OFL-1.1, Apache-2.0, MIT]
 defaults:
   generated: {license: CC0-1.0, author: "NEXUS (generated locally)", commercial_use: true, attribution: "none required",
               source_url: "https://github.com/Ahmedhan1/new-project-money/blob/main/nexus/assetlib/generators.py"}
-  builtin: {license: NEXUS-AGPL-3.0, author: "NEXUS renderer (FFmpeg filters)", commercial_use: true, attribution: "none required",
+  builtin: {license: NEXUS-Proprietary, author: "NEXUS renderer (FFmpeg filters)", commercial_use: true, attribution: "none required",
             source_url: "https://github.com/Ahmedhan1/new-project-money/blob/main/nexus/fx/effects.py"}
 assets:
   # ---------------------------------------------------------------- effects (builtin renderer looks)
