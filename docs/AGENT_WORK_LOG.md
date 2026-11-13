@@ -75,3 +75,12 @@ output, so the lead did the work sequentially. Every item below was driven by a 
 | Delivery | export verify + size-cap re-encode inside the deliver job; subtitle package with readiness manifest | gap list | `628ca30`, `dc40e8d` |
 | Windows | `windows-e2e.yml`: SETUP → START → API e2e (non-ASCII paths) → STATUS → BACKUP drill → STOP on a clean VM | WIN-1 | `33ac0af`, `3cb50aa` |
 | Release | `scripts/release_check.py`: fresh clone, hygiene, ruff, fast suite | release discipline | `1ed89a0` |
+
+## 2026-11-13 - Account 2 follow-up: asset library, external storage, disk management (branch work/account-2-asset-library-storage)
+| Area | Change | Why | Evidence |
+|---|---|---|---|
+| Disk | inventory before/after the disk-full incident; 15.4 GB of identified, recorded leftovers removed | demo render ran out of space | `docs/results/a2_storage/disk_before.json`, `disk_after.json` |
+| Disk | `nexus/diskman.py`: usage by category, render preflight, LRU cache quota, rule-based plan/execute cleanup, protections, log rotation, `NEXUS_WORK_DIR` | prevent accumulation | `tests/fast/test_a2_diskman.py` |
+| Archive | `nexus/archive.py` on Account 1 storage: verified upload, strict verification, crash recovery, release after verification, retrieve | daily videos must live externally | `test_a2_archive.py`, `test_a2_archive_account1.py`, `daily_archive_e2e.json` |
+| Assets | `nexus/assetlib` + `asset_library.yaml`: 182 assets, licence gate, lazy install, previews, apply; 11 looks, 18 transitions, 14 LUTs, overlays, templates, sounds, fonts | professional asset ecosystem | `test_a2_assetlib.py`, `docs/results/a2_assets/` |
+| UI | Asset Library page, workspace Assets card, Storage page disk + archive panels | owner workflow | `docs/results/a2_assets/ui_check.json` |
