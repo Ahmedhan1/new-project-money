@@ -1,0 +1,126 @@
+{
+ "benchmark": "podcast",
+ "n_requested": 10,
+ "n_built": 5,
+ "elapsed_s": 0.3,
+ "use_llm": false,
+ "overlap_max_share": 0.0,
+ "overlap_mean_share": 0.0,
+ "pairs_over_10pct": 0,
+ "endings_terminal": 5,
+ "with_context_line": 0,
+ "shorts": [
+  {
+   "rank": 1,
+   "start": 0.0,
+   "end": 44.96,
+   "dur": 41.68,
+   "title": "I was a contractor",
+   "platform_title": "I was a contractor",
+   "opening": "Actually, at the end of this month, it'll be 36 years I've been working in mission control",
+   "opening_speaker": "guest",
+   "ending": "So I applied and I was selected as the first contractor flight director.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.46)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    0.0,
+    44.96
+   ]
+  },
+  {
+   "rank": 2,
+   "start": 162.02,
+   "end": 214.78,
+   "dur": 45.92,
+   "title": "There's pros and cons, everything, right?",
+   "platform_title": "There's pros and cons, everything, right?",
+   "opening": "There's pros and cons, like everything, right?",
+   "opening_speaker": "guest",
+   "ending": "So they wanted to offload some of his work and they asked me to help him out.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.45)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    162.02,
+    214.78
+   ]
+  },
+  {
+   "rank": 3,
+   "start": 45.14,
+   "end": 78.86,
+   "dur": 33.9,
+   "title": "Two of them went shuttle",
+   "platform_title": "Two of them went shuttle",
+   "opening": "When I joined the office then I became a civil servant and when my class had four and two ",
+   "opening_speaker": "guest",
+   "ending": "ran flight directors in the office I was able to, I worked the last three shuttle flights.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.34)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    45.14,
+    78.86
+   ]
+  },
+  {
+   "rank": 4,
+   "start": 102.2,
+   "end": 131.48,
+   "dur": 28.12,
+   "title": "I was actually the flight director resident in Moscow",
+   "platform_title": "I was actually the flight director resident in Moscow",
+   "opening": "So, just before we started the assembly sequence for the International Space Station, and ",
+   "opening_speaker": "guest",
+   "ending": "lture, but it was really enlightening to see how the Russian flight control team operates.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.45)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    102.2,
+    131.48
+   ]
+  },
+  {
+   "rank": 5,
+   "start": 83.14,
+   "end": 97.54,
+   "dur": 14.1,
+   "title": "Just becoming a flight director is an amazing experience",
+   "platform_title": "Just becoming a flight director is an amazing experience",
+   "opening": "So, how does that time, you look back on it now, working with International Space Station,",
+   "opening_speaker": "interviewer",
+   "ending": "I mean, just becoming a flight director is an amazing experience to start with.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.61)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    83.14,
+    97.54
+   ]
+  }
+ ],
+ "notes": [],
+ "rejected": 25
+}

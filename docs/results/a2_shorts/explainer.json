@@ -1,0 +1,104 @@
+{
+ "benchmark": "explainer",
+ "n_requested": 10,
+ "n_built": 4,
+ "elapsed_s": 0.2,
+ "use_llm": false,
+ "overlap_max_share": 0.0,
+ "overlap_mean_share": 0.0,
+ "pairs_over_10pct": 0,
+ "endings_terminal": 4,
+ "with_context_line": 0,
+ "shorts": [
+  {
+   "rank": 1,
+   "start": 214.86,
+   "end": 227.65,
+   "dur": 12.05,
+   "title": "The atmosphere is a bit warmer down here",
+   "platform_title": "The atmosphere is a bit warmer down here",
+   "opening": "The interesting thing is the reason that stratosphere begins to warm up is because all of ",
+   "opening_speaker": "narrator",
+   "ending": "So the atmosphere is a bit warmer down here.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.76)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    214.86,
+    227.65
+   ]
+  },
+  {
+   "rank": 2,
+   "start": 118.04,
+   "end": 137.48,
+   "dur": 19.44,
+   "title": "This is an invisible form of light it can't",
+   "platform_title": "This is an invisible form of light it can't",
+   "opening": "Now the sun's radiation as it comes down it comes down in a couple of different forms one ",
+   "opening_speaker": "narrator",
+   "ending": "ght it can cause skin cancer for example but it's mainly absorbed here by the ozone layer.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.50)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    118.04,
+    137.48
+   ]
+  },
+  {
+   "rank": 3,
+   "start": 145.16,
+   "end": 160.52,
+   "dur": 15.28,
+   "title": "90 % is absorbed by the ozone layer",
+   "platform_title": "90 % is absorbed by the ozone layer",
+   "opening": "So we see this stuff coming down but if we don't see much of it get through the ozone laye",
+   "opening_speaker": "narrator",
+   "ending": "So about 90 % of what we call UVB, 90 % is absorbed by the ozone layer.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.66)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    145.16,
+    160.52
+   ]
+  },
+  {
+   "rank": 4,
+   "start": 70.59,
+   "end": 89.51,
+   "dur": 18.8,
+   "title": "You get to the stratosphere",
+   "platform_title": "You get to the stratosphere",
+   "opening": "So there's a huge decrease in temperature and this is all occurring in the troposphere.",
+   "opening_speaker": "narrator",
+   "ending": "Now you get to the stratosphere, that's this layer, and temperatures begin to increase.",
+   "ending_terminal": true,
+   "context_line": null,
+   "context_status": "ok",
+   "reframe": [
+    "reframe: crop follows the subject position recorded in the analysis (x=0.60)"
+   ],
+   "keyframes": 0,
+   "src_range": [
+    70.59,
+    89.51
+   ]
+  }
+ ],
+ "notes": [],
+ "rejected": 7
+}

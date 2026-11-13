@@ -259,7 +259,7 @@ def title_info(text: str, max_words: int = 9, use_llm: bool = False) -> dict:
             toks = [re.sub(r"[^\w']", "", w.lower()) for w in cw]
             if not (4 <= len(cw) <= max_words) or toks[-1] in STOP or not _verbish(toks) or len(understand.content(cl)) < 2:
                 continue
-            if _pronoun_dangles(toks[:3]) or toks[0] in BACKREF_OPENERS or toks[0] in ("which", "that", "because", "to", "of", "for"):
+            if _pronoun_dangles(toks[:3]) or toks[0] in BACKREF_OPENERS or toks[0] in ("which", "that", "because", "to", "of", "for") or toks[0] in VERBISH:
                 continue
             cands.append((base + 0.12, " ".join(cw), "clause", True))
     out = None
@@ -273,7 +273,7 @@ def title_info(text: str, max_words: int = 9, use_llm: bool = False) -> dict:
         words = _strip_lead(re.sub(r"\s+", " ", _FILL_RE.sub("", best)).strip(" ,").rstrip(".!?…").split()) if best else []
         if words:
             words = words[:max_words]
-            while len(words) > 3 and (re.sub(r"[^\w']", "", words[-1].lower()) in STOP or words[-1].endswith(",")):
+            while len(words) > 3 and (re.sub(r"[^\w']", "", words[-1].lower()) in STOP | PRON_CONTRACT | {"it's", "is", "was", "that", "the"} or words[-1].endswith(",")):
                 words = words[:-1]
             t = " ".join(words).strip(" ,")
             t = t[:1].upper() + t[1:]
@@ -1066,6 +1066,11 @@ def select(analysis: dict, *, time_range: tuple[float, float] | None = None, top
                 continue
             cc = resolve_context(sents, i, best[1], max_raw=max_raw, time_range=time_range)
             ci, cj = cc["sentences"]
+            if not _opens_well(sents[ci]) or not _und.good_ending({**sents[cj], "prompt_like": sents[cj].get("interviewer")}):
+                if len(rejected) < 25:
+                    rejected.append({"start": sents[ci]["start"], "end": sents[cj]["end"], "text": sents[ci]["text"][:120],
+                                     "reason": "opening leans on unseen context or ending is unfinished / a question / a pleasantry"})
+                continue
             m = dict(scored(ci, cj))
             if (ci, cj) in opts:
                 opts[(ci, cj)]["targets"].append(D)
@@ -1264,6 +1269,19 @@ def _hook_titles(text: str, natural: str, use_llm: bool = False) -> list[str]:
 
 
 CONTEXT_LINE_GAP = 8.0   # a question asked at most this long before the answer is its context
+
+
+def _opens_well(s: dict) -> bool:
+    """A short may open on a question (the viewer hears what is being answered) or on a line that stands alone once
+    leading fillers/answer words are trimmed ("Actually, at the end of ..." -> "At the end of ...")."""
+    from .media import understand
+    if s["text"].strip().endswith("?") and s.get("terminal"):
+        return not s["text"].lstrip("\"'([ ")[:1].islower()
+    ws = s["text"].split()
+    while len(ws) > 4 and re.sub(r"[^\w']", "", ws[0].lower()) in LEAD_DROP:
+        ws = ws[1:]
+    txt = " ".join(ws)
+    return understand.self_contained({**s, "text": txt[:1].upper() + txt[1:], "prompt_like": False})
 
 
 def context_line(sents: list[dict], i: int) -> dict | None:
