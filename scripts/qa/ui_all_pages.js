@@ -27,7 +27,7 @@ const [base, token, outDir] = process.argv.slice(2);
       current = id;
       const t0 = Date.now();
       await page.evaluate(i => go(i), id);
-      await page.waitForTimeout(1200);
+      await page.waitForTimeout(parseInt(process.env.WAIT_MS || "1200"));
       const info = await page.evaluate(() => {
         const m = document.querySelector('main') || document.body;
         const txt = m.innerText || '';
