@@ -68,6 +68,8 @@ Found and fixed by this check: preview rendering could occupy all shared API thr
   `test_jobs::test_worker_killed_mid_job...` that did not reproduce in isolation, under load, or in the next full run.
 - Local merge Account 1 `919f158` + this branch (+ shared-contracts layout): **603 passed, 0 failed, 10 skipped**,
   no code conflicts (`docs/results/a2_storage/merged_a1_a2_check.json`).
+- Three accounts (PR #3 head a889cd8 incl. Account 1 f9d8f11 + this branch 1b2df1d + Account 3 62414bf + `apply.sh`):
+  **923 passed, 0 failed, 12 skipped** (local merge, not pushed; resolutions in `docs/results/a2_storage/merged_a1_a2_check.json`).
 - GitHub Actions: **not run** - since about 10:27 UTC every job in the repository (PRs #4, #5, #7) fails in 2 s without
   starting a step (account-level Actions limit/billing; owner action). Linux/Windows CI and the clean-machine Windows
   E2E (`scripts/acceptance/windows_e2e.py`, now also covering library/disk/archive endpoints) must be re-run when Actions
