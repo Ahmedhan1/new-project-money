@@ -1,0 +1,66 @@
+{
+ "date": "2026-11-12 18:08:43 UTC",
+ "platform": "Linux-6.18.44-fc-v378-x86_64-with-glibc2.39",
+ "python": "3.13.18",
+ "url": "http://images-assets.nasa.gov/video/jsc2022m000270_Orion_First_Imagery_Timelapse_and_Original_221117/jsc2022m000270_Orion_First_Imagery_Timelapse_and_Original_221117~mobile.mp4",
+ "status": "stored",
+ "reason": null,
+ "seconds": 1.32,
+ "artifact_id": "art_b9dbc09baa7a",
+ "mime": "video/mp4",
+ "size": 10291901,
+ "sha256": "1f915d60215831911ef02ab34eefda98c5358976567cd1c68bc01735bb626ae9",
+ "location": {
+  "provider": "local",
+  "connection_id": "local",
+  "ref": "storage/local/NEXUS/OriginalMedia/evidence/jsc2022m000270_Orion_First_Imagery_Timelapse_and_Original_221117_mobile.mp4",
+  "path": "NEXUS/OriginalMedia/evidence/jsc2022m000270_Orion_First_Imagery_Timelapse_and_Original_221117_mobile.mp4",
+  "verified_at": 1794506922.7947335
+ },
+ "recomputed_sha256_matches": true,
+ "provenance": {
+  "source_kind": "http_url",
+  "source_ref": "http://images-assets.nasa.gov/video/jsc2022m000270_Orion_First_Imagery_Timelapse_and_Original_221117/jsc2022m000270_Orion_First_Imagery_Timelapse_and_Original_221117~mobile.mp4",
+  "rights": "public_domain",
+  "licence": "NASA media usage guidelines (US Government work, no copyright)",
+  "attribution": "NASA/JSC - Orion first imagery timelapse (Artemis I)",
+  "declared_by": "owner",
+  "ingestion_id": "ing_60b4fbaea65a",
+  "ingested_at": 1794506921.5017304,
+  "url": "http://images-assets.nasa.gov/video/jsc2022m000270_Orion_First_Imagery_Timelapse_and_Original_221117/jsc2022m000270_Orion_First_Imagery_Timelapse_and_Original_221117~mobile.mp4",
+  "final_url": "https://images-assets.nasa.gov/video/jsc2022m000270_Orion_First_Imagery_Timelapse_and_Original_221117/jsc2022m000270_Orion_First_Imagery_Timelapse_and_Original_221117~mobile.mp4",
+  "redirects": [
+   "http://images-assets.nasa.gov/video/jsc2022m000270_Orion_First_Imagery_Timelapse_and_Original_221117/jsc2022m000270_Orion_First_Imagery_Timelapse_and_Original_221117~mobile.mp4"
+  ],
+  "http_content_type": "video/mp4",
+  "connect_mode": "proxy",
+  "fetched_at": 1794506922.6701562,
+  "ffprobe": {
+   "available": true,
+   "ok": true,
+   "format": "mov,mp4,m4a,3gp,3g2,mj2",
+   "duration": 242.4,
+   "streams": [
+    {
+     "codec_type": "audio",
+     "codec_name": "aac"
+    },
+    {
+     "codec_type": "video",
+     "codec_name": "h264",
+     "width": 320,
+     "height": 180
+    }
+   ]
+  },
+  "sha256": "1f915d60215831911ef02ab34eefda98c5358976567cd1c68bc01735bb626ae9",
+  "sniffed_mime": "video/mp4"
+ },
+ "mbit_per_s": 62.24,
+ "second_ingest_of_same_url": {
+  "status": "stored",
+  "reason": "duplicate of art_b9dbc09baa7a (same sha256); not stored twice",
+  "same_artifact": true
+ },
+ "unknown_rights_check": "declare rights or upload a file you own"
+}

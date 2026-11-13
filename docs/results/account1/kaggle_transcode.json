@@ -1,0 +1,324 @@
+{
+ "scenario": "transcode",
+ "date": "2026-11-12 18:04:34 UTC",
+ "host_platform": "Linux-6.18.44-fc-v378-x86_64-with-glibc2.39",
+ "job_id": "rjob_8cf7be1ccb4d",
+ "task": "ffmpeg_transcode",
+ "status": "succeeded",
+ "provider": "kaggle",
+ "attempts": 1,
+ "kernel": "<owner>/nexus-rjob-8cf7be1ccb4d",
+ "error": null,
+ "attempt_history": [
+  {
+   "attempt": 1,
+   "provider": "kaggle",
+   "ref": "<owner>/nexus-rjob-8cf7be1ccb4d",
+   "remote_state": "complete",
+   "wall_s": 32.0,
+   "outcome": "succeeded",
+   "duration_s": 3.988,
+   "accelerator": "Tesla T4 x2",
+   "error": null,
+   "artifacts": [
+    "output.mp4"
+   ],
+   "checkpoints_new": [],
+   "metrics": {
+    "encoder": "h264_nvenc",
+    "gpu_encode": true,
+    "encode_s": 1.797,
+    "realtime_factor": 5.57,
+    "gpu_util_mean": 1.1,
+    "gpu_util_max": 5.0,
+    "gpu_mem_used_max_mb": 163.0,
+    "peak_vram_allocated_mb": 0.0,
+    "cpu_percent_mean": 30.1,
+    "input_bytes": 449084,
+    "output_bytes": 3882848,
+    "task_s": 3.988,
+    "nvenc_available": true
+   }
+  }
+ ],
+ "final_result": {
+  "contract": "WorkerExecutionResult/v1",
+  "job_id": "rjob_8cf7be1ccb4d",
+  "provider": "kaggle",
+  "connection_id": "kaggle_primary",
+  "status": "succeeded",
+  "started_at": 1794506652.8964884,
+  "finished_at": 1794506656.8847997,
+  "duration_s": 3.988,
+  "accelerator": "Tesla T4 x2",
+  "metrics": {
+   "input_bytes": 449084,
+   "input_fetch_s": 0.004,
+   "nvenc_available": true,
+   "encoder": "h264_nvenc",
+   "gpu_encode": true,
+   "encode_s": 1.797,
+   "output_duration_s": 10.008005,
+   "realtime_factor": 5.57,
+   "output_probe": {
+    "programs": [],
+    "streams": [
+     {
+      "codec_name": "h264",
+      "codec_type": "video",
+      "width": 1280,
+      "height": 720,
+      "r_frame_rate": "30/1",
+      "nb_frames": "300"
+     },
+     {
+      "codec_name": "aac",
+      "codec_type": "audio",
+      "r_frame_rate": "0/0",
+      "nb_frames": "432"
+     }
+    ],
+    "format": {
+     "duration": "10.008005",
+     "size": "3882848",
+     "bit_rate": "3103793"
+    }
+   },
+   "input_probe": {
+    "programs": [],
+    "streams": [
+     {
+      "codec_name": "h264",
+      "codec_type": "video",
+      "width": 640,
+      "height": 360,
+      "r_frame_rate": "30/1",
+      "nb_frames": "300"
+     },
+     {
+      "codec_name": "aac",
+      "codec_type": "audio",
+      "r_frame_rate": "0/0",
+      "nb_frames": "432"
+     }
+    ],
+    "format": {
+     "duration": "10.000000",
+     "size": "449084",
+     "bit_rate": "359267"
+    }
+   },
+   "gpu_util_samples": [
+    {
+     "t": 1794506653.45,
+     "util": [
+      0.0,
+      0.0
+     ],
+     "mem_mb": [
+      3.0,
+      3.0
+     ]
+    },
+    {
+     "t": 1794506654.01,
+     "util": [
+      0.0,
+      0.0
+     ],
+     "mem_mb": [
+      3.0,
+      3.0
+     ]
+    },
+    {
+     "t": 1794506654.55,
+     "util": [
+      3.0,
+      0.0
+     ],
+     "mem_mb": [
+      107.0,
+      3.0
+     ]
+    },
+    {
+     "t": 1794506655.1,
+     "util": [
+      2.0,
+      0.0
+     ],
+     "mem_mb": [
+      3.0,
+      3.0
+     ]
+    },
+    {
+     "t": 1794506655.65,
+     "util": [
+      5.0,
+      0.0
+     ],
+     "mem_mb": [
+      163.0,
+      3.0
+     ]
+    },
+    {
+     "t": 1794506656.19,
+     "util": [
+      5.0,
+      0.0
+     ],
+     "mem_mb": [
+      163.0,
+      3.0
+     ]
+    },
+    {
+     "t": 1794506656.73,
+     "util": [
+      0.0,
+      0.0
+     ],
+     "mem_mb": [
+      3.0,
+      3.0
+     ]
+    }
+   ],
+   "gpu_util_mean": 1.1,
+   "gpu_util_max": 5.0,
+   "gpu_mem_used_max_mb": 163.0,
+   "cpu_percent_mean": 30.1,
+   "cpu_percent_max": 42.1,
+   "samples": 7,
+   "ram_total_gb": 31.35,
+   "ram_available_gb": 29.86,
+   "peak_rss_mb": 495.2,
+   "peak_vram_allocated_mb": 0.0,
+   "model_download_bytes": 0,
+   "gpus": [
+    {
+     "name": "Tesla T4",
+     "vram_gb": 15.0,
+     "driver": "580.178.04"
+    },
+    {
+     "name": "Tesla T4",
+     "vram_gb": 15.0,
+     "driver": "580.178.04"
+    }
+   ],
+   "output_bytes": 3882848,
+   "worker_version": "1.0.0",
+   "task_s": 3.988
+  },
+  "artifacts": [
+   {
+    "contract": "ArtifactManifest/v1",
+    "artifact_id": "art_917b53a0f41b",
+    "kind": "proxy",
+    "name": "output.mp4",
+    "mime": "video/mp4",
+    "size": 3882848,
+    "sha256": "695b432187ad964cdbd17853eac19767f61defb7a55a86d07ddb971af7d5a03f",
+    "project_id": null,
+    "produced_by_job": "rjob_8cf7be1ccb4d",
+    "locations": [
+     {
+      "provider": "local",
+      "connection_id": "local",
+      "ref": "compute/artifacts/rjob_8cf7be1ccb4d/output.mp4",
+      "path": "compute/artifacts/rjob_8cf7be1ccb4d/output.mp4",
+      "verified_at": 1794506674.2852697
+     }
+    ],
+    "provenance": {
+     "worker_version": "1.0.0",
+     "task": "ffmpeg_transcode",
+     "attempt": 1,
+     "encoder": "h264_nvenc",
+     "source": "nexus_testclip.mp4",
+     "provider": "kaggle",
+     "connection_id": "kaggle_primary"
+    },
+    "retention": "keep",
+    "expires_at": null,
+    "created_at": 1794506656.7810888
+   }
+  ],
+  "log_tail": "18:04:12 NEXUS worker 1.0.0: job rjob_8cf7be1ccb4d task ffmpeg_transcode attempt 1",
+  "error": null,
+  "checkpoint": null
+ },
+ "postprocess": null,
+ "artifacts_verified": [
+  {
+   "name": "output.mp4",
+   "size": 3882848,
+   "sha256": "695b432187ad964cdbd17853eac19767f61defb7a55a86d07ddb971af7d5a03f",
+   "local_sha256_recomputed": "695b432187ad964cdbd17853eac19767f61defb7a55a86d07ddb971af7d5a03f",
+   "match": true
+  }
+ ],
+ "checkpoints": [],
+ "events": [
+  {
+   "type": "job.submitted",
+   "message": "ffmpeg_transcode submitted (priority 5)",
+   "at": 1794506637.2397802
+  },
+  {
+   "type": "job.dispatched",
+   "message": "attempt 1 on kaggle",
+   "at": 1794506639.8140585
+  },
+  {
+   "type": "job.progress",
+   "message": "running on kaggle",
+   "at": 1794506650.5863123
+  },
+  {
+   "type": "job.succeeded",
+   "message": "ffmpeg_transcode succeeded on kaggle in 3.988s (1 verified artifact(s))",
+   "at": 1794506674.2887945
+  }
+ ],
+ "quota": {
+  "contract": "QuotaStatus/v1",
+  "provider": "kaggle",
+  "connection_id": "kaggle_primary",
+  "resource": "gpu_seconds_week",
+  "limit": 108000.0,
+  "used": 126.8,
+  "remaining": 107873.2,
+  "period": "weekly (rolling 7 days, conservative)",
+  "source": "measured",
+  "measured_at": 1794506674.3621054,
+  "exhausted": false
+ },
+ "end_to_end_s": 37.1,
+ "input": {
+  "name": "nexus_testclip.mp4",
+  "size": 449084,
+  "sha256": "be8f17ce21946f9d5c09ef47bffb7911c83449fc71171da9e901edb6e7de5b29",
+  "licence": "synthetic, public domain"
+ },
+ "local_ffprobe_of_output": {
+  "programs": [],
+  "streams": [
+   {
+    "codec_name": "h264",
+    "width": 1280,
+    "height": 720
+   },
+   {
+    "codec_name": "aac"
+   }
+  ],
+  "format": {
+   "duration": "10.008005"
+  }
+ }
+}

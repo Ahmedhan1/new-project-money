@@ -1,0 +1,15 @@
+{
+ "date": "2026-11-12",
+ "real_google": true,
+ "isolation": {
+  "file_in_drive_a_visible_to_drive_b": false,
+  "drive_b_download_succeeded": false,
+  "drive_b_error": "StorageError",
+  "token_a_differs_from_token_b": true
+ },
+ "refresh": {
+  "new_access_token_issued": true,
+  "api_call_with_refreshed_token_ok": true
+ },
+ "cleanup_ok": true
+}

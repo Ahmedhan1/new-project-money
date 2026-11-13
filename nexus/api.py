@@ -18,7 +18,61 @@ from . import assets, compute, config, costguard, db, edit, factory, jobs, proje
 from .timeline import ops
 from .timeline.render import clip_duration, clip_starts, total_duration
 
-app = FastAPI(title="NEXUS Video AI", version="0.1.0")
+from .cloud import production as _production  # noqa: E402
+
+# Production profile (NEXUS_ENV=production): refuse to start unless every required gate passes, hold the single-instance
+# lock, and do not publish the interactive API docs. Development (the default) keeps docs, guarded by the owner check.
+_PROD = _production.is_production()
+if _PROD:
+    _production.enforce(os.environ.get("NEXUS_BIND_HOST"))
+    from .cloud import instance as _instance
+    if not _instance.acquire("api"):
+        raise _production.ProductionConfigError("another NEXUS API process already serves this NEXUS_HOME (single instance only)")
+
+
+def _lifespan_factory():
+    from contextlib import asynccontextmanager
+
+    @asynccontextmanager
+    async def lifespan(_app):
+        from .cloud import lifecycle
+        lifecycle.started()
+        try:
+            yield
+        finally:
+            lifecycle.stopping()
+    return lifespan
+
+
+app = FastAPI(title="NEXUS Video AI", version="0.1.0", lifespan=_lifespan_factory(),
+              docs_url=None if _PROD else "/docs", redoc_url=None if _PROD else "/redoc",
+              openapi_url=None if _PROD else "/openapi.json")
+
+# Account 1 security: response headers (CSP, nosniff, frame-ancestors none, no-store for API) and an owner guard on the
+# legacy /api/* routes and the main page, which previously relied only on binding to 127.0.0.1.
+from fastapi.responses import JSONResponse as _JSONResponse  # noqa: E402
+
+from .cloud import security as _security  # noqa: E402
+
+_security.install(app)
+
+
+DOC_PATHS = ("/docs", "/redoc", "/openapi.json")
+
+
+@app.middleware("http")
+async def _owner_guard(request, call_next):
+    p = request.url.path
+    # the legacy UI/API and the interactive docs (route inventory) are owner-only; /api/v1 routers carry their own check
+    if ((p == "/" or p.startswith("/api/")) and not p.startswith("/api/v1")) or p in DOC_PATHS or p.startswith("/docs/"):
+        try:
+            _security.check(request)
+        except HTTPException as e:
+            return _JSONResponse({"detail": e.detail}, status_code=e.status_code)
+    return await call_next(request)
+from .cloud import limits as _limits  # noqa: E402
+
+app.add_middleware(_limits.BodyLimit)
 UI = Path(__file__).resolve().parent / "ui" / "index.html"
 _q: "queue.Queue[tuple[str, callable]]" = queue.Queue()
 _analyses: dict[str, dict] = {}
@@ -30,6 +84,29 @@ _analyses: dict[str, dict] = {}
 jobs.recover(api_worker="")
 if os.environ.get("NEXUS_EMBEDDED_WORKER", "1") != "0":  # `nexus start` runs the worker as its own process instead
     threading.Thread(target=jobs.run_worker, kwargs={"role": "embedded"}, daemon=True).start()
+    # remote compute (Account 1): poll/dispatch Kaggle and pull-worker jobs while any are active
+    from .cloud.compute import poller as _remote_poller
+    _remote_poller.start()
+    # storage: uploads left "running" by a crash become "interrupted" and can be resumed from the provider's offset
+    from .cloud import alerts as _alerts
+    _alerts.start()
+    try:
+        from .cloud.storage import transfers as _transfers
+        _transfers.recover_after_restart()
+    except Exception:  # noqa: BLE001 - never block startup on transfer bookkeeping
+        pass
+
+
+# Account 1 cloud platform routers (/api/v1). Each owner module exposes `router`; a module that is not present in
+# this build is reported by /api/v1/health instead of failing the whole app.
+CLOUD_ROUTERS = ("routes_core", "routes_security", "routes_compute", "routes_storage", "routes_studio")
+CLOUD_MISSING: dict[str, str] = {}
+for _name in CLOUD_ROUTERS:
+    try:
+        import importlib as _il
+        app.include_router(_il.import_module(f"nexus.cloud.{_name}").router)
+    except ModuleNotFoundError as _e:
+        CLOUD_MISSING[_name] = str(_e)
 
 
 def _project(pid: str) -> prj.Project:
@@ -194,16 +271,27 @@ def api_file(pid: str, path: str):
     return FileResponse(f)
 
 
+_UPLOAD_EXT = {".mp4", ".mov", ".mkv", ".webm", ".avi", ".m4v", ".mpg", ".mpeg", ".ts", ".mts", ".wmv", ".flv",
+               ".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg", ".opus", ".wma",
+               ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".tif", ".tiff", ".heic"}
+
+
 @app.post("/api/upload")
 async def api_upload(file: UploadFile = File(...), project_id: str | None = None):
     """Upload media the user owns or is authorised to use. Analysis starts immediately."""
-    p = _project(project_id) if project_id else prj.Project.create(Path(file.filename).stem, "edit")
-    tmp = config.CACHE / "uploads" / Path(file.filename).name
+    import uuid
+    name = Path((file.filename or "").replace("\\", "/")).name.strip()
+    if not name or name in (".", "..") or Path(name).suffix.lower() not in _UPLOAD_EXT:
+        raise HTTPException(415, "unsupported file type: upload a video, audio or image file")
+    p = _project(project_id) if project_id else prj.Project.create(Path(name).stem, "edit")
+    tmp = config.CACHE / "uploads" / uuid.uuid4().hex / name   # one folder per upload: concurrent same-name uploads never collide
     tmp.parent.mkdir(parents=True, exist_ok=True)
-    with tmp.open("wb") as f:
-        shutil.copyfileobj(file.file, f)
-    m = p.import_media(tmp)
-    tmp.unlink()
+    try:
+        with tmp.open("wb") as f:
+            shutil.copyfileobj(file.file, f)
+        m = p.import_media(tmp)
+    finally:
+        shutil.rmtree(tmp.parent, ignore_errors=True)
 
     return {"project": p.id, "media": m, **jobs.submit("analyze", {"project": p.id, "media": m["id"]}, p.id)}
 

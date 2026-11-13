@@ -1,0 +1,302 @@
+{
+ "scenario": "probe",
+ "date": "2026-11-12 17:03:03 UTC",
+ "host_platform": "Linux-6.18.44-fc-v378-x86_64-with-glibc2.39",
+ "job_id": "rjob_09e355c9dff4",
+ "task": "probe",
+ "status": "succeeded",
+ "provider": "kaggle",
+ "attempts": 1,
+ "kernel": "<owner>/nexus-rjob-09e355c9dff4",
+ "error": null,
+ "attempt_history": [
+  {
+   "attempt": 1,
+   "provider": "kaggle",
+   "ref": "<owner>/nexus-rjob-09e355c9dff4",
+   "remote_state": "complete",
+   "wall_s": 94.7,
+   "outcome": "succeeded",
+   "duration_s": 2.78,
+   "accelerator": "Tesla T4 x2",
+   "error": null,
+   "artifacts": [
+    "probe.json"
+   ],
+   "checkpoints_new": [],
+   "metrics": {
+    "gpu_util_mean": 6.0,
+    "gpu_util_max": 60.0,
+    "gpu_mem_used_max_mb": 437.0,
+    "peak_vram_allocated_mb": 200.1,
+    "cpu_percent_mean": 26.2,
+    "input_bytes": 0,
+    "output_bytes": 1068,
+    "task_s": 2.78
+   }
+  }
+ ],
+ "final_result": {
+  "contract": "WorkerExecutionResult/v1",
+  "job_id": "rjob_09e355c9dff4",
+  "provider": "kaggle",
+  "connection_id": "kaggle_primary",
+  "status": "succeeded",
+  "started_at": 1794502944.892973,
+  "finished_at": 1794502947.6733794,
+  "duration_s": 2.78,
+  "accelerator": "Tesla T4 x2",
+  "metrics": {
+   "input_bytes": 0,
+   "input_fetch_s": 0.0,
+   "hardware": {
+    "python": "3.13.16",
+    "platform": "Linux-6.18.55+-x86_64-with-glibc2.39",
+    "cpus": 4,
+    "ram_total_gb": 31.35,
+    "ram_available_gb": 29.97,
+    "gpus": [
+     {
+      "name": "Tesla T4",
+      "vram_gb": 15.0,
+      "driver": "580.178.04"
+     },
+     {
+      "name": "Tesla T4",
+      "vram_gb": 15.0,
+      "driver": "580.178.04"
+     }
+    ],
+    "torch": "2.11.0+cu130",
+    "cuda": "13.0",
+    "ffmpeg": "ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers",
+    "torch_devices": [
+     {
+      "name": "Tesla T4",
+      "vram_gb": 14.56
+     },
+     {
+      "name": "Tesla T4",
+      "vram_gb": 14.56
+     }
+    ],
+    "nvenc": true,
+    "internet": true
+   },
+   "matmul": [
+    {
+     "n": 4096,
+     "dtype": "float16",
+     "device": "cuda",
+     "iters": 20,
+     "seconds": 0.1152,
+     "tflops": 23.87
+    },
+    {
+     "n": 4096,
+     "dtype": "float32",
+     "device": "cuda",
+     "iters": 5,
+     "seconds": 0.1666,
+     "tflops": 4.124
+    },
+    {
+     "n": 1024,
+     "dtype": "float32",
+     "device": "cpu",
+     "iters": 3,
+     "seconds": 0.026,
+     "tflops": 0.247
+    }
+   ],
+   "gpu_util_samples": [
+    {
+     "t": 1794502945.44,
+     "util": [
+      0.0,
+      0.0
+     ],
+     "mem_mb": [
+      3.0,
+      3.0
+     ]
+    },
+    {
+     "t": 1794502946.0,
+     "util": [
+      0.0,
+      0.0
+     ],
+     "mem_mb": [
+      13.0,
+      3.0
+     ]
+    },
+    {
+     "t": 1794502946.54,
+     "util": [
+      60.0,
+      0.0
+     ],
+     "mem_mb": [
+      427.0,
+      3.0
+     ]
+    },
+    {
+     "t": 1794502947.1,
+     "util": [
+      0.0,
+      0.0
+     ],
+     "mem_mb": [
+      437.0,
+      3.0
+     ]
+    },
+    {
+     "t": 1794502947.64,
+     "util": [
+      0.0,
+      0.0
+     ],
+     "mem_mb": [
+      427.0,
+      3.0
+     ]
+    }
+   ],
+   "gpu_util_mean": 6.0,
+   "gpu_util_max": 60.0,
+   "gpu_mem_used_max_mb": 437.0,
+   "cpu_percent_mean": 26.2,
+   "cpu_percent_max": 48.0,
+   "samples": 5,
+   "ram_total_gb": 31.35,
+   "ram_available_gb": 29.66,
+   "peak_rss_mb": 693.8,
+   "peak_vram_allocated_mb": 200.1,
+   "model_download_bytes": 0,
+   "gpus": [
+    {
+     "name": "Tesla T4",
+     "vram_gb": 15.0,
+     "driver": "580.178.04"
+    },
+    {
+     "name": "Tesla T4",
+     "vram_gb": 15.0,
+     "driver": "580.178.04"
+    }
+   ],
+   "output_bytes": 1068,
+   "worker_version": "1.0.0",
+   "task_s": 2.78
+  },
+  "artifacts": [
+   {
+    "contract": "ArtifactManifest/v1",
+    "artifact_id": "art_13ac62fb36bf",
+    "kind": "analysis",
+    "name": "probe.json",
+    "mime": "application/json",
+    "size": 1068,
+    "sha256": "c9c1976657b18063a02299d88cb190619ea9b3549d4c0fafa042950d5b62a91b",
+    "project_id": null,
+    "produced_by_job": "rjob_09e355c9dff4",
+    "locations": [
+     {
+      "provider": "local",
+      "connection_id": "local",
+      "ref": "compute/artifacts/rjob_09e355c9dff4/probe.json",
+      "path": "compute/artifacts/rjob_09e355c9dff4/probe.json",
+      "verified_at": 1794502983.365914
+     }
+    ],
+    "provenance": {
+     "worker_version": "1.0.0",
+     "task": "probe",
+     "attempt": 1,
+     "provider": "kaggle",
+     "connection_id": "kaggle_primary"
+    },
+    "retention": "keep",
+    "expires_at": null,
+    "created_at": 1794502947.6732543
+   }
+  ],
+  "log_tail": "17:02:24 NEXUS worker 1.0.0: job rjob_09e355c9dff4 task probe attempt 1",
+  "error": null,
+  "checkpoint": null
+ },
+ "postprocess": null,
+ "artifacts_verified": [
+  {
+   "name": "probe.json",
+   "size": 1068,
+   "sha256": "c9c1976657b18063a02299d88cb190619ea9b3549d4c0fafa042950d5b62a91b",
+   "local_sha256_recomputed": "c9c1976657b18063a02299d88cb190619ea9b3549d4c0fafa042950d5b62a91b",
+   "match": true
+  }
+ ],
+ "checkpoints": [],
+ "events": [
+  {
+   "type": "job.submitted",
+   "message": "probe submitted (priority 5)",
+   "at": 1794502881.6228406
+  },
+  {
+   "type": "job.dispatched",
+   "message": "attempt 1 on kaggle",
+   "at": 1794502886.3179648
+  },
+  {
+   "type": "job.progress",
+   "message": "running on kaggle",
+   "at": 1794502950.0210228
+  },
+  {
+   "type": "provider.health",
+   "message": "kaggle capability measured: Tesla T4 x2",
+   "at": 1794502983.3730679
+  },
+  {
+   "type": "job.succeeded",
+   "message": "probe succeeded on kaggle in 2.78s (1 verified artifact(s))",
+   "at": 1794502983.3743331
+  }
+ ],
+ "quota": {
+  "contract": "QuotaStatus/v1",
+  "provider": "kaggle",
+  "connection_id": "kaggle_primary",
+  "resource": "gpu_seconds_week",
+  "limit": 108000.0,
+  "used": 94.7,
+  "remaining": 107905.3,
+  "period": "weekly (rolling 7 days, conservative)",
+  "source": "measured",
+  "measured_at": 1794502983.3773584,
+  "exhausted": false
+ },
+ "end_to_end_s": 102.6,
+ "measured_capability": {
+  "contract": "RemoteWorkerCapability/v1",
+  "provider": "kaggle",
+  "connection_id": "kaggle_primary",
+  "accelerator": "Tesla T4 x2",
+  "vram_gb": 15.0,
+  "ram_gb": 31.35,
+  "cpus": 4,
+  "max_runtime_s": 43200.0,
+  "frameworks": [
+   "torch",
+   "ffmpeg",
+   "nvenc"
+  ],
+  "internet": true,
+  "measured": true,
+  "measured_at": 1794502947.6733794
+ }
+}

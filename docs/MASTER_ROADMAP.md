@@ -154,3 +154,10 @@ for fragments.
    opacity keyframes; tracked masks (face blur) using `faces.follow_keyframes`.
 6. **Real video generation** once a GPU is available: Wan 2.1 1.3B T2V first (Apache-2.0, ~8 GB VRAM), then Wan 2.2 5B
    TI2V for animating licensed stills; provenance kind `generated` only for those clips.
+
+## 10. Three-account program (from 2026-11-12)
+Account 1 (cloud platform: remote compute, multi-account storage, ingestion, scheduler, Remote Studio, security) is on
+`work/account-1-cloud-platform` (PR #4). Accounts 2 (editing/rendering/video generation) and 3 (research, translation,
+localization, publishing, analytics, AI providers) start from that branch and integrate through the v1 contracts:
+`docs/ACCOUNT1_HANDOFF_TO_ACCOUNT2.md`. Remaining Account 1 items need the owner: Drive OAuth client + consent (Demo B/E),
+a permanent host (ACC1-HOSTING). Kaggle is closed (accepted as-is by the owner).

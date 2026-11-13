@@ -49,7 +49,7 @@ main a{color:var(--acc)}
 <script>
 const $=(s,e=document)=>e.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const api=async(p,body)=>{const r=await fetch(p,body===undefined?{}:{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+const api=async(p,body)=>{const r=await fetch(p,body===undefined?{credentials:"same-origin"}:{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json","X-NEXUS-CSRF":"1"},body:JSON.stringify(body)});
   const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.detail||r.statusText);return j};
 const tag=(t,c="")=>`<span class="tag ${c}">${esc(t)}</span>`;
 const statusTag=s=>tag(s,/PASSED|VERIFIED|done|deployed|true|scheduled/i.test(s)?"ok":/BLOCK|fail|REJECT/i.test(s)?"bad":"warn");
@@ -66,7 +66,7 @@ const MODULES=[["Create",[["home","What do you want to create?","live"],["creato
 const PLANNED={enhance:"Upscaling, interpolation and stabilisation controls. FFmpeg's stabiliser is installed but not exposed here yet; Real-ESRGAN/RIFE need a GPU worker.",
  vfx:"Masks, keying and compositing. Not built. Candidates: SAM 2 (GPU) and rembg (CPU).",research:"Trend and competitor research. Not built: needs platform analytics access that you authorise. Wikipedia-based topic research already runs inside the AI Video Creator.",
  analytics:"Performance analytics from YouTube/TikTok/Instagram. Not built: requires your own OAuth authorisation for each platform's official API.",plugins:"Third-party plugin loading. Not built."};
-function nav(){ $("#nav").innerHTML=`<h1>NEXUS VIDEO AI</h1><div class="zero" id="spend">spend: $0.00</div>`+MODULES.map(([g,items])=>`<h2>${g}</h2>`+items.map(([id,name,st])=>`<a data-id="${id}" class="${id===current?"on":""}">${esc(name)}${st==="live"?"":`<small>${st}</small>`}</a>`).join("")).join("");
+function nav(){ $("#nav").innerHTML=`<h1>NEXUS VIDEO AI</h1><div class="zero" id="spend">spend: $0.00</div><a href="/studio" style="display:block;margin:6px 0 10px">Open Remote Studio (cloud) →</a>`+MODULES.map(([g,items])=>`<h2>${g}</h2>`+items.map(([id,name,st])=>`<a data-id="${id}" class="${id===current?"on":""}">${esc(name)}${st==="live"?"":`<small>${st}</small>`}</a>`).join("")).join("");
   document.querySelectorAll("nav a").forEach(a=>a.onclick=()=>go(a.dataset.id));
   api("/api/spend").then(s=>$("#spend").textContent=`spend: $${s.actual_spend_usd.toFixed(2)} · ${s.decisions.block||0} paid ops blocked`).catch(()=>{}) }
 function go(id,arg){current=id;nav();const m=$("#main");m.innerHTML="<p class='lead'>Loading…</p>";(PAGES[id]||planned)(m,arg,id).catch(e=>m.innerHTML=`<div class="note">Error: ${esc(e.message)}</div>`)}
@@ -269,7 +269,7 @@ async discovery(m){const c=await api("/api/catalog");const cls=[...new Set(c.map
 async settings(m){m.innerHTML=`<h2 class="page">Settings</h2><div class="row"><label>User mode<select id="mode"><option value="beginner">Beginner: guided, automatic</option><option value="creator">Creator: creative settings</option><option value="professional">Professional: full detail</option></select></label></div>
  <p class="lead">Beginner hides transcripts, research notes and technical detail. Stored in this browser only.</p>`;$("#mode").value=mode;$("#mode").onchange=e=>{mode=e.target.value;localStorage.setItem("nexus-mode",mode)}}
 };
-go("home");
+go((location.hash.slice(1) in PAGES) ? location.hash.slice(1) : "home");  // deep links such as /#review
 </script>
 </body>
 </html>

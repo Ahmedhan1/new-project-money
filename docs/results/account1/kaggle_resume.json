@@ -1,0 +1,612 @@
+{
+ "scenario": "resume",
+ "date": "2026-11-12 18:06:36 UTC",
+ "host_platform": "Linux-6.18.44-fc-v378-x86_64-with-glibc2.39",
+ "job_id": "rjob_ca88a8b5c42b",
+ "task": "chunked_transcode",
+ "status": "succeeded",
+ "provider": "kaggle",
+ "attempts": 2,
+ "kernel": "<owner>/nexus-rjob-ca88a8b5c42b",
+ "error": null,
+ "attempt_history": [
+  {
+   "attempt": 1,
+   "provider": "kaggle",
+   "ref": "<owner>/nexus-rjob-ca88a8b5c42b",
+   "remote_state": "complete",
+   "wall_s": 32.1,
+   "outcome": "lost",
+   "duration_s": 3.841,
+   "accelerator": "Tesla T4 x2",
+   "error": "simulated worker loss after 2 chunk(s) (params.simulate_loss_after)",
+   "artifacts": [
+    "chunk_000.mp4",
+    "chunk_001.mp4"
+   ],
+   "checkpoints_new": [
+    1,
+    2
+   ],
+   "metrics": {
+    "encoder": "h264_nvenc",
+    "chunks_run_this_attempt": [
+     0,
+     1
+    ],
+    "chunks_skipped": [],
+    "gpu_util_mean": 0.4,
+    "gpu_util_max": 3.0,
+    "gpu_mem_used_max_mb": 163.0,
+    "peak_vram_allocated_mb": 0.0,
+    "cpu_percent_mean": 29.3,
+    "input_bytes": 449084,
+    "output_bytes": 1839205,
+    "task_s": 3.841,
+    "nvenc_available": true
+   }
+  },
+  {
+   "attempt": 2,
+   "provider": "kaggle",
+   "ref": "<owner>/nexus-rjob-ca88a8b5c42b",
+   "remote_state": "complete",
+   "wall_s": 63.6,
+   "outcome": "succeeded",
+   "duration_s": 5.017,
+   "accelerator": "Tesla T4 x2",
+   "error": null,
+   "artifacts": [
+    "chunk_002.mp4",
+    "chunk_003.mp4"
+   ],
+   "checkpoints_new": [
+    3,
+    4
+   ],
+   "metrics": {
+    "encoder": "h264_nvenc",
+    "chunks_run_this_attempt": [
+     2,
+     3
+    ],
+    "chunks_skipped": [
+     0,
+     1
+    ],
+    "gpu_util_mean": 0.7,
+    "gpu_util_max": 4.0,
+    "gpu_mem_used_max_mb": 137.0,
+    "peak_vram_allocated_mb": 0.0,
+    "cpu_percent_mean": 26.2,
+    "input_bytes": 449084,
+    "output_bytes": 1956687,
+    "task_s": 5.017,
+    "nvenc_available": true
+   }
+  }
+ ],
+ "final_result": {
+  "contract": "WorkerExecutionResult/v1",
+  "job_id": "rjob_ca88a8b5c42b",
+  "provider": "kaggle",
+  "connection_id": "kaggle_primary",
+  "status": "succeeded",
+  "started_at": 1794506750.2204416,
+  "finished_at": 1794506755.2377174,
+  "duration_s": 5.017,
+  "accelerator": "Tesla T4 x2",
+  "metrics": {
+   "input_bytes": 449084,
+   "input_fetch_s": 0.004,
+   "nvenc_available": true,
+   "encoder": "h264_nvenc",
+   "chunks_total": 4,
+   "chunks_run_this_attempt": [
+    2,
+    3
+   ],
+   "chunks_skipped": [
+    0,
+    1
+   ],
+   "chunk_runs": [
+    {
+     "chunk": 2,
+     "encode_s": 1.098,
+     "sha256": "273ec8442bcc7ada27935f8c0dd6a14eafe69a18b0441f3c8c7519ba383019e7"
+    },
+    {
+     "chunk": 3,
+     "encode_s": 1.127,
+     "sha256": "a4d8fad7e4c8e187c74b9656eba0107b52d311a73c493ce209f7f525ee39f118"
+    }
+   ],
+   "input_duration_s": 10.0,
+   "gpu_util_samples": [
+    {
+     "t": 1794506750.77,
+     "util": [
+      0.0,
+      0.0
+     ],
+     "mem_mb": [
+      3.0,
+      3.0
+     ]
+    },
+    {
+     "t": 1794506751.31,
+     "util": [
+      0.0,
+      0.0
+     ],
+     "mem_mb": [
+      3.0,
+      3.0
+     ]
+    },
+    {
+     "t": 1794506751.87,
+     "util": [
+      0.0,
+      0.0
+     ],
+     "mem_mb": [
+      3.0,
+      3.0
+     ]
+    },
+    {
+     "t": 1794506752.41,
+     "util": [
+      4.0,
+      0.0
+     ],
+     "mem_mb": [
+      118.0,
+      3.0
+     ]
+    },
+    {
+     "t": 1794506752.97,
+     "util": [
+      2.0,
+      0.0
+     ],
+     "mem_mb": [
+      3.0,
+      3.0
+     ]
+    },
+    {
+     "t": 1794506753.51,
+     "util": [
+      0.0,
+      0.0
+     ],
+     "mem_mb": [
+      137.0,
+      3.0
+     ]
+    },
+    {
+     "t": 1794506754.07,
+     "util": [
+      1.0,
+      0.0
+     ],
+     "mem_mb": [
+      79.0,
+      3.0
+     ]
+    },
+    {
+     "t": 1794506754.62,
+     "util": [
+      2.0,
+      0.0
+     ],
+     "mem_mb": [
+      109.0,
+      3.0
+     ]
+    },
+    {
+     "t": 1794506755.18,
+     "util": [
+      3.0,
+      0.0
+     ],
+     "mem_mb": [
+      79.0,
+      3.0
+     ]
+    }
+   ],
+   "gpu_util_mean": 0.7,
+   "gpu_util_max": 4.0,
+   "gpu_mem_used_max_mb": 137.0,
+   "cpu_percent_mean": 26.2,
+   "cpu_percent_max": 57.6,
+   "samples": 9,
+   "ram_total_gb": 31.35,
+   "ram_available_gb": 29.58,
+   "peak_rss_mb": 493.8,
+   "peak_vram_allocated_mb": 0.0,
+   "model_download_bytes": 0,
+   "gpus": [
+    {
+     "name": "Tesla T4",
+     "vram_gb": 15.0,
+     "driver": "580.178.04"
+    },
+    {
+     "name": "Tesla T4",
+     "vram_gb": 15.0,
+     "driver": "580.178.04"
+    }
+   ],
+   "output_bytes": 1956687,
+   "worker_version": "1.0.0",
+   "task_s": 5.017
+  },
+  "artifacts": [
+   {
+    "contract": "ArtifactManifest/v1",
+    "artifact_id": "art_4c57f963c44d",
+    "kind": "proxy",
+    "name": "chunk_002.mp4",
+    "mime": "video/mp4",
+    "size": 1012143,
+    "sha256": "273ec8442bcc7ada27935f8c0dd6a14eafe69a18b0441f3c8c7519ba383019e7",
+    "project_id": null,
+    "produced_by_job": "rjob_ca88a8b5c42b",
+    "locations": [
+     {
+      "provider": "local",
+      "connection_id": "local",
+      "ref": "compute/artifacts/rjob_ca88a8b5c42b/chunk_002.mp4",
+      "path": "compute/artifacts/rjob_ca88a8b5c42b/chunk_002.mp4",
+      "verified_at": 1794506796.746155
+     }
+    ],
+    "provenance": {
+     "worker_version": "1.0.0",
+     "task": "chunked_transcode",
+     "attempt": 2,
+     "chunk": 2,
+     "encoder": "h264_nvenc",
+     "provider": "kaggle",
+     "connection_id": "kaggle_primary"
+    },
+    "retention": "keep",
+    "expires_at": null,
+    "created_at": 1794506754.1052048
+   },
+   {
+    "contract": "ArtifactManifest/v1",
+    "artifact_id": "art_f5846ec31b02",
+    "kind": "proxy",
+    "name": "chunk_003.mp4",
+    "mime": "video/mp4",
+    "size": 944544,
+    "sha256": "a4d8fad7e4c8e187c74b9656eba0107b52d311a73c493ce209f7f525ee39f118",
+    "project_id": null,
+    "produced_by_job": "rjob_ca88a8b5c42b",
+    "locations": [
+     {
+      "provider": "local",
+      "connection_id": "local",
+      "ref": "compute/artifacts/rjob_ca88a8b5c42b/chunk_003.mp4",
+      "path": "compute/artifacts/rjob_ca88a8b5c42b/chunk_003.mp4",
+      "verified_at": 1794506796.7473435
+     }
+    ],
+    "provenance": {
+     "worker_version": "1.0.0",
+     "task": "chunked_transcode",
+     "attempt": 2,
+     "chunk": 3,
+     "encoder": "h264_nvenc",
+     "provider": "kaggle",
+     "connection_id": "kaggle_primary"
+    },
+    "retention": "keep",
+    "expires_at": null,
+    "created_at": 1794506755.2371824
+   }
+  ],
+  "log_tail": "18:05:50 NEXUS worker 1.0.0: job rjob_ca88a8b5c42b task chunked_transcode attempt 2\n18:05:53 chunk 0: already done in an earlier attempt (checkpoint) - skipped\n18:05:53 chunk 1: already done in an earlier attempt (checkpoint) - skipped\n18:05:54 checkpoint 3: chunk_2\n18:05:55 checkpoint 4: chunk_3",
+  "error": null,
+  "checkpoint": {
+   "contract": "JobCheckpoint/v1",
+   "job_id": "rjob_ca88a8b5c42b",
+   "step": "chunk_3",
+   "seq": 4,
+   "state": {
+    "chunks_total": 4,
+    "done": [
+     0,
+     1,
+     2,
+     3
+    ],
+    "chunk_files": {
+     "0": {
+      "name": "chunk_000.mp4",
+      "sha256": "ba74a1471028c76a492443a6ce94babe732a7f2852e78039e35f0024b80ca103",
+      "attempt": 1
+     },
+     "1": {
+      "name": "chunk_001.mp4",
+      "sha256": "f9c2d99c24de7ed96a502921468dbfbc70650d69f1a32040996bf679a3288fd2",
+      "attempt": 1
+     },
+     "2": {
+      "name": "chunk_002.mp4",
+      "sha256": "273ec8442bcc7ada27935f8c0dd6a14eafe69a18b0441f3c8c7519ba383019e7",
+      "attempt": 2
+     },
+     "3": {
+      "name": "chunk_003.mp4",
+      "sha256": "a4d8fad7e4c8e187c74b9656eba0107b52d311a73c493ce209f7f525ee39f118",
+      "attempt": 2
+     }
+    }
+   },
+   "artifacts": [
+    "art_4c57f963c44d",
+    "art_f5846ec31b02"
+   ],
+   "created_at": 1794506755.2373018
+  }
+ },
+ "postprocess": {
+  "concat": "ok",
+  "artifact": "art_9a8ac3270f4f",
+  "sha256": "1665aa6dce1e9f4efb2368308f08520002c1fda8fc53c8c2133688671205ecfb",
+  "chunks": 4
+ },
+ "artifacts_verified": [
+  {
+   "name": "chunk_000.mp4",
+   "size": 864088,
+   "sha256": "ba74a1471028c76a492443a6ce94babe732a7f2852e78039e35f0024b80ca103",
+   "local_sha256_recomputed": "ba74a1471028c76a492443a6ce94babe732a7f2852e78039e35f0024b80ca103",
+   "match": true
+  },
+  {
+   "name": "chunk_001.mp4",
+   "size": 975117,
+   "sha256": "f9c2d99c24de7ed96a502921468dbfbc70650d69f1a32040996bf679a3288fd2",
+   "local_sha256_recomputed": "f9c2d99c24de7ed96a502921468dbfbc70650d69f1a32040996bf679a3288fd2",
+   "match": true
+  },
+  {
+   "name": "chunk_002.mp4",
+   "size": 1012143,
+   "sha256": "273ec8442bcc7ada27935f8c0dd6a14eafe69a18b0441f3c8c7519ba383019e7",
+   "local_sha256_recomputed": "273ec8442bcc7ada27935f8c0dd6a14eafe69a18b0441f3c8c7519ba383019e7",
+   "match": true
+  },
+  {
+   "name": "chunk_003.mp4",
+   "size": 944544,
+   "sha256": "a4d8fad7e4c8e187c74b9656eba0107b52d311a73c493ce209f7f525ee39f118",
+   "local_sha256_recomputed": "a4d8fad7e4c8e187c74b9656eba0107b52d311a73c493ce209f7f525ee39f118",
+   "match": true
+  },
+  {
+   "name": "joined.mp4",
+   "size": 3793503,
+   "sha256": "1665aa6dce1e9f4efb2368308f08520002c1fda8fc53c8c2133688671205ecfb",
+   "local_sha256_recomputed": "1665aa6dce1e9f4efb2368308f08520002c1fda8fc53c8c2133688671205ecfb",
+   "match": true
+  }
+ ],
+ "checkpoints": [
+  {
+   "contract": "JobCheckpoint/v1",
+   "job_id": "rjob_ca88a8b5c42b",
+   "step": "chunk_0",
+   "seq": 1,
+   "state": {
+    "chunks_total": 4,
+    "done": [
+     0
+    ],
+    "chunk_files": {
+     "0": {
+      "name": "chunk_000.mp4",
+      "sha256": "ba74a1471028c76a492443a6ce94babe732a7f2852e78039e35f0024b80ca103",
+      "attempt": 1
+     }
+    }
+   },
+   "artifacts": [
+    "art_42e27c2100a8"
+   ],
+   "created_at": 1794506702.1619775
+  },
+  {
+   "contract": "JobCheckpoint/v1",
+   "job_id": "rjob_ca88a8b5c42b",
+   "step": "chunk_1",
+   "seq": 2,
+   "state": {
+    "chunks_total": 4,
+    "done": [
+     0,
+     1
+    ],
+    "chunk_files": {
+     "0": {
+      "name": "chunk_000.mp4",
+      "sha256": "ba74a1471028c76a492443a6ce94babe732a7f2852e78039e35f0024b80ca103",
+      "attempt": 1
+     },
+     "1": {
+      "name": "chunk_001.mp4",
+      "sha256": "f9c2d99c24de7ed96a502921468dbfbc70650d69f1a32040996bf679a3288fd2",
+      "attempt": 1
+     }
+    }
+   },
+   "artifacts": [
+    "art_42e27c2100a8",
+    "art_a8b6786a9cb1"
+   ],
+   "created_at": 1794506703.2161984
+  },
+  {
+   "contract": "JobCheckpoint/v1",
+   "job_id": "rjob_ca88a8b5c42b",
+   "step": "chunk_2",
+   "seq": 3,
+   "state": {
+    "chunks_total": 4,
+    "done": [
+     0,
+     1,
+     2
+    ],
+    "chunk_files": {
+     "0": {
+      "name": "chunk_000.mp4",
+      "sha256": "ba74a1471028c76a492443a6ce94babe732a7f2852e78039e35f0024b80ca103",
+      "attempt": 1
+     },
+     "1": {
+      "name": "chunk_001.mp4",
+      "sha256": "f9c2d99c24de7ed96a502921468dbfbc70650d69f1a32040996bf679a3288fd2",
+      "attempt": 1
+     },
+     "2": {
+      "name": "chunk_002.mp4",
+      "sha256": "273ec8442bcc7ada27935f8c0dd6a14eafe69a18b0441f3c8c7519ba383019e7",
+      "attempt": 2
+     }
+    }
+   },
+   "artifacts": [
+    "art_4c57f963c44d"
+   ],
+   "created_at": 1794506754.1053016
+  },
+  {
+   "contract": "JobCheckpoint/v1",
+   "job_id": "rjob_ca88a8b5c42b",
+   "step": "chunk_3",
+   "seq": 4,
+   "state": {
+    "chunks_total": 4,
+    "done": [
+     0,
+     1,
+     2,
+     3
+    ],
+    "chunk_files": {
+     "0": {
+      "name": "chunk_000.mp4",
+      "sha256": "ba74a1471028c76a492443a6ce94babe732a7f2852e78039e35f0024b80ca103",
+      "attempt": 1
+     },
+     "1": {
+      "name": "chunk_001.mp4",
+      "sha256": "f9c2d99c24de7ed96a502921468dbfbc70650d69f1a32040996bf679a3288fd2",
+      "attempt": 1
+     },
+     "2": {
+      "name": "chunk_002.mp4",
+      "sha256": "273ec8442bcc7ada27935f8c0dd6a14eafe69a18b0441f3c8c7519ba383019e7",
+      "attempt": 2
+     },
+     "3": {
+      "name": "chunk_003.mp4",
+      "sha256": "a4d8fad7e4c8e187c74b9656eba0107b52d311a73c493ce209f7f525ee39f118",
+      "attempt": 2
+     }
+    }
+   },
+   "artifacts": [
+    "art_4c57f963c44d",
+    "art_f5846ec31b02"
+   ],
+   "created_at": 1794506755.2373018
+  }
+ ],
+ "events": [
+  {
+   "type": "job.submitted",
+   "message": "chunked_transcode submitted (priority 5)",
+   "at": 1794506686.6730592
+  },
+  {
+   "type": "job.dispatched",
+   "message": "attempt 1 on kaggle",
+   "at": 1794506689.727207
+  },
+  {
+   "type": "job.progress",
+   "message": "running on kaggle",
+   "at": 1794506700.6836529
+  },
+  {
+   "type": "job.checkpoint",
+   "message": "checkpoint 1: chunk_0",
+   "at": 1794506725.6125445
+  },
+  {
+   "type": "job.checkpoint",
+   "message": "checkpoint 2: chunk_1",
+   "at": 1794506725.6139255
+  },
+  {
+   "type": "worker.lost",
+   "message": "simulated worker loss after 2 chunk(s) (params.simulate_loss_after)",
+   "at": 1794506725.62111
+  },
+  {
+   "type": "job.retrying",
+   "message": "worker lost: simulated worker loss after 2 chunk(s) (params.simulate_loss_after) - retry 1/1, resuming from checkpoint 2 (chunk_1)",
+   "at": 1794506725.623329
+  },
+  {
+   "type": "job.dispatched",
+   "message": "attempt 2 on kaggle (resuming from checkpoint)",
+   "at": 1794506728.6389744
+  },
+  {
+   "type": "job.checkpoint",
+   "message": "checkpoint 3: chunk_2",
+   "at": 1794506796.7401242
+  },
+  {
+   "type": "job.checkpoint",
+   "message": "checkpoint 4: chunk_3",
+   "at": 1794506796.7417512
+  },
+  {
+   "type": "job.succeeded",
+   "message": "chunked_transcode succeeded on kaggle in 5.017s (2 verified artifact(s))",
+   "at": 1794506796.8347278
+  }
+ ],
+ "quota": {
+  "contract": "QuotaStatus/v1",
+  "provider": "kaggle",
+  "connection_id": "kaggle_primary",
+  "resource": "gpu_seconds_week",
+  "limit": 108000.0,
+  "used": 222.4,
+  "remaining": 107777.6,
+  "period": "weekly (rolling 7 days, conservative)",
+  "source": "measured",
+  "measured_at": 1794506796.852937,
+  "exhausted": false
+ },
+ "end_to_end_s": 110.2,
+ "how_loss_was_simulated": "attempt 1 ran with params.simulate_loss_after=2: the worker stopped after chunk 2 and reported status 'lost'; the dispatcher stored its checkpoints and verified chunks, emitted worker.lost and re-pushed the job with the last JobCheckpoint embedded"
+}

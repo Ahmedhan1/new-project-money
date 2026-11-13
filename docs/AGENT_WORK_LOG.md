@@ -58,3 +58,39 @@ output, so the lead did the work sequentially. Every item below was driven by a 
 | Delivery | export verify + size-cap re-encode inside the deliver job; subtitle package with readiness manifest | gap list | `628ca30`, `dc40e8d` |
 | Windows | `windows-e2e.yml`: SETUP → START → API e2e (non-ASCII paths) → STATUS → BACKUP drill → STOP on a clean VM | WIN-1 | `33ac0af`, `3cb50aa` |
 | Release | `scripts/release_check.py`: fresh clone, hygiene, ruff, fast suite | release discipline | `1ed89a0` |
+
+## Account 1 (2026-11-12): cloud platform — branch work/account-1-cloud-platform, PR #4
+Lead verified real Kaggle GPU access first, then built the shared foundation (contracts v1, vault, migration 2, events,
+owner auth). Four sub-agents in separate worktrees: A security/architecture, B compute (Kaggle), C storage/Drive/ingest,
+D Studio/scheduler. Three hit the 5-hour usage limit and were resumed after the reset; all delivered. Lead integration
+found and fixed: CI backup-test regression, Studio CSRF/session mismatch, token-shaped literal in a test, a non-contract
+quota response, unauthenticated legacy routes. Demos C, D (worker loss + control-plane SIGKILL), F, G done for real;
+A done on the dev host; B and the Drive legs of E blocked on the owner's Google OAuth client. Fast suite 392 passed.
+Details: docs/ACCOUNT1_EXECUTION_REPORT.md, docs/ACCOUNT1_ACCEPTANCE_RESULTS.md.
+
+**2026-11-13 — Account 1 final closure (lead, single session).** Refreshed GitHub state: PR #4 b2517b2 green, no reviews;
+PR #5 24b3f71 green; PR #6 9929512 red (Account 2's undeclared CI deps). Added the `batch_llm` worker task (Kaggle-only,
+bounded, checkpointed parts; live on T4 x2 with Qwen2.5-0.5B-Instruct, 8/8), declared Wikidata in the Cost Guard (GDELT
+stays with Account 3), made the cookie/CSRF test deterministic, and added a control-plane-restart regression test. Built
+the three-account integration at exact heads with `apply.sh`: 663 passed with the packages present; with CI deps only,
+27 Account 2 tests fail on scipy/cv2/onnxruntime (fix verified). Clean-clone release check at 9ea4a73: 412 passed,
+4 skipped. Verdict and details: docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md.
+
+**2026-11-13 — Account 1 closure round (docs/state only, no code change).** The owner closed Kaggle (accepted as-is),
+and the docs and task registry now record it. CI on `e9ad5e9` is green: Linux and Windows 411 passed / 5 skipped. The
+dev-container count (412 / 4) is reconciled: same 416 tests, with font and rclone skips mapped from the CI progress
+output. Integration at the latest exact heads A1 `e9ad5e9` + A2 `a52a24a` + A3 `fd71471` + `apply.sh`: 748 passed,
+0 failed, 12 skipped (Linux, CI deps). PR #6 is green (Windows failures fixed by Account 2). The Account 3
+`account1_manifest` mismatch is still open; Account 3 was notified on PR #5. Audit: docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md.
+
+**2026-11-13 — Account 1 production closure (lead, single session).** PR #4 was at `919f158` (green), PR #5 at `fd71471`
+(Account 3's `batch_llm` manifest still incompatible), Account 2 at `d979df1`. Reproduced Account 2's cookie/CSRF report:
+httpx 0.28 sends the server-set and the manually set cookie together and the old test's verdict depended on the
+parser's order (test ambiguity, not a bypass); fixed in the server too (any presented value must carry a valid
+signature). Added the production profile (`NEXUS_ENV=production`, 12 startup gates, `production-check`), readiness
+probe, single-instance lock, lifespan audit/unclean-restart detection, trusted-proxy rate-limit identity, request/upload
+limits, vault ciphertext in backups (never the key) with restore validation, offline vault-key export/verify, backup/
+auth/disk alerts, log rotation, refusal of credentials in job manifests. 16 new tests (`test_production.py`). Runbooks:
+`ACCOUNT1_PRODUCTION_DEPLOYMENT.md`, `ACCOUNT1_DISASTER_RECOVERY.md`, `ACCOUNT1_OAUTH_PRODUCTION_CHECKLIST.md` (Google
+facts re-checked). Fresh local integration at A1 `34a5ba1` + A2 `d979df1` + A3 `fd71471` + `apply.sh`; results in the
+audit §7. Nothing merged, deployed or changed on Account 2/3 branches; no Kaggle change.

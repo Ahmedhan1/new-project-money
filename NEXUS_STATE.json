@@ -3,13 +3,13 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-12T14:28:46Z",
+ "updated": "2026-11-13T10:27:10Z",
  "git": {
-  "branch": "claude/hopeful-allen-luubcy",
-  "commit": "c69fc56",
-  "subject": "Final report: tests section; release check PASS on 9e9b527",
+  "branch": "work/account-1-cloud-platform",
+  "commit": "a559669",
+  "subject": "Account 1 production closure: CI 427/5 Linux+Windows at 73c0023, integration 766 passed at exact heads, audit verdict READY FOR OWNER DEPLOYMENT",
   "dirty_files": 0,
-  "upstream": "origin/claude/hopeful-allen-luubcy",
+  "upstream": "origin/work/account-1-cloud-platform",
   "unpushed_commits": 1
  },
  "current_task": {
@@ -56,11 +56,11 @@
   }
  ],
  "tasks": {
-  "total": 52,
+  "total": 60,
   "by_status": {
-   "verified": 17,
+   "verified": 23,
    "tested": 12,
-   "blocked": 4,
+   "blocked": 6,
    "deferred": 1,
    "planned": 16,
    "in_progress": 2
@@ -69,9 +69,9 @@
  },
  "tests": {
   "fast": {
-   "summary": "209 passed, 0 failed, 4 skipped",
+   "summary": "428 passed, 0 failed, 4 skipped",
    "ok": true,
-   "date": "2026-11-12",
+   "date": "2026-11-13",
    "platform": "Linux",
    "python": "3.13.18"
   }
@@ -79,9 +79,20 @@
  "jobs": {
   "counts": {
    "cancelled": 3,
-   "done": 29
+   "done": 29,
+   "running": 1
   },
-  "active": []
+  "active": [
+   {
+    "id": "job_fb9b1b1159",
+    "kind": "backup",
+    "status": "running",
+    "stage": "backup-verify",
+    "worker": "embedded-vm-585",
+    "retries": 0,
+    "recovery": null
+   }
+  ]
  },
  "blockers": [
   {
@@ -103,6 +114,16 @@
    "id": "ANA-1",
    "title": "Analytics + monetisation intelligence from real platform data",
    "why": "Same OAuth authorisation as PUB-1. The revenue ledger exists but holds only manual entries."
+  },
+  {
+   "id": "ACC1-HOSTING",
+   "title": "Deploy the control plane on an owner-approved zero-cost host",
+   "why": "Owner decision (host and exposure need explicit approval; no public deployment without it)."
+  },
+  {
+   "id": "ACC1-INTEGRATION",
+   "title": "Three-account shared-contracts integration (nexus/contracts/{cloud,media}.py + shared __init__)",
+   "why": "Account 3: bench_v2.account1_manifest at fd71471 still sends params.models / items as a count / runtime ollama (incompatible with batch_llm). Owner: merge approval and order. (Account 2: no open item.)"
   }
  ],
  "backup": {

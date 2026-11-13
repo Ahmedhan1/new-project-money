@@ -1,0 +1,41 @@
+{
+ "date": "2026-11-12",
+ "connections": {
+  "drive_a": {
+   "identity_domain": "gmail.com",
+   "quota_limit": 16106127360.0,
+   "quota_used": 2979325186.0,
+   "folders": 1,
+   "upload_seconds": 3.32,
+   "interrupted_at": 2097152,
+   "sha256Checksum_from_drive": true,
+   "md5_from_drive": true,
+   "versions": 1,
+   "ok": true
+  },
+  "drive_b": {
+   "identity_domain": "gmail.com",
+   "quota_limit": 16106127360.0,
+   "quota_used": 662061291.0,
+   "folders": 1,
+   "upload_seconds": 4.52,
+   "interrupted_at": 2097152,
+   "sha256Checksum_from_drive": true,
+   "md5_from_drive": true,
+   "versions": 1,
+   "ok": true
+  },
+  "drive_c": {
+   "identity_domain": "gmail.com",
+   "quota_limit": 16106127360.0,
+   "quota_used": 14484493447.0,
+   "folders": 1,
+   "upload_seconds": 5.25,
+   "interrupted_at": 2097152,
+   "sha256Checksum_from_drive": true,
+   "md5_from_drive": true,
+   "versions": 1,
+   "ok": true
+  }
+ }
+}

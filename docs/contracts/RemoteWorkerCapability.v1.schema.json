@@ -1,0 +1,123 @@
+{
+ "additionalProperties": false,
+ "properties": {
+  "contract": {
+   "const": "RemoteWorkerCapability/v1",
+   "default": "RemoteWorkerCapability/v1",
+   "title": "Contract",
+   "type": "string"
+  },
+  "provider": {
+   "enum": [
+    "local",
+    "kaggle",
+    "colab",
+    "user_gpu",
+    "other"
+   ],
+   "title": "Provider",
+   "type": "string"
+  },
+  "connection_id": {
+   "title": "Connection Id",
+   "type": "string"
+  },
+  "accelerator": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "description": "measured, e.g. 'Tesla T4 x2'; None = CPU only",
+   "title": "Accelerator"
+  },
+  "vram_gb": {
+   "anyOf": [
+    {
+     "type": "number"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Vram Gb"
+  },
+  "ram_gb": {
+   "anyOf": [
+    {
+     "type": "number"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Ram Gb"
+  },
+  "cpus": {
+   "anyOf": [
+    {
+     "type": "integer"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Cpus"
+  },
+  "max_runtime_s": {
+   "anyOf": [
+    {
+     "type": "number"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Max Runtime S"
+  },
+  "frameworks": {
+   "items": {
+    "type": "string"
+   },
+   "title": "Frameworks",
+   "type": "array"
+  },
+  "internet": {
+   "default": false,
+   "title": "Internet",
+   "type": "boolean"
+  },
+  "measured": {
+   "default": false,
+   "description": "True only when the values come from a completed probe job",
+   "title": "Measured",
+   "type": "boolean"
+  },
+  "measured_at": {
+   "anyOf": [
+    {
+     "type": "number"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Measured At"
+  }
+ },
+ "required": [
+  "provider",
+  "connection_id"
+ ],
+ "title": "RemoteWorkerCapability",
+ "type": "object"
+}
