@@ -132,10 +132,75 @@ Also found on the real research and fixed: place resolver mapped "Kourou" → Gu
 - **Publishing (Part 7):** **blocked** — no Google OAuth client exists; nothing uploaded.
 - **Analytics (Part 8):** first-party ledger joining platform analytics to production facts and experiment arms; no
   owner data exists yet.
-- **Integration (Part 9):** one `nexus.contracts` package; local three-account merge: 538 passed, 2 failures that also
-  fail on Account 1's own branch (test bugs, documented), 1 Account 3 test literal (fixed). Strategy Handoff validated
-  by Account 2's own validator.
+- **Integration (Part 9):** one `nexus.contracts` package. Local three-account merge (run r1):
+  - **full fast suite: 538 passed, 3 skipped, 3 failed**. Two failures were Account 1 test bugs that also failed on
+    Account 1's own branch (later fixed there). One was an Account 3 test literal (fixed).
+  - **Focused** contract and handoff tests: 53 passed.
 
-## Verification
-Fast suite on this branch: 363 passed, 3 skipped (before the last gate commits; CI re-runs on every push). Linux and
-Windows CI were red from `9fc6cfb` (undeclared `pycountry`) and green again from `ba777cf`.
+  The two figures come from different test sets and are not added together. The Strategy Handoff was validated by
+  Account 2's own validator.
+
+## Verification (V2, superseded)
+At the time: fast suite 363 passed, 3 skipped. CI was red from `9fc6cfb` (undeclared `pycountry`) and green from `ba777cf`.
+Current numbers are in the "Final production closure" section below.
+
+
+# Final hardening and production closure (2026-11-13)
+
+## Zero spend (D-16)
+The router used to refuse a hosted provider only when `payment_method_required is True`. A string such as `unverified`
+(Groq, Mistral) passed once the provider was authorised and a key added. The gate now fails closed, and
+`costguard.check_host` re-runs it. No hosted provider was used. Tests: `test_zero_spend_fail_closed.py`.
+
+## Account 1 batch_llm contract (D-17)
+Before the fix, `account1_manifest` sent a model list, items as a count and `runtime: ollama`. Account 1's worker fails
+on that shape with `TypeError: 'int' object is not iterable`. Now:
+- one job per model, carrying the HF repo and the actual prompt list;
+- the engine is transformers, vllm or echo;
+- a params-hash idempotency key;
+- Kaggle only;
+- the old shape is refused with a named cause.
+
+On the merged tree, `test_intel_batch_llm_integration.py` runs on Account 1's real dispatcher and worker script (fake
+Kaggle CLI, echo engine). It checks:
+- validation against the pydantic contract;
+- execution;
+- verified artifacts with the right ids and counts;
+- the simulated label;
+- idempotency;
+- old-shape failure.
+
+## Publishing release gate (D-18), disclosure, provider readiness, owner validation
+- **Release gate.** No upload without Account 2's QualityReport for the exact file (PASSED, no critical finding,
+  checksum). Public also needs human QA approval, same-variety native review and the disclosure decision.
+- **Disclosure.** Seven categories. Fields read on the first-party pages: YouTube `containsSyntheticMedia`, TikTok
+  `is_aigc`, Instagram `is_ai_generated`. Facebook /videos refuses AI content. Unknown provenance is treated as AI.
+- **Provider readiness.** No platform is live-verified. YouTube is ready for owner authorization; TikTok, Instagram and
+  Facebook need approved apps; Snapchat is manual.
+- **Owner validation.** `owner_validation youtube` makes one private upload, mock-tested only. Docs:
+  `ACCOUNT3_PUBLISHING_RELEASE_GATE.md`, `ACCOUNT3_YOUTUBE_OWNER_VALIDATION.md`.
+
+## Analytics (D-19) and research
+- Analytics records carry a data origin; simulated rows never conclude experiments.
+- Dates and time zones are normalised without guessing.
+- Duplicates and invalid values are reported.
+- Rows are reconciled against the Total row and the API.
+- Research sources that are down, undeclared or keyless produce explicit error/skipped/disabled results and unknown
+  factors.
+
+## Benchmark V3
+- 184 items, at least 15 per capability. 8 models × 184 answers ran on the authorised free Kaggle worker with no errors.
+- qwen3-4b (no thinking) is an invalid harness run (reasoning leaked into the answers) and is excluded.
+- No best model is separable from the second.
+- Dialect is weak (Gulf ≤ 0.31). Details: `ACCOUNT3_MODEL_BENCHMARKS_V3.md`.
+
+## Not done (owner or other accounts)
+- The first private YouTube upload and analytics on real data (OAuth client).
+- The YouTube competition key.
+- Native reviewers.
+- A real-model batch_llm run with A3 items.
+- GDELT reachability from the owner's PC.
+- A2-1 and A2-2 (Account 2).
+- Merge approval.
+
+Test, CI and integration numbers for the final commit: `integration/contracts_v1/RESULT.md` (run r3) and PR #5.
