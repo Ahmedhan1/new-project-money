@@ -195,6 +195,13 @@ def stop(say=print) -> int:
     return 0
 
 
+def restart(port: int | None = None, open_browser: bool = False, say=print) -> int:
+    """Stop then start (jobs resume from their checkpoints). Used by the System page and `nexus restart`."""
+    stop(say=say)
+    time.sleep(1.0)
+    return start(port=port, open_browser=open_browser, say=say)
+
+
 def service_status() -> dict:
     s = config.settings()
     api, worker = _alive("api"), _alive("worker")

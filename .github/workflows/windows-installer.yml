@@ -1,0 +1,91 @@
+name: Windows installer (build + clean install test)
+# Builds NEXUS_VIDEO_AI_Setup.exe on a real Windows VM (installer/windows/build.ps1), then tests it like a user would:
+# silent per-user install -> launch the installed app -> API end-to-end -> verified backup + restore drill -> stop ->
+# uninstall (program removed, user data kept). On a v* tag the tested installer and its .sha256 are attached to the
+# GitHub release. Windows minutes count double on private repositories: manual or tag only.
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: read
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    env:
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Inno Setup present
+        shell: pwsh
+        run: if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) { choco install innosetup -y --no-progress }
+      - name: Build the installer (pinned + SHA-256-checked downloads)
+        shell: pwsh
+        run: installer\windows\build.ps1 -Python python
+      - name: Silent per-user install into a clean profile path
+        shell: pwsh
+        run: |
+          $dir = "$env:LOCALAPPDATA\Programs\NEXUS VIDEO AI"
+          Start-Process dist\NEXUS_VIDEO_AI_Setup.exe -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART","/LOG=install.log" -Wait
+          if (-not (Test-Path "$dir\runtime\python.exe")) { throw "not installed" }
+          Add-Content $env:GITHUB_ENV "NX=$dir"
+      - name: Launch the installed app (no system Python on PATH)
+        shell: pwsh
+        run: |
+          $env:PATH = ($env:PATH -split ';' | Where-Object { $_ -notmatch 'Python|hostedtoolcache' }) -join ';'
+          & "$env:NX\runtime\python.exe" -m nexus start --no-browser
+          if ($LASTEXITCODE -ne 0) { throw "start failed" }
+          & "$env:NX\runtime\python.exe" -c "import shutil,nexus.config as c; print(c.HOME, shutil.which('ffmpeg')); assert 'NEXUS' in str(c.HOME) and 'ffmpeg' in (shutil.which('ffmpeg') or '')"
+      - name: End-to-end through the API (installed runtime)
+        shell: pwsh
+        run: |
+          $env:PATH = "$env:NX\ffmpeg;$env:PATH"
+          & "$env:NX\runtime\python.exe" scripts\acceptance\windows_e2e.py
+          if ($LASTEXITCODE -ne 0) { throw "e2e failed" }
+      - name: Verified backup + restore drill
+        shell: pwsh
+        run: '& "$env:NX\runtime\python.exe" -m nexus backup --drill; if ($LASTEXITCODE -ne 0) { throw "backup drill failed" }'
+      - name: Stop
+        if: always()
+        shell: pwsh
+        run: '& "$env:NX\runtime\python.exe" -m nexus stop'
+      - name: Uninstall (program removed, user data kept)
+        shell: pwsh
+        run: |
+          Start-Process "$env:NX\unins000.exe" -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART" -Wait
+          Start-Sleep 3
+          if (Test-Path "$env:NX\runtime") { throw "program files left behind" }
+          if (-not (Test-Path "$env:LOCALAPPDATA\NEXUS\data\nexus.db")) { throw "user data was not kept" }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: NEXUS_VIDEO_AI_Setup
+          path: |
+            dist/NEXUS_VIDEO_AI_Setup.exe
+            dist/NEXUS_VIDEO_AI_Setup.exe.sha256
+            dist/build_manifest.json
+            e2e_report.json
+            install.log
+          if-no-files-found: ignore
+          retention-days: 30
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: NEXUS_VIDEO_AI_Setup
+      - name: Attach the tested installer to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha256sum -c NEXUS_VIDEO_AI_Setup.exe.sha256
+          gh release create "$GITHUB_REF_NAME" NEXUS_VIDEO_AI_Setup.exe NEXUS_VIDEO_AI_Setup.exe.sha256 build_manifest.json \
+            --repo "$GITHUB_REPOSITORY" --title "NEXUS VIDEO AI $GITHUB_REF_NAME" --notes-file build_manifest.json --draft

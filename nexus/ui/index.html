@@ -61,7 +61,7 @@ const MODULES=[["Create",[["home","What do you want to create?","live"],["creato
  ["enhance","Video Enhancement","planned"],["vfx","VFX Studio","planned"],["documentary","Documentary Studio","partial"]]],
  ["Produce",[["dashboard","Dashboard","live"],["factory","Content Factory","live"],["publishing","Publishing Studio","live"],["review","Review (speakers, translations, cutaways)","live"],["channels","Channels & Business","partial"],
  ["research","Content Research & Trends","planned"],["analytics","Analytics","planned"]]],
- ["System",[["projects","Project History","live"],["qa","Quality Assurance Center","live"],["assets","Asset Library","live"],["resources","Free Resources & Compute","live"],["storage","Storage & Backup","live"],
+ ["System",[["projects","Project History","live"],["qa","Quality Assurance Center","live"],["assets","Asset Library","live"],["resources","Free Resources & Compute","live"],["storage","Storage & Backup","live"],["system","System & Updates","live"],
  ["tools","Deployed Tools & Models","live"],["models","Generation & Vision Models","live"],["discovery","GitHub Discovery","live"],["plugins","Plugin Manager","planned"],["settings","Settings","live"]]]];
 const PLANNED={enhance:"Upscaling, interpolation and stabilisation controls. FFmpeg's stabiliser is installed but not exposed here yet; Real-ESRGAN/RIFE need a GPU worker.",
  vfx:"Masks, keying and compositing. Not built. Candidates: SAM 2 (GPU) and rembg (CPU).",research:"Trend and competitor research. Not built: needs platform analytics access that you authorise. Wikipedia-based topic research already runs inside the AI Video Creator.",
@@ -101,6 +101,24 @@ async function archivePanel(el,pid){const r=await api("/api/archive"+(pid?`?proj
  el.querySelectorAll("[data-ret]").forEach(b=>b.onclick=async()=>{await api("/api/archive/retrieve",{record:b.dataset.ret});poll($("#arjobs"))});
  $("#arr").onclick=async()=>{await api("/api/archive/retry",{});poll($("#arjobs"))}}
 const PAGES={
+async system(m){const s=await api("/api/v1/system/status");const sv=s.services||{};
+ m.innerHTML=`<h2 class="page">System & Updates</h2><p class="lead">The local services behind this page. NEXUS runs only on this computer (${esc(sv.url||"")}); nothing is exposed to the internet. Jobs that are running resume from their last checkpoint after a stop or restart.</p>
+ <div class="grid"><div class="card"><h3>Services</h3><p>API ${sv.api?tag("running","ok"):tag("stopped","bad")} · worker ${sv.worker?tag("running","ok"):tag("stopped","warn")} · ${sv.healthy?tag("healthy","ok"):tag("not healthy","warn")}</p>
+ <p>Version ${esc(s.version)} · Python ${esc(s.python)} · FFmpeg ${s.ffmpeg?tag("found","ok"):tag("missing","bad")}</p><p class="lead">Data folder: ${esc(s.home)}${s.installed?" (installed app)":" (source checkout)"}</p>
+ <button class="sec" id="sysrs">Restart</button> <button class="sec" id="sysst">Stop NEXUS</button><div id="sysmsg"></div></div>
+ <div class="card"><h3>Updates</h3><p class="lead">Updates come only from this project's GitHub releases. The installer is installed only after its SHA-256 matches the published checksum; your projects and vault are kept.</p>
+ <button class="sec" id="sysuc">Check for updates</button><div id="sysup"></div></div>
+ <div class="card"><h3>Backup & restore</h3><p class="lead">Verified backups and restore drills run from <a data-go="storage">Storage & Backup</a>. Restores always go to a new folder.</p><button class="sec" id="sysbk">Back up now (with restore drill)</button><div id="sysbm"></div></div></div>`;
+ const say=(id,t)=>$(id).innerHTML=`<p>${t}</p>`;
+ $("#sysrs").onclick=async()=>{const r=await api("/api/v1/system/restart",{});say("#sysmsg",esc(r.detail));setTimeout(()=>location.reload(),8000)};
+ $("#sysst").onclick=async()=>{if(!confirm("Stop NEXUS? Start it again from the desktop shortcut."))return;const r=await api("/api/v1/system/stop",{});say("#sysmsg",esc(r.detail))};
+ $("#sysbk").onclick=async()=>{await api("/api/backup",{drill:true});say("#sysbm","Backup started - progress is on the Storage & Backup page.")};
+ m.querySelectorAll("[data-go]").forEach(a=>a.onclick=()=>go(a.dataset.go));
+ $("#sysuc").onclick=async()=>{const u=await api("/api/v1/system/update");
+  if(u.error){say("#sysup",`Could not check: ${esc(u.error)}`);return}
+  if(!u.available){say("#sysup",`You have the latest version (${esc(u.current)}).`);return}
+  $("#sysup").innerHTML=`<p>Version ${esc(u.latest)} is available${u.sha256_file?"":" but has no published checksum, so it cannot be installed from here"}.</p>${u.sha256_file?'<button id="sysui">Download, verify and install</button>':""}`;
+  const b=$("#sysui"); if(b) b.onclick=async()=>{b.disabled=true;try{const r=await api("/api/v1/system/update",{});say("#sysup",esc(r.detail))}catch(e){say("#sysup","Update refused: "+esc(e.message))}}}},
 async home(m){const C=[["creator","Create a video from an idea","Research, script, licensed visuals, narration, music, captions."],["series","Create a cinematic film plan","Logline, characters, scenes and a shot list."],
  ["series","Create an episodic series","Series bible, season plan, continuity-checked episodes."],["creator","Create a documentary","Source-cited narration over licensed archive images."],
  ["animation","Create an animated explainer","Manim diagrams, data graphics, 3D titles."],["editor","Edit an existing video","Upload, analyse, get an edit proposal, refine on the timeline."],

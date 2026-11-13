@@ -21,6 +21,22 @@ def _stop(a):
     return launcher.stop()
 
 
+def _import_home(a):
+    from . import migrate
+    try:
+        r = migrate.import_home(a.src)
+    except migrate.ImportRefused as e:
+        print(f"not imported: {e}")
+        return 1
+    print(f"imported {', '.join(r['copied'])} from {r['from']} into {r['to']}")
+    return 0
+
+
+def _restart(a):
+    from . import launcher
+    return launcher.restart(getattr(a, "port", None), open_browser=False)
+
+
 def _status(a):
     import time
     from . import launcher, state, storage
@@ -220,7 +236,7 @@ def _production_check(a):
     return 0 if not bad else 1
 
 
-_OPS = {"vault-key": _vault_key, "production-check": _production_check, "start": _start, "stop": _stop, "status": _status, "worker": _worker, "jobs": _jobs, "backup": _backup, "verify": _verify,
+_OPS = {"vault-key": _vault_key, "production-check": _production_check, "start": _start, "stop": _stop, "restart": _restart, "import-home": _import_home, "status": _status, "worker": _worker, "jobs": _jobs, "backup": _backup, "verify": _verify,
         "restore": _restore, "storage": _storage, "checkpoint": _checkpoint, "resume": _resume, "tasks": _tasks, "profile": _profile}
 
 
@@ -234,6 +250,10 @@ def main() -> None:
     st.add_argument("--port", type=int, default=None)
     st.add_argument("--no-browser", action="store_true")
     sub.add_parser("stop", help="stop the app (running jobs resume from their checkpoint next start)")
+    ih = sub.add_parser("import-home", help="copy an earlier NEXUS data folder into this install (never overwrites)")
+    ih.add_argument("--from", dest="src", required=True)
+    rs = sub.add_parser("restart", help="stop then start the app services (no browser)")
+    rs.add_argument("--port", type=int)
     vk = sub.add_parser("vault-key", help="offline vault-key backup: fingerprint | export --to PATH | verify --from-file PATH")
     vk.add_argument("action", choices=["fingerprint", "export", "verify"])
     vk.add_argument("--to")

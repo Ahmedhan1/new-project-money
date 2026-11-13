@@ -105,7 +105,7 @@ if os.environ.get("NEXUS_EMBEDDED_WORKER", "1") != "0":  # `nexus start` runs th
 
 # Account 1 cloud platform routers (/api/v1). Each owner module exposes `router`; a module that is not present in
 # this build is reported by /api/v1/health instead of failing the whole app.
-CLOUD_ROUTERS = ("routes_core", "routes_security", "routes_compute", "routes_storage", "routes_studio")
+CLOUD_ROUTERS = ("routes_core", "routes_security", "routes_compute", "routes_storage", "routes_studio", "routes_system")
 CLOUD_MISSING: dict[str, str] = {}
 for _name in CLOUD_ROUTERS:
     try:

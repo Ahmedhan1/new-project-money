@@ -1,0 +1,24 @@
+{
+ "captured_at": "2026-11-13T13:14:06Z",
+ "kind": "LIVE (real Kaggle GPU, real Wan 2.2 TI2V-5B)",
+ "profile": "smoke",
+ "job_id": "rjob_5952e1f8b4de",
+ "status": "failed",
+ "error": "RuntimeError: The size of tensor a (2) must match the size of tensor b (4) at non-singleton dimension 2",
+ "accelerator": null,
+ "duration_s": null,
+ "worker_metrics": {
+  "peak_rss_mb": null,
+  "ram_total_gb": null,
+  "gpu_util_max": null,
+  "gpu_util_mean": null,
+  "gpu_mem_used_max_mb": null,
+  "task_s": null,
+  "per_gpu": null,
+  "load_s": null,
+  "download_s": null
+ },
+ "benchmark": null,
+ "videos": [],
+ "log_tail": ""
+}

@@ -23,7 +23,7 @@ from .. import config
 
 TASK_RENDER = "a2_render_steps"
 TASK_WAN = "a2_wan_video"
-WAN_MIN_VRAM_GB = 8.19  # Wan 2.1 T2V-1.3B, diffusers offload (docs/results/a2_demos/demo5_generation.json)
+WAN_MIN_VRAM_GB = 8.19  # Wan 2.1 T2V-1.3B, diffusers offload (docs/results/a2_demos/demo5_generation.json); 5B: docs/results/wan22_5b/
 
 
 class NotRemoteRenderable(ValueError):
