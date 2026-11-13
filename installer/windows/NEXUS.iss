@@ -49,15 +49,30 @@ Type: filesandordirs; Name: "{app}\runtime"
 
 [Code]
 var
+  ImportAsk: TInputOptionWizardPage;
   ImportPage: TInputDirWizardPage;
 
 procedure InitializeWizard;
 begin
-  ImportPage := CreateInputDirPage(wpSelectTasks, 'Existing NEXUS data (optional)',
-    'Import projects, settings and the encrypted vault from an earlier NEXUS folder?',
-    'If you used NEXUS before from a downloaded folder, choose its ".nexus" data folder. Leave empty to start fresh. ' +
-    'Nothing is imported if this computer already has NEXUS data, and the old folder is never changed.', False, '');
+  // A dir page refuses an empty path ("You must enter a full path with drive letter"), which aborted the silent
+  // install and blocked users without old data. The import is now opt-in: a checkbox first, the folder page only
+  // when it is ticked, pre-filled with a valid default.
+  ImportAsk := CreateInputOptionPage(wpSelectTasks, 'Existing NEXUS data (optional)',
+    'Did you use NEXUS before from a downloaded folder?',
+    'Tick the box only if you want to import projects, settings and the encrypted vault from an earlier ".nexus" ' +
+    'data folder. Nothing is imported if this computer already has NEXUS data, and the old folder is never changed.',
+    False, False);
+  ImportAsk.Add('Import data from an earlier NEXUS folder');
+  ImportAsk.Values[0] := False;
+  ImportPage := CreateInputDirPage(ImportAsk.ID, 'Existing NEXUS data (optional)',
+    'Choose the earlier ".nexus" data folder', 'Select the folder, then click Next.', False, '');
   ImportPage.Add('');
+  ImportPage.Values[0] := ExpandConstant('{userdocs}');
+end;
+
+function ShouldSkipPage(PageID: Integer): Boolean;
+begin
+  Result := (PageID = ImportPage.ID) and (not ImportAsk.Values[0]);
 end;
 
 function ImportDir(Param: String): String;
@@ -67,7 +82,7 @@ end;
 
 function WantImport: Boolean;
 begin
-  Result := (ImportPage.Values[0] <> '') and DirExists(ImportPage.Values[0]);
+  Result := ImportAsk.Values[0] and (ImportPage.Values[0] <> '') and DirExists(ImportPage.Values[0]);
 end;
 
 function PrepareToInstall(var NeedsRestart: Boolean): String;

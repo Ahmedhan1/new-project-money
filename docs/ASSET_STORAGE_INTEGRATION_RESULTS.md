@@ -44,7 +44,7 @@ md5-only and no-checksum providers; retention cannot be enabled; release path gu
 | | |
 |---|---|
 | Catalog | 182 assets: effects 21, transitions 76 (58 FFmpeg + 18 new), LUTs 14, frames 5, overlays 7, titles 6, templates 3, animations 14, sound effects 24 (+50 in the CC0 pack), music 5, fonts 7 |
-| Licence check | 182/182 pass (`docs/ASSET_LICENSES.md`); licences: CC0-1.0, OFL-1.1, NEXUS-AGPL-3.0 (built-in renderer features) |
+| Licence check | 182/182 pass (`docs/ASSET_LICENSES.md`); licences: CC0-1.0, OFL-1.1, NEXUS-Proprietary (built-in renderer features) |
 | Installed size, everything | 116 MB (67 installs) + 3.1 MB cached previews; nothing installed by default |
 | Downloads | 7 OFL fonts (google/fonts @ 3e56677, licence text pinned too) + 1 CC0 pack (1.9 MB zip -> 50 .ogg), all SHA-256 verified |
 | Previews | every built-in and generated asset rendered a preview through the real FFmpeg path, 0 failures (~141 s one-time) |

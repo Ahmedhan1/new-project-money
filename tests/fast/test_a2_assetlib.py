@@ -332,3 +332,31 @@ def test_library_api_and_workspace_apply(home, tmp_path):
     assert cl.post("/api/disk/cleanup", json={"plan_id": "0" * 16}).status_code == 409
     assert "summary" in cl.get("/api/archive").json()
     assert json.loads(json.dumps(cl.get("/api/fx/catalog").json()))["transitions"].count("film_burn") == 1
+
+
+def test_previews_survive_windows_style_paths(tmp_path, monkeypatch):
+    """Regression (first Windows clean-machine run, 2026-11-13: GET /api/library/preview/lut.cinematic -> 500): the
+    font path (C:\\Windows\\Fonts\\...) and the LUT path went into FFmpeg filters unescaped. Paths here carry the
+    characters that break a filter on every OS (drive-style colon, quote, spaces, non-ASCII); the backslash -> slash part
+    of ff.filter_path only applies to real Windows paths and is covered by the Windows CI run."""
+    import shutil
+
+    from nexus import db
+    weird = tmp_path / "D:" / "NEXUS dâta's 数据"
+    font_dir = tmp_path / "C:" / "Windows" / "Fonts it's"
+    font_dir.mkdir(parents=True)
+    font = font_dir / "segoeuib.ttf"
+    shutil.copyfile(config.FONT_LATIN, font)
+    old = config.HOME
+    db.reset_for_tests()
+    config.set_home(weird)
+    config.ensure_dirs()
+    monkeypatch.setattr(config, "FONT_LATIN", str(font))
+    try:
+        assetlib.install("lut.cinematic")
+        for aid in ("lut.cinematic", "effect.vhs", "transition.shape_star"):
+            p = assetlib.preview(aid)
+            assert p.exists() and p.stat().st_size > 1000, aid
+    finally:
+        db.reset_for_tests()
+        config.set_home(old)

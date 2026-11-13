@@ -7,10 +7,10 @@ the font). `tests/fast/test_a2_assetlib.py::test_manifest_is_valid_and_every_ass
 
 ## Policy
 
-- Allowed: CC0-1.0, OFL-1.1, Apache-2.0, MIT, CC-BY-4.0, PD-USGov, NEXUS-AGPL-3.0
+- Allowed: CC0-1.0, OFL-1.1, Apache-2.0, MIT, CC-BY-4.0, PD-USGov, NEXUS-Proprietary
 - Attribution text required: CC-BY-4.0
 - Licence text must travel with the file: OFL-1.1, Apache-2.0, MIT
-- `NEXUS-AGPL-3.0` = renderer features that are part of NEXUS's own code (no separate file).
+- `NEXUS-Proprietary` = renderer features that are part of NEXUS's own code (all rights reserved, see LICENSE; no separate file).
 - Generated assets (CC0-1.0) are NEXUS's own work, made on your machine by `nexus/assetlib/generators.py`.
 
 ## Counts by licence
@@ -18,7 +18,7 @@ the font). `tests/fast/test_a2_assetlib.py::test_manifest_is_valid_and_every_ass
 | Licence | Assets |
 |---|---|
 | CC0-1.0 | 64 |
-| NEXUS-AGPL-3.0 | 111 |
+| NEXUS-Proprietary | 111 |
 | OFL-1.1 | 7 |
 
 ## Third-party files (downloaded on demand)
