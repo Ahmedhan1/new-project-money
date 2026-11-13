@@ -1,0 +1,9 @@
+{
+ "date": "2026-11-13",
+ "tree": "local merge (not pushed) of Account 1 origin/work/account-1-cloud-platform @ 919f158 + Account 2 work/account-2-asset-library-storage @ 849a11b; Account 3 shared-contracts layout applied by hand (nexus/contracts.py -> contracts/cloud.py, contracts__init__.py from Account 3 integration/contracts_v1); project-memory files taken from Account 1 for the run",
+ "command": "pytest tests/fast -q (NEXUS_SCHEDULER_THREAD=0, NEXUS_EMBEDDED_WORKER=0)",
+ "result": "603 passed, 0 failed, 10 skipped",
+ "code_conflicts": "none (nexus/ui/index.html merges cleanly after moving the disk/archive helpers away from Account 1's nav() edit)",
+ "account1_storage_tests": "tests/fast/test_a2_archive_account1.py 4/4 passed (Drive adapter + FakeGoogle, LocalProvider)",
+ "daily_archive_e2e": "docs/results/a2_storage/daily_archive_e2e.json 13/13"
+}
