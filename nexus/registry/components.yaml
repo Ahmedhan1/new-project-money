@@ -449,3 +449,34 @@ components:
     hardware: CPU
     install: "not installed"
     status: rejected
+  # ---- Account 2: professional asset library (nexus/assetlib, nexus/registry/asset_library.yaml)
+  - id: google-fonts-ofl
+    name: "Google Fonts (github.com/google/fonts, OFL-1.1 families pinned at commit 3e56677)"
+    kind: media-source
+    capability: [fonts]
+    source_url: https://github.com/google/fonts
+    license: "SIL Open Font License 1.1 per family (OFL.txt downloaded and kept next to each font)"
+    free_tier: "static files, no key, no account"
+    quotas: "none published; each font is downloaded once on demand (60-880 KB) and verified by SHA-256"
+    commercial_use: "yes (OFL: use in videos is unrestricted; redistributing the font file requires keeping the licence)"
+    usage_restrictions: "the font may not be sold on its own; Reserved Font Names apply to modified versions"
+    data_retention: "none"
+    availability: "local after download; titles fall back to the system font"
+    hardware: none
+    network_hosts: [raw.githubusercontent.com]
+    status: deployed
+  - id: opengameart-cc0
+    name: "OpenGameArt.org CC0 sound packs (pinned files only)"
+    kind: media-source
+    capability: [sound-effects]
+    source_url: https://opengameart.org
+    license: "CC0-1.0 for the pinned packs (licence shown on each pack page, recorded in asset_library.yaml)"
+    free_tier: "static files, no key, no account"
+    quotas: "none published; one pinned 1.9 MB zip downloaded on demand, verified by SHA-256"
+    commercial_use: "yes (CC0)"
+    usage_restrictions: "none (attribution appreciated)"
+    data_retention: "none"
+    availability: "local after download; generated NEXUS sounds otherwise"
+    hardware: none
+    network_hosts: [opengameart.org]
+    status: deployed

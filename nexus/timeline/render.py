@@ -180,12 +180,22 @@ def _vcodec(draft: bool, threads: int | None) -> list:
     return args
 
 
+def _mark_used(p: Path) -> None:
+    """A cache hit refreshes the file's mtime: the disk manager evicts the least recently USED entries first and never
+    evicts an entry touched after the oldest running render started (nexus/diskman.py)."""
+    try:
+        os.utime(p, None)
+    except OSError:
+        pass
+
+
 def render_segment(c: dict, tl: dict, cache: Path, draft: bool = False, threads: int | None = None) -> tuple[Path, bool]:
     """Render one clip to a normalised segment. Returns (path, was_cached)."""
     W, H, scale = _size(tl, draft)
     fps = tl.get("fps", config.FPS)
     out = cache / f"seg_{segment_key(c, tl, draft)}.mp4"
     if out.exists() and out.stat().st_size > 0:
+        _mark_used(out)
         return out, True
     with _dirs_lock:
         cache.mkdir(parents=True, exist_ok=True)
@@ -435,7 +445,8 @@ def _concat(segs: list[Path], tl: dict, out: Path, draft: bool = False) -> None:
                 name = transitions.resolve(name) if hasattr(transitions, "resolve") else name
             except Exception:  # noqa: BLE001
                 pass
-            fc.append(f"[{vlast}][pv{i}]xfade=transition={name}:duration={d}:offset={t - d:.3f},settb=AVTB[xv{i}]")
+            from ..fx import transitions as _tr
+            fc.append(f"[{vlast}][pv{i}]{_tr.filter_for(name, d, round(t - d, 3))},settb=AVTB[xv{i}]")
             fc.append(f"[{alast}][pa{i}]acrossfade=d={d}[xa{i}]")
             t += vd[i] - d
         else:
@@ -597,6 +608,7 @@ def _finish_pieces(tl: dict, out: Path, workdir: Path, segs: list[Path], layers:
 
     def audio_job() -> bool:
         if final_audio.exists() and final_audio.stat().st_size > 0:
+            _mark_used(final_audio)
             return True
         pcache.mkdir(parents=True, exist_ok=True)
         wav = workdir / f"programme_{out.stem}.wav"

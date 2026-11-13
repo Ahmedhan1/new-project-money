@@ -14,7 +14,24 @@ from pathlib import Path
 
 from .. import config
 
-KNOWN = ("punch_in", "zoom", "shake", "vignette", "grain", "letterbox", "blur", "flash", "glitch", "speed_ramp")
+KNOWN = ("punch_in", "zoom", "shake", "vignette", "grain", "letterbox", "blur", "flash", "glitch", "speed_ramp",
+         # finishing looks added with the asset library (nexus/assetlib; params in LOOK_PARAMS)
+         "bloom", "glow", "motion_blur", "chromatic_aberration", "light_leak", "lens_distortion", "vhs", "film_burn",
+         "sharpen", "denoise", "finish")
+# Parameters of the finishing looks (the asset catalog and the editor read this; every value is optional)
+LOOK_PARAMS = {
+    "bloom": {"amount": "0..1 (0.45)", "threshold": "0..255 luma (175)", "radius": "px (14)"},
+    "glow": {"amount": "0..1 (0.35)", "radius": "px (10)"},
+    "motion_blur": {"frames": "2..8 frames blended (3)"},
+    "chromatic_aberration": {"amount": "px (3)"},
+    "light_leak": {"amount": "0..1 (0.5)", "color": "#RRGGBB (#FF9A3C)", "start": "s", "end": "s", "speed": "0.001..0.2 (0.02)"},
+    "lens_distortion": {"k1": "-0.5..0.5 (-0.15 barrel)", "k2": "-0.5..0.5 (0.02)"},
+    "vhs": {"amount": "0..1 (0.6)"},
+    "film_burn": {"start": "s", "duration": "s (1.2)", "color": "#RRGGBB (#FF7A1A)"},
+    "sharpen": {"amount": "0..2 (0.6)"},
+    "denoise": {"strength": "0..10 (3)"},
+    "finish": {"amount": "0..1 (0.5)"},
+}
 # Every property that accepts keyframes [[t, value, "linear"|"ease"], ...] (clip["keyframes"][prop], layer items, and
 # for "opacity" also tracks). The editor UI builds its keyframe editor from this (GET /api/fx/catalog).
 #   x, y        0..1 crop position (cover fit)          scale     >= 1 zoom           volume  gain (1 = unchanged)
@@ -223,11 +240,81 @@ def video_filters(c: dict, W: int, H: int, fps: int, dur: float, scale: float = 
                 look.append(f"noise=alls={int(min(60, max(5, _f(e, 'noise', 28))))}:allf=t:enable='between(t,{w[0]:.3f},{w[1]:.3f})'")
         elif ty == "letterbox":
             letterbox = max(0.2, _f(e, "ratio", 2.39))
+        elif ty in LOOK_PARAMS:
+            look += _finishing(ty, e, W, H, fps, dur, scale, f"lk{len(look)}")
     if letterbox:
         bar = int(round(max(0.0, (H - W / letterbox) / 2)))
         if bar >= 2:
             look.append(f"drawbox=x=0:y=0:w=iw:h={bar}:color=black:t=fill,drawbox=x=0:y=ih-{bar}:w=iw:h={bar}:color=black:t=fill")
     return geo, look
+
+
+def _hexc(col, default: str) -> str:
+    c = str(col or default).lstrip("#")
+    return c if len(c) == 6 and all(x in "0123456789abcdefABCDEF" for x in c) else default.lstrip("#")
+
+
+def _screen_expr(weight: str) -> str:
+    """blend expression (per RGB plane): A screened with B, mixed by `weight` (may use T = seconds)."""
+    return f"A+((255-(255-A)*(255-B)/255)-A)*({weight})"
+
+
+def _finishing(ty: str, e: dict, W: int, H: int, fps: int, dur: float, scale: float, tag: str) -> list[str]:
+    """One finishing look as filter-chain items. Items that need a second stream (bloom, glow, light leak, film burn)
+    are graph fragments with labels unique to this clip (`tag`); they rejoin the clip's single chain."""
+    if ty == "bloom":
+        a, th, r = min(1.0, max(0.0, _f(e, "amount", 0.45))), int(min(250, max(0, _f(e, "threshold", 175)))), max(1.0, _f(e, "radius", 14) * scale)
+        return [f"format=gbrp,split[{tag}a][{tag}b];[{tag}b]lutrgb=r='if(gt(val,{th}),val,0)':g='if(gt(val,{th}),val,0)':"
+                f"b='if(gt(val,{th}),val,0)',gblur=sigma={r:.2f}[{tag}c];[{tag}a][{tag}c]blend=all_expr='{_screen_expr(f'{a:.3f}')}'"]
+    if ty == "glow":
+        a, r = min(1.0, max(0.0, _f(e, "amount", 0.35))), max(1.0, _f(e, "radius", 10) * scale)
+        return [f"format=gbrp,split[{tag}a][{tag}b];[{tag}b]gblur=sigma={r:.2f}[{tag}c];[{tag}a][{tag}c]blend=all_expr='{_screen_expr(f'{a:.3f}')}'"]
+    if ty == "motion_blur":
+        n = int(min(8, max(2, _f(e, "frames", 3))))
+        return [f"tmix=frames={n}"]
+    if ty == "chromatic_aberration":
+        a = int(round(max(1, min(20, _f(e, "amount", 3))) * scale)) or 1
+        return [f"rgbashift=rh=-{a}:bh={a}:edge=smear"]
+    if ty == "lens_distortion":
+        k1, k2 = max(-0.5, min(0.5, _f(e, "k1", -0.15))), max(-0.5, min(0.5, _f(e, "k2", 0.02)))
+        return [f"lenscorrection=k1={k1:.3f}:k2={k2:.3f}:i=bilinear"]
+    if ty == "vhs":
+        a = min(1.0, max(0.0, _f(e, "amount", 0.6)))
+        sh = max(1, int(round(4 * a * scale)))
+        return [f"chromashift=cbh={sh}:crh=-{sh}", f"gblur=sigma={0.4 + 0.8 * a:.2f}:steps=1",
+                f"eq=saturation={1 + 0.3 * a:.2f}:contrast={1 + 0.06 * a:.2f}:brightness={0.02 * a:.3f}",
+                f"noise=alls={int(6 + 14 * a)}:allf=t", f"drawgrid=w=iw:h={max(2, int(3 * scale))}:t=1:c=black@{0.12 + 0.2 * a:.2f}"]
+    if ty == "sharpen":
+        a = min(2.0, max(0.0, _f(e, "amount", 0.6)))
+        return [f"unsharp=5:5:{a:.2f}:5:5:0"]
+    if ty == "denoise":
+        s = min(10.0, max(0.0, _f(e, "strength", 3)))
+        return [f"hqdn3d={s:.2f}:{s * 0.75:.2f}:{s * 1.5:.2f}:{s * 1.1:.2f}"]
+    if ty == "finish":
+        a = min(1.0, max(0.0, _f(e, "amount", 0.5)))
+        return [f"unsharp=3:3:{0.25 + 0.35 * a:.2f}:3:3:0", f"noise=c0s={int(2 + 5 * a)}:c0f=t+u", f"vignette=angle={0.35 + 0.25 * a:.3f}"]
+    if ty in ("light_leak", "film_burn"):
+        if ty == "light_leak":
+            st, en = max(0.0, _f(e, "start", 0.0)), min(dur, _f(e, "end", dur))
+            a = min(1.0, max(0.0, _f(e, "amount", 0.5)))
+            col, ramp = _hexc(e.get("color"), "FF9A3C"), min(0.8, max(0.05, (en - st) / 4))
+            speed = min(0.2, max(0.001, _f(e, "speed", 0.02)))
+        else:
+            st = max(0.0, _f(e, "start", _f(e, "at", max(0.0, dur - 1.2))))
+            en = min(dur, st + max(0.2, _f(e, "duration", 1.2)))
+            a, col, ramp, speed = 1.0, _hexc(e.get("color"), "FF7A1A"), max(0.1, (en - st) / 2), 0.08
+        if en - st <= 0.04:
+            return []
+        w = f"{a:.3f}*clip(min((T-{st:.3f})/{ramp:.3f}\\,({en:.3f}-T)/{ramp:.3f})\\,0\\,1)"
+        seed = int(hashlib.sha1(repr(sorted(e.items())).encode()).hexdigest()[:6], 16)
+        x0, y0 = int(W * (0.1 + 0.3 * ((seed & 0xFF) / 255))), int(H * (0.1 + 0.3 * (((seed >> 8) & 0xFF) / 255)))
+        src = (f"gradients=s={W}x{H}:r={fps}:d={dur:.3f}:type=radial:c0=0x{col}:c1=0x000000:"
+               f"x0={x0}:y0={y0}:x1={int(W * 0.95)}:y1={int(H * 0.95)}:speed={speed}:seed={seed % 100000},format=gbrp")
+        out = [f"format=gbrp[{tag}a];{src}[{tag}g];[{tag}a][{tag}g]blend=all_expr='{_screen_expr(w)}'"]
+        if ty == "film_burn":
+            out.append(f"eq=brightness=0.25:contrast=1.15:enable='between(t,{st + (en - st) * 0.35:.3f},{st + (en - st) * 0.65:.3f})'")
+        return out
+    return []
 
 
 # ------------------------------------------------------------------ picture in picture
@@ -394,6 +481,17 @@ def overlay_graph(overlays: list[dict], W: int, H: int, fps: int, total: float, 
             lines.append(f"[{n_in}:v]format=rgba[wm{k}]")
             lines.append(f"{last}[wm{k}]overlay=0:0:eof_action=repeat[ov{k}]")
             n_in += 1
+        elif ty == "image" and o.get("src") and Path(str(o["src"])).is_file():
+            # a full-frame PNG from the asset library (frames, borders, viewfinder, layouts); programme time window
+            st, en = _f(o, "start", 0.0), _f(o, "end", total)
+            a0, a1 = max(st - offset, 0.0), min(en - offset, dur)
+            if a1 <= a0:
+                continue
+            op = min(1.0, max(0.0, _f(o, "opacity", 1.0)))
+            args += ["-loop", "1", "-t", f"{dur:.3f}", "-i", str(o["src"])]
+            lines.append(f"[{n_in}:v]scale={W}:{H},format=rgba,colorchannelmixer=aa={op:.3f}[im{k}]")
+            lines.append(f"{last}[im{k}]overlay=0:0:eof_action=repeat:enable='between(t,{a0:.3f},{a1:.3f})'[ov{k}]")
+            n_in += 1
         else:
             continue
         last = f"[ov{k}]"
@@ -403,4 +501,11 @@ def overlay_graph(overlays: list[dict], W: int, H: int, fps: int, total: float, 
 
 def overlays_signature(tl: dict) -> list:
     """The parts of tl['overlays'] that change pixels (for cache keys)."""
-    return [o for o in (tl.get("overlays") or []) if isinstance(o, dict) and o.get("type") in ("progress_bar", "watermark")]
+    out = []
+    for o in tl.get("overlays") or []:
+        if isinstance(o, dict) and o.get("type") in ("progress_bar", "watermark"):
+            out.append(o)
+        elif isinstance(o, dict) and o.get("type") == "image" and o.get("src") and Path(str(o["src"])).is_file():
+            st = Path(str(o["src"])).stat()
+            out.append({**o, "_file": [st.st_size, int(st.st_mtime)]})
+    return out
