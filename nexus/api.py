@@ -18,7 +18,35 @@ from . import assets, compute, config, costguard, db, edit, factory, jobs, proje
 from .timeline import ops
 from .timeline.render import clip_duration, clip_starts, total_duration
 
-app = FastAPI(title="NEXUS Video AI", version="0.1.0")
+from .cloud import production as _production  # noqa: E402
+
+# Production profile (NEXUS_ENV=production): refuse to start unless every required gate passes, hold the single-instance
+# lock, and do not publish the interactive API docs. Development (the default) keeps docs, guarded by the owner check.
+_PROD = _production.is_production()
+if _PROD:
+    _production.enforce(os.environ.get("NEXUS_BIND_HOST"))
+    from .cloud import instance as _instance
+    if not _instance.acquire("api"):
+        raise _production.ProductionConfigError("another NEXUS API process already serves this NEXUS_HOME (single instance only)")
+
+
+def _lifespan_factory():
+    from contextlib import asynccontextmanager
+
+    @asynccontextmanager
+    async def lifespan(_app):
+        from .cloud import lifecycle
+        lifecycle.started()
+        try:
+            yield
+        finally:
+            lifecycle.stopping()
+    return lifespan
+
+
+app = FastAPI(title="NEXUS Video AI", version="0.1.0", lifespan=_lifespan_factory(),
+              docs_url=None if _PROD else "/docs", redoc_url=None if _PROD else "/redoc",
+              openapi_url=None if _PROD else "/openapi.json")
 
 # Account 1 security: response headers (CSP, nosniff, frame-ancestors none, no-store for API) and an owner guard on the
 # legacy /api/* routes and the main page, which previously relied only on binding to 127.0.0.1.
@@ -29,15 +57,22 @@ from .cloud import security as _security  # noqa: E402
 _security.install(app)
 
 
+DOC_PATHS = ("/docs", "/redoc", "/openapi.json")
+
+
 @app.middleware("http")
 async def _owner_guard(request, call_next):
     p = request.url.path
-    if (p == "/" or p.startswith("/api/")) and not p.startswith("/api/v1"):
+    # the legacy UI/API and the interactive docs (route inventory) are owner-only; /api/v1 routers carry their own check
+    if ((p == "/" or p.startswith("/api/")) and not p.startswith("/api/v1")) or p in DOC_PATHS or p.startswith("/docs/"):
         try:
             _security.check(request)
         except HTTPException as e:
             return _JSONResponse({"detail": e.detail}, status_code=e.status_code)
     return await call_next(request)
+from .cloud import limits as _limits  # noqa: E402
+
+app.add_middleware(_limits.BodyLimit)
 UI = Path(__file__).resolve().parent / "ui" / "index.html"
 _q: "queue.Queue[tuple[str, callable]]" = queue.Queue()
 _analyses: dict[str, dict] = {}
@@ -236,16 +271,27 @@ def api_file(pid: str, path: str):
     return FileResponse(f)
 
 
+_UPLOAD_EXT = {".mp4", ".mov", ".mkv", ".webm", ".avi", ".m4v", ".mpg", ".mpeg", ".ts", ".mts", ".wmv", ".flv",
+               ".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg", ".opus", ".wma",
+               ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".tif", ".tiff", ".heic"}
+
+
 @app.post("/api/upload")
 async def api_upload(file: UploadFile = File(...), project_id: str | None = None):
     """Upload media the user owns or is authorised to use. Analysis starts immediately."""
-    p = _project(project_id) if project_id else prj.Project.create(Path(file.filename).stem, "edit")
-    tmp = config.CACHE / "uploads" / Path(file.filename).name
+    import uuid
+    name = Path((file.filename or "").replace("\\", "/")).name.strip()
+    if not name or name in (".", "..") or Path(name).suffix.lower() not in _UPLOAD_EXT:
+        raise HTTPException(415, "unsupported file type: upload a video, audio or image file")
+    p = _project(project_id) if project_id else prj.Project.create(Path(name).stem, "edit")
+    tmp = config.CACHE / "uploads" / uuid.uuid4().hex / name   # one folder per upload: concurrent same-name uploads never collide
     tmp.parent.mkdir(parents=True, exist_ok=True)
-    with tmp.open("wb") as f:
-        shutil.copyfileobj(file.file, f)
-    m = p.import_media(tmp)
-    tmp.unlink()
+    try:
+        with tmp.open("wb") as f:
+            shutil.copyfileobj(file.file, f)
+        m = p.import_media(tmp)
+    finally:
+        shutil.rmtree(tmp.parent, ignore_errors=True)
 
     return {"project": p.id, "media": m, **jobs.submit("analyze", {"project": p.id, "media": m["id"]}, p.id)}
 

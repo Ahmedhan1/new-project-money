@@ -46,8 +46,25 @@ def api_token() -> str | None:
     return os.environ.get("NEXUS_API_TOKEN") or None
 
 
+def _trusted_proxies() -> set[str]:
+    """Addresses of the owner's own reverse proxy (NEXUS_TRUSTED_PROXIES, comma-separated). Only these may name the
+    real client in X-Forwarded-For; any other peer's forwarding headers are ignored for identity."""
+    return {x.strip() for x in os.environ.get("NEXUS_TRUSTED_PROXIES", "").split(",") if x.strip()}
+
+
 def _client(req: Request) -> str:
-    return req.client.host if req.client else "unknown"
+    """Identity used for rate limiting and audit. Behind a trusted reverse proxy every request arrives from the proxy's
+    address, so one attacker would lock out the owner too; there the right-most X-Forwarded-For address that is not
+    itself a trusted proxy is the real client. A spoofed X-Forwarded-For from an untrusted peer is never believed."""
+    peer = req.client.host if req.client else "unknown"
+    trusted = _trusted_proxies()
+    if peer not in trusted:
+        return peer
+    hops = [h.strip() for h in req.headers.get("x-forwarded-for", "").split(",") if h.strip()]
+    for h in reversed(hops):
+        if h not in trusted:
+            return h[:64]
+    return peer
 
 
 def _audit(event: str, ok: bool, req: Request | None = None, **detail) -> None:
@@ -107,7 +124,7 @@ def _host_name(host_header: str) -> str:
 
 def is_direct_loopback(req: Request) -> bool:
     """Direct loopback client, no proxy headers, loopback Host header (defeats DNS rebinding)."""
-    who = _client(req)
+    who = req.client.host if req.client else "unknown"
     if who not in LOOPBACK or via_proxy(req):
         return False
     host = _host_name(req.headers.get("host", ""))
@@ -163,6 +180,22 @@ def session_valid(value: str, tok: str, now: float | None = None) -> bool:
     return hmac.compare_digest(value.encode(), tok.encode())
 
 
+def session_cookie_values(req: Request) -> list[str]:
+    """Every `nexus_session` value the client sent. A browser can hold two cookies with the same name (different
+    Domain/Path, or one planted by a sibling sub-domain); servers differ on which one their parser keeps, so the
+    decision must not depend on that order. The request is accepted when ANY presented value carries a valid
+    signature: a planted or forged sibling can never grant access (it fails the HMAC) and cannot lock the owner out."""
+    out = []
+    for part in req.headers.get("cookie", "").split(";"):
+        k, _, v = part.strip().partition("=")
+        if k.strip() == COOKIE and v.strip():
+            out.append(v.strip().strip('"'))
+    parsed = req.cookies.get(COOKIE, "")
+    if parsed and parsed not in out:
+        out.append(parsed)
+    return out[:8]
+
+
 def open_session(request: Request, response: Response, token: str) -> dict:
     """Exchange the owner token for a signed HttpOnly SameSite=Strict cookie. Rate limited and audited.
     routes_core's POST /api/v1/session should delegate here."""
@@ -192,6 +225,8 @@ def check(req: Request) -> None:
     q = _rate_check(req)
     unsafe = req.method.upper() not in SAFE_METHODS
     if tok is None:
+        if os.environ.get("NEXUS_ENV", "").strip().lower() in ("production", "prod"):
+            _fail_auth(req, q, 503, "production mode needs NEXUS_API_TOKEN; loopback mode is disabled", "production_without_token")
         if not is_direct_loopback(req):
             _fail_auth(req, q, 401, "remote access needs NEXUS_API_TOKEN to be configured on the server", "remote_without_token")
         if unsafe and not same_origin(req):
@@ -203,9 +238,9 @@ def check(req: Request) -> None:
         if given and hmac.compare_digest(given.encode(), tok.encode()):
             return  # bearer clients (CLI, other accounts) are not CSRF-exposed: browsers never add this header
         _fail_auth(req, q, 401, "owner authentication required", "bad_bearer")
-    cookie = req.cookies.get(COOKIE, "")
-    if not session_valid(cookie, tok):
-        _fail_auth(req, q, 401, "owner authentication required", "bad_cookie" if cookie else "missing")
+    cookies = session_cookie_values(req)
+    if not any(session_valid(v, tok) for v in cookies):
+        _fail_auth(req, q, 401, "owner authentication required", "bad_cookie" if cookies else "missing")
     if unsafe:
         if req.headers.get(CSRF_HEADER, "") != "1":
             _fail_auth(req, q, 403, "missing X-NEXUS-CSRF header on a cookie-authenticated request", "csrf_header")
@@ -220,7 +255,8 @@ async def require_owner(request: Request) -> None:
 def auth_mode() -> dict:
     """Non-secret description of the active policy (for the Studio and /api/v1/health)."""
     return {"mode": "token" if api_token() else "loopback", "cookie": COOKIE, "csrf_header": "X-NEXUS-CSRF",
-            "session_ttl_s": SESSION_TTL_S, "max_failures": MAX_FAILS, "window_s": WINDOW_S}
+            "session_ttl_s": SESSION_TTL_S, "max_failures": MAX_FAILS, "window_s": WINDOW_S,
+            "trusted_proxies": len(_trusted_proxies()), "rate_limit_scope": "per process (single-instance deployment)"}
 
 
 # ---------------------------------------------------------------- per-worker tokens (pull workers: Colab, user GPU)

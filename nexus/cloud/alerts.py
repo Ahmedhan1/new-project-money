@@ -3,7 +3,9 @@
 
 Conditions: storage use >= WARN/CRIT of a connection's provider-reported quota; a connection that needs
 reauthorisation; failed transfers; repeated failures of one task; lost workers; Kaggle GPU quota use >= QUOTA_WARN of
-the allowance. Quota alerts say whether the figure is provider-reported or NEXUS's own measurement - an estimate is
+the allowance; a failed, incomplete or overdue backup; repeated failed sign-ins or lockouts; low disk on the NEXUS_HOME
+volume. An unclean service restart is raised by lifecycle.started(). Titles and bodies pass through vault.redact.
+Quota alerts say whether the figure is provider-reported or NEXUS's own measurement - an estimate is
 never shown as an exact provider quota.
 """
 from __future__ import annotations
@@ -20,7 +22,7 @@ REPEAT_S = 6 * 3600
 FAILS_IN_DAY = 3
 
 
-STATE_PREFIXES = ("storage:", "quota:", "reauth:")  # conditions that can clear; events (transfer/fails/lost) just expire
+STATE_PREFIXES = ("storage:", "quota:", "reauth:", "backup:", "disk:")  # conditions that can clear; events (transfer/fails/lost) just expire
 _seen: set[str] = set()
 
 
@@ -30,6 +32,8 @@ def _once(key: str, level: str, title: str, body: str, now: float) -> dict | Non
     r = db.query("SELECT last FROM alert_state WHERE key=?", (key,))
     if r and now - (r[0]["last"] or 0) < REPEAT_S:
         return None
+    from ..vault import redact  # an alert body may quote a provider error: never let a credential through
+    title, body = redact(title), redact(body)
     db.execute("INSERT OR REPLACE INTO alert_state(key,last,title) VALUES(?,?,?)", (key, now, title))
     events.notify(level, title, body)
     return {"key": key, "level": level, "title": title, "body": body}
@@ -102,11 +106,69 @@ def _quota(now: float) -> list[dict]:
     return out
 
 
+AUTH_FAILS_HOUR = 20
+
+
+def _backup(now: float) -> list[dict]:
+    """Last backup failed, reached only some destinations, or is older than twice the configured interval."""
+    from .. import config
+    f = config.HOME / "last_backup.json"
+    try:
+        last = json.loads(f.read_text(encoding="utf-8")) if f.exists() else None
+    except (OSError, ValueError):
+        last = {"ok": False, "warning": "last_backup.json is unreadable", "ts": now}
+    out = []
+    if last is None:
+        from . import production
+        if production.is_production():
+            out.append(_once("backup:none", "error", "no backup has run yet",
+                             "Run a backup now (python -m nexus backup) and check that the backup schedule is active.", now))
+        return out
+    if not last.get("ok") or not last.get("complete", True):
+        failed = [r.get("destination") for r in last.get("results", []) if not r.get("ok")]
+        out.append(_once("backup:failed", "error", "backup failed" if not last.get("ok") else "backup incomplete",
+                         (last.get("warning") or "") + (f" Failed destinations: {', '.join(map(str, failed))}." if failed else "") +
+                         " Fix the destination and run python -m nexus backup; nothing was deleted.", now))
+    every = float(config.settings().get("backup_every_hours", 24) or 24)
+    if last.get("ts") and now - float(last["ts"]) > 2 * every * 3600:
+        out.append(_once("backup:stale", "warning", f"last backup is {(now - float(last['ts'])) / 3600:.0f} h old",
+                         f"Backups are configured every {every:g} h. Check the backup schedule and run python -m nexus backup.", now))
+    return out
+
+
+def _auth(now: float) -> list[dict]:
+    """Brute force or a misconfigured client: lockouts or many failed authentications in the last hour."""
+    rows = db.query("SELECT event, COUNT(*) n FROM security_audit WHERE at > ? AND event IN ('auth.fail','auth.locked','worker.auth_fail') "
+                    "GROUP BY event", (now - 3600,))
+    n = {r["event"]: r["n"] for r in rows}
+    out = []
+    if n.get("auth.locked") or n.get("auth.fail", 0) + n.get("worker.auth_fail", 0) >= AUTH_FAILS_HOUR:
+        out.append(_once(f"auth:{int(now // 3600)}", "warning", "repeated failed sign-ins",
+                         f"{n.get('auth.fail', 0)} failed owner and {n.get('worker.auth_fail', 0)} failed worker authentications, "
+                         f"{n.get('auth.locked', 0)} lockout(s) in the last hour. Security -> Audit shows the client addresses; "
+                         "rotate NEXUS_API_TOKEN if it may have leaked.", now))
+    return out
+
+
+def _disk(now: float) -> list[dict]:
+    """The NEXUS_HOME volume itself (renders, database, uploads), independent of storage connections."""
+    import shutil
+    from .. import config
+    need = float(config.settings().get("min_free_disk_gb", 2.0)) * 2 ** 30
+    free = shutil.disk_usage(config.HOME).free
+    if free < 2 * need:
+        lvl = "error" if free < need else "warning"
+        return [_once(f"disk:home:{lvl}", lvl, f"NEXUS_HOME disk low: {free / 2**30:.1f} GiB free",
+                      "Renders and uploads stop below the minimum. Free space or move old exports to a storage destination.", now)]
+    return []
+
+
 def check(now: float | None = None) -> list[dict]:
     now = now or time.time()
     fired, ok = [], set()
     _seen.clear()
-    for fn, prefixes in ((_storage, ("storage:", "reauth:")), (_transfers, ()), (_jobs, ()), (_quota, ("quota:",))):
+    for fn, prefixes in ((_storage, ("storage:", "reauth:")), (_transfers, ()), (_jobs, ()), (_quota, ("quota:",)),
+                         (_backup, ("backup:",)), (_auth, ()), (_disk, ("disk:",))):
         try:
             fired += [a for a in fn(now) if a]
             ok.update(prefixes)
@@ -128,19 +190,28 @@ def active(now: float | None = None) -> list[dict]:
 
 
 _thread: threading.Thread | None = None
+_stop = threading.Event()
 
 
 def start(interval: float = 300.0) -> None:
     global _thread
     if _thread and _thread.is_alive():
         return
+    _stop.clear()
 
     def loop():
-        while True:
-            check()
-            time.sleep(interval)
+        while not _stop.is_set():
+            try:
+                check()
+            except Exception:  # noqa: BLE001 - the alert loop must outlive one failing check
+                pass
+            _stop.wait(interval)
     _thread = threading.Thread(target=loop, daemon=True, name="nexus-alerts")
     _thread.start()
+
+
+def stop() -> None:
+    _stop.set()
 
 
 def _dump(x) -> str:

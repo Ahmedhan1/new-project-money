@@ -20,7 +20,8 @@ TABLE = """CREATE TABLE IF NOT EXISTS security_audit(id INTEGER PRIMARY KEY AUTO
 INDEX = "CREATE INDEX IF NOT EXISTS security_audit_at ON security_audit(at)"
 EVENTS = {"auth.fail", "auth.locked", "session.open", "session.close", "worker_token.issued", "worker_token.revoked",
           "worker.auth_fail", "connection.connect", "connection.disconnect", "oauth.start", "oauth.callback",
-          "secret.put", "secret.delete", "scan.run", "dispatch.remote", "other"}
+          "secret.put", "secret.delete", "scan.run", "dispatch.remote", "service.start", "service.stop",
+          "service.unclean_restart", "backup.run", "restore.run", "vault_key.export", "other"}
 SECRET_KEY_RE = re.compile(r"token|secret|password|passwd|refresh|authorization|cookie|api_?key|credential|code_verifier",
                            re.I)
 RETENTION_S = 90 * 86400

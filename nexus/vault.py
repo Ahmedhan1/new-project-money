@@ -144,3 +144,66 @@ def scan_repo(root: str | Path, history: bool = False) -> list[dict]:
         for m in TOKEN_RE.finditer(log):
             hits.append({"file": "(history)", "match": m.group(0)[:8] + "...", "where": "history"})
     return hits
+
+
+# ---------------------------------------------------------------- vault key: offline backup without ever displaying it
+def key_fingerprint(key: bytes | None = None) -> str:
+    """Short, non-reversible identifier of a vault key (sha256 of the key, first 16 hex). Safe to show and to write on
+    the label of the offline copy; it lets the owner check that a copy matches without revealing the key."""
+    import hashlib
+    k = (key if key is not None else _key()).strip()
+    return "sha256:" + hashlib.sha256(k).hexdigest()[:16]
+
+
+def export_key(dest: str | Path, forbidden_roots: list[Path] | None = None) -> dict:
+    """Write the active vault key to `dest` (a removable drive / password-manager import file chosen by the owner).
+    Refuses: an existing file (never overwrites), a path inside NEXUS_HOME or the repository, or inside any backup
+    destination root - the key must never sit next to the data or the backups it protects. The key is never printed."""
+    dest = Path(dest).expanduser()
+    roots = [config.HOME, config.ROOT, *(forbidden_roots or [])]
+    try:
+        from . import storage
+        roots += [Path(d["root"]) for d in storage.destinations() if d.get("provider") == "local" and d.get("root")]
+    except Exception:  # noqa: BLE001
+        pass
+    rd = dest.resolve()
+    for r in roots:
+        try:
+            rd.relative_to(Path(r).resolve())
+            raise ValueError(f"refusing to write the vault key inside {r}: keep it apart from the data and the backups")
+        except ValueError as e:
+            if "refusing" in str(e):
+                raise
+    if dest.exists():
+        raise FileExistsError(f"{dest} exists: the export never overwrites a file")
+    k = _key()
+    Fernet(k)  # a broken key is never exported as if it were good
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    old = os.umask(0o077)
+    try:
+        dest.write_bytes(k + b"\n")
+    finally:
+        os.umask(old)
+    try:
+        os.chmod(dest, 0o600)
+    except OSError:
+        pass
+    fp = key_fingerprint(k)
+    try:
+        from .cloud import audit
+        audit.record("vault_key.export", ok=True, actor="owner", fingerprint=fp)
+    except Exception:  # noqa: BLE001
+        pass
+    return {"written": str(dest), "fingerprint": fp}
+
+
+def verify_key_file(path: str | Path) -> dict:
+    """Does the offline copy at `path` hold the active key? Compares fingerprints; prints/returns no key material."""
+    k = Path(path).expanduser().read_bytes().strip()
+    try:
+        Fernet(k)
+        valid = True
+    except ValueError:
+        valid = False
+    fp, active = key_fingerprint(k), key_fingerprint()
+    return {"valid_fernet_key": valid, "matches_active_key": valid and fp == active, "file_fingerprint": fp, "active_fingerprint": active}

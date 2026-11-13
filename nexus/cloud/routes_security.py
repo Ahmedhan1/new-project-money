@@ -24,6 +24,31 @@ def live():
     return {"ok": True}
 
 
+def readiness() -> dict:
+    """Is this instance able to serve? Internal detail for the owner; /health/ready exposes only the verdict."""
+    api = sys.modules.get("nexus.api")
+    missing = sorted(getattr(api, "CLOUD_MISSING", {}) or {})
+    try:
+        db.query("SELECT 1")
+        db_ok = True
+    except Exception:  # noqa: BLE001
+        db_ok = False
+    v = vault_status()
+    from . import production
+    gates = production.failing() if production.is_production() else []
+    return {"ready": db_ok and v["ok"] and not missing and not gates, "db": db_ok, "vault": v["ok"], "routers_missing": missing,
+            "mode": production.mode(), "failing_gates": [g["check"] for g in gates]}
+
+
+@router.get("/health/ready")
+def ready():
+    """Unauthenticated readiness probe for the reverse proxy / process supervisor: 200 {'ready': true} or 503
+    {'ready': false}. Reveals nothing else (which gate fails is in the authenticated /health and in the log)."""
+    from fastapi.responses import JSONResponse
+    ok = readiness()["ready"]
+    return JSONResponse({"ready": ok}, status_code=200 if ok else 503)
+
+
 def vault_status() -> dict:
     """Is the vault usable? Counts only - never names' values. `undecryptable` > 0 means the key changed or was lost."""
     from .. import vault
@@ -59,7 +84,8 @@ def health():
     v = vault_status()
     return {"ok": db_ok and v["ok"] and not missing, "version": config.VERSION, "api": "v1", "time": time.time(),
             "routers": {"mounted": [r for r in wanted if r not in missing], "missing": sorted(missing)},
-            "db": {"ok": db_ok, "schema": schema}, "vault": v, "disk": disk, "auth": security.auth_mode()}
+            "db": {"ok": db_ok, "schema": schema}, "vault": v, "disk": disk, "auth": security.auth_mode(),
+            "readiness": readiness()}
 
 
 @router.get("/security/secrets", dependencies=[Depends(security.require_owner)])

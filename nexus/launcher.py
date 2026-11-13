@@ -70,8 +70,30 @@ def preflight() -> list[dict]:
     return out
 
 
+LOG_MAX_BYTES, LOG_KEEP = 20 << 20, 5
+
+
+def rotate_log(log: Path, max_bytes: int = LOG_MAX_BYTES, keep: int = LOG_KEEP) -> bool:
+    """Size-based rotation at service start: name.log -> name.log.1 -> ... -> name.log.<keep> (oldest dropped).
+    Service logs never grow without bound and the last `keep` generations stay available for diagnosis."""
+    try:
+        if not log.exists() or log.stat().st_size < max_bytes:
+            return False
+        oldest = log.with_name(f"{log.name}.{keep}")
+        oldest.unlink(missing_ok=True)
+        for i in range(keep - 1, 0, -1):
+            src = log.with_name(f"{log.name}.{i}")
+            if src.exists():
+                os.replace(src, log.with_name(f"{log.name}.{i + 1}"))
+        os.replace(log, log.with_name(f"{log.name}.1"))
+        return True
+    except OSError:
+        return False
+
+
 def _spawn(name: str, args: list[str], env: dict) -> dict:
     log = config.LOGS / f"{name}.log"
+    rotate_log(log)
     f = open(log, "ab")
     kw: dict = {"creationflags": 0x00000008 | 0x00000200 | 0x08000000} if os.name == "nt" else {"start_new_session": True}  # detached, no console
     p = subprocess.Popen([sys.executable, "-m", "nexus", *args], cwd=str(config.ROOT), stdout=f, stderr=subprocess.STDOUT,
