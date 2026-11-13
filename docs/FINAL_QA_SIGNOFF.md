@@ -1,6 +1,9 @@
 # Final QA, performance and release validation (independent QA: Account 3)
 
-Date 2026-11-13. Machine-readable summary: `docs/results/final_qa_summary.json`. Defects: `docs/results/final_qa/defects.json`.
+Date 2026-11-13. **Tested SHAs.** Round 1 used integration candidate `9752d91`. Round 2 used the current integration head
+`4a3dd6f8e30c6766cddb18ec88afe1230be7b846`, the base of PR #9, which adds Wan 720p evidence and an I2V VAE change.
+Every finding below names the SHA it was reproduced on. No QA finding is closed from code inspection: a defect is
+marked fixed only after it is reproduced as gone on a tested SHA. Machine-readable summary: `docs/results/final_qa_summary.json`. Defects: `docs/results/final_qa/defects.json`.
 Status words: **PASS** (tested and verified with evidence), **TESTED** (automated checks pass; live or human validation
 remains), **BLOCKED** (needs an owner credential, resource or approval), **DEFERRED** (accepted for later), **FAIL** (a
 reproducible defect remains). Independent results are listed separately and never added together.
@@ -26,7 +29,8 @@ The release is still not ready, for two reasons:
 ## 1. Inputs and environment
 | Input | SHA |
 |---|---|
-| Integration candidate `integration/final-release` (Account 1) | `9752d919858abdd434501bd13d3a8274a9f41cca` |
+| Integration candidate, round 1 | `9752d919858abdd434501bd13d3a8274a9f41cca` |
+| **Integration head, round 2** (current base of PR #9) | **`4a3dd6f8e30c6766cddb18ec88afe1230be7b846`** |
 | Release candidate `claude/hopeful-allen-luubcy` | `813967e524ea7e7372653e1b081fb2b92f14b2de` |
 | Account 3 PR #5 in the candidate | `0c0fd7d`; QA fix after the candidate: `80e04fc` |
 | Account 2 PR #6 / PR #7 in the candidate | `d979df1` / `387b9da` (PR #7's later head `516d94d` is docs only) |
@@ -35,7 +39,26 @@ Environment: Linux 6.18 x86_64 cloud container, 4 vCPU, 15 GiB RAM, Python 3.13.
 Chromium through Node Playwright. No GPU and no Windows. Tests ran in an untouched detached worktree of the candidate,
 each with a fresh temporary `NEXUS_HOME`. The QA branch's own changes were tested in a separate run.
 
-## 2. Test programme (candidate `9752d91`)
+## 2. Test programme
+
+### Round 2, on `4a3dd6f` (current integration head)
+Each line is a separate run; the counts are never added together. Evidence is in `docs/results/final_qa/round2/`.
+| Check | Result |
+|---|---|
+| `ruff check .` | clean |
+| Full fast suite | **953 passed, 9 skipped, 0 failed** of 962 (579.7 s), the same skips as round 1. junit sha256 `c1f16b90…1dc4` |
+| Cross-account and contract set | **156 passed** (junit `7b482f19…111e`) |
+| `apply.sh` twice | 42 passed, then 42 passed, 0 files changed |
+| Break-test | **30 passed, 5 failed**: the same five as round 1 (QA-D1, D6, D7, D8 ×2) |
+| UI, all 31 pages, real Chromium | 0 page errors, 0 console errors, 0 HTTP 5xx. `a3refs` still prints `[object Object]`: the fix `80e04fc` is **not yet in the integration branch**. `assets` and `dubbing` were blank at 1.2 s |
+| Navigation race (QA-D5) | reproduced: Storage → Home still shows "Storage & Backup" |
+| `/api/library` (QA-D3) | 17.8 s |
+| QA-D2 (damaged DB), QA-D4 (disk full) | not re-run. None of `nexus/db.py`, `api.py`, `project.py`, `__main__.py`, `cloud/security.py`, `jobs.py`, `ui/index.html` or `assetlib` changed between `9752d91` and `4a3dd6f` (0 files). Status stays open as reproduced in round 1 |
+
+QA branch after merging `4a3dd6f` (`572eba3` plus these docs), separate run: **961 passed, 9 skipped, 0 failed** (578.6 s).
+junit sha256 `a927f170…968f`.
+
+### Round 1, on candidate `9752d91`
 | Check | Result | Evidence |
 |---|---|---|
 | `ruff check .` | clean | `raw/` |
@@ -125,19 +148,20 @@ Performance (`perf_summary.json`, `perf_assetlib.json`):
 | Restart after SIGKILL | 1.11 s |
 | 9.6 s 720p render | cold 9.4 s; warm (5/5 segments from cache) 6.5 s, of which 0.4 s is render and ~6 s is QA and the quality score (QA-O1). One warm run took 60 s; 3 further runs did not reproduce it |
 
-## 6. Wan 2.2 TI2V-5B: independent review of Account 1's evidence (TESTED)
+## 6. Wan 2.2 TI2V-5B: independent review of Account 1's evidence (as of `4a3dd6f`)
 | Check | Finding |
 |---|---|
-| Model identity | `Wan-AI/Wan2.2-TI2V-5B-Diffusers` at revision `b8fff7315c768468a5333511427288870b2e9635` in every record. The worker selects it by explicit key, with no fallback path; the 1.3B entry is separate and unpinned (QA-W4). No 14B model and no paid provider appear |
-| Real GPU run | 3 Kaggle jobs (`rjob_3ea658eeb829`, `rjob_c1ad61c90bb8`, `rjob_e03072b99fd5`). Accelerator "Tesla T4 x2"; the environment probe shows 2 × T4 (sm 7.5, 14.56 GiB), torch 2.11 / CUDA 13.0, diffusers 0.35.2. Not echo, not CPU, not a still |
-| Per-GPU use | recorded separately. GPU0 peak 12.6 GB alloc, 13.0 GB smi; GPU1 9.9 / 14.2 GB (smoke); sharded run 7.9 / 12.8 GB. Utilisation max 100 % on both, mean 13–38 % (download and load dominate a 7–8 min session) |
-| Output validity | ffprobe: h264, 672×384, 24 fps, 25 frames, 1.04 s; local SHA-256 equals the worker's; no static pairs, not black, not flat. Tiled vs reference decode: 44.55 dB PSNR |
-| Motion and consistency | the contact sheets show a stable scene with a moving subject (T2V) and small coherent motion (I2V). Two different motion numbers are recorded for the same clip (14.67 vs 5.78; QA-W3) |
-| Prompt adherence | weak at this size: the "fox" is an unrecognisable dark shape and the camera does not track; the I2V cat does not turn or blink (QA-W2) |
-| Not verified | the 720p acceptance runs. The report still has `__WAN_VERDICT__`, `__WAN_720_ROWS__` and `__GATE__` placeholders. The MP4 files are not in the repository, so QA could not re-hash or watch them (QA-W1) |
+| Model identity | `Wan-AI/Wan2.2-TI2V-5B-Diffusers` at revision `b8fff7315c768468a5333511427288870b2e9635` in every successful record. The worker selects it by explicit key, with no fallback path; the 1.3B entry is separate and unpinned (QA-W4). No 14B model and no paid provider appear |
+| Real GPU | Kaggle T4 × 2 on every job (sm 7.5, 14.56 GiB each), with per-GPU memory and utilisation recorded. Not echo, not CPU, not a still |
+| **720p T2V** (`rjob_620150232fa9`) | **succeeded**: 1280×704, 121 frames at 24 fps, 30 steps, h264; the local SHA-256 equals the worker's (`26c351fd…2e1f`). Generation 2,835 s, decode 1,264 s (own tiling), job 4,455 s (74 min). Peak allocated GPU0 12.9 GB / GPU1 9.7 GB; mean utilisation 34 % / 61 %. No static pairs, not black, not flat. Contact sheet: a recognisable red fox trotting through snow in a sunlit birch forest, with the camera moving alongside, temporally consistent and on prompt |
+| **720p I2V** | **not verified.** `rjob_5b6d09efb6d1` failed with CUDA OOM on GPU0. `i2v720.json` is that same failed attempt. The VAE-placement change in `4a3dd6f` has **no successful post-fix run yet**, so there is no I2V MP4 to inspect |
+| Smoke runs (672×384, 25 f) | T2V and I2V succeeded. Prompt adherence was weak at that size (QA-W2) |
+| MP4 files | not in the repository. `tasks.yaml` cites `media/t2v_1280x704_121f_24fps.mp4`, which does not exist in the tree. QA could inspect only the contact sheets and the ffprobe and hash records, not the video itself (QA-W1) |
+| Motion metrics | two different numbers per clip: worker 13.74 vs local decoded 3.97 at 720p (QA-W3) |
 
-Verdict: real generation of valid moving video on the owner's Kaggle T4×2 is **evidenced at smoke size**. The 720p
-acceptance and the speed/quality comparison are **not done**.
+Verdict: **720p T2V is evidenced as real, valid, moving and on-prompt** (from records and the contact sheet). **720p I2V
+is not**: it needs a successful post-fix run and its MP4 inspected. Speed: about 74 min of T4×2 time per 5 s 720p
+clip.
 
 ## 7. Real providers (evidence review; QA has no owner credentials and re-ran nothing live)
 **Google Drive Daily Archive** (`docs/results/a2_storage/daily_archive_live.json`, 12/12): TESTED.
@@ -192,6 +216,31 @@ PR #5 is ready for Account 1's integration. It holds the A3 code in the candidat
   - native reviewers;
   - an analytics export.
 
+## 9b. Owner-only validation (BLOCKED / OWNER ACTION; never inferred from local Linux tests)
+| Item | Status |
+|---|---|
+| YouTube OAuth client and one private upload (`owner_validation`) | BLOCKED, owner action |
+| TikTok, Instagram, Facebook developer apps | BLOCKED, owner action |
+| YouTube Data API key (competition research) | BLOCKED, owner action |
+| Real analytics import (one owner export) | BLOCKED, owner action |
+| Native-language review: ar-EG, ar-Gulf, hi, zh | BLOCKED, owner action (every output stays a draft) |
+| Audio listening review and creative review (a human watches the renders; the QLT-1 rubric does not replace this) | BLOCKED, owner action |
+| GitHub Actions restored; Windows installer built and installed | BLOCKED, owner action |
+| Merge approvals (PR #8 into the RC, PR #3 into `main`) | owner decision. QA does not merge |
+
+## 9c. Re-test protocol once Account 1 reports fixes
+A finding closes only when it is reproduced as gone on the new exact integration SHA:
+1. Re-run `ruff`, the full fast suite and the cross-account set, and run `apply.sh` twice.
+2. `scripts/qa/break_probe.py` against a live server: QA-D1, D6, D7 and D8 must pass.
+3. QA-D2: corrupt `nexus.db` (WAL checkpointed first). Expect a plain message pointing to `nexus restore`, and doctor
+   showing `[BAD] database`.
+4. QA-D4: put the home on a 40 MB tmpfs and upload 18 MB twice. Expect HTTP 507, no partial file and no orphan project.
+5. QA-D3: time `/api/library` (target under 0.5 s). Edit the registry and check the next call reflects it. Call it
+   from 16 threads and check every result is identical. `scripts/qa/bench_assetlib.py` already does all three for the
+   proposed fix: 17.6 s → 0.004 s, the reload is seen after an edit, and 16/16 results are identical.
+6. QA-D5: `scripts/qa/ui_nav_race.js` (Storage → Home must show Home), and `ui_all_pages.js` over every page.
+7. QA-D11: `a3refs` must show hook text once PR #5 `80e04fc` is integrated. Keep `tests/fast/test_intel_ui_pattern_library.py`.
+
 ## 10. For Account 1 (integration owner)
 Merge `work/final-qa-performance` (QLT-1 improvements, rubric, regression tests, QA scripts and evidence) and PR #5
 `80e04fc`. Then fix or accept the items below, and re-run the full suite and `scripts/qa/break_probe.py`:
@@ -202,5 +251,5 @@ Merge `work/final-qa-performance` (QLT-1 improvements, rubric, regression tests,
 The release needs, in addition:
 - Actions restored by the owner;
 - the Windows plan in §8 executed;
-- the Wan 720p acceptance and the report placeholders resolved;
+- a successful post-fix Wan 720p I2V run, with its MP4 available for inspection;
 - the owner's approval.

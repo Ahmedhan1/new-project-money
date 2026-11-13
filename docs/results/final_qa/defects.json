@@ -1,6 +1,9 @@
 {
  "schema": "nexus.QADefects/1",
- "sha": "9752d919858abdd434501bd13d3a8274a9f41cca",
+ "sha": [
+  "9752d91",
+  "4a3dd6f"
+ ],
  "defects": [
   {
    "id": "QA-D1",
@@ -14,7 +17,11 @@
    "repro": "Token mode. From one address send 11 GET /api/projects without credentials, then GET /api/projects with the correct Bearer token -> 429 'too many failed authentications'. Realistic trigger: a tab left open after the 12 h session expiry polls the API.",
    "expected": "Requests without any credential do not count as failed authentication; a correct credential is accepted (or only wrong credentials count).",
    "fix": "In check(): do not record a failure for reason 'missing'; verify a presented credential before refusing on the lock-out, or lock per (address, presented credential).",
-   "evidence": "docs/results/final_qa/break_probe.json"
+   "evidence": "docs/results/final_qa/break_probe.json",
+   "reproduced_at": [
+    "9752d91",
+    "4a3dd6f"
+   ]
   },
   {
    "id": "QA-D2",
@@ -29,7 +36,11 @@
    "repro": "Checkpoint the WAL, delete -wal/-shm, overwrite the first bytes of nexus.db, import nexus.api or run `nexus doctor`.",
    "expected": "A plain message naming the damaged file and the recovery command; doctor reports [BAD] database instead of crashing.",
    "fix": "Catch sqlite3.DatabaseError where the connection is opened; message: 'nexus.db is damaged; run `nexus restore <new folder>` (backups exist)'. QA verified that `nexus restore` recovers this home.",
-   "evidence": "docs/results/final_qa/raw/startup_corrupt_db.txt"
+   "evidence": "docs/results/final_qa/raw/startup_corrupt_db.txt",
+   "reproduced_at": [
+    "9752d91"
+   ],
+   "note_4a3dd6f": "code unchanged in 4a3dd6f; not re-run"
   },
   {
    "id": "QA-D3",
@@ -43,7 +54,11 @@
    "repro": "Any home: time GET /api/library. Profile: _registry() re-parses asset_library.yaml with pure-Python PyYAML for each of 183 assets (license_check -> policy -> _registry).",
    "expected": "Sub-second response.",
    "fix": "Cache the parsed registry keyed by (mtime_ns, size) and load with CSafeLoader. Measured: 17.7 s -> 0.004 s, payload identical (scripts/qa/bench_assetlib.py).",
-   "evidence": "docs/results/final_qa/perf_assetlib.json"
+   "evidence": "docs/results/final_qa/perf_assetlib.json",
+   "reproduced_at": [
+    "9752d91",
+    "4a3dd6f"
+   ]
   },
   {
    "id": "QA-D4",
@@ -58,7 +73,11 @@
    "repro": "NEXUS_HOME on a 40 MB tmpfs; upload an 18 MB video twice.",
    "expected": "Free-space check before accepting; on failure no partial file and no orphan project; HTTP 507 with a plain message.",
    "fix": "shutil.disk_usage preflight (size x 2 + margin); move instead of copy when on the same filesystem; write to a temp name and os.replace; on error remove the partial file and the project created for this upload.",
-   "evidence": "docs/results/final_qa/FINAL_QA_SIGNOFF.md section 4"
+   "evidence": "docs/results/final_qa/FINAL_QA_SIGNOFF.md section 4",
+   "reproduced_at": [
+    "9752d91"
+   ],
+   "note_4a3dd6f": "code unchanged in 4a3dd6f; not re-run"
   },
   {
    "id": "QA-D5",
@@ -72,7 +91,11 @@
    "repro": "scripts/qa/ui_nav_race.js: go('storage'); go('home') -> main shows Storage & Backup.",
    "expected": "The last navigation wins.",
    "fix": "go() increments a navigation counter; each renderer captures it and returns after every await if it changed.",
-   "evidence": "docs/results/final_qa/ui/ui_all_pages_candidate.json"
+   "evidence": "docs/results/final_qa/ui/ui_all_pages_candidate.json",
+   "reproduced_at": [
+    "9752d91",
+    "4a3dd6f"
+   ]
   },
   {
    "id": "QA-D6",
@@ -85,7 +108,11 @@
    "summary": "Logout only deletes the cookie; a copied session cookie stays valid until its 12 h TTL",
    "repro": "open session, copy cookie, POST /api/v1/studio/logout, reuse cookie -> 200",
    "expected": "Logout revokes the session.",
-   "fix": "Session epoch stored server-side (vault/DB), included in the signature; logout bumps it."
+   "fix": "Session epoch stored server-side (vault/DB), included in the signature; logout bumps it.",
+   "reproduced_at": [
+    "9752d91",
+    "4a3dd6f"
+   ]
   },
   {
    "id": "QA-D7",
@@ -98,7 +125,11 @@
    "summary": "A cookie whose value is the raw API token is accepted with no expiry (legacy path)",
    "repro": "Cookie nexus_session=<token> -> 200",
    "expected": "Only signed, expiring session values.",
-   "fix": "Remove the legacy branch (or accept it once and re-issue a signed cookie)."
+   "fix": "Remove the legacy branch (or accept it once and re-issue a signed cookie).",
+   "reproduced_at": [
+    "9752d91",
+    "4a3dd6f"
+   ]
   },
   {
    "id": "QA-D8",
@@ -111,7 +142,11 @@
    "summary": "A failed job's API error contains the Python traceback and absolute server paths; an undecodable upload is retried 3 times; its stage stays 'running' after failure",
    "repro": "Upload a corrupt .mp4 -> analyze job failed with retries=3, error starts 'FFError: ffprobe failed for /abs/path ... Traceback'",
    "expected": "Plain message to the client (traceback in the log); deterministic input errors not retried; stage marked failed.",
-   "fix": "Split error into message/details; classify FFError 'Invalid data' as permanent."
+   "fix": "Split error into message/details; classify FFError 'Invalid data' as permanent.",
+   "reproduced_at": [
+    "9752d91",
+    "4a3dd6f"
+   ]
   },
   {
    "id": "QA-D9",
@@ -124,7 +159,11 @@
    "summary": "Without FFmpeg, doctor says [BAD] FFmpeg but [OK] 'NEXUS motion graphics (Pillow + FFmpeg)'",
    "repro": "PATH without ffmpeg; nexus doctor",
    "expected": "Components that need FFmpeg are reported unavailable.",
-   "fix": "Make the motion-graphics health check depend on the FFmpeg check."
+   "fix": "Make the motion-graphics health check depend on the FFmpeg check.",
+   "reproduced_at": [
+    "9752d91"
+   ],
+   "note_4a3dd6f": "code unchanged in 4a3dd6f; not re-run"
   },
   {
    "id": "QA-D10",
@@ -137,12 +176,16 @@
    "summary": "The step reads result keys 'verified'/'checks' that export() never returns, so it passes when they are None",
    "repro": "Run the e2e: the step shows verified: None, checks: None and PASS",
    "expected": "Assert result['verify']['ok'] is True.",
-   "fix": "Use the 'verify' report returned by nexus.export.export (the export itself is verified: ok comes from verify)."
+   "fix": "Use the 'verify' report returned by nexus.export.export (the export itself is verified: ok comes from verify).",
+   "reproduced_at": [
+    "9752d91"
+   ],
+   "note_4a3dd6f": "code unchanged in 4a3dd6f; not re-run"
   },
   {
    "id": "QA-D11",
    "severity": "minor",
-   "status": "fixed (PR #5, 80e04fc)",
+   "status": "fixed on PR #5 (80e04fc); NOT yet in integration 4a3dd6f (reproduced there)",
    "owner": "Account 3",
    "files": [
     "nexus/ui/intelligence.js"
@@ -200,7 +243,7 @@
    "severity": "evidence gap",
    "status": "open",
    "owner": "Account 1",
-   "summary": "Wan 2.2 720p acceptance rows and verdict are placeholders in docs/FINAL_RELEASE_REPORT.md (__WAN_VERDICT__, __WAN_720_ROWS__, __GATE__); MP4s are not in the repository, so QA could inspect contact sheets and records only"
+   "summary": "MP4s are not in the repository (tasks.yaml cites media/t2v_1280x704_121f_24fps.mp4, absent); QA reviewed contact sheets and ffprobe/hash records only. 720p T2V succeeded; 720p I2V has only an OOM failure and no post-fix run"
   },
   {
    "id": "QA-W2",

@@ -3,7 +3,7 @@
  "date": "2026-11-13",
  "qa_owner": "Account 3 (independent QA / performance)",
  "verdict": "NOT READY FOR RELEASE",
- "verdict_reason": "The integrated product works end to end on Linux (fresh clone, real Chromium, crash recovery, path containment). Four major defects remain open (owner lock-out by anonymous traffic, startup on a damaged database, disk-full upload leaves a truncated file, Asset Library 17.7 s per request); GitHub Actions starts no job, so no CI, Windows E2E or Windows installer exists for this candidate.",
+ "verdict_reason": "The integrated product works end to end on Linux (fresh clone, real Chromium, crash recovery, path containment). Four major defects remain open (owner lock-out by anonymous traffic, startup on a damaged database, disk-full upload leaves a truncated file, Asset Library 17.7 s per request); GitHub Actions starts no job, so no CI, Windows E2E or Windows installer exists for this candidate. Round 2 on 4a3dd6f reproduces every open finding; 80e04fc is not yet integrated; 720p I2V has no successful run.",
  "inputs": {
   "integration_candidate": {
    "branch": "integration/final-release",
@@ -21,6 +21,11 @@
   "account2_pr7": {
    "in_candidate": "387b9daacdf7384d9971421995bab6b314ddfaa3",
    "later_head": "516d94d (docs only, not in candidate)"
+  },
+  "integration_head_round2": {
+   "branch": "integration/final-release",
+   "sha": "4a3dd6f8e30c6766cddb18ec88afe1230be7b846",
+   "contains_80e04fc": false
   }
  },
  "environment": {
@@ -130,6 +135,52 @@
    "seconds": 576.2,
    "junit_sha256": "37a946acec24bd8c7ad2a0f84f15d07c24b6495e48243b1ba1eb1e8e32d3b199",
    "note": "separate run on candidate + QA changes; not added to the candidate run"
+  },
+  "round2_4a3dd6f": {
+   "ruff": "clean",
+   "fast_suite": {
+    "tests": 962,
+    "passed": 953,
+    "failed": 0,
+    "skipped": 9,
+    "seconds": 579.7,
+    "junit_sha256": "c1f16b902a5e093bd5a61fb5fd677cee0b226922e3d1a1ff08e5ad4677c41dc4"
+   },
+   "cross_account": {
+    "passed": 156,
+    "junit_sha256": "7b482f19e4fcac24f9c3f34277c143e154974dbdcedb360ff227b4619e8c111e"
+   },
+   "apply_sh_twice": {
+    "passed": [
+     42,
+     42
+    ],
+    "changed": 0
+   },
+   "break_probe": {
+    "passed": 30,
+    "failed": 5,
+    "same_failures_as_round1": true
+   },
+   "ui_all_pages": {
+    "pages": 31,
+    "page_errors": 0,
+    "console_errors": 0,
+    "http_5xx": 0,
+    "a3refs_object_text": true
+   },
+   "nav_race_reproduced": true,
+   "api_library_s": 17.8,
+   "not_rerun": "QA-D2, QA-D4: their code files are unchanged between 9752d91 and 4a3dd6f (0 files); open as reproduced in round 1"
+  },
+  "fast_suite_qa_branch_round2": {
+   "base": "4a3dd6f merged (572eba3)",
+   "tests": 970,
+   "passed": 961,
+   "failed": 0,
+   "skipped": 9,
+   "seconds": 578.6,
+   "junit_sha256": "a927f170b7e7f5410a34d4c8c9897963b158240d8741abadde68086a2fdb968f"
   }
  },
  "areas": [
@@ -227,7 +278,7 @@
    "area": "Wan 2.2 TI2V-5B generation",
    "status": "TESTED",
    "evidence": "docs/results/wan22_5b/*.json + contact sheets",
-   "notes": "real Kaggle T4x2 smoke runs (672x384, 25 f) at pinned revision; 720p acceptance runs not in the candidate; MP4s not in the repo, so not re-hashed by QA (QA-W1..W4)"
+   "notes": "720p T2V real and on-prompt (rjob_620150232fa9, 1280x704x121 @ 24 fps, sha 26c351fd..., contact sheet); 720p I2V NOT verified: only an OOM failure, no post-fix run (4a3dd6f); MP4s not in the repo (QA-W1)"
   },
   {
    "area": "Google Drive daily archive",
@@ -264,6 +315,24 @@
    "status": "BLOCKED",
    "evidence": "run 43422710660 etc.",
    "notes": "account-level: jobs end in ~2 s, no runner"
+  },
+  {
+   "area": "YouTube / provider OAuth, private upload",
+   "status": "BLOCKED",
+   "evidence": "-",
+   "notes": "owner action"
+  },
+  {
+   "area": "Real analytics import",
+   "status": "BLOCKED",
+   "evidence": "-",
+   "notes": "owner action"
+  },
+  {
+   "area": "Audio listening and creative review",
+   "status": "BLOCKED",
+   "evidence": "-",
+   "notes": "owner action; the rubric does not replace a human"
   }
  ],
  "defects": "docs/results/final_qa/defects.json",
@@ -271,5 +340,9 @@
   "docs/results/final_qa/perf_summary.json",
   "docs/results/final_qa/perf_assetlib.json"
  ],
- "signoff": "docs/FINAL_QA_SIGNOFF.md"
+ "signoff": "docs/FINAL_QA_SIGNOFF.md",
+ "tested_shas": {
+  "round1": "9752d919858abdd434501bd13d3a8274a9f41cca",
+  "round2": "4a3dd6f8e30c6766cddb18ec88afe1230be7b846"
+ }
 }

@@ -51,6 +51,42 @@ def proposed_registry():
     return _registry
 
 
+def invalidation_check() -> dict:
+    """Edit a copy of the registry (rename one asset): the cached loader must return the new name on the next call."""
+    import shutil
+    import tempfile
+    orig = config.REGISTRY_DIR
+    tmp = Path(tempfile.mkdtemp())
+    try:
+        for f in Path(orig).iterdir():
+            if f.is_file():
+                shutil.copy2(f, tmp / f.name)
+        config.REGISTRY_DIR = tmp
+        first = assetlib.catalog(None, None, None)
+        reg = tmp / "asset_library.yaml"
+        data = yaml.safe_load(reg.read_text(encoding="utf-8"))
+        entries = next(v for v in data.values() if isinstance(v, list) and v and isinstance(v[0], dict) and "id" in v[0])
+        target = entries[0]["id"]
+        entries[0]["name"] = "QA renamed asset"
+        time.sleep(0.01)
+        reg.write_text(yaml.safe_dump(data, sort_keys=False, allow_unicode=True), encoding="utf-8")
+        second = assetlib.catalog(None, None, None)
+        name = next((a["name"] for a in second if a["id"] == target), None)
+        return {"edited_asset": target, "name_after_edit": name, "reloaded": name == "QA renamed asset",
+                "unchanged_before_edit": any(a["id"] == target for a in first)}
+    finally:
+        config.REGISTRY_DIR = orig
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def thread_check(reference: str, n: int = 16) -> dict:
+    """n threads call the payload at once (FastAPI runs sync routes in a thread pool): every result must equal the reference."""
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(n) as ex:
+        outs = list(ex.map(lambda _: json.dumps(library_payload(), sort_keys=True, default=str), range(n)))
+    return {"threads": n, "identical": sum(o == reference for o in outs), "of": n}
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", required=True)
@@ -60,17 +96,20 @@ def main() -> None:
     assetlib._registry = proposed_registry()
     after, new = timed(a.runs)
     same = json.dumps(ref, sort_keys=True, default=str) == json.dumps(new, sort_keys=True, default=str)
+    inval = invalidation_check()
+    threads = thread_check(json.dumps(new, sort_keys=True, default=str))
     res = {"schema": "nexus.PerfBench/1", "what": "GET /api/library payload (catalog + summary + categories + optional_future)",
            "assets": len(ref["assets"]), "runs": a.runs,
            "before_s": {"median": statistics.median(before), "runs": before},
            "after_s": {"median": statistics.median(after), "runs": after},
            "speedup": round(statistics.median(before) / max(statistics.median(after), 1e-6), 1),
-           "identical_output": same, "libyaml": bool(getattr(yaml, "__with_libyaml__", False)),
+           "identical_output": same, "invalidation": inval, "concurrency": threads,
+           "libyaml": bool(getattr(yaml, "__with_libyaml__", False)),
            "fix": "nexus/assetlib/__init__.py _registry(): cache the parsed YAML keyed by (mtime_ns, size); use CSafeLoader when available",
            "owner": "Account 2 (nexus/assetlib) via Account 1 integration"}
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(res, indent=1), encoding="utf-8")
-    print(json.dumps({k: res[k] for k in ("assets", "before_s", "after_s", "speedup", "identical_output")}))
+    print(json.dumps({k: res[k] for k in ("assets", "before_s", "after_s", "speedup", "identical_output", "invalidation", "concurrency")}))
 
 
 if __name__ == "__main__":
