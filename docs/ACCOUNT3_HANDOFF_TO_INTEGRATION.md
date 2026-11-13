@@ -83,13 +83,20 @@ This supersedes request 1 in the table above (no module is renamed; both import 
   `nexus/create.py`, a 20-line opt-in path; without `script` Account 2's own writer runs as before).
 - Refused when originality, grounding or framing fails (`handoff.submit`).
 
-### Requests that remain
-| # | To | Request |
-|---|---|---|
-| A1-1 | Account 1 | `tests/fast/test_cloud_compute.py:353` reads `["job"]["id"]`; `dispatcher.submit` returns `job_id` |
-| A1-2 | Account 1 | `test_cookie_session_and_csrf`: `c.cookies.clear()` before setting the forged cookie (httpx 0.28 keeps both; server behaviour is correct) |
-| A1-3 | Account 1 | `batch_llm` job kind: run `bench_v2`-style prompts on the Kaggle worker (Kaggle forbids persistent serving) so the measured batch-only models in `providers.yaml` become usable for non-interactive tasks |
-| A1-4 | Account 1 | Declare `www.wikidata.org` (place-resolution fallback) and keep `api.gdeltproject.org` reachable from the owner's PC |
-| A2-1 | Account 2 | Fact graphics: label + figure from `scene_plan.key_fact` (fixed here); please keep the figure as the headline in `mograph.kinetic_text` |
-| A2-2 | Account 2 | Asset ranking: prefer a candidate whose title names the scene's subject (the gate now refuses wrong-subject images; ranking first would avoid fallbacks) |
-| OWNER | owner | Google OAuth client + consent → first private upload (PUB-1) and analytics import (ANA-1); native reviewers for ar-EG/ar-Gulf/hi/zh |
+### Requests that remain (status checked 2026-11-13 against `2ac7f96` / `cc836de`; Account 3 edits no other branch)
+| # | To | Request | Status |
+|---|---|---|---|
+| A1-1 | Account 1 | `test_cloud_compute.py` read `["job"]["id"]`; `dispatcher.submit` returns `job_id` | **done** by Account 1 (`633cc8b`); passes on run r2 |
+| A1-2 | Account 1 | `test_cookie_session_and_csrf` kept the valid cookie next to the forged one (httpx 0.28) | **done** by Account 1 (`2ac7f96`); passes on run r2 |
+| A1-3 | Account 1 | `batch_llm` job kind for Kaggle (no persistent serving) so batch-only models become usable | **added** by Account 1 (`2ac7f96`); not yet wired to the Account 3 router (pending integration) |
+| A1-4 | Account 1 | Declare `www.wikidata.org`; keep `api.gdeltproject.org` reachable from the owner's PC | Wikidata **declared** (`2ac7f96`); GDELT open |
+| A2-1 | Account 2 | Fact graphics: keep the `scene_plan.key_fact` figure as the headline in `mograph.kinetic_text` | open (not re-checked on `cc836de`) |
+| A2-2 | Account 2 | Asset ranking: prefer a candidate whose title names the scene's subject (Demo 10 run 4: Philae temple shown for the dam's construction) | **open defect, Account 2 owns it.** Account 2 reports semantic B-roll ranking (`14ca114`); not re-verified with Demo 10. Account 3 did not modify Account 2 code |
+| OWNER | owner | Google OAuth client → first private upload (PUB-1) and analytics import (ANA-1); YouTube Data API key (A3-COMPETITION); native reviewers for ar-EG/ar-Gulf/hi/zh (A3-NATIVE); merge approval (A3-INT) | blocked by owner authorization |
+
+### Integration evidence
+`integration/contracts_v1/RESULT.md` records the exact SHAs, each conflict resolution and the results of both runs.
+- Run r2 (current heads, order main → A1 → A2 → A3 → `apply.sh`): full fast suite 746 passed, 8 skipped, 0 failed;
+  `apply.sh` focused tests 41 passed.
+- Run r1 (earlier heads): full suite 538 passed, 3 skipped, 3 failed; focused tests 53 passed.
+Linux and Windows CI have not run on a merged tree: that needs the owner to approve and push the merge.
