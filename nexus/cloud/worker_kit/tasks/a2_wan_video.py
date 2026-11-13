@@ -184,10 +184,12 @@ def task_a2_wan_video(ctx: Context) -> dict:
     # the text encoder is not needed again: free its ~11 GB so the VAE can decode untiled on the auxiliary GPU
     # (diffusers 0.35.2 Wan 2.2 VAE tiled_decode fails: avg_shortcut shape mismatch, measured on Kaggle 2026-11-13)
     t2v.text_encoder = i2v.text_encoder = None
+    common.clear()          # the constructor kwargs held a second reference to the encoder (measured: 14.1 GB stayed on cuda:1)
     del te
     import gc
     gc.collect()
     torch.cuda.empty_cache()
+    ctx.log(f"text encoder freed: cuda:{dev_aux.index} free {torch.cuda.mem_get_info(dev_aux)[0] / 2 ** 30:.1f} GB")
     results = []
     for k, r in enumerate(runs):
         key = f"run{k}"
@@ -229,6 +231,7 @@ def task_a2_wan_video(ctx: Context) -> dict:
         # decode on the auxiliary GPU (FP32, tiled) so the transformer can stay resident on cuda:0
         d_t = _t.time()
         vae.to(dev_aux)
+        free_aux = torch.cuda.mem_get_info(dev_aux)[0] / 2 ** 30
         with torch.no_grad():
             z = lat.to(dev_aux, torch.float32)
             mean = torch.tensor(vae.config.latents_mean).view(1, vae.config.z_dim, 1, 1, 1).to(z)
@@ -249,7 +252,7 @@ def task_a2_wan_video(ctx: Context) -> dict:
         res = {"run": key, "mode": mode, "prompt": r["prompt"], "image": image_info, "width": W, "height": H, "frames": F, "fps": fps,
                "steps": steps, "guidance": gs, "seed": seed, "scheduler": "UniPCMultistepScheduler",
                "text_encode_s": te_s.get(k), "generate_s": round(gen_s, 1), "decode_s": round(dec_s, 1),
-               "s_per_step_mean": round(sum(sp) / len(sp), 2) if sp else None, "vram": vram, "quality": q, "ffprobe": probe}
+               "s_per_step_mean": round(sum(sp) / len(sp), 2) if sp else None, "aux_free_gb_before_decode": round(free_aux, 2), "vram": vram, "quality": q, "ffprobe": probe}
         a = ctx.artifact(out, "generated-video", model=ctx.params["model"], repo=repo, revision=rev, mode=mode,
                          gpu=env["gpus"][0]["name"], prompt=r["prompt"], seed=seed, steps=steps)
         res["artifact"] = {"name": a["name"], "sha256": a["sha256"], "size": a["size"]}

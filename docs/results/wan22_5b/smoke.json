@@ -1,24 +1,24 @@
 {
- "captured_at": "2026-11-13T13:14:06Z",
+ "captured_at": "2026-11-13T13:22:18Z",
  "kind": "LIVE (real Kaggle GPU, real Wan 2.2 TI2V-5B)",
  "profile": "smoke",
- "job_id": "rjob_5952e1f8b4de",
+ "job_id": "rjob_89f0bf37067a",
  "status": "failed",
- "error": "RuntimeError: The size of tensor a (2) must match the size of tensor b (4) at non-singleton dimension 2",
- "accelerator": null,
- "duration_s": null,
+ "error": "OutOfMemoryError: CUDA out of memory. Tried to allocate 386.00 MiB. GPU 1 has a total capacity of 14.56 GiB of which 70.81 MiB is free. Including non-PyTorch memory, this process has 14.49 GiB memory in use. Of the allocated memory 14.13 GiB is allocated by PyTorch, and 237.43 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)",
+ "accelerator": "Tesla T4 x2",
+ "duration_s": 389.404,
  "worker_metrics": {
-  "peak_rss_mb": null,
-  "ram_total_gb": null,
-  "gpu_util_max": null,
-  "gpu_util_mean": null,
-  "gpu_mem_used_max_mb": null,
-  "task_s": null,
+  "peak_rss_mb": 22489.2,
+  "ram_total_gb": 31.35,
+  "gpu_util_max": 100.0,
+  "gpu_util_mean": 9.0,
+  "gpu_mem_used_max_mb": 14833.0,
+  "task_s": 389.404,
   "per_gpu": null,
   "load_s": null,
   "download_s": null
  },
  "benchmark": null,
  "videos": [],
- "log_tail": ""
+ "log_tail": ", {\"index\": 1, \"name\": \"Tesla T4\", \"vram_gb\": 14.56, \"cc\": \"7.5\"}], \"bf16_native\": false, \"bf16_matmul_works\": true, \"versions\": {\"torch\": \"2.11.0+cu130\", \"diffusers\": \"0.35.2\", \"transformers\": \"5.20.2\", \"accelerate\": \"1.15.0\", \"safetensors\": \"0.8.0\", \"huggingface_hub\": \"1.33.0\", \"cuda\": \"13.0\"}}\n13:18:36 snapshot Wan-AI/Wan2.2-TI2V-5B-Diffusers@b8fff7315c768468a5333511427288870b2e9635 in 154s\n13:20:50 loaded in 133s: transformer torch.float16 on cuda:0, text encoder gpu-bf16, vae fp32\n13:21:55    return forward_call(*args, **kwargs)\n  File \"/usr/local/lib/python3.13/dist-packages/diffusers/models/autoencoders/autoencoder_kl_wan.py\", line 698, in forward\n    x = resnet(x, feat_cache, feat_idx)\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1779, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1790, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/usr/local/lib/python3.13/dist-packages/diffusers/models/autoencoders/autoencoder_kl_wan.py\", line 356, in forward\n    x = self.conv1(x, feat_cache[idx])\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1779, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1790, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/usr/local/lib/python3.13/dist-packages/diffusers/models/autoencoders/autoencoder_kl_wan.py\", line 175, in forward\n    x = F.pad(x, padding)\n  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/functional.py\", line 5430, in pad\n    return torch._C._nn.pad(input, pad, mode, value)\n           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^\ntorch.OutOfMemoryError: CUDA out of memory. Tried to allocate 386.00 MiB. GPU 1 has a total capacity of 14.56 GiB of which 70.81 MiB is free. Including non-PyTorch memory, this process has 14.49 GiB memory in use. Of the allocated memory 14.13 GiB is allocated by PyTorch, and 237.43 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)\n"
 }
