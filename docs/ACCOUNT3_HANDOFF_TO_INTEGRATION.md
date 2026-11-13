@@ -118,6 +118,18 @@ clone, file mtimes are checkout order, so the pinned result it reports may not b
 Auto-merged without conflict: `components.yaml`, `tests/fast/conftest.py`, `.gitignore`. Account 1's `nexus/cloud/`,
 security, vault and Studio files are byte-identical to the base.
 
+### Independent QA of the integration candidate (2026-11-13)
+Account 1's candidate `integration/final-release` @ `9752d91` contains this PR at `0c0fd7d`.
+- **Independent QA (Account 3):** reported in `docs/FINAL_QA_SIGNOFF.md` on `work/final-qa-performance`
+  ([Ahmedhan1/new-project-money#9](https://github.com/Ahmedhan1/new-project-money/pull/9)).
+- **One Account 3 defect, fixed here:** `80e04fc`, the Creator References page printing `[object Object]` (QA-D11). It
+  has a regression test and was checked in Chromium.
+- **Results on the candidate:** the Account 3 tests (283) and the release-gate and Account 2 QualityReport integration
+  tests pass.
+- **Unchanged:** the `batch_llm` contract, the release gate and the disclosure rules.
+- **Still owner-only:** the YouTube OAuth client and one private upload, the YouTube Data API key, native reviewers,
+  and an analytics export.
+
 ### Integration evidence
 `integration/contracts_v1/RESULT.md` records the exact SHAs, each conflict resolution and the results of every run.
 - **Run r4c (current)**:
