@@ -78,12 +78,14 @@ map, background replacement, tracking, particles, depth of field; benchmarks in 
 
 ## 11. Linux and Windows CI
 Fixed in this pass: SciPy, onnxruntime and opencv-python-headless declared in `requirements-ci.txt` (runtime imports);
-Windows-only bugs found once collection worked. Green on Linux and Windows at `a52a24a` (run 148) and `012a436`
-(run 152). Results for the final head are recorded in the PR description.
+Windows-only bugs found once collection worked. Green on Linux and Windows at `a52a24a` (run 148), `012a436` (run 152)
+and at the code-final head `010d29f`: CI run 43400716347 (ubuntu-latest success, windows-latest success). Release
+check (clean clone of `010d29f`, fresh NEXUS_HOME, ruff + fast suite + hygiene): PASS (`docs/results/release_check.json`;
+its first attempt failed only the two launcher tests because the container had < 2 GB free disk).
 
 ## 12. Windows E2E
-The "Windows end-to-end (clean machine)" workflow passed on every push in this pass (runs 76-88), and its script now
-also covers the workspace page, split + undo/redo, draft preview, final render and verified export.
+The "Windows end-to-end (clean machine)" workflow passed on every push in this pass (runs 76-90; at `010d29f`: run
+43400716242), and its script now also covers the workspace page, split + undo/redo, draft preview, final render and verified export.
 
 ## 13. Clean clone
 Fresh clone + fresh venv from `requirements-ci.txt` + empty non-ASCII `NEXUS_HOME`: app starts, 13/13 E2E steps pass
@@ -122,5 +124,6 @@ non-public until owner approval. Evidence: `docs/results/a2_three_account_check.
 | Launchers never run on the owner's PC (K-1) | owner |
 
 ## Verdict
-See the PR description and the final report for the verdict on the final head (`READY FOR REVIEW` only if Linux CI,
-Windows CI and Windows E2E are green on that head).
+**READY FOR REVIEW** - every code-level acceptance criterion passes on `010d29f` (Linux CI, Windows CI, Windows E2E,
+release check, clean-clone E2E, demos 1-4 rendered and inspected, Demo 5 honestly GPU-READY-UNVERIFIED). This is not a
+production-ready claim: human creative review, audio listening, the owner's Windows PC and a real GPU run are pending.
