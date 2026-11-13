@@ -107,29 +107,49 @@ configured list (no wildcard, no open redirect) - minimum scope (`drive.file`) -
 access tokens in memory only - revoke on disconnect - device flow for headless hosts - identity (e-mail) shown to the
 owner so the right account is connected to A/B/C - errors from Google redacted before logging.
 
-## 7. Open risks (honest)
+## 7. Risk register (re-audited 2026-11-13 at the production-closure round)
 
-1. **Legacy routes unauthenticated** (T28): `/api/*` and `/` rely on binding to `127.0.0.1`. Through a Codespaces
-   forward or any proxy they are reachable by whoever can reach the port. Fix (lead, `api.py`): a middleware that calls
-   `security.check(request)` for every path outside `/api/v1/health/live` - exact code in the sub-agent A report.
-2. **`POST /api/v1/session` (routes_core)** compares the token itself without the rate limiter and stores the raw token
-   in the cookie. Fix: delegate to `security.open_session(request, response, r.token)`.
-3. Security headers are only active after the lead calls `security.install(app)` in `api.py`.
-4. `vault.TOKEN_RE` does not know the `nxw_` worker-token prefix, so a leaked worker token is not redacted from free
-   text. Add `nxw_[A-Za-z0-9_-]{40,}`.
-5. No fuzzing of ffprobe/ffmpeg inputs; media parsing relies on timeouts and size caps. Keep FFmpeg updated.
-6. Rate limiting is per process and in memory (restart resets it) and keyed on the socket address: behind a proxy all
-   clients share one address, so an attacker can lock the owner out for 5 minutes (fails closed; acceptable).
-7. Codespaces: whether its port forwarder always adds `X-Forwarded-*` headers is assumed, not measured. The rule is
-   therefore: **with a forwarded port, always set `NEXUS_API_TOKEN`**.
-8. The vault key sits next to the vault in `NEXUS_HOME` unless `NEXUS_VAULT_KEY` is injected; a host compromise
-   exposes both. Acceptable for a single-owner app; hosted deployments must inject the key.
-9. `ProductionJobManifest.params` is free-form; nothing stops a client from putting a token into it. The dispatcher
-   should reject token-shaped values (`vault.TOKEN_RE`) on submit.
+### 7.1 Closed since the first audit (each with a regression test)
+| # | Risk | Status | Evidence |
+|---|---|---|---|
+| 1 | Legacy `/api/*` and `/` relied on binding to 127.0.0.1 | closed: `_owner_guard` middleware in `api.py`; `/docs`, `/redoc`, `/openapi.json` now owner-only too, and not served in production | `test_api_docs_are_owner_only_in_development`, `test_every_v1_route_requires_auth` |
+| 2 | `POST /api/v1/session` compared the token without the limiter and put the raw token in the cookie | closed: delegates to `security.open_session` (rate limited, HMAC-signed expiring value) | `test_cookie_session_and_csrf`, `test_session_cookie_attributes` |
+| 3 | Security headers depended on `install(app)` | closed: installed in `api.py` | `test_security_headers` |
+| 4 | `nxw_` worker tokens not redacted | closed: `nxw_[A-Za-z0-9_-]{40,}` is in `vault.TOKEN_RE` (`nexus/vault.py`) | code; redaction path covered by `test_audit_strips_secrets` |
+| 6 | Rate limiting keyed on the socket address: behind a proxy one attacker locks out the owner | closed: the real client is taken from `X-Forwarded-For` **only** when the peer is in `NEXUS_TRUSTED_PROXIES`; spoofed headers from other peers are ignored. Per-process by design: single instance is enforced (`instance.py`) | `test_rate_limit_identity_behind_trusted_proxy`, `test_single_instance_lock_refuses_a_second_api_process` |
+| 8 | Vault key next to the vault | closed for production: the `vault_key_offdisk` gate refuses to start with `NEXUS_HOME/secrets/vault.key`; the key is injected and kept offline (`vault-key export/verify`); backups never contain it | `test_production_gates_*`, `test_backup_carries_vault_ciphertext_never_the_key`, `test_offline_vault_key_export_and_verify` |
+| 9 | A client could put a token into `ProductionJobManifest.params` (which travel to Kaggle kernels) | closed: `submit()` refuses token-shaped strings and any stored secret value, without echoing it | `test_job_manifest_with_a_credential_is_refused` |
+| 10 | Duplicate `nexus_session` cookies: the decision depended on the server's cookie-parser order (Account 2's report against httpx 0.28) | closed: every presented value is checked; access only with a valid signature; a forged or planted sibling never grants access and cannot lock the owner out. `/studio/auth` uses the same rule | `test_duplicate_session_cookies_are_decided_by_signature_not_parser_order` |
+| 11 | No request-size limit on JSON or the legacy upload; upload type unchecked | closed: 8 MiB JSON / 20 GiB multipart, also for chunked bodies (413); legacy upload allow-list (415), base-name only, private temp folder | `test_body_and_upload_limits` |
+| 12 | A misconfigured hosted deployment silently ran in loopback/dev mode | closed: `NEXUS_ENV=production` refuses to start unless every gate passes; no token in production = 503 for every request | `test_production_startup_refuses_then_serves_without_docs` |
+
+### 7.2 Still open (accepted, documented)
+5. No fuzzing of ffprobe/ffmpeg inputs; media parsing relies on timeouts, size caps and the type allow-list. Keep FFmpeg
+   updated on the host.
+7. Codespaces: whether its port forwarder always adds `X-Forwarded-*` headers is assumed, not measured. Rule: **with a
+   forwarded port, always set `NEXUS_API_TOKEN`** (production makes this mandatory).
+13. Rate-limit counters are in memory: a restart resets them (fails open for one window of 10 attempts per client, a
+    token of >= 32 random characters is not brute-forceable in that budget).
+14. Kaggle: KAGGLE: CLOSED — ACCEPTED AS-IS BY OWNER (see §8). The residual exposure of the once-shared token is a fact,
+    not an open engineering item.
+15. The CSP keeps `'unsafe-inline'` for the self-contained single-file UI; mitigated by `connect-src 'self'`,
+    `frame-ancestors 'none'`, no third-party script, and escaping of user text in the UI.
+
+### 7.3 Account 2's cookie/CSRF report, explained
+Account 2's audit (`ACCOUNT2_FINAL_RELEASE_AUDIT.md` §10, `ACCOUNT2_HANDOFF_TO_ACCOUNT1.md` §4) recorded
+`test_cloud_security::test_cookie_session_and_csrf` failing with httpx 0.28 on an earlier Account 1 commit.
+Reproduced on 2026-11-13 (httpx 0.28.1, Starlette 1.7.0): httpx keeps the server-set cookie (domain `testserver.local`)
+next to a manually set one (no domain) and sends **both** (`nexus_session=GOOD; nexus_session=FORGED`). Which value
+the server read depended on the cookie parser (this Starlette keeps the last one); with a parser keeping the first,
+the old test saw the genuine cookie and got 200 where it expected 401. So: **an environment-dependent ambiguity in
+the test, not an authentication bypass** - in every case the server only accepted a value with a valid HMAC, and the
+client really held a valid session. It was fixed in the test in `2ac7f96` (jar cleared, one cookie per assertion;
+Account 3's `RESULT.md` r2 confirms it passes), and is now also fixed in the server (§7.1 #10) with a deterministic
+regression test that sends both orders explicitly. Current HEAD: the test passes on Linux and Windows CI.
 
 ## 8. Procedures
 
-### Kaggle credential: CLOSED — ACCEPTED AS-IS BY PROJECT OWNER (2026-11-13)
+### KAGGLE: CLOSED — ACCEPTED AS-IS BY OWNER (2026-11-13)
 Kaggle API tokens were once shared in a chat. The owner decided to keep the current Kaggle configuration unchanged and
 closed the topic, so no rotation is requested. The residual exposure stays a fact: anyone who saw that chat could use
 the token within the account's own Kaggle quota until the owner chooses to expire it. NEXUS's controls are unchanged:
@@ -142,12 +162,10 @@ tokens), reconnect drive A/B/C; OAuth client secret - reset in Google Cloud cons
 or revoke.
 
 ### Vault key backup
-* Hosted: generate a key once (`python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`),
-  keep it in the host's secret store as `NEXUS_VAULT_KEY` **and** in the owner's password manager.
-* Local/Codespaces: copy `NEXUS_HOME/secrets/vault.key` into the password manager. Without it, a restored backup's
-  secrets are unreadable (fail closed) and every connection must be re-authorised - nothing else is lost.
-* Never commit it, never put it into the same backup archive as the vault unless that archive is encrypted with a
-  different passphrase (`NEXUS_BACKUP_PASSPHRASE`).
+See `ACCOUNT1_DISASTER_RECOVERY.md` §2: `python -m nexus vault-key export --to <removable drive>` (never printed,
+never next to the data or a backup destination), `vault-key verify --from-file`, fingerprint on the label; production
+injects the key as `NEXUS_VAULT_KEY` and refuses to start with a key file in `NEXUS_HOME`. Backups carry the vault as
+ciphertext and never the key.
 
 ### Codespaces port visibility
 Keep the forwarded port **Private** (default). Never switch it to Public. Set `NEXUS_API_TOKEN` as a Codespaces secret.

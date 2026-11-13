@@ -1,6 +1,6 @@
 # Account 1 acceptance results (2026-11-12, refreshed 2026-11-13 closure round)
 
-**Kaggle: CLOSED — ACCEPTED AS-IS BY PROJECT OWNER.**
+**KAGGLE: CLOSED — ACCEPTED AS-IS BY OWNER.**
 
 Classes: **RV** real-verified · **MO** mocks/fake-server only · **P** partial · **BU** blocked by user · **BP** blocked by
 provider · **NI** not implemented. Finalization mission (Parts 1-12), demos A-K.

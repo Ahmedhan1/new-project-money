@@ -356,3 +356,16 @@ def test_service_log_rotation(clean_env):
     assert kept == [f"api.log.{i}" for i in range(1, launcher.LOG_KEEP + 1)]
     assert (log.parent / "api.log.1").read_bytes().endswith(str(launcher.LOG_KEEP + 1).encode())   # newest generation first
     assert not launcher.rotate_log(log.parent / "api.log.1", max_bytes=10 << 20)
+
+
+def test_job_manifest_with_a_credential_is_refused(clean_env):
+    """Params go to remote workers (Kaggle kernels): a token-shaped value or a stored secret is refused on submit."""
+    from nexus.cloud.compute import dispatcher as dsp
+    from nexus.contracts import ProductionJobManifest
+    vault.put("kaggle_primary", "stored-secret-value-0123456789", {"provider": "kaggle"})
+    for bad in ({"note": "ghp_" + "a" * 36}, {"note": "use stored-secret-value-0123456789 here"}):
+        with pytest.raises(ValueError) as e:
+            dsp.submit(ProductionJobManifest(task="probe", owner_account="account1", params=bad))
+        assert "stored-secret-value" not in str(e.value) and "ghp_" not in str(e.value)
+    ok = dsp.submit(ProductionJobManifest(task="probe", owner_account="account1", params={"note": "plain"}))
+    assert ok["created"] is True

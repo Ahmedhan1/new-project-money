@@ -122,7 +122,7 @@ def _verify(a):
 def _restore(a):
     from . import backup
     r = backup.restore(_open_dest(a.src), a.target, a.snapshot, backup.passphrase())
-    _p({k: r[k] for k in ("ok", "snapshot", "target", "files_restored", "files_expected", "problems", "paths_rewritten", "use")})
+    _p({k: r[k] for k in ("ok", "snapshot", "target", "files_restored", "files_expected", "problems", "paths_rewritten", "vault", "use")})
     print("references:", {k: (len(v) if isinstance(v, list) else v) for k, v in r["references"].items()})
     return 0 if r["ok"] else 1
 

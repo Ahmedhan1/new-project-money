@@ -57,13 +57,14 @@ def auth_state(request: Request):
     import hmac
     tok = security.api_token()
     if tok is None:
-        ok = security.is_direct_loopback(request)
+        from . import production
+        ok = security.is_direct_loopback(request) and not production.is_production()
     else:
         auth = request.headers.get("authorization", "")
         bearer = auth[7:].strip() if auth.lower().startswith("bearer ") else ""
         # the session cookie is a signed value (security.session_valid), never the raw token
         ok = (bool(bearer) and hmac.compare_digest(bearer.encode(), tok.encode())) or \
-            security.session_valid(request.cookies.get(security.COOKIE, ""), tok)
+            any(security.session_valid(v, tok) for v in security.session_cookie_values(request))
     return {"token_mode": security.api_token() is not None, "authenticated": ok}
 
 

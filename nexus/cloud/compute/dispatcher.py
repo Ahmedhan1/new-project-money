@@ -158,6 +158,13 @@ class Dispatcher:
                 return ex[0], False
         if task_registry.spec(manifest.task) is None:
             raise ValueError(f"unknown task '{manifest.task}' (registered: {sorted(task_registry.TASKS)})")
+        # params and inputs travel to remote workers (a Kaggle kernel, a pull worker): a credential must never be among
+        # them. Token-shaped strings and any value stored in the vault are refused; the message never echoes the value.
+        from ... import vault
+        blob = manifest.model_dump_json()
+        if vault.redact(blob) != blob:
+            raise ValueError("the job manifest contains a credential (token-shaped or a stored secret value); secrets never "
+                             "travel in a job: workers get scoped access from the control plane instead")
         now = time.time()
         try:
             db.execute("INSERT INTO remote_jobs(id,task,owner_account,project_id,status,priority,provider,connection_id,remote_ref,attempts,"

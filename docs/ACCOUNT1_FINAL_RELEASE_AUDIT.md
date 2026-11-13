@@ -3,7 +3,7 @@
 Scope: Account 1 (cloud platform) on `work/account-1-cloud-platform`, PR #4. This audit covers Account 1's own code and
 its integration status with Accounts 2 and 3. It is **not** a production-readiness claim for NEXUS as a whole.
 
-**Kaggle: CLOSED — ACCEPTED AS-IS BY PROJECT OWNER** (owner decision, 2026-11-13). No further Kaggle changes are
+**KAGGLE: CLOSED — ACCEPTED AS-IS BY OWNER** (owner decision, 2026-11-13). No further Kaggle changes are
 requested or planned. The residual credential exposure is recorded in §9.
 
 ## 1. Verified PR state (re-fetched from GitHub, 2026-11-13)
@@ -172,7 +172,7 @@ No test was removed, skipped on purpose or weakened.
 ## 9. Security status
 - No secrets, tokens or account identities in Git. The repository scan is clean in CI. The Kaggle account id was
   redacted from the new evidence before push, and history was checked.
-- **Kaggle credential: CLOSED — ACCEPTED AS-IS BY PROJECT OWNER.** Residual exposure: the Kaggle token that was shared
+- **KAGGLE: CLOSED — ACCEPTED AS-IS BY OWNER.** Residual exposure: the Kaggle token that was shared
   in a chat earlier is the one still configured. It worked for the live `batch_llm` job on 2026-11-13. Anyone who saw
   that chat could use it within the account's own Kaggle quota until the owner chooses to expire it. NEXUS's own
   controls are unchanged: vault-only storage, redaction, the token never travels in a kernel, scans in CI. This is
