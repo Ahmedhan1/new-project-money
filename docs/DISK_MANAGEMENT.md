@@ -15,7 +15,7 @@ cleanup (`docs/results/a2_storage/disk_before.json`, produced by `scripts/mainte
 | pytest `tmp_path` of the last 3 runs | 0.31 GB | rendered test videos | deleted; retention now "failed tests only, last run" |
 | demo homes (Demo 1/2/4 finals, audio review package) | 1.46 GB | evidence for PR #6 | kept (finals); caches left for the disk manager |
 
-After cleanup: **18.5 GB free** (`disk_after.json`). Nothing of the application, no test code, no fixture, no licence
+After cleanup: **19.74 GB free** (`disk_after.json`). Nothing of the application, no test code, no fixture, no licence
 manifest and no small machine-readable evidence was deleted.
 
 **What caused the accumulation:** every benchmark/demo/test run created a complete NEXUS home (cache + projects) and

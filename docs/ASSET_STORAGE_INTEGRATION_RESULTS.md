@@ -7,7 +7,7 @@ Machine: shared 4-vCPU cloud development container, no GPU. Every number below w
 | | Free (writable) | Source |
 |---|---|---|
 | Before any cleanup | 3.09 GB | `docs/results/a2_storage/disk_before.json` |
-| After removing identified, recorded leftovers (scratch benchmark homes, agent workdirs, pip cache, pytest outputs, superseded demo run) | ~18.5 GB | `disk_after.json` |
+| After removing identified, recorded leftovers (scratch benchmark homes, agent workdirs, pip cache, pytest outputs, superseded demo run) and the disk-manager pass below | 19.74 GB | `disk_after.json` (end of this work) |
 | Disk manager on the demo/test homes (`nexus disk plan` -> `clean --plan`) | +317 MB (1752 files; 47 protected skipped) | this section |
 Every location's owner and purpose was recorded before deletion. Kept: model weights, licensed benchmark media, the venv,
 the repository, every final demo video (Demo 1/2/3/4) and the audio review package. Details: `docs/DISK_MANAGEMENT.md`.
@@ -63,7 +63,9 @@ Found and fixed by this check: preview rendering could occupy all shared API thr
 2-thread limiter).
 
 ## 6. Tests and CI
-- Account 2 branch, full fast suite: see the PR description (recorded in `docs/results/fast_tests.json`).
+- Account 2 branch, full fast suite (dev container, Linux): **400 passed, 0 failed, 7 skipped** (`docs/results/fast_tests.json`;
+  skips include the 4 Account 1 storage tests, which run on the merged tree). An earlier run had 1 failure in
+  `test_jobs::test_worker_killed_mid_job...` that did not reproduce in isolation, under load, or in the next full run.
 - GitHub Actions: **not run** - since about 10:27 UTC every job in the repository (PRs #4, #5, #7) fails in 2 s without
   starting a step (account-level Actions limit/billing; owner action). Linux/Windows CI and the clean-machine Windows
   E2E (`scripts/acceptance/windows_e2e.py`, now also covering library/disk/archive endpoints) must be re-run when Actions

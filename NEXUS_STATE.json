@@ -3,13 +3,13 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-13T09:21:57Z",
+ "updated": "2026-11-13T11:25:38Z",
  "git": {
-  "branch": "work/account-2-cinematic-engine",
-  "commit": "f697355",
-  "subject": "Windows: atomic publish of render cache files retries a refused rename and accepts an existing content-addressed copy (intermittent WinError 5 when two workers produce the same segment, CI run 43394820291); clean-clone Linux end-to-end evidence (fresh clone + fresh venv from requirements-ci.txt + empty non-ASCII NEXUS_HOME: 13/13 steps incl. split/undo/redo, draft, final render, verified export)",
-  "dirty_files": 7,
-  "upstream": "origin/work/account-2-cinematic-engine",
+  "branch": "work/account-2-asset-library-storage",
+  "commit": "5ed9d05",
+  "subject": "Docs: asset + storage integration results; handoff points at the follow-up branch",
+  "dirty_files": 4,
+  "upstream": "origin/work/account-2-asset-library-storage",
   "unpushed_commits": 0
  },
  "current_task": {
@@ -41,25 +41,25 @@
    "next": "Owner review of Demo 3; renderer on the owner's Windows PC."
   },
   {
-   "id": "A2-B",
+   "id": "A2-ARCHIVE",
    "priority": 1,
-   "title": "Agent B: visual embeddings, semantic B-roll, 14 creative profiles, reference-style profiles, director coherence, shorts titles",
+   "title": "Daily output archive through Account 1 storage: verified upload, crash-safe resume, release local copy only after verification, browse + retrieve",
    "status": "tested",
-   "next": "Better titles (K-23); OCR-class text detection (K-25)."
+   "next": "Owner: one live archive to drive_a (K-28)."
   },
   {
-   "id": "A2-C",
+   "id": "A2-ASSETS",
    "priority": 1,
-   "title": "Agent C: audio benchmark, noise-reduction comparison, dialogue chain v2, sound-design engine, audio QA (sync)",
+   "title": "Professional asset library: catalog, lazy licence-checked install, previews, apply to clip/timeline, new effects/transitions/LUTs/overlays/sounds/fonts",
    "status": "tested",
-   "next": "A2-AUDIO-REVIEW (owner listening)."
+   "next": "Owner: listen to the generated sounds/beds; pick favourites."
   }
  ],
  "tasks": {
-  "total": 60,
+  "total": 63,
   "by_status": {
    "verified": 17,
-   "tested": 19,
+   "tested": 22,
    "blocked": 6,
    "deferred": 1,
    "planned": 15,
@@ -69,7 +69,7 @@
  },
  "tests": {
   "fast": {
-   "summary": "346 passed, 0 failed, 6 skipped",
+   "summary": "400 passed, 0 failed, 7 skipped",
    "ok": true,
    "date": "2026-11-13",
    "platform": "Linux",
