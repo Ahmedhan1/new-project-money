@@ -3,14 +3,14 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-13T11:59:01Z",
+ "updated": "2026-11-13T11:59:25Z",
  "git": {
   "branch": "work/account-3-intelligence-growth",
-  "commit": "fae6d38",
-  "subject": "Account 3 task 'next' texts shortened: headroom under the 1,500-word handoff limit on the three-account tree",
-  "dirty_files": 7,
+  "commit": "8a6e4f5",
+  "subject": "Release sign-off docs: integration r4b at exact final heads (base a889cd8 with A1 f9d8f11, A2 d979df1, A3 fae6d38): 867 passed, 8 skipped, 0 failed, focused 209, apply.sh 42 (local Linux). CI not starting; Windows not re-run. Verdict READY FOR OWNER AUTHORIZATION.",
+  "dirty_files": 6,
   "upstream": "origin/work/account-3-intelligence-growth",
-  "unpushed_commits": 3
+  "unpushed_commits": 0
  },
  "current_task": {
   "id": "QLT-1",
@@ -75,6 +75,9 @@
    "date": "2026-11-13",
    "platform": "Linux",
    "python": "3.13.18"
+  },
+  "integration": {
+   "summary": "862 passed, 0 failed, 12 skipped at A1 f9d8f11 / A2 d979df1 / A3 62414bf (local Linux (cloud container); not run: Windows CI on the merged tree, Windows clean-machine E2E on the merged tree, GitHub-hosted Linux CI on the merged tree) - docs/results/integration/heads-f9d8f11-d979df1-62414bf.json"
   }
  },
  "jobs": {
