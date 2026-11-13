@@ -1,15 +1,17 @@
 # NEXUS VIDEO AI — Final release report (integration owner: Account 1)
 
 Date: 2026-11-13. Branch `integration/final-release`, PR #8 → Release Candidate `claude/hopeful-allen-luubcy` (PR #3 → `main`).
+Includes Account 3's independent QA (PR #9) and fixes for every major/minor defect it found.
 Every claim below names its evidence. "Not run" means not run; nothing here is simulated or inferred from CI.
 
 ## 0. Verdict
 
 | Area | Status | Evidence |
 |---|---|---|
-| Three-account code integration (A1+A2+A3, PR #5/#6/#7) | **DONE** (Linux) | §1, §2 |
+| Three-account code integration (A1+A2+A3, PR #5/#6/#7, QA PR #9) | **DONE** (Linux) | §1, §2, §3a |
 | Mandatory security fix (export path containment) | **DONE** | §3 |
-| Wan 2.2 TI2V-5B real Kaggle generation | __WAN_VERDICT__ | §4 |
+| Account 3 QA (PR #9) integrated; QA-D1–D10 fixed with regression tests | **DONE** | §3a |
+| Wan 2.2 TI2V-5B real Kaggle generation | **VERIFIED LIVE: T2V and I2V at 1280×704, 121 f, 24 fps** | §4 |
 | Daily Archive on live Google Drive | **VERIFIED LIVE** (12/12) | §5 |
 | Production profile on the merged tree | **READY** (12/12 gates, owner-only routes) | §6 |
 | Windows single installer `NEXUS_VIDEO_AI_Setup.exe` | **BUILT FROM SOURCE: NO — BLOCKED** (no Windows builder; Actions starts no job) | §7 |
@@ -27,6 +29,8 @@ cannot be closed until GitHub Actions runs (owner billing) so the Windows instal
 | Account 3 PR #5 | `work/account-3-intelligence-growth` | `0c0fd7d9312d9acb0d39422ee2b0a65cdea2256a` |
 | Account 2 PR #6 | `work/account-2-cinematic-engine` | `d979df1e390abc48e79a7e6645229968a5b94107` |
 | Account 2 PR #7 (contains PR #6) | `work/account-2-asset-library-storage` | `387b9daacdf7384d9971421995bab6b314ddfaa3` |
+| Account 3 PR #5 follow-up (incl. `80e04fc`) | `work/account-3-intelligence-growth` | `d0d37a9` |
+| Account 3 QA PR #9 | `work/final-qa-performance` | `e50bcf21b9b6bab8bc3617a978d9424f7e6fecc3` |
 
 ## 2. Integration
 
@@ -53,6 +57,30 @@ Reviewed, no change needed: every non-static route refuses anonymous access (swe
 401, then 429 lockout; only `/ui/intelligence.js` is public); loopback mode refuses a foreign `Origin`; cookie mode
 requires `X-NEXUS-CSRF`; production gates (§6).
 
+## 3a. Account 3 QA (PR #9) and the defects it found
+
+Integrated: PR #9 `e50bcf2` (QLT-1 series parsing, visual queries, image reuse and location repair; the scored rubric;
+QA scripts and evidence) and Account 3's follow-up `d0d37a9` (including `80e04fc`, QA-D11 `[object Object]`).
+Fixed in `a209660`, each with a regression test that fails on the old code:
+
+| QA id | Fix | Test |
+|---|---|---|
+| D1: anonymous requests locked the owner out | no credential, or a genuine expired session → 401, not counted; wrong credentials still lock | `test_qa_security_fixes.py` |
+| D2: damaged `nexus.db` → traceback | `DatabaseDamaged` naming the file and `nexus restore`; preflight, doctor and CLI report it (exit 3) | `test_qa_robustness_fixes.py` |
+| D3: `/api/library` 17.7 s | cached registry (path, mtime, size, sha256; CSafeLoader; deep copy): **18.3–18.9 s → 0.21 s, identical payload SHA-256** | same + `perf_assetlib_after_fix.json` |
+| D4: disk full during upload → 500, orphan project, truncated file | free-space preflight (507), staged and moved, atomic `import_media`, project discarded on failure | `test_qa_upload_fixes.py` |
+| D5: a stale page overwrote the new one | navigation token + guarded view of `#main` | `test_qa_ui_nav.py`; QA's `ui_nav_race.js`: every pair correct |
+| D6: logout did not revoke copied sessions | server-side session epoch inside the HMAC | `test_qa_security_fixes.py` |
+| D7: raw-token cookie without expiry | refused | same |
+| D8: traceback and paths in job errors, corrupt media retried, stage left running | public error, permanent errors not retried, stage `failed`, details in the job log | `test_qa_robustness_fixes.py` |
+| D9: doctor OK for FFmpeg-dependent parts without FFmpeg | `requires_bin` in `components.yaml` | same |
+| D10: weak e2e export assertion | asserts `verify.ok is True` | `test_qa_e2e_assertions.py` |
+
+Deferred, with reasons in `docs/results/final_qa/defects.json`: D14 (non-Latin research ranking: measured no gain),
+O1 (QA re-analysis of cached re-renders), O2 (the first visit to the Asset Library generates previews and slows the next
+page to ~1.9 s; cached afterwards). Browser: QA's 31-page Chromium probe after the fixes found 0 page errors, 0 console
+errors and 0 HTTP 5xx; its 1.2 s probe still lists Storage as empty because of O2 (Storage renders in 85 ms on its own).
+
 ## 4. Wan 2.2 TI2V-5B on Kaggle (`kaggle_primary`, no other account, no paid compute)
 
 Model `Wan-AI/Wan2.2-TI2V-5B-Diffusers` @ `b8fff7315c768468a5333511427288870b2e9635`, Apache-2.0; diffusers 0.35.2 (pinned).
@@ -73,7 +101,21 @@ Strategy (D-22), each step found by a real failure, not assumed:
 | Smoke T2V | `rjob_3ea658eeb829` | 672×384, 25 f @ 24 fps | 20 | 48.6 s (2.43 s/step) | 42.1 s | 12.6 / 9.9 GB (unsharded) | 14.67 | `45fce875…` |
 | Smoke I2V | `rjob_c1ad61c90bb8` | 672×384, 25 f @ 24 fps | 20 | 49.6 s | 42.9 s | 12.8 / 9.9 GB (unsharded) | 4.84 | `8cb1dc78…` |
 | Shard + tiled check | `rjob_e03072b99fd5` | 672×384, 25 f | 20 | 55.6 s (2.78 s/step) | 118.2 s (tiled + reference) | 7.9 / 12.8 GB | 14.65 | — |
-__WAN_720_ROWS__
+| **720p T2V** | `rjob_620150232fa9` | **1280×704, 121 f @ 24 fps (5.04 s)** | 30 | 2835 s (94.5 s/step) | 1264 s (tiled) | 12.9 / 9.7 GB | 13.74 | `26c351fd1427fc9b…` |
+| 720p I2V, attempt 1 | `rjob_5b6d09efb6d1` | 1280×704, 121 f | 30 | **failed: OOM on GPU0 in the first step** (fp32 image encode left ~2 GB cached next to 15 blocks) | — | — | — | — |
+| I2V smoke after the fix (VAE on GPU1) | `rjob_a3611e323cb4` | 672×384, 25 f | 20 | succeeded | — | — | — | — |
+| **720p I2V** | `rjob_c2b5eb742475` | **1280×704, 121 f @ 24 fps (5.04 s)** | 30 | 3230 s (107.7 s/step) | 1358 s (tiled) | 10.2 / 12.4 GB | 7.71 | `1bd915afa4b8ae10…` |
+
+Both 720p clips: ffprobe h264 / yuv420p / 24/1 fps / 121 decoded frames / 5.041667 s; no static frame pair; not black,
+not flat; local SHA-256 equals the worker's; **Account 2's guard (`nexus/generate/classify.py`) classifies both
+`generated-video` (verdict independent-motion)**: `t2v720_generated_media_manifest.json`, `i2v720_generated_media_manifest.json`.
+Contact sheets: `media/t2v720_sheet.png` (a red fox trotting through snow in a birch forest at sunrise with a tracking
+camera, as prompted) and `media/i2v720_sheet.png` (the model card's example image; the cat turns its head). Whole Kaggle
+sessions: 74 min (T2V) and 82 min (I2V) including the ~152 s download and ~131 s load. Peak RAM ~22 GB of 31 GB.
+
+Motion numbers (QA-W3): the worker's `mean_abs_frame_diff` is the mean absolute RGB difference between consecutive
+full-resolution frames (0–255); the local `motion.mean_abs_diff` is the mean absolute luma difference at 64×36 grey
+(`scripts/acceptance/wan22_5b_live.py _motion`). Different scales of the same clip; both are > 0 for every frame pair.
 
 ffprobe on every output confirms codec h264, the stated resolution, 24/1 fps and the stated frame count; the local
 SHA-256 equals the worker's. Model download ~152 s, load ~131 s per session; peak RAM (RSS) ~22 GB of 31 GB.

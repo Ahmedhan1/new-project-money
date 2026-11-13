@@ -120,12 +120,12 @@ tasks:
   - id: QLT-1
     priority: 1
     title: "Creative quality pass: measured rubric + series writer on the script schema + research/visual relevance"
-    status: in_progress
+    status: tested
     deps: [TST-D]
     acceptance: "A reviewer rubric (hook, story arc, visual relevance per scene, no repeated visuals, audio balance) is scored in the QA report and gates approval; series episodes meet the same scene-depth gate as create-from-idea; no scene falls back to a title card when a relevant image exists."
     test: "Render 3 topics + 1 series episode; rubric scores recorded in docs/results; a human watches them."
     evidence: "Done so far - script schema, scene-depth gate, reviewer feedback loop, stock query ladder, sentence-aware subtitles (Test D run 4); series writer gets reviewer feedback + depth gate, episodes request location images (Test F run 2 - scenes 24-31 words, 3 of 8 scenes with images)."
-    next: "1) Series visuals - derive the image query from the bible's location LOOK text (generic nouns), not its fictional name, and allow reuse of an image for a repeated location. 2) Repair off-bible locations instead of only reporting them. 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Scored rubric in the QA report."
+    next: "Items 1, 2, 4 delivered by Account 3 QA (PR #9, integrated: look-text image queries, image reuse per location, off-bible repair, nexus/intelligence/quality/rubric.py; tests/fast/test_qa_qlt1.py); item 3 done earlier; non-Latin ranking deferred (QA-D14). Remaining: a person watches 3 topics + 1 episode (the acceptance's human step)."
   - id: QLT-2
     priority: 2
     title: "Production presets (cinematic, documentary, educational, scientific, commercial, product-ad, storytelling, social, explainer, film/series)"
@@ -684,13 +684,12 @@ tasks:
     next: "Account 3 switches bench_v2.account1_manifest to this params schema (model, items JSONL) and adds its batch provider."
   - id: ACC1-INTEGRATION
     priority: 1
-    title: "Three-account shared-contracts integration (nexus/contracts/{cloud,media}.py + shared __init__)"
-    status: in_progress
-    blocked_by: "Owner: GitHub Actions runners (account-level outage, audit section 7.6) and merge approval/order. Account 3 manifest fix landed (62414bf) and verified."
-    acceptance: "A1 -> A2 -> A3 merge at exact heads + apply.sh: full fast suite green with CI's dependency set."
-    test: "see docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md section 7"
-    next: "Linux done at A1 f9d8f11 / A2 d979df1 / A3 62414bf: 862 passed, 0 failed + live production smoke. Remaining: Windows CI + clean-machine E2E on the merged tree once runners work; rerun at current heads at merge time."
-  # ------------------------------------------------------------------ Account 2: cinematic engine (docs/ACCOUNT2_*.md)
+    title: "Final three-account integration (RC + PR #5 + PR #6 + PR #7 + QA PR #9) on integration/final-release"
+    status: tested
+    blocked_by: "Owner: GitHub Actions starts no job (0 billable ms) - hosted Linux/Windows CI, Windows E2E and the installer build cannot run; final merge needs the owner's explicit approval."
+    acceptance: "All three accounts' code in one tree; full fast suite, contracts apply.sh x2, browser pages, production check, live Drive archive and live Wan 5B pass at one exact SHA; hosted CI + Windows installer green."
+    test: "docs/FINAL_RELEASE_REPORT.md section 9 (exact SHA, counts, evidence)"
+    next: "Owner restores Actions -> run CI, windows-e2e and windows-installer.yml on the final SHA -> owner approves merging PR #8 into the RC and PR #3 into main."
   - id: A2-0
     priority: 1
     title: "Account 2 integration contract (schemas + validator) and licensed benchmark media set"
@@ -737,8 +736,8 @@ tasks:
     status: verified
     acceptance: "A real model output on a named GPU, classified generated-video by the guard, with WorkerExecutionResult metrics."
     test: "Account 1 dispatcher with an authorised GPU provider; scripts/gpu_video_bench.py"
-    evidence: "docs/results/wan22_5b/t2v720.json (Kaggle T4 x2, 1280x704, 121 frames @ 24 fps, 30 steps, rjob_620150232fa9, sha256 26c351fd...), smoke T2V/I2V + shard/tiled-decode check (44.55 dB vs reference); Account 2 guard classifies it generated-video (independent motion): t2v720_generated_media_manifest.json"
-    next: "720p I2V (i2v720 profile) - see docs/FINAL_RELEASE_REPORT.md section 4."
+    evidence: "docs/results/wan22_5b/t2v720.json + i2v720.json (Kaggle T4 x2, 1280x704, 121 frames @ 24 fps, 30 steps; sha256 26c351fd... / 1bd915af...), smoke T2V/I2V + shard/tiled-decode check (44.55 dB vs reference); Account 2 guard classifies it generated-video (independent motion): t2v720_generated_media_manifest.json"
+    next: "Done: T2V and I2V at 1280x704 x 121 frames @ 24 fps on Kaggle T4 x2 (rjob_620150232fa9, rjob_c2b5eb742475), both classified generated-video. Budget ~75-85 min of Kaggle GPU per 5 s 720p clip."
   - id: A2-AUDIO-REVIEW
     priority: 2
     title: "Owner listens to the audio reviewer package and records a verdict per item"

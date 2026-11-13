@@ -5,7 +5,7 @@
   {
    "id": "QA-D1",
    "severity": "major",
-   "status": "open",
+   "status": "fixed (a209660)",
    "owner": "Account 1",
    "files": [
     "nexus/cloud/security.py (check, _fail_auth, _rate_check)"
@@ -14,12 +14,13 @@
    "repro": "Token mode. From one address send 11 GET /api/projects without credentials, then GET /api/projects with the correct Bearer token -> 429 'too many failed authentications'. Realistic trigger: a tab left open after the 12 h session expiry polls the API.",
    "expected": "Requests without any credential do not count as failed authentication; a correct credential is accepted (or only wrong credentials count).",
    "fix": "In check(): do not record a failure for reason 'missing'; verify a presented credential before refusing on the lock-out, or lock per (address, presented credential).",
-   "evidence": "docs/results/final_qa/break_probe.json"
+   "evidence": "docs/results/final_qa/break_probe.json",
+   "verified_by": "tests/fast/test_qa_security_fixes.py::test_qa_d1_*"
   },
   {
    "id": "QA-D2",
    "severity": "major",
-   "status": "open",
+   "status": "fixed (a209660)",
    "owner": "Account 1",
    "files": [
     "nexus/db.py (connection setup)",
@@ -29,12 +30,13 @@
    "repro": "Checkpoint the WAL, delete -wal/-shm, overwrite the first bytes of nexus.db, import nexus.api or run `nexus doctor`.",
    "expected": "A plain message naming the damaged file and the recovery command; doctor reports [BAD] database instead of crashing.",
    "fix": "Catch sqlite3.DatabaseError where the connection is opened; message: 'nexus.db is damaged; run `nexus restore <new folder>` (backups exist)'. QA verified that `nexus restore` recovers this home.",
-   "evidence": "docs/results/final_qa/raw/startup_corrupt_db.txt"
+   "evidence": "docs/results/final_qa/raw/startup_corrupt_db.txt",
+   "verified_by": "tests/fast/test_qa_robustness_fixes.py::test_qa_d2_*"
   },
   {
    "id": "QA-D3",
    "severity": "major (performance)",
-   "status": "open (fix measured)",
+   "status": "fixed (a209660)",
    "owner": "Account 2 module, Account 1 integration",
    "files": [
     "nexus/assetlib/__init__.py _registry()"
@@ -43,12 +45,13 @@
    "repro": "Any home: time GET /api/library. Profile: _registry() re-parses asset_library.yaml with pure-Python PyYAML for each of 183 assets (license_check -> policy -> _registry).",
    "expected": "Sub-second response.",
    "fix": "Cache the parsed registry keyed by (mtime_ns, size) and load with CSafeLoader. Measured: 17.7 s -> 0.004 s, payload identical (scripts/qa/bench_assetlib.py).",
-   "evidence": "docs/results/final_qa/perf_assetlib.json"
+   "evidence": "docs/results/final_qa/perf_assetlib.json",
+   "verified_by": "tests/fast/test_qa_robustness_fixes.py::test_qa_d3_*; docs/results/final_qa/perf_assetlib_after_fix.json (18.3-18.9 s -> 0.21 s, identical payload sha256)"
   },
   {
    "id": "QA-D4",
    "severity": "major (data integrity)",
-   "status": "open",
+   "status": "fixed (a209660)",
    "owner": "Account 1",
    "files": [
     "nexus/api.py api_upload",
@@ -58,12 +61,13 @@
    "repro": "NEXUS_HOME on a 40 MB tmpfs; upload an 18 MB video twice.",
    "expected": "Free-space check before accepting; on failure no partial file and no orphan project; HTTP 507 with a plain message.",
    "fix": "shutil.disk_usage preflight (size x 2 + margin); move instead of copy when on the same filesystem; write to a temp name and os.replace; on error remove the partial file and the project created for this upload.",
-   "evidence": "docs/results/final_qa/FINAL_QA_SIGNOFF.md section 4"
+   "evidence": "docs/results/final_qa/FINAL_QA_SIGNOFF.md section 4",
+   "verified_by": "tests/fast/test_qa_upload_fixes.py"
   },
   {
    "id": "QA-D5",
    "severity": "minor",
-   "status": "open",
+   "status": "fixed (a209660)",
    "owner": "Account 1 / Account 2 (shared nexus/ui/index.html)",
    "files": [
     "nexus/ui/index.html go() and async page renderers"
@@ -72,12 +76,13 @@
    "repro": "scripts/qa/ui_nav_race.js: go('storage'); go('home') -> main shows Storage & Backup.",
    "expected": "The last navigation wins.",
    "fix": "go() increments a navigation counter; each renderer captures it and returns after every await if it changed.",
-   "evidence": "docs/results/final_qa/ui/ui_all_pages_candidate.json"
+   "evidence": "docs/results/final_qa/ui/ui_all_pages_candidate.json",
+   "verified_by": "tests/fast/test_qa_ui_nav.py; docs/results/final_qa/ui/nav_race_after_fix.json (Chromium, QA's script)"
   },
   {
    "id": "QA-D6",
    "severity": "minor",
-   "status": "open",
+   "status": "fixed (a209660)",
    "owner": "Account 1",
    "files": [
     "nexus/cloud/security.py close_session / session_valid"
@@ -85,12 +90,13 @@
    "summary": "Logout only deletes the cookie; a copied session cookie stays valid until its 12 h TTL",
    "repro": "open session, copy cookie, POST /api/v1/studio/logout, reuse cookie -> 200",
    "expected": "Logout revokes the session.",
-   "fix": "Session epoch stored server-side (vault/DB), included in the signature; logout bumps it."
+   "fix": "Session epoch stored server-side (vault/DB), included in the signature; logout bumps it.",
+   "verified_by": "tests/fast/test_qa_security_fixes.py::test_qa_d6_*"
   },
   {
    "id": "QA-D7",
    "severity": "minor",
-   "status": "open",
+   "status": "fixed (a209660)",
    "owner": "Account 1",
    "files": [
     "nexus/cloud/security.py session_valid (legacy branch)"
@@ -98,12 +104,13 @@
    "summary": "A cookie whose value is the raw API token is accepted with no expiry (legacy path)",
    "repro": "Cookie nexus_session=<token> -> 200",
    "expected": "Only signed, expiring session values.",
-   "fix": "Remove the legacy branch (or accept it once and re-issue a signed cookie)."
+   "fix": "Remove the legacy branch (or accept it once and re-issue a signed cookie).",
+   "verified_by": "tests/fast/test_qa_security_fixes.py::test_qa_d7_*"
   },
   {
    "id": "QA-D8",
    "severity": "minor",
-   "status": "open",
+   "status": "fixed (a209660)",
    "owner": "Account 1",
    "files": [
     "nexus/jobs.py"
@@ -111,12 +118,13 @@
    "summary": "A failed job's API error contains the Python traceback and absolute server paths; an undecodable upload is retried 3 times; its stage stays 'running' after failure",
    "repro": "Upload a corrupt .mp4 -> analyze job failed with retries=3, error starts 'FFError: ffprobe failed for /abs/path ... Traceback'",
    "expected": "Plain message to the client (traceback in the log); deterministic input errors not retried; stage marked failed.",
-   "fix": "Split error into message/details; classify FFError 'Invalid data' as permanent."
+   "fix": "Split error into message/details; classify FFError 'Invalid data' as permanent.",
+   "verified_by": "tests/fast/test_qa_robustness_fixes.py::test_qa_d8_*"
   },
   {
    "id": "QA-D9",
    "severity": "minor",
-   "status": "open",
+   "status": "fixed (a209660)",
    "owner": "Account 1",
    "files": [
     "doctor / tools registry"
@@ -124,12 +132,13 @@
    "summary": "Without FFmpeg, doctor says [BAD] FFmpeg but [OK] 'NEXUS motion graphics (Pillow + FFmpeg)'",
    "repro": "PATH without ffmpeg; nexus doctor",
    "expected": "Components that need FFmpeg are reported unavailable.",
-   "fix": "Make the motion-graphics health check depend on the FFmpeg check."
+   "fix": "Make the motion-graphics health check depend on the FFmpeg check.",
+   "verified_by": "tests/fast/test_qa_robustness_fixes.py::test_qa_d9_*"
   },
   {
    "id": "QA-D10",
    "severity": "minor (test quality)",
-   "status": "open",
+   "status": "fixed (a209660)",
    "owner": "Account 1/2",
    "files": [
     "scripts/acceptance/windows_e2e.py step 'export with verification'"
@@ -137,7 +146,8 @@
    "summary": "The step reads result keys 'verified'/'checks' that export() never returns, so it passes when they are None",
    "repro": "Run the e2e: the step shows verified: None, checks: None and PASS",
    "expected": "Assert result['verify']['ok'] is True.",
-   "fix": "Use the 'verify' report returned by nexus.export.export (the export itself is verified: ok comes from verify)."
+   "fix": "Use the 'verify' report returned by nexus.export.export (the export itself is verified: ok comes from verify).",
+   "verified_by": "tests/fast/test_qa_e2e_assertions.py"
   },
   {
    "id": "QA-D11",
@@ -198,30 +208,34 @@
   {
    "id": "QA-W1",
    "severity": "evidence gap",
-   "status": "open",
+   "status": "fixed (final report filled with the measured 720p rows and gate)",
    "owner": "Account 1",
-   "summary": "Wan 2.2 720p acceptance rows and verdict are placeholders in docs/FINAL_RELEASE_REPORT.md (__WAN_VERDICT__, __WAN_720_ROWS__, __GATE__); MP4s are not in the repository, so QA could inspect contact sheets and records only"
+   "summary": "Wan 2.2 720p acceptance rows and verdict are placeholders in docs/FINAL_RELEASE_REPORT.md (__WAN_VERDICT__, __WAN_720_ROWS__, __GATE__); MP4s are not in the repository, so QA could inspect contact sheets and records only",
+   "verified_by": "docs/FINAL_RELEASE_REPORT.md"
   },
   {
    "id": "QA-W2",
    "severity": "quality",
-   "status": "open",
+   "status": "addressed at 720p",
    "owner": "Account 1/2",
-   "summary": "Wan smoke clips move and are temporally stable, but prompt adherence is weak at 672x384x25: the fox is an unrecognisable dark shape, no tracking camera; the I2V cat does not turn or blink"
+   "summary": "Wan smoke clips move and are temporally stable, but prompt adherence is weak at 672x384x25: the fox is an unrecognisable dark shape, no tracking camera; the I2V cat does not turn or blink",
+   "verified_by": "t2v720 contact sheet shows a recognisable red fox trotting through snow with a tracking camera; smoke settings (672x384, 25 f, 20 steps) are placement checks, not the quality target"
   },
   {
    "id": "QA-W3",
    "severity": "evidence consistency",
-   "status": "open",
+   "status": "documented",
    "owner": "Account 1",
-   "summary": "Two different motion numbers for the same clip: worker mean_abs_frame_diff 14.67 vs local decoded 5.78 (T2V) - document which measure each is"
+   "summary": "Two different motion numbers for the same clip: worker mean_abs_frame_diff 14.67 vs local decoded 5.78 (T2V) - document which measure each is",
+   "verified_by": "docs/FINAL_RELEASE_REPORT.md section 4: worker metric = mean |RGB diff| between consecutive full-resolution frames (0-255 scale); local metric = mean |luma diff| at 64x36 grey (scripts/acceptance/wan22_5b_live.py _motion). Different scales, same clip."
   },
   {
    "id": "QA-W4",
    "severity": "minor",
-   "status": "open",
+   "status": "fixed (a209660)",
    "owner": "Account 2",
-   "summary": "wan21-t2v-1.3b has no pinned revision in _WAN_REPOS (selectable only explicitly; no silent fallback found)"
+   "summary": "wan21-t2v-1.3b has no pinned revision in _WAN_REPOS (selectable only explicitly; no silent fallback found)",
+   "verified_by": "wan21-t2v-1.3b pinned to 0fad780...; tests/fast/test_qa_ui_nav.py::test_every_wan_model_has_a_pinned_revision"
   },
   {
    "id": "QA-W5",
@@ -229,6 +243,15 @@
    "status": "observation",
    "owner": "owner",
    "summary": "drive_c reports 13.5 of 15 GB used (90 %) in the live archive health record"
+  },
+  {
+   "id": "QA-O2",
+   "severity": "optimisation",
+   "status": "open (observation)",
+   "owner": "Account 2 module",
+   "summary": "First visit of the Asset Library on a fresh home generates ~20 previews (FFmpeg + PIL, 2 at a time); while they render, light endpoints such as /api/storage take ~1.3 s instead of <0.05 s (GIL/CPU contention), so the next page (Storage) appears after ~1.85 s. Previews are cached afterwards. Visible only since QA-D3 made the library render immediately.",
+   "evidence": "measured with Chromium request timings, final integration 2026-11-13; QA's ui_all_pages.js 1.2 s probe lists 'storage' as empty for this reason (it renders in 85 ms in isolation)",
+   "fix": "Pre-generate previews in the installer/first start, or render them in a separate process"
   }
  ]
 }
