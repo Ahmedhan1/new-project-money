@@ -21,3 +21,5 @@ python-multipart
 cryptography
 fonttools
 pycountry
+kaggle>=2.0,<3  # official Kaggle CLI: heavy steps on the owner's free Kaggle GPU (nexus/remote_llm.py)
+six  # kaggle 2.2.x imports six without declaring it

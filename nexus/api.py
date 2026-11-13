@@ -233,6 +233,41 @@ class BackupReq(BaseModel):
     to: str | None = None
 
 
+class KaggleConnectReq(BaseModel):
+    token: str
+
+
+class HeavyModeReq(BaseModel):
+    mode: str
+
+
+@app.get("/api/kaggle")
+def api_kaggle():
+    from . import remote_llm
+    return remote_llm.status()
+
+
+@app.post("/api/kaggle/connect")
+def api_kaggle_connect(r: KaggleConnectReq):
+    from . import remote_llm
+    try:
+        return remote_llm.connect(r.token)
+    except (ValueError, RuntimeError) as e:
+        raise HTTPException(400, str(e)) from None
+
+
+@app.post("/api/kaggle/mode")
+def api_kaggle_mode(r: HeavyModeReq):
+    from . import remote_llm
+    if r.mode not in remote_llm.MODES:
+        raise HTTPException(400, f"mode must be one of {remote_llm.MODES}")
+    f = config.HOME / "settings.json"
+    data = json.loads(f.read_text(encoding="utf-8")) if f.exists() else {}
+    data["heavy_compute"] = r.mode
+    f.write_text(json.dumps(data, indent=1), encoding="utf-8")
+    return remote_llm.status()
+
+
 @app.post("/api/backup")
 def api_backup(r: BackupReq):
     return jobs.submit("backup", {"drill": r.drill, "to": r.to}, max_retries=0)

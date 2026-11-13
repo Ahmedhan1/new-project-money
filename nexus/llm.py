@@ -32,8 +32,11 @@ def unload() -> None:
 
 def chat(prompt: str, system: str = "You are a precise assistant.", max_tokens: int = 900, temperature: float = 0.5,
          json_mode: bool = False, schema: dict | None = None) -> str:
+    from . import jobs, remote_llm
+    if remote_llm.use_kaggle():  # heavy text on the free Kaggle GPU: nothing is downloaded or run on this CPU
+        txt = remote_llm.chat(prompt, system, max_tokens, temperature, json_mode=json_mode, schema=schema)
+        return re.sub(r"<think>.*?</think>", "", txt, flags=re.S).strip()
     costguard.authorize("local-llm", "generate")
-    from . import jobs
     with _lock:
         jobs.note("writing with the local language model (CPU, can take a few minutes)")
         t0 = time.time()

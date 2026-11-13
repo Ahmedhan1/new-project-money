@@ -114,7 +114,16 @@ async system(m){const s=await api("/api/v1/system/status");const sv=s.services||
  <button class="sec" id="sysrs">Restart</button> <button class="sec" id="sysst">Stop NEXUS</button><div id="sysmsg"></div></div>
  <div class="card"><h3>Updates</h3><p class="lead">Updates come only from this project's GitHub releases. The installer is installed only after its SHA-256 matches the published checksum; your projects and vault are kept.</p>
  <button class="sec" id="sysuc">Check for updates</button><div id="sysup"></div></div>
- <div class="card"><h3>Backup & restore</h3><p class="lead">Verified backups and restore drills run from <a data-go="storage">Storage & Backup</a>. Restores always go to a new folder.</p><button class="sec" id="sysbk">Back up now (with restore drill)</button><div id="sysbm"></div></div></div>`;
+ <div class="card"><h3>Backup & restore</h3><p class="lead">Verified backups and restore drills run from <a data-go="storage">Storage & Backup</a>. Restores always go to a new folder.</p><button class="sec" id="sysbk">Back up now (with restore drill)</button><div id="sysbm"></div></div>
+ <div class="card"><h3>Kaggle GPU for heavy steps</h3><p class="lead">Script writing runs on your free Kaggle GPU instead of this computer, so the 2.5 GB language model is never downloaded here. Each Kaggle run needs a few minutes to start. Token: kaggle.com &gt; Settings &gt; API &gt; Create New Token. It is stored encrypted on this computer only.</p>
+ <div id="kgst" class="lead">Checking Kaggle...</div>
+ <input id="kgtok" type="password" placeholder="Paste your Kaggle API token (or kaggle.json)" style="width:100%;margin:6px 0" autocomplete="off"> <button id="kgcon">Connect Kaggle</button>
+ <p style="margin-top:10px">Heavy steps run on: <select id="kgmode"><option value="auto">Kaggle when connected, else this computer</option><option value="kaggle">Kaggle only (never download big models here)</option><option value="local">This computer only</option></select></p><div id="kgmsg"></div></div></div>`;
+ const kgShow=k=>{$("#kgst").innerHTML=k.ready?`${tag("connected","ok")} ${esc(k.username||"")}${k.gpu_hours_left_week!=null?" · about "+esc(k.gpu_hours_left_week)+" GPU hours left this week":""} · model ${esc(k.model)}`:`${tag("not connected","warn")} ${esc(k.detail||"")}`;$("#kgmode").value=k.mode};
+ api("/api/kaggle").then(kgShow).catch(e=>$("#kgst").textContent=e.message);
+ $("#kgcon").onclick=async()=>{const t=$("#kgtok").value.trim();if(!t)return;$("#kgcon").disabled=true;$("#kgmsg").textContent="Checking the token with Kaggle...";
+  try{const r=await api("/api/kaggle/connect",{token:t});$("#kgtok").value="";$("#kgmsg").innerHTML=`<p>Connected as ${esc(r.username)}.</p>`;kgShow(await api("/api/kaggle"))}catch(e){$("#kgmsg").innerHTML=`<p style="color:var(--bad)">${esc(e.message)}</p>`}$("#kgcon").disabled=false};
+ $("#kgmode").onchange=async e=>{try{kgShow(await api("/api/kaggle/mode",{mode:e.target.value}));$("#kgmsg").innerHTML="<p>Saved.</p>"}catch(x){$("#kgmsg").innerHTML=`<p style="color:var(--bad)">${esc(x.message)}</p>`}};
  const say=(id,t)=>$(id).innerHTML=`<p>${t}</p>`;
  $("#sysrs").onclick=async()=>{const r=await api("/api/v1/system/restart",{});say("#sysmsg",esc(r.detail));setTimeout(()=>location.reload(),8000)};
  $("#sysst").onclick=async()=>{if(!confirm("Stop NEXUS? Start it again from the desktop shortcut."))return;const r=await api("/api/v1/system/stop",{});say("#sysmsg",esc(r.detail))};
