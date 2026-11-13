@@ -250,6 +250,12 @@ def platforms():
     return _mod("publishing.capabilities").matrix()
 
 
+@router.get("/platforms/readiness")
+def platforms_readiness():
+    """Provider readiness classes + AI-disclosure capability per platform (nothing is live-verified yet)."""
+    return {"readiness": _mod("publishing.capabilities").readiness(), "disclosure": _mod("publishing.release_gate").PLATFORMS}
+
+
 class PackReq(BaseModel):
     platform: str
     transcript: str

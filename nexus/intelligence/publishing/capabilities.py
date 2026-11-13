@@ -85,3 +85,35 @@ def registry_diff() -> list[dict]:
                 out.append({"platform": p, "field": theirs, "registry_says": None,
                             "correct": "documented in capabilities.yaml (see api." + ours + ")", "origin": "automatic diff"})
     return out
+
+
+# ------------------------------------------------------------------ provider readiness (honest, evidence-backed)
+READINESS_CLASSES = ("real_provider_verified", "automated_test_verified", "implemented_not_live_tested",
+                     "requires_owner_authorization", "manual_export_only", "not_supported")
+_EVIDENCE = {
+    "youtube": (["automated_test_verified", "implemented_not_live_tested", "requires_owner_authorization"],
+                "resumable upload, resume after 5xx, thumbnails, quota ledger, containsSyntheticMedia and analytics import tested "
+                "against recorded responses (test_intel_publishing, test_intel_release_gate, test_intel_owner_validation); no "
+                "live upload yet: needs the owner's OAuth client (PUB-1) and owner_validation youtube --i-authorize-a-private-upload"),
+    "tiktok": (["implemented_not_live_tested", "requires_owner_authorization"],
+               "documented request flow incl. post_info.is_aigc; refuses without an approved TikTok app and token; unaudited apps "
+               "post SELF_ONLY"),
+    "instagram_reels": (["implemented_not_live_tested", "requires_owner_authorization"],
+                        "container + resumable upload + is_ai_generated; no private mode, so media_publish only after owner approval"),
+    "facebook": (["implemented_not_live_tested", "requires_owner_authorization"],
+                 "Page /videos upload; this endpoint carries no AI label, so AI content is refused (manual upload with Meta's label)"),
+    "snapchat_spotlight": (["manual_export_only"], "no organic upload API; package + MANUAL_UPLOAD.md only"),
+}
+_EVIDENCE["youtube_shorts"] = _EVIDENCE["youtube"]
+_EVIDENCE["instagram_feed"] = _EVIDENCE["instagram_reels"]
+
+
+def readiness() -> dict:
+    """{platform: {classes, primary, live_verified, evidence}}. `live_verified` is True only for real_provider_verified."""
+    out = {}
+    for p in PLATFORMS:
+        classes, ev = _EVIDENCE[p]
+        assert set(classes) <= set(READINESS_CLASSES)
+        out[p] = {"classes": classes, "primary": classes[-1] if "requires_owner_authorization" in classes else classes[0],
+                  "live_verified": "real_provider_verified" in classes, "adapter_status": api(p).get("adapter_status"), "evidence": ev}
+    return out

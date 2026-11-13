@@ -286,3 +286,12 @@ def test_api_create_attach_and_check(home, clip):
     assert chk["upload_ok"] and not chk["public_ok"]
     r = c.post(f"/api/a3/publish/{mid}/release", json={"quality_report": qr(clip, human="APPROVED"), "disclosure_decision": DECISION})
     assert r.status_code == 200 and r.json()["release_check"]["public_ok"]
+
+
+def test_no_platform_is_advertised_as_live_verified():
+    from nexus.intelligence.publishing import capabilities
+    r = capabilities.readiness()
+    assert set(r) == set(capabilities.PLATFORMS)
+    assert not any(x["live_verified"] for x in r.values())
+    assert r["snapchat_spotlight"]["primary"] == "manual_export_only"
+    assert all(r[p]["primary"] == "requires_owner_authorization" for p in ("youtube", "tiktok", "instagram_reels", "facebook"))
