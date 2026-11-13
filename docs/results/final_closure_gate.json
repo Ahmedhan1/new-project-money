@@ -1,0 +1,9 @@
+{
+ "date": "2026-11-13",
+ "tree": "integration/final-release 77f6dea + Account 3 QA rounds 2-3 (ebad9a4) + Account 2 PR #7 evidence (516d94d) = 3dbc12d",
+ "ruff": "clean",
+ "apply_sh": "42 passed, second run changed no file",
+ "fast_suite": "978 passed, 0 failed, 12 skipped (Linux, Python 3.13, requirements-ci)",
+ "not_run": "GitHub Actions (Linux/Windows CI, windows-e2e, windows-installer): account-level Actions block, owner action",
+ "authorised_by": "owner, in the Account 2 session: fix first, then merge #8 -> #3 -> main and close the remaining PRs"
+}
