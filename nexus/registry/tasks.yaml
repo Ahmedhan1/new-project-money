@@ -182,7 +182,7 @@ tasks:
     priority: 3
     title: "Platform upload via official APIs (YouTube first)"
     status: blocked
-    blocked_by: "Needs the owner's own Google Cloud OAuth client + consent. Engine, approval gate, idempotency, resumable YouTube adapter and durable publish-upload job are built and tested on recorded responses (Account 3 stream E)."
+    blocked_by: "Owner's Google OAuth client + one private upload (docs/ACCOUNT3_YOUTUBE_OWNER_VALIDATION.md)."
     acceptance: "An approved package is uploaded as private to the owner's channel through the official API; quota recorded."
     test: "Owner runs the OAuth helper (nexus/intelligence/publishing/youtube_oauth.py), then Publishing page -> Upload."
     next: "Owner: create a Google Cloud project (no billing), enable YouTube Data API v3, OAuth client 'Desktop app', then run the helper. TikTok/Instagram/Facebook need approved apps."
@@ -191,7 +191,7 @@ tasks:
     title: "Analytics + monetisation intelligence from real platform data"
     status: blocked
     deps: [PUB-1]
-    blocked_by: "No owner analytics in this environment. CSV import (YouTube Studio/TikTok/Instagram/Facebook) and YouTube Analytics API import are built; growth statistics ran only on a public CC BY 4.0 dataset."
+    blocked_by: "No owner analytics data yet (OAuth or one owner export)."
     acceptance: "Owner analytics imported; one experiment evaluated; a recommendation traced to the owner's own numbers."
     test: "Analytics & Growth page: import an export, plan + evaluate an experiment."
     next: "Owner exports a YouTube Studio CSV (Advanced mode -> Export) and imports it on the Analytics & Growth page."
@@ -597,7 +597,7 @@ tasks:
     priority: 1
     title: "Three-account integration (A1 -> A2 -> A3, then integration/contracts_v1/apply.sh)"
     status: blocked
-    blocked_by: "Owner approval of the merge order and of merging into main. Agents never merge."
+    blocked_by: "Owner merge approval (agents never merge)."
     acceptance: "Merged tree: full fast suite green, apply.sh focused tests green, CI green on Linux and Windows."
     test: "Follow integration/contracts_v1/RESULT.md (run r2 recipe)."
     evidence: "integration/contracts_v1/RESULT.md"
@@ -606,7 +606,7 @@ tasks:
     priority: 2
     title: "Native-language review of ar-EG, ar-Gulf, hi and zh lines"
     status: blocked
-    blocked_by: "The owner must supply native reviewers; agents may not mark machine output as reviewed."
+    blocked_by: "Owner supplies native reviewers; agents never mark output reviewed."
     acceptance: "At least 20 reviewed lines per language in the review workflow; readiness recomputed from the reviews."
     test: "pytest tests/fast/test_intel_readiness.py; Review page"
     next: "Owner assigns reviewers."
@@ -614,7 +614,7 @@ tasks:
     priority: 3
     title: "Competition and saturation signals in market research (YouTube supply)"
     status: blocked
-    blocked_by: "Needs the owner's YouTube Data API key (free quota)."
+    blocked_by: "Owner's YouTube Data API key."
     acceptance: "Competition and saturation are measured, not unknown, for a real topic."
     test: "pytest tests/fast/test_intel_market_v2.py; Content Research page"
     next: "Owner adds the key (vault ai/youtube or env NEXUS_KEY_YOUTUBE)."

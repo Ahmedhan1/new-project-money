@@ -3,14 +3,14 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-13T11:24:39Z",
+ "updated": "2026-11-13T11:35:30Z",
  "git": {
-  "branch": "tmp/base-merge-check",
-  "commit": "5034c8d",
-  "subject": "Merge PR base claude/hopeful-allen-luubcy (Account 1 f9d8f11 via PR #4) into Account 3",
-  "dirty_files": 1,
-  "upstream": null,
-  "unpushed_commits": null
+  "branch": "work/account-3-intelligence-growth",
+  "commit": "f34d9b8",
+  "subject": "Growth: experiment recommendations carry the data origin (real vs simulated) in their evidence (D-19)",
+  "dirty_files": 3,
+  "upstream": "origin/work/account-3-intelligence-growth",
+  "unpushed_commits": 58
  },
  "current_task": {
   "id": "QLT-1",
@@ -70,8 +70,8 @@
  },
  "tests": {
   "fast": {
-   "summary": "721 passed, 1 failed, 5 skipped",
-   "ok": false,
+   "summary": "723 passed, 0 failed, 5 skipped",
+   "ok": true,
    "date": "2026-11-13",
    "platform": "Linux",
    "python": "3.13.18"
@@ -95,27 +95,27 @@
   {
    "id": "PUB-1",
    "title": "Platform upload via official APIs (YouTube first)",
-   "why": "Needs the owner's own Google Cloud OAuth client + consent. Engine, approval gate, idempotency, resumable YouTube adapter and durable publish-upload job are built and tested on recorded responses (Account 3 stream E)."
+   "why": "Owner's Google OAuth client + one private upload (docs/ACCOUNT3_YOUTUBE_OWNER_VALIDATION.md)."
   },
   {
    "id": "ANA-1",
    "title": "Analytics + monetisation intelligence from real platform data",
-   "why": "No owner analytics in this environment. CSV import (YouTube Studio/TikTok/Instagram/Facebook) and YouTube Analytics API import are built; growth statistics ran only on a public CC BY 4.0 dataset."
+   "why": "No owner analytics data yet (OAuth or one owner export)."
   },
   {
    "id": "A3-INT",
    "title": "Three-account integration (A1 -> A2 -> A3, then integration/contracts_v1/apply.sh)",
-   "why": "Owner approval of the merge order and of merging into main. Agents never merge."
+   "why": "Owner merge approval (agents never merge)."
   },
   {
    "id": "A3-NATIVE",
    "title": "Native-language review of ar-EG, ar-Gulf, hi and zh lines",
-   "why": "The owner must supply native reviewers; agents may not mark machine output as reviewed."
+   "why": "Owner supplies native reviewers; agents never mark output reviewed."
   },
   {
    "id": "A3-COMPETITION",
    "title": "Competition and saturation signals in market research (YouTube supply)",
-   "why": "Needs the owner's YouTube Data API key (free quota)."
+   "why": "Owner's YouTube Data API key."
   },
   {
    "id": "ACC1-HOSTING",
