@@ -5,6 +5,7 @@ faster-whisper
 scenedetect[opencv-headless]
 pillow
 numpy
+scipy>=1.11.2,<2  # nexus/audio DSP (filters, STFT, resampling); binary wheels for Python 3.12 on Linux and Windows
 piper-tts
 huggingface_hub
 arabic-reshaper
