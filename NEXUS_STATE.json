@@ -3,14 +3,14 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-13T11:49:34Z",
+ "updated": "2026-11-13T11:50:04Z",
  "git": {
   "branch": "work/account-3-intelligence-growth",
-  "commit": "0d9d1de",
-  "subject": "Handoff and Account 3 blocker texts shortened so the three-account merge stays under the 1,500-word handoff limit (run r4 finding)",
-  "dirty_files": 9,
+  "commit": "d8fbda3",
+  "subject": "Account 3 release sign-off: PR #5 base reconciled by merge (5034c8d, 9 conflicts, all sides kept, D-20); batch_llm checkpoint-resume integration test; growth evidence carries data origin; integration r4 on A1 f9d8f11 / A2 d979df1 / A3 0d9d1de: 867 passed, 8 skipped, 0 failed (local Linux). CI jobs not starting on any account; Windows not re-run. Verdict: READY FOR OWNER AUTHORIZATION.",
+  "dirty_files": 5,
   "upstream": "origin/work/account-3-intelligence-growth",
-  "unpushed_commits": 59
+  "unpushed_commits": 0
  },
  "current_task": {
   "id": "QLT-1",
@@ -19,6 +19,13 @@
   "next": "1) Series visuals - derive the image query from the bible's location LOOK text (generic nouns), not its fictional name, and allow reuse of an image for a repeated location. 2) Repair off-bible locations instead of only reporting them. 3) Research - rank Wikipedia pages by topic overlap (K-4). 4) Scored rubric in the QA report."
  },
  "next_tasks": [
+  {
+   "id": "ACC1-INTEGRATION",
+   "priority": 1,
+   "title": "Three-account shared-contracts integration (nexus/contracts/{cloud,media}.py + shared __init__)",
+   "status": "in_progress",
+   "next": "Linux done at A1 f9d8f11 / A2 d979df1 / A3 62414bf: 862 passed, 0 failed + live production smoke. Remaining: Windows CI + clean-machine E2E on the merged tree once runners work; rerun at current heads at merge time."
+  },
   {
    "id": "QLT-1",
    "priority": 1,
@@ -46,13 +53,6 @@
    "title": "Demo 4 defects: visual-context gate (geography/period/maps), glyph-coverage fonts + OCR read-back, scene visual plan (no silent title cards), factual framing gate",
    "status": "tested",
    "next": "Optional SigLIP image classification on the owner's PC (local only, never downloaded during a render)."
-  },
-  {
-   "id": "A3-RELEASE",
-   "priority": 1,
-   "title": "Release gate: QualityReport, AI-content disclosure and per-output language review decide upload / public (D-18)",
-   "status": "tested",
-   "next": "Owner: OAuth client + one private upload with owner_validation (docs/ACCOUNT3_YOUTUBE_OWNER_VALIDATION.md)."
   }
  ],
  "tasks": {
@@ -60,10 +60,10 @@
   "by_status": {
    "verified": 24,
    "tested": 30,
-   "blocked": 9,
+   "blocked": 8,
    "deferred": 1,
    "planned": 15,
-   "in_progress": 2,
+   "in_progress": 3,
    "implemented": 2
   },
   "registry": "nexus/registry/tasks.yaml"
@@ -121,11 +121,6 @@
    "id": "ACC1-HOSTING",
    "title": "Deploy the control plane on an owner-approved zero-cost host",
    "why": "Owner decision (host and exposure need explicit approval; no public deployment without it)."
-  },
-  {
-   "id": "ACC1-INTEGRATION",
-   "title": "Three-account shared-contracts integration (nexus/contracts/{cloud,media}.py + shared __init__)",
-   "why": "Account 3: bench_v2.account1_manifest at fd71471 still sends params.models / items as a count / runtime ollama (incompatible with batch_llm). Owner: merge approval and order. (Account 2: no open item.)"
   }
  ],
  "backup": {
