@@ -17,7 +17,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 12
+    # ~990 fast tests after the three-account merge: Linux ~8 min, Windows ~21 min (first Windows run: 534 passed
+    # at the half-way mark when the old 12-minute limit cancelled it). Not a hang: a slow-but-healthy margin.
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

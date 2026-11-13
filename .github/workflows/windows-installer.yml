@@ -30,8 +30,14 @@ jobs:
         shell: pwsh
         run: |
           $dir = "$env:LOCALAPPDATA\Programs\NEXUS VIDEO AI"
-          Start-Process dist\NEXUS_VIDEO_AI_Setup.exe -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART","/LOG=install.log" -Wait
-          if (-not (Test-Path "$dir\runtime\python.exe")) { throw "not installed" }
+          $log = Join-Path $PWD "install.log"
+          $p = Start-Process dist\NEXUS_VIDEO_AI_Setup.exe -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART","/LOG=`"$log`"" -Wait -PassThru
+          Write-Host "setup exit code: $($p.ExitCode)"
+          if (-not (Test-Path "$dir\runtime\python.exe")) {
+            if (Test-Path $log) { Get-Content $log -Tail 80 } else { Write-Host "no install log at $log" }
+            Get-ChildItem "$env:LOCALAPPDATA\Programs", "$env:ProgramFiles" -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -match 'NEXUS' } | ForEach-Object { Write-Host "found: $($_.FullName)"; Get-ChildItem $_.FullName | Select-Object -First 15 | ForEach-Object { Write-Host "   $($_.Name)" } }
+            throw "not installed (setup exit code $($p.ExitCode))"
+          }
           Add-Content $env:GITHUB_ENV "NX=$dir"
       - name: Launch the installed app (no system Python on PATH)
         shell: pwsh
