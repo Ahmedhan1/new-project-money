@@ -253,12 +253,24 @@ def kernel_source(model_ids: list[str]) -> str:
             .replace("__MODELS__", repr(json.dumps(models))))
 
 
-def account1_manifest(job_id: str, model_ids: list[str]) -> dict:
-    """The same job expressed as Account 1's ProductionJobManifest/v1 (task 'batch_llm'), recorded with the run so the
-    dispatcher can take it over once Account 1's branch is merged."""
-    return {"contract": "ProductionJobManifest/v1", "job_id": job_id, "task": "batch_llm", "owner_account": "account3",
-            "params": {"models": model_ids, "items": len(taskset()), "runtime": "ollama"}, "requires": {"gpu": True, "vram_gb": 15},
-            "priority": 5, "max_runtime_s": 12 * 3600, "preferred_providers": ["kaggle"], "idempotency_key": job_id}
+def account1_manifest(job_id: str, model_ids: list[str], items: list[dict] | None = None, **kw) -> list[dict]:
+    """The same benchmark as Account 1 `batch_llm` jobs (ProductionJobManifest/v1): ONE job per model, each carrying the
+    actual prompts in params.items. Raises batch_jobs.BatchManifestError for a model that cannot run as batch_llm
+    (e.g. full-precision weights too large for the 2x T4 worker); account1_manifest_plan reports those instead."""
+    from . import batch_jobs
+    return batch_jobs.manifests(job_id, model_ids, items if items is not None else taskset(), **kw)
+
+
+def account1_manifest_plan(job_id: str, model_ids: list[str], items: list[dict] | None = None, **kw) -> dict:
+    """{"jobs": [...], "not_eligible": {model: reason}}: never silently drops a model."""
+    from . import batch_jobs
+    jobs, skipped = [], {}
+    for k in model_ids:
+        try:
+            jobs.append(batch_jobs.manifest_for_model(job_id, k, items if items is not None else taskset(), **kw))
+        except batch_jobs.BatchManifestError as e:
+            skipped[k] = str(e)
+    return {"schema": "nexus.Account1BatchPlan/1", "jobs": jobs, "not_eligible": skipped}
 
 
 def score_results(raw: dict, back_fn=None) -> dict:
@@ -311,7 +323,7 @@ def main(argv: list[str] | None = None) -> int:
                                                             "enable_gpu": True, "enable_tpu": False, "enable_internet": True,
                                                             "dataset_sources": [], "competition_sources": [], "kernel_sources": [],
                                                             "model_sources": []}, indent=1), encoding="utf-8")
-        (d / "account1_manifest.json").write_text(json.dumps(account1_manifest(a.slug, ids), indent=1), encoding="utf-8")
+        (d / "account1_manifest.json").write_text(json.dumps(account1_manifest_plan(a.slug, ids), indent=1, ensure_ascii=False), encoding="utf-8")
         print(d)
     return 0
 

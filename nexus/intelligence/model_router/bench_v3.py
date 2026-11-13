@@ -776,7 +776,16 @@ def main(argv: list[str] | None = None) -> int:
     k.add_argument("--slug", required=True)
     k.add_argument("--user", default="ahmedhanimohamed")
     sub.add_parser("count")
+    j = sub.add_parser("account1", help="write Account 1 batch_llm jobs (one per model, prompts inline); submits nothing")
+    j.add_argument("--models", required=True)
+    j.add_argument("--run-id", required=True)
+    j.add_argument("--out", required=True)
     a = ap.parse_args(argv)
+    if a.cmd == "account1":
+        plan = b2.account1_manifest_plan(a.run_id, a.models.split(","), taskset())
+        Path(a.out).write_text(json.dumps(plan, indent=1, ensure_ascii=False), encoding="utf-8")
+        print(len(plan["jobs"]), "jobs;", "not eligible:", plan["not_eligible"] or "none")
+        return 0
     if a.cmd == "count":
         from collections import Counter
         print(json.dumps(Counter(it["cap"] for it in taskset()), indent=1), len(taskset()))
