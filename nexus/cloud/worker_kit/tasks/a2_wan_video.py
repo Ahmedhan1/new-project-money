@@ -3,13 +3,13 @@
 # docs/results/wan22_5b/). Appended to Account 1's nexus_worker.py: `task`, `Context`, `_torch`, `ffprobe`, `_run`
 # are that script's globals.
 #
-# Execution strategy (measured, not assumed): `enable_model_cpu_offload()` keeps one module on ONE GPU and does not use a
-# second GPU. On 2 x 15 GB T4 the 5B transformer (FP16, ~10 GB) runs on cuda:0, the UMT5-XXL text encoder (~11 GB) on
-# cuda:1; all prompts are encoded first, the text encoder is then freed and the VAE (FP32, untiled) decodes on cuda:1;
-# prompt embeddings move between the GPUs. T4 (sm_75) has no
-# native BF16, so the transformer runs in FP16 unless the GPU is sm_80+ (then BF16); the text encoder uses BF16 only if
-# a BF16 matmul actually works on the device, else FP32 on the CPU. A NaN/Inf result is reported as a failure, never
-# exported. On a single GPU every component shares cuda:0 with model offload.
+# Execution strategy (measured on Kaggle T4 x2, not assumed): `enable_model_cpu_offload()` keeps modules on ONE GPU.
+# Instead: (1) the UMT5-XXL text encoder (~11 GB, BF16 - emulated on T4, probed with a real matmul first) encodes every
+# prompt on cuda:1 and is then freed; (2) the 5B transformer (FP16: T4/sm_75 has no native BF16; BF16 on sm_80+) is
+# layer-sharded, blocks 0-14 on cuda:0 and 15-29 on cuda:1; (3) the VAE (FP32) encodes the I2V image on cuda:0 and
+# decodes on cuda:1, untiled when it fits, else with our first-chunk-aware spatial tiling (diffusers 0.35.2's
+# tiled_decode drops first_chunk and unpatchify for the Wan 2.2 VAE and crashes). NaN/Inf, black or flat output is a
+# failure and is never exported. No silent fallback to the 1.3B model.
 
 _WAN_REPOS = {"wan21-t2v-1.3b": ("Wan-AI/Wan2.1-T2V-1.3B-Diffusers", None),
               "wan22-ti2v-5b": ("Wan-AI/Wan2.2-TI2V-5B-Diffusers", "b8fff7315c768468a5333511427288870b2e9635")}
@@ -108,6 +108,71 @@ def _wan_write_mp4(frames, path, fps: int) -> None:
         raise RuntimeError("ffmpeg encode failed")
 
 
+def _wan_to(obj, dev):
+    import torch
+    if isinstance(obj, torch.Tensor):
+        return obj.to(dev)
+    if isinstance(obj, (tuple, list)):
+        return type(obj)(_wan_to(o, dev) for o in obj)
+    if isinstance(obj, dict):
+        return {k: _wan_to(v, dev) for k, v in obj.items()}
+    return obj
+
+
+def _wan_shard(tr, dev_main, dev_aux) -> dict:
+    """Genuine layer sharding of the 5B transformer: the second half of its blocks lives on dev_aux. A pre-hook moves
+    each block's inputs to its device; the last block's output comes back to dev_main for the final norm/projection."""
+    blocks = tr.blocks
+    cut = len(blocks) // 2
+    for i, b in enumerate(blocks):
+        dev = dev_main if i < cut else dev_aux
+        b.to(dev)
+        b.register_forward_pre_hook(lambda m, a, kw, _d=dev: (_wan_to(a, _d), _wan_to(kw, _d)), with_kwargs=True)
+    blocks[-1].register_forward_hook(lambda m, a, out: _wan_to(out, dev_main))
+    return {"blocks_on_main": cut, "blocks_on_aux": len(blocks) - cut}
+
+
+def _wan_tiled_decode(vae, z, tile: int = 256, stride: int = 192):
+    """Spatially tiled Wan 2.2 VAE decode that keeps the causal first-chunk handling and the patch_size unpatchify of
+    AutoencoderKLWan._decode (diffusers 0.35.2 tiled_decode omits both: measured crash on Kaggle 2026-11-13). Tiles are
+    collected on the CPU and blended with the VAE's own blend_v/blend_h; returns a CPU float tensor in [-1, 1]."""
+    import torch
+    from diffusers.models.autoencoders.autoencoder_kl_wan import unpatchify
+    # decoder upsampling x patch unpatchify (Wan 2.2: 8 x 2 = 16 pixels per latent; spatial_compression_ratio is 8 alone)
+    r = vae.spatial_compression_ratio * (vae.config.patch_size or 1)
+    tl, sl = tile // r, stride // r
+    _, _, T, H, W = z.shape
+    blend = tile - stride
+    rows = []
+    for i in range(0, H, sl):
+        row = []
+        for j in range(0, W, sl):
+            vae.clear_cache()
+            x = vae.post_quant_conv(z[:, :, :, i:i + tl, j:j + tl])
+            outs = []
+            for k in range(T):
+                vae._conv_idx = [0]
+                outs.append(vae.decoder(x[:, :, k:k + 1], feat_cache=vae._feat_map, feat_idx=vae._conv_idx, first_chunk=(k == 0)))
+            o = torch.cat(outs, 2)
+            if vae.config.patch_size is not None:
+                o = unpatchify(o, patch_size=vae.config.patch_size)
+            row.append(o.clamp(-1, 1).float().cpu())
+            del outs, o, x
+        rows.append(row)
+    vae.clear_cache()
+    res = []
+    for i, row in enumerate(rows):
+        rr = []
+        for j, t in enumerate(row):
+            if i > 0:
+                t = vae.blend_v(rows[i - 1][j], t, blend)
+            if j > 0:
+                t = vae.blend_h(row[j - 1], t, blend)
+            rr.append(t[:, :, :, :stride, :stride])
+        res.append(torch.cat(rr, dim=-1))
+    return torch.cat(res, dim=3)[:, :, :, :H * r, :W * r]
+
+
 @task("a2_wan_video")
 def task_a2_wan_video(ctx: Context) -> dict:
     """params: model (catalogue id), runs: [{mode: t2v|i2v, prompt, image_url?, width, height, frames, fps, steps,
@@ -181,8 +246,7 @@ def task_a2_wan_video(ctx: Context) -> dict:
                                        max_sequence_length=512, device=te_dev, dtype=te.dtype)
         embeds[k] = (pe.to("cpu"), ne.to("cpu") if ne is not None else None)
         te_s[k] = round(_t.time() - te_t, 1)
-    # the text encoder is not needed again: free its ~11 GB so the VAE can decode untiled on the auxiliary GPU
-    # (diffusers 0.35.2 Wan 2.2 VAE tiled_decode fails: avg_shortcut shape mismatch, measured on Kaggle 2026-11-13)
+    # the text encoder is not needed again: free its ~11 GB for the transformer shard and the VAE decode on cuda:1
     t2v.text_encoder = i2v.text_encoder = None
     common.clear()          # the constructor kwargs held a second reference to the encoder (measured: 14.1 GB stayed on cuda:1)
     del te
@@ -190,6 +254,12 @@ def task_a2_wan_video(ctx: Context) -> dict:
     gc.collect()
     torch.cuda.empty_cache()
     ctx.log(f"text encoder freed: cuda:{dev_aux.index} free {torch.cuda.mem_get_info(dev_aux)[0] / 2 ** 30:.1f} GB")
+    shard = None
+    if n > 1 and ctx.params.get("shard", True):
+        shard = _wan_shard(tr, dev_main, dev_aux)
+        torch.cuda.empty_cache()
+        ctx.log(f"transformer sharded {shard}: free cuda:0 {torch.cuda.mem_get_info(dev_main)[0] / 2 ** 30:.1f} GB, "
+                f"cuda:{dev_aux.index} {torch.cuda.mem_get_info(dev_aux)[0] / 2 ** 30:.1f} GB")
     results = []
     for k, r in enumerate(runs):
         key = f"run{k}"
@@ -228,7 +298,7 @@ def task_a2_wan_video(ctx: Context) -> dict:
         gen_s = _t.time() - g_t
         if not torch.isfinite(lat).all():
             raise RuntimeError(f"{key}: non-finite latents with transformer dtype {tdtype} (precision overflow); not exported")
-        # decode on the auxiliary GPU (FP32, tiled) so the transformer can stay resident on cuda:0
+        # decode on the auxiliary GPU (FP32; tiled above ~1.5x 672x384 pixels)
         d_t = _t.time()
         vae.to(dev_aux)
         free_aux = torch.cuda.mem_get_info(dev_aux)[0] / 2 ** 30
@@ -236,7 +306,14 @@ def task_a2_wan_video(ctx: Context) -> dict:
             z = lat.to(dev_aux, torch.float32)
             mean = torch.tensor(vae.config.latents_mean).view(1, vae.config.z_dim, 1, 1, 1).to(z)
             inv_std = 1.0 / torch.tensor(vae.config.latents_std).view(1, vae.config.z_dim, 1, 1, 1).to(z)
-            video = vae.decode(z / inv_std + mean, return_dict=False)[0]
+            zz = z / inv_std + mean
+            tiled = r.get("decode", "auto") == "tiled" or (r.get("decode", "auto") == "auto" and W * H > 672 * 384 * 1.5)
+            video = _wan_tiled_decode(vae, zz) if tiled else vae.decode(zz, return_dict=False)[0].float().cpu()
+            decode_check = None
+            if r.get("decode_check"):   # same latents both ways: proves the tiled decode against the reference decode
+                other = vae.decode(zz, return_dict=False)[0].float().cpu() if tiled else _wan_tiled_decode(vae, zz)
+                mse = float(((video - other) ** 2).mean())
+                decode_check = {"psnr_db": round(10 * __import__("math").log10(4.0 / max(mse, 1e-12)), 2), "mse": mse}
             frames = t2v.video_processor.postprocess_video(video, output_type="np")[0]
         dec_s = _t.time() - d_t
         frames = [(f * 255).round().clip(0, 255).astype("uint8") for f in frames]
@@ -252,8 +329,9 @@ def task_a2_wan_video(ctx: Context) -> dict:
         res = {"run": key, "mode": mode, "prompt": r["prompt"], "image": image_info, "width": W, "height": H, "frames": F, "fps": fps,
                "steps": steps, "guidance": gs, "seed": seed, "scheduler": "UniPCMultistepScheduler",
                "text_encode_s": te_s.get(k), "generate_s": round(gen_s, 1), "decode_s": round(dec_s, 1),
-               "s_per_step_mean": round(sum(sp) / len(sp), 2) if sp else None, "aux_free_gb_before_decode": round(free_aux, 2), "vram": vram, "quality": q, "ffprobe": probe}
-        a = ctx.artifact(out, "generated-video", model=ctx.params["model"], repo=repo, revision=rev, mode=mode,
+               "s_per_step_mean": round(sum(sp) / len(sp), 2) if sp else None, "aux_free_gb_before_decode": round(free_aux, 2),
+               "decode": "tiled (own, first-chunk aware)" if tiled else "untiled", "decode_check": decode_check, "vram": vram, "quality": q, "ffprobe": probe}
+        a = ctx.artifact(out, "source", classification="generated-video", model=ctx.params["model"], repo=repo, revision=rev, mode=mode,
                          gpu=env["gpus"][0]["name"], prompt=r["prompt"], seed=seed, steps=steps)
         res["artifact"] = {"name": a["name"], "sha256": a["sha256"], "size": a["size"]}
         results.append(res)
@@ -265,8 +343,8 @@ def task_a2_wan_video(ctx: Context) -> dict:
     peak.halt.set()
     peak.join(timeout=3)
     bench = {"model": ctx.params["model"], "repo": repo, "revision": rev, "licence": "apache-2.0", "diffusers_pinned": _WAN_DIFFUSERS,
-             "env": env, "strategy": {"transformer": f"{tdtype} on {dev_main}", "text_encoder": te_mode + (f" on {dev_aux}" if te_mode == "gpu-bf16" else ""),
-                                      "vae": f"fp32 encode on {dev_main}, untiled fp32 decode on {dev_aux} (text encoder freed after encoding)", "cpu_offload": False},
+             "env": env, "strategy": {"transformer": f"{tdtype}, " + (f"blocks split {shard} across {dev_main}/{dev_aux}" if shard else f"on {dev_main}"), "text_encoder": te_mode + (f" on {dev_aux}" if te_mode == "gpu-bf16" else ""),
+                                      "vae": f"fp32 encode on {dev_main}, fp32 decode on {dev_aux} (untiled when it fits, else own first-chunk-aware tiling)", "cpu_offload": False},
              "download_s": round(dl_s, 1), "load_s": round(load_s, 1), "runs": results, "per_gpu": peak.summary(n)}
     ctx.write_json_artifact("wan_benchmark.json", bench)
     return {"model": ctx.params["model"], "gpu": env["gpus"][0]["name"], "gpu_count": n, "load_s": round(load_s, 1),

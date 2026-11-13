@@ -31,6 +31,9 @@ T2V = ("A red fox trots through fresh snow in a birch forest at sunrise, its bre
 I2V = "The cat slowly turns its head toward the camera and blinks while the background gently moves, natural motion."
 PROFILES = {
     "smoke": [{"mode": "t2v", "prompt": T2V, "width": 672, "height": 384, "frames": 25, "fps": 24, "steps": 20, "seed": 7}],
+    # sharded transformer + the tiled decode checked against the reference decode on the same latents (PSNR)
+    "smoke_check": [{"mode": "t2v", "prompt": T2V, "width": 672, "height": 384, "frames": 25, "fps": 24, "steps": 20, "seed": 7,
+                     "decode": "tiled", "decode_check": True}],
     "smoke_i2v": [{"mode": "i2v", "prompt": I2V, "width": 672, "height": 384, "frames": 25, "fps": 24, "steps": 20, "seed": 11}],
     # 720p @ 24 fps, 121 frames (5 s): one job per mode so each fits a Kaggle session on its own
     "t2v720": [{"mode": "t2v", "prompt": T2V, "width": 1280, "height": 704, "frames": 121, "fps": 24, "steps": 30, "seed": 7}],
