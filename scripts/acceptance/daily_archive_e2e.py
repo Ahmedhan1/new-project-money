@@ -90,16 +90,17 @@ def main() -> int:
     step("render job (disk preflight + QA + quality)", r["status"] == "done", status=r["status"], output=res.get("output"),
          qa=res.get("status"), preflight=(r["stages"].get("disk-preflight") or {}).get("output", {}).get("estimate"), error=(r.get("error") or "")[:300])
     final = p.dir / res["output"]
-    sha = hashlib.sha256(final.read_bytes()).hexdigest()
-    size = final.stat().st_size
     aj = (res.get("archive") or {}).get("job")
     step("render job started the archive job (auto_archive with a configured destination)", bool(aj), archive_job=aj)
-    jobs.run_worker(once=True)
+    if jobs.get(aj)["status"] == "queued":   # the same worker pass usually runs it right after the render
+        jobs.run_worker(once=True)
     arj = jobs.get(aj)
     out = arj["result"] or {}
     step("archive job: every file uploaded and verified", arj["status"] == "done" and out.get("verified"), records=out.get("records"),
          error=(arj.get("error") or "")[:300])
     rec = archive.get(out["records"][0]["id"])
+    sha, size = rec["sha256"], rec["size"]
+    step("archived bytes are the rendered output (SHA-256 recorded before upload)", rec["source_path"].endswith(final.name), sha256=sha)
     drive_copy = [f for f in g.files.values() if f["name"] == final.name]
     step("Drive holds exactly one copy with the same SHA-256", len(drive_copy) == 1 and hashlib.sha256(drive_copy[0]["data"]).hexdigest() == sha,
          drive_path=rec["remote"]["path"], verification=rec["verification"]["method"])

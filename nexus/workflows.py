@@ -54,7 +54,7 @@ def render(job: jobs.Job) -> dict:
     r["quality"] = job.stage("quality-score", lambda: _quality(p, tl, r["output"], a.get("platform")))
     if a.get("archive") or (a.get("archive") is None and _auto_archive()):
         # daily output: archive the verified final externally (the local copy is released only after verification)
-        r["archive"] = {"job": jobs.submit("archive", {"project": p.id, "render": r["output"], "kind": a.get("kind", "master")}, p.id)}
+        r["archive"] = {"job": jobs.submit("archive", {"project": p.id, "render": r["output"], "kind": a.get("kind", "master")}, p.id)["job"]}
     return r
 
 

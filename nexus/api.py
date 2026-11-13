@@ -1038,7 +1038,7 @@ def api_library_install(r: LibInstallReq):
     except KeyError as ex:
         raise HTTPException(404, str(ex))
     if e["kind"] in ("download", "pack"):
-        return {"job": jobs.submit("asset-install", {"asset_id": r.asset_id})}
+        return jobs.submit("asset-install", {"asset_id": r.asset_id})
     try:
         return {"installed": assetlib.install(r.asset_id)}
     except assetlib.AssetError as ex:
@@ -1068,11 +1068,22 @@ def api_library_favorite(r: LibFavReq):
         raise HTTPException(404, str(ex))
 
 
+_PREVIEW_LIMIT = None
+
+
 @app.get("/api/library/preview/{asset_id}")
-def api_library_preview(asset_id: str):
+async def api_library_preview(asset_id: str):
+    """Previews render on first request (FFmpeg). They run on their own 2-thread limiter so a page full of new previews
+    never occupies the shared worker threads that every other API call needs."""
+    import anyio
+
     from . import assetlib
+    global _PREVIEW_LIMIT
+    if _PREVIEW_LIMIT is None:
+        _PREVIEW_LIMIT = anyio.CapacityLimiter(2)
     try:
-        return FileResponse(assetlib.preview(asset_id))
+        path = await anyio.to_thread.run_sync(assetlib.preview, asset_id, limiter=_PREVIEW_LIMIT)
+        return FileResponse(path)
     except FileNotFoundError as ex:
         raise HTTPException(404, str(ex))
     except KeyError as ex:
@@ -1207,7 +1218,7 @@ class ArchiveReq(BaseModel):
 @app.post("/api/projects/{pid}/archive")
 def api_archive_output(pid: str, r: ArchiveReq):
     _project(pid)
-    return {"job": jobs.submit("archive", {"project": pid, "render": r.render, "kind": r.kind, "release_local": r.release_local}, pid)}
+    return jobs.submit("archive", {"project": pid, "render": r.render, "kind": r.kind, "release_local": r.release_local}, pid)
 
 
 class ArchiveRecReq(BaseModel):
@@ -1220,12 +1231,12 @@ def api_archive_retrieve(r: ArchiveRecReq):
     rec = archive.get(r.record)
     if not rec:
         raise HTTPException(404, "unknown archive record")
-    return {"job": jobs.submit("archive-retrieve", {"record": r.record}, rec.get("project_id") or "")}
+    return jobs.submit("archive-retrieve", {"record": r.record}, rec.get("project_id") or "")
 
 
 @app.post("/api/archive/retry")
 def api_archive_retry():
-    return {"job": jobs.submit("archive-recover", {})}
+    return jobs.submit("archive-recover", {})
 
 
 @app.get("/api/archive/thumb/{record}")

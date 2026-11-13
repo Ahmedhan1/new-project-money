@@ -1,0 +1,36 @@
+{
+ "date": "2026-11-13",
+ "steps": [
+  {
+   "step": "asset library lists the catalog",
+   "ok": true,
+   "detail": "182 asset cards"
+  },
+  {
+   "step": "install a LUT from the browser and see its rendered preview",
+   "ok": true,
+   "detail": "lut.teal_orange installed, preview loaded"
+  },
+  {
+   "step": "mark a favourite",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "step": "transition previews render on demand",
+   "ok": true,
+   "detail": "transition.shape_heart preview loaded"
+  },
+  {
+   "step": "verify checksums from the browser",
+   "ok": true,
+   "detail": "1/1 installed assets match their SHA-256. 0 file(s) used by timelines are missing."
+  },
+  {
+   "step": "exception",
+   "ok": false,
+   "detail": "TimeoutError: Page.wait_for_selector: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator(\"#wal [data-aa]\") to be visible\n"
+  }
+ ],
+ "ok": false
+}
