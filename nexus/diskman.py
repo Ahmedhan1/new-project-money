@@ -38,8 +38,8 @@ DEFAULTS = {
     "preview_max_age_days": 7,     # draft pieces / preview renders older than this are stale
     "tmp_max_age_hours": 12,       # partial downloads, temp files and abandoned render work older than this
     "job_log_max_age_days": 30,    # logs of FINISHED jobs older than this
-    "log_max_mb": 20,              # rotate server/worker logs above this size
-    "log_keep": 3,                 # rotated generations kept
+    "log_max_mb": 20,              # rotation size for the disk manager's own journal helpers
+    "log_keep": 3,                 # generations kept by rotate_log() callers in Account 2 code
     "render_margin": 1.25,         # safety factor on the render estimate
 }
 RENDER_CACHE = ("segments", "pieces", "pieces_draft", "audio", "overlays")
@@ -443,11 +443,8 @@ def _rule_logs(now: float, s: dict) -> list[dict]:
             c = _cand(p, "old_job_log", f"log of a finished job older than {s['job_log_max_age_days']} days")
             if c:
                 out.append(c)
-    for p in (config.LOGS.glob("*.log.[0-9]*") if config.LOGS.exists() else []):
-        if p.is_file() and int(p.suffix.lstrip(".") or 0) > s["log_keep"]:
-            c = _cand(p, "rotated_log", f"rotated log beyond the {s['log_keep']} kept generations")
-            if c:
-                out.append(c)
+    # Rotated service logs (server.log.1 ...) are owned by the launcher's rotation (Account 1 keeps 5 generations):
+    # the disk manager does not delete them.
     return out
 
 
