@@ -511,7 +511,7 @@ tasks:
     acceptance: "Each Demo 4 defect is rejected by a gate with a regression test, and a new real render shows it."
     test: "pytest tests/fast/test_intel_quality_gates.py tests/fast/test_intel_market_v2.py; python scripts/account3/demo10_e2e.py"
     evidence: "docs/results/account3/demo10_e2e.json"
-    next: "Optional SigLIP image classification on the owner's PC (local only, never downloaded during a render)."
+    next: "Optional local SigLIP classification on the owner's PC."
   - id: A3-HANDOFF
     priority: 1
     title: "Strategy Handoff to Account 2 (EditorialPlan + RenderJobManifest), approved script used verbatim; shared contracts package"
@@ -519,7 +519,7 @@ tasks:
     acceptance: "Handoff validates with Account 2's own validator; create_video(script=...) never paraphrases; one nexus.contracts package for all accounts."
     test: "pytest tests/fast/test_intel_handoff.py; integration/contracts_v1/apply.sh on a three-account merge"
     evidence: "integration/contracts_v1/RESULT.md (run r2 on the current heads of all three branches); docs/SHARED_CONTRACTS_ARCHITECTURE.md"
-    next: "Pending integration: the owner approves the merge order (A3-INT). Both Account 1 test findings from run r1 are fixed on Account 1's branch (633cc8b, 2ac7f96)."
+    next: "Pending the owner's merge approval (A3-INT)."
   - id: A3-BENCH2
     priority: 2
     title: "Open-weight model benchmark V2 on Kaggle GPUs (36 items, Qwen/DeepSeek/Mistral/GLM/Nemotron) + task routing"
@@ -576,7 +576,7 @@ tasks:
     acceptance: "Generated manifest validates against Account 1's ProductionJobManifest, runs on Account 1's real dispatcher + worker script, returns every item with verified artifacts, is idempotent; invalid manifests fail with a named cause."
     test: "pytest tests/fast/test_intel_batch_manifest.py; on the merged tree also tests/fast/test_intel_batch_llm_integration.py"
     evidence: "integration/contracts_v1/RESULT.md run r3 (echo engine through FakeKaggleCLI; simulated label checked)"
-    next: "A real-model batch_llm run with the V3 items on the Kaggle worker (owner/Account 1 operation; Kaggle config unchanged)."
+    next: "Optional: one real-model batch_llm run (Kaggle config unchanged)."
   - id: A3-RELEASE
     priority: 1
     title: "Release gate: QualityReport, AI-content disclosure and per-output language review decide upload / public (D-18)"
@@ -584,7 +584,7 @@ tasks:
     acceptance: "No upload without a passing QualityReport for the exact file; public needs human QA approval, same-variety native review and the disclosure decision; adapters send the platform's AI field; no platform claimed live-verified."
     test: "pytest tests/fast/test_intel_release_gate.py tests/fast/test_intel_publishing.py tests/fast/test_intel_owner_validation.py"
     evidence: "docs/ACCOUNT3_PUBLISHING_RELEASE_GATE.md"
-    next: "Owner: OAuth client + one private upload with owner_validation (docs/ACCOUNT3_YOUTUBE_OWNER_VALIDATION.md)."
+    next: "Owner: OAuth client + one private upload (owner_validation)."
   - id: A3-ANALYTICS2
     priority: 2
     title: "Analytics data origin, normalisation, duplicates, invalid values, reconciliation (D-19)"

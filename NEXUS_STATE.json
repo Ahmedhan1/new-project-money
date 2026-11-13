@@ -3,14 +3,14 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-13T11:50:04Z",
+ "updated": "2026-11-13T11:50:38Z",
  "git": {
   "branch": "work/account-3-intelligence-growth",
-  "commit": "d8fbda3",
-  "subject": "Account 3 release sign-off: PR #5 base reconciled by merge (5034c8d, 9 conflicts, all sides kept, D-20); batch_llm checkpoint-resume integration test; growth evidence carries data origin; integration r4 on A1 f9d8f11 / A2 d979df1 / A3 0d9d1de: 867 passed, 8 skipped, 0 failed (local Linux). CI jobs not starting on any account; Windows not re-run. Verdict: READY FOR OWNER AUTHORIZATION.",
-  "dirty_files": 5,
+  "commit": "4486de4",
+  "subject": "Merge PR base claude/hopeful-allen-luubcy (a889cd8, Account 1 final review) into Account 3",
+  "dirty_files": 1,
   "upstream": "origin/work/account-3-intelligence-growth",
-  "unpushed_commits": 0
+  "unpushed_commits": 2
  },
  "current_task": {
   "id": "QLT-1",
@@ -38,21 +38,21 @@
    "priority": 1,
    "title": "Account 1 batch_llm manifests: one job per model, prompts inline, old shape refused (D-17)",
    "status": "tested",
-   "next": "A real-model batch_llm run with the V3 items on the Kaggle worker (owner/Account 1 operation; Kaggle config unchanged)."
+   "next": "Optional: one real-model batch_llm run (Kaggle config unchanged)."
   },
   {
    "id": "A3-HANDOFF",
    "priority": 1,
    "title": "Strategy Handoff to Account 2 (EditorialPlan + RenderJobManifest), approved script used verbatim; shared contracts package",
    "status": "tested",
-   "next": "Pending integration: the owner approves the merge order (A3-INT). Both Account 1 test findings from run r1 are fixed on Account 1's branch (633cc8b, 2ac7f96)."
+   "next": "Pending the owner's merge approval (A3-INT)."
   },
   {
    "id": "A3-QGATES",
    "priority": 1,
    "title": "Demo 4 defects: visual-context gate (geography/period/maps), glyph-coverage fonts + OCR read-back, scene visual plan (no silent title cards), factual framing gate",
    "status": "tested",
-   "next": "Optional SigLIP image classification on the owner's PC (local only, never downloaded during a render)."
+   "next": "Optional local SigLIP classification on the owner's PC."
   }
  ],
  "tasks": {
