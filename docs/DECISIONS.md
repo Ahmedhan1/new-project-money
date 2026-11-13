@@ -195,3 +195,14 @@ uninstall unless the user ticks removal), localhost only. Chosen over PyInstalle
 `python -m nexus` service processes, which an embedded interpreter supports unchanged. Updates only from this
 repository's releases and only after the published SHA-256 matches. Built and tested only on a real Windows VM
 (`windows-installer.yml`); a Linux build is never presented as a Windows verification.
+
+**D-24 Cloudflare Workers Free is the hosted control plane; Kaggle does all heavy work (owner decision, 2026-11-13).**
+The FastAPI app cannot run on Workers (FFmpeg, SQLite files, models), so `cloudflare/` is a small JS control plane:
+owner login (`OWNER_PASSWORD` secret, HMAC session cookie, CSRF header, login lockout), the Kaggle API key saved from the
+Settings page AES-GCM-encrypted in D1 (key derived from `OWNER_PASSWORD`; a `KAGGLE_API_TOKEN` Worker secret overrides
+it), and the job ledger in D1, polled by a 5-minute cron. Jobs call the same REST endpoints as kaggle CLI 2.x
+(`api.kaggle.com/v1/kernels.KernelsApiService/*`) and push the unchanged `worker_kit` script (frozen by
+`scripts/cloudflare/build_worker_script.py`, checked by a fast test) with the bundle embedded, so result/checkpoint
+contracts are identical and `retry` resumes from `result.json`'s checkpoint. Zero spend: no R2 (needs a payment method),
+outputs stay on Kaggle and are downloaded through fresh signed URLs; GPU jobs are refused when the measured weekly quota
+left is under `MIN_GPU_RESERVE_S`. Kernels are always private; one Kaggle account only.
