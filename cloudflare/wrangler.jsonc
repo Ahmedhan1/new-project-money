@@ -1,17 +1,17 @@
 {
-  // NEXUS control plane on Cloudflare Workers - FREE plan only (no R2, no paid add-ons; nothing here needs a card).
+  // NEXUS control plane on Cloudflare Workers - FREE plan only (no R2, no D1 needed, no paid add-ons; nothing here needs a card).
   // Heavy work never runs here: every job is pushed to the owner's single Kaggle account (private kernels, free GPU).
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "nexus-cloud",
   "main": "src/index.js",
   "compatibility_date": "2026-10-01",
   "workers_dev": true,
+  "preview_urls": false,
   "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": ["/api/*"] },
-  "d1_databases": [
-    // No database_id: `wrangler deploy` provisions the database on the first deploy (dashboard or CLI).
-    // The tables are created by the Worker itself on its first request (src/schema.js) - no migration step.
-    { "binding": "DB", "database_name": "nexus-cloud" }
-  ],
+  // All state lives in one SQLite-backed Durable Object (free plan; no separate database, no extra token permission).
+  // Tables are created by the object itself on first use (src/schema.js).
+  "durable_objects": { "bindings": [{ "name": "STORE", "class_name": "NexusStore" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["NexusStore"] }],
   // Free plan: up to 5 cron triggers. Checks running Kaggle jobs every 5 minutes.
   "triggers": { "crons": ["*/5 * * * *"] },
   "observability": { "enabled": true },

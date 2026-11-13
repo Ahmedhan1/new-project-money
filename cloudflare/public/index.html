@@ -80,13 +80,13 @@
         </div>
         <p class="msg" id="kaggle-msg"></p>
       </form>
-      <p class="hint">المفتاح بيتجرب على Kaggle الأول، وبعدين بيتحفظ متشفّر (AES-256-GCM) في قاعدة D1 بمفتاح مشتق من كلمة سر المالك. عمره ما بيرجع للمتصفح.
+      <p class="hint">المفتاح بيتجرب على Kaggle الأول، وبعدين بيتحفظ متشفّر (AES-256-GCM) في تخزين Cloudflare بمفتاح مشتق من كلمة سر المالك. عمره ما بيرجع للمتصفح.
         لو عايز أمان أعلى: حطه بدل كده كـ Secret على Cloudflare باسم <code>KAGGLE_API_TOKEN</code> — ساعتها بيتقدم على المحفوظ هنا.</p>
     </div>
     <div class="card">
       <h2>مجاني بالكامل</h2>
       <ul class="hint">
-        <li>Cloudflare Workers (الخطة المجانية) + D1 + Cron — من غير كارت.</li>
+        <li>Cloudflare Workers (الخطة المجانية) + Durable Object + Cron — من غير كارت.</li>
         <li>Kaggle: حساب واحد بس، نوتبوكات خاصة (Private)، GPU T4 مجاني ضمن الرصيد الأسبوعي. لوحة التحكم بترفض شغل GPU جديد لو الرصيد قرب يخلص.</li>
         <li>مفيش R2 ولا أي خدمة محتاجة وسيلة دفع. الملفات الناتجة بتفضل على Kaggle وبتتحمل من هنا.</li>
       </ul>

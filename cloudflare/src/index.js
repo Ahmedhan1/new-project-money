@@ -1,4 +1,6 @@
-// NEXUS Cloud - control plane on Cloudflare Workers (free plan). UI in ./public, API under /api, cron polls Kaggle.
+// NEXUS Cloud - control plane on Cloudflare Workers (free plan). UI in ./public, API under /api (served by the
+// NexusStore Durable Object, which holds all state in its SQLite storage), cron polls Kaggle.
+import { DurableObject } from "cloudflare:workers";
 import * as sec from "./security.js";
 import * as kaggle from "./kaggle.js";
 import * as jobs from "./jobs.js";
@@ -40,7 +42,7 @@ async function handleApi(request, env, url) {
   const m = request.method;
 
   // ---- public endpoints
-  if (path === "/api/health") return json({ ok: true, owner_configured: sec.ownerConfigured(env), db: !!env.DB });
+  if (path === "/api/health") return json({ ok: true, owner_configured: sec.ownerConfigured(env), storage: "durable-object-sqlite" });
   if (path === "/api/session" && m === "GET") {
     return json({ owner_configured: sec.ownerConfigured(env), logged_in: await sec.hasSession(env, request), min_password_len: sec.MIN_PASSWORD_LEN });
   }
@@ -114,25 +116,66 @@ async function handleApi(request, env, url) {
   return err("Not found", 404);
 }
 
+/** The API with a D1-compatible `env.DB` (used by the Durable Object below, and directly by the tests). */
+export async function app(request, env) {
+  const url = new URL(request.url);
+  try {
+    await ensureSchema(env.DB);
+    return await handleApi(request, env, url);
+  } catch (e) {
+    if (e instanceof jobs.JobError) return err(e.message, e.status);
+    if (e instanceof kaggle.KaggleError) return err(e.auth ? `Kaggle رفض المفتاح: ${e.message}` : e.message, e.auth ? 400 : 502);
+    console.error("unhandled", e && e.stack);
+    return err("خطأ داخلي", 500);
+  }
+}
+
+/** D1-shaped adapter over Durable Object SQLite storage (prepare/bind/first/all/run/batch). */
+export function sqlDb(sql) {
+  const clean = (a) => a.map((v) => (v === undefined ? null : typeof v === "boolean" ? (v ? 1 : 0) : v));
+  const stmt = (q, args = []) => ({
+    bind: (...a) => stmt(q, clean(a)),
+    first: async () => sql.exec(q, ...args).toArray()[0] ?? null,
+    all: async () => ({ results: sql.exec(q, ...args).toArray() }),
+    run: async () => {
+      const c = sql.exec(q, ...args);
+      return { meta: { changes: c.rowsWritten } };
+    },
+  });
+  return { prepare: (q) => stmt(q), batch: async (list) => { const out = []; for (const s of list) out.push(await s.run()); return out; } };
+}
+
+/**
+ * All state (jobs, encrypted settings, login throttling) lives in ONE SQLite-backed Durable Object - free on the
+ * Workers Free plan and needs no separate database or extra API-token permission. One owner => one instance.
+ */
+export class NexusStore extends DurableObject {
+  constructor(ctx, env) {
+    super(ctx, env);
+    this.db = sqlDb(ctx.storage.sql);
+  }
+
+  async fetch(request) {
+    return app(request, { ...this.env, DB: this.db });
+  }
+
+  async cron() {
+    const env = { ...this.env, DB: this.db };
+    await ensureSchema(this.db);
+    return jobs.refreshActive(env);
+  }
+}
+
+const store = (env) => env.STORE.get(env.STORE.idFromName("owner"));
+
 export default {
-  async fetch(request, env, ctx) {
+  async fetch(request, env) {
     const url = new URL(request.url);
-    if (url.pathname.startsWith("/api/")) {
-      try {
-        if (!env.DB) return err("قاعدة D1 مش مربوطة بالـ Worker (binding اسمه DB)", 503);
-        await ensureSchema(env.DB);
-        return await handleApi(request, env, url);
-      } catch (e) {
-        if (e instanceof jobs.JobError) return err(e.message, e.status);
-        if (e instanceof kaggle.KaggleError) return err(e.auth ? `Kaggle رفض المفتاح: ${e.message}` : e.message, e.auth ? 400 : 502);
-        console.error("unhandled", e && e.stack);
-        return err("خطأ داخلي", 500);
-      }
-    }
+    if (url.pathname.startsWith("/api/")) return store(env).fetch(request);
     return env.ASSETS.fetch(request);
   },
 
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(ensureSchema(env.DB).then(() => jobs.refreshActive(env)).then((r) => console.log("cron refresh", JSON.stringify(r))));
+    ctx.waitUntil(store(env).cron().then((r) => console.log("cron refresh", JSON.stringify(r))));
   },
 };

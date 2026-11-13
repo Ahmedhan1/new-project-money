@@ -355,22 +355,22 @@ components:
     network_hosts: [www.kaggle.com, api.kaggle.com]
     status: adapter
   - id: cloudflare-workers
-    name: Cloudflare Workers Free + D1 + Cron Triggers (NEXUS Cloud control plane, cloudflare/)
+    name: Cloudflare Workers Free + SQLite Durable Object + Cron Triggers (NEXUS Cloud control plane, cloudflare/)
     kind: hosting
     capability: [control-plane, web-ui, scheduler]
     source_url: https://developers.cloudflare.com/workers/platform/pricing/
     license: "Cloudflare Terms of Service (service); NEXUS code is the owner's"
-    free_tier: "Workers Free: 100k requests/day, 10 ms CPU per invocation; D1 Free: 5 GB, 5M rows read/day; up to 5 cron triggers"
+    free_tier: "Workers Free: 100k requests/day, 10 ms CPU per invocation; SQLite-backed Durable Objects on Free: 100k requests/day, 5 GB storage; up to 5 cron triggers"
     account_required: true
     payment_method_required: false
-    quotas: "daily request/D1 limits reset at 00:00 UTC; over the limit requests fail (no automatic billing on the Free plan)"
+    quotas: "daily request/Durable Object limits reset at 00:00 UTC; over the limit requests fail (no automatic billing on the Free plan)"
     commercial_use: "allowed under Cloudflare ToS"
     usage_restrictions: "Free plan only; never enable Workers Paid, R2 (needs a payment method) or other paid add-ons; heavy compute is never run on Workers"
-    data_retention: "job ledger + AES-GCM encrypted settings in the owner's D1 database; secrets in Worker secrets"
+    data_retention: "job ledger + AES-GCM encrypted settings in the owner's Durable Object SQLite storage; secrets in Worker secrets"
     availability: "remote, https://<name>.<subdomain>.workers.dev"
     hardware: none
     network_hosts: [api.kaggle.com, www.kaggleusercontent.com]
-    status: adapter
+    status: deployed
   - id: google-drive
     name: Google Drive API v3 (owner's own accounts drive_a/b/c, OAuth scope drive.file)
     kind: storage

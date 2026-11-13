@@ -1,4 +1,4 @@
-// Job ledger (D1) + the Kaggle lifecycle: submit -> poll (cron every 5 min, or "تحديث" in the UI) -> collect outputs.
+// Job ledger (SQLite in the NexusStore Durable Object) + the Kaggle lifecycle: submit -> poll (cron every 5 min, or "تحديث" in the UI) -> collect outputs.
 // The NEXUS worker that runs on Kaggle is nexus/cloud/worker_kit (frozen into worker_script.generated.js), with the job
 // bundle embedded exactly as the Python dispatcher does it, so results/checkpoints have the same contracts.
 

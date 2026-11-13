@@ -1,10 +1,12 @@
 # NEXUS Cloud — لوحة تحكم على Cloudflare، والشغل التقيل على Kaggle
 
+**النسخة الشغالة:** <https://nexus-cloud.nexus-ahmed.workers.dev>
+
 ```
 المتصفح (موبايل/كمبيوتر)
       │ HTTPS + كلمة سر المالك
       ▼
-Cloudflare Worker (مجاني)  ── D1: سجل الشغلانات + مفتاح Kaggle متشفّر
+Cloudflare Worker (مجاني)  ── Durable Object (SQLite): سجل الشغلانات + مفتاح Kaggle متشفّر
       │  Cron كل 5 دقايق: يسأل Kaggle عن الشغلانات
       ▼
 Kaggle API  ──►  نوتبوك خاص (Private) على GPU T4 ×2 مجاني  ──►  result.json + artifacts/
@@ -13,7 +15,7 @@ Kaggle API  ──►  نوتبوك خاص (Private) على GPU T4 ×2 مجان�
 - **Cloudflare** = المكان اللي بتشغّل منه: تسجيل دخول، صفحة إعدادات فيها مكان مفتاح Kaggle السري، تبعت شغلانات، تتابعها، وتحمّل النتايج.
 - **Kaggle** = كل الحاجات التقيلة: الفيديو، الـ LLM، توليد الفيديو (Wan)، التحويل. بيتشغل نفس الـ worker بتاع NEXUS
   (`nexus/cloud/worker_kit`) من غير أي تغيير.
-- **مجاني**: خطة Workers المجانية + D1 + Cron، من غير كارت. مفيش R2 ولا أي خدمة محتاجة وسيلة دفع. حساب Kaggle واحد بس.
+- **مجاني**: خطة Workers المجانية + Durable Object بـ SQLite + Cron، من غير كارت ومن غير قاعدة بيانات منفصلة. مفيش R2 ولا أي خدمة محتاجة وسيلة دفع. حساب Kaggle واحد بس.
 
 ## النشر (مرة واحدة)
 
@@ -23,8 +25,7 @@ Kaggle API  ──►  نوتبوك خاص (Private) على GPU T4 ×2 مجان�
 3. في إعدادات البناء:
    - **Root directory**: `cloudflare`
    - **Deploy command**: `npm run deploy`
-4. اضغط **Deploy**. قاعدة D1 بتتعمل لوحدها أول مرة، والجداول بيعملها الـ Worker نفسه.
-   (لو ظهر خطأ عن D1: **Storage & Databases ← D1 ← Create** باسم `nexus-cloud`، وبعدين من إعدادات الـ Worker ← **Bindings** ← اربطها باسم `DB`.)
+4. اضغط **Deploy**. التخزين (Durable Object بـ SQLite) والجداول بيتعملوا لوحدهم.
 5. بعد ما يخلص: **Settings** ← **Variables and Secrets** ← **Add** ← النوع **Secret**:
    - الاسم `OWNER_PASSWORD`، والقيمة كلمة سر طويلة (12 حرف على الأقل). دي كلمة سر الدخول للوحة.
 6. افتح الرابط `https://nexus-cloud.<اسمك>.workers.dev` ← ادخل بكلمة السر ← **الإعدادات** ← الصق مفتاح Kaggle ← **اختبر واحفظ**.
@@ -34,13 +35,13 @@ Kaggle API  ──►  نوتبوك خاص (Private) على GPU T4 ×2 مجان�
 cd cloudflare
 npm install
 npx wrangler login
-npm run deploy                          # أول مرة بيعمل قاعدة D1 لوحده
+npm run deploy
 npx wrangler secret put OWNER_PASSWORD
 ```
 
 ## مفتاح Kaggle — فين بيتحط؟
 - من **kaggle.com ← Settings ← API ← Generate New Token**. تقدر تلصق التوكن (`KGAT_...`) أو محتوى `kaggle.json` كله.
-- **في صفحة الإعدادات في اللوحة** (الأسهل): بيتجرب على Kaggle الأول، وبعدين بيتحفظ متشفّر AES-256-GCM في D1، بمفتاح مشتق
+- **في صفحة الإعدادات في اللوحة** (الأسهل): بيتجرب على Kaggle الأول، وبعدين بيتحفظ متشفّر AES-256-GCM في تخزين الـ Durable Object، بمفتاح مشتق
   من `OWNER_PASSWORD`. عمره ما بيرجع للمتصفح ولا بيظهر في اللوج. لو غيّرت كلمة السر لازم تدخّل المفتاح تاني.
 - **أو كـ Cloudflare Secret** باسم `KAGGLE_API_TOKEN` (ومعاه `KAGGLE_USERNAME` لو كان مفتاح قديم من kaggle.json): ده بيتقدم
   على المحفوظ في الصفحة.
@@ -75,4 +76,4 @@ KAGGLE_API_TOKEN=KGAT_... node test/live_e2e.mjs # اختبار حقيقي: prob
 python ../scripts/cloudflare/build_worker_script.py   # بعد أي تعديل في nexus/cloud/worker_kit
 ```
 الكود: `src/index.js` (الراوتر)، `src/security.js` (الدخول والتشفير)، `src/kaggle.js` (Kaggle API)، `src/jobs.js` (دورة حياة الشغلانة)،
-`src/schema.js` (جداول D1)، `public/` (الواجهة).
+`src/schema.js` (الجداول)، `public/` (الواجهة).

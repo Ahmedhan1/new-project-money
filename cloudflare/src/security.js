@@ -1,12 +1,12 @@
 // Owner authentication, sessions, CSRF and the settings vault - Web Crypto only, no dependencies.
 //
-// * One owner. The password is the Cloudflare secret OWNER_PASSWORD (never stored in D1, never sent anywhere else).
+// * One owner. The password is the Cloudflare secret OWNER_PASSWORD (never stored in the database, never sent anywhere else).
 // * Session cookie: "<expiry>.<HMAC-SHA256(expiry)>" with a key derived (HKDF) from OWNER_PASSWORD, so changing the
 //   password logs every session out. HttpOnly, Secure, SameSite=Strict.
 // * CSRF: every state-changing /api call must carry the header "X-Nexus: 1" (a cross-site form cannot set it) and,
 //   when the browser sends Origin, it must be this host.
-// * Vault: secrets saved from the Settings page (the Kaggle API token) are AES-256-GCM encrypted in D1 with a key
-//   derived from OWNER_PASSWORD + a random per-install salt. D1 alone never reveals them.
+// * Vault: secrets saved from the Settings page (the Kaggle API token) are AES-256-GCM encrypted in the Durable Object's SQLite with a key
+//   derived from OWNER_PASSWORD + a random per-install salt. The stored rows alone never reveal them.
 
 const enc = new TextEncoder();
 const dec = new TextDecoder();

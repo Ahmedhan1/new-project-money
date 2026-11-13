@@ -670,10 +670,10 @@ tasks:
     priority: 2
     title: "Deploy the control plane on an owner-approved zero-cost host"
     status: tested
-    blocked_by: "Deploy needs the owner's own free Cloudflare account (agents never create accounts) and the OWNER_PASSWORD secret."
-    acceptance: "Owner chose Cloudflare Workers Free (2026-11-13). cloudflare/: control plane (owner login, encrypted Kaggle key in D1, job submit/poll/retry/download, cron every 5 min) pushing the real worker_kit to the single Kaggle account; zero spend (no R2, no paid add-on)."
-    test: "cd cloudflare && npm test (10 passed); tests/fast/test_cloudflare_control_plane.py; LIVE 2026-11-13: test/live_e2e.mjs ran the Worker job code against the real Kaggle API - probe (CPU) queued -> running -> COMPLETE, result.json succeeded, artifacts/probe.json downloaded; wrangler dev smoke (login, CSRF, self-created schema, UI with no JS errors). NOT yet deployed to workers.dev."
-    next: "Owner: follow cloudflare/README.md (import the repo in Workers & Pages, root dir cloudflare, add secret OWNER_PASSWORD), paste the Kaggle token in Settings, run probe from the UI, then mark verified."
+    blocked_by: "Owner: paste the Kaggle API token in Settings on the live site (the agent has no copy of it)."
+    acceptance: "Owner chose Cloudflare Workers Free (2026-11-13). cloudflare/: control plane (owner login, encrypted Kaggle key in a SQLite Durable Object, job submit/poll/retry/download, cron every 5 min) pushing the real worker_kit to the single Kaggle account; zero spend (no R2, no paid add-on)."
+    test: "cd cloudflare && npm test (10 passed); tests/fast/test_cloudflare_control_plane.py; LIVE 2026-11-13: test/live_e2e.mjs ran the Worker job code against the real Kaggle API - probe (CPU) queued -> running -> COMPLETE, result.json succeeded, artifacts/probe.json downloaded; wrangler dev smoke (login, CSRF, self-created schema, UI with no JS errors). DEPLOYED 2026-11-13 to https://nexus-cloud.nexus-ahmed.workers.dev (owner's Cloudflare account, Free plan): /api/health ok, owner login ok, Worker reached api.kaggle.com (rejected a fake key as expected)."
+    next: "Owner logs in, pastes the Kaggle token in Settings, runs probe from the UI; then mark verified. Redeploy: cd cloudflare && npx wrangler deploy."
   - id: ACC1-BATCH-LLM
     priority: 1
     title: "batch_llm worker task for Account 3 (bounded batch inference on the Kaggle GPU, no serving endpoint)"

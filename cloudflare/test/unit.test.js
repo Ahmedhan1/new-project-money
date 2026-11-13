@@ -5,7 +5,8 @@ import { makeD1 } from "./d1shim.js";
 import * as sec from "../src/security.js";
 import * as kaggle from "../src/kaggle.js";
 import * as jobs from "../src/jobs.js";
-import worker from "../src/index.js";
+import { app, sqlDb } from "../src/index.js";
+const worker = { fetch: (r, e) => app(r, e) };
 
 const PW = "correct-horse-battery-staple";
 const env = () => ({ OWNER_PASSWORD: PW, DB: makeD1(), MAX_RUNTIME_S: "10800", MIN_GPU_RESERVE_S: "3600", ASSETS: { fetch: () => new Response("ui") } });

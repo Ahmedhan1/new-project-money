@@ -35,9 +35,9 @@ also `docs/ACCOUNT1_*.md` (acceptance, handoffs, setup guide).
 
 ## Cloudflare control plane (`cloudflare/`, D-24) - owner-chosen host, free plan
 Cloudflare Worker = UI + API + cron; Kaggle = all heavy work. Owner login, Kaggle key saved encrypted from the Settings
-page, submit/track/retry/download jobs that push the unchanged `worker_kit` to the single Kaggle account. Tested
-(npm test, live probe through the real Kaggle API), NOT yet deployed: the owner imports the repo in Workers & Pages
-(root `cloudflare`) and adds the `OWNER_PASSWORD` secret - steps in `cloudflare/README.md`. After any `worker_kit`
+page, submit/track/retry/download jobs that push the unchanged `worker_kit` to the single Kaggle account. Live at
+https://nexus-cloud.nexus-ahmed.workers.dev (state in a SQLite Durable Object); the owner still has to paste the Kaggle
+token in Settings. Redeploy/steps: `cloudflare/README.md`. After any `worker_kit`
 change run `python scripts/cloudflare/build_worker_script.py`.
 
 ## What actually works (evidence: `docs/results/demos/acceptance_*.json`, `docs/FEATURE_MATRIX.md`, `docs/FINAL_REPORT.md`)

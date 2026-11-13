@@ -199,8 +199,9 @@ repository's releases and only after the published SHA-256 matches. Built and te
 **D-24 Cloudflare Workers Free is the hosted control plane; Kaggle does all heavy work (owner decision, 2026-11-13).**
 The FastAPI app cannot run on Workers (FFmpeg, SQLite files, models), so `cloudflare/` is a small JS control plane:
 owner login (`OWNER_PASSWORD` secret, HMAC session cookie, CSRF header, login lockout), the Kaggle API key saved from the
-Settings page AES-GCM-encrypted in D1 (key derived from `OWNER_PASSWORD`; a `KAGGLE_API_TOKEN` Worker secret overrides
-it), and the job ledger in D1, polled by a 5-minute cron. Jobs call the same REST endpoints as kaggle CLI 2.x
+Settings page AES-GCM-encrypted (key derived from `OWNER_PASSWORD`; a `KAGGLE_API_TOKEN` Worker secret overrides
+it), and the job ledger, both in one SQLite-backed Durable Object (free; D1 was dropped because it needs an
+extra API-token permission and a separate database), polled by a 5-minute cron. Jobs call the same REST endpoints as kaggle CLI 2.x
 (`api.kaggle.com/v1/kernels.KernelsApiService/*`) and push the unchanged `worker_kit` script (frozen by
 `scripts/cloudflare/build_worker_script.py`, checked by a fast test) with the bundle embedded, so result/checkpoint
 contracts are identical and `retry` resumes from `result.json`'s checkpoint. Zero spend: no R2 (needs a payment method),
