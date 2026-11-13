@@ -271,9 +271,11 @@ def api_project(pid: str, branch: str = "main"):
 @app.get("/api/projects/{pid}/file")
 def api_file(pid: str, path: str):
     p = _project(pid)
-    f = (p.dir / path).resolve()
-    if not str(f).startswith(str(p.dir.resolve())) or not f.is_file():
-        raise HTTPException(404, "file not found")
+    from .pathsafe import PathEscape, contained
+    try:
+        f = contained(p.dir, path, must_be_file=True)
+    except PathEscape:
+        raise HTTPException(404, "file not found") from None
     return FileResponse(f)
 
 

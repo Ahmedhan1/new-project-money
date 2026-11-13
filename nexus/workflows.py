@@ -364,9 +364,11 @@ def export_(job: jobs.Job) -> dict:
     from . import export, project as prj
     a = job.params
     p = prj.Project(a["project"])
-    src = (p.dir / a["render"]).resolve()
-    if not str(src).startswith(str(p.dir.resolve())) or not src.is_file():
-        raise ValueError(f"render not found: {a['render']}")
+    from .pathsafe import PathEscape, contained
+    try:
+        src = contained(p.dir, a["render"], must_be_file=True)
+    except PathEscape:
+        raise ValueError(f"render not found: {a['render']}") from None
     ext = {"av1": ".mkv"}.get(a.get("codec", "h264"), ".mp4")
     out = p.dir / "exports" / f"{src.stem}_{a.get('codec', 'h264')}_{a.get('quality', 'balanced')}{ext}"
     out.parent.mkdir(parents=True, exist_ok=True)
