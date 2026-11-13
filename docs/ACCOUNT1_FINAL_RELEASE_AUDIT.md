@@ -21,12 +21,27 @@ work. The residual exposure is recorded in §9 as a fact, not as an action.
 |---|---|
 | PR #4 | open, **draft**, unmerged: https://github.com/Ahmedhan1/new-project-money/pull/4 |
 | Base | `claude/hopeful-allen-luubcy` @ `c93847d` (PR #3, draft) |
-| Code head audited | `dafefe3` (production hardening `34a5ba1` + manifest credential refusal / runbooks `dafefe3`). Later commits are docs/state only. |
+| Code head audited | `73c0023` (production hardening `34a5ba1`, manifest-credential refusal `dafefe3`, test-literal fix `73c0023`). Later commits are docs/state only. |
 | Reviews | 0 reviews, 0 review threads |
 | Merged / deployed | nothing. No force-push, no branch deletion, no change to an Account 2/3 branch, no billing. |
 
 ## 2. Account 1 CI
-CI_TABLE
+Runs [43407933476](https://github.com/Ahmedhan1/new-project-money/actions/runs/43407933476) (CI) and
+[43407933450](https://github.com/Ahmedhan1/new-project-money/actions/runs/43407933450) (Windows clean machine), both on
+`73c0023a43e8b3e186b9fc0d28c8b402718e2376`. GitHub reports every job as **success**.
+
+| Job | Conclusion | Fast tests | Steps |
+|---|---|---|---|
+| lint-and-fast-tests (ubuntu-latest), [job 131826894522](https://github.com/Ahmedhan1/new-project-money/actions/runs/43407933476/job/131826894522) | success | **427 passed, 0 failed, 5 skipped** (432 collected) | lint, state validation, fast tests, secret/media scan: all success |
+| lint-and-fast-tests (windows-latest), [job 131826894751](https://github.com/Ahmedhan1/new-project-money/actions/runs/43407933476/job/131826894751) | success | **427 passed, 0 failed, 5 skipped** (432 collected) | same steps: all success |
+| windows-e2e (clean machine): setup, start, E2E, status, backup, stop | success | n/a | |
+
+Notes on the intermediate pushes:
+- CI on `34a5ba1` and `dafefe3` was **cancelled** by the concurrency group when the next commit was pushed. It did not
+  fail.
+- Their Windows E2E runs succeeded.
+- `34a5ba1` would have failed the secret-scan test (a token-shaped literal in a new test file). The local integration
+  run caught it first, and `73c0023` fixed it (§7.1).
 
 ### Test-count reconciliation
 - Every environment collects the same tests. The differences are environment-dependent skips only.
@@ -141,27 +156,43 @@ Conclusions:
 - **Production OAuth readiness is not claimed.** The owner must publish the consent screen and reconnect A/B/C.
 
 ## 7. Cross-account integration (exact SHAs; separate from Account 1's own CI)
-### 7.1 Current run (this round), local branch `integration/heads-34a5ba1`, not pushed
+### 7.1 Current run (this round), local branch `integration/heads-73c0023`, not pushed
 | Input | SHA |
 |---|---|
-| Account 1 | `34a5ba1349f99bda83865bf15103943286791698` |
+| Account 1 | `73c0023a43e8b3e186b9fc0d28c8b402718e2376` (code head; later Account 1 commits are docs/state only) |
 | Account 2 | `d979df1e390abc48e79a7e6645229968a5b94107` (`work/account-2-cinematic-engine`) |
 | Account 3 | `fd71471df08dc82e262176487651c04c947fa9f8` (`work/account-3-intelligence-growth`, its `integration/contracts_v1/apply.sh`) |
 
 Order: fresh tree at A1 → merge A2 → merge A3 → `apply.sh`.
 
 Conflicts, all resolved by keeping both sides:
-- `nexus/registry/tasks.yaml`: union; 87 unique ids, registry validates.
+- `nexus/registry/tasks.yaml`: union; 88 unique ids, registry validates.
 - `nexus/api.py`: A1 production gate, owner guard and limits + A3 router.
 - `nexus/workflows.py`: A2 remote-render registration + A3 job kinds.
 - `nexus/ui/index.html`: A1 deep-link `go(...)` after `intelligence.js`, replacing A3's `go("home")`.
 
 Generated docs/state files took Account 1's side.
 
-INTEG_RESULTS
+The merge is scripted and reproducible: fresh worktree, the same keep-both resolutions, then `apply.sh`.
 
-`dafefe3` came after this run. Its code delta is the manifest-credential refusal and the `/studio/auth` cookie rule;
-the rest is docs.
+Results:
+- **Focused contract tests** (from `apply.sh`): **42 passed**.
+- **Ruff:** clean.
+- **Full fast suite** in a venv built from the merged `requirements-ci.txt` (Linux, Python 3.13):
+  **766 passed, 0 failed, 12 skipped**.
+  - All skips are optional assets: opentimelineio 1, TTS/Piper voices 2, voice models 2, SigLIP ONNX 3, tesseract 3,
+    rclone 1.
+- **Not run on the merged tree:**
+  - Windows CI;
+  - the Windows clean-machine E2E;
+  - renders with real models.
+
+  The merged tree is local and is not pushed. These runs wait for Account 3's fix (§7.4) and the owner's go-ahead.
+
+**A defect found by the integration and fixed:** the first run of this round (A1 `34a5ba1`) gave 764 passed, 1 failed.
+- The failure: `test_no_secrets` flagged a token-shaped literal in Account 1's new `test_production.py`.
+- The fix: `73c0023` builds the value at runtime.
+- No test was weakened.
 
 ### 7.2 Superseded runs (not evidence for current heads)
 | Run | A1 | A2 | A3 | Result |

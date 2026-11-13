@@ -124,7 +124,8 @@ python scripts/release_check.py                                 # fresh clone + 
 
 ## Shared-contracts integration status (refreshed 2026-11-13, production-closure round)
 - Latest Account 2 head checked: `d979df1` (`work/account-2-cinematic-engine`). Earlier results at `a52a24a` are superseded.
-- Integration at exact heads A1 `34a5ba1` + A2 `d979df1` + A3 `fd71471` + `apply.sh` (local, not pushed): INTEG_RESULT
+- Integration at exact heads A1 `73c0023` + A2 `d979df1` + A3 `fd71471` + `apply.sh` (local, not pushed): 42 focused
+  contract tests passed; full fast suite **766 passed, 0 failed, 12 skipped** with CI's dependency set (Linux).
 - The previous figure (748 passed at A1 `e9ad5e9` + A2 `a52a24a`) is superseded and no longer quoted as current.
 - Windows CI and the Windows clean-machine E2E on the merged tree are not run: they wait for Account 3's `batch_llm`
   manifest fix and the owner's merge approval (the merged tree is not pushed).

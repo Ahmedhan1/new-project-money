@@ -3,12 +3,12 @@
  "project": "NEXUS VIDEO AI",
  "version": "0.2.0",
  "phase": "hardening",
- "updated": "2026-11-13T08:36:37Z",
+ "updated": "2026-11-13T10:27:07Z",
  "git": {
   "branch": "work/account-1-cloud-platform",
-  "commit": "f75a33a",
-  "subject": "Account 1 closure round: Kaggle closed (accepted as-is by owner), CI counts reconciled (411/5 CI vs 412/4 dev container), latest-head integration 748 passed, Account 2 unblocked, Account 3 batch_llm interface still open",
-  "dirty_files": 0,
+  "commit": "73c0023",
+  "subject": "Account 1: build token-shaped test values at runtime (repository secret scan); handoffs, tasks, decisions D-13..D-15, work log",
+  "dirty_files": 4,
   "upstream": "origin/work/account-1-cloud-platform",
   "unpushed_commits": 0
  },
@@ -56,9 +56,9 @@
   }
  ],
  "tasks": {
-  "total": 59,
+  "total": 60,
   "by_status": {
-   "verified": 22,
+   "verified": 23,
    "tested": 12,
    "blocked": 6,
    "deferred": 1,
@@ -69,7 +69,7 @@
  },
  "tests": {
   "fast": {
-   "summary": "412 passed, 0 failed, 4 skipped",
+   "summary": "428 passed, 0 failed, 4 skipped",
    "ok": true,
    "date": "2026-11-13",
    "platform": "Linux",
@@ -79,9 +79,20 @@
  "jobs": {
   "counts": {
    "cancelled": 3,
-   "done": 29
+   "done": 29,
+   "running": 1
   },
-  "active": []
+  "active": [
+   {
+    "id": "job_fb9b1b1159",
+    "kind": "backup",
+    "status": "running",
+    "stage": "backup-verify",
+    "worker": "embedded-vm-585",
+    "retries": 0,
+    "recovery": null
+   }
+  ]
  },
  "blockers": [
   {
@@ -106,13 +117,13 @@
   },
   {
    "id": "ACC1-HOSTING",
-   "title": "Choose and deploy a permanent free host for the control plane",
-   "why": "Owner decision (public deployment needs explicit approval); see docs/ACCOUNT1_PROVIDER_COMPARISON.md."
+   "title": "Deploy the control plane on an owner-approved zero-cost host",
+   "why": "Owner decision (host and exposure need explicit approval; no public deployment without it)."
   },
   {
    "id": "ACC1-INTEGRATION",
    "title": "Three-account shared-contracts integration (nexus/contracts/{cloud,media}.py + shared __init__)",
-   "why": "Account 3: bench_v2.account1_manifest still sends params.models / items as a count / runtime ollama (incompatible with batch_llm). Account 2: Windows CI on a52a24a to finish green. Owner: merge approval and order."
+   "why": "Account 3: bench_v2.account1_manifest at fd71471 still sends params.models / items as a count / runtime ollama (incompatible with batch_llm). Owner: merge approval and order. (Account 2: no open item.)"
   }
  ],
  "backup": {

@@ -1,4 +1,4 @@
-# Account 1 acceptance results (2026-11-12, refreshed 2026-11-13 closure round)
+# Account 1 acceptance results (2026-11-12, refreshed 2026-11-13 production-closure round)
 
 **KAGGLE: CLOSED — ACCEPTED AS-IS BY OWNER.**
 
@@ -18,10 +18,14 @@ provider · **NI** not implemented. Finalization mission (Parts 1-12), demos A-K
 | I. Secure link ingestion | **RV** | Authorised https source, redirect re-validated, ffprobe, sha256, provenance; SSRF 34/34 refused; platform pages refused. | `ingest_live.json`, `ingest_ssrf_live.json` |
 | J. Browser-only operation + observability | **RV** (dev host) | Studio: jobs, storage, alerts (storage threshold, quota labelled as estimate), GPU quota bar; alerts clear when resolved. | `tests/e2e/test_studio_browser.py`, `GET /api/v1/alerts` |
 | L. `batch_llm` on the Kaggle GPU (Account 3 request) | **RV** | Qwen2.5-0.5B-Instruct, Tesla T4 x2, 8/8 prompts, 2 checksum-verified parts joined, no endpoint. Job `rjob_877fa89eb0ac`. | `batch_llm_live.json`, `test_cloud_batch_llm.py` |
-| K. CI green on the newest commit | **RV** | `e9ad5e9`: Linux 411 passed / 5 skipped, Windows 411 passed / 5 skipped, windows-e2e success. | [run 43389988132](https://github.com/Ahmedhan1/new-project-money/actions/runs/43389988132) |
+| K. CI green on the newest commit | **RV** | `73c0023`: Linux 427 passed / 5 skipped, Windows 427 passed / 5 skipped, windows-e2e success. | [run 43407933476](https://github.com/Ahmedhan1/new-project-money/actions/runs/43407933476), [e2e 43407933450](https://github.com/Ahmedhan1/new-project-money/actions/runs/43407933450) |
+| M. Production profile (fail-closed startup, readiness, single instance, graceful shutdown, limits) | **RV** (CI) / **BU** (host) | Real subprocess: refuses with incomplete config, serves with full config (docs off, ready 200); second API process refused; lifespan audit + unclean-restart detection. On an owner host: not yet (host not approved). | `test_production.py`, `ACCOUNT1_PRODUCTION_DEPLOYMENT.md` |
+| N. Vault backup / disaster recovery | **RV** (local) / **BU** (Drive) | Backups carry vault ciphertext, never the key; restore validates decryptability (no/right/wrong key); offline key export/verify; never overwrites. Real Drive restore: owner-authorised step, not run. | `test_production.py`, `test_storage_backup.py`, `ACCOUNT1_DISASTER_RECOVERY.md` |
 
 ## Tests
-- Fast suite: CI at `e9ad5e9` **411 passed, 5 skipped** (Linux and Windows); dev-container clean clone at `9ea4a73` **412 passed, 4 skipped**. Same 416 tests; the skips depend on fonts and rclone (reconciled in the audit §2).
+- Fast suite: CI at `73c0023` **427 passed, 5 skipped** (Linux and Windows); dev container **428 passed, 4 skipped**. Same 432 tests; the skips depend on fonts and rclone (audit §2).
+- Three-account integration at A1 `73c0023` + A2 `d979df1` + A3 `fd71471` + `apply.sh`: **766 passed, 0 failed, 12 skipped** (Linux, local; audit §7).
+- Production acceptance matrix (auth, CSRF, session expiry, vault, backup/restore, interrupted transfers, duplicates, worker loss, restart, scheduler, storage failure, rate limiting, uploads, clean install, production startup, graceful shutdown): audit §8.
 - Three-account integration and the final verdict: `docs/ACCOUNT1_FINAL_RELEASE_AUDIT.md`.
 - Real browser E2E of the Studio: passed. Security recovery checks: 7/7. Secret scan (tracked files): clean.
 - Live Kaggle evidence: probe, transcode, worker-loss resume, control-plane-crash resume, scheduler run.
@@ -47,9 +51,9 @@ provider · **NI** not implemented. Finalization mission (Parts 1-12), demos A-K
 
 ## Not complete (stated plainly)
 Not exercised for real:
-- a permanent public host (owner decision);
+- a permanent host (owner decision; production profile ready, `production-check` not yet run on a host);
 - real Drive token revocation;
-- a Drive backup/restore run;
+- a Drive backup/restore run (local backup/restore with vault validation is tested);
 - forced failover between real Drives;
 - a real owner-GPU/Colab pull worker;
 - testing on the owner's machine.
