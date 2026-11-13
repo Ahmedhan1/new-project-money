@@ -1,0 +1,18 @@
+PASS health - {'ok': True, 'version': '0.2.0', 'db_schema': 2, 'jobs': {}}
+PASS ffmpeg made a source file with a non-ASCII name - clip ünïcode 视频.mp4
+PASS project + media under a non-ASCII NEXUS_HOME - /home/user/qa_fresh/home/projects/prj_ffd971e22f/media/00_clip ünïcode 视频.mp4
+PASS director job - {'sources': 1, 'source_seconds': 20.0, 'programme_seconds': 9.6, 'clips': 4, 'sentences_kept': 4, 'spans_dropped': 5, 'hook': 'Solar panels convert sunlight into electricity.', 'cold_open': False}
+PASS editable timeline - 4 clips, 9.6 s
+PASS Arabic/Chinese timeline round trip
+PASS render job with burned Arabic/Chinese captions - 91.9
+PASS output MP4 is valid - 9.600000
+PASS workspace page + effects catalogue - 76 transitions
+PASS local edit (split) with undo/redo - 4 -> 5 -> 4 -> 5 clips
+PASS draft preview render - renders/draft_preview.mp4
+PASS final render - renders/final.mp4
+PASS export with verification - {'output': 'exports/final_h264_balanced.mp4', 'verified': None, 'ok': True, 'checks': None}
+PASS asset library catalog with licences - 182 assets
+PASS install a generated LUT + rendered preview - /home/user/qa_fresh/home/assets/luts/lut.cinematic.cube
+PASS render with a custom transition + library LUT - renders/with_assets.mp4
+PASS disk dashboard + cleanup dry run - 5.07 GB free, 0 cleanable files
+PASS archive browser answers (no destination configured -> nothing is deleted) - {'name': 'account1', 'external': False, 'detail': 'local: LocalProvider root /home/user/qa_fresh/home/storage/local is inside NEXUS_HOME', 'usage': {'connection_id': 'local', 'limit': 270553174016.0, 'used': 265105457152.0, 'remaining': 5447716864.0, 'source': 'measured'}}

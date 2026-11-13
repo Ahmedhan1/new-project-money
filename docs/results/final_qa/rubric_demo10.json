@@ -1,0 +1,157 @@
+{
+ "schema": "nexus.RubricOnEvidence/1",
+ "rows": [
+  {
+   "run": 1,
+   "evidence": "docs/results/account3/demo10_run1_e2e.json",
+   "overall": 0.771,
+   "verdict": "pass",
+   "unknown": [
+    "audio_balance",
+    "repeated_visuals"
+   ],
+   "dimensions": {
+    "hook": {
+     "score": 0.681,
+     "why": "first sentence 20 words, no hook cue (question/number/address), without on-screen text"
+    },
+    "story_arc": {
+     "score": 0.7,
+     "why": "4 scenes, 100% with >= 12 words, 33% adjacent scenes share a content word, no clear closing line"
+    },
+    "scene_relevance": {
+     "score": 0.9,
+     "why": "4 scenes: {'licensed_photo': 2, 'fact_graphic': 2}"
+    },
+    "repeated_visuals": {
+     "score": null,
+     "why": "fewer than 2 licensed images"
+    },
+    "audio_balance": {
+     "score": null,
+     "why": "no QualityReport audio checks"
+    }
+   },
+   "visual_kinds": [
+    "licensed_photo",
+    "fact_graphic",
+    "fact_graphic",
+    "licensed_photo"
+   ]
+  },
+  {
+   "run": 2,
+   "evidence": "docs/results/account3/demo10_run2_e2e.json",
+   "overall": 0.675,
+   "verdict": "needs_review",
+   "unknown": [
+    "audio_balance",
+    "repeated_visuals"
+   ],
+   "dimensions": {
+    "hook": {
+     "score": 0.681,
+     "why": "first sentence 20 words, no hook cue (question/number/address), without on-screen text"
+    },
+    "story_arc": {
+     "score": 0.7,
+     "why": "4 scenes, 100% with >= 12 words, 33% adjacent scenes share a content word, no clear closing line"
+    },
+    "scene_relevance": {
+     "score": 0.65,
+     "why": "4 scenes: {'title_card_fallback': 1, 'fact_graphic': 2, 'licensed_photo': 1}"
+    },
+    "repeated_visuals": {
+     "score": null,
+     "why": "fewer than 2 licensed images"
+    },
+    "audio_balance": {
+     "score": null,
+     "why": "no QualityReport audio checks"
+    }
+   },
+   "visual_kinds": [
+    "title_card_fallback",
+    "fact_graphic",
+    "fact_graphic",
+    "licensed_photo"
+   ]
+  },
+  {
+   "run": 3,
+   "evidence": "docs/results/account3/demo10_run3_e2e.json",
+   "overall": 0.79,
+   "verdict": "pass",
+   "unknown": [
+    "audio_balance",
+    "repeated_visuals"
+   ],
+   "dimensions": {
+    "hook": {
+     "score": 0.681,
+     "why": "first sentence 20 words, no hook cue (question/number/address), without on-screen text"
+    },
+    "story_arc": {
+     "score": 0.7,
+     "why": "4 scenes, 100% with >= 12 words, 33% adjacent scenes share a content word, no clear closing line"
+    },
+    "scene_relevance": {
+     "score": 0.95,
+     "why": "4 scenes: {'licensed_photo': 3, 'fact_graphic': 1}"
+    },
+    "repeated_visuals": {
+     "score": null,
+     "why": "fewer than 2 licensed images"
+    },
+    "audio_balance": {
+     "score": null,
+     "why": "no QualityReport audio checks"
+    }
+   },
+   "visual_kinds": [
+    "licensed_photo",
+    "fact_graphic",
+    "licensed_photo",
+    "licensed_photo"
+   ]
+  },
+  {
+   "run": 4,
+   "evidence": "docs/results/account3/demo10_run4_e2e.json",
+   "overall": 0.81,
+   "verdict": "pass",
+   "unknown": [
+    "audio_balance",
+    "repeated_visuals"
+   ],
+   "dimensions": {
+    "hook": {
+     "score": 0.681,
+     "why": "first sentence 20 words, no hook cue (question/number/address), without on-screen text"
+    },
+    "story_arc": {
+     "score": 0.7,
+     "why": "4 scenes, 100% with >= 12 words, 33% adjacent scenes share a content word, no clear closing line"
+    },
+    "scene_relevance": {
+     "score": 1.0,
+     "why": "4 scenes: {'licensed_photo': 4}"
+    },
+    "repeated_visuals": {
+     "score": null,
+     "why": "fewer than 2 licensed images"
+    },
+    "audio_balance": {
+     "score": null,
+     "why": "no QualityReport audio checks"
+    }
+   },
+   "visual_kinds": [
+    "licensed_photo",
+    "licensed_photo",
+    "licensed_photo",
+    "licensed_photo"
+   ]
+  }
+ ]
+}

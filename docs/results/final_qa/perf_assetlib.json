@@ -1,0 +1,27 @@
+{
+ "schema": "nexus.PerfBench/1",
+ "what": "GET /api/library payload (catalog + summary + categories + optional_future)",
+ "assets": 182,
+ "runs": 3,
+ "before_s": {
+  "median": 17.7093,
+  "runs": [
+   17.7093,
+   18.1911,
+   16.8684
+  ]
+ },
+ "after_s": {
+  "median": 0.0039,
+  "runs": [
+   0.0107,
+   0.0039,
+   0.0036
+  ]
+ },
+ "speedup": 4540.8,
+ "identical_output": true,
+ "libyaml": true,
+ "fix": "nexus/assetlib/__init__.py _registry(): cache the parsed YAML keyed by (mtime_ns, size); use CSafeLoader when available",
+ "owner": "Account 2 (nexus/assetlib) via Account 1 integration"
+}

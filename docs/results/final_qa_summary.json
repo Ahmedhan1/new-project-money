@@ -1,0 +1,275 @@
+{
+ "schema": "nexus.FinalQASummary/1",
+ "date": "2026-11-13",
+ "qa_owner": "Account 3 (independent QA / performance)",
+ "verdict": "NOT READY FOR RELEASE",
+ "verdict_reason": "The integrated product works end to end on Linux (fresh clone, real Chromium, crash recovery, path containment). Four major defects remain open (owner lock-out by anonymous traffic, startup on a damaged database, disk-full upload leaves a truncated file, Asset Library 17.7 s per request); GitHub Actions starts no job, so no CI, Windows E2E or Windows installer exists for this candidate.",
+ "inputs": {
+  "integration_candidate": {
+   "branch": "integration/final-release",
+   "sha": "9752d919858abdd434501bd13d3a8274a9f41cca"
+  },
+  "release_candidate": {
+   "branch": "claude/hopeful-allen-luubcy",
+   "sha": "813967e524ea7e7372653e1b081fb2b92f14b2de"
+  },
+  "account3_pr5": {
+   "in_candidate": "0c0fd7d9312d9acb0d39422ee2b0a65cdea2256a",
+   "fix_after_candidate": "80e04fc (UI defect QA-D11)"
+  },
+  "account2_pr6": "d979df1e390abc48e79a7e6645229968a5b94107",
+  "account2_pr7": {
+   "in_candidate": "387b9daacdf7384d9971421995bab6b314ddfaa3",
+   "later_head": "516d94d (docs only, not in candidate)"
+  }
+ },
+ "environment": {
+  "os": "Linux 6.18 x86_64 (cloud container)",
+  "cpus": 4,
+  "ram_gib": 15,
+  "python": "3.13.18",
+  "ffmpeg": "6.1.1",
+  "node": "22.23.4",
+  "browser": "Chromium via Node Playwright (pre-installed)",
+  "gpu": null,
+  "windows": null
+ },
+ "tests": {
+  "ruff_candidate": {
+   "result": "All checks passed",
+   "exit": 0
+  },
+  "fast_suite_candidate": {
+   "tests": 962,
+   "passed": 953,
+   "failed": 0,
+   "errors": 0,
+   "skipped": 9,
+   "seconds": 588.7,
+   "junit_sha256": "0b68257f05e9f8ff1e943812742f6a6217f13ebdb140599877542c3403d44bf4",
+   "home": "fresh temp NEXUS_HOME",
+   "skip_reasons": [
+    "opentimelineio not installed (1)",
+    "no local TTS/Piper voice (4)",
+    "SigLIP ONNX not installed (3)",
+    "test_a2_archive:165 superseded on this tree by test_a2_cross_account (1)"
+   ],
+   "areas": "docs/results/final_qa/fast_suite_areas.json (slices of this one run, not extra runs)"
+  },
+  "cross_account_candidate": {
+   "files": 14,
+   "passed": 156,
+   "failed": 0,
+   "skipped": 0,
+   "seconds": 47.6,
+   "junit_sha256": "b9061ab63e8c09e6b7f875a989655478c34b58caa3cbd7228ccf400d5618d270",
+   "note": "separate run; overlaps the fast suite, never added to it"
+  },
+  "apply_sh_twice_candidate": {
+   "runs": [
+    {
+     "passed": 42,
+     "code_files_changed": 0
+    },
+    {
+     "passed": 42,
+     "code_files_changed": 0
+    }
+   ],
+   "idempotent": true
+  },
+  "browser_studio_e2e": {
+   "test": "tests/e2e/test_studio_browser.py",
+   "result": "1 passed (8.9 s), real Chromium"
+  },
+  "browser_all_pages_candidate": {
+   "pages": 31,
+   "page_errors": 1,
+   "console_errors": 0,
+   "http_5xx": 0,
+   "pages_with_error_text": [
+    "a3refs: [object Object]"
+   ],
+   "empty_after_1.2s": [
+    "assets (API takes 17.7 s)"
+   ],
+   "evidence": "docs/results/final_qa/ui/ui_all_pages_candidate.json"
+  },
+  "browser_all_pages_after_A3_fix": {
+   "pages": 29,
+   "page_errors": 0,
+   "console_errors": 0,
+   "note": "A3 branch 80e04fc alone (no Account 2 pages)"
+  },
+  "account2_ui_check_script": {
+   "result": "NOT RUN",
+   "reason": "needs the Python Playwright package; installing another Playwright would not find the pre-installed browser. Account 1 reports 11/11 on the merged tree."
+  },
+  "fresh_clone": {
+   "clone": "local clone at 9752d919858abdd434501bd13d3a8274a9f41cca",
+   "venv": "new",
+   "pip_install_s": 47,
+   "cold_start_to_health_s": 1.1,
+   "e2e": "scripts/acceptance/windows_e2e.py run on Linux against `python -m nexus serve`: all 18 steps PASS (non-ASCII paths, Arabic/Chinese captions, render, export, assets, disk, archive, backup)",
+   "evidence": "docs/results/final_qa/raw/fresh_clone_e2e_report.json"
+  },
+  "break_probe": {
+   "passed": 30,
+   "failed": 5,
+   "evidence": "docs/results/final_qa/break_probe.json"
+  },
+  "windows_e2e": {
+   "result": "NOT RUN",
+   "reason": "no Windows machine; GitHub Actions starts no job"
+  },
+  "fast_suite_qa_branch": {
+   "tests": 970,
+   "passed": 961,
+   "failed": 0,
+   "skipped": 9,
+   "seconds": 576.2,
+   "junit_sha256": "37a946acec24bd8c7ad2a0f84f15d07c24b6495e48243b1ba1eb1e8e32d3b199",
+   "note": "separate run on candidate + QA changes; not added to the candidate run"
+  }
+ },
+ "areas": [
+  {
+   "area": "Three-account integration (Linux)",
+   "status": "PASS",
+   "evidence": "fast suite 953/0/9, cross-account 156/0, apply.sh x2 idempotent, fresh clone e2e 18/18",
+   "notes": ""
+  },
+  {
+   "area": "Shared contracts",
+   "status": "PASS",
+   "evidence": "apply.sh 42+42, test_contracts_* in cross-account run",
+   "notes": ""
+  },
+  {
+   "area": "Authentication, sessions, CSRF",
+   "status": "FAIL",
+   "evidence": "break_probe.json",
+   "notes": "QA-D1 major open; QA-D6, QA-D7 minor open. Core protections pass: anonymous 401, CSRF 403, foreign Origin 403, tampered/expired session 401, /docs and system stop refused"
+  },
+  {
+   "area": "Paths, symlinks, uploads, request limits",
+   "status": "PASS",
+   "evidence": "break_probe.json: traversal x5, symlink escape, project id traversal -> 404; .exe -> 415; ../ filename reduced; 9 MiB JSON -> 413",
+   "notes": ""
+  },
+  {
+   "area": "Durable jobs, crash recovery",
+   "status": "PASS",
+   "evidence": "SIGKILL during analysis -> restart 1.1 s -> job resumed and done; 31 job/recovery tests",
+   "notes": ""
+  },
+  {
+   "area": "Startup failure handling",
+   "status": "FAIL",
+   "evidence": "raw/startup_corrupt_db.txt, raw/doctor_without_ffmpeg.txt",
+   "notes": "QA-D2 major (damaged DB: traceback, no guidance; `nexus restore` does recover). Missing FFmpeg is reported clearly (QA-D9 minor)"
+  },
+  {
+   "area": "Disk exhaustion",
+   "status": "FAIL",
+   "evidence": "40 MB tmpfs home",
+   "notes": "QA-D4 major: HTTP 500, orphan project, truncated 4.6 MB copy of an 18 MB upload"
+  },
+  {
+   "area": "Production profile",
+   "status": "TESTED",
+   "evidence": "unconfigured production-check exits 1 (6 gates fail closed); configured 12/12 READY is Account 1's evidence, not re-run",
+   "notes": ""
+  },
+  {
+   "area": "Renderer, director, audio, VFX, export",
+   "status": "PASS",
+   "evidence": "268 tests (8 skips: optional models); fresh clone render + verified export",
+   "notes": ""
+  },
+  {
+   "area": "Asset Library, archive, disk",
+   "status": "FAIL",
+   "evidence": "perf_assetlib.json",
+   "notes": "functional tests pass (61); QA-D3 major performance: /api/library 17.7 s per request, page blank meanwhile; proposed fix measured 0.004 s with identical output"
+  },
+  {
+   "area": "Browser UI",
+   "status": "FAIL",
+   "evidence": "ui_all_pages_candidate.json",
+   "notes": "QA-D5 minor: late async render overwrites the page the user moved to; QA-D11 (A3) fixed in 80e04fc"
+  },
+  {
+   "area": "Account 3 intelligence, research, growth, localization, publishing",
+   "status": "PASS",
+   "evidence": "283 tests; release gate 44; A2 QualityReport integration 3; research degradation tests",
+   "notes": ""
+  },
+  {
+   "area": "Publishing release gate and AI disclosure",
+   "status": "TESTED",
+   "evidence": "test_intel_release_gate.py, test_intel_a2_publishing_integration.py",
+   "notes": "no platform verified on a real account"
+  },
+  {
+   "area": "Native-language review (ar-EG, ar-Gulf, hi, zh)",
+   "status": "BLOCKED",
+   "evidence": "language matrix",
+   "notes": "owner must supply reviewers; output stays draft"
+  },
+  {
+   "area": "QLT-1 creative quality",
+   "status": "TESTED",
+   "evidence": "qlt1_measure.json, rubric_demo10.json, tests/fast/test_qa_qlt1.py",
+   "notes": "delivered on the QA branch; human viewing still required"
+  },
+  {
+   "area": "Wan 2.2 TI2V-5B generation",
+   "status": "TESTED",
+   "evidence": "docs/results/wan22_5b/*.json + contact sheets",
+   "notes": "real Kaggle T4x2 smoke runs (672x384, 25 f) at pinned revision; 720p acceptance runs not in the candidate; MP4s not in the repo, so not re-hashed by QA (QA-W1..W4)"
+  },
+  {
+   "area": "Google Drive daily archive",
+   "status": "TESTED",
+   "evidence": "docs/results/a2_storage/daily_archive_live.json",
+   "notes": "live evidence reviewed (12/12, byte-identical, re-verified before local delete, isolated temp home); not re-run by QA (no credentials in this session)"
+  },
+  {
+   "area": "Kaggle accelerator",
+   "status": "TESTED",
+   "evidence": "Wan job records: accelerator 'Tesla T4 x2', per-GPU memory and utilisation recorded",
+   "notes": "owner's account; configuration not changed"
+  },
+  {
+   "area": "Backup and restore",
+   "status": "PASS",
+   "evidence": "`nexus restore` from a home with a damaged DB: 3 projects, media refs ok, doctor OK on the restored home",
+   "notes": ""
+  },
+  {
+   "area": "Windows single installer",
+   "status": "BLOCKED",
+   "evidence": "FINAL_RELEASE_REPORT.md section 7",
+   "notes": "not built: no Windows builder, Actions starts no job"
+  },
+  {
+   "area": "Windows E2E, update, uninstall/rollback",
+   "status": "BLOCKED",
+   "evidence": "-",
+   "notes": "needs the installer and a Windows machine"
+  },
+  {
+   "area": "GitHub CI",
+   "status": "BLOCKED",
+   "evidence": "run 43422710660 etc.",
+   "notes": "account-level: jobs end in ~2 s, no runner"
+  }
+ ],
+ "defects": "docs/results/final_qa/defects.json",
+ "performance": [
+  "docs/results/final_qa/perf_summary.json",
+  "docs/results/final_qa/perf_assetlib.json"
+ ],
+ "signoff": "docs/FINAL_QA_SIGNOFF.md"
+}

@@ -1,0 +1,37 @@
+SKIPPED [1] tests/fast/test_a2_archive.py:165: Account 1 storage is present on this tree (covered by test_a2_cross_account)
+SKIPPED [1] tests/fast/test_a2_edl.py:95: opentimelineio not installed (optional)
+SKIPPED [1] tests/fast/test_audio_post.py:50: no local TTS voice to make a speech fixture (FileNotFoundError)
+SKIPPED [1] tests/fast/test_b2_broll_visual.py:131: SigLIP int8 ONNX files not on this machine (opt-in download)
+SKIPPED [1] tests/fast/test_b2_visual.py:91: SigLIP int8 ONNX files not on this machine (opt-in download)
+SKIPPED [1] tests/fast/test_b2_visual.py:115: SigLIP int8 ONNX files not on this machine (opt-in download)
+SKIPPED [1] tests/fast/test_c2_dialogue.py:47: no local Piper voice to make a real speech fixture
+SKIPPED [2] tests/fast/test_diarize_faces.py:103: no local voices/speaker model for a two-voice fixture (FileNotFoundError)
+953 passed, 9 skipped, 3 warnings in 588.69s (0:09:48)
+EXIT 0
+============================= slowest 25 durations =============================
+22.37s call     tests/fast/test_edit_flow.py::test_edit_my_video_end_to_end
+17.99s call     tests/fast/test_edit_flow.py::test_destination_selector_shares_renders_and_writes_packages
+13.08s setup    tests/fast/test_quality.py::test_each_defect_is_caught_for_the_right_reason[black-visual.black_frames-verdicts0]
+12.17s call     tests/fast/test_a2_archive_account1.py::test_cut_connection_resumes_the_same_drive_session_without_duplicates
+11.82s call     tests/fast/test_a2_assetlib.py::test_library_api_and_workspace_apply
+10.54s call     tests/fast/test_a2_assetlib.py::test_manifest_is_valid_and_every_asset_has_licence_metadata
+10.34s call     tests/fast/test_shorts_factory.py::test_one_factory_short_renders_vertical
+8.83s call     tests/fast/test_a2_resume.py::test_killed_render_resumes_from_finished_segments
+7.40s call     tests/fast/test_broll.py::test_apply_inserts_full_frame_cutaways_that_change_pixels_and_keep_audio
+7.37s call     tests/fast/test_director.py::test_built_timeline_renders_to_planned_duration
+7.03s call     tests/fast/test_a2_cross_account.py::test_account1_worker_renders_account2_steps_and_stores_the_master
+6.78s call     tests/fast/test_audio_continuity.py::test_continuity_flags_level_and_brightness_jump
+6.74s call     tests/fast/test_a2_pieces.py::test_pieces_match_legacy_and_reuse_on_edits
+6.22s call     tests/fast/test_audio_continuity.py::test_continuity_flash_frame_and_narration_cut
+5.87s call     tests/fast/test_a2_av_sync.py::test_no_av_drift_over_twenty_clips[legacy]
+5.57s call     tests/fast/test_d2_enhance.py::test_interpolate_doubles_frames_and_denoise_improves_psnr
+5.51s call     tests/fast/test_a2_assetlib.py::test_lut_overlay_and_sound_change_the_render
+5.35s call     tests/fast/test_fx.py::test_j_cut_brings_the_next_clip_audio_under_the_previous_picture
+5.29s call     tests/fast/test_fx.py::test_parallel_matches_serial_and_reuses_cache
+5.25s call     tests/fast/test_repurpose.py::test_commentary_layout_meets_thresholds_and_renders
+5.08s call     tests/fast/test_fx.py::test_pip_titles_and_colour_correction_change_the_right_pixels
+4.78s call     tests/fast/test_a2_assetlib.py::test_extended_transitions_render_through_the_piece_pipeline[shape_heart]
+4.67s call     tests/fast/test_a2_av_sync.py::test_no_av_drift_over_twenty_clips[pieces]
+4.49s call     tests/fast/test_fx.py::test_lut_files_are_validated_and_applied_on_pixels
+4.43s call     tests/fast/test_a2_assetlib.py::test_extended_transitions_render_through_the_piece_pipeline[whip_pan_left]
+=========================== short test summary info ============================
