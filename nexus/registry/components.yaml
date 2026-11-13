@@ -412,3 +412,26 @@ components:
     install: "opt-in download with consent (nexus.generate.downloads)"
     status: deployed
     network_hosts: [huggingface.co]
+  # ---- Account 2 / Agent C: audio
+  - id: noisereduce
+    name: "noisereduce 3.0.3 (spectral gating denoiser)"
+    kind: software
+    capability: [denoise]
+    source_url: "https://github.com/timsainb/noisereduce"
+    license: "MIT"
+    commercial_use: "yes"
+    usage_restrictions: "optional dependency; chosen per material by nexus/audio/denoise.py (archival/documentary)"
+    hardware: CPU
+    install: "pip install noisereduce==3.0.3 (about 3.5 MB with dependencies)"
+    status: deployed
+  - id: deepfilternet
+    name: "DeepFilterNet (evaluated, not used)"
+    kind: model
+    capability: [denoise]
+    source_url: "https://github.com/Rikorose/DeepFilterNet"
+    license: "MIT / Apache-2.0 (code)"
+    commercial_use: "yes by licence"
+    usage_restrictions: "REJECTED for now: needs torch (~750 MB unpacked), pins numpy<2, no cp313 wheel for its Rust library, weights hosted on GitHub releases"
+    hardware: CPU
+    install: "not installed"
+    status: rejected

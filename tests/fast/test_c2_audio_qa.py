@@ -41,9 +41,8 @@ def test_first_clip_is_in_sync_and_every_clip_is_measurable(rendered):
     assert abs(rows[0]["offset_ms"]) <= 1000 / 30        # within one frame
 
 
-@pytest.mark.xfail(strict=True, reason="renderer defect found by this check: hard-cut concat copies AAC segments, each adds "
-                   "~38 ms of priming/padding, so audio drifts later clip by clip (measured +5, +44, +82 ms). Fix requested "
-                   "from the renderer owner (segments with PCM audio, AAC encoded once). Remove this marker when fixed.")
+# Regression guard: this check found AAC priming/padding drift at hard cuts (+5, +44, +82 ms); fixed in the renderer
+# (93f851b: audio decoded sample-exact at the concat, video still stream-copied). Every clip must stay within one frame.
 def test_every_rendered_clip_is_in_sync_with_its_source(rendered):
     tl, out, _ = rendered
     rows = AQ.sync_offsets(out, tl, _cut_times(tl))

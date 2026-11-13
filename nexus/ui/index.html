@@ -243,6 +243,9 @@ async workspace(m,pid){
    <div class="card"><h3>Whole programme</h3><div class="row"><label>Look<select id="gg">${opt(cat.grades,tl.grade)}</select></label><label>LUT<select id="glut"><option value="">none</option>${opt([...(cat.luts||[]).map(l=>l.name||l)],typeof tl.lut==="string"?tl.lut:"")}</select></label></div>
     <div class="row"><label>Captions<select id="gcs">${opt(["(legacy)",...cat.caption_styles],(tl.captions||{}).style||"(legacy)")}</select></label><label>Position<select id="gcp">${opt(["bottom","middle","top"],(tl.captions||{}).position||"bottom")}</select></label><label>Words per cue<input id="gcw" type="number" min="2" max="6" value="${(tl.captions||{}).words_per_cue||3}"></label></div>
     <div class="row"><label>Highlight<input id="gch" value="${esc((tl.captions||{}).highlight||"#FFD400")}"></label><label>Music volume<input id="gmv" type="number" step="0.05" value="${tl.music?tl.music.volume:""}" ${tl.music?"":"disabled"}></label><label>Loudness (LUFS)<input id="glu" type="number" step="0.5" value="${tl.target_lufs??-14}"></label></div>
+    <div class="row"><label>Music ducking<select id="gdk" ${tl.music?"":"disabled"}><option value="sidechain" ${tl.music&&tl.music.duck===true?"selected":""}>under speech (compressor)</option><option value="keyframes" ${tl.music&&tl.music.duck==="keyframes"?"selected":""}>under captions (automation, no pumping)</option><option value="off" ${tl.music&&tl.music.duck===false?"selected":""}>off</option></select></label>
+     <label>Dialogue clean-up<select id="gafx">${opt(["none","denoise","voice","clean_speech","dialogue_v2_ffmpeg"],tl.audio_fx||"none")}</select></label></div>
+    <p class="lead">Audio numbers are measurements, not listening. Listen before you export.</p>
     <div class="row"><label>Slow-motion quality<select id="gsm">${opt(cat.slowmo||["none"],tl.slowmo||"none")}</select></label><label>Render pipeline<select id="gpl">${opt(cat.pipelines||["pieces"],tl.render_pipeline||"pieces")}</select></label></div>
     <div class="row"><button class="sm" id="gapply">Apply to programme</button></div></div>
    <div class="card" style="margin-top:12px"><h3>Export</h3><div class="row"><label>File<select id="xf">${opt(renders,last)}</select></label></div>
@@ -259,8 +262,9 @@ async workspace(m,pid){
  $("#wfinal").onclick=async()=>{await api(`/api/projects/${pid}/render`,{branch});poll($("#jobs"))};
  $("#gapply").onclick=()=>{const cs=$("#gcs").value;const a={grade:$("#gg").value,lut:$("#glut").value||null,target_lufs:+$("#glu").value,
    captions:cs==="(legacy)"?null:{style:cs,position:$("#gcp").value,words_per_cue:+$("#gcw").value,highlight:$("#gch").value}};
-   a.slowmo=$("#gsm").value;a.render_pipeline=$("#gpl").value;
-   if(tl.music&&$("#gmv").value!=="")a.music={...tl.music,volume:+$("#gmv").value};op("set_global",null,a)};
+   a.slowmo=$("#gsm").value;a.render_pipeline=$("#gpl").value;a.audio_fx=$("#gafx").value;
+   if(tl.music){const dk=$("#gdk").value;a.music={...tl.music,duck:dk==="sidechain"?true:dk==="keyframes"?"keyframes":false};if($("#gmv").value!=="")a.music.volume=+$("#gmv").value}
+   op("set_global",null,a)};
  $("#xgo").onclick=async()=>{await api(`/api/projects/${pid}/export`,{render:$("#xf").value,codec:$("#xc").value,quality:$("#xq").value,max_mb:+$("#xm").value||null});poll($("#jobs"))};
  document.querySelectorAll(".tl div[data-c]").forEach(d=>d.onclick=()=>{sel=d.dataset.c;go("workspace",pid)});
  api(`/api/projects/${pid}/scenes`).then(sc=>{$("#wsc").innerHTML=sc.length?sc.slice(0,120).map(s=>`<div class="card click" style="padding:4px" data-s='${esc(JSON.stringify({src:s.src,in:s.in,out:s.out}))}'><img src="/api/projects/${pid}/file?path=${encodeURIComponent(s.thumb)}" style="width:100%;border-radius:4px"><p>${s.in.toFixed(1)}–${s.out.toFixed(1)} s</p></div>`).join(""):'<p class="lead">No analysed source in this project.</p>';
@@ -280,7 +284,7 @@ async workspace(m,pid){
  const kf=c.keyframes||{};const fxOn=new Set((c.effects||[]).map(e=>e.type));const cc=c.correct||{};
  $("#winsp").innerHTML=`<div class="card"><h3>Selected clip · ${c.type} · ${c._duration}s</h3>
   <div class="row">${c.type==="video"?`<label>In<input id="ci" type="number" step="0.04" value="${c.in}"></label><label>Out<input id="co" type="number" step="0.04" value="${c.out}"></label><label>Speed<input id="csp" type="number" step="0.05" value="${c.speed||1}"></label>`:`<label>Duration<input id="cd" type="number" step="0.1" value="${c.duration}"></label>`}
-  <label>Volume<input id="cv" type="number" step="0.1" value="${c.volume??1}"></label><label>Mute<select id="cm"><option value="">no</option><option value="1" ${c.mute?"selected":""}>yes</option></select></label></div>
+  <label>Volume<input id="cv" type="number" step="0.1" value="${c.volume??1}"></label><label>Dialogue clean-up<select id="cafx"><option value="">(programme)</option>${opt(["none","denoise","voice","clean_speech","dialogue_v2_ffmpeg"],c.audio_fx)}</select></label><label>Mute<select id="cm"><option value="">no</option><option value="1" ${c.mute?"selected":""}>yes</option></select></label></div>
   <div class="row"><label>Transition in<select id="ct"><option value="">cut</option>${opt(cat.transitions,c.transition?(c.xfade||"fade"):"")}</select></label><label>Length (s)<input id="ctd" type="number" step="0.05" value="${c.transition_dur||0.5}"></label>
   <label>Look<select id="cg"><option value="">(programme)</option>${opt(cat.grades,c.grade)}</select></label><label>Framing<select id="cf">${opt(cat.fits,c.fit||"cover")}</select></label></div>
   <div class="row"><label>Exposure<input id="kx" type="number" step="0.1" value="${cc.exposure??0}"></label><label>Contrast<input id="kc" type="number" step="0.05" value="${cc.contrast??1}"></label><label>Saturation<input id="ks" type="number" step="0.05" value="${cc.saturation??1}"></label><label>Temperature K<input id="kt" type="number" step="100" value="${cc.temperature??6500}"></label></div>
@@ -310,7 +314,7 @@ async workspace(m,pid){
   const effects=[...document.querySelectorAll(".cfx:checked")].map(x=>(c.effects||[]).find(e=>e.type===x.value)||{type:x.value});
   const pts=$("#kv").value.split("\n").map(l=>l.split(",").map(Number)).filter(p=>p.length>=2&&p.every(n=>!isNaN(n)));
   const keyframes={...kf};if(pts.length)keyframes[$("#kp").value]=pts;else delete keyframes[$("#kp").value];
-  const props={volume:+$("#cv").value,mute:!!$("#cm").value,grade:$("#cg").value||null,fit:$("#cf").value,effects,keyframes,
+  const props={volume:+$("#cv").value,mute:!!$("#cm").value,audio_fx:$("#cafx").value||null,grade:$("#cg").value||null,fit:$("#cf").value,effects,keyframes,
    correct:{...cc,exposure:+$("#kx").value,contrast:+$("#kc").value,saturation:+$("#ks").value,temperature:+$("#kt").value}};
   if(i>0){props.transition=$("#ct").value?"crossfade":null;props.xfade=$("#ct").value||null;props.transition_dur=+$("#ctd").value}
   if(c.type==="video")props.speed=+$("#csp").value;

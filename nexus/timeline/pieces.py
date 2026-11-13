@@ -210,4 +210,7 @@ def audio_key(tl: dict, segs: list[Path], n: list[int], d: list[int], fps: int, 
     sig = {"v": PIECE_VERSION, "segs": [audio_digest(s) for s in segs], "n": n, "d": d, "fps": fps, "items": items,
            "music": {**music, "_s": src_sig(music["src"])} if music.get("src") else None,
            "target": tl.get("target_lufs", -14.0), "acodec": config.ACODEC}
+    if music.get("duck") == "keyframes":  # the duck automation follows where speech is, so caption timing changes the mix
+        from .render import _speech_spans
+        sig["speech"] = _speech_spans(tl)
     return hashlib.sha1(json.dumps(sig, sort_keys=True, ensure_ascii=False, default=str).encode()).hexdigest()[:20]

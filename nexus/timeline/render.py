@@ -147,7 +147,7 @@ def segment_key(c: dict, tl: dict, draft: bool = False) -> str:
         payload["_slowmo"] = tl["slowmo"]
     if tl.get("audio_fx", "none") != "none":
         payload["_afx"] = tl["audio_fx"]  # was missing before: changing the global audio chain must re-render
-        if "clean_speech" in (tl.get("audio_fx"), c.get("audio_fx")):
+        if {"clean_speech", "dialogue_v2_ffmpeg"} & {tl.get("audio_fx"), c.get("audio_fx")}:
             from ..audio import post as apost
             payload["_afx_model"] = apost.chain_signature()  # model installed or not, and the exact filters, change the sound
     if c.get("lut") or tl.get("lut"):
@@ -355,6 +355,9 @@ def render_segment(c: dict, tl: dict, cache: Path, draft: bool = False, threads:
         if afx_name == "clean_speech":
             from ..audio import post as apost
             afx = apost.segment_chain("clean_speech")
+        elif afx_name == "dialogue_v2_ffmpeg":  # Account 2 dialogue chain (denoise + de-ess + gentle compression)
+            from ..audio import mixgraph
+            afx = mixgraph.dialogue_chain("dialogue_v2_ffmpeg")
         else:
             afx = AUDIO_FX.get(afx_name, "")
         if afx:
@@ -444,6 +447,21 @@ def _concat(segs: list[Path], tl: dict, out: Path, draft: bool = False) -> None:
             *_vcodec(draft, None), *config.ACODEC, "-movflags", "+faststart", out], op="concat-xfade")
 
 
+def _speech_spans(tl: dict) -> list[dict]:
+    """Programme-time speech spans for keyframe ducking: caption cues plus narration/dialogue items (merged)."""
+    spans = [(float(c["start"]), float(c["end"])) for c in tl.get("subtitles") or [] if c.get("end", 0) > c.get("start", 0)]
+    for a in tl.get("audio") or []:
+        if a.get("role", "narration") in SPEECH_ROLES and a.get("duration"):
+            spans.append((float(a.get("start", 0)), float(a.get("start", 0)) + float(a["duration"])))
+    out: list[list[float]] = []
+    for a, b in sorted(spans):
+        if out and a <= out[-1][1] + 0.05:
+            out[-1][1] = max(out[-1][1], b)
+        else:
+            out.append([a, b])
+    return [{"start": a, "end": b} for a, b in out]
+
+
 def _mix_graph(tl: dict, n_narr: int, has_music: bool, dur: float) -> tuple[list[str], str]:
     """Programme audio [0:a] and narration/dialogue items key the music ducking; sfx/ambience/music-role items are
     mixed in after the ducking so a whoosh never pumps the music and never counts as speech."""
@@ -460,8 +478,15 @@ def _mix_graph(tl: dict, n_narr: int, has_music: bool, dur: float) -> tuple[list
                 cut += f"afade=t=out:st={max(0.0, ilen - float(a['fade_out'])):.4f}:d={float(a['fade_out']):.4f},"
         if a.get("fade_in"):
             cut += f"afade=t=in:st=0:d={float(a['fade_in']):.4f},"
+        extra = ""
+        if a.get("gain_db"):
+            extra += f",volume={float(a['gain_db']):.2f}dB"
+        if a.get("pan") is not None and abs(float(a["pan"]) - 0.5) > 1e-3:  # constant-power pan, 0 = left, 1 = right
+            import math
+            th = max(0.0, min(1.0, float(a["pan"]))) * math.pi / 2
+            extra += f",pan=stereo|c0={math.cos(th) * math.sqrt(2):.4f}*c0|c1={math.sin(th) * math.sqrt(2):.4f}*c1"
         fc.append(f"[{i + 1}:a]{cut}aresample={config.AUDIO_RATE},aformat=channel_layouts=stereo,"
-                  f"volume={a.get('volume', 1.0)},adelay={ms}:all=1[n{i}]")
+                  f"volume={a.get('volume', 1.0)}{extra},adelay={ms}:all=1[n{i}]")
         (speech if a.get("role") in SPEECH_ROLES else other).append(f"[n{i}]")
     if len(speech) > 1:
         fc.append(f"{''.join(speech)}amix=inputs={len(speech)}:normalize=0:duration=first[sp]")
@@ -471,9 +496,17 @@ def _mix_graph(tl: dict, n_narr: int, has_music: bool, dur: float) -> tuple[list
         m = tl["music"]
         idx = n_narr + 1
         fo = max(0.0, dur - 2.0)
-        fc.append(f"[{idx}:a]aresample={config.AUDIO_RATE},aformat=channel_layouts=stereo,volume={m.get('volume', 0.5)},"
-                  f"atrim=0:{dur:.3f},afade=t=in:st=0:d=1,afade=t=out:st={fo:.3f}:d=2[mus]")
-        if m.get("duck", True):
+        speech_spans = _speech_spans(tl) if m.get("duck") == "keyframes" else None
+        if speech_spans:
+            # duck as volume automation from where speech is (captions + narration), so the bed never pumps between words
+            from ..audio import mixgraph
+            line, sidechain = mixgraph.music_line(idx, m, dur, speech_spans, config.AUDIO_RATE)
+            fc.append(line)
+        else:
+            fc.append(f"[{idx}:a]aresample={config.AUDIO_RATE},aformat=channel_layouts=stereo,volume={m.get('volume', 0.5)},"
+                      f"atrim=0:{dur:.3f},afade=t=in:st=0:d=1,afade=t=out:st={fo:.3f}:d=2[mus]")
+            sidechain = bool(m.get("duck", True))
+        if sidechain:
             fc.append("[sp]asplit[sp1][sp2]")
             fc.append("[mus][sp2]sidechaincompress=threshold=0.02:ratio=10:attack=15:release=450:makeup=1[duck]")
             fc.append("[sp1][duck]amix=inputs=2:normalize=0:duration=first[pre0]")
