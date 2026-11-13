@@ -1,0 +1,69 @@
+{
+ "contract": "IntegrationResult/v1",
+ "merged_sha": "b59050da0ebd8c0cf79066038e2c919e68b3f33c",
+ "branch": "integration/final-release",
+ "inputs": {
+  "account1": {
+   "sha": "813967e524ea7e7372653e1b081fb2b92f14b2de",
+   "what": "Release Candidate (A1 PR #4 merged)"
+  },
+  "account2": {
+   "sha": "387b9daacdf7384d9971421995bab6b314ddfaa3",
+   "what": "PR #7 (contains PR #6 d979df1)"
+  },
+  "account3": {
+   "sha": "d0d37a9",
+   "what": "PR #5 head incl. 80e04fc; QA PR #9 e50bcf2"
+  }
+ },
+ "environment": {
+  "os": "Linux (cloud container)",
+  "python": "3.13.18",
+  "deps": "requirements-ci.txt (sha256 cba808aa708a70ff)"
+ },
+ "results": {
+  "fast_suite": {
+   "tests": 990,
+   "passed": 977,
+   "failed": 0,
+   "errors": 0,
+   "skipped": 13,
+   "seconds": 484.19,
+   "junit_sha256": "65d18094a18d2436df5a97fd8ee3b5d4f54e250027a1100e9c5baa0dc879eabb",
+   "skip_reasons": [
+    "1x tests/fast/test_a2_archive.py:165: Account 1 storage is present on this tree (covered by test_a2_cross_account)",
+    "1x tests/fast/test_a2_edl.py:95: opentimelineio not installed (optional)",
+    "1x tests/fast/test_audio_post.py:50: no local TTS voice to make a speech fixture (FileNotFoundError)",
+    "1x tests/fast/test_b2_broll_visual.py:131: SigLIP int8 ONNX files not on this machine (opt-in download)",
+    "1x tests/fast/test_b2_visual.py:91: SigLIP int8 ONNX files not on this machine (opt-in download)",
+    "1x tests/fast/test_b2_visual.py:115: SigLIP int8 ONNX files not on this machine (opt-in download)",
+    "1x tests/fast/test_c2_dialogue.py:47: no local Piper voice to make a real speech fixture",
+    "2x tests/fast/test_diarize_faces.py:103: no local voices/speaker model for a two-voice fixture (FileNotFoundError)",
+    "3x tests/fast/test_intel_quality_gates.py:47: tesseract not installed",
+    "1x tests/fast/test_storage_backup.py:35: rclone not installed"
+   ]
+  },
+  "apply_sh": [
+   {
+    "run": 1,
+    "result": "42 passed",
+    "files_changed": 0
+   },
+   {
+    "run": 2,
+    "result": "42 passed",
+    "files_changed": 0
+   }
+  ],
+  "break_probe": "35/35 passed (docs/results/final_gate/break_probe.json; QA baseline at 9752d91: 30/35)",
+  "fresh_clone_e2e": "18/18 PASS, new clone + new venv (install 21 s), NEXUS_HOME with non-ASCII characters (docs/results/final_gate/fresh_clone_e2e_report.json)",
+  "production_check": "12/12 READY in a configured test environment with injected TEST secrets (docs/results/final_gate/production_check.txt); the real host gates are owner-only"
+ },
+ "not_run": [
+  "GitHub-hosted CI (Linux, Windows)",
+  "windows-e2e on a clean Windows VM",
+  "windows-installer.yml (installer build, silent install, uninstall)"
+ ],
+ "why_not_run": "GitHub Actions starts no job on this account (every run ~3-5 s, no runner, 0 billable ms); no Windows build machine available to agents",
+ "release_gate": "NOT PASSED (Windows and hosted CI not run)"
+}

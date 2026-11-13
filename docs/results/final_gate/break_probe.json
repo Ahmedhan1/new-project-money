@@ -1,0 +1,369 @@
+{
+ "schema": "nexus.BreakProbe/1",
+ "base": "http://127.0.0.1:8899",
+ "when": "2026-11-13T17:28:50Z",
+ "passed": 35,
+ "failed": 0,
+ "results": [
+  {
+   "area": "auth",
+   "probe": "anonymous GET /api/projects",
+   "expected": 401,
+   "actual": 401,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "major"
+  },
+  {
+   "area": "auth",
+   "probe": "anonymous GET /api/v1/system/status",
+   "expected": 401,
+   "actual": 401,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "major"
+  },
+  {
+   "area": "auth",
+   "probe": "wrong bearer token",
+   "expected": 401,
+   "actual": 401,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "major"
+  },
+  {
+   "area": "auth",
+   "probe": "correct bearer token",
+   "expected": 200,
+   "actual": 200,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "major"
+  },
+  {
+   "area": "auth",
+   "probe": "anonymous POST /api/v1/system/stop",
+   "expected": 401,
+   "actual": 401,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "critical"
+  },
+  {
+   "area": "auth",
+   "probe": "anonymous /docs",
+   "expected": [
+    "401",
+    "404"
+   ],
+   "actual": 401,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "major"
+  },
+  {
+   "area": "session",
+   "probe": "open session with the token",
+   "expected": 200,
+   "actual": 200,
+   "ok": true,
+   "detail": "cookie set: True",
+   "severity_if_fail": "major"
+  },
+  {
+   "area": "session",
+   "probe": "cookie GET",
+   "expected": 200,
+   "actual": 200,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "major"
+  },
+  {
+   "area": "csrf",
+   "probe": "cookie POST without X-NEXUS-CSRF",
+   "expected": 403,
+   "actual": 403,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "critical"
+  },
+  {
+   "area": "csrf",
+   "probe": "cookie POST with header but foreign Origin",
+   "expected": 403,
+   "actual": 403,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "critical"
+  },
+  {
+   "area": "session",
+   "probe": "tampered session cookie",
+   "expected": 401,
+   "actual": 401,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "major"
+  },
+  {
+   "area": "session",
+   "probe": "expired session (TTL + 2 min)",
+   "expected": 401,
+   "actual": 401,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "major"
+  },
+  {
+   "area": "session",
+   "probe": "copied session cookie after logout",
+   "expected": 401,
+   "actual": 401,
+   "ok": true,
+   "detail": "logout returned 200; a stateless signed cookie stays valid until its TTL unless revoked server-side",
+   "severity_if_fail": "minor"
+  },
+  {
+   "area": "session",
+   "probe": "legacy raw-token cookie",
+   "expected": 401,
+   "actual": 401,
+   "ok": true,
+   "detail": "a cookie holding the raw token never expires",
+   "severity_if_fail": "minor"
+  },
+  {
+   "area": "upload",
+   "probe": "executable extension refused",
+   "expected": 415,
+   "actual": 415,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "major"
+  },
+  {
+   "area": "upload",
+   "probe": "traversal filename is reduced to its base name",
+   "expected": 200,
+   "actual": 200,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "major"
+  },
+  {
+   "area": "upload",
+   "probe": "nothing written outside the project",
+   "expected": 0,
+   "actual": 0,
+   "ok": true,
+   "detail": "[]",
+   "severity_if_fail": "major"
+  },
+  {
+   "area": "upload",
+   "probe": "corrupt video accepted for analysis without a server error",
+   "expected": [
+    "200",
+    "400",
+    "415",
+    "422"
+   ],
+   "actual": 200,
+   "ok": true,
+   "detail": "{\"project\":\"prj_5f4716e23e\",\"media\":{\"id\":\"m0\",\"name\":\"broken.mp4\",\"path\":\"<tmp>/projects/prj_5f4716e23e/media/00_broken.mp4\",\"sha256\":\"c3a5a3da92",
+   "severity_if_fail": "major"
+  },
+  {
+   "area": "paths",
+   "probe": "valid project file",
+   "expected": 200,
+   "actual": 200,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "major"
+  },
+  {
+   "area": "paths",
+   "probe": "project file path '../../token'",
+   "expected": [
+    "400",
+    "404",
+    "422"
+   ],
+   "actual": 404,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "critical"
+  },
+  {
+   "area": "paths",
+   "probe": "project file path '/etc/passwd'",
+   "expected": [
+    "400",
+    "404",
+    "422"
+   ],
+   "actual": 404,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "critical"
+  },
+  {
+   "area": "paths",
+   "probe": "project file path '..%2F..%2Fetc%2Fpasswd'",
+   "expected": [
+    "400",
+    "404",
+    "422"
+   ],
+   "actual": 404,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "critical"
+  },
+  {
+   "area": "paths",
+   "probe": "project file path 'media/../../../etc/passwd'",
+   "expected": [
+    "400",
+    "404",
+    "422"
+   ],
+   "actual": 404,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "critical"
+  },
+  {
+   "area": "paths",
+   "probe": "project file path '....//....//etc/passwd'",
+   "expected": [
+    "400",
+    "404",
+    "422"
+   ],
+   "actual": 404,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "critical"
+  },
+  {
+   "area": "paths",
+   "probe": "symlink inside the project pointing outside",
+   "expected": [
+    "400",
+    "404"
+   ],
+   "actual": 404,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "critical"
+  },
+  {
+   "area": "paths",
+   "probe": "project id traversal",
+   "expected": [
+    "400",
+    "404",
+    "422"
+   ],
+   "actual": 404,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "major"
+  },
+  {
+   "area": "paths",
+   "probe": "unknown project id",
+   "expected": 404,
+   "actual": 404,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "minor"
+  },
+  {
+   "area": "input",
+   "probe": "malformed JSON body",
+   "expected": [
+    "400",
+    "422"
+   ],
+   "actual": 422,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "major"
+  },
+  {
+   "area": "input",
+   "probe": "JSON body over the 8 MiB limit",
+   "expected": [
+    "413",
+    "connection_closed"
+   ],
+   "actual": 413,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "major"
+  },
+  {
+   "area": "recovery",
+   "probe": "corrupt video analysis ends (not stuck)",
+   "expected": [
+    "done",
+    "failed",
+    "succeeded"
+   ],
+   "actual": "failed",
+   "ok": true,
+   "detail": "FFError: ffprobe failed for <NEXUS_HOME>/projects/prj_5f4716e23e/media/00_broken.mp4: [mov,mp4,m4a,3gp,3g2,mj2 @ 0x562316b0f6c0] moov atom not found",
+   "severity_if_fail": "major"
+  },
+  {
+   "area": "ux",
+   "probe": "failed job error is a plain message (no traceback, no server paths)",
+   "expected": false,
+   "actual": false,
+   "ok": true,
+   "detail": "the API returns the Python traceback and absolute paths to the client",
+   "severity_if_fail": "minor"
+  },
+  {
+   "area": "recovery",
+   "probe": "an undecodable file is not retried",
+   "expected": 0,
+   "actual": 0,
+   "ok": true,
+   "detail": "deterministic input errors are retried like transient ones",
+   "severity_if_fail": "minor"
+  },
+  {
+   "area": "server",
+   "probe": "server still healthy after the probes",
+   "expected": 200,
+   "actual": 200,
+   "ok": true,
+   "detail": "",
+   "severity_if_fail": "critical"
+  },
+  {
+   "area": "auth",
+   "probe": "repeated wrong tokens are locked out",
+   "expected": 429,
+   "actual": 429,
+   "ok": true,
+   "detail": "codes [401, 401, 401, 401, 401, 401, 401, 401, 401, 401, 429, 429]",
+   "severity_if_fail": "major"
+  },
+  {
+   "area": "auth",
+   "probe": "owner's correct token after 11 anonymous requests from the same address",
+   "expected": 200,
+   "actual": 200,
+   "ok": true,
+   "detail": "anonymous codes [401, 401, 401, 401, 401, 401, 401, 401, 401, 401, 401]: plain unauthenticated requests (an old browser tab polling, a page load before login) count as failed logins, and the lockout then refuses the owner's valid token for the window",
+   "severity_if_fail": "major"
+  }
+ ]
+}

@@ -16,10 +16,12 @@ Every claim below names its evidence. "Not run" means not run; nothing here is s
 | Production profile on the merged tree | **READY** (12/12 gates, owner-only routes) | §6 |
 | Windows single installer `NEXUS_VIDEO_AI_Setup.exe` | **BUILT FROM SOURCE: NO — BLOCKED** (no Windows builder; Actions starts no job) | §7 |
 | Hosted CI / Windows E2E | **NOT RUN** (GitHub Actions account-level block) | §8 |
+| Local final gate at `b59050d` | **GREEN**: 977/0/13, apply.sh ×2 idempotent, break probe 35/35, fresh clone 18/18, production 12/12 | §9 |
 | Merge to `main` | **NOT DONE** — needs Actions green, the Windows installer test, Account 3 sign-off and owner approval | §10 |
 
-**Overall: NOT READY FOR PRODUCTION RELEASE.** The integrated code is ready for owner validation on Linux. The release
-cannot be closed until GitHub Actions runs (owner billing) so the Windows installer can be built and clean-install-tested.
+**Overall: NOT READY FOR PRODUCTION RELEASE** — every code-level item and every live acceptance that agents can run is
+green at `b59050d`, but the release cannot be closed until GitHub Actions runs (owner billing) so that hosted CI and the
+Windows installer build + clean-install test can run, and the owner approves the merge. No Windows EXE is claimed.
 
 ## 1. Inputs (fetched 2026-11-13, exact SHAs)
 
@@ -168,7 +170,24 @@ visibility or bypass required checks.
 
 ## 9. Final integration gate (local Linux, exact SHA)
 
-__GATE__
+Gate SHA **`b59050da0ebd8c0cf79066038e2c919e68b3f33c`** (`integration/final-release`), checked out clean in a separate
+worktree; Linux, Python 3.13.18, CI dependency set `requirements-ci.txt`. Machine-readable: `docs/results/final_gate/gate.json`.
+
+| Check | Result |
+|---|---|
+| `python -m ruff check .` | clean |
+| `python -m pytest tests/fast` | **990 tests: 977 passed, 0 failed, 0 errors, 13 skipped** (484 s; JUnit sha256 `65d18094…`) |
+| Skips (all optional tools/models not in the CI set) | SigLIP ONNX ×3, tesseract ×3, voices/speaker models ×4, opentimelineio, rclone, A2 archive standalone (covered by the cross-account test) |
+| Cross-account / contracts | included in the suite (A1 154, A2 176, A3 275+, integration and QA additions); `integration/contracts_v1/apply.sh` run 1: 42 passed, 0 files changed; run 2: 42 passed, 0 files changed |
+| Account 3 break probe (`scripts/qa/break_probe.py`) | **35/35** (QA baseline at `9752d91`: 30/35) — `final_gate/break_probe.json` |
+| Fresh clone + new venv, non-ASCII `NEXUS_HOME`, `nexus start` → `windows_e2e.py` (on Linux) → `nexus stop` | **18/18 PASS**, install 21 s; export step asserts `verify.ok is True` — `final_gate/fresh_clone_e2e_report.json` |
+| Production profile (configured test environment, injected TEST secrets) | **12/12 READY** — `final_gate/production_check.txt`. Real host, real secrets, offline vault-key export, OAuth consent publication: owner-only (§10) |
+| Chromium, 31 pages (QA's `ui_all_pages.js`) + navigation race | 0 page errors, 0 console errors, 0 HTTP 5xx; race fixed (UI files unchanged since `a209660`, where it ran) — `final_gate/ui_all_pages.json`, `final_qa/ui/nav_race_after_fix.json` |
+| Live Google Drive daily archive (drive_a, disposable media) | 12/12 — archive and storage code unchanged since that run |
+| Live Wan 2.2 TI2V-5B on Kaggle T4×2 | 720p T2V and 720p I2V succeeded (§4). The I2V ran on worker code identical to the gate's except the 1.3B revision pin; the 720p T2V ran before the VAE moved to GPU1 (the post-move I2V smoke and 720p I2V exercise the same placement) |
+| **Not run** | GitHub-hosted CI (Linux, Windows), `windows-e2e` on a clean Windows VM, `windows-installer.yml` (build, silent install, launch without Python, E2E, backup/restore, uninstall). Cause: Actions starts no job (0 billable ms) and no Windows builder is available to agents. |
+
+**Release gate: NOT PASSED** — Windows packaging and hosted CI are unverified. Nothing above is presented as CI.
 
 ## 10. Remaining owner-only actions
 

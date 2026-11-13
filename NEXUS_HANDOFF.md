@@ -59,7 +59,8 @@ Sessions 4-6 (2026-11-12), all on a real 19.4-min public-domain NASA interview (
 - Defects: `docs/KNOWN_ISSUES.md`. Plan: `docs/MASTER_ROADMAP.md` (section 9 = next stage). Log: `docs/AGENT_WORK_LOG.md`.
 
 ## Final integration (branch `integration/final-release`) - Accounts 1+2+3 in one tree
-RC `813967e` + A3 PR #5 + A2 PR #6 + A2 PR #7 + `apply.sh`. Status, SHAs, evidence: `docs/FINAL_RELEASE_REPORT.md`.
+RC `813967e` + A3 PR #5 (`d0d37a9`) + A2 PR #6/#7 + A3 QA PR #9 + `apply.sh`; QA-D1..D10 fixed. Local gate GREEN at
+`b59050d` (977/0/13); hosted CI + Windows installer NOT RUN (Actions block). Evidence: `docs/FINAL_RELEASE_REPORT.md`.
 - Account 3 (`nexus/intelligence/`, `/api/a3/*`): `docs/ACCOUNT3_EXECUTION_REPORT.md`, `integration/contracts_v1/RESULT.md`.
 - Account 2 engine: `docs/ACCOUNT2_FINAL_RELEASE_AUDIT.md`, `ACCOUNT2_QUALITY_REPORT.md`, `ACCOUNT2_EDITING_GUIDE.md`; owns
   `nexus/contracts/media.py`. Asset library `nexus/assetlib`, disk manager `nexus/diskman.py`, daily archive
