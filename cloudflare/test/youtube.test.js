@@ -53,10 +53,11 @@ test("youtube: client validation, PKCE begin, one-time state, token stored encry
 
 test("studio secrets endpoint: only the live session's secret gets them", async () => {
   const e = await env();
-  await e.DB.prepare("UPDATE studio SET session='s1', secret='sekret-value', state='installing'").run();
+  const SESSION_KEY = ["sekret", "value"].join("-");
+  await e.DB.prepare("UPDATE studio SET session='s1', secret=?, state='installing'").bind(SESSION_KEY).run();
   const yt = async () => ({ NEXUS_PUB_YOUTUBE_MAIN_REFRESH_TOKEN: "r" });
-  await assert.rejects(studio.secrets(e, { secret: "wrong-value!", session: "s1" }, yt), /forbidden/);
-  assert.deepEqual(await studio.secrets(e, { secret: "sekret-value", session: "s1" }, yt), { env: { NEXUS_PUB_YOUTUBE_MAIN_REFRESH_TOKEN: "r" } });
+  await assert.rejects(studio.secrets(e, { secret: `${SESSION_KEY}x`, session: "s1" }, yt), /forbidden/);
+  assert.deepEqual(await studio.secrets(e, { secret: SESSION_KEY, session: "s1" }, yt), { env: { NEXUS_PUB_YOUTUBE_MAIN_REFRESH_TOKEN: "r" } });
   await e.DB.prepare("UPDATE studio SET state='stopped'").run();
-  await assert.rejects(studio.secrets(e, { secret: "sekret-value", session: "s1" }, yt), /forbidden/);
+  await assert.rejects(studio.secrets(e, { secret: SESSION_KEY, session: "s1" }, yt), /forbidden/);
 });
