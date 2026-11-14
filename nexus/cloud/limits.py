@@ -16,6 +16,9 @@ DEFAULT_BODY = 8 << 20
 DEFAULT_UPLOAD = 20 << 30
 
 
+CHUNK_BYTES = 64 * 2 ** 20  # PUT /api/upload/chunk (nexus/api.py CHUNK_MAX)
+
+
 def _limit(name: str, default: int) -> int:
     try:
         v = int(os.environ.get(name, "") or default)
@@ -42,6 +45,8 @@ class BodyLimit:
         headers = {k.decode("latin-1").lower(): v.decode("latin-1") for k, v in scope.get("headers", [])}
         multipart = headers.get("content-type", "").lower().startswith("multipart/form-data")
         lim = limits()["upload_bytes" if multipart else "body_bytes"]
+        if scope.get("path") == "/api/upload/chunk":  # one piece of a big upload (raw bytes); the handler caps it again
+            lim = max(lim, CHUNK_BYTES)
         cl = headers.get("content-length", "")
         if cl.isdigit() and int(cl) > lim:
             return await self._reject(send, lim)

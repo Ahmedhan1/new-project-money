@@ -5,12 +5,13 @@ from __future__ import annotations
 import json
 import os
 import queue
+import re
 import shutil
 import threading
 import time
 from pathlib import Path
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
 
@@ -385,6 +386,82 @@ async def api_upload(file: UploadFile = File(...), project_id: str | None = None
     finally:
         shutil.rmtree(tmp.parent, ignore_errors=True)
     return {"project": p.id, "media": m, **jobs.submit("analyze", {"project": p.id, "media": m["id"]}, p.id)}
+
+
+# ---------------------------------------------------------------- big uploads: chunked + automatic size reduction
+CHUNK_MAX = 64 * 2 ** 20          # one request (Cloudflare's gateway accepts up to 100 MB per request)
+CHUNKED_MAX = 20 * 2 ** 30        # a whole upload
+_UID = re.compile(r"^[a-f0-9]{16,40}$")
+
+
+def _chunk_dir(uid: str) -> Path:
+    if not _UID.match(uid or ""):
+        raise HTTPException(400, "bad upload id")
+    return config.HOME / "tmp" / "chunked" / uid
+
+
+@app.put("/api/upload/chunk")
+async def api_upload_chunk(request: Request, upload_id: str, index: int, total: int, size: int):
+    """One piece of a big upload (the browser splits the file). Idempotent: a piece sent twice just replaces itself."""
+    d = _chunk_dir(upload_id)
+    if not (0 <= index < total <= 4000) or not (0 < size <= CHUNKED_MAX):
+        raise HTTPException(400, "bad chunk numbers")
+    if index == 0 and not d.exists():
+        for old in d.parent.glob("*") if d.parent.exists() else []:  # abandoned uploads older than a day
+            if old.is_dir() and time.time() - old.stat().st_mtime > 86400:
+                shutil.rmtree(old, ignore_errors=True)
+        free = shutil.disk_usage(config.HOME).free
+        if size * 2 + UPLOAD_MARGIN_BYTES > free:  # the pieces + the assembled file
+            raise HTTPException(507, f"not enough free disk space: the upload needs {size * 2 / 1e9:.1f} GB, {free / 1e9:.1f} GB free")
+    d.mkdir(parents=True, exist_ok=True)
+    part, n = d / f"{index:05d}.part", 0
+    tmp = part.with_suffix(".tmp")
+    with tmp.open("wb") as f:
+        async for block in request.stream():
+            n += len(block)
+            if n > CHUNK_MAX:
+                f.close()
+                tmp.unlink(missing_ok=True)
+                raise HTTPException(413, f"a piece may be at most {CHUNK_MAX // 2 ** 20} MB")
+            f.write(block)
+    tmp.replace(part)
+    return {"upload_id": upload_id, "index": index, "bytes": n, "received": len(list(d.glob("*.part")))}
+
+
+class ChunkFinishReq(BaseModel):
+    upload_id: str
+    name: str
+    total: int
+    size: int
+    project_id: str | None = None
+    optimize: bool = True
+
+
+@app.post("/api/upload/finish")
+def api_upload_finish(r: ChunkFinishReq):
+    """Join the pieces, then a durable job reduces the size when worthwhile, imports and analyses the video."""
+    import uuid
+    d = _chunk_dir(r.upload_id)
+    name = Path((r.name or "").replace("\\", "/")).name.strip()
+    if not name or Path(name).suffix.lower() not in _UPLOAD_EXT:
+        raise HTTPException(415, "unsupported file type: upload a video, audio or image file")
+    parts = [d / f"{i:05d}.part" for i in range(r.total)]
+    missing = [i for i, x in enumerate(parts) if not x.exists()]
+    if missing:
+        raise HTTPException(409, f"{len(missing)} piece(s) missing (first: {missing[0]}): send them again")
+    if sum(x.stat().st_size for x in parts) != r.size:
+        raise HTTPException(409, "the pieces do not add up to the file size: send the upload again")
+    out = config.HOME / "tmp" / "uploads" / uuid.uuid4().hex / name
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with out.open("wb") as f:
+        for x in parts:
+            with x.open("rb") as g:
+                shutil.copyfileobj(g, f, 4 << 20)
+            x.unlink()
+    shutil.rmtree(d, ignore_errors=True)
+    p = _project(r.project_id) if r.project_id else prj.Project.create(Path(name).stem, "edit")
+    job = jobs.submit("media-prepare", {"project": p.id, "file": str(out), "optimize": r.optimize}, p.id)
+    return {"project": p.id, **job}
 
 
 class ProposeReq(BaseModel):

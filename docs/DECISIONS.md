@@ -230,3 +230,12 @@ screen the owner needs; the gateway serves it at `/` and the classic UI at `/app
 file URL is a plain GET of a file (nothing billable), so autopilot fetches it with the SSRF-safe `ingest.fetch` without
 the costguard host list (paid hosts still refused); platform PAGE URLs (YouTube, TikTok, ...) stay refused - their terms
 forbid downloading. Discover picks the topic from Wikipedia pageview trends in a niche (emerging > rising), and says why.
+
+**D-27 Big uploads: chunked through the gateway, then reduced to 1080p (owner request, 2026-11-14).** Cloudflare accepts
+at most 100 MB per request, so the simple UI sends files over 80 MB as 48 MB pieces (`PUT /api/upload/chunk`, each
+retried; the body-limit middleware allows 64 MB on that path only), joined by `POST /api/upload/finish` (refused when a
+piece is missing or the sizes disagree). A durable `media-prepare` job then reduces the size when worthwhile
+(`nexus/media/optimize.py`: > 1080p, > 12 Mbit/s, or a non-H.264 file over 300 MB -> 1080p H.264 at "balanced"
+constant quality, NVENC on the studio GPU, CPU fallback; kept only if smaller; the optimised copy REPLACES the original
+to keep one copy within the session's 20 GB output), imports and analyses it. Limit 20 GB per upload. Measured locally:
+a 208 MB 4K/55 Mbit/s file -> 12 MB 1080p in 17 s.
