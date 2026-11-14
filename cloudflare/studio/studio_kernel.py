@@ -165,7 +165,7 @@ def cuda_lib_path() -> str:
     """Kaggle ships CUDA 13 system-wide, but the CUDA 12 runtime/cuBLAS that the llama.cpp cu12 wheel needs are in pip
     packages (site-packages/nvidia/<lib>/lib, seen live 2026-11-14) that are not on LD_LIBRARY_PATH."""
     import glob
-    dirs = sorted({str(Path(p).parent) for pat in ("nvidia/*/lib/libcudart.so.12", "nvidia/*/lib/libcublas*.so.12")
+    dirs = sorted({str(Path(p).parent) for pat in ("nvidia/*/lib/libcudart.so.12", "nvidia/*/lib/libcublas*.so.12", "nvidia/cudnn/lib/libcudnn.so.9")
                    for base in sys.path if base.endswith(("site-packages", "dist-packages")) for p in glob.glob(os.path.join(base, pat))})
     return ":".join(dirs + [x for x in os.environ.get("LD_LIBRARY_PATH", "").split(":") if x])
 

@@ -1,7 +1,8 @@
-"""Transcription with faster-whisper (CPU int8). Lazy-loaded, unloadable."""
+"""Transcription with faster-whisper (CUDA float16 when a GPU works, else CPU int8). Lazy-loaded, unloadable."""
 from __future__ import annotations
 
 import gc
+import os
 import subprocess
 import time
 from pathlib import Path
@@ -18,8 +19,27 @@ def load():
     if _model is None:
         costguard.authorize("faster-whisper", "load")
         from faster_whisper import WhisperModel
-        _model = WhisperModel(str(models.ensure_model("whisper-small")), device="cpu", compute_type="int8", cpu_threads=4)
+        path = str(models.ensure_model("whisper-small"))
+        _model = _gpu_model(WhisperModel, path) or WhisperModel(path, device="cpu", compute_type="int8",
+                                                                  cpu_threads=max(4, min(16, os.cpu_count() or 4)))
     return _model
+
+
+def _gpu_model(cls, path: str):
+    """Same model on a CUDA GPU when one is usable (cloud studio: Kaggle T4), else None. A probe transcription runs first,
+    because a missing CUDA/cuDNN library only fails at the first inference; NEXUS_ASR_DEVICE=cpu forces the CPU."""
+    if os.environ.get("NEXUS_ASR_DEVICE", "auto").lower() == "cpu":
+        return None
+    try:
+        import ctranslate2
+        if ctranslate2.get_cuda_device_count() < 1:
+            return None
+        m = cls(path, device="cuda", compute_type="float16")
+        list(m.transcribe(np.zeros(16000, dtype=np.float32), language="en")[0])
+        return m
+    except Exception as e:  # noqa: BLE001 - any CUDA problem -> the CPU path, which always works
+        print(f"faster-whisper: GPU not usable ({type(e).__name__}: {str(e)[:120]}); using the CPU", flush=True)
+        return None
 
 
 def unload() -> None:
