@@ -128,6 +128,8 @@ class Job:
         if st and st["status"] == "done":
             self.log(f"stage {name}: restored from checkpoint (not re-run)")
             return st["output"]
+        if cancel_requested(self.id):
+            raise JobCancelled(f"cancelled by the owner before stage '{name}'")
         runs = (st or {}).get("runs", 0) + 1
         self._stages[name] = {"status": "running", "started": time.time(), "runs": runs}
         self._save(name)
@@ -169,8 +171,24 @@ def get(job_id: str) -> dict | None:
     return r
 
 
+CANCEL_REQUESTED = "cancel requested by the owner"
+
+
+class JobCancelled(Exception):
+    """Raised at the next stage boundary of a running job whose owner asked to cancel it."""
+
+
 def cancel(job_id: str) -> bool:
-    return db.execute("UPDATE jobs SET status='cancelled', finished=? WHERE id=? AND status='queued'", (time.time(), job_id)).rowcount == 1
+    """Queued -> cancelled now. Running -> cancelled at its next stage boundary (the stage in progress finishes first)."""
+    now = time.time()
+    if db.execute("UPDATE jobs SET status='cancelled', finished=? WHERE id=? AND status='queued'", (now, job_id)).rowcount == 1:
+        return True
+    return db.execute("UPDATE jobs SET recovery=? WHERE id=? AND status='running'", (CANCEL_REQUESTED, job_id)).rowcount == 1
+
+
+def cancel_requested(job_id: str) -> bool:
+    r = db.query("SELECT recovery FROM jobs WHERE id=?", (job_id,))
+    return bool(r) and r[0]["recovery"] == CANCEL_REQUESTED
 
 
 def retry(job_id: str) -> bool:
@@ -220,8 +238,12 @@ def recover(stale_after: float = STALE_S, api_worker: str | None = None) -> dict
     jobs. Safe to call any time."""
     now = time.time()
     out = {"requeued": [], "failed": [], "interrupted": []}
-    for r in db.query("SELECT id,stage,retries,max_retries,heartbeat,worker FROM jobs WHERE status='running' AND durable=1"):
+    for r in db.query("SELECT id,stage,retries,max_retries,heartbeat,worker,recovery FROM jobs WHERE status='running' AND durable=1"):
         if r["heartbeat"] and now - r["heartbeat"] < stale_after and not _local_worker_dead(r["worker"]):
+            continue
+        if r["recovery"] == CANCEL_REQUESTED:  # the owner cancelled it: do not resume it after a restart
+            db.execute("UPDATE jobs SET status='cancelled', finished=? WHERE id=? AND status='running'", (now, r["id"]))
+            out.setdefault("cancelled", []).append(r["id"])
             continue
         n = (r["retries"] or 0) + 1
         note = f"worker {r['worker']} lost at stage '{r['stage'] or 'start'}'"
@@ -293,6 +315,10 @@ def run_job(job: Job) -> str:
                    (time.time(), json.dumps(result, default=str, ensure_ascii=False), job.id))
         job.log("job done")
         return "done"
+    except JobCancelled as e:
+        db.execute("UPDATE jobs SET status='cancelled', finished=?, error=? WHERE id=?", (time.time(), str(e), job.id))
+        job.log(str(e))
+        return "cancelled"
     except Exception as e:
         job.log(f"job error: {type(e).__name__}: {e}\n{traceback.format_exc()[-3000:]}")   # full detail stays in the log
         err = public_error(e)

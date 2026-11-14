@@ -260,8 +260,9 @@ def api_job_retry(job_id: str):
 @app.post("/api/jobs/{job_id}/cancel")
 def api_job_cancel(job_id: str):
     if not jobs.cancel(job_id):
-        raise HTTPException(409, "only queued jobs can be cancelled")
-    return {"job": job_id, "status": "cancelled"}
+        raise HTTPException(409, "only queued or running jobs can be cancelled")
+    st = (jobs.get(job_id) or {}).get("status")
+    return {"job": job_id, "status": st if st == "cancelled" else "cancelling"}
 
 
 @app.get("/api/storage")

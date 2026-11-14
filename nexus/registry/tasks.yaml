@@ -21,7 +21,7 @@ tasks:
     acceptance: "Killing the worker mid-job loses nothing; after restart the job finishes and completed stages are not re-run."
     test: "pytest tests/fast/test_jobs.py (kills a real worker process with SIGKILL mid-stage)"
     evidence: "tests/fast/test_jobs.py::test_worker_killed_mid_job_resumes_without_repeating_stages"
-    next: "Add job cancellation for running jobs (today only queued jobs can be cancelled)."
+    next: "Running jobs can now be cancelled (stop at the next stage boundary, D-26); remaining: interrupting a long single stage."
   - id: JOB-2
     priority: 2
     title: "Move remaining in-process API jobs onto the durable ledger (analyze, remix, series, film, animate, package)"

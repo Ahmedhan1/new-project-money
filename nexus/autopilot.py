@@ -69,6 +69,7 @@ def validate(params: dict) -> dict:
                    target_seconds=float(params["target_seconds"]) if params.get("target_seconds") else None,
                    shorts=max(0, min(10, int(params.get("shorts") if params.get("shorts") is not None else (3 if goal == "shorts" else 0)))),
                    scenes=[[float(a), float(b)] for a, b in (params.get("scenes") or []) if float(b) > float(a)])
+        out["dub"], out["subtitles"] = wanted_languages(params, out["instructions"])
         if goal == "shorts" and not out["shorts"]:
             out["shorts"] = 3
         if goal == "scenes" and not out["scenes"]:
@@ -95,6 +96,24 @@ def validate(params: dict) -> dict:
         out["vertical"] = bool(params.get("vertical"))
         out["scenes_n"] = max(3, min(12, int(params.get("scenes_n") or 6)))
     return out
+
+
+LANGS = {"ar": ("عربي", "arabic|عرب"), "en": ("English", "english|انجليز|إنجليز|انكليز"), "fr": ("Français", "french|فرنس"),
+         "de": ("Deutsch", "german|ألمان|الماني"), "es": ("Español", "spanish|اسبان|إسبان"), "tr": ("Türkçe", "turkish|ترك")}
+
+
+def wanted_languages(params: dict, instructions: str = "") -> tuple[list[str], list[str]]:
+    """Dub / subtitle languages from explicit fields, or understood from the owner's own words
+    ("دبلجه عربي وترجمه" -> dub ar + subtitles ar). Without a named language, Arabic is assumed."""
+    dub = [x for x in (params.get("dub") or []) if x in LANGS]
+    subs = [x for x in (params.get("subtitles") or []) if x in LANGS]
+    t = (instructions or "").lower()
+    named = [k for k, (_n, pat) in LANGS.items() if re.search(pat, t)] or ["ar"]
+    if not dub and re.search(r"دبلج|dub|voice ?over|تعليق صوتي", t):
+        dub = named
+    if not subs and re.search(r"ترجم|subtitl|translat|كابشن|caption", t):
+        subs = named
+    return dub[:3], [x for x in subs if x not in dub][:3]
 
 
 def submit(params: dict) -> dict:
@@ -151,6 +170,9 @@ def autopilot(job: jobs.Job) -> dict:
 # ---------------------------------------------------------------- edit an existing video
 def _edit(job: jobs.Job, a: dict) -> dict:
     from . import project as prj
+    if "dub" not in a:  # submitted before languages were a field: understand them from the instructions
+        a = {**a}
+        a["dub"], a["subtitles"] = wanted_languages(a, a.get("instructions", ""))
 
     def importing():
         if a.get("project"):
@@ -262,6 +284,9 @@ def _edit(job: jobs.Job, a: dict) -> dict:
             t = s["title"] if s.get("title") and not str(s["title"]).startswith("short-") else ""
             outputs.append({"label": (f"شورت {i}: {t}" if t else f"شورت {i}")[:90], "path": s["path"], "kind": "short", "why": s.get("why")})
 
+    if ren:
+        outputs += _languages(job, p, an_all, a, title, (an.get("transcript") or {}).get("language", "en"))
+
     land = [x for x in a["platforms"] if x in LANDSCAPE]
     if land and ren:
         def packaging():
@@ -274,6 +299,32 @@ def _edit(job: jobs.Job, a: dict) -> dict:
             outputs.append({"label": f"نسخة {_display(name)}", "path": meta["video"], "kind": "platform", "platform": name,
                             "cover": meta.get("cover"), "ok": meta.get("ok")})
     return {"project": p.id, "mode": "edit", "goal": a["goal"], "edit": ed, "render": ren, "outputs": outputs}
+
+
+def _languages(job: jobs.Job, p, an_all: dict, a: dict, title: str, src_lang: str) -> list[dict]:
+    """Dubbed and/or subtitled versions of the master (nexus.localize: MT + review + TTS), each rendered with QA."""
+    from . import localize, qa
+    outs = []
+    for lang, dub in [(x, True) for x in a.get("dub") or []] + [(x, False) for x in a.get("subtitles") or []]:
+        if lang == src_lang and not dub:
+            continue
+        branch = f"{lang}_{'dub' if dub else 'subs'}"
+
+        def run(lang=lang, dub=dub, branch=branch):
+            ltl, review = localize.localize(p, p.timeline("main"), lang, an_all or None, context=title, dub=dub, source_lang=src_lang,
+                                            allow_noncommercial=True, mode="replace")
+            p.save_timeline(ltl, f"autopilot: {lang} {'dub' if dub else 'subtitles'}", branch=branch)
+            stats, rep = qa.render_with_qa(p, p.timeline(branch), f"main_{branch}", max_rounds=1)
+            warn = [str(w) for w in (review.get("warnings") or [])][:3] if isinstance(review, dict) else []
+            return {"output": str(Path(stats["output"]).relative_to(p.dir)), "status": rep["status"], "warnings": warn}
+
+        r = job.stage(f"{'dub' if dub else 'subs'}-{lang}", run)
+        name = LANGS.get(lang, (lang,))[0]
+        label = f"نسخة مدبلجة {name}" if dub else f"نسخة مترجمة {name}"
+        if dub and lang == "ar":
+            label += " (صوت Kareem — ترخيصه التجاري غير مؤكد: راجعه قبل نشر فيديو بيكسب)"
+        outs.append({"label": label, "path": r["output"], "kind": "language", "lang": lang})
+    return outs
 
 
 # ---------------------------------------------------------------- make a new video

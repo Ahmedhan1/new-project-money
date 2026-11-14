@@ -86,6 +86,11 @@ textarea{min-height:110px}
     <label>تعليمات إضافية (اختياري)</label>
     <textarea id="instructions" placeholder="مثلاً: ركّز على الجزء اللي بيتكلم فيه عن المريخ، وشيل المقدمة"></textarea>
 
+    <label>دبلجة بصوت</label>
+    <div class="opts" id="dub"><label><input type="checkbox" value="ar"> عربي</label><label><input type="checkbox" value="en"> English</label></div>
+    <label>ترجمة مكتوبة (subtitles)</label>
+    <div class="opts" id="subs"><label><input type="checkbox" value="ar"> عربي</label><label><input type="checkbox" value="en"> English</label></div>
+    <p class="hint">أو اكتبها في التعليمات («دبلجه عربي وترجمه») وهو هيفهم.</p>
     <label>كام شورت؟</label>
     <input type="number" id="shorts" min="0" max="10" value="3">
     <label>انشره على</label>
@@ -125,7 +130,7 @@ textarea{min-height:110px}
 const $ = (s) => document.querySelector(s);
 const H = { "Content-Type": "application/json", "X-NEXUS-CSRF": "1" };
 const STAGE = { import: "استيراد", analyze: "تحليل", edit: "تعديل", render: "رندر", shorts: "شورتس", platforms: "نسخ المنصات",
-  discover: "اختيار الفكرة", project: "مشروع", research: "بحث", script: "سكريبت", "review-script": "مراجعة", narrate: "تعليق صوتي",
+  discover: "اختيار الفكرة", "dub-ar": "دبلجة عربي", "dub-en": "دبلجة إنجليزي", "subs-ar": "ترجمة عربي", "subs-en": "ترجمة إنجليزي", project: "مشروع", research: "بحث", script: "سكريبت", "review-script": "مراجعة", narrate: "تعليق صوتي",
   visuals: "صور ومشاهد", storyboard: "ستوري بورد", "render-qa": "رندر وفحص", produce: "إنتاج" };
 const STATUS = { queued: ["في الطابور", "queued"], running: ["شغال…", "running"], done: ["خلص ✓", "done"], failed: ["فشل", "failed"], cancelled: ["اتلغى", "failed"] };
 let project = null, analysisJob = null, picked = new Set(), opts = null;
@@ -217,7 +222,7 @@ $("#go-edit").onclick = async (e) => {
   const m = $("#msg-edit"), url = $("#url").value.trim(), goal = chosen($("#goal"))[0];
   if (!project && !url) return msg(m, "ارفع فيديو أو حط لينك الأول");
   const body = { mode: "edit", goal, style: $("#style").value, instructions: $("#instructions").value, shorts: Number($("#shorts").value || 0),
-    platforms: chosen($("#plats-edit")), ...(url ? { url } : { project }) };
+    platforms: chosen($("#plats-edit")), dub: chosen($("#dub")), subtitles: chosen($("#subs")), ...(url ? { url } : { project }) };
   if (goal === "summary") body.target_seconds = Math.round(Number($("#minutes").value) * 60);
   if (goal === "scenes") {
     body.scenes = [...picked].map((k) => k.split("-").map(Number)).sort((a, b) => a[0] - b[0]);
@@ -261,6 +266,12 @@ async function loadRuns() {
     el.querySelector(".steps").replaceChildren(...(r.stages || []).map((s) => {
       const sp = document.createElement("span"); sp.className = s.status; sp.textContent = STAGE[s.name] || s.name; return sp;
     }));
+    if (["queued", "running"].includes(r.status)) {
+      const b = document.createElement("button"); b.className = "go"; b.style.cssText = "margin-top:8px;background:transparent;color:var(--bad);border:1px solid var(--bad)";
+      b.textContent = r.status === "running" ? "إلغاء (بيقف بعد الخطوة الحالية)" : "إلغاء";
+      b.onclick = async () => { b.disabled = true; try { await api(`/api/jobs/${r.id}/cancel`, { method: "POST" }); loadRuns(); } catch (x) { alert(x.message); } };
+      el.append(b);
+    }
     if (r.status === "failed" && r.error) {
       const e = document.createElement("div"); e.className = "err"; e.textContent = r.error.split("\n")[0].slice(0, 400); el.append(e);
       const b = document.createElement("button"); b.className = "go"; b.style.marginTop = "8px"; b.textContent = "حاول تاني (بيكمل من مكان ما وقف)";
