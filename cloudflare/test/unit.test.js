@@ -152,3 +152,13 @@ test("Kaggle errors never echo the token", async () => {
   const f = async () => new Response(JSON.stringify({ code: 401, message: "bad token KGAT_secret_value_x" }), { status: 401, headers: { "Content-Type": "application/json" } });
   await assert.rejects(kaggle.quota({ token: "KGAT_secret_value_x", kind: "bearer" }, f), (e) => e.auth && !e.message.includes("KGAT_secret_value_x"));
 });
+
+test("password change: secrets saved under the old password are re-encrypted, not lost", async () => {
+  const e = env();
+  await sec.putSecret(e, "kaggle", { token: "KGAT_keep_me_please" });
+  const changed = { ...e, OWNER_PASSWORD: "Ahmedhani", OWNER_PASSWORD_OLD: PW };
+  assert.equal((await sec.getSecret(changed, "kaggle")).token, "KGAT_keep_me_please");
+  const after = { ...e, OWNER_PASSWORD: "Ahmedhani" };      // old secret removed: still readable (re-encrypted)
+  assert.equal((await sec.getSecret(after, "kaggle")).token, "KGAT_keep_me_please");
+  assert.equal(sec.ownerConfigured(after), true);
+});

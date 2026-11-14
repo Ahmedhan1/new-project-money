@@ -12,7 +12,7 @@ const enc = new TextEncoder();
 const dec = new TextDecoder();
 export const SESSION_COOKIE = "nx_s";
 const SESSION_TTL_S = 7 * 24 * 3600;
-export const MIN_PASSWORD_LEN = 12;
+export const MIN_PASSWORD_LEN = 8;
 const MAX_FAILURES = 10;
 const FAILURE_WINDOW_S = 15 * 60;
 
@@ -115,14 +115,14 @@ export async function recordFailure(db, ip, now = Date.now()) {
 }
 
 // ---------------------------------------------------------------- vault (encrypted settings)
-async function vaultKey(env) {
+async function vaultKey(env, password = env.OWNER_PASSWORD) {
   let salt = await getSetting(env.DB, "vault_salt");
   if (!salt) {
     salt = b64url(crypto.getRandomValues(new Uint8Array(16)));
     await env.DB.prepare("INSERT OR IGNORE INTO settings (k, v, updated) VALUES ('vault_salt', ?, ?)").bind(salt, Date.now()).run();
     salt = await getSetting(env.DB, "vault_salt");
   }
-  return hkdf(env.OWNER_PASSWORD, fromB64url(salt), "vault", ["encrypt", "decrypt"], { name: "AES-GCM", length: 256 });
+  return hkdf(password, fromB64url(salt), "vault", ["encrypt", "decrypt"], { name: "AES-GCM", length: 256 });
 }
 
 export async function getSetting(db, k) {
@@ -150,10 +150,23 @@ export async function getSecret(env, name) {
   if (!raw) return null;
   const [ver, iv, ct] = raw.split(".");
   if (ver !== "v1") return null;
-  try {
-    const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: fromB64url(iv), additionalData: enc.encode(name) }, await vaultKey(env), fromB64url(ct));
+  const open = async (password) => {
+    const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: fromB64url(iv), additionalData: enc.encode(name) },
+      await vaultKey(env, password), fromB64url(ct));
     return JSON.parse(dec.decode(pt));
+  };
+  try {
+    return await open(env.OWNER_PASSWORD);
   } catch {
+    // Password change: while the OWNER_PASSWORD_OLD secret is set, secrets saved under the old password are opened with
+    // it and re-encrypted under the new one, so the owner does not have to enter the Kaggle/YouTube keys again.
+    if (env.OWNER_PASSWORD_OLD) {
+      try {
+        const value = await open(env.OWNER_PASSWORD_OLD);
+        await putSecret(env, name, value);
+        return value;
+      } catch { /* fall through */ }
+    }
     return { undecryptable: true }; // OWNER_PASSWORD changed since it was saved: the owner must enter it again
   }
 }
