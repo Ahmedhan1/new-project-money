@@ -1,0 +1,27 @@
+{
+  // NEXUS control plane on Cloudflare Workers - FREE plan only (no R2, no D1 needed, no paid add-ons; nothing here needs a card).
+  // Heavy work never runs here: every job is pushed to the owner's single Kaggle account (private kernels, free GPU).
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "nexus-cloud",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": true },
+  // All state lives in one SQLite-backed Durable Object (free plan; no separate database, no extra token permission).
+  // Tables are created by the object itself on first use (src/schema.js).
+  "durable_objects": { "bindings": [{ "name": "STORE", "class_name": "NexusStore" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["NexusStore"] }],
+  // Free plan: up to 5 cron triggers. Checks running Kaggle jobs every 5 minutes.
+  "triggers": { "crons": ["*/5 * * * *"] },
+  "observability": { "enabled": true },
+  "vars": {
+    "MAX_RUNTIME_S": "10800",       // default per-job Kaggle time limit (3 h); hard cap 12 h
+    "MIN_GPU_RESERVE_S": "3600",    // refuse new GPU jobs when the weekly Kaggle GPU quota left is below this
+    // Git ref of NEXUS the studio session clones. The simple UI + autopilot live on this branch until PR 13 is merged;
+    // then set it back to "main".
+    "STUDIO_REF": "claude/cloudflare-control-plane"
+  }
+  // Secrets (never in this file): OWNER_PASSWORD (required). Optional: KAGGLE_API_TOKEN, KAGGLE_USERNAME.
+  // Set them in the dashboard (Worker > Settings > Variables and Secrets) or `npx wrangler secret put OWNER_PASSWORD`.
+}

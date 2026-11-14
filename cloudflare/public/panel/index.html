@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEXUS Cloud</title>
+<link rel="stylesheet" href="/panel/app.css">
+<script src="/panel/app.js" defer></script>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="logo">N</span> NEXUS Cloud <small>Cloudflare + Kaggle</small></div>
+  <nav id="nav" hidden>
+    <button data-view="dash" class="tab active">لوحة التحكم</button>
+    <button data-view="new" class="tab">شغلانة جديدة</button>
+    <button data-view="settings" class="tab">الإعدادات</button>
+    <button id="logout" class="ghost">خروج</button>
+  </nav>
+</header>
+
+<main>
+  <section id="view-setup" class="card narrow" hidden>
+    <h2>خطوة أولى: كلمة سر المالك</h2>
+    <p>لسه مفيش كلمة سر. ادخل على Cloudflare &larr; Workers &amp; Pages &larr; <b>nexus-cloud</b> &larr; Settings &larr; Variables and Secrets
+      &larr; Add &larr; النوع <b>Secret</b>، الاسم <code>OWNER_PASSWORD</code>، والقيمة كلمة سر طويلة (<span id="minlen">12</span> حرف على الأقل). بعدين Deploy وارجع هنا.</p>
+  </section>
+
+  <section id="view-login" class="card narrow" hidden>
+    <h2>تسجيل الدخول</h2>
+    <form id="login-form">
+      <label>كلمة السر<input type="password" name="password" autocomplete="current-password" required></label>
+      <button type="submit">دخول</button>
+      <p class="msg" id="login-msg"></p>
+    </form>
+  </section>
+
+  <section id="view-dash" hidden>
+    <div class="card studio" id="studio">
+      <div class="row between">
+        <div>
+          <h2>استوديو NEXUS الكامل</h2>
+          <p class="hint">نفس البرنامج اللي كان على الويندوز بكل مميزاته — مونتاج، شورتس، إنشاء فيديو من فكرة، تحريك، دبلجة وترجمة، مسلسلات، تصدير للمنصات ويوتيوب —
+            شغال على Kaggle (GPU T4) وبتفتحه من هنا من أي متصفح.</p>
+        </div>
+        <span class="badge" id="studio-badge">مقفول</span>
+      </div>
+      <div id="studio-steps" class="steps"></div>
+      <div class="row" id="studio-controls">
+        <a id="studio-open" class="btn big" href="/" hidden>افتح الاستوديو ←</a>
+        <button id="studio-start" class="big">شغّل الاستوديو</button>
+        <button id="studio-stop" class="ghost danger" hidden>اقفل واحفظ الشغل</button>
+      </div>
+      <div class="row" id="studio-opts">
+        <label class="inline"><input type="checkbox" id="studio-gpu" checked> GPU (أسرع، بيصرف من رصيد الأسبوع)</label>
+        <label class="inline">مدة الجلسة (ساعات)<input type="number" id="studio-hours" min="1" max="12" step="1" value="6"></label>
+        <label class="inline">يقفل لوحده لو مفيش استخدام (دقيقة)<input type="number" id="studio-idle" min="10" max="240" step="5" value="45"></label>
+      </div>
+      <p class="msg" id="studio-msg"></p>
+      <details id="studio-log-box" hidden><summary>تفاصيل التشغيل</summary><pre id="studio-log"></pre></details>
+    </div>
+    <div class="grid">
+      <div class="card stat"><div class="k">Kaggle</div><div class="v" id="st-kaggle">—</div><div class="s" id="st-user"></div></div>
+      <div class="card stat"><div class="k">رصيد GPU الأسبوع ده</div><div class="v" id="st-quota">—</div>
+        <div class="bar"><span id="st-bar"></span></div><div class="s" id="st-refresh"></div></div>
+      <div class="card stat"><div class="k">الشغلانات</div><div class="v" id="st-jobs">—</div><div class="s" id="st-worker"></div></div>
+    </div>
+    <div class="card">
+      <div class="row between"><h2>شغلانات Kaggle المباشرة (متقدم)</h2><button id="refresh" class="ghost">تحديث من Kaggle</button></div>
+      <p class="hint">كل 5 دقايق Cloudflare بيسأل Kaggle لوحده عن الشغلانات الشغالة. الشغل التقيل كله بيتعمل على Kaggle (GPU T4 مجاني).</p>
+      <div id="jobs" class="jobs"></div>
+    </div>
+  </section>
+
+  <section id="view-new" class="card" hidden>
+    <h2>شغلانة جديدة على Kaggle</h2>
+    <form id="job-form">
+      <label>النوع
+        <select name="task" id="task"></select>
+      </label>
+      <p class="hint" id="task-help"></p>
+      <label>اسم للشغلانة (اختياري)<input name="title" maxlength="120"></label>
+      <label>الإعدادات (JSON)<textarea name="params" id="params" rows="12" spellcheck="false" dir="ltr"></textarea></label>
+      <div class="row">
+        <label class="inline"><input type="checkbox" name="gpu" id="gpu" checked> استخدم GPU</label>
+        <label class="inline">أقصى وقت (ساعات)<input type="number" name="hours" min="0.1" max="12" step="0.5" value="3"></label>
+      </div>
+      <button type="submit">ابعت لـ Kaggle</button>
+      <p class="msg" id="job-msg"></p>
+    </form>
+  </section>
+
+  <section id="view-settings" hidden>
+    <div class="card">
+      <h2>مفتاح Kaggle API (سري)</h2>
+      <div id="kaggle-state" class="state"></div>
+      <form id="kaggle-form">
+        <label>المفتاح — <span class="hint">من kaggle.com &larr; Settings &larr; API &larr; Generate New Token. تقدر تلصق التوكن (KGAT_…) أو محتوى ملف kaggle.json كله.</span>
+          <textarea name="token" rows="3" dir="ltr" autocomplete="off" spellcheck="false" required></textarea></label>
+        <label>اسم المستخدم على Kaggle (اختياري — بيتعرف لوحده)<input name="username" dir="ltr" autocomplete="off"></label>
+        <div class="row">
+          <button type="submit">اختبر واحفظ</button>
+          <button type="button" id="kaggle-delete" class="danger">امسح المفتاح</button>
+        </div>
+        <p class="msg" id="kaggle-msg"></p>
+      </form>
+      <p class="hint">المفتاح بيتجرب على Kaggle الأول، وبعدين بيتحفظ متشفّر (AES-256-GCM) في تخزين Cloudflare بمفتاح مشتق من كلمة سر المالك. عمره ما بيرجع للمتصفح.
+        لو عايز أمان أعلى: حطه بدل كده كـ Secret على Cloudflare باسم <code>KAGGLE_API_TOKEN</code> — ساعتها بيتقدم على المحفوظ هنا.</p>
+    </div>
+    <div class="card">
+      <h2>قناة يوتيوب</h2>
+      <div id="yt-state" class="state"></div>
+      <div id="yt-connected" hidden class="row">
+        <a class="btn" id="yt-reconnect" href="/panel/api/youtube/connect">اربط قناة تانية / جدد الربط</a>
+        <button type="button" id="yt-delete" class="danger">افصل القناة</button>
+      </div>
+      <details id="yt-setup">
+        <summary><b>خطوات الربط (مرة واحدة، مجانية ومن غير كارت)</b></summary>
+        <ol class="hint">
+          <li>افتح <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener noreferrer">Google Cloud Console</a> واعمل مشروع جديد.</li>
+          <li>APIs &amp; Services ← Library: فعّل <b>YouTube Data API v3</b> و <b>YouTube Analytics API</b>.</li>
+          <li>OAuth consent screen: النوع External، وضيف إيميلك كـ Test user، وبعدين اضغط <b>Publish app</b> (عشان الربط مايقعش كل 7 أيام).</li>
+          <li>Credentials ← Create credentials ← OAuth client ID ← النوع <b>Web application</b>.</li>
+          <li>في Authorized redirect URIs حط الرابط ده بالظبط:<br><code id="yt-redirect" dir="ltr"></code></li>
+          <li>انسخ Client ID و Client secret وحطهم هنا، وبعدين اضغط «اربط القناة».</li>
+        </ol>
+        <form id="yt-form">
+          <label>Client ID<input name="client_id" dir="ltr" autocomplete="off" required></label>
+          <label>Client secret<input name="client_secret" type="password" dir="ltr" autocomplete="off" required></label>
+          <button type="submit">احفظ</button>
+        </form>
+        <a class="btn" id="yt-connect" href="/panel/api/youtube/connect" hidden>اربط القناة مع Google ←</a>
+      </details>
+      <p class="msg" id="yt-msg"></p>
+      <p class="hint">المفاتيح بتتحفظ متشفّرة هنا، وكل جلسة استوديو بتاخدها وقت التشغيل بس (مش بتتكتب في النوتبوك). النشر من «Publishing Studio» جوه الاستوديو،
+        والفيديوهات بتترفع <b>Private</b> لحد ما توافق عليها بنفسك.</p>
+    </div>
+    <div class="card">
+      <h2>مجاني بالكامل</h2>
+      <ul class="hint">
+        <li>Cloudflare Workers (الخطة المجانية) + Durable Object + Cron — من غير كارت.</li>
+        <li>Kaggle: حساب واحد بس، نوتبوكات خاصة (Private)، GPU T4 مجاني ضمن الرصيد الأسبوعي. لوحة التحكم بترفض شغل GPU جديد لو الرصيد قرب يخلص.</li>
+        <li>مفيش R2 ولا أي خدمة محتاجة وسيلة دفع. الملفات الناتجة بتفضل على Kaggle وبتتحمل من هنا.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+<template id="job-tpl">
+  <article class="job">
+    <div class="row between">
+      <div><span class="badge"></span> <b class="jt"></b> <code class="jtask"></code></div>
+      <div class="actions"></div>
+    </div>
+    <div class="meta"></div>
+    <pre class="err" hidden></pre>
+    <ul class="files"></ul>
+    <details class="log" hidden><summary>اللوج</summary><pre></pre></details>
+  </article>
+</template>
+</body>
+</html>

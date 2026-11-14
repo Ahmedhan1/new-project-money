@@ -1314,6 +1314,8 @@ def plan_variants(analysis: dict, moment: dict, n: int = 3, use_llm: bool = Fals
     sents = usable_sentences(an)
     sl = moment.get("sentences") or []
     titles = _hook_titles(moment.get("text", ""), moment.get("title") or suggest_title(moment.get("text", "")), use_llm)
+    if not titles:  # no speech (music/visual-only video): no words to title the short with
+        titles = [moment.get("title") or ""]
     cc = moment.get("context_check") or {}
     k = None
     why_no_cold = None

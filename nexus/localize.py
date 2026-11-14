@@ -263,6 +263,46 @@ def narration_units(tl: dict, analyses: dict | None = None) -> list[dict]:
     return units
 
 
+def _voice_reference(project, tl: dict, analyses: dict | None) -> dict | None:
+    """For SILMA voice cloning: a clean 4-7.5 s line of the original speaker (wav + transcript), or None."""
+    from .speech import silma
+    if not silma.available() or not analyses:
+        return None
+    for c in tl.get("clips", []):
+        src = c.get("src")
+        ref = silma.pick_reference(analyses.get(src) or {}) if src else None
+        if ref:
+            try:
+                wav = silma.extract_reference(src, ref, project.dir / "audio" / "voice_reference.wav")
+                return {"wav": str(wav), "text": ref["text"]}
+            except Exception:  # noqa: BLE001 - no reference: Piper voice instead
+                return None
+    return None
+
+
+def _restore_background(project, out: dict, review: dict, lang: str) -> None:
+    """Dubbed (muted) clips get their own music/effects back from a Demucs background stem (GPU only)."""
+    from .audio import separate
+    muted = {c["id"] for c in out["clips"] if c.get("mute") and c.get("type") == "video"}
+    if not muted:
+        return
+    if not separate.available():
+        review["checks"].append(qa._c(f"dub background [{lang}]", False, "no source separation here (GPU studio only): "
+                                      "the original music/effects under dubbed scenes are silent", "minor"))
+        return
+    bg = {}
+    for src in {c["src"] for c in out["clips"] if c.get("id") in muted}:
+        try:
+            bg[src] = str(separate.background(src, project.dir / "audio" / "separation"))
+        except Exception as e:  # noqa: BLE001 - the dub still works, only without its background
+            review["checks"].append(qa._c(f"dub background [{lang}]", False, f"separation failed: {str(e)[:160]}", "minor"))
+    items = separate.background_items(out, bg, muted)
+    out.setdefault("audio", []).extend(items)
+    if items:
+        review["checks"].append(qa._c(f"dub background [{lang}]", True,
+                                      f"original music/effects kept under {len(items)} dubbed scene(s) ({separate.LICENSE})", "minor"))
+
+
 def localize(project, tl: dict, lang: str, analyses: dict | None = None, context: str = "", dub: bool = True,
              source_lang: str = "en", allow_noncommercial: bool = False, mode: str = "replace") -> tuple[dict, dict]:
     """Return (localised timeline, language review). The source timeline is not modified."""
@@ -296,12 +336,14 @@ def localize(project, tl: dict, lang: str, analyses: dict | None = None, context
     review["lines"] = [{"source": s, "target": t} for s, t in zip(src_lines, lines)]
     voice_info = None
     voice_id = None
+    reference = _voice_reference(project, tl, analyses) if dub and lang != source_lang else None
     if dub and lang != source_lang and lp.get(lang):
         try:
             voice_id = lp.voice_for(lang, allow_noncommercial)["id"]
         except LookupError as e:
-            review["checks"].append(qa._c(f"dub [{lang}]", False, f"not produced: {e}", "minor"))
-            dub = False
+            if not reference:  # SILMA (commercial licence, cloned voice) can still dub without a Piper voice
+                review["checks"].append(qa._c(f"dub [{lang}]", False, f"not produced: {e}", "minor"))
+                dub = False
     if dub and lang != source_lang:
         out["audio"] = []
         vo_delay: dict = {}
@@ -309,11 +351,11 @@ def localize(project, tl: dict, lang: str, analyses: dict | None = None, context
         for u, line in zip(units, lines):
             c = out["clips"][u["clip"]]
             wav = adir / f"u{u['clip']:03d}.wav"
-            voice_info = tts.synthesize(line, wav, LANGS[lang]["tts"], voice=voice_id, length_scale=PACE.get(LANGS[lang]["tts"], 1.0))
+            voice_info = tts.synthesize(line, wav, LANGS[lang]["tts"], voice=voice_id, reference=reference, length_scale=PACE.get(LANGS[lang]["tts"], 1.0))
             slot = clip_duration(c)
             need = voice_info["duration"] + 0.25
             if need > slot * 1.05:  # 1st: a slightly brisker read
-                voice_info = tts.synthesize(line, wav, LANGS[lang]["tts"], voice=voice_id,
+                voice_info = tts.synthesize(line, wav, LANGS[lang]["tts"], voice=voice_id, reference=reference,
                                             length_scale=PACE.get(LANGS[lang]["tts"], 1.0) * 0.88)
                 need = voice_info["duration"] + 0.25
             if mode == "voiceover":
@@ -322,7 +364,7 @@ def localize(project, tl: dict, lang: str, analyses: dict | None = None, context
                 # gentle slow-down (>= VOICEOVER_MIN_SPEED) with a review flag. (The first German voice-over slowed
                 # 19 of 39 clips, down to 0.6x.)
                 if voice_info["duration"] + 0.1 > slot:
-                    voice_info = tts.synthesize(line, wav, LANGS[lang]["tts"], voice=voice_id,
+                    voice_info = tts.synthesize(line, wav, LANGS[lang]["tts"], voice=voice_id, reference=reference,
                                                 length_scale=PACE.get(LANGS[lang]["tts"], 1.0) * 0.8)
                 d = voice_info["duration"]
                 vo_delay[u["clip"]] = round(min(VOICEOVER_DELAY, max(0.0, slot - d - 0.1)), 3)
@@ -347,7 +389,7 @@ def localize(project, tl: dict, lang: str, analyses: dict | None = None, context
                 if mode == "voiceover":  # UN-style voice-over: the real speaker stays audible underneath
                     c["volume"] = round(float(c.get("volume", 1.0)) * VOICEOVER_ORIGINAL_GAIN, 3)
                 else:
-                    c["mute"] = True  # original speech replaced (no source separation deployed: original music/effects go too)
+                    c["mute"] = True  # original speech replaced; its music/effects come back from a Demucs stem (GPU)
             c["narration"] = line
             review["checks"].append(qa.dub_review(wav, line, lang))
         starts = clip_starts(out)
@@ -378,6 +420,7 @@ def localize(project, tl: dict, lang: str, analyses: dict | None = None, context
                 last["freeze"] = {"at": round(max(0.0, clip_duration(last) - 0.05), 3), "duration": round(over, 3)}
                 review["checks"].append(qa._c(f"voice-over end [{lang}]", True,
                                               f"final frame held {over:.1f}s so the last line finishes", "minor"))
+        _restore_background(project, out, review, lang)
         out["subtitles"] = subs.fix_timing(cues)
         review["voice"] = {k2: voice_info[k2] for k2 in ("voice", "license", "commercial", "engine")} if voice_info else None
         review["dub_mode"] = mode

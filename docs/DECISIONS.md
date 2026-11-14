@@ -195,3 +195,78 @@ uninstall unless the user ticks removal), localhost only. Chosen over PyInstalle
 `python -m nexus` service processes, which an embedded interpreter supports unchanged. Updates only from this
 repository's releases and only after the published SHA-256 matches. Built and tested only on a real Windows VM
 (`windows-installer.yml`); a Linux build is never presented as a Windows verification.
+
+**D-24 Cloudflare Workers Free is the hosted control plane; Kaggle does all heavy work (owner decision, 2026-11-13).**
+The FastAPI app cannot run on Workers (FFmpeg, SQLite files, models), so `cloudflare/` is a small JS control plane:
+owner login (`OWNER_PASSWORD` secret, HMAC session cookie, CSRF header, login lockout), the Kaggle API key saved from the
+Settings page AES-GCM-encrypted (key derived from `OWNER_PASSWORD`; a `KAGGLE_API_TOKEN` Worker secret overrides
+it), and the job ledger, both in one SQLite-backed Durable Object (free; D1 was dropped because it needs an
+extra API-token permission and a separate database), polled by a 5-minute cron. Jobs call the same REST endpoints as kaggle CLI 2.x
+(`api.kaggle.com/v1/kernels.KernelsApiService/*`) and push the unchanged `worker_kit` script (frozen by
+`scripts/cloudflare/build_worker_script.py`, checked by a fast test) with the bundle embedded, so result/checkpoint
+contracts are identical and `retry` resumes from `result.json`'s checkpoint. Zero spend: no R2 (needs a payment method),
+outputs stay on Kaggle and are downloaded through fresh signed URLs; GPU jobs are refused when the measured weekly quota
+left is under `MIN_GPU_RESERVE_S`. Kernels are always private; one Kaggle account only.
+
+**D-25 The cloud studio runs the WHOLE NEXUS app in a Kaggle session behind the Cloudflare gateway (owner request,
+2026-11-14: "full control, everything I did from the Windows browser").** Re-implementing ~100 routes on Workers is not
+possible (no FFmpeg/models there), so `cloudflare/studio/studio_kernel.py` runs `python -m nexus serve` in a private
+Kaggle kernel (GPU T4 or CPU, owner's choice) in hosted mode (`NEXUS_API_TOKEN`, fresh per session), opens a
+cloudflared quick tunnel and reports it to the Worker; the Worker proxies every non-`/panel` path of a logged-in owner
+with the bearer token, so the browser sees exactly the Windows UI at the Worker's URL. Bounded use, not serving: one
+owner, sessions end on Stop, after `idle_min` without requests, or 20 min before the Kaggle limit. Persistence: the
+session copies NEXUS_HOME (without models/caches) to its output; the next session mounts it (Kaggle path
+`/kaggle/input/notebooks/<owner>/<slug>/`, seen live) from the other notebook of a pair (`nexus-studio-a/b`), and a
+session that could not load the previous work never saves over it. YouTube: the app's loopback OAuth cannot work
+remotely, so the Worker runs Google's web-server flow (PKCE, owner's own Web client) and hands the keys to each
+session as `NEXUS_PUB_YOUTUBE_MAIN_*` env vars (read by `publishing/creds.py`); they are never in a notebook.
+
+**D-26 Simple mode is the default screen; one autopilot job does the whole path (owner request, 2026-11-14:
+"send a video and it edits/cuts/shortens it and makes it fit Shorts or any platform - or it finds an idea, a link or a
+script - automatically, with smart choices and a simple working UI").** `nexus/autopilot.py` chains the existing
+engines as durable stages (import -> analyze -> director edit / chosen scenes / summary -> QA render -> shorts ->
+platform packages, or research/script -> create_video -> packages); `nexus/ui/simple.html` (`/simple`) is the only
+screen the owner needs; the gateway serves it at `/` and the classic UI at `/app/`. Links: an owner-supplied DIRECT media
+file URL is a plain GET of a file (nothing billable), so autopilot fetches it with the SSRF-safe `ingest.fetch` without
+the costguard host list (paid hosts still refused); platform PAGE URLs (YouTube, TikTok, ...) stay refused - their terms
+forbid downloading. Discover picks the topic from Wikipedia pageview trends in a niche (emerging > rising), and says why.
+
+**D-27 Big uploads: chunked through the gateway, then reduced to 1080p (owner request, 2026-11-14).** Cloudflare accepts
+at most 100 MB per request, so the simple UI sends files over 80 MB as 48 MB pieces (`PUT /api/upload/chunk`, each
+retried; the body-limit middleware allows 64 MB on that path only), joined by `POST /api/upload/finish` (refused when a
+piece is missing or the sizes disagree). A durable `media-prepare` job then reduces the size when worthwhile
+(`nexus/media/optimize.py`: > 1080p, > 12 Mbit/s, or a non-H.264 file over 300 MB -> 1080p H.264 at "balanced"
+constant quality, NVENC on the studio GPU, CPU fallback; kept only if smaller; the optimised copy REPLACES the original
+to keep one copy within the session's 20 GB output), imports and analyses it. Limit 20 GB per upload. Measured locally:
+a 208 MB 4K/55 Mbit/s file -> 12 MB 1080p in 17 s.
+
+**D-28 Simple-mode edits: an editor brain picks the story, a finishing pass makes it look edited (owner feedback,
+2026-11-14: "a 5-minute request just cut the first 5 minutes", "editing and effects are very weak").** `nexus/editor_ai.py`:
+(1) selection - with a transcript the local LLM (now fully offloaded to the GPU, `n_gpu_layers=-1`) reads the numbered
+transcript and returns a story (hook first, main ideas in order, conclusive ending, whole video covered) which is fitted
+to the requested length by adding the next-best / dropping the weakest lines; without the LLM or a transcript, every
+sentence/shot is scored (density, motion, sharpness, speech share, faces, analysis moments/hook) and the timeline is split
+into equal windows that each contribute their best material - ties never fall back to timeline order. (2) polish - xfade
+transitions only where the source jumps (style sets the family), alternating 1.08 reframes on jump cuts inside a shot,
+Ken Burns push-in on shots >= 6 s, a grade per style, a CC0 music bed from the asset library ducked under speech, fades.
+Researched first (open-source auto-editors: transcript + LLM moment picking + FFmpeg; editing craft: split edits, cutting
+on action, punch-ins). Not done yet: J/L split edits (the renderer cuts picture and sound together), better Arabic voice
+(candidate: SILMA TTS, F5-TTS based, Apache-2.0 weights) and timing-fitted dubbing.
+
+**D-29 Dubbing voice: SILMA TTS with the original speaker's cloned voice on the GPU, Piper otherwise.** Owner: "the
+Arabic is very bad". Research (2026-11): SILMA TTS v1 (F5-TTS architecture, 150 M, Apache-2.0 weights) is the open
+Arabic/English model with a commercial licence and voice cloning. Tested on Kaggle: it installs on Python 3.13 next to
+Kaggle's torch, and Whisper read its Arabic back almost word for word; on CPU it took ~87 s per 5 s line, so NEXUS uses
+it only with a CUDA GPU (`nexus/speech/silma.py`, installed by GPU studio sessions). The reference is a clean 4-7.5 s line
+of the owner's own video (`pick_reference`), so the dub keeps the speaker's timbre; the existing timing fitter
+(brisker read, L-cut spill, gentle picture slow-down) is unchanged and now drives SILMA's speed. Any SILMA failure falls
+back to Piper/eSpeak inside `tts.synthesize`.
+
+**D-30 No "download from any site" (yt-dlp / IDM-style); a free legal video library instead; dubs keep their background
+(owner request, 2026-11-14).** A general downloader for YouTube/TikTok/... pages stays out: it contradicts PROJECT_BRIEF
+and ingest.py's rule (platform terms forbid it; re-uploading other people's videos gets channels removed), and the owner
+had already tried to process a commercial adult video. Instead `nexus/library.py` searches official public APIs - NASA
+(public domain), Internet Archive (only Creative Commons / Public Domain licence URLs) and Wikimedia Commons (video files,
+non-free excluded) - and the simple UI imports a pick through autopilot, recording licence, credit and page as the media's
+rights. Dubbing: muted (dubbed) clips get their own music/effects back as "ambience" audio items cut from a Demucs
+two-stem background (`nexus/audio/separate.py`, MIT, GPU studio only); stretched clips stay quiet to avoid drift.

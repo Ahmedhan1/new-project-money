@@ -229,6 +229,49 @@ def analyze_(job: jobs.Job) -> dict:
     return job.stage("analyze", run)
 
 
+@jobs.handler("media-prepare")
+def media_prepare(job: jobs.Job) -> dict:
+    """A big upload: reduce the size when worthwhile (1080p H.264, GPU when available), import it, analyse it."""
+    import json
+    from . import project as prj
+    from .media import analyze, optimize
+    a = job.params
+    p = prj.Project(a["project"])
+    src = Path(a["file"])
+
+    def shrink():
+        if not a.get("optimize", True):
+            return {"path": str(src), "reencoded": False, "why": ["size reduction switched off"]}
+        if not src.exists():  # resumed after the import already consumed it
+            return {"path": str(src), "reencoded": False, "why": ["already imported"]}
+        rep = optimize.optimize(src, src.with_name(src.stem + "_1080p.mp4"),
+                                on_progress=lambda i: job.progress(0.6 * float(i.get("fraction") or 0)))
+        if rep["reencoded"]:
+            src.unlink(missing_ok=True)  # keep one copy: the optimised file replaces the original
+        return rep
+
+    rep = job.stage("optimize", shrink)
+
+    def importing():
+        f = Path(rep["path"])
+        m = p.import_media(f, move=True)
+        import shutil
+        shutil.rmtree(f.parent, ignore_errors=True)  # the per-upload staging folder
+        return {"media": m["id"]}
+
+    mid = job.stage("import", importing)["media"]
+    p = prj.Project(a["project"])
+    m = next(x for x in p.data["media"] if x["id"] == mid)
+
+    def run():
+        an = analyze.analyze(m["path"])
+        (p.dir / "reports" / f"analysis_{m['id']}.json").write_text(json.dumps(an, ensure_ascii=False), encoding="utf-8")
+        return {"issues": an["issues"], "scenes": len(an["scenes"]), "duration": an["probe"]["duration"]}
+
+    out = job.stage("analyze", run)
+    return {"project": p.id, "media": mid, "optimize": rep, **out}
+
+
 @jobs.handler("remix")
 def remix_(job: jobs.Job) -> dict:
     from . import project as prj, remix
@@ -488,3 +531,7 @@ def archive_retrieve(job: jobs.Job) -> dict:
 def archive_recover(job: jobs.Job) -> dict:
     from . import archive
     return job.stage("recover", lambda: archive.recover())
+
+
+# Simple mode: one request -> finished videos (registered by import)
+from . import autopilot as _autopilot  # noqa: E402,F401

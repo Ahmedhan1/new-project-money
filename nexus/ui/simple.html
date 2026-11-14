@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEXUS</title>
+<style>
+:root{--bg:#0f1220;--card:#181c30;--ink:#eef0f8;--mute:#9aa2bd;--line:#2a3050;--acc:#7c74ff;--good:#34d399;--bad:#fb7185;--warn:#fbbf24}
+@media (prefers-color-scheme: light){:root{--bg:#f5f6fb;--card:#fff;--ink:#141826;--mute:#5b6378;--line:#e3e6ef;--acc:#4f46e5;--good:#0f8a5f;--bad:#be123c;--warn:#a16207}}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;font:16px/1.6 system-ui,"Segoe UI",Tahoma,sans-serif;background:var(--bg);color:var(--ink)}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+header b{font-size:18px}header a{color:var(--mute);font-size:13px;text-decoration:none;margin-inline-start:12px}
+main{max-width:760px;margin:0 auto;padding:16px}
+.big{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.big button{padding:18px 10px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:700;cursor:pointer}
+.big button small{display:block;font-weight:400;color:var(--mute);font-size:12px}
+.big button.on{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc) inset}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+h2{font-size:17px;margin:0 0 10px}label{display:block;margin:12px 0 4px;font-weight:600}
+input[type=text],input[type=url],input[type=number],textarea,select{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+textarea{min-height:110px}
+.opts{display:flex;flex-wrap:wrap;gap:8px}.opts label{display:flex;gap:6px;align-items:center;margin:0;padding:8px 12px;border:1px solid var(--line);border-radius:999px;font-weight:400;cursor:pointer}
+.opts input{margin:0}.opts label:has(input:checked){border-color:var(--acc);color:var(--acc)}
+.go{width:100%;margin-top:16px;padding:14px;border:0;border-radius:12px;background:var(--acc);color:#fff;font:inherit;font-weight:700;font-size:17px;cursor:pointer}
+.go:disabled{opacity:.6}
+.hint{color:var(--mute);font-size:13px}.msg{margin-top:8px;min-height:1.3em}.msg.bad{color:var(--bad)}.msg.ok{color:var(--good)}
+.or{text-align:center;color:var(--mute);margin:8px 0}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:18px;text-align:center;cursor:pointer}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:8px}.bar span{display:block;height:100%;width:0;background:var(--acc);transition:width .3s}
+.scenes{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:8px}
+.scene{position:relative;border:2px solid var(--line);border-radius:8px;overflow:hidden;cursor:pointer;font-size:12px}
+.scene img{width:100%;display:block}.scene span{display:block;padding:2px 6px;color:var(--mute)}
+.scene.on{border-color:var(--good)}.scene b{display:block;padding:2px 6px;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.scene.on::after{content:"✓";position:absolute;top:4px;left:6px;color:#fff;background:var(--good);border-radius:50%;width:22px;height:22px;text-align:center;line-height:22px}
+.run{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
+.run .top{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.badge{font-size:12px;padding:2px 10px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.badge.done{color:var(--good);border-color:var(--good)}.badge.failed{color:var(--bad);border-color:var(--bad)}.badge.running,.badge.queued{color:var(--warn);border-color:var(--warn)}
+.steps{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.steps span{font-size:12px;padding:2px 8px;border-radius:6px;border:1px solid var(--line);color:var(--mute)}
+.steps span.done{color:var(--good);border-color:var(--good)}.steps span.running{color:var(--warn);border-color:var(--warn)}.steps span.failed{color:var(--bad);border-color:var(--bad)}
+.out{margin-top:10px}.out video{width:100%;max-height:70vh;border-radius:10px;background:#000}
+.out a{color:var(--acc);font-size:14px}.err{color:var(--bad);font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.small{font-size:13px}
+</style>
+</head>
+<body>
+<header><b>NEXUS</b><span><a href="/app/" id="adv">الوضع المتقدم</a></span></header>
+<main>
+  <div class="big">
+    <button data-tab="edit" class="on">✂️ عدّل فيديو<small>ارفع أو حط لينك</small></button>
+    <button data-tab="make">🎬 فيديو جديد<small>من فكرة أو سكريبت</small></button>
+  </div>
+
+  <section id="tab-edit" class="card">
+    <h2>الفيديو</h2>
+    <div class="drop" id="drop">اضغط هنا واختار فيديو من جهازك<div class="hint">لحد 20GB — الكبير بيترفع على أجزاء وبيتصغّر لوحده لـ 1080p</div>
+      <input type="file" id="file" accept="video/*,audio/*" hidden></div>
+    <div class="bar" id="upbar" hidden><span></span></div>
+    <div class="or">أو</div>
+    <details id="free-box"><summary><b>🎞️ مكتبة فيديوهات مجانية وقانونية</b> <span class="hint">NASA · Internet Archive · Wikimedia</span></summary>
+      <div style="display:flex;gap:8px;margin-top:8px"><input type="text" id="free-q" placeholder="ابحث (بالإنجليزي أفضل): moon, ocean, city…">
+        <button type="button" class="go" id="free-go" style="width:auto;margin:0;padding:8px 16px">بحث</button></div>
+      <p class="hint" id="free-msg">كل فيديو بيظهر برخصته؛ الاستيراد بيسجل الرخصة والكريديت عشان تحطهم في الوصف.</p>
+      <div class="scenes" id="free-results"></div></details>
+    <div class="or">أو</div>
+    <details id="lib-box"><summary><b>اختار فيديو اترفع قبل كده</b> <span class="hint" id="lib-count"></span></summary>
+      <div class="scenes" id="library"></div></details>
+    <div class="or">أو</div>
+    <input type="url" id="url" placeholder="لينك مباشر لملف الفيديو (.mp4) أو Google Drive" dir="ltr">
+    <p class="hint">لينكات صفحات يوتيوب/تيك توك/إنستجرام مش بتتحمل (شروطهم بتمنع ده) — ارفع الملف نفسه.</p>
+    <p class="msg" id="srcmsg"></p>
+
+    <label>عاوز تعمل إيه؟</label>
+    <div class="opts" id="goal">
+      <label><input type="radio" name="goal" value="auto" checked> تنظيف (نفس المدة تقريباً)</label>
+      <label><input type="radio" name="goal" value="summary"> مدة أنا أحددها</label>
+      <label><input type="radio" name="goal" value="scenes"> أختار المشاهد بنفسي</label>
+      <label><input type="radio" name="goal" value="shorts"> شورتس بس</label>
+    </div>
+    <p class="hint" id="goal-hint">بيشيل السكتات والتكرار بس — الفيديو بيفضل كامل تقريباً.</p>
+    <div id="summary-box" hidden>
+      <label>المدة النهائية بالظبط</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="number" id="minutes" min="0" max="180" step="1" value="5" style="width:90px"> دقيقة
+        <input type="number" id="secs" min="0" max="59" step="5" value="0" style="width:80px"> ثانية
+      </div>
+      <p class="hint" id="src-dur"></p>
+    </div>
+    <div id="scenes-box" hidden>
+      <p class="hint" id="scenes-hint">ارفع الفيديو الأول — بعد التحليل هتظهر المشاهد هنا وتختار اللي عاوزه.</p>
+      <div class="scenes" id="scenes"></div>
+    </div>
+
+    <label>الأسلوب</label>
+    <select id="style">
+      <option value="auto">تلقائي (متوازن)</option>
+      <option value="social">سريع للسوشيال</option>
+      <option value="documentary">وثائقي سينمائي</option>
+      <option value="explainer">تعليمي / شرح</option>
+      <option value="podcast">بودكاست / كلام</option>
+      <option value="interview">مقابلة</option>
+      <option value="vlog">فلوج / سفر</option>
+    </select>
+    <label>تعليمات إضافية (اختياري)</label>
+    <textarea id="instructions" placeholder="مثلاً: ركّز على الجزء اللي بيتكلم فيه عن المريخ، وشيل المقدمة"></textarea>
+
+    <label>دبلجة بصوت</label>
+    <div class="opts" id="dub"><label><input type="checkbox" value="ar"> عربي</label><label><input type="checkbox" value="en"> English</label></div>
+    <label>ترجمة مكتوبة (subtitles)</label>
+    <div class="opts" id="subs"><label><input type="checkbox" value="ar"> عربي</label><label><input type="checkbox" value="en"> English</label></div>
+    <p class="hint">أو اكتبها في التعليمات («دبلجه عربي وترجمه») وهو هيفهم.</p>
+    <label>كام شورت؟</label>
+    <input type="number" id="shorts" min="0" max="10" value="3">
+    <label>انشره على</label>
+    <div class="opts" id="plats-edit"></div>
+    <button class="go" id="go-edit">ابدأ ✨</button>
+    <p class="msg" id="msg-edit"></p>
+  </section>
+
+  <section id="tab-make" class="card" hidden>
+    <div class="opts" id="make-mode">
+      <label><input type="radio" name="mm" value="idea" checked> عندي فكرة</label>
+      <label><input type="radio" name="mm" value="script"> عندي سكريبت</label>
+      <label><input type="radio" name="mm" value="discover"> اختار إنت فكرة</label>
+    </div>
+    <div id="mm-idea"><label>الفكرة</label><textarea id="idea" placeholder="مثلاً: ليه المريخ لونه أحمر؟"></textarea></div>
+    <div id="mm-script" hidden><label>السكريبت (كل فقرة = مشهد)</label><textarea id="script" style="min-height:200px"></textarea>
+      <label>العنوان (اختياري)</label><input type="text" id="stitle"></div>
+    <div id="mm-discover" hidden><label>المجال</label><select id="niche"></select>
+      <p class="hint">بيدور على المواضيع اللي الاهتمام بيها بيزيد دلوقتي (Wikipedia) ويختار أقواها.</p></div>
+    <label>الشكل</label>
+    <div class="opts"><label><input type="radio" name="orient" value="h" checked> أفقي (يوتيوب)</label><label><input type="radio" name="orient" value="v"> طولي (شورتس/تيك توك)</label></div>
+    <label>اللغة</label>
+    <select id="lang"><option value="auto">تلقائي من النص</option><option value="ar">عربي</option><option value="en">English</option></select>
+    <label>انشره على</label>
+    <div class="opts" id="plats-make"></div>
+    <button class="go" id="go-make">اعمل الفيديو ✨</button>
+    <p class="msg" id="msg-make"></p>
+  </section>
+
+  <section class="card">
+    <h2>شغلك</h2>
+    <div id="runs"><p class="hint">لسه مفيش.</p></div>
+  </section>
+</main>
+<script>
+"use strict";
+const $ = (s) => document.querySelector(s);
+const H = { "Content-Type": "application/json", "X-NEXUS-CSRF": "1" };
+const STAGE = { import: "استيراد", analyze: "تحليل", edit: "تعديل", render: "رندر", shorts: "شورتس", platforms: "نسخ المنصات",
+  discover: "اختيار الفكرة", "dub-ar": "دبلجة عربي", "dub-en": "دبلجة إنجليزي", "subs-ar": "ترجمة عربي", "subs-en": "ترجمة إنجليزي", project: "مشروع", research: "بحث", script: "سكريبت", "review-script": "مراجعة", narrate: "تعليق صوتي",
+  visuals: "صور ومشاهد", storyboard: "ستوري بورد", "render-qa": "رندر وفحص", produce: "إنتاج" };
+const STATUS = { queued: ["في الطابور", "queued"], running: ["شغال…", "running"], done: ["خلص ✓", "done"], failed: ["فشل", "failed"], cancelled: ["اتلغى", "failed"] };
+let project = null, analysisJob = null, picked = new Set(), opts = null, libraryItem = null;
+
+async function api(path, init = {}) {
+  const r = await fetch(path, { ...init, headers: { ...H, ...(init.headers || {}) }, credentials: "same-origin" });
+  let j = null; try { j = await r.json(); } catch { /* */ }
+  if (!r.ok) throw new Error((j && (j.detail || j.error)) || `HTTP ${r.status}`);
+  return j;
+}
+function msg(el, t, ok) { el.textContent = t || ""; el.className = "msg" + (t ? (ok ? " ok" : " bad") : ""); }
+const fileUrl = (pid, path) => `/api/projects/${encodeURIComponent(pid)}/file?path=${encodeURIComponent(path)}`;
+
+function platBoxes(el, def) {
+  el.replaceChildren(...Object.entries(opts.platforms).map(([k, v]) => {
+    const l = document.createElement("label");
+    l.innerHTML = `<input type="checkbox" value="${k}"> `;
+    l.append(v.replace(/ \(.*\)/, ""));
+    l.querySelector("input").checked = def.includes(k);
+    return l;
+  }));
+}
+const chosen = (el) => [...el.querySelectorAll("input:checked")].map((x) => x.value);
+
+// ---------------- tabs
+document.querySelectorAll("[data-tab]").forEach((b) => b.onclick = () => {
+  document.querySelectorAll("[data-tab]").forEach((x) => x.classList.toggle("on", x === b));
+  $("#tab-edit").hidden = b.dataset.tab !== "edit"; $("#tab-make").hidden = b.dataset.tab !== "make";
+});
+document.querySelectorAll("input[name=goal]").forEach((r) => r.onchange = () => {
+  const g = chosen($("#goal"))[0];
+  $("#summary-box").hidden = g !== "summary"; $("#scenes-box").hidden = g !== "scenes";
+  $("#goal-hint").textContent = { auto: "بيشيل السكتات والتكرار بس — الفيديو بيفضل كامل تقريباً.",
+    summary: "بيختار أقوى الأجزاء لحد المدة اللي تحددها بالظبط.", scenes: "إنت بتختار المشاهد اللي تفضل، بالترتيب.",
+    shorts: "بيطلّع مقاطع قصيرة طولي من أقوى اللحظات." }[g] || "";
+  if (g === "shorts" && Number($("#shorts").value) < 1) $("#shorts").value = 3;
+  if (g === "scenes") loadScenes();
+});
+document.querySelectorAll("input[name=mm]").forEach((r) => r.onchange = () => {
+  const m = chosen($("#make-mode"))[0];
+  ["idea", "script", "discover"].forEach((k) => $("#mm-" + k).hidden = k !== m);
+});
+
+// ---------------- upload
+$("#drop").onclick = () => $("#file").click();
+$("#file").onchange = async () => {
+  const f = $("#file").files[0]; if (!f) return;
+  if (f.size > 20 * 1024 ** 3) return msg($("#srcmsg"), "الملف أكبر من 20GB.");
+  $("#upbar").hidden = false; $("#upbar span").style.width = "0%";
+  $("#go-edit").disabled = true;
+  try {
+    const j = f.size > 80 * 1024 * 1024 ? await chunkedUpload(f) : await simpleUpload(f);
+    project = j.project; analysisJob = j.job; $("#url").value = ""; picked.clear(); libraryItem = null;
+    $("#drop").firstChild.textContent = `✓ ${f.name} (${(f.size / 1024 ** 2).toFixed(0)}MB)`;
+    msg($("#srcmsg"), f.size > 80 * 1024 ** 2
+      ? "اترفع ✓ — لو حجمه كبير بيتصغّر لوحده لـ 1080p بجودة كويسة، وبعدين بيتحلل. تقدر تضغط «ابدأ» على طول."
+      : "اترفع ✓ — بيتحلل دلوقتي (المشاهد والكلام). تقدر تضغط «ابدأ» على طول.", true);
+    if (chosen($("#goal"))[0] === "scenes") loadScenes();
+    showDuration();
+    setTimeout(loadLibrary, 1500);
+  } catch (e) { msg($("#srcmsg"), e.message); } finally { $("#go-edit").disabled = false; }
+};
+
+function simpleUpload(f) {
+  return new Promise((resolve, reject) => {
+    const fd = new FormData(); fd.append("file", f);
+    const x = new XMLHttpRequest();
+    x.open("POST", "/api/upload"); x.setRequestHeader("X-NEXUS-CSRF", "1");
+    msg($("#srcmsg"), "بيترفع…", true);
+    x.upload.onprogress = (e) => { if (e.lengthComputable) $("#upbar span").style.width = `${(100 * e.loaded / e.total).toFixed(0)}%`; };
+    x.onload = () => {
+      let j = {}; try { j = JSON.parse(x.responseText); } catch { /* */ }
+      x.status >= 300 ? reject(new Error(j.detail || `فشل الرفع (HTTP ${x.status})`)) : resolve(j);
+    };
+    x.onerror = () => reject(new Error("فشل الرفع — جرّب تاني"));
+    x.send(fd);
+  });
+}
+
+function putChunk(url, blob, onProgress) {
+  return new Promise((resolve, reject) => {
+    const x = new XMLHttpRequest();
+    x.open("PUT", url); x.setRequestHeader("X-NEXUS-CSRF", "1"); x.setRequestHeader("Content-Type", "application/octet-stream");
+    x.upload.onprogress = (e) => onProgress(e.loaded);
+    x.onload = () => (x.status < 300 ? resolve() : reject(new Error(`HTTP ${x.status}: ${x.responseText.slice(0, 200)}`)));
+    x.onerror = () => reject(new Error("network"));
+    x.send(blob);
+  });
+}
+
+async function chunkedUpload(f) {
+  // Cloudflare accepts up to 100 MB per request: send the file in 48 MB pieces, each retried, then join on the server.
+  const CH = 48 * 1024 * 1024, total = Math.ceil(f.size / CH);
+  const id = [...crypto.getRandomValues(new Uint8Array(12))].map((b) => b.toString(16).padStart(2, "0")).join("");
+  let done = 0;
+  for (let i = 0; i < total; i++) {
+    const blob = f.slice(i * CH, Math.min(f.size, (i + 1) * CH));
+    for (let attempt = 1; ; attempt++) {
+      try {
+        msg($("#srcmsg"), `بيترفع… جزء ${i + 1} من ${total}`, true);
+        await putChunk(`/api/upload/chunk?upload_id=${id}&index=${i}&total=${total}&size=${f.size}`, blob,
+          (n) => { $("#upbar span").style.width = `${(100 * (done + n) / f.size).toFixed(1)}%`; });
+        break;
+      } catch (e) {
+        if (attempt >= 5 || /^HTTP (4|507)/.test(e.message) && !/^HTTP 429/.test(e.message)) throw new Error(`فشل رفع الجزء ${i + 1}: ${e.message}`);
+        msg($("#srcmsg"), `الجزء ${i + 1} وقع — بحاول تاني (${attempt})…`);
+        await new Promise((r) => setTimeout(r, 2000 * attempt));
+      }
+    }
+    done += blob.size;
+  }
+  msg($("#srcmsg"), "بيجمّع الملف…", true);
+  return api("/api/upload/finish", { method: "POST", body: JSON.stringify({ upload_id: id, name: f.name, total, size: f.size }) });
+}
+
+function shortLicense(l) {
+  l = String(l || "");
+  if (/public ?domain|publicdomain|cc0/i.test(l)) return "ملكية عامة";
+  const m = l.match(/licenses\/([a-z-]+)\/([\d.]+)/i);
+  return m ? `CC ${m[1].toUpperCase()} ${m[2]}` : l.slice(0, 22);
+}
+
+async function freeSearch() {
+  const q = $("#free-q").value.trim(); if (q.length < 2) return;
+  msg($("#free-msg"), "بيدوّر…", true); $("#free-results").replaceChildren();
+  let r;
+  try { r = await api(`/api/videos/search?q=${encodeURIComponent(q)}`); } catch (e) { return msg($("#free-msg"), e.message); }
+  msg($("#free-msg"), r.results.length ? `${r.results.length} نتيجة — اضغط على فيديو تختاره` : "مالقيتش. جرب كلمة تانية بالإنجليزي.", !!r.results.length);
+  $("#free-results").replaceChildren(...r.results.map((v) => {
+    const d = document.createElement("div"); d.className = "scene";
+    if (v.thumb) { const img = document.createElement("img"); img.loading = "lazy"; img.referrerPolicy = "no-referrer"; img.src = v.thumb; d.append(img); }
+    const b = document.createElement("b"); b.dir = "auto"; b.textContent = v.title; b.title = v.description || v.title; d.append(b);
+    const t = document.createElement("span"); t.textContent = `${v.source} · ${shortLicense(v.license)}`; d.append(t);
+    d.onclick = () => {
+      libraryItem = v; project = null; analysisJob = null; picked.clear(); $("#url").value = "";
+      document.querySelectorAll("#free-results .scene, #library .scene").forEach((x) => x.classList.toggle("on", x === d));
+      msg($("#srcmsg"), `✓ اخترت «${v.title}» (${v.source} — ${v.license})`, true);
+    };
+    return d;
+  }));
+}
+
+async function loadLibrary() {
+  let lib;
+  try { lib = await api("/api/autopilot/library"); } catch { return; }
+  $("#lib-count").textContent = lib.length ? `(${lib.length})` : "(لسه مفيش)";
+  $("#library").replaceChildren(...lib.map((v) => {
+    const d = document.createElement("div"); d.className = "scene" + (v.project === project ? " on" : "");
+    if (v.cover) { const img = document.createElement("img"); img.loading = "lazy"; img.src = fileUrl(v.project, v.cover); d.append(img); }
+    const b = document.createElement("b"); b.textContent = v.name.replace(/\.[^.]+$/, ""); b.title = v.name; d.append(b);
+    const t = document.createElement("span");
+    t.textContent = `${v.duration ? fmt(v.duration) : "بيتحلل…"} · ${(v.bytes / 1024 ** 2).toFixed(0)}MB`; d.append(t);
+    d.onclick = () => {
+      project = v.project; analysisJob = null; picked.clear(); $("#url").value = ""; libraryItem = null;
+      document.querySelectorAll("#library .scene").forEach((x) => x.classList.toggle("on", x === d));
+      $("#drop").firstChild.textContent = "اضغط هنا واختار فيديو من جهازك";
+      msg($("#srcmsg"), `✓ اخترت «${v.name}»`, true);
+      if (v.duration) {
+        $("#src-dur").textContent = `مدة الفيديو الأصلي: ${fmt(v.duration)}`;
+        $("#minutes").value = Math.max(1, Math.round(v.duration / 120)); $("#secs").value = 0;
+      }
+      if (chosen($("#goal"))[0] === "scenes") loadScenes();
+    };
+    return d;
+  }));
+}
+
+async function showDuration() {
+  for (let i = 0; i < 200 && project; i++) {
+    const jobs = await api("/api/jobs").catch(() => []);
+    const j = jobs.find((x) => x.id === analysisJob);
+    if (j && j.status === "done") {
+      const d = (j.result && (j.result.duration || (j.result.analyze || {}).duration)) || 0;
+      if (d) {
+        $("#src-dur").textContent = `مدة الفيديو الأصلي: ${fmt(d)}`;
+        const m = Math.max(1, Math.round(d / 120));
+        if ($("#minutes").value === "5" && $("#secs").value === "0") $("#minutes").value = m;  // default: about half
+      }
+      return;
+    }
+    if (!j || j.status === "failed") return;
+    await new Promise((r) => setTimeout(r, 4000));
+  }
+}
+
+async function loadScenes() {
+  if (!project) { $("#scenes-hint").textContent = "ارفع الفيديو الأول — بعد التحليل هتظهر المشاهد هنا."; return; }
+  $("#scenes-hint").textContent = "بيستنى التحليل يخلص…";
+  for (let i = 0; i < 120; i++) {
+    const jobs = await api("/api/jobs").catch(() => []);
+    const j = analysisJob && jobs.find((x) => x.id === analysisJob);
+    if (!j || j.status === "done") break;
+    if (j.status === "failed") { $("#scenes-hint").textContent = "التحليل فشل: " + (j.error || ""); return; }
+    await new Promise((r) => setTimeout(r, 3000));
+  }
+  const sc = await api(`/api/projects/${project}/scenes`).catch((e) => { $("#scenes-hint").textContent = e.message; return []; });
+  $("#scenes-hint").textContent = sc.length ? "اضغط على المشاهد اللي عاوزها تفضل في الفيديو (بالترتيب)." : "مالقيتش مشاهد.";
+  $("#scenes").replaceChildren(...sc.map((s) => {
+    const d = document.createElement("div"); d.className = "scene";
+    const key = `${s.in}-${s.out}`; if (picked.has(key)) d.classList.add("on");
+    const img = document.createElement("img"); img.loading = "lazy"; img.src = fileUrl(project, s.thumb);
+    const t = document.createElement("span"); t.textContent = `${fmt(s.in)} – ${fmt(s.out)}`;
+    d.append(img, t);
+    d.onclick = () => { picked.has(key) ? picked.delete(key) : picked.add(key); d.classList.toggle("on"); };
+    return d;
+  }));
+}
+const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+
+// ---------------- submit
+$("#go-edit").onclick = async (e) => {
+  const m = $("#msg-edit"), url = $("#url").value.trim(), goal = chosen($("#goal"))[0];
+  if (!project && !url && !libraryItem) return msg(m, "ارفع فيديو أو اختار من المكتبة أو حط لينك الأول");
+  const body = { mode: "edit", goal, style: $("#style").value, instructions: $("#instructions").value, shorts: Number($("#shorts").value || 0),
+    platforms: chosen($("#plats-edit")), dub: chosen($("#dub")), subtitles: chosen($("#subs")),
+    ...(url ? { url } : libraryItem ? { library_item: libraryItem } : { project }) };
+  if (goal === "summary") {
+    body.target_seconds = Math.round(Number($("#minutes").value || 0) * 60 + Number($("#secs").value || 0));
+    if (body.target_seconds < 5) return msg(m, "حدد المدة (5 ثواني على الأقل)");
+  }
+  if (goal === "scenes") {
+    body.scenes = [...picked].map((k) => k.split("-").map(Number)).sort((a, b) => a[0] - b[0]);
+    if (!body.scenes.length) return msg(m, "اختار مشهد واحد على الأقل");
+  }
+  await send(e.target, m, body);
+};
+$("#go-make").onclick = async (e) => {
+  const mode = chosen($("#make-mode"))[0], m = $("#msg-make");
+  const body = { mode, vertical: chosen($("#tab-make").querySelector(".opts:nth-of-type(2)") || document.createElement("div"))[0] === "v",
+    lang: $("#lang").value, platforms: chosen($("#plats-make")) };
+  body.vertical = document.querySelector("input[name=orient]:checked").value === "v";
+  if (mode === "idea") body.idea = $("#idea").value;
+  if (mode === "script") { body.script = $("#script").value; body.title = $("#stitle").value; }
+  if (mode === "discover") body.niche = $("#niche").value;
+  await send(e.target, m, body);
+};
+async function send(btn, m, body) {
+  btn.disabled = true; msg(m, "بيتبعت…", true);
+  try {
+    await api("/api/autopilot", { method: "POST", body: JSON.stringify(body) });
+    msg(m, "اشتغل ✓ — تابعه تحت في «شغلك»", true);
+    loadRuns(); document.querySelector("#runs").scrollIntoView({ behavior: "smooth" });
+  } catch (x) { msg(m, x.message); } finally { btn.disabled = false; }
+}
+
+// ---------------- results
+async function loadRuns() {
+  let runs;
+  try { runs = await api("/api/autopilot/runs"); } catch (e) { $("#runs").textContent = e.message; return; }
+  if (!runs.length) return;
+  const open = new Set([...document.querySelectorAll(".run details[open]")].map((d) => d.dataset.id));
+  $("#runs").replaceChildren(...runs.map((r) => {
+    const el = document.createElement("div"); el.className = "run";
+    const [label, cls] = STATUS[r.status] || [r.status, ""];
+    const p = r.params || {};
+    const what = p.mode === "edit" ? ({ auto: "تعديل تلقائي", summary: "اختصار", scenes: "مشاهد مختارة", shorts: "شورتس" }[p.goal] || "تعديل")
+      : p.mode === "idea" ? `فكرة: ${p.idea}` : p.mode === "script" ? "من سكريبت" : `فكرة يختارها: ${(r.result && r.result.topic) || p.niche}`;
+    el.innerHTML = `<div class="top"><b class="small"></b><span class="badge ${cls}">${label}</span></div><div class="steps"></div>`;
+    el.querySelector("b").textContent = what.slice(0, 90);
+    el.querySelector(".steps").replaceChildren(...(r.stages || []).map((s) => {
+      const sp = document.createElement("span"); sp.className = s.status; sp.textContent = STAGE[s.name] || s.name; return sp;
+    }));
+    if (["queued", "running"].includes(r.status)) {
+      const b = document.createElement("button"); b.className = "go"; b.style.cssText = "margin-top:8px;background:transparent;color:var(--bad);border:1px solid var(--bad)";
+      b.textContent = r.status === "running" ? "إلغاء (بيقف بعد الخطوة الحالية)" : "إلغاء";
+      b.onclick = async () => { b.disabled = true; try { await api(`/api/jobs/${r.id}/cancel`, { method: "POST" }); loadRuns(); } catch (x) { alert(x.message); } };
+      el.append(b);
+    }
+    if (r.status === "failed" && r.error) {
+      const e = document.createElement("div"); e.className = "err"; e.textContent = r.error.split("\n")[0].slice(0, 400); el.append(e);
+      const b = document.createElement("button"); b.className = "go"; b.style.marginTop = "8px"; b.textContent = "حاول تاني (بيكمل من مكان ما وقف)";
+      b.onclick = async () => { b.disabled = true; try { await api(`/api/jobs/${r.id}/retry`, { method: "POST" }); loadRuns(); } catch (x) { alert(x.message); } };
+      el.append(b);
+    }
+    const res = r.result || {};
+    if (res.picked && res.picked.why) { const w = document.createElement("div"); w.className = "hint"; w.textContent = `اختار «${res.topic}» — ${res.picked.why}`; el.append(w); }
+    if (res.edit && res.edit.how) { const w = document.createElement("div"); w.className = "hint"; w.textContent = `إزاي اتعدل: ${res.edit.how}`; el.append(w); }
+    for (const o of res.outputs || []) {
+      const d = document.createElement("div"); d.className = "out";
+      const t = document.createElement("div"); t.className = "small"; t.textContent = o.label; d.append(t);
+      const v = document.createElement("video"); v.controls = true; v.preload = "metadata"; v.src = fileUrl(res.project, o.path); d.append(v);
+      const a = document.createElement("a"); a.href = fileUrl(res.project, o.path); a.download = ""; a.textContent = "⬇ تحميل"; d.append(a);
+      el.append(d);
+    }
+    if ((res.issues || []).length) { const w = document.createElement("details"); w.innerHTML = "<summary class='hint'>ملاحظات الفحص</summary>"; w.append(Object.assign(document.createElement("div"), { className: "hint", textContent: res.issues.join(" • ") })); el.append(w); }
+    return el;
+  }));
+  if (runs.some((r) => ["queued", "running"].includes(r.status))) setTimeout(loadRuns, 8000);
+}
+
+(async () => {
+  try {
+    opts = await api("/api/autopilot/options");
+    platBoxes($("#plats-edit"), ["youtube", "youtube_shorts"]);
+    platBoxes($("#plats-make"), ["youtube"]);
+    $("#niche").replaceChildren(...opts.niches.map((n) => new Option(n.name, n.id)));
+  } catch (e) { msg($("#msg-edit"), e.message); }
+  loadRuns();
+  loadLibrary();
+  $("#free-go").onclick = freeSearch;
+  $("#free-q").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); freeSearch(); } });
+})();
+</script>
+</body>
+</html>

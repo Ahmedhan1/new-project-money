@@ -18,6 +18,9 @@ def new_timeline(width: int = 1920, height: int = 1080, lang: str = "en") -> dic
             "burn_subtitles": True, "markers": []}
 
 
+SUBDIRS = ("media", "timelines", "renders", "reports", "work", "audio")
+
+
 class Project:
     def __init__(self, pid: str):
         rows = db.query("SELECT * FROM projects WHERE id=?", (pid,))
@@ -28,13 +31,17 @@ class Project:
         self.kind = rows[0]["kind"]
         self.data: dict = json.loads(rows[0]["data"])
         self.dir = config.PROJECTS / pid
+        # A restored project can lack its empty folders (copies/backups that skip empty dirs, e.g. Kaggle outputs used
+        # by the cloud studio): recreate them so later stages never fail on a missing directory.
+        for sub in SUBDIRS:
+            (self.dir / sub).mkdir(parents=True, exist_ok=True)
 
     # ---- lifecycle
     @classmethod
     def create(cls, name: str, kind: str = "edit", **data) -> "Project":
         pid = db.new_id("prj")
         d = config.PROJECTS / pid
-        for sub in ("media", "timelines", "renders", "reports", "work", "audio"):
+        for sub in SUBDIRS:
             (d / sub).mkdir(parents=True, exist_ok=True)
         base = {"media": [], "branches": {"main": {"versions": [], "head": -1}}, "analysis": {}, "style": {}, **data}
         db.execute("INSERT INTO projects(id,name,kind,created,data) VALUES(?,?,?,?,?)",

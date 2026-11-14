@@ -33,6 +33,16 @@ KAGGLE: CLOSED — ACCEPTED AS-IS BY OWNER. Status and verdict: `docs/ACCOUNT1_F
 also `docs/ACCOUNT1_*.md` (acceptance, handoffs, setup guide).
 **Never** add a second Kaggle account or rotate accounts to get around quotas.
 
+## Cloudflare control plane (`cloudflare/`, D-24) - owner-chosen host, free plan
+Cloudflare Worker = UI + API + cron; Kaggle = all heavy work. Owner login, Kaggle key saved encrypted from the Settings
+page, submit/track/retry/download jobs that push the unchanged `worker_kit` to the single Kaggle account. Live at
+https://nexus-cloud.nexus-ahmed.workers.dev: `/panel/` = control panel; everything else = the FULL NEXUS app running in a
+Kaggle studio session (D-25: start/stop from the panel, idle auto-stop, projects saved/restored between sessions,
+YouTube connected from Settings). `/` = simple mode (`nexus/ui/simple.html` + `nexus/autopilot.py`, D-26: edit/summarise/
+pick scenes/shorts/dub/subtitles/platforms, or a video from an idea/script/auto-picked topic); classic UI at `/app/`.
+The studio clones `STUDIO_REF` (wrangler.jsonc; this branch until PR 13 merges). Redeploy/steps: `cloudflare/README.md`. After any `worker_kit`
+change run `python scripts/cloudflare/build_worker_script.py`.
+
 ## What actually works (evidence: `docs/results/demos/acceptance_*.json`, `docs/FEATURE_MATRIX.md`, `docs/FINAL_REPORT.md`)
 Sessions 4-6 (2026-11-12), all on a real 19.4-min public-domain NASA interview (project `prj_2b1a5a2f07`, outside Git):
 - **4-min cinematic edit (demo 1)**: director + licensed NASA/Openverse B-roll (motion-picked, 720p windows) + RNNoise

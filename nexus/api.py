@@ -5,12 +5,13 @@ from __future__ import annotations
 import json
 import os
 import queue
+import re
 import shutil
 import threading
 import time
 from pathlib import Path
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
 
@@ -192,6 +193,98 @@ def api_health():
     return {"ok": True, "version": config.VERSION, "db_schema": db.schema_version(), "jobs": jobs.summary()["counts"]}
 
 
+# ---------------------------------------------------------------- simple mode (autopilot): /simple
+SIMPLE_UI = Path(__file__).resolve().parent / "ui" / "simple.html"
+
+
+@app.get("/simple", response_class=HTMLResponse)
+def simple_page():
+    """The one-screen UI (edit my video / video from an idea or script / let NEXUS pick). Data comes from owner-only /api."""
+    return SIMPLE_UI.read_text(encoding="utf-8")
+
+
+@app.post("/api/autopilot")
+def api_autopilot(body: dict):
+    from . import autopilot
+    try:
+        return autopilot.submit(body)
+    except autopilot.AutopilotError as e:
+        raise HTTPException(400, str(e)) from None
+
+
+@app.get("/api/autopilot/options")
+def api_autopilot_options():
+    from . import autopilot, platforms
+    from .intelligence.market import load_niches
+    plats = {}
+    for k in autopilot.VERTICAL + autopilot.LANDSCAPE:
+        try:
+            plats[k] = platforms.get(k)["display"]
+        except Exception:  # noqa: BLE001
+            pass
+    raw = load_niches()
+    raw = raw.get("niches", raw) if isinstance(raw, dict) else raw
+    nich = [{"id": k, "name": (v or {}).get("label") or k} for k, v in raw.items()] if isinstance(raw, dict) else []
+    return {"platforms": plats, "vertical": list(autopilot.VERTICAL), "styles": list(autopilot.PROFILES), "niches": nich}
+
+
+@app.get("/api/autopilot/library")
+def api_autopilot_library(limit: int = 60):
+    """Videos already in NEXUS (uploads and links), newest first, to edit again without uploading: name, length, cover."""
+    from .media import ff
+    out = []
+    for row in prj.Project.list()[: max(1, min(200, limit))]:
+        try:
+            p = prj.Project(row["id"])
+        except KeyError:
+            continue
+        for m in p.data.get("media") or []:
+            src = Path(m["path"])
+            if not src.exists() or src.suffix.lower() not in _UPLOAD_EXT:
+                continue
+            f = p.dir / "reports" / f"analysis_{m['id']}.json"
+            dur = None
+            if f.exists():
+                try:
+                    dur = json.loads(f.read_text(encoding="utf-8"))["probe"]["duration"]
+                except (ValueError, KeyError):
+                    dur = None
+            thumb = p.dir / "work" / "thumbs" / f"cover_{m['id']}.jpg"
+            if not thumb.exists():
+                thumb.parent.mkdir(parents=True, exist_ok=True)
+                try:
+                    ff.run(["-ss", f"{(dur or 6) / 3:.2f}", "-i", str(src), "-frames:v", "1", "-vf", "scale=320:-2", "-q:v", "5", str(thumb)],
+                           op="thumbnail", timeout=60)
+                except Exception:  # noqa: BLE001 - audio files and broken media simply have no cover
+                    pass
+            out.append({"project": p.id, "media": m["id"], "name": m.get("name") or p.name, "duration": dur, "analysed": dur is not None,
+                        "created": row["created"], "bytes": src.stat().st_size,
+                        "cover": str(thumb.relative_to(p.dir)) if thumb.exists() else None})
+            break  # one entry per project: its first video
+    return out
+
+
+@app.get("/api/videos/search")
+def api_videos_search(q: str, sources: str = "nasa,archive,commons", n: int = 10):
+    """Free, legally reusable videos (NASA public domain, Internet Archive CC/PD, Wikimedia Commons) with licence + credit."""
+    from . import library
+    if len(q.strip()) < 2:
+        raise HTTPException(400, "write what to search for")
+    return library.search(q, [x for x in sources.split(",") if x], max(1, min(20, n)))
+
+
+@app.get("/api/autopilot/runs")
+def api_autopilot_runs(limit: int = 30):
+    rows = db.query("SELECT id,project_id,status,progress,created,started,finished,error,result,stage,stages,params "
+                    "FROM jobs WHERE kind='autopilot' ORDER BY created DESC LIMIT ?", (min(100, limit),))
+    for r in rows:
+        r["result"] = json.loads(r["result"]) if r["result"] else None
+        r["params"] = json.loads(r["params"]) if r["params"] else {}
+        st = json.loads(r.pop("stages") or "{}")
+        r["stages"] = [{"name": k, "status": v["status"], "seconds": v.get("seconds")} for k, v in st.items()]
+    return rows
+
+
 @app.get("/api/jobs")
 def api_jobs():
     rows = db.query("SELECT id,project_id,kind,status,worker,progress,created,started,finished,error,result,stage,stages,retries,recovery,durable "
@@ -213,8 +306,9 @@ def api_job_retry(job_id: str):
 @app.post("/api/jobs/{job_id}/cancel")
 def api_job_cancel(job_id: str):
     if not jobs.cancel(job_id):
-        raise HTTPException(409, "only queued jobs can be cancelled")
-    return {"job": job_id, "status": "cancelled"}
+        raise HTTPException(409, "only queued or running jobs can be cancelled")
+    st = (jobs.get(job_id) or {}).get("status")
+    return {"job": job_id, "status": st if st == "cancelled" else "cancelling"}
 
 
 @app.get("/api/storage")
@@ -337,6 +431,82 @@ async def api_upload(file: UploadFile = File(...), project_id: str | None = None
     finally:
         shutil.rmtree(tmp.parent, ignore_errors=True)
     return {"project": p.id, "media": m, **jobs.submit("analyze", {"project": p.id, "media": m["id"]}, p.id)}
+
+
+# ---------------------------------------------------------------- big uploads: chunked + automatic size reduction
+CHUNK_MAX = 64 * 2 ** 20          # one request (Cloudflare's gateway accepts up to 100 MB per request)
+CHUNKED_MAX = 20 * 2 ** 30        # a whole upload
+_UID = re.compile(r"^[a-f0-9]{16,40}$")
+
+
+def _chunk_dir(uid: str) -> Path:
+    if not _UID.match(uid or ""):
+        raise HTTPException(400, "bad upload id")
+    return config.HOME / "tmp" / "chunked" / uid
+
+
+@app.put("/api/upload/chunk")
+async def api_upload_chunk(request: Request, upload_id: str, index: int, total: int, size: int):
+    """One piece of a big upload (the browser splits the file). Idempotent: a piece sent twice just replaces itself."""
+    d = _chunk_dir(upload_id)
+    if not (0 <= index < total <= 4000) or not (0 < size <= CHUNKED_MAX):
+        raise HTTPException(400, "bad chunk numbers")
+    if index == 0 and not d.exists():
+        for old in d.parent.glob("*") if d.parent.exists() else []:  # abandoned uploads older than a day
+            if old.is_dir() and time.time() - old.stat().st_mtime > 86400:
+                shutil.rmtree(old, ignore_errors=True)
+        free = shutil.disk_usage(config.HOME).free
+        if size * 2 + UPLOAD_MARGIN_BYTES > free:  # the pieces + the assembled file
+            raise HTTPException(507, f"not enough free disk space: the upload needs {size * 2 / 1e9:.1f} GB, {free / 1e9:.1f} GB free")
+    d.mkdir(parents=True, exist_ok=True)
+    part, n = d / f"{index:05d}.part", 0
+    tmp = part.with_suffix(".tmp")
+    with tmp.open("wb") as f:
+        async for block in request.stream():
+            n += len(block)
+            if n > CHUNK_MAX:
+                f.close()
+                tmp.unlink(missing_ok=True)
+                raise HTTPException(413, f"a piece may be at most {CHUNK_MAX // 2 ** 20} MB")
+            f.write(block)
+    tmp.replace(part)
+    return {"upload_id": upload_id, "index": index, "bytes": n, "received": len(list(d.glob("*.part")))}
+
+
+class ChunkFinishReq(BaseModel):
+    upload_id: str
+    name: str
+    total: int
+    size: int
+    project_id: str | None = None
+    optimize: bool = True
+
+
+@app.post("/api/upload/finish")
+def api_upload_finish(r: ChunkFinishReq):
+    """Join the pieces, then a durable job reduces the size when worthwhile, imports and analyses the video."""
+    import uuid
+    d = _chunk_dir(r.upload_id)
+    name = Path((r.name or "").replace("\\", "/")).name.strip()
+    if not name or Path(name).suffix.lower() not in _UPLOAD_EXT:
+        raise HTTPException(415, "unsupported file type: upload a video, audio or image file")
+    parts = [d / f"{i:05d}.part" for i in range(r.total)]
+    missing = [i for i, x in enumerate(parts) if not x.exists()]
+    if missing:
+        raise HTTPException(409, f"{len(missing)} piece(s) missing (first: {missing[0]}): send them again")
+    if sum(x.stat().st_size for x in parts) != r.size:
+        raise HTTPException(409, "the pieces do not add up to the file size: send the upload again")
+    out = config.HOME / "tmp" / "uploads" / uuid.uuid4().hex / name
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with out.open("wb") as f:
+        for x in parts:
+            with x.open("rb") as g:
+                shutil.copyfileobj(g, f, 4 << 20)
+            x.unlink()
+    shutil.rmtree(d, ignore_errors=True)
+    p = _project(r.project_id) if r.project_id else prj.Project.create(Path(name).stem, "edit")
+    job = jobs.submit("media-prepare", {"project": p.id, "file": str(out), "optimize": r.optimize}, p.id)
+    return {"project": p.id, **job}
 
 
 class ProposeReq(BaseModel):
