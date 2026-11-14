@@ -286,43 +286,32 @@ def _edit(job: jobs.Job, a: dict) -> dict:
 
     if a["goal"] != "shorts":
         def editing():
-            from . import director, edit
+            from . import edit, editor_ai
+            style = a.get("style") or "auto"
+            speech = bool(info["speech"])
             if a["goal"] == "scenes":
                 prop = edit.propose(an, "tighten")
                 prop["keep"] = [{"in": s, "out": e, "score": 1.0, "segs": []} for s, e in sorted(a["scenes"])]
-                tl = edit.build_timeline(m["path"], an, prop)
+                tl = editor_ai.polish(edit.build_timeline(m["path"], an, prop), style, speech)
                 vid = p.save_timeline(tl, f"autopilot: {len(a['scenes'])} chosen scenes")
-                return {"version": vid, "how": f"خلّيت الـ {len(a['scenes'])} مشاهد اللي اخترتها بالترتيب", "seconds": sum(e - s for s, e in a["scenes"])}
+                return {"version": vid, "how": f"خلّيت الـ {len(a['scenes'])} مشاهد اللي اخترتها بالترتيب + انتقالات ولون وموسيقى",
+                        "seconds": sum(e - s for s, e in a["scenes"])}
             target = a.get("target_seconds")
             if a["goal"] == "summary" and not target:
                 target = max(30.0, min(600.0, info["duration"] * 0.3))
             if not target:  # "clean": the owner's video at (almost) its own length - only dead air and repeated takes go
                 prop = edit.propose(an, "tighten")
-                tl = edit.build_timeline(m["path"], an, prop)
+                tl = editor_ai.polish(edit.build_timeline(m["path"], an, prop), style, speech)
                 vid = p.save_timeline(tl, "autopilot: clean (same length, dead air removed)")
                 return {"version": vid, "seconds": prop["proposed_duration"],
-                        "how": f"تنظيف: شلت السكتات والتكرار بس — {_mmss(prop['proposed_duration'])} من {_mmss(info['duration'])}"}
-            if info["speech"]:
-                brief = {"profile": PROFILES[a.get("style") or "auto"], "title": title,
-                         **({"target_seconds": target} if target else {}), **({"instructions": a["instructions"]} if a.get("instructions") else {})}
-                try:
-                    out = director.direct([m["path"]], an_all, brief)
-                    got = float(out["plan"]["summary"].get("programme_seconds") or 0)
-                    if abs(got - target) <= max(5.0, 0.1 * target):  # the director hit the length the owner asked for
-                        vid = p.save_timeline(out["master"], f"autopilot: director {brief['profile']}")
-                        return {"version": vid, "seconds": got, "notes": out["notes"][:8],
-                                "how": f"المخرج الذكي: اختار أقوى الأجزاء ورتّبها — {_mmss(got)} (طلبت {_mmss(target)})"}
-                    fallback = f"المخرج طلّع {_mmss(got)} بدل {_mmss(target)}، فظبطت المدة على اللي طلبته"
-                except Exception as e:  # noqa: BLE001 - fall back to the simpler speech/scene editor, and say so
-                    fallback = f"المخرج الذكي ماقدرش ({type(e).__name__}: {str(e)[:160]})؛ استخدمت المونتاج الأساسي (الكلام والمشاهد)"
-                except Exception as e:  # noqa: BLE001 - fall back to the simpler speech/scene editor, and say so
-                    fallback = f"المخرج الذكي ماقدرش ({type(e).__name__}: {str(e)[:160]})؛ استخدمت المونتاج الأساسي (الكلام والمشاهد)"
-            else:
-                fallback = "الفيديو مفيهوش كلام: اتعدل حسب المشاهد والجودة"
-            prop = fit_to_target(an, target)
-            tl = edit.build_timeline(m["path"], an, prop)
-            vid = p.save_timeline(tl, "autopilot: fitted to the requested length")
-            return {"version": vid, "how": f"{fallback} — {_mmss(prop['proposed_duration'])}", "seconds": prop["proposed_duration"]}
+                        "how": f"تنظيف: شلت السكتات والتكرار بس + لون وانتقالات وموسيقى — {_mmss(prop['proposed_duration'])} من {_mmss(info['duration'])}"}
+            pick = editor_ai.choose(an, target, a.get("instructions", ""), a.get("title") or "")
+            prop = edit.propose(an, "tighten")
+            prop["keep"] = pick["keep"]
+            tl = editor_ai.polish(edit.build_timeline(m["path"], an, prop, title=a.get("title") or None), style, speech)
+            vid = p.save_timeline(tl, f"autopilot: story cut to {int(target)} s")
+            got = sum(r["out"] - r["in"] for r in pick["keep"])
+            return {"version": vid, "seconds": round(got, 2), "how": f"{pick['how']} — {_mmss(got)} (طلبت {_mmss(target)})"}
 
         ed = job.stage("edit", editing)
 

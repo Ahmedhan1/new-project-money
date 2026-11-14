@@ -19,7 +19,11 @@ def load():
         costguard.authorize("local-llm", "load")
         from llama_cpp import Llama
         path = models.ensure_model("llm-qwen3-4b") / "Qwen3-4B-Q4_K_M.gguf"
-        _llm = Llama(model_path=str(path), n_ctx=8192, n_threads=4, n_batch=256, verbose=False)
+        import os
+        # all layers on the GPU when this llama.cpp build has CUDA (cloud studio); a CPU build ignores it
+        gpu = int(os.environ.get("NEXUS_LLM_GPU_LAYERS", "-1"))
+        _llm = Llama(model_path=str(path), n_ctx=8192, n_threads=max(4, min(16, os.cpu_count() or 4)), n_batch=512 if gpu else 256,
+                     n_gpu_layers=gpu, verbose=False)
     return _llm
 
 

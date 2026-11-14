@@ -239,3 +239,16 @@ piece is missing or the sizes disagree). A durable `media-prepare` job then redu
 constant quality, NVENC on the studio GPU, CPU fallback; kept only if smaller; the optimised copy REPLACES the original
 to keep one copy within the session's 20 GB output), imports and analyses it. Limit 20 GB per upload. Measured locally:
 a 208 MB 4K/55 Mbit/s file -> 12 MB 1080p in 17 s.
+
+**D-28 Simple-mode edits: an editor brain picks the story, a finishing pass makes it look edited (owner feedback,
+2026-11-14: "a 5-minute request just cut the first 5 minutes", "editing and effects are very weak").** `nexus/editor_ai.py`:
+(1) selection - with a transcript the local LLM (now fully offloaded to the GPU, `n_gpu_layers=-1`) reads the numbered
+transcript and returns a story (hook first, main ideas in order, conclusive ending, whole video covered) which is fitted
+to the requested length by adding the next-best / dropping the weakest lines; without the LLM or a transcript, every
+sentence/shot is scored (density, motion, sharpness, speech share, faces, analysis moments/hook) and the timeline is split
+into equal windows that each contribute their best material - ties never fall back to timeline order. (2) polish - xfade
+transitions only where the source jumps (style sets the family), alternating 1.08 reframes on jump cuts inside a shot,
+Ken Burns push-in on shots >= 6 s, a grade per style, a CC0 music bed from the asset library ducked under speech, fades.
+Researched first (open-source auto-editors: transcript + LLM moment picking + FFmpeg; editing craft: split edits, cutting
+on action, punch-ins). Not done yet: J/L split edits (the renderer cuts picture and sound together), better Arabic voice
+(candidate: SILMA TTS, F5-TTS based, Apache-2.0 weights) and timing-fitted dubbing.
