@@ -63,12 +63,20 @@ textarea{min-height:110px}
 
     <label>عاوز تعمل إيه؟</label>
     <div class="opts" id="goal">
-      <label><input type="radio" name="goal" value="auto" checked> تعديل تلقائي ذكي</label>
-      <label><input type="radio" name="goal" value="summary"> اختصره</label>
+      <label><input type="radio" name="goal" value="auto" checked> تنظيف (نفس المدة تقريباً)</label>
+      <label><input type="radio" name="goal" value="summary"> مدة أنا أحددها</label>
       <label><input type="radio" name="goal" value="scenes"> أختار المشاهد بنفسي</label>
       <label><input type="radio" name="goal" value="shorts"> شورتس بس</label>
     </div>
-    <div id="summary-box" hidden><label>المدة المطلوبة (دقايق)</label><input type="number" id="minutes" min="0.5" max="30" step="0.5" value="3"></div>
+    <p class="hint" id="goal-hint">بيشيل السكتات والتكرار بس — الفيديو بيفضل كامل تقريباً.</p>
+    <div id="summary-box" hidden>
+      <label>المدة النهائية بالظبط</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="number" id="minutes" min="0" max="180" step="1" value="5" style="width:90px"> دقيقة
+        <input type="number" id="secs" min="0" max="59" step="5" value="0" style="width:80px"> ثانية
+      </div>
+      <p class="hint" id="src-dur"></p>
+    </div>
     <div id="scenes-box" hidden>
       <p class="hint" id="scenes-hint">ارفع الفيديو الأول — بعد التحليل هتظهر المشاهد هنا وتختار اللي عاوزه.</p>
       <div class="scenes" id="scenes"></div>
@@ -163,6 +171,9 @@ document.querySelectorAll("[data-tab]").forEach((b) => b.onclick = () => {
 document.querySelectorAll("input[name=goal]").forEach((r) => r.onchange = () => {
   const g = chosen($("#goal"))[0];
   $("#summary-box").hidden = g !== "summary"; $("#scenes-box").hidden = g !== "scenes";
+  $("#goal-hint").textContent = { auto: "بيشيل السكتات والتكرار بس — الفيديو بيفضل كامل تقريباً.",
+    summary: "بيختار أقوى الأجزاء لحد المدة اللي تحددها بالظبط.", scenes: "إنت بتختار المشاهد اللي تفضل، بالترتيب.",
+    shorts: "بيطلّع مقاطع قصيرة طولي من أقوى اللحظات." }[g] || "";
   if (g === "shorts" && Number($("#shorts").value) < 1) $("#shorts").value = 3;
   if (g === "scenes") loadScenes();
 });
@@ -186,6 +197,7 @@ $("#file").onchange = async () => {
       ? "اترفع ✓ — لو حجمه كبير بيتصغّر لوحده لـ 1080p بجودة كويسة، وبعدين بيتحلل. تقدر تضغط «ابدأ» على طول."
       : "اترفع ✓ — بيتحلل دلوقتي (المشاهد والكلام). تقدر تضغط «ابدأ» على طول.", true);
     if (chosen($("#goal"))[0] === "scenes") loadScenes();
+    showDuration();
   } catch (e) { msg($("#srcmsg"), e.message); } finally { $("#go-edit").disabled = false; }
 };
 
@@ -241,6 +253,24 @@ async function chunkedUpload(f) {
   return api("/api/upload/finish", { method: "POST", body: JSON.stringify({ upload_id: id, name: f.name, total, size: f.size }) });
 }
 
+async function showDuration() {
+  for (let i = 0; i < 200 && project; i++) {
+    const jobs = await api("/api/jobs").catch(() => []);
+    const j = jobs.find((x) => x.id === analysisJob);
+    if (j && j.status === "done") {
+      const d = (j.result && (j.result.duration || (j.result.analyze || {}).duration)) || 0;
+      if (d) {
+        $("#src-dur").textContent = `مدة الفيديو الأصلي: ${fmt(d)}`;
+        const m = Math.max(1, Math.round(d / 120));
+        if ($("#minutes").value === "5" && $("#secs").value === "0") $("#minutes").value = m;  // default: about half
+      }
+      return;
+    }
+    if (!j || j.status === "failed") return;
+    await new Promise((r) => setTimeout(r, 4000));
+  }
+}
+
 async function loadScenes() {
   if (!project) { $("#scenes-hint").textContent = "ارفع الفيديو الأول — بعد التحليل هتظهر المشاهد هنا."; return; }
   $("#scenes-hint").textContent = "بيستنى التحليل يخلص…";
@@ -271,7 +301,10 @@ $("#go-edit").onclick = async (e) => {
   if (!project && !url) return msg(m, "ارفع فيديو أو حط لينك الأول");
   const body = { mode: "edit", goal, style: $("#style").value, instructions: $("#instructions").value, shorts: Number($("#shorts").value || 0),
     platforms: chosen($("#plats-edit")), dub: chosen($("#dub")), subtitles: chosen($("#subs")), ...(url ? { url } : { project }) };
-  if (goal === "summary") body.target_seconds = Math.round(Number($("#minutes").value) * 60);
+  if (goal === "summary") {
+    body.target_seconds = Math.round(Number($("#minutes").value || 0) * 60 + Number($("#secs").value || 0));
+    if (body.target_seconds < 5) return msg(m, "حدد المدة (5 ثواني على الأقل)");
+  }
   if (goal === "scenes") {
     body.scenes = [...picked].map((k) => k.split("-").map(Number)).sort((a, b) => a[0] - b[0]);
     if (!body.scenes.length) return msg(m, "اختار مشهد واحد على الأقل");

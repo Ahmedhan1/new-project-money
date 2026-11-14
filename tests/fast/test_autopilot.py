@@ -45,3 +45,33 @@ def test_running_job_cancels_at_next_stage(home):
     jid = jobs.submit("two-stages")["job"]
     assert jobs.run_job(jobs.claim("w1")) == "cancelled"
     assert seen == ["a"] and jobs.get(jid)["status"] == "cancelled"
+
+
+def _an(dur, scenes, silences=()):
+    return {"probe": {"duration": dur, "audio": True, "video": {"width": 1280, "height": 720}}, "transcript": None,
+            "scenes": scenes, "silences": list(silences), "black": [], "repetitions": [], "loudness": {}, "quality": {}, "issues": []}
+
+
+def _len(prop):
+    return sum(r["out"] - r["in"] for r in prop["keep"])
+
+
+def test_fit_to_target_hits_the_requested_length():
+    an = _an(720.0, [(i * 30.0, (i + 1) * 30.0) for i in range(24)])  # a 12-minute video in 30 s scenes
+    for target in (30, 95, 360, 600):
+        prop = autopilot.fit_to_target(an, target)
+        assert abs(_len(prop) - target) <= max(1.0, 0.02 * target), (target, _len(prop))
+        assert all(a["out"] <= b["in"] + 1e-6 for a, b in zip(prop["keep"], prop["keep"][1:]))  # in order, no overlap
+
+
+def test_fit_to_target_adds_context_back_when_clean_material_is_short():
+    # 12 minutes, but only 2 x 20 s of usable scenes (the rest is silence): 6 minutes asked -> about 6 minutes delivered
+    an = _an(720.0, [(100.0, 120.0), (500.0, 520.0)])
+    prop = autopilot.fit_to_target(an, 360)
+    assert abs(_len(prop) - 360) <= 8, _len(prop)
+
+
+def test_fit_to_target_whole_video_when_target_is_its_length():
+    an = _an(300.0, [(0.0, 150.0), (150.0, 300.0)])
+    prop = autopilot.fit_to_target(an, 300)
+    assert prop["keep"] == [{"in": 0.0, "out": 300.0, "score": 1.0, "segs": []}]

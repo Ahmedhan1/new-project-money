@@ -24,7 +24,7 @@ from . import jobs
 
 VERTICAL = ("youtube_shorts", "tiktok", "instagram_reels", "snapchat_spotlight")
 LANDSCAPE = ("youtube", "facebook", "instagram_feed")
-PROFILES = {"auto": "fast_social", "documentary": "cinematic_documentary", "explainer": "educational_explainer",
+PROFILES = {"auto": "cinematic_documentary", "documentary": "cinematic_documentary", "explainer": "educational_explainer",
             "podcast": "podcast_edit", "vlog": "travel_vlog", "interview": "interview_storytelling", "social": "fast_social"}
 MAX_URL_BYTES = 4 * 2 ** 30
 PLATFORM_PAGE = re.compile(r"(^|\.)(youtube\.com|youtu\.be|tiktok\.com|instagram\.com|facebook\.com|fb\.watch|x\.com|twitter\.com|"
@@ -43,6 +43,11 @@ def _analysis(p) -> dict:
         if f.exists():
             out[m["path"]] = json.loads(f.read_text(encoding="utf-8"))
     return out
+
+
+def _mmss(s) -> str:
+    s = int(round(float(s or 0)))
+    return f"{s // 60}:{s % 60:02d}"
 
 
 def _display(name: str) -> str:
@@ -168,6 +173,58 @@ def autopilot(job: jobs.Job) -> dict:
     return _create(job, a)
 
 
+# ---------------------------------------------------------------- duration control
+def _merge(rs: list[dict]) -> list[dict]:
+    out: list[dict] = []
+    for r in sorted(rs, key=lambda r: r["in"]):
+        if out and r["in"] <= out[-1]["out"] + 0.05:
+            out[-1] = {**out[-1], "out": max(out[-1]["out"], r["out"]), "segs": out[-1].get("segs", []) + r.get("segs", []),
+                       "score": max(out[-1].get("score", 0), r.get("score", 0))}
+        else:
+            out.append(dict(r))
+    return out
+
+
+def fit_to_target(an: dict, target: float) -> dict:
+    """A proposal whose length IS the target (within ~2%): the strongest pieces first, the last one trimmed to fit; when
+    the clean material is shorter than the target, context around each kept piece is added back instead of padding.
+    Returns edit.propose()'s shape with "keep" replaced."""
+    from . import edit
+    dur = float(an["probe"]["duration"])
+    prop = edit.propose(an, "tighten")
+    target = max(5.0, min(float(target), dur))
+    if target >= dur * 0.97:  # (almost) the whole video: keep it all
+        prop["keep"] = [{"in": 0.0, "out": round(dur, 3), "score": 1.0, "segs": [x for r in prop["keep"] for x in r.get("segs", [])]}]
+        prop["proposed_duration"] = round(dur, 2)
+        return prop
+    ranges = [dict(r) for r in prop["keep"] if r["out"] - r["in"] > 0.3] or [{"in": 0.0, "out": dur, "score": 1.0, "segs": []}]
+    total = sum(r["out"] - r["in"] for r in ranges)
+    if total >= target:
+        chosen, used = [], 0.0
+        for r in sorted(ranges, key=lambda r: -r.get("score", 0)):
+            d = r["out"] - r["in"]
+            left = target - used
+            if left < 1.5:
+                break
+            if d > left:  # trim the last piece to land on the target
+                r = {**r, "out": r["in"] + left, "segs": [x for x in r.get("segs", []) if x.get("start", 0) < r["in"] + left]}
+                d = left
+            chosen.append(r)
+            used += d
+        keep = sorted(chosen, key=lambda r: r["in"])
+    else:  # not enough clean material: add context back around each piece until the target is reached
+        keep = ranges
+        for _ in range(12):
+            have = sum(r["out"] - r["in"] for r in keep)
+            if have >= target * 0.98:
+                break
+            pad = (target - have) / (2 * len(keep))
+            keep = _merge([{**r, "in": max(0.0, r["in"] - pad), "out": min(dur, r["out"] + pad)} for r in keep])
+    prop["keep"] = [{**r, "in": round(r["in"], 3), "out": round(r["out"], 3)} for r in keep]
+    prop["proposed_duration"] = round(sum(r["out"] - r["in"] for r in prop["keep"]), 2)
+    return prop
+
+
 # ---------------------------------------------------------------- edit an existing video
 def _edit(job: jobs.Job, a: dict) -> dict:
     from . import project as prj
@@ -237,22 +294,33 @@ def _edit(job: jobs.Job, a: dict) -> dict:
             target = a.get("target_seconds")
             if a["goal"] == "summary" and not target:
                 target = max(30.0, min(600.0, info["duration"] * 0.3))
+            if not target:  # "clean": the owner's video at (almost) its own length - only dead air and repeated takes go
+                prop = edit.propose(an, "tighten")
+                tl = edit.build_timeline(m["path"], an, prop)
+                vid = p.save_timeline(tl, "autopilot: clean (same length, dead air removed)")
+                return {"version": vid, "seconds": prop["proposed_duration"],
+                        "how": f"تنظيف: شلت السكتات والتكرار بس — {_mmss(prop['proposed_duration'])} من {_mmss(info['duration'])}"}
             if info["speech"]:
                 brief = {"profile": PROFILES[a.get("style") or "auto"], "title": title,
                          **({"target_seconds": target} if target else {}), **({"instructions": a["instructions"]} if a.get("instructions") else {})}
                 try:
                     out = director.direct([m["path"]], an_all, brief)
-                    vid = p.save_timeline(out["master"], f"autopilot: director {brief['profile']}")
-                    s = out["plan"]["summary"]
-                    return {"version": vid, "how": f"المخرج الذكي ({brief['profile']}): شال الكلام الضعيف والسكتات والتكرار ورتّب الأقوى", "seconds": s.get("programme_seconds"), "notes": out["notes"][:8]}
+                    got = float(out["plan"]["summary"].get("programme_seconds") or 0)
+                    if abs(got - target) <= max(5.0, 0.1 * target):  # the director hit the length the owner asked for
+                        vid = p.save_timeline(out["master"], f"autopilot: director {brief['profile']}")
+                        return {"version": vid, "seconds": got, "notes": out["notes"][:8],
+                                "how": f"المخرج الذكي: اختار أقوى الأجزاء ورتّبها — {_mmss(got)} (طلبت {_mmss(target)})"}
+                    fallback = f"المخرج طلّع {_mmss(got)} بدل {_mmss(target)}، فظبطت المدة على اللي طلبته"
+                except Exception as e:  # noqa: BLE001 - fall back to the simpler speech/scene editor, and say so
+                    fallback = f"المخرج الذكي ماقدرش ({type(e).__name__}: {str(e)[:160]})؛ استخدمت المونتاج الأساسي (الكلام والمشاهد)"
                 except Exception as e:  # noqa: BLE001 - fall back to the simpler speech/scene editor, and say so
                     fallback = f"المخرج الذكي ماقدرش ({type(e).__name__}: {str(e)[:160]})؛ استخدمت المونتاج الأساسي (الكلام والمشاهد)"
             else:
                 fallback = "الفيديو مفيهوش كلام: اتعدل حسب المشاهد والجودة"
-            prop = edit.propose(an, "highlights" if target else "tighten", target)
+            prop = fit_to_target(an, target)
             tl = edit.build_timeline(m["path"], an, prop)
-            vid = p.save_timeline(tl, "autopilot: basic edit")
-            return {"version": vid, "how": fallback, "seconds": prop["proposed_duration"]}
+            vid = p.save_timeline(tl, "autopilot: fitted to the requested length")
+            return {"version": vid, "how": f"{fallback} — {_mmss(prop['proposed_duration'])}", "seconds": prop["proposed_duration"]}
 
         ed = job.stage("edit", editing)
 
@@ -272,6 +340,9 @@ def _edit(job: jobs.Job, a: dict) -> dict:
         def shorting():
             from . import qa, shorts
             items = shorts.factory(m["path"], an, n=a["shorts"], platforms=tuple(vertical[:1]), captions="classic", aspect="9:16")
+            if not items:  # nothing passed the quality bar: take the best moments anyway and say so
+                items = shorts.factory(m["path"], an, n=a["shorts"], platforms=tuple(vertical[:1]), captions="classic", aspect="9:16",
+                                       min_score=0)
             rows = shorts.save_batch(p, items)
             done = []
             for row, it in zip(rows, items):
