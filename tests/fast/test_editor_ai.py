@@ -63,3 +63,28 @@ def test_fit_sentences_grows_passages_instead_of_scattering():
     an = _an(600.0, [{"start": 0.0, "end": 600.0}], segs)
     keep = editor_ai._fit_sentences(an, [5, 40, 80], 90)
     assert len(keep) <= 4, len(keep)   # three passages (maybe one more), not fifteen scattered lines
+
+
+def test_llm_story_covers_every_section_even_if_the_model_drifts_to_the_start(monkeypatch):
+    import sys
+    import types
+    segs = [{"start": i * 6.0, "end": i * 6.0 + 5.0, "text": f"line {i} with some words"} for i in range(190)]  # ~19 min
+    an = _an(1140.0, [{"start": 0.0, "end": 1140.0}], segs)
+    fake = types.ModuleType("nexus.llm")
+    seen = {}
+
+    def chat_json(prompt, **kw):
+        seen["prompt"] = prompt
+        return {"passages": [{"first": 1, "last": 4}, {"first": 5, "last": 8}, {"first": 10, "last": 12}],  # all in section 1
+                "title": "t", "why": "w"}
+
+    fake.chat_json = chat_json
+    monkeypatch.setitem(sys.modules, "nexus.llm", fake)
+    import nexus
+    monkeypatch.setattr(nexus, "llm", fake, raising=False)
+    story = editor_ai.llm_story(an, 180)
+    assert "SECTION 8" in seen["prompt"]
+    starts = sorted(segs[i]["start"] for i in story["keep"])
+    assert starts[0] < 60 and starts[-1] > 1000      # the cut reaches the end of the video
+    sections = {int(t / (1140 / 8)) for t in starts}
+    assert len(sections) == 8, sections               # one passage per section

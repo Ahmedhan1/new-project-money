@@ -127,38 +127,75 @@ def llm_story(an: dict, target: float, instructions: str = "", title: str = "") 
         from . import llm
     except Exception:  # noqa: BLE001
         return None
-    lines, budget = [], 22000  # characters of transcript the 8k-token context can hold with room for the answer
-    step = max(1, int(math.ceil(sum(len(str(s.get("text", ""))) + 18 for s in segs) / budget)))
-    for i, s in enumerate(segs):
-        if i % step and step > 1:
-            continue
-        lines.append(f"{i} [{int(s['start']) // 60}:{int(s['start']) % 60:02d}] {str(s.get('text', '')).strip()[:160]}")
     total = sum(float(s["end"]) - float(s["start"]) for s in segs)
     n_pass = max(3, min(14, int(round(target / 22))))
-    prompt = (f"You are a senior film editor. Cut this {int(float(an['probe']['duration']) // 60)}-minute video down to about "
-              f"{int(target)} seconds of speech (the transcript has about {int(total)} seconds).\n"
-              f"Choose about {n_pass} PASSAGES. A passage is a run of consecutive lines (first..last) that is a complete thought "
-              "(roughly 15-30 seconds) - an editor keeps whole thoughts, never scattered single lines.\n"
-              "Rules: the first passage is the strongest hook; then the main ideas in their original order; end on a conclusive "
-              "passage; cover the whole video, not only its beginning; skip filler, repetition, greetings and tangents.\n"
+    # The transcript is shown in n_pass SECTIONS of equal source time; the editor must take one passage from each, so the
+    # cut covers the whole video (a single free choice drifted to the first minutes: live test, 6-302 s of 1151 s).
+    dur = float(an["probe"]["duration"])
+    bounds = [dur * k / n_pass for k in range(n_pass + 1)]
+    section_of = [min(n_pass - 1, int(float(sg["start"]) / dur * n_pass)) for sg in segs]
+    budget = 22000  # characters the 8k-token context can hold with room for the answer
+    step = max(1, int(math.ceil(sum(len(str(sg.get("text", ""))) + 18 for sg in segs) / budget)))
+    lines, cur = [], -1
+    for i, sg in enumerate(segs):
+        if section_of[i] != cur:
+            cur = section_of[i]
+            lines.append(f"=== SECTION {cur + 1} ({int(bounds[cur]) // 60}:{int(bounds[cur]) % 60:02d}-"
+                         f"{int(bounds[cur + 1]) // 60}:{int(bounds[cur + 1]) % 60:02d}) ===")
+        if i % step and step > 1:
+            continue
+        lines.append(f"{i} [{int(sg['start']) // 60}:{int(sg['start']) % 60:02d}] {str(sg.get('text', '')).strip()[:160]}")
+    prompt = (f"You are a senior film editor. Cut this {int(dur // 60)}-minute video down to about {int(target)} seconds "
+              f"(the transcript has about {int(total)} seconds of speech).\n"
+              f"The transcript is split into {n_pass} SECTIONS. Choose exactly ONE PASSAGE FROM EACH SECTION, in order. A passage is "
+              "a run of consecutive lines (first..last, both inside that section) forming one complete thought of about "
+              f"{int(target / n_pass)} seconds - the most interesting, informative or emotional thought of that section. "
+              "Skip filler, greetings and repetition. The first passage should work as a hook, the last as an ending.\n"
               + (f"Owner's instructions: {instructions}\n" if instructions else "")
-              + "Return JSON {\"passages\": [{\"first\": line, \"last\": line}, ...] in playing order, \"title\": short title "
-              "in the video's language, \"why\": one sentence}.\nTranscript (line number, time, text):\n" + "\n".join(lines))
+              + f"Return JSON {{\"passages\": [{n_pass} items {{\"first\": line, \"last\": line}} in section order], "
+              "\"title\": short title in the video's language, \"why\": one sentence}.\nTranscript (line number, time, text):\n"
+              + "\n".join(lines))
     schema = {"type": "object", "properties": {
-        "passages": {"type": "array", "minItems": 2, "items": {"type": "object", "properties": {
+        "passages": {"type": "array", "minItems": n_pass, "maxItems": n_pass, "items": {"type": "object", "properties": {
             "first": {"type": "integer"}, "last": {"type": "integer"}}, "required": ["first", "last"]}},
         "title": {"type": "string"}, "why": {"type": "string"}}, "required": ["passages", "title", "why"]}
     try:
         out = llm.chat_json(prompt, max_tokens=1200, temperature=0.3, require="passages", schema=schema)
     except Exception:  # noqa: BLE001 - no local LLM: the caller uses the scored selection
         return None
+    scored = {r["segs"][0]: r["score"] for r in _sentence_ranges(an)}
+    per = target / n_pass
     keep_set = set()
+    picked_sections = set()
     for ps in (out or {}).get("passages") or []:
         try:
             a, b = sorted((int(ps["first"]), int(ps["last"])))
         except (KeyError, TypeError, ValueError):
             continue
-        keep_set.update(i for i in range(max(0, a), min(len(segs) - 1, b, a + 40) + 1))
+        a, b = max(0, a), min(len(segs) - 1, b, a + 40)
+        if a > b:
+            continue
+        sec = section_of[a]
+        if sec in picked_sections:  # two passages in one section: the model ignored the rule - keep only the first
+            continue
+        picked_sections.add(sec)
+        keep_set.update(range(a, b + 1))
+    for sec in range(n_pass):  # a section the model skipped gets its best-scoring run of lines
+        if sec in picked_sections:
+            continue
+        idx = [i for i in range(len(segs)) if section_of[i] == sec]
+        if not idx:
+            continue
+        best = max(idx, key=lambda i: scored.get(i, 0))
+        run, length = [best], float(segs[best]["end"]) - float(segs[best]["start"])
+        while length < per:
+            nxt = [j for j in (run[0] - 1, run[-1] + 1) if j in idx and j not in run]
+            if not nxt:
+                break
+            j = max(nxt, key=lambda j: scored.get(j, 0))
+            run = sorted(run + [j])
+            length += float(segs[j]["end"]) - float(segs[j]["start"])
+        keep_set.update(run)
     keep = sorted(keep_set)
     if len(keep) < 3:
         return None
