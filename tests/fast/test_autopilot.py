@@ -90,3 +90,13 @@ def test_library_lists_uploaded_videos(home, tmp_path, monkeypatch):
     p.import_media(src)
     lib = TestClient(api.app).get("/api/autopilot/library").json()
     assert lib and lib[0]["project"] == p.id and lib[0]["name"] == "trip.mp4" and lib[0]["cover"]
+
+
+def test_fit_to_target_with_speech_trims_by_transcript_index():
+    # a talking video: 60 lines of 8 s with 2 s pauses (10 min); 95 s asked -> the last piece is trimmed by time
+    segs = [{"start": i * 10.0, "end": i * 10.0 + 8.0, "text": f"line {i}", "score": (i % 7) / 7} for i in range(60)]
+    an = {**_an(600.0, [(0.0, 600.0)]), "transcript": {"segments": segs, "language": "en"}}
+    prop = autopilot.fit_to_target(an, 95)
+    assert abs(_len(prop) - 95) <= 2, _len(prop)
+    for r in prop["keep"]:
+        assert all(isinstance(i, int) and segs[i]["start"] < r["out"] for i in r["segs"])

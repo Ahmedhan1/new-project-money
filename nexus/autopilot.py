@@ -197,6 +197,7 @@ def fit_to_target(an: dict, target: float) -> dict:
         prop["keep"] = [{"in": 0.0, "out": round(dur, 3), "score": 1.0, "segs": [x for r in prop["keep"] for x in r.get("segs", [])]}]
         prop["proposed_duration"] = round(dur, 2)
         return prop
+    tsegs = (an.get("transcript") or {}).get("segments") or []
     ranges = [dict(r) for r in prop["keep"] if r["out"] - r["in"] > 0.3] or [{"in": 0.0, "out": dur, "score": 1.0, "segs": []}]
     total = sum(r["out"] - r["in"] for r in ranges)
     if total >= target:
@@ -207,7 +208,8 @@ def fit_to_target(an: dict, target: float) -> dict:
             if left < 1.5:
                 break
             if d > left:  # trim the last piece to land on the target
-                r = {**r, "out": r["in"] + left, "segs": [x for x in r.get("segs", []) if x.get("start", 0) < r["in"] + left]}
+                cut = r["in"] + left  # "segs" are indices into the transcript: keep the lines that start before the cut
+                r = {**r, "out": cut, "segs": [i for i in r.get("segs", []) if i < len(tsegs) and tsegs[i]["start"] < cut]}
                 d = left
             chosen.append(r)
             used += d
