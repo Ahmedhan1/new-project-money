@@ -126,12 +126,11 @@ def install() -> None:
             reqs.append(name)
     sh([sys.executable, "-m", "pip", "install", "-q", *reqs], 2400, check=True)
 
+    install_llama({**os.environ, "LD_LIBRARY_PATH": cuda_lib_path()})
+
     def background() -> None:
         sh([sys.executable, "-m", "pip", "install", "-q", "manim"], 2400)
-        cuda = "https://abetlen.github.io/llama-cpp-python/whl/cu124"
-        if sh([sys.executable, "-m", "pip", "install", "-q", "--only-binary=:all:", "llama-cpp-python", "--extra-index-url", cuda], 1800):
-            sh([sys.executable, "-m", "pip", "install", "-q", "llama-cpp-python"], 3600)
-        log("optional packages (manim, llama-cpp-python) done")
+        log("optional package manim done")
 
     threading.Thread(target=background, daemon=True).start()
 
@@ -162,8 +161,40 @@ def register_youtube() -> None:
 
 
 
+def cuda_lib_path() -> str:
+    """Kaggle ships CUDA 13 system-wide, but the CUDA 12 runtime/cuBLAS that the llama.cpp cu12 wheel needs are in pip
+    packages (site-packages/nvidia/<lib>/lib, seen live 2026-11-14) that are not on LD_LIBRARY_PATH."""
+    import glob
+    dirs = sorted({str(Path(p).parent) for pat in ("nvidia/*/lib/libcudart.so.12", "nvidia/*/lib/libcublas*.so.12")
+                   for base in sys.path if base.endswith(("site-packages", "dist-packages")) for p in glob.glob(os.path.join(base, pat))})
+    return ":".join(dirs + [x for x in os.environ.get("LD_LIBRARY_PATH", "").split(":") if x])
+
+
+def llama_ok(env: dict) -> bool:
+    code = "import llama_cpp, sys; llama_cpp.llama_backend_init(); print('llama ok', llama_cpp.__version__)"
+    r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, env=env, timeout=120)
+    if r.returncode != 0:
+        log(f"llama.cpp check failed: {(r.stderr or r.stdout)[-300:]}")
+    return r.returncode == 0
+
+
+def install_llama(env: dict) -> None:
+    """The local LLM (scripts, titles, translation checks). Order: CUDA 12 wheel -> CPU wheel -> build from source."""
+    cuda = "https://abetlen.github.io/llama-cpp-python/whl/cu124"
+    cpu = "https://abetlen.github.io/llama-cpp-python/whl/cpu"
+    sh([sys.executable, "-m", "pip", "install", "-q", "diskcache>=5.6.1", "jinja2>=2.11.3", "typing-extensions>=4.5.0"], 600)
+    for extra in (cuda, cpu):
+        sh([sys.executable, "-m", "pip", "install", "-q", "--force-reinstall", "--no-deps", "--only-binary=:all:", "llama-cpp-python",
+            "--extra-index-url", extra], 1800)
+        if llama_ok(env):
+            log(f"llama.cpp ready ({'GPU' if extra == cuda else 'CPU'})")
+            return
+    sh([sys.executable, "-m", "pip", "install", "-q", "--force-reinstall", "--no-binary=llama-cpp-python", "llama-cpp-python"], 3600)
+    log("llama.cpp ready (built from source)" if llama_ok(env) else "llama.cpp NOT available: scripts use the fallback writer")
+
+
 def start_app() -> subprocess.Popen:
-    env = {**os.environ, **SECRETS, "NEXUS_HOME": str(HOME), "NEXUS_API_TOKEN": CFG["token"], "NEXUS_PORT": "8765",
+    env = {**os.environ, **SECRETS, "LD_LIBRARY_PATH": cuda_lib_path(), "NEXUS_HOME": str(HOME), "NEXUS_API_TOKEN": CFG["token"], "NEXUS_PORT": "8765",
            "PYTHONUNBUFFERED": "1", "NEXUS_EMBEDDED_WORKER": "1"}
     out = open(WORK / "nexus_app.log", "a", encoding="utf-8")  # noqa: SIM115 - kept open for the child
     p = subprocess.Popen([sys.executable, "-m", "nexus", "serve", "--host", "127.0.0.1", "--port", "8765"],

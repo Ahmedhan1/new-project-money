@@ -17,7 +17,10 @@
   "observability": { "enabled": true },
   "vars": {
     "MAX_RUNTIME_S": "10800",       // default per-job Kaggle time limit (3 h); hard cap 12 h
-    "MIN_GPU_RESERVE_S": "3600"     // refuse new GPU jobs when the weekly Kaggle GPU quota left is below this
+    "MIN_GPU_RESERVE_S": "3600",    // refuse new GPU jobs when the weekly Kaggle GPU quota left is below this
+    // Git ref of NEXUS the studio session clones. The simple UI + autopilot live on this branch until PR 13 is merged;
+    // then set it back to "main".
+    "STUDIO_REF": "claude/cloudflare-control-plane"
   }
   // Secrets (never in this file): OWNER_PASSWORD (required). Optional: KAGGLE_API_TOKEN, KAGGLE_USERNAME.
   // Set them in the dashboard (Worker > Settings > Variables and Secrets) or `npx wrangler secret put OWNER_PASSWORD`.

@@ -158,9 +158,9 @@ export async function watchdog(env) {
 const HOP = ["cookie", "host", "authorization", "cf-connecting-ip", "cf-ipcountry", "cf-ray", "cf-visitor", "cf-worker", "x-forwarded-for",
   "x-forwarded-proto", "x-forwarded-host", "x-real-ip", "forwarded", "connection", "keep-alive", "upgrade", "te", "trailer", "transfer-encoding"];
 
-export async function proxy(request, rt) {
+export async function proxy(request, rt, upstreamPath = null) {
   const url = new URL(request.url);
-  const target = new URL(url.pathname + url.search, rt.url);
+  const target = new URL((upstreamPath || url.pathname) + url.search, rt.url);
   const h = new Headers(request.headers);
   for (const k of HOP) h.delete(k);
   h.set("Authorization", `Bearer ${rt.token}`);

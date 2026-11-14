@@ -242,7 +242,13 @@ async function gateway(request, env, ctx) {
   if (!routeCache.rt || now - routeCache.at > 20000) routeCache = { at: now, rt: await store(env).route() };
   const rt = routeCache.rt;
   if (!rt) return wantsHtml(request) ? redirect("/panel/?studio=off") : err("الاستوديو مش شغال. شغّله من لوحة التحكم /panel", 503);
-  const res = await studio.proxy(request, rt);
+  // "/" is the one-screen simple UI (the app's /simple); the full classic UI stays reachable at /app/.
+  const url = new URL(request.url);
+  let upstreamPath = null;
+  if (url.pathname === "/") upstreamPath = "/simple";
+  else if (url.pathname === "/app") return redirect("/app/");
+  else if (url.pathname === "/app/") upstreamPath = "/";
+  const res = await studio.proxy(request, rt, upstreamPath);
   if (!res) {
     routeCache = { at: 0, rt: null };
     return wantsHtml(request) ? redirect("/panel/?studio=lost") : err("الاستوديو مش بيرد", 502);

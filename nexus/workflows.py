@@ -488,3 +488,7 @@ def archive_retrieve(job: jobs.Job) -> dict:
 def archive_recover(job: jobs.Job) -> dict:
     from . import archive
     return job.stage("recover", lambda: archive.recover())
+
+
+# Simple mode: one request -> finished videos (registered by import)
+from . import autopilot as _autopilot  # noqa: E402,F401

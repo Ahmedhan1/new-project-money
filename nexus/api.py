@@ -192,6 +192,53 @@ def api_health():
     return {"ok": True, "version": config.VERSION, "db_schema": db.schema_version(), "jobs": jobs.summary()["counts"]}
 
 
+# ---------------------------------------------------------------- simple mode (autopilot): /simple
+SIMPLE_UI = Path(__file__).resolve().parent / "ui" / "simple.html"
+
+
+@app.get("/simple", response_class=HTMLResponse)
+def simple_page():
+    """The one-screen UI (edit my video / video from an idea or script / let NEXUS pick). Data comes from owner-only /api."""
+    return SIMPLE_UI.read_text(encoding="utf-8")
+
+
+@app.post("/api/autopilot")
+def api_autopilot(body: dict):
+    from . import autopilot
+    try:
+        return autopilot.submit(body)
+    except autopilot.AutopilotError as e:
+        raise HTTPException(400, str(e)) from None
+
+
+@app.get("/api/autopilot/options")
+def api_autopilot_options():
+    from . import autopilot, platforms
+    from .intelligence.market import load_niches
+    plats = {}
+    for k in autopilot.VERTICAL + autopilot.LANDSCAPE:
+        try:
+            plats[k] = platforms.get(k)["display"]
+        except Exception:  # noqa: BLE001
+            pass
+    raw = load_niches()
+    raw = raw.get("niches", raw) if isinstance(raw, dict) else raw
+    nich = [{"id": k, "name": (v or {}).get("label") or k} for k, v in raw.items()] if isinstance(raw, dict) else []
+    return {"platforms": plats, "vertical": list(autopilot.VERTICAL), "styles": list(autopilot.PROFILES), "niches": nich}
+
+
+@app.get("/api/autopilot/runs")
+def api_autopilot_runs(limit: int = 30):
+    rows = db.query("SELECT id,project_id,status,progress,created,started,finished,error,result,stage,stages,params "
+                    "FROM jobs WHERE kind='autopilot' ORDER BY created DESC LIMIT ?", (min(100, limit),))
+    for r in rows:
+        r["result"] = json.loads(r["result"]) if r["result"] else None
+        r["params"] = json.loads(r["params"]) if r["params"] else {}
+        st = json.loads(r.pop("stages") or "{}")
+        r["stages"] = [{"name": k, "status": v["status"], "seconds": v.get("seconds")} for k, v in st.items()]
+    return rows
+
+
 @app.get("/api/jobs")
 def api_jobs():
     rows = db.query("SELECT id,project_id,kind,status,worker,progress,created,started,finished,error,result,stage,stages,retries,recovery,durable "
