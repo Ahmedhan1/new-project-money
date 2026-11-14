@@ -42,8 +42,24 @@ def test_polish_transitions_only_at_scene_jumps_and_framing_on_jump_cuts():
     out = editor_ai.polish(tl, "documentary", speech=True)
     c = out["clips"]
     assert "transition" not in c[1]                          # 1 s gap inside one shot: no transition...
-    assert {"type": "zoom", "from": 1.08, "to": 1.08} in c[1]["effects"]   # ...but a reframe hides the jump cut
+    assert {"type": "zoom", "from": 1.1, "to": 1.1} in c[1]["effects"]   # ...but a reframe hides the jump cut
     assert c[2]["transition"] == "crossfade" and c[2]["xfade"] in ("fade", "fadeblack")
     assert "transition" not in c[3]                          # too short to dissolve into
     assert out["grade"] == "documentary" and c[0]["fade_in"] >= 0.4 and c[-1]["fade_out"] >= 0.8
     assert any(e["type"] == "zoom" and e["to"] > 1.0 for e in c[0]["effects"])  # 8 s shot: Ken Burns push-in
+
+
+def test_interview_cut_is_mostly_hard_cuts_with_few_dissolves():
+    clip = lambda a, b: {"id": f"c{a}", "src": "/v.mp4", "in": a, "out": b}  # noqa: E731
+    tl = {"clips": [clip(i * 60.0, i * 60.0 + 5) for i in range(20)], "width": 1280, "height": 720}  # 20 pieces, all far apart
+    c = editor_ai.polish(tl, "documentary", speech=True)["clips"]
+    n = sum(1 for x in c if x.get("transition"))
+    assert 1 <= n <= 4, n   # 100 s of programme: a dissolve at most every 25 s
+    assert sum(1 for x in c if {"type": "zoom", "from": 1.1, "to": 1.1} in x.get("effects", [])) >= 6  # the rest: reframed cuts
+
+
+def test_fit_sentences_grows_passages_instead_of_scattering():
+    segs = [{"start": i * 6.0, "end": i * 6.0 + 5.0, "text": "a b c d e f g"} for i in range(100)]
+    an = _an(600.0, [{"start": 0.0, "end": 600.0}], segs)
+    keep = editor_ai._fit_sentences(an, [5, 40, 80], 90)
+    assert len(keep) <= 4, len(keep)   # three passages (maybe one more), not fifteen scattered lines

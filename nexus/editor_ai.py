@@ -134,22 +134,32 @@ def llm_story(an: dict, target: float, instructions: str = "", title: str = "") 
             continue
         lines.append(f"{i} [{int(s['start']) // 60}:{int(s['start']) % 60:02d}] {str(s.get('text', '')).strip()[:160]}")
     total = sum(float(s["end"]) - float(s["start"]) for s in segs)
+    n_pass = max(3, min(14, int(round(target / 22))))
     prompt = (f"You are a senior film editor. Cut this {int(float(an['probe']['duration']) // 60)}-minute video down to about "
               f"{int(target)} seconds of speech (the transcript has about {int(total)} seconds).\n"
-              "Rules: start with the strongest hook line; keep the main ideas in their original order; every kept line must make "
-              "sense without the removed ones (keep the line before a reply when needed); end on a conclusive line; cover the whole "
-              "video, not only its beginning; drop filler, repetition, greetings and tangents.\n"
+              f"Choose about {n_pass} PASSAGES. A passage is a run of consecutive lines (first..last) that is a complete thought "
+              "(roughly 15-30 seconds) - an editor keeps whole thoughts, never scattered single lines.\n"
+              "Rules: the first passage is the strongest hook; then the main ideas in their original order; end on a conclusive "
+              "passage; cover the whole video, not only its beginning; skip filler, repetition, greetings and tangents.\n"
               + (f"Owner's instructions: {instructions}\n" if instructions else "")
-              + "Return JSON {\"keep\": [line numbers in order], \"title\": short title in the video's language, "
-              "\"why\": one sentence}.\nTranscript (line number, time, text):\n" + "\n".join(lines))
-    schema = {"type": "object", "properties": {"keep": {"type": "array", "items": {"type": "integer"}, "minItems": 3},
-                                               "title": {"type": "string"}, "why": {"type": "string"}},
-              "required": ["keep", "title", "why"]}
+              + "Return JSON {\"passages\": [{\"first\": line, \"last\": line}, ...] in playing order, \"title\": short title "
+              "in the video's language, \"why\": one sentence}.\nTranscript (line number, time, text):\n" + "\n".join(lines))
+    schema = {"type": "object", "properties": {
+        "passages": {"type": "array", "minItems": 2, "items": {"type": "object", "properties": {
+            "first": {"type": "integer"}, "last": {"type": "integer"}}, "required": ["first", "last"]}},
+        "title": {"type": "string"}, "why": {"type": "string"}}, "required": ["passages", "title", "why"]}
     try:
-        out = llm.chat_json(prompt, max_tokens=1200, temperature=0.3, require="keep", schema=schema)
+        out = llm.chat_json(prompt, max_tokens=1200, temperature=0.3, require="passages", schema=schema)
     except Exception:  # noqa: BLE001 - no local LLM: the caller uses the scored selection
         return None
-    keep = sorted({int(i) for i in (out or {}).get("keep") or [] if isinstance(i, int) and 0 <= int(i) < len(segs)})
+    keep_set = set()
+    for ps in (out or {}).get("passages") or []:
+        try:
+            a, b = sorted((int(ps["first"]), int(ps["last"])))
+        except (KeyError, TypeError, ValueError):
+            continue
+        keep_set.update(i for i in range(max(0, a), min(len(segs) - 1, b, a + 40) + 1))
+    keep = sorted(keep_set)
     if len(keep) < 3:
         return None
     return {"keep": keep, "title": str(out.get("title") or title)[:80], "why": str(out.get("why") or "")[:300]}
@@ -164,9 +174,19 @@ def _fit_sentences(an: dict, keep: list[int], target: float) -> list[dict]:
     def length() -> float:
         return sum(float(segs[i]["end"]) - float(segs[i]["start"]) for i in chosen)
 
-    others = sorted((i for i in scored if i not in chosen), key=lambda i: -scored[i]["score"])
-    while length() < target * 0.95 and others:
-        chosen.add(others.pop(0))
+    def top_up() -> None:
+        # grow the chosen passages first (the line before/after a kept line reads as one continuous thought, fewer cuts),
+        # only then open new places in the video
+        while length() < target * 0.95:
+            near = sorted({j for i in chosen for j in (i - 1, i + 1) if j in scored and j not in chosen},
+                          key=lambda j: -scored[j]["score"])
+            far = sorted((i for i in scored if i not in chosen), key=lambda i: -scored[i]["score"])
+            pool = near or far
+            if not pool:
+                return
+            chosen.add(pool[0])
+
+    top_up()
     weakest = sorted(chosen, key=lambda i: scored[i]["score"])
     while length() > target * 1.05 and len(chosen) > 3 and weakest:
         i = weakest.pop(0)
@@ -176,7 +196,7 @@ def _fit_sentences(an: dict, keep: list[int], target: float) -> list[dict]:
     out: list[dict] = []
     for i in sorted(chosen):
         a, b = max(0.0, float(segs[i]["start"]) - 0.12), float(segs[i]["end"]) + 0.18
-        if out and a - out[-1]["out"] <= 0.9:
+        if out and a - out[-1]["out"] <= 2.5:  # a short gap is kept: natural breath, one piece instead of a choppy cut
             out[-1]["out"], out[-1]["segs"] = b, out[-1]["segs"] + [i]
         else:
             out.append({"in": a, "out": b, "score": scored[i]["score"], "segs": [i]})
@@ -210,6 +230,7 @@ def polish(tl: dict, style: str = "auto", speech: bool = True) -> dict:
     prev = None
     flip = False
     tn = 0
+    prog, last_tr = 0.0, -1e9  # programme time, time of the last dissolve
     for c in tl.get("clips", []):
         if not c.get("src"):
             prev = None
@@ -219,7 +240,9 @@ def polish(tl: dict, style: str = "auto", speech: bool = True) -> dict:
         if prev is not None:
             gap = float(c["in"]) - float(prev["out"])
             same_shot = 0 <= gap < 4.0
-            if same_shot:  # a cut inside one continuous shot: change the framing so it reads as a new angle
+            # an interview is cut, not dissolved: a dissolve marks a new section (a big jump in the source), at most every 25 s
+            section = gap > (45.0 if speech else 4.0) and prog - last_tr >= (25.0 if speech else 6.0)
+            if same_shot or not section:  # a hard cut with changed framing reads as a new angle
                 flip = not flip
             elif d > 1.2 and float(prev["out"]) - float(prev["in"]) > 1.2:
                 c["transition"] = "crossfade"
@@ -227,11 +250,13 @@ def polish(tl: dict, style: str = "auto", speech: bool = True) -> dict:
                 c["transition_dur"] = min(st["tdur"], d / 4)
                 tn += 1
                 flip = False
+                last_tr = prog
         if flip:
-            effects.append({"type": "zoom", "from": 1.08, "to": 1.08})
+            effects.append({"type": "zoom", "from": 1.1, "to": 1.1})
         elif d >= 6.0:  # slow push-in keeps long shots alive
             effects.append({"type": "zoom", "from": 1.0, "to": st["kenburns"]})
         c["effects"] = effects
+        prog += d
         prev = c
     tl["grade"] = st["grade"]
     if clips:
