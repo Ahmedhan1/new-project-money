@@ -28,7 +28,8 @@ PROFILES = {"auto": "fast_social", "documentary": "cinematic_documentary", "expl
             "podcast": "podcast_edit", "vlog": "travel_vlog", "interview": "interview_storytelling", "social": "fast_social"}
 MAX_URL_BYTES = 4 * 2 ** 30
 PLATFORM_PAGE = re.compile(r"(^|\.)(youtube\.com|youtu\.be|tiktok\.com|instagram\.com|facebook\.com|fb\.watch|x\.com|twitter\.com|"
-                           r"vimeo\.com|dailymotion\.com|twitch\.tv|snapchat\.com)$", re.I)
+                           r"vimeo\.com|dailymotion\.com|twitch\.tv|snapchat\.com|pornhub\.com|xvideos\.com|xnxx\.com|xhamster\.com|redtube\.com|"
+                           r"youporn\.com|onlyfans\.com)$", re.I)
 
 
 class AutopilotError(ValueError):
@@ -80,8 +81,8 @@ def validate(params: dict) -> dict:
             from urllib.parse import urlparse
             host = (urlparse(out["url"]).hostname or "").lower()
             if PLATFORM_PAGE.search(host):
-                raise AutopilotError("links to YouTube/TikTok/Instagram/Facebook pages cannot be downloaded (their terms forbid it). "
-                                     "Upload the video file you own, or paste a direct link to the file (.mp4) or a Google Drive file.")
+                raise AutopilotError("لينكات صفحات مواقع الفيديو (يوتيوب، تيك توك، إنستجرام، فيسبوك، والمواقع المشابهة) مش بتتحمل — "
+                                     "شروطها بتمنع ده. ارفع ملف الفيديو اللي تملكه، أو حط لينك مباشر للملف (.mp4) أو ملف على Google Drive.")
     elif mode == "idea":
         out["idea"] = (params.get("idea") or "").strip()[:500]
         if len(out["idea"]) < 3:

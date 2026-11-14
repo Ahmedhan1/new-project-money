@@ -5,8 +5,9 @@ from nexus import autopilot, jobs
 
 
 def test_validate_rejects_platform_page_links_and_empty_requests():
-    with pytest.raises(autopilot.AutopilotError, match="cannot be downloaded"):
-        autopilot.validate({"mode": "edit", "url": "https://www.youtube.com/watch?v=abc"})
+    for url in ("https://www.youtube.com/watch?v=abc", "https://www.pornhub.com/view_video.php?viewkey=x"):
+        with pytest.raises(autopilot.AutopilotError, match="مش بتتحمل"):
+            autopilot.validate({"mode": "edit", "url": url})
     with pytest.raises(autopilot.AutopilotError):
         autopilot.validate({"mode": "edit"})
     with pytest.raises(autopilot.AutopilotError):
