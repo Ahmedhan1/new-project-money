@@ -182,8 +182,8 @@ $("#file").onchange = async () => {
     const j = f.size > 80 * 1024 * 1024 ? await chunkedUpload(f) : await simpleUpload(f);
     project = j.project; analysisJob = j.job; $("#url").value = ""; picked.clear();
     $("#drop").firstChild.textContent = `✓ ${f.name} (${(f.size / 1024 ** 2).toFixed(0)}MB)`;
-    msg($("#srcmsg"), f.size > 300 * 1024 ** 2
-      ? "اترفع ✓ — بيصغّر حجمه دلوقتي (1080p بجودة كويسة) وبعدين بيحلله. تقدر تضغط «ابدأ» على طول."
+    msg($("#srcmsg"), f.size > 80 * 1024 ** 2
+      ? "اترفع ✓ — لو حجمه كبير بيتصغّر لوحده لـ 1080p بجودة كويسة، وبعدين بيتحلل. تقدر تضغط «ابدأ» على طول."
       : "اترفع ✓ — بيتحلل دلوقتي (المشاهد والكلام). تقدر تضغط «ابدأ» على طول.", true);
     if (chosen($("#goal"))[0] === "scenes") loadScenes();
   } catch (e) { msg($("#srcmsg"), e.message); } finally { $("#go-edit").disabled = false; }
