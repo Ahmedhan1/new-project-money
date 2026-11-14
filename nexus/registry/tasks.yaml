@@ -670,10 +670,11 @@ tasks:
     priority: 2
     title: "Deploy the control plane on an owner-approved zero-cost host"
     status: tested
-    blocked_by: "Owner: paste the Kaggle API token in Settings on the live site (the agent has no copy of it)."
+    blocked_by: "Owner: real use of the studio (GPU session, renders) and YouTube connection need the owner's own clicks/accounts."
     acceptance: "Owner chose Cloudflare Workers Free (2026-11-13). cloudflare/: control plane (owner login, encrypted Kaggle key in a SQLite Durable Object, job submit/poll/retry/download, cron every 5 min) pushing the real worker_kit to the single Kaggle account; zero spend (no R2, no paid add-on)."
     test: "cd cloudflare && npm test (10 passed); tests/fast/test_cloudflare_control_plane.py; LIVE 2026-11-13: test/live_e2e.mjs ran the Worker job code against the real Kaggle API - probe (CPU) queued -> running -> COMPLETE, result.json succeeded, artifacts/probe.json downloaded; wrangler dev smoke (login, CSRF, self-created schema, UI with no JS errors). DEPLOYED 2026-11-13 to https://nexus-cloud.nexus-ahmed.workers.dev (owner's Cloudflare account, Free plan): /api/health ok, owner login ok, Worker reached api.kaggle.com (rejected a fake key as expected)."
-    next: "Owner logs in, pastes the Kaggle token in Settings, runs probe from the UI; then mark verified. Redeploy: cd cloudflare && npx wrangler deploy."
+    next: "Owner: open the studio from /panel and use the app; connect YouTube in Settings (own Google Web OAuth client). Redeploy: cd cloudflare && npx wrangler deploy."
+    evidence_studio: "2026-11-14 live: studio session (CPU) installing -> ready in ~1 min; full NEXUS UI loaded through the gateway on a phone viewport with no failed requests; upload via gateway created a project and the analyze job finished; Stop saved NEXUS_HOME; the next session restored it (project listed). GPU session and YouTube connect not yet exercised live."
   - id: ACC1-BATCH-LLM
     priority: 1
     title: "batch_llm worker task for Account 3 (bounded batch inference on the Kaggle GPU, no serving endpoint)"

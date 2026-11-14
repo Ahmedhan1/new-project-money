@@ -1,3 +1,4 @@
+[hidden] { display: none !important; }
 :root { --bg:#f6f7fb; --card:#fff; --ink:#151a2d; --mute:#5b6378; --line:#e3e6ef; --acc:#4f46e5; --good:#0f8a5f; --bad:#c2410c; --warn:#a16207; }
 @media (prefers-color-scheme: dark) { :root { --bg:#0e1120; --card:#161a2e; --ink:#e8eaf3; --mute:#9aa1b8; --line:#272c45; --acc:#8b85ff; --good:#34d399; --bad:#fb923c; --warn:#facc15; } }
 * { box-sizing: border-box; }
@@ -38,3 +39,12 @@ button.danger { background:transparent; color:var(--bad); border:1px solid var(-
 .badge.succeeded { color:var(--good); border-color:var(--good); } .badge.failed { color:var(--bad); border-color:var(--bad); }
 .badge.running, .badge.queued, .badge.submitting { color:var(--warn); border-color:var(--warn); }
 code { background:var(--bg); padding:1px 5px; border-radius:4px; }
+.studio { border-color: var(--acc); }
+.btn { display:inline-block; text-decoration:none; border-radius:8px; padding:8px 14px; background:var(--good); color:#fff; font-weight:700; }
+.big { font-size:17px; padding:12px 22px; }
+.steps { display:grid; gap:6px; margin:10px 0; }
+.step { padding:6px 10px; border-radius:8px; border:1px dashed var(--line); color:var(--mute); }
+.step.now { border-style:solid; border-color:var(--warn); color:var(--warn); }
+.step.done { border-style:solid; border-color:var(--good); color:var(--good); }
+.step.done::before { content:"✓ "; }
+#studio pre { white-space:pre-wrap; overflow-wrap:anywhere; max-height:240px; overflow:auto; background:var(--bg); padding:8px; border-radius:6px; font-size:12px; direction:ltr; text-align:left; }

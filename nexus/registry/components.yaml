@@ -369,7 +369,24 @@ components:
     data_retention: "job ledger + AES-GCM encrypted settings in the owner's Durable Object SQLite storage; secrets in Worker secrets"
     availability: "remote, https://<name>.<subdomain>.workers.dev"
     hardware: none
-    network_hosts: [api.kaggle.com, www.kaggleusercontent.com]
+    network_hosts: [api.kaggle.com, www.kaggleusercontent.com, oauth2.googleapis.com, www.googleapis.com]
+    status: deployed
+  - id: cloudflared-quick-tunnel
+    name: cloudflared quick tunnel (trycloudflare.com) from the Kaggle studio session to the Cloudflare gateway
+    kind: service
+    capability: [tunnel]
+    source_url: https://github.com/cloudflare/cloudflared
+    license: Apache-2.0 (client); Cloudflare ToS (service)
+    free_tier: "quick tunnels need no account and no card"
+    account_required: false
+    payment_method_required: false
+    quotas: "best effort, testing-grade service; 200 in-flight requests; 100 MB request bodies"
+    commercial_use: "allowed under Cloudflare ToS"
+    usage_restrictions: "random URL per session; only the gateway knows it and the app still requires the per-session bearer token"
+    data_retention: "none"
+    availability: "remote, best effort"
+    hardware: none
+    network_hosts: [github.com, trycloudflare.com]
     status: deployed
   - id: google-drive
     name: Google Drive API v3 (owner's own accounts drive_a/b/c, OAuth scope drive.file)

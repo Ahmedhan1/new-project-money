@@ -36,8 +36,9 @@ also `docs/ACCOUNT1_*.md` (acceptance, handoffs, setup guide).
 ## Cloudflare control plane (`cloudflare/`, D-24) - owner-chosen host, free plan
 Cloudflare Worker = UI + API + cron; Kaggle = all heavy work. Owner login, Kaggle key saved encrypted from the Settings
 page, submit/track/retry/download jobs that push the unchanged `worker_kit` to the single Kaggle account. Live at
-https://nexus-cloud.nexus-ahmed.workers.dev (state in a SQLite Durable Object); the owner still has to paste the Kaggle
-token in Settings. Redeploy/steps: `cloudflare/README.md`. After any `worker_kit`
+https://nexus-cloud.nexus-ahmed.workers.dev: `/panel/` = control panel; everything else = the FULL NEXUS app running in a
+Kaggle studio session (D-25: start/stop from the panel, idle auto-stop, projects saved/restored between sessions,
+YouTube connected from Settings). Redeploy/steps: `cloudflare/README.md`. After any `worker_kit`
 change run `python scripts/cloudflare/build_worker_script.py`.
 
 ## What actually works (evidence: `docs/results/demos/acceptance_*.json`, `docs/FEATURE_MATRIX.md`, `docs/FINAL_REPORT.md`)

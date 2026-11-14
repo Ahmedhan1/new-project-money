@@ -129,12 +129,12 @@ export function cleanRef(ref) {
   return String(ref || "").replace(/^https?:\/\/www\.kaggle\.com/, "").replace(/^\/?code\//, "").replace(/^\//, "");
 }
 
-export async function push(creds, { slug, script, gpu, timeoutS }, fetchImpl = fetch) {
+export async function push(creds, { slug, script, gpu, timeoutS, kernelSources = [] }, fetchImpl = fetch) {
   // No owner prefix needed: Kaggle creates the kernel under the token's account and returns its ref (verified live).
   const body = {
     ...(creds.username ? { slug: `${creds.username}/${slug}` } : {}), newTitle: slug, text: script, language: "python", kernelType: "script",
     isPrivate: true, enableGpu: !!gpu, enableTpu: false, enableInternet: true,
-    datasetDataSources: [], competitionDataSources: [], kernelDataSources: [], modelDataSources: [], categoryIds: [],
+    datasetDataSources: [], competitionDataSources: [], kernelDataSources: kernelSources, modelDataSources: [], categoryIds: [],
     sessionTimeoutSeconds: Math.max(60, Math.min(SESSION_MAX_S, Math.floor(timeoutS))),
   };
   if (gpu) body.machineShape = GPU_SHAPE;

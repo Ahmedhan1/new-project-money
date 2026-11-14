@@ -23,7 +23,7 @@ async function api(path, opts = {}) {
     headers: { "Content-Type": "application/json", "X-Nexus": "1", ...(opts.headers || {}) } });
   let j = {};
   try { j = await r.json(); } catch { /* empty */ }
-  if (r.status === 401 && path !== "/api/login") { show("login"); throw new Error(j.error || "سجل دخول"); }
+  if (r.status === 401 && path !== "/panel/api/login") { show("login"); throw new Error(j.error || "سجل دخول"); }
   if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
   return j;
 }
@@ -41,10 +41,54 @@ function msg(el, text, ok = false) { el.textContent = text || ""; el.className =
 const hrs = (s) => (s / 3600).toFixed(1);
 const when = (t) => (t ? new Date(t).toLocaleString("ar-EG") : "");
 
+const STUDIO_STATE = {
+  off: ["مقفول", ""], starting: ["بيتبعت لـ Kaggle", "running"], installing: ["بيجهّز البرنامج", "running"],
+  ready: ["شغال ✓", "succeeded"], saving: ["بيحفظ شغلك", "running"], stopped: ["مقفول (الشغل محفوظ)", ""], error: ["حصل خطأ", "failed"],
+};
+const STEPS = [["starting", "Kaggle بيحجز جهاز"], ["installing", "تحميل وتثبيت NEXUS (أول مرة 5-10 دقايق)"], ["ready", "الاستوديو جاهز"]];
+let studioTimer = null;
+
+async function loadStudio() {
+  let s;
+  try { s = await api("/panel/api/studio"); } catch (e) { msg($("#studio-msg"), e.message); return; }
+  const [label, cls] = STUDIO_STATE[s.state] || [s.state, ""];
+  const badge = $("#studio-badge");
+  badge.textContent = label; badge.className = "badge " + cls;
+  const live = ["starting", "installing", "ready", "saving"].includes(s.state);
+  $("#studio-open").hidden = s.state !== "ready";
+  $("#studio-start").hidden = live;
+  $("#studio-stop").hidden = !live || s.state === "saving";
+  $("#studio-opts").hidden = live;
+  const idx = STEPS.findIndex(([k]) => k === s.state);
+  $("#studio-steps").replaceChildren(...(live && s.state !== "saving" ? STEPS.map(([k, t], i) => {
+    const d = document.createElement("div");
+    d.className = "step " + (i < idx || s.state === "ready" ? "done" : i === idx ? "now" : "");
+    d.textContent = t; return d;
+  }) : []));
+  let note = "";
+  if (s.state === "ready") note = `شغال${s.gpu ? " على GPU" : ""}. بيقفل لوحده بعد ${s.idle_min || 45} دقيقة من غير استخدام، وشغلك بيتحفظ.`;
+  else if (s.state === "saving") note = "بيحفظ مشاريعك عشان الجلسة الجاية…";
+  else if (s.state === "error") note = s.error || "";
+  else if (s.state === "stopped" || s.state === "off") note = s.has_saved_work ? "مشاريعك محفوظة وهترجع لما تشغّل الاستوديو تاني." : "";
+  if (s.stop_requested && live) note = "بيقفل ويحفظ…";
+  msg($("#studio-msg"), note, s.state !== "error");
+  const lb = $("#studio-log-box");
+  lb.hidden = !(s.log && s.log.length);
+  $("#studio-log").textContent = (s.log || []).join("\n");
+  clearTimeout(studioTimer);
+  if (live) studioTimer = setTimeout(() => { if (!$("#view-dash").hidden) loadStudio(); }, s.state === "ready" ? 30000 : 8000);
+  if (s.kernel_url) {
+    let a = $("#studio-kaggle");
+    if (!a) { a = document.createElement("a"); a.id = "studio-kaggle"; a.target = "_blank"; a.rel = "noopener noreferrer"; a.className = "hint"; $("#studio-controls").append(a); }
+    a.href = s.kernel_url; a.textContent = "النوتبوك على Kaggle";
+  }
+}
+
 let timer = null;
 async function loadDash() {
+  loadStudio();
   try {
-    const s = await api("/api/status");
+    const s = await api("/panel/api/status");
     $("#st-kaggle").textContent = s.kaggle.configured ? "متصل" : "مش متصل";
     $("#st-kaggle").className = "v " + (s.kaggle.configured && !s.kaggle_error ? "good" : "bad");
     $("#st-user").textContent = s.kaggle_error || (s.kaggle.username ? `@${s.kaggle.username}` : s.kaggle.problem || "روح للإعدادات وحط المفتاح");
@@ -67,7 +111,7 @@ async function loadDash() {
 async function loadJobs() {
   const box = $("#jobs");
   try {
-    const { jobs } = await api("/api/jobs");
+    const { jobs } = await api("/panel/api/jobs");
     box.replaceChildren(...(jobs.length ? jobs.map(renderJob) : [Object.assign(document.createElement("p"), { className: "hint", textContent: "لسه مفيش شغلانات. ابدأ بـ «شغلانة جديدة» ← probe." })]));
   } catch (e) { box.textContent = e.message; }
 }
@@ -93,14 +137,14 @@ function renderJob(j) {
   if (j.error) { const p = $(".err", el); p.hidden = false; p.textContent = j.error; }
   const acts = $(".actions", el);
   if (j.kernel_url) { const a = document.createElement("a"); a.href = j.kernel_url; a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = "افتح على Kaggle"; acts.append(a); }
-  if (["failed", "cancelled"].includes(j.status)) acts.append(button(j.result?.has_checkpoint ? "كمّل من آخر نقطة" : "إعادة المحاولة", "ghost", async () => { await api(`/api/jobs/${j.id}/retry`, { method: "POST" }); loadJobs(); }));
-  if (["submitting", "queued", "running"].includes(j.status)) acts.append(button("إلغاء", "ghost danger", async () => { if (confirm("تلغي الشغلانة؟")) { await api(`/api/jobs/${j.id}/cancel`, { method: "POST" }); loadJobs(); } }));
+  if (["failed", "cancelled"].includes(j.status)) acts.append(button(j.result?.has_checkpoint ? "كمّل من آخر نقطة" : "إعادة المحاولة", "ghost", async () => { await api(`/panel/api/jobs/${j.id}/retry`, { method: "POST" }); loadJobs(); }));
+  if (["submitting", "queued", "running"].includes(j.status)) acts.append(button("إلغاء", "ghost danger", async () => { if (confirm("تلغي الشغلانة؟")) { await api(`/panel/api/jobs/${j.id}/cancel`, { method: "POST" }); loadJobs(); } }));
   const ul = $(".files", el);
   const arts = new Set((j.result?.artifacts || []).map((a) => a.name));
   for (const f of j.files || []) {
     if (!(f.fileName === "result.json" || f.fileName.startsWith("artifacts/") || arts.has(f.fileName.split("/").pop()))) continue;
     const li = document.createElement("li"); const a = document.createElement("a");
-    a.href = `/api/jobs/${j.id}/file?name=${encodeURIComponent(f.fileName)}`; a.textContent = f.fileName; a.target = "_blank"; a.rel = "noopener";
+    a.href = `/panel/api/jobs/${j.id}/file?name=${encodeURIComponent(f.fileName)}`; a.textContent = f.fileName; a.target = "_blank"; a.rel = "noopener";
     li.append(a); ul.append(li);
   }
   if (j.result?.log_tail) { const d = $(".log", el); d.hidden = false; $("pre", d).textContent = j.result.log_tail; }
@@ -121,9 +165,23 @@ function applyPreset() {
   $("#gpu").checked = p.gpu;
 }
 
-async function loadSettings() {
+async function loadYoutube() {
   try {
-    const k = await api("/api/settings/kaggle");
+    const y = await api("/panel/api/youtube");
+    $("#yt-redirect").textContent = y.redirect_uri;
+    const st = $("#yt-state");
+    st.className = "state " + (y.connected ? "good" : "bad");
+    st.textContent = y.connected ? `متصلة ✓ ${y.channel?.title ? "— " + y.channel.title : ""}` : y.client_configured ? `Client محفوظ (${y.client_id_hint}) — فاضل تضغط «اربط القناة»` : "مش متصلة";
+    $("#yt-connected").hidden = !y.connected;
+    $("#yt-connect").hidden = !y.client_configured || y.connected;
+    $("#yt-setup").open = !y.connected;
+  } catch (e) { msg($("#yt-msg"), e.message); }
+}
+
+async function loadSettings() {
+  loadYoutube();
+  try {
+    const k = await api("/panel/api/settings/kaggle");
     const st = $("#kaggle-state");
     st.className = "state " + (k.configured ? "good" : "bad");
     st.textContent = k.configured
@@ -136,15 +194,46 @@ async function loadSettings() {
 document.addEventListener("DOMContentLoaded", async () => {
   for (const b of document.querySelectorAll(".tab")) b.addEventListener("click", () => show(b.dataset.view));
   $("#task").addEventListener("change", applyPreset);
-  $("#logout").addEventListener("click", async () => { await api("/api/logout", { method: "POST" }); show("login"); });
+  $("#logout").addEventListener("click", async () => { await api("/panel/api/logout", { method: "POST" }); show("login"); });
   $("#refresh").addEventListener("click", async (e) => {
     e.target.disabled = true;
-    try { await api("/api/jobs/refresh", { method: "POST" }); await loadDash(); } catch (x) { alert(x.message); } finally { e.target.disabled = false; }
+    try { await api("/panel/api/jobs/refresh", { method: "POST" }); await loadDash(); } catch (x) { alert(x.message); } finally { e.target.disabled = false; }
   });
+
+  $("#studio-start").addEventListener("click", async (e) => {
+    e.target.disabled = true; msg($("#studio-msg"), "بيتبعت لـ Kaggle…", true);
+    try {
+      await api("/panel/api/studio/start", { method: "POST", body: JSON.stringify({ gpu: $("#studio-gpu").checked, hours: Number($("#studio-hours").value), idle_min: Number($("#studio-idle").value) }) });
+      await loadStudio();
+    } catch (x) { msg($("#studio-msg"), x.message); } finally { e.target.disabled = false; }
+  });
+  $("#studio-stop").addEventListener("click", async (e) => {
+    if (!confirm("تقفل الاستوديو؟ شغلك هيتحفظ للجلسة الجاية.")) return;
+    e.target.disabled = true;
+    try { await api("/panel/api/studio/stop", { method: "POST" }); await loadStudio(); } catch (x) { alert(x.message); } finally { e.target.disabled = false; }
+  });
+  $("#yt-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    try {
+      await api("/panel/api/youtube/client", { method: "POST", body: JSON.stringify({ client_id: e.target.client_id.value, client_secret: e.target.client_secret.value }) });
+      e.target.reset(); msg($("#yt-msg"), "اتحفظ ✓ — اضغط «اربط القناة مع Google»", true); loadYoutube();
+    } catch (x) { msg($("#yt-msg"), x.message); }
+  });
+  $("#yt-delete").addEventListener("click", async () => {
+    if (!confirm("تفصل قناة يوتيوب؟")) return;
+    try { await api("/panel/api/youtube", { method: "DELETE" }); loadYoutube(); } catch (x) { msg($("#yt-msg"), x.message); }
+  });
+  const params = new URLSearchParams(location.search);
+  if (params.get("youtube") === "ok" || params.get("youtube_error")) {
+    setTimeout(() => { show("settings"); msg($("#yt-msg"), params.get("youtube_error") || "القناة اتربطت ✓ — هتشتغل من جلسة الاستوديو الجاية", !params.get("youtube_error")); }, 400);
+  }
+  const q = params.get("studio");
+  if (q === "off") setTimeout(() => msg($("#studio-msg"), "الاستوديو مقفول — شغّله الأول."), 300);
+  if (q === "lost") setTimeout(() => msg($("#studio-msg"), "الاستوديو مش بيرد. لو لسه بيقفل استنى شوية، أو شغّله تاني."), 300);
 
   $("#login-form").addEventListener("submit", async (e) => {
     e.preventDefault();
-    try { await api("/api/login", { method: "POST", body: JSON.stringify({ password: e.target.password.value }) }); e.target.reset(); show("dash"); }
+    try { await api("/panel/api/login", { method: "POST", body: JSON.stringify({ password: e.target.password.value }) }); e.target.reset(); show("dash"); }
     catch (x) { msg($("#login-msg"), x.message); }
   });
 
@@ -155,7 +244,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try { params = JSON.parse(f.params.value || "{}"); } catch { return msg(m, "الـ JSON فيه غلطة"); }
     const btn = f.querySelector("button[type=submit]"); btn.disabled = true; msg(m, "بيتبعت لـ Kaggle…", true);
     try {
-      const j = await api("/api/jobs", { method: "POST", body: JSON.stringify({ task: f.task.value, title: f.title.value, params, gpu: f.gpu.checked, max_runtime_s: Math.round(Number(f.hours.value) * 3600) }) });
+      const j = await api("/panel/api/jobs", { method: "POST", body: JSON.stringify({ task: f.task.value, title: f.title.value, params, gpu: f.gpu.checked, max_runtime_s: Math.round(Number(f.hours.value) * 3600) }) });
       if (j.status === "failed") msg(m, j.error || "فشلت");
       else { msg(m, "اتبعتت ✓", true); show("dash"); }
     } catch (x) { msg(m, x.message); } finally { btn.disabled = false; }
@@ -166,7 +255,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const f = e.target, m = $("#kaggle-msg");
     msg(m, "بنجرب المفتاح على Kaggle…", true);
     try {
-      const r = await api("/api/settings/kaggle", { method: "POST", body: JSON.stringify({ token: f.token.value, username: f.username.value }) });
+      const r = await api("/panel/api/settings/kaggle", { method: "POST", body: JSON.stringify({ token: f.token.value, username: f.username.value }) });
       f.reset();
       msg(m, `اتحفظ ✓ — رصيد GPU المتبقي ${hrs(r.quota.gpu_left_s)} ساعة`, true);
       loadSettings();
@@ -174,11 +263,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   $("#kaggle-delete").addEventListener("click", async () => {
     if (!confirm("تمسح مفتاح Kaggle المحفوظ؟")) return;
-    try { await api("/api/settings/kaggle", { method: "DELETE" }); loadSettings(); } catch (x) { msg($("#kaggle-msg"), x.message); }
+    try { await api("/panel/api/settings/kaggle", { method: "DELETE" }); loadSettings(); } catch (x) { msg($("#kaggle-msg"), x.message); }
   });
 
   try {
-    const s = await api("/api/session");
+    const s = await api("/panel/api/session");
     $("#minlen").textContent = s.min_password_len;
     show(!s.owner_configured ? "setup" : s.logged_in ? "dash" : "login");
   } catch (e) { document.body.append(e.message); }

@@ -6,6 +6,8 @@ import * as kaggle from "./kaggle.js";
 import * as jobs from "./jobs.js";
 import { WORKER_VERSION } from "./worker_script.generated.js";
 import { ensureSchema } from "./schema.js";
+import * as studio from "./studio.js";
+import * as youtube from "./youtube.js";
 
 const SECURITY_HEADERS = {
   "X-Content-Type-Options": "nosniff",
@@ -38,8 +40,21 @@ async function kaggleSettings(env) {
 }
 
 async function handleApi(request, env, url) {
-  const path = url.pathname;
+  const path = url.pathname.replace(/^\/panel(?=\/api\/)/, ""); // the panel lives under /panel; its API under /panel/api
   const m = request.method;
+
+  // ---- studio kernel heartbeat: authenticated by its per-session secret (no browser, no cookie, no CSRF header)
+  if (path === "/api/studio/callback" && m === "POST") return json(await studio.callback(env, await body(request)));
+  if (path === "/api/studio/secrets" && m === "POST") return json(await studio.secrets(env, await body(request), youtube.sessionEnv));
+  // Google redirects back here cross-site, so the SameSite=Strict cookie is absent: the one-time state authenticates.
+  if (path === "/api/youtube/callback" && m === "GET") {
+    try {
+      await youtube.finish(env, url.origin, url.searchParams);
+      return new Response(null, { status: 302, headers: { Location: "/panel/?youtube=ok", ...SECURITY_HEADERS } });
+    } catch (e) {
+      return new Response(null, { status: 302, headers: { Location: `/panel/?youtube_error=${encodeURIComponent(e.message)}`, ...SECURITY_HEADERS } });
+    }
+  }
 
   // ---- public endpoints
   if (path === "/api/health") return json({ ok: true, owner_configured: sec.ownerConfigured(env), storage: "durable-object-sqlite" });
@@ -95,6 +110,22 @@ async function handleApi(request, env, url) {
     }
   }
 
+  if (path === "/api/youtube" && m === "GET") return json(await youtube.status(env, url.origin));
+  if (path === "/api/youtube" && m === "DELETE") {
+    await youtube.disconnect(env);
+    return json(await youtube.status(env, url.origin));
+  }
+  if (path === "/api/youtube/client" && m === "POST") {
+    await youtube.saveClient(env, await body(request));
+    return json(await youtube.status(env, url.origin));
+  }
+  if (path === "/api/youtube/connect" && m === "GET") {
+    return new Response(null, { status: 302, headers: { Location: await youtube.begin(env, url.origin), ...SECURITY_HEADERS } });
+  }
+  if (path === "/api/studio" && m === "GET") return json(await studio.status(env));
+  if (path === "/api/studio/start" && m === "POST") return json(await studio.start(env, { ...(await body(request)), origin: url.origin }));
+  if (path === "/api/studio/stop" && m === "POST") return json(await studio.stop(env));
+
   if (path === "/api/jobs" && m === "GET") return json({ jobs: await jobs.listJobs(env.DB, Math.min(200, Number(url.searchParams.get("limit") || 50))) });
   if (path === "/api/jobs" && m === "POST") return json(await jobs.submit(env, await body(request)), 201);
   if (path === "/api/jobs/refresh" && m === "POST") return json(await jobs.refreshActive(env));
@@ -146,8 +177,8 @@ export function sqlDb(sql) {
 }
 
 /**
- * All state (jobs, encrypted settings, login throttling) lives in ONE SQLite-backed Durable Object - free on the
- * Workers Free plan and needs no separate database or extra API-token permission. One owner => one instance.
+ * All state (jobs, encrypted settings, login throttling, studio session) lives in ONE SQLite-backed Durable Object -
+ * free on the Workers Free plan and needs no separate database or extra API-token permission. One owner => one instance.
  */
 export class NexusStore extends DurableObject {
   constructor(ctx, env) {
@@ -155,27 +186,85 @@ export class NexusStore extends DurableObject {
     this.db = sqlDb(ctx.storage.sql);
   }
 
+  get env2() {
+    return { ...this.env, DB: this.db };
+  }
+
   async fetch(request) {
-    return app(request, { ...this.env, DB: this.db });
+    return app(request, this.env2);
   }
 
   async cron() {
-    const env = { ...this.env, DB: this.db };
     await ensureSchema(this.db);
-    return jobs.refreshActive(env);
+    const jobsResult = await jobs.refreshActive(this.env2);
+    const studioResult = await studio.watchdog(this.env2).catch((e) => ({ error: e.message }));
+    return { jobs: jobsResult, studio: studioResult };
+  }
+
+  async route() {
+    await ensureSchema(this.db);
+    return studio.route(this.env2);
+  }
+
+  async touch() {
+    await ensureSchema(this.db);
+    return studio.touch(this.env2);
   }
 }
 
 const store = (env) => env.STORE.get(env.STORE.idFromName("owner"));
 
+// Per-isolate cache of where the studio is, so page loads do not hit the Durable Object on every request.
+let routeCache = { at: 0, rt: null };
+let lastTouch = 0;
+
+function redirect(to) {
+  return new Response(null, { status: 302, headers: { Location: to, ...SECURITY_HEADERS } });
+}
+
+function sameOrigin(request) {
+  if (["GET", "HEAD", "OPTIONS"].includes(request.method)) return true;
+  const o = request.headers.get("Origin");
+  if (o) return o === new URL(request.url).origin;
+  const site = request.headers.get("Sec-Fetch-Site");
+  return !site || site === "same-origin" || site === "none";
+}
+
+function wantsHtml(request) {
+  return request.method === "GET" && (request.headers.get("Accept") || "").includes("text/html");
+}
+
+/** Everything outside /panel is the full NEXUS app running in the Kaggle studio session. */
+async function gateway(request, env, ctx) {
+  if (!(await sec.hasSession(env, request))) return wantsHtml(request) ? redirect("/panel/") : err("سجل دخول الأول", 401);
+  if (!sameOrigin(request)) return err("cross-origin request refused", 403);
+  const now = Date.now();
+  if (!routeCache.rt || now - routeCache.at > 20000) routeCache = { at: now, rt: await store(env).route() };
+  const rt = routeCache.rt;
+  if (!rt) return wantsHtml(request) ? redirect("/panel/?studio=off") : err("الاستوديو مش شغال. شغّله من لوحة التحكم /panel", 503);
+  const res = await studio.proxy(request, rt);
+  if (!res) {
+    routeCache = { at: 0, rt: null };
+    return wantsHtml(request) ? redirect("/panel/?studio=lost") : err("الاستوديو مش بيرد", 502);
+  }
+  if (now - lastTouch > 60000) {
+    lastTouch = now;
+    ctx.waitUntil(store(env).touch());
+  }
+  return res;
+}
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
-    if (url.pathname.startsWith("/api/")) return store(env).fetch(request);
-    return env.ASSETS.fetch(request);
+    const p = url.pathname;
+    if (p.startsWith("/panel/api/")) return store(env).fetch(request);
+    if (p === "/panel") return redirect("/panel/");
+    if (p.startsWith("/panel/")) return env.ASSETS.fetch(request);
+    return gateway(request, env, ctx);
   },
 
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(store(env).cron().then((r) => console.log("cron refresh", JSON.stringify(r))));
+    ctx.waitUntil(store(env).cron().then((r) => console.log("cron", JSON.stringify(r))));
   },
 };

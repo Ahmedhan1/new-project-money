@@ -207,3 +207,16 @@ extra API-token permission and a separate database), polled by a 5-minute cron. 
 contracts are identical and `retry` resumes from `result.json`'s checkpoint. Zero spend: no R2 (needs a payment method),
 outputs stay on Kaggle and are downloaded through fresh signed URLs; GPU jobs are refused when the measured weekly quota
 left is under `MIN_GPU_RESERVE_S`. Kernels are always private; one Kaggle account only.
+
+**D-25 The cloud studio runs the WHOLE NEXUS app in a Kaggle session behind the Cloudflare gateway (owner request,
+2026-11-14: "full control, everything I did from the Windows browser").** Re-implementing ~100 routes on Workers is not
+possible (no FFmpeg/models there), so `cloudflare/studio/studio_kernel.py` runs `python -m nexus serve` in a private
+Kaggle kernel (GPU T4 or CPU, owner's choice) in hosted mode (`NEXUS_API_TOKEN`, fresh per session), opens a
+cloudflared quick tunnel and reports it to the Worker; the Worker proxies every non-`/panel` path of a logged-in owner
+with the bearer token, so the browser sees exactly the Windows UI at the Worker's URL. Bounded use, not serving: one
+owner, sessions end on Stop, after `idle_min` without requests, or 20 min before the Kaggle limit. Persistence: the
+session copies NEXUS_HOME (without models/caches) to its output; the next session mounts it (Kaggle path
+`/kaggle/input/notebooks/<owner>/<slug>/`, seen live) from the other notebook of a pair (`nexus-studio-a/b`), and a
+session that could not load the previous work never saves over it. YouTube: the app's loopback OAuth cannot work
+remotely, so the Worker runs Google's web-server flow (PKCE, owner's own Web client) and hands the keys to each
+session as `NEXUS_PUB_YOUTUBE_MAIN_*` env vars (read by `publishing/creds.py`); they are never in a notebook.

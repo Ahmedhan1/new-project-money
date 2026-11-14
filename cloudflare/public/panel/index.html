@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NEXUS Cloud</title>
-<link rel="stylesheet" href="/app.css">
-<script src="/app.js" defer></script>
+<link rel="stylesheet" href="/panel/app.css">
+<script src="/panel/app.js" defer></script>
 </head>
 <body>
 <header class="top">
@@ -35,6 +35,29 @@
   </section>
 
   <section id="view-dash" hidden>
+    <div class="card studio" id="studio">
+      <div class="row between">
+        <div>
+          <h2>استوديو NEXUS الكامل</h2>
+          <p class="hint">نفس البرنامج اللي كان على الويندوز بكل مميزاته — مونتاج، شورتس، إنشاء فيديو من فكرة، تحريك، دبلجة وترجمة، مسلسلات، تصدير للمنصات ويوتيوب —
+            شغال على Kaggle (GPU T4) وبتفتحه من هنا من أي متصفح.</p>
+        </div>
+        <span class="badge" id="studio-badge">مقفول</span>
+      </div>
+      <div id="studio-steps" class="steps"></div>
+      <div class="row" id="studio-controls">
+        <a id="studio-open" class="btn big" href="/" hidden>افتح الاستوديو ←</a>
+        <button id="studio-start" class="big">شغّل الاستوديو</button>
+        <button id="studio-stop" class="ghost danger" hidden>اقفل واحفظ الشغل</button>
+      </div>
+      <div class="row" id="studio-opts">
+        <label class="inline"><input type="checkbox" id="studio-gpu" checked> GPU (أسرع، بيصرف من رصيد الأسبوع)</label>
+        <label class="inline">مدة الجلسة (ساعات)<input type="number" id="studio-hours" min="1" max="12" step="1" value="6"></label>
+        <label class="inline">يقفل لوحده لو مفيش استخدام (دقيقة)<input type="number" id="studio-idle" min="10" max="240" step="5" value="45"></label>
+      </div>
+      <p class="msg" id="studio-msg"></p>
+      <details id="studio-log-box" hidden><summary>تفاصيل التشغيل</summary><pre id="studio-log"></pre></details>
+    </div>
     <div class="grid">
       <div class="card stat"><div class="k">Kaggle</div><div class="v" id="st-kaggle">—</div><div class="s" id="st-user"></div></div>
       <div class="card stat"><div class="k">رصيد GPU الأسبوع ده</div><div class="v" id="st-quota">—</div>
@@ -42,7 +65,7 @@
       <div class="card stat"><div class="k">الشغلانات</div><div class="v" id="st-jobs">—</div><div class="s" id="st-worker"></div></div>
     </div>
     <div class="card">
-      <div class="row between"><h2>الشغلانات</h2><button id="refresh" class="ghost">تحديث من Kaggle</button></div>
+      <div class="row between"><h2>شغلانات Kaggle المباشرة (متقدم)</h2><button id="refresh" class="ghost">تحديث من Kaggle</button></div>
       <p class="hint">كل 5 دقايق Cloudflare بيسأل Kaggle لوحده عن الشغلانات الشغالة. الشغل التقيل كله بيتعمل على Kaggle (GPU T4 مجاني).</p>
       <div id="jobs" class="jobs"></div>
     </div>
@@ -82,6 +105,34 @@
       </form>
       <p class="hint">المفتاح بيتجرب على Kaggle الأول، وبعدين بيتحفظ متشفّر (AES-256-GCM) في تخزين Cloudflare بمفتاح مشتق من كلمة سر المالك. عمره ما بيرجع للمتصفح.
         لو عايز أمان أعلى: حطه بدل كده كـ Secret على Cloudflare باسم <code>KAGGLE_API_TOKEN</code> — ساعتها بيتقدم على المحفوظ هنا.</p>
+    </div>
+    <div class="card">
+      <h2>قناة يوتيوب</h2>
+      <div id="yt-state" class="state"></div>
+      <div id="yt-connected" hidden class="row">
+        <a class="btn" id="yt-reconnect" href="/panel/api/youtube/connect">اربط قناة تانية / جدد الربط</a>
+        <button type="button" id="yt-delete" class="danger">افصل القناة</button>
+      </div>
+      <details id="yt-setup">
+        <summary><b>خطوات الربط (مرة واحدة، مجانية ومن غير كارت)</b></summary>
+        <ol class="hint">
+          <li>افتح <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener noreferrer">Google Cloud Console</a> واعمل مشروع جديد.</li>
+          <li>APIs &amp; Services ← Library: فعّل <b>YouTube Data API v3</b> و <b>YouTube Analytics API</b>.</li>
+          <li>OAuth consent screen: النوع External، وضيف إيميلك كـ Test user، وبعدين اضغط <b>Publish app</b> (عشان الربط مايقعش كل 7 أيام).</li>
+          <li>Credentials ← Create credentials ← OAuth client ID ← النوع <b>Web application</b>.</li>
+          <li>في Authorized redirect URIs حط الرابط ده بالظبط:<br><code id="yt-redirect" dir="ltr"></code></li>
+          <li>انسخ Client ID و Client secret وحطهم هنا، وبعدين اضغط «اربط القناة».</li>
+        </ol>
+        <form id="yt-form">
+          <label>Client ID<input name="client_id" dir="ltr" autocomplete="off" required></label>
+          <label>Client secret<input name="client_secret" type="password" dir="ltr" autocomplete="off" required></label>
+          <button type="submit">احفظ</button>
+        </form>
+        <a class="btn" id="yt-connect" href="/panel/api/youtube/connect" hidden>اربط القناة مع Google ←</a>
+      </details>
+      <p class="msg" id="yt-msg"></p>
+      <p class="hint">المفاتيح بتتحفظ متشفّرة هنا، وكل جلسة استوديو بتاخدها وقت التشغيل بس (مش بتتكتب في النوتبوك). النشر من «Publishing Studio» جوه الاستوديو،
+        والفيديوهات بتترفع <b>Private</b> لحد ما توافق عليها بنفسك.</p>
     </div>
     <div class="card">
       <h2>مجاني بالكامل</h2>
