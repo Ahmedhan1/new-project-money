@@ -228,6 +228,42 @@ def api_autopilot_options():
     return {"platforms": plats, "vertical": list(autopilot.VERTICAL), "styles": list(autopilot.PROFILES), "niches": nich}
 
 
+@app.get("/api/autopilot/library")
+def api_autopilot_library(limit: int = 60):
+    """Videos already in NEXUS (uploads and links), newest first, to edit again without uploading: name, length, cover."""
+    from .media import ff
+    out = []
+    for row in prj.Project.list()[: max(1, min(200, limit))]:
+        try:
+            p = prj.Project(row["id"])
+        except KeyError:
+            continue
+        for m in p.data.get("media") or []:
+            src = Path(m["path"])
+            if not src.exists() or src.suffix.lower() not in _UPLOAD_EXT:
+                continue
+            f = p.dir / "reports" / f"analysis_{m['id']}.json"
+            dur = None
+            if f.exists():
+                try:
+                    dur = json.loads(f.read_text(encoding="utf-8"))["probe"]["duration"]
+                except (ValueError, KeyError):
+                    dur = None
+            thumb = p.dir / "work" / "thumbs" / f"cover_{m['id']}.jpg"
+            if not thumb.exists():
+                thumb.parent.mkdir(parents=True, exist_ok=True)
+                try:
+                    ff.run(["-ss", f"{(dur or 6) / 3:.2f}", "-i", str(src), "-frames:v", "1", "-vf", "scale=320:-2", "-q:v", "5", str(thumb)],
+                           op="thumbnail", timeout=60)
+                except Exception:  # noqa: BLE001 - audio files and broken media simply have no cover
+                    pass
+            out.append({"project": p.id, "media": m["id"], "name": m.get("name") or p.name, "duration": dur, "analysed": dur is not None,
+                        "created": row["created"], "bytes": src.stat().st_size,
+                        "cover": str(thumb.relative_to(p.dir)) if thumb.exists() else None})
+            break  # one entry per project: its first video
+    return out
+
+
 @app.get("/api/autopilot/runs")
 def api_autopilot_runs(limit: int = 30):
     rows = db.query("SELECT id,project_id,status,progress,created,started,finished,error,result,stage,stages,params "

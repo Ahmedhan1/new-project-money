@@ -75,3 +75,18 @@ def test_fit_to_target_whole_video_when_target_is_its_length():
     an = _an(300.0, [(0.0, 150.0), (150.0, 300.0)])
     prop = autopilot.fit_to_target(an, 300)
     assert prop["keep"] == [{"in": 0.0, "out": 300.0, "score": 1.0, "segs": []}]
+
+
+def test_library_lists_uploaded_videos(home, tmp_path, monkeypatch):
+    import subprocess
+
+    from fastapi.testclient import TestClient
+    monkeypatch.setenv("NEXUS_EMBEDDED_WORKER", "0")
+    from nexus import api, project as prj
+    src = tmp_path / "trip.mp4"
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "testsrc=size=320x240:rate=10", "-t", "3",
+                    "-c:v", "libx264", str(src)], check=True)
+    p = prj.Project.create("trip", "edit")
+    p.import_media(src)
+    lib = TestClient(api.app).get("/api/autopilot/library").json()
+    assert lib and lib[0]["project"] == p.id and lib[0]["name"] == "trip.mp4" and lib[0]["cover"]
