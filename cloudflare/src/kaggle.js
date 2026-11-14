@@ -139,7 +139,13 @@ export async function push(creds, { slug, script, gpu, timeoutS, kernelSources =
   };
   if (gpu) body.machineShape = GPU_SHAPE;
   const j = await kernels(creds, "SaveKernel", body, fetchImpl);
-  if (j.error) throw new KaggleError(`Kaggle push: ${j.error}`, { quota: QUOTA_RE.test(j.error) });
+  if (j.error) {
+    const msg = typeof j.error === "string" ? j.error : j.error.message || JSON.stringify(j.error);
+    if (/maximum batch gpu session/i.test(msg)) {
+      throw new KaggleError("Kaggle: فيه جلستين GPU شغالين أو مستنيين بالفعل (الحد 2). استنى لما يخلصوا، أو شغّل من غير GPU.", { quota: true });
+    }
+    throw new KaggleError(`Kaggle push: ${msg}`, { quota: QUOTA_RE.test(msg) });
+  }
   const ref = cleanRef(j.ref || j.url || (creds.username ? `${creds.username}/${slug}` : ""));
   if (!/^[^/]+\/[^/]+$/.test(ref)) throw new KaggleError(`Kaggle push: unexpected reply ${JSON.stringify(j).slice(0, 200)}`);
   return { ref, url: j.url || `https://www.kaggle.com/code/${ref}`, version: j.versionNumber ?? null };

@@ -26,6 +26,7 @@ import subprocess
 import sys
 import threading
 import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -37,7 +38,9 @@ WORK = Path("/kaggle/working") if Path("/kaggle/working").is_dir() else Path("st
 HOME = Path("/tmp/nexus_home")
 SRC = Path("/tmp/nexus_src")
 SAVE = WORK / "nexus_home"
-SKIP_SAVE = {"models", "cache", "tmp", "logs", "run"}  # re-creatable; models are re-downloaded on first use
+# re-creatable; models are re-downloaded on first use. "backups": the app's local backup copies duplicate every
+# project file - the saved session output IS the backup here, so keeping them would double its size.
+SKIP_SAVE = {"models", "cache", "tmp", "logs", "run", "backups"}
 LOG: list[str] = []
 STATE = {"restored": False, "saved": False, "safe_to_save": False}
 SECRETS: dict = {}  # session-only secrets (never written to disk or the output)
@@ -60,6 +63,12 @@ def report(state: str, **extra) -> dict:
     try:
         with urllib.request.urlopen(req, timeout=20) as r:  # noqa: S310 - https control plane URL from the config
             return json.loads(r.read() or b"{}")
+    except urllib.error.HTTPError as e:
+        if e.code == 403:  # a newer session replaced this one: stop at once, never hold a GPU nobody can reach
+            print("this session was replaced by a newer one: stopping", flush=True)
+            return {"stop": True, "superseded": True}
+        print(f"report {state} failed: HTTP {e.code}", flush=True)
+        return {}
     except Exception as e:  # noqa: BLE001
         print(f"report {state} failed: {type(e).__name__}", flush=True)
         return {}
@@ -272,11 +281,13 @@ def main() -> int:
     max_s = float(CFG.get("max_s", 6 * 3600))
     app = cf = None
     try:
-        report("installing")
+        if report("installing").get("superseded"):
+            return 0  # replaced before it started: exit without touching the saved work
         restore()
         STATE["safe_to_save"] = True
         install()
-        report("starting")
+        if report("starting").get("superseded"):
+            return 0
         SECRETS.update(fetch_secrets())
         app = start_app()
         if "NEXUS_PUB_YOUTUBE_MAIN_REFRESH_TOKEN" in SECRETS:
@@ -285,6 +296,8 @@ def main() -> int:
             register_youtube()
         cf, url = tunnel()
         reply = report("ready", url=url)
+        if reply.get("superseded"):
+            reply = {"stop": True}
         while not reply.get("stop"):
             if time.time() - T0 > max_s - 20 * 60:
                 log("Kaggle session limit is near: stopping to save your work")

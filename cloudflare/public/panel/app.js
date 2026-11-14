@@ -56,7 +56,9 @@ async function loadStudio() {
   badge.textContent = label; badge.className = "badge " + cls;
   const live = ["starting", "installing", "ready", "saving"].includes(s.state);
   $("#studio-open").hidden = s.state !== "ready";
-  $("#studio-start").hidden = live;
+  const stuck = s.state === "starting" && Date.now() - (s.last_seen || 0) > 15 * 60 * 1000;
+  $("#studio-start").hidden = live && !stuck;
+  if (stuck) $("#studio-start").textContent = "Kaggle ما بدأش — ابعته تاني";
   $("#studio-stop").hidden = !live || s.state === "saving";
   $("#studio-opts").hidden = live;
   const idx = STEPS.findIndex(([k]) => k === s.state);

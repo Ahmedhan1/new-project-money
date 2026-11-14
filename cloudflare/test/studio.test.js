@@ -105,3 +105,19 @@ test("gateway proxy: adds the bearer, strips cookies, rewrites tunnel redirects"
     globalThis.fetch = real;
   }
 });
+
+test("studio: a session stuck in 'starting' for 15 min can be started again", async () => {
+  const e = await env();
+  const calls = [];
+  const real = globalThis.fetch;
+  globalThis.fetch = fakeKaggle(calls);
+  try {
+    await studio.start(e, { origin: "https://n.dev" });
+    await assert.rejects(studio.start(e, { origin: "https://n.dev" }), /شغال بالفعل/);
+    await e.DB.prepare("UPDATE studio SET last_seen = ? WHERE id = 1").bind(Date.now() - 16 * 60 * 1000).run();
+    const s = await studio.start(e, { origin: "https://n.dev" });
+    assert.equal(s.state, "starting");
+  } finally {
+    globalThis.fetch = real;
+  }
+});

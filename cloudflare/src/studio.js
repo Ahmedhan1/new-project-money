@@ -52,7 +52,9 @@ export async function status(env) {
 
 export async function start(env, body = {}) {
   const r = await row(env.DB);
-  if (LIVE.includes(r.state)) throw new JobError("الاستوديو شغال بالفعل", 409);
+  // A session Kaggle accepted but never started (no heartbeat for 15 min while "starting") may be replaced.
+  const stuck = r.state === "starting" && Date.now() - (r.last_seen || 0) > 15 * 60 * 1000;
+  if (LIVE.includes(r.state) && !stuck) throw new JobError("الاستوديو شغال بالفعل", 409);
   const gpu = body.gpu !== false;
   const hours = Math.max(1, Math.min(12, Number(body.hours || DEFAULTS.hours)));
   const idle = Math.max(10, Math.min(240, Number(body.idle_min || DEFAULTS.idle_min)));
