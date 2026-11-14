@@ -280,6 +280,29 @@ def _voice_reference(project, tl: dict, analyses: dict | None) -> dict | None:
     return None
 
 
+def _restore_background(project, out: dict, review: dict, lang: str) -> None:
+    """Dubbed (muted) clips get their own music/effects back from a Demucs background stem (GPU only)."""
+    from .audio import separate
+    muted = {c["id"] for c in out["clips"] if c.get("mute") and c.get("type") == "video"}
+    if not muted:
+        return
+    if not separate.available():
+        review["checks"].append(qa._c(f"dub background [{lang}]", False, "no source separation here (GPU studio only): "
+                                      "the original music/effects under dubbed scenes are silent", "minor"))
+        return
+    bg = {}
+    for src in {c["src"] for c in out["clips"] if c.get("id") in muted}:
+        try:
+            bg[src] = str(separate.background(src, project.dir / "audio" / "separation"))
+        except Exception as e:  # noqa: BLE001 - the dub still works, only without its background
+            review["checks"].append(qa._c(f"dub background [{lang}]", False, f"separation failed: {str(e)[:160]}", "minor"))
+    items = separate.background_items(out, bg, muted)
+    out.setdefault("audio", []).extend(items)
+    if items:
+        review["checks"].append(qa._c(f"dub background [{lang}]", True,
+                                      f"original music/effects kept under {len(items)} dubbed scene(s) ({separate.LICENSE})", "minor"))
+
+
 def localize(project, tl: dict, lang: str, analyses: dict | None = None, context: str = "", dub: bool = True,
              source_lang: str = "en", allow_noncommercial: bool = False, mode: str = "replace") -> tuple[dict, dict]:
     """Return (localised timeline, language review). The source timeline is not modified."""
@@ -366,7 +389,7 @@ def localize(project, tl: dict, lang: str, analyses: dict | None = None, context
                 if mode == "voiceover":  # UN-style voice-over: the real speaker stays audible underneath
                     c["volume"] = round(float(c.get("volume", 1.0)) * VOICEOVER_ORIGINAL_GAIN, 3)
                 else:
-                    c["mute"] = True  # original speech replaced (no source separation deployed: original music/effects go too)
+                    c["mute"] = True  # original speech replaced; its music/effects come back from a Demucs stem (GPU)
             c["narration"] = line
             review["checks"].append(qa.dub_review(wav, line, lang))
         starts = clip_starts(out)
@@ -397,6 +420,7 @@ def localize(project, tl: dict, lang: str, analyses: dict | None = None, context
                 last["freeze"] = {"at": round(max(0.0, clip_duration(last) - 0.05), 3), "duration": round(over, 3)}
                 review["checks"].append(qa._c(f"voice-over end [{lang}]", True,
                                               f"final frame held {over:.1f}s so the last line finishes", "minor"))
+        _restore_background(project, out, review, lang)
         out["subtitles"] = subs.fix_timing(cues)
         review["voice"] = {k2: voice_info[k2] for k2 in ("voice", "license", "commercial", "engine")} if voice_info else None
         review["dub_mode"] = mode

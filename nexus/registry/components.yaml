@@ -79,6 +79,19 @@ components:
     install: "pip install silma-tts (cloud studio installs it in GPU sessions)"
     network_hosts: [huggingface.co]
     status: adapter
+  - id: demucs
+    name: Demucs v4 (htdemucs) voice / background separation
+    kind: model
+    capability: [source-separation, dubbing]
+    source_url: https://github.com/adefossez/demucs
+    license: MIT
+    weights_license: "MIT (repository licence; pretrained htdemucs released with it)"
+    commercial_use: "yes"
+    usage_restrictions: "GPU only in NEXUS (CPU is many times slower than real time)"
+    hardware: "CUDA GPU (Kaggle T4 in the cloud studio)"
+    install: "pip install demucs (cloud studio installs it in GPU sessions)"
+    network_hosts: [dl.fbaipublicfiles.com]
+    status: adapter
   - id: espeak-ng
     name: eSpeak NG
     kind: software
@@ -197,6 +210,21 @@ components:
     availability: "remote; falls back to generated title cards"
     hardware: none
     network_hosts: [api.openverse.org]
+    status: deployed
+  - id: internet-archive
+    name: Internet Archive search + metadata API (CC / public-domain videos only)
+    kind: media-source
+    capability: [video-search]
+    source_url: https://archive.org/developers/
+    license: "each item has its own licence URL - NEXUS lists only Creative Commons / Public Domain items and records it"
+    free_tier: "anonymous access, no key, no card"
+    quotas: "best effort; be polite (one search per user request)"
+    commercial_use: "per item licence (CC BY / BY-SA / CC0 / PD); NC items are shown with their licence - the owner decides"
+    usage_restrictions: "attribution as the licence requires; credit is recorded on the imported media"
+    data_retention: "search terms are sent to archive.org"
+    availability: "remote"
+    hardware: none
+    network_hosts: [archive.org]
     status: deployed
   - id: nasa-media
     name: NASA Image and Video Library API (images.nasa.gov)

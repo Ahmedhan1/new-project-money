@@ -69,6 +69,14 @@ def validate(params: dict) -> dict:
         goal = params.get("goal") or "auto"
         if goal not in ("auto", "summary", "scenes", "shorts"):
             raise AutopilotError("goal must be auto, summary, scenes or shorts")
+        item = params.get("library_item")
+        if item and not params.get("url"):  # a video picked in the free library: import its file, keep its licence
+            from . import library
+            try:
+                params = {**params, "url": library.resolve(item)}
+            except Exception as e:  # noqa: BLE001
+                raise AutopilotError(f"ماقدرتش أجيب ملف الفيديو ده من المكتبة: {e}") from None
+            out["source"] = {k: str(item.get(k) or "")[:300] for k in ("source", "title", "license", "credit", "page")}
         out.update(goal=goal, style=params.get("style") if params.get("style") in PROFILES else "auto",
                    instructions=(params.get("instructions") or "").strip()[:2000], project=params.get("project"),
                    url=(params.get("url") or "").strip() or None,
@@ -259,8 +267,16 @@ def _edit(job: jobs.Job, a: dict) -> dict:
             name += ".mp4"
         final = tmp.with_name(name)
         tmp.replace(final)
-        p = prj.Project.create(a.get("title") or Path(name).stem, "edit")
+        p = prj.Project.create(a.get("title") or (a.get("source") or {}).get("title") or Path(name).stem, "edit")
         m = p.import_media(final, move=True)
+        if a.get("source"):  # licence + credit of a free-library video travel with the media (credits in descriptions)
+            src = a["source"]
+            basis = "public-domain" if re.search(r"public ?domain|publicdomain|cc0", src.get("license", ""), re.I) else "licensed"
+            for x in p.data["media"]:
+                if x["id"] == m["id"]:
+                    x["rights"] = {"basis": basis, "license": src.get("license"), "holder": src.get("credit"),
+                                   "source": src.get("source"), "page": src.get("page")}
+            p.save()
         return {"project": p.id, "media": m["id"], "bytes": r.size}
 
     imp = job.stage("import", importing)

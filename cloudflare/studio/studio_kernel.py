@@ -143,6 +143,8 @@ def install() -> None:
         if shutil.which("nvidia-smi"):  # natural Arabic/English dubbing voice (GPU only; ~87 s per line on CPU)
             ok = sh([sys.executable, "-m", "pip", "install", "-q", "silma-tts"], 2400) == 0
             log("SILMA TTS (Arabic voice) ready" if ok else "SILMA TTS not installed: dubbing uses the Piper voice")
+            ok = sh([sys.executable, "-m", "pip", "install", "-q", "demucs"], 2400) == 0  # keeps music/effects under a dub
+            log("Demucs (voice/background separation) ready" if ok else "Demucs not installed: dubbed scenes lose their background")
 
     threading.Thread(target=background, daemon=True).start()
 

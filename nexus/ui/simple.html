@@ -57,6 +57,12 @@ textarea{min-height:110px}
       <input type="file" id="file" accept="video/*,audio/*" hidden></div>
     <div class="bar" id="upbar" hidden><span></span></div>
     <div class="or">أو</div>
+    <details id="free-box"><summary><b>🎞️ مكتبة فيديوهات مجانية وقانونية</b> <span class="hint">NASA · Internet Archive · Wikimedia</span></summary>
+      <div style="display:flex;gap:8px;margin-top:8px"><input type="text" id="free-q" placeholder="ابحث (بالإنجليزي أفضل): moon, ocean, city…">
+        <button type="button" class="go" id="free-go" style="width:auto;margin:0;padding:8px 16px">بحث</button></div>
+      <p class="hint" id="free-msg">كل فيديو بيظهر برخصته؛ الاستيراد بيسجل الرخصة والكريديت عشان تحطهم في الوصف.</p>
+      <div class="scenes" id="free-results"></div></details>
+    <div class="or">أو</div>
     <details id="lib-box"><summary><b>اختار فيديو اترفع قبل كده</b> <span class="hint" id="lib-count"></span></summary>
       <div class="scenes" id="library"></div></details>
     <div class="or">أو</div>
@@ -145,7 +151,7 @@ const STAGE = { import: "استيراد", analyze: "تحليل", edit: "تعدي
   discover: "اختيار الفكرة", "dub-ar": "دبلجة عربي", "dub-en": "دبلجة إنجليزي", "subs-ar": "ترجمة عربي", "subs-en": "ترجمة إنجليزي", project: "مشروع", research: "بحث", script: "سكريبت", "review-script": "مراجعة", narrate: "تعليق صوتي",
   visuals: "صور ومشاهد", storyboard: "ستوري بورد", "render-qa": "رندر وفحص", produce: "إنتاج" };
 const STATUS = { queued: ["في الطابور", "queued"], running: ["شغال…", "running"], done: ["خلص ✓", "done"], failed: ["فشل", "failed"], cancelled: ["اتلغى", "failed"] };
-let project = null, analysisJob = null, picked = new Set(), opts = null;
+let project = null, analysisJob = null, picked = new Set(), opts = null, libraryItem = null;
 
 async function api(path, init = {}) {
   const r = await fetch(path, { ...init, headers: { ...H, ...(init.headers || {}) }, credentials: "same-origin" });
@@ -195,7 +201,7 @@ $("#file").onchange = async () => {
   $("#go-edit").disabled = true;
   try {
     const j = f.size > 80 * 1024 * 1024 ? await chunkedUpload(f) : await simpleUpload(f);
-    project = j.project; analysisJob = j.job; $("#url").value = ""; picked.clear();
+    project = j.project; analysisJob = j.job; $("#url").value = ""; picked.clear(); libraryItem = null;
     $("#drop").firstChild.textContent = `✓ ${f.name} (${(f.size / 1024 ** 2).toFixed(0)}MB)`;
     msg($("#srcmsg"), f.size > 80 * 1024 ** 2
       ? "اترفع ✓ — لو حجمه كبير بيتصغّر لوحده لـ 1080p بجودة كويسة، وبعدين بيتحلل. تقدر تضغط «ابدأ» على طول."
@@ -258,6 +264,33 @@ async function chunkedUpload(f) {
   return api("/api/upload/finish", { method: "POST", body: JSON.stringify({ upload_id: id, name: f.name, total, size: f.size }) });
 }
 
+function shortLicense(l) {
+  l = String(l || "");
+  if (/public ?domain|publicdomain|cc0/i.test(l)) return "ملكية عامة";
+  const m = l.match(/licenses\/([a-z-]+)\/([\d.]+)/i);
+  return m ? `CC ${m[1].toUpperCase()} ${m[2]}` : l.slice(0, 22);
+}
+
+async function freeSearch() {
+  const q = $("#free-q").value.trim(); if (q.length < 2) return;
+  msg($("#free-msg"), "بيدوّر…", true); $("#free-results").replaceChildren();
+  let r;
+  try { r = await api(`/api/videos/search?q=${encodeURIComponent(q)}`); } catch (e) { return msg($("#free-msg"), e.message); }
+  msg($("#free-msg"), r.results.length ? `${r.results.length} نتيجة — اضغط على فيديو تختاره` : "مالقيتش. جرب كلمة تانية بالإنجليزي.", !!r.results.length);
+  $("#free-results").replaceChildren(...r.results.map((v) => {
+    const d = document.createElement("div"); d.className = "scene";
+    if (v.thumb) { const img = document.createElement("img"); img.loading = "lazy"; img.referrerPolicy = "no-referrer"; img.src = v.thumb; d.append(img); }
+    const b = document.createElement("b"); b.dir = "auto"; b.textContent = v.title; b.title = v.description || v.title; d.append(b);
+    const t = document.createElement("span"); t.textContent = `${v.source} · ${shortLicense(v.license)}`; d.append(t);
+    d.onclick = () => {
+      libraryItem = v; project = null; analysisJob = null; picked.clear(); $("#url").value = "";
+      document.querySelectorAll("#free-results .scene, #library .scene").forEach((x) => x.classList.toggle("on", x === d));
+      msg($("#srcmsg"), `✓ اخترت «${v.title}» (${v.source} — ${v.license})`, true);
+    };
+    return d;
+  }));
+}
+
 async function loadLibrary() {
   let lib;
   try { lib = await api("/api/autopilot/library"); } catch { return; }
@@ -269,7 +302,7 @@ async function loadLibrary() {
     const t = document.createElement("span");
     t.textContent = `${v.duration ? fmt(v.duration) : "بيتحلل…"} · ${(v.bytes / 1024 ** 2).toFixed(0)}MB`; d.append(t);
     d.onclick = () => {
-      project = v.project; analysisJob = null; picked.clear(); $("#url").value = "";
+      project = v.project; analysisJob = null; picked.clear(); $("#url").value = ""; libraryItem = null;
       document.querySelectorAll("#library .scene").forEach((x) => x.classList.toggle("on", x === d));
       $("#drop").firstChild.textContent = "اضغط هنا واختار فيديو من جهازك";
       msg($("#srcmsg"), `✓ اخترت «${v.name}»`, true);
@@ -328,9 +361,10 @@ const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(
 // ---------------- submit
 $("#go-edit").onclick = async (e) => {
   const m = $("#msg-edit"), url = $("#url").value.trim(), goal = chosen($("#goal"))[0];
-  if (!project && !url) return msg(m, "ارفع فيديو أو حط لينك الأول");
+  if (!project && !url && !libraryItem) return msg(m, "ارفع فيديو أو اختار من المكتبة أو حط لينك الأول");
   const body = { mode: "edit", goal, style: $("#style").value, instructions: $("#instructions").value, shorts: Number($("#shorts").value || 0),
-    platforms: chosen($("#plats-edit")), dub: chosen($("#dub")), subtitles: chosen($("#subs")), ...(url ? { url } : { project }) };
+    platforms: chosen($("#plats-edit")), dub: chosen($("#dub")), subtitles: chosen($("#subs")),
+    ...(url ? { url } : libraryItem ? { library_item: libraryItem } : { project }) };
   if (goal === "summary") {
     body.target_seconds = Math.round(Number($("#minutes").value || 0) * 60 + Number($("#secs").value || 0));
     if (body.target_seconds < 5) return msg(m, "حدد المدة (5 ثواني على الأقل)");
@@ -414,6 +448,8 @@ async function loadRuns() {
   } catch (e) { msg($("#msg-edit"), e.message); }
   loadRuns();
   loadLibrary();
+  $("#free-go").onclick = freeSearch;
+  $("#free-q").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); freeSearch(); } });
 })();
 </script>
 </body>

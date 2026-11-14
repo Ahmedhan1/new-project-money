@@ -264,6 +264,15 @@ def api_autopilot_library(limit: int = 60):
     return out
 
 
+@app.get("/api/videos/search")
+def api_videos_search(q: str, sources: str = "nasa,archive,commons", n: int = 10):
+    """Free, legally reusable videos (NASA public domain, Internet Archive CC/PD, Wikimedia Commons) with licence + credit."""
+    from . import library
+    if len(q.strip()) < 2:
+        raise HTTPException(400, "write what to search for")
+    return library.search(q, [x for x in sources.split(",") if x], max(1, min(20, n)))
+
+
 @app.get("/api/autopilot/runs")
 def api_autopilot_runs(limit: int = 30):
     rows = db.query("SELECT id,project_id,status,progress,created,started,finished,error,result,stage,stages,params "

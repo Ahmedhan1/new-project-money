@@ -261,3 +261,12 @@ it only with a CUDA GPU (`nexus/speech/silma.py`, installed by GPU studio sessio
 of the owner's own video (`pick_reference`), so the dub keeps the speaker's timbre; the existing timing fitter
 (brisker read, L-cut spill, gentle picture slow-down) is unchanged and now drives SILMA's speed. Any SILMA failure falls
 back to Piper/eSpeak inside `tts.synthesize`.
+
+**D-30 No "download from any site" (yt-dlp / IDM-style); a free legal video library instead; dubs keep their background
+(owner request, 2026-11-14).** A general downloader for YouTube/TikTok/... pages stays out: it contradicts PROJECT_BRIEF
+and ingest.py's rule (platform terms forbid it; re-uploading other people's videos gets channels removed), and the owner
+had already tried to process a commercial adult video. Instead `nexus/library.py` searches official public APIs - NASA
+(public domain), Internet Archive (only Creative Commons / Public Domain licence URLs) and Wikimedia Commons (video files,
+non-free excluded) - and the simple UI imports a pick through autopilot, recording licence, credit and page as the media's
+rights. Dubbing: muted (dubbed) clips get their own music/effects back as "ambience" audio items cut from a Demucs
+two-stem background (`nexus/audio/separate.py`, MIT, GPU studio only); stretched clips stay quiet to avoid drift.
