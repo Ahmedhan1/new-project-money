@@ -220,3 +220,13 @@ session copies NEXUS_HOME (without models/caches) to its output; the next sessio
 session that could not load the previous work never saves over it. YouTube: the app's loopback OAuth cannot work
 remotely, so the Worker runs Google's web-server flow (PKCE, owner's own Web client) and hands the keys to each
 session as `NEXUS_PUB_YOUTUBE_MAIN_*` env vars (read by `publishing/creds.py`); they are never in a notebook.
+
+**D-26 Simple mode is the default screen; one autopilot job does the whole path (owner request, 2026-11-14:
+"send a video and it edits/cuts/shortens it and makes it fit Shorts or any platform - or it finds an idea, a link or a
+script - automatically, with smart choices and a simple working UI").** `nexus/autopilot.py` chains the existing
+engines as durable stages (import -> analyze -> director edit / chosen scenes / summary -> QA render -> shorts ->
+platform packages, or research/script -> create_video -> packages); `nexus/ui/simple.html` (`/simple`) is the only
+screen the owner needs; the gateway serves it at `/` and the classic UI at `/app/`. Links: an owner-supplied DIRECT media
+file URL is a plain GET of a file (nothing billable), so autopilot fetches it with the SSRF-safe `ingest.fetch` without
+the costguard host list (paid hosts still refused); platform PAGE URLs (YouTube, TikTok, ...) stay refused - their terms
+forbid downloading. Discover picks the topic from Wikipedia pageview trends in a niche (emerging > rising), and says why.
