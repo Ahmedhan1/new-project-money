@@ -140,6 +140,9 @@ def install() -> None:
     def background() -> None:
         sh([sys.executable, "-m", "pip", "install", "-q", "manim"], 2400)
         log("optional package manim done")
+        if shutil.which("nvidia-smi"):  # natural Arabic/English dubbing voice (GPU only; ~87 s per line on CPU)
+            ok = sh([sys.executable, "-m", "pip", "install", "-q", "silma-tts"], 2400) == 0
+            log("SILMA TTS (Arabic voice) ready" if ok else "SILMA TTS not installed: dubbing uses the Piper voice")
 
     threading.Thread(target=background, daemon=True).start()
 

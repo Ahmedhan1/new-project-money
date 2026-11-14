@@ -66,6 +66,19 @@ components:
     network_hosts: [huggingface.co]
     version_py: piper
     status: deployed
+  - id: silma-tts
+    name: SILMA TTS v1 (silma-ai/silma-tts) - Arabic/English, voice cloning, F5-TTS architecture
+    kind: model
+    capability: [narration, dubbing]
+    source_url: https://huggingface.co/silma-ai/silma-tts
+    license: MIT (code) / Apache-2.0 (weights) per the model card, read 2026-11-14
+    weights_license: Apache-2.0
+    commercial_use: "yes (Apache-2.0 weights); clone only voices the owner has the right to use (their own video)"
+    usage_restrictions: "GPU only in NEXUS (CPU measured ~87 s per 5 s line); MSA Arabic, no dialects documented"
+    hardware: "CUDA GPU (Kaggle T4 in the cloud studio)"
+    install: "pip install silma-tts (cloud studio installs it in GPU sessions)"
+    network_hosts: [huggingface.co]
+    status: adapter
   - id: espeak-ng
     name: eSpeak NG
     kind: software

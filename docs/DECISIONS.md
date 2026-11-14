@@ -252,3 +252,12 @@ Ken Burns push-in on shots >= 6 s, a grade per style, a CC0 music bed from the a
 Researched first (open-source auto-editors: transcript + LLM moment picking + FFmpeg; editing craft: split edits, cutting
 on action, punch-ins). Not done yet: J/L split edits (the renderer cuts picture and sound together), better Arabic voice
 (candidate: SILMA TTS, F5-TTS based, Apache-2.0 weights) and timing-fitted dubbing.
+
+**D-29 Dubbing voice: SILMA TTS with the original speaker's cloned voice on the GPU, Piper otherwise.** Owner: "the
+Arabic is very bad". Research (2026-11): SILMA TTS v1 (F5-TTS architecture, 150 M, Apache-2.0 weights) is the open
+Arabic/English model with a commercial licence and voice cloning. Tested on Kaggle: it installs on Python 3.13 next to
+Kaggle's torch, and Whisper read its Arabic back almost word for word; on CPU it took ~87 s per 5 s line, so NEXUS uses
+it only with a CUDA GPU (`nexus/speech/silma.py`, installed by GPU studio sessions). The reference is a clean 4-7.5 s line
+of the owner's own video (`pick_reference`), so the dub keeps the speaker's timbre; the existing timing fitter
+(brisker read, L-cut spill, gentle picture slow-down) is unchanged and now drives SILMA's speed. Any SILMA failure falls
+back to Piper/eSpeak inside `tts.synthesize`.

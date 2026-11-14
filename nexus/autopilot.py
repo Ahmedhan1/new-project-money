@@ -384,8 +384,12 @@ def _languages(job: jobs.Job, p, an_all: dict, a: dict, title: str, src_lang: st
         r = job.stage(f"{'dub' if dub else 'subs'}-{lang}", run)
         name = LANGS.get(lang, (lang,))[0]
         label = f"نسخة مدبلجة {name}" if dub else f"نسخة مترجمة {name}"
-        if dub and lang == "ar":
-            label += " (صوت Kareem — ترخيصه التجاري غير مؤكد: راجعه قبل نشر فيديو بيكسب)"
+        if dub:
+            from .speech import silma
+            if silma.available():
+                label += " (بصوت المتكلم الأصلي — SILMA)"
+            elif lang == "ar":
+                label += " (صوت Kareem — ترخيصه التجاري غير مؤكد: راجعه قبل نشر فيديو بيكسب)"
         outs.append({"label": label, "path": r["output"], "kind": "language", "lang": lang})
     return outs
 

@@ -71,7 +71,7 @@ def _store(key: str, out: Path, info: dict) -> None:
 
 
 def synthesize(text: str, out: Path, lang: str = "en", voice: str | None = None, length_scale: float = 1.0,
-               master: bool = True, cache: bool = True) -> dict:
+               master: bool = True, cache: bool = True, reference: dict | None = None) -> dict:
     """Synthesize `text`; returns {path, duration, engine, voice, license, commercial, lufs, mastered, cached}.
     `lufs` is the measured integrated loudness of the delivered file (None when mastering is off).
     Cache: Piper's key is looked up first; the eSpeak key only when eSpeak is the engine that ends up running."""
@@ -98,12 +98,30 @@ def synthesize(text: str, out: Path, lang: str = "en", voice: str | None = None,
             _espeak(text, out, lang, length_scale)
         return {"voice": f"espeak-ng:{lang}", "license": "GPL-3.0 engine; output unencumbered", "commercial": True}
 
-    try:
-        engine, meta = costguard.run_with_fallback("piper", ["narration"], {"piper": piper_run, "espeak-ng": espeak_run})
-    except (KeyError, FileNotFoundError, RuntimeError, ImportError):
-        # no Piper voice for this language / model unavailable -> clear-licence fallback
-        costguard.authorize("espeak-ng", "narration-fallback")
-        engine, meta = "espeak-ng", espeak_run()
+    def silma_run():
+        from . import silma
+        ref_id = "silma:" + hashlib.sha256(Path(reference["wav"]).read_bytes()).hexdigest()[:12]
+        if not lookup("silma", ref_id):
+            silma.synthesize(text, out, reference["wav"], reference["text"], speed=1.0 / max(0.5, float(length_scale)))
+        return {"voice": ref_id, "license": silma.LICENSE, "commercial": True}
+
+    engine = meta = None
+    if reference and str(lang)[:2] in ("ar", "en"):
+        from . import silma
+        if silma.available():
+            try:
+                costguard.authorize("silma-tts", "narration")
+                engine, meta = "silma", silma_run()
+            except Exception as e:  # noqa: BLE001 - any SILMA problem: the Piper/eSpeak path below still delivers a voice
+                print(f"SILMA TTS failed ({type(e).__name__}: {str(e)[:120]}); falling back to Piper", flush=True)
+                engine = meta = None
+    if not engine:
+        try:
+            engine, meta = costguard.run_with_fallback("piper", ["narration"], {"piper": piper_run, "espeak-ng": espeak_run})
+        except (KeyError, FileNotFoundError, RuntimeError, ImportError):
+            # no Piper voice for this language / model unavailable -> clear-licence fallback
+            costguard.authorize("espeak-ng", "narration-fallback")
+            engine, meta = "espeak-ng", espeak_run()
     if hit:
         return hit
     db.metric("tts_rtf", (time.time() - t0) / max(_wav_duration(out), 0.1), engine=engine)
